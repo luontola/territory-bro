@@ -1,4 +1,4 @@
-(ns territory-bro.test.db.core
+(ns territory-bro.db.core-test
   (:require [territory-bro.db.core :as db]
             [territory-bro.db.migrations :as migrations]
             [clojure.test :refer :all]

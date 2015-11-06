@@ -1,4 +1,4 @@
-(ns territory-bro.test.util-test
+(ns territory-bro.util-test
   (:require [clojure.test :refer :all]
             [ring.mock.request :refer :all]
             [territory-bro.util :refer :all])
