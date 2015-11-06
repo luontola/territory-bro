@@ -4,6 +4,7 @@
 /.idea/
 /*.iml
 /.vagrant/
+/profiles.clj
 .DS_Store
 *.tmp
 *.bak
