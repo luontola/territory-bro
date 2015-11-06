@@ -1,5 +1,6 @@
 (ns territory-bro.middleware
-  (:require [territory-bro.layout :refer [*app-context* error-page]]
+  (:require [territory-bro.util :as util]
+            [territory-bro.layout :refer [*app-context* error-page]]
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
             [selmer.middleware :refer [wrap-error-page]]
@@ -34,9 +35,16 @@
       (handler req)
       (catch Throwable t
         (timbre/error t)
-        (error-page {:status 500
-                     :title "Something very bad has happened!"
+        (error-page {:status  500
+                     :title   "Something very bad has happened!"
                      :message "We've dispatched a team of highly trained gnomes to take care of the problem."})))))
+
+(defn wrap-sqlexception-chain [handler]
+  (fn [req]
+    (try
+      (handler req)
+      (catch Throwable t
+        (throw (util/fix-sqlexception-chain t))))))
 
 (defn wrap-dev [handler]
   (if (env :dev)
@@ -52,13 +60,14 @@
     {:error-response
      (error-page
        {:status 403
-        :title "Invalid anti-forgery token"})}))
+        :title  "Invalid anti-forgery token"})}))
 
 (defn wrap-formats [handler]
   (wrap-restful-format handler {:formats [:json-kw :transit-json :transit-msgpack]}))
 
 (defn wrap-base [handler]
   (-> handler
+      wrap-sqlexception-chain
       wrap-dev
       wrap-formats
       wrap-webjars

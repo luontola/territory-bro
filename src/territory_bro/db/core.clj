@@ -28,9 +28,9 @@
 (defn connect! []
   (conman/connect!
     *conn*
-   (assoc
-     pool-spec
-     :jdbc-url (env :database-url))))
+    (assoc
+      pool-spec
+      :jdbc-url (env :database-url))))
 
 (defn disconnect! []
   (conman/disconnect! *conn*))
@@ -50,7 +50,7 @@
 
   PGobject
   (result-set-read-column [pgobj _metadata _index]
-    (let [type  (.getType pgobj)
+    (let [type (.getType pgobj)
           value (.getValue pgobj)]
       (case type
         "json" (parse-string value true)
