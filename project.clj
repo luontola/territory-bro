@@ -21,6 +21,9 @@
                  [org.clojure/tools.nrepl "0.2.12"]
                  [org.webjars/bootstrap "3.3.5"]
                  [org.webjars/jquery "2.1.4"]
+                 [migratus "0.8.7"]
+                 [conman "0.2.4"]
+                 [org.postgresql/postgresql "9.4-1203-jdbc41"]
                  [org.immutant/web "2.1.0"]]
 
   :min-lein-version "2.0.0"
@@ -28,8 +31,10 @@
   :jvm-opts ["-server"]
 
   :main territory-bro.core
+  :migratus {:store :database}
 
-  :plugins [[lein-environ "1.0.1"]]
+  :plugins [[lein-environ "1.0.1"]
+            [migratus-lein "0.2.0"]]
   :profiles
   {:uberjar {:omit-source true
              :env {:production true}
@@ -38,7 +43,8 @@
    :test          [:project/test :profiles/test]
    :project/dev  {:dependencies [[ring/ring-mock "0.3.0"]
                                  [ring/ring-devel "1.4.0"]
-                                 [pjstadig/humane-test-output "0.7.0"]]
+                                 [pjstadig/humane-test-output "0.7.0"]
+                                 [mvxcvi/puget "1.0.0"]]
                   
                   
                   :repl-options {:init-ns territory-bro.core}
