@@ -1,5 +1,6 @@
 (ns territory-bro.routes.home
-  (:require [territory-bro.domain :as domain]
+  (:require [territory-bro.db.core :as db]
+            [territory-bro.domain :as domain]
             [territory-bro.layout :as layout]
             [compojure.core :refer [defroutes GET POST]]
             [ring.util.response :refer [redirect]]
@@ -18,11 +19,13 @@
   (layout/render "territories.html"))
 
 (defn save-territories! [request]
-  #_(prn request)
   (let [tempfile (-> request :params :territories :tempfile)]
     (try
-      #_(prn (-> tempfile slurp json/read-str))
-      (domain/import-territories-geojson! (-> tempfile slurp json/read-str))
+      (doseq [territory (-> tempfile
+                            slurp
+                            json/read-str
+                            domain/geojson-to-territories)]
+        (db/create-territory! territory))
       (finally
         (io/delete-file tempfile))))
   (redirect "/territories"))

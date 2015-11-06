@@ -3,20 +3,20 @@
     [cheshire.core :refer [generate-string parse-string]]
     [clojure.java.jdbc :as jdbc]
     [conman.core :as conman]
-    [environ.core :refer [env]])
+    [environ.core :refer [env]]
+    [clojure.data.json :as json])
   (:import org.postgresql.util.PGobject
            org.postgresql.jdbc4.Jdbc4Array
            clojure.lang.IPersistentMap
            clojure.lang.IPersistentVector
-           [java.sql
-            BatchUpdateException
-            Date
-            Timestamp
-            PreparedStatement]))
+           [java.sql Date Timestamp PreparedStatement]))
 
 (defonce ^:dynamic *conn* (atom nil))
 
 (conman/bind-connection *conn* "sql/queries.sql")
+
+(defn create-territory! [opts]
+  (-create-territory! (update opts :area json/write-str)))
 
 (def pool-spec
   {:adapter    :postgresql

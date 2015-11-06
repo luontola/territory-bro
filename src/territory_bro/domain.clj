@@ -1,9 +1,12 @@
-(ns territory-bro.domain
-  (:require [territory-bro.db.core :as db]))
+(ns territory-bro.domain)
 
-(defn import-territories-geojson! [data]
-  (assert (= "FeatureCollection" (get data "type"))
-          (str "Not a FeatureCollection: " data))
-  (db/create-territory! {:name    "foo2"
-                         :address "fdas"
-                         :area    nil}))
+(defn geojson-to-territories [geojson]
+  (when (not= "FeatureCollection" (get geojson "type"))
+    (throw (IllegalArgumentException. (str "Not a FeatureCollection: " geojson))))
+  (let [crs (get geojson "crs")]
+    (map (fn [feature]
+           {:name    (get-in feature ["properties" "number"])
+            :address (get-in feature ["properties" "address"])
+            :area    (assoc (get feature "geometry")
+                       "crs" crs)})
+         (get geojson "features"))))
