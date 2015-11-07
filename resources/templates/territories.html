@@ -14,20 +14,45 @@
 
 {% for territory in territories %}
 <h3>{{ territory.name }}: {{ territory.address }}</h3>
-<p>{{ territory }}</p>
 
 <div id="map-{{ territory.id }}" class="map"></div>
 <script type="text/javascript">
-    var map = new ol.Map({
-        target: 'map-{{ territory.id }}',
-        layers: [
-            new ol.layer.Tile({source: new ol.source.OSM()})
-        ],
-        view: new ol.View({
-            center: ol.proj.fromLonLat([25.14611191708061, 60.204996197266127]),
-            zoom: 17
-        })
-    });
+    (function () {
+
+        var territoryArea = new ol.format.WKT().readFeature('{{ territory.area }}');
+        territoryArea.getGeometry().transform('EPSG:4326', 'EPSG:3857');
+        var territoryStyles = [
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(255, 0, 0, 1.0)',
+                    width: 3
+                }),
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 0, 0, 0.1)'
+                })
+            })
+        ];
+        var territoryLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [territoryArea]
+            }),
+            style: territoryStyles
+        });
+
+        var streetsLayer = new ol.layer.Tile({
+            source: new ol.source.OSM()
+        });
+
+        var map = new ol.Map({
+            target: 'map-{{ territory.id }}',
+            layers: [streetsLayer, territoryLayer],
+            view: new ol.View({
+                center: ol.proj.fromLonLat([25.14611191708061, 60.204996197266127]),
+                zoom: 17
+            })
+        });
+
+    })();
 </script>
 {% endfor %}
 
