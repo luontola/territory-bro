@@ -18,6 +18,7 @@
 <div id="map-{{ territory.id }}" class="map"></div>
 <script type="text/javascript">
     (function () {
+        var MAX_ZOOM = 18;
 
         var territoryArea = new ol.format.WKT().readFeature('{{ territory.area }}');
         territoryArea.getGeometry().transform('EPSG:4326', 'EPSG:3857');
@@ -52,7 +53,9 @@
                 zoom: 1
             })
         });
-        map.getView().fit(territorySource.getExtent(), map.getSize());
+        var view = map.getView();
+        view.fit(territorySource.getExtent(), map.getSize());
+        view.setZoom(Math.min(MAX_ZOOM, view.getZoom()));
 
     })();
 </script>
