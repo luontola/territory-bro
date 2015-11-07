@@ -10,10 +10,16 @@
 </style>
 <script src="http://openlayers.org/en/v3.10.1/build/ol.js" type="text/javascript"></script>
 
-<div id="map" class="map"></div>
+<h2>Territories</h2>
+
+{% for territory in territories %}
+<h3>{{ territory.name }}: {{ territory.address }}</h3>
+<p>{{ territory }}</p>
+
+<div id="map-{{ territory.id }}" class="map"></div>
 <script type="text/javascript">
     var map = new ol.Map({
-        target: 'map',
+        target: 'map-{{ territory.id }}',
         layers: [
             new ol.layer.Tile({source: new ol.source.OSM()})
         ],
@@ -23,11 +29,7 @@
         })
     });
 </script>
-
-{% for territory in territories %}
-<p>{{ territory }}</p>
 {% endfor %}
-
 
 <h2>Import</h2>
 
