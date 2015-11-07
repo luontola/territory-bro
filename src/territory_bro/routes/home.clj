@@ -16,7 +16,7 @@
   (layout/render "about.html"))
 
 (defn territories-page []
-  (layout/render "territories.html"))
+  (layout/render "territories.html" {:territories (db/find-territories)}))
 
 (defn save-territories! [request]
   (let [tempfile (-> request :params :territories :tempfile)]
