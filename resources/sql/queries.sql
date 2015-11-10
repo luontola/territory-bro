@@ -2,6 +2,9 @@
 INSERT INTO territory (id, name, address, area)
 VALUES (nextval('territory_id_seq'), :name, :address, ST_GeomFromGeoJSON(:area));
 
+-- name: delete-all-territories!
+DELETE FROM territory;
+
 -- name: find-territories
 SELECT
   id,

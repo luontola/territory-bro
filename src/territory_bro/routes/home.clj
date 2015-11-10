@@ -21,6 +21,7 @@
 (defn save-territories! [request]
   (let [tempfile (-> request :params :territories :tempfile)]
     (try
+      (db/delete-all-territories!)
       (doseq [territory (-> tempfile
                             slurp
                             json/read-str
