@@ -35,6 +35,14 @@
 (defn disconnect! []
   (conman/disconnect! *conn*))
 
+(defn transactional* [f]
+  (conman/with-transaction
+    [t-conn *conn*]
+    (f)))
+
+(defmacro transactional [& body]
+  `(transactional* (fn [] ~@body)))
+
 (defn to-date [sql-date]
   (-> sql-date (.getTime) (java.util.Date.)))
 
