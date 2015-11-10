@@ -5,6 +5,7 @@
             [compojure.core :refer [defroutes GET POST]]
             [ring.util.response :refer [redirect]]
             [ring.util.http-response :refer [ok]]
+            [conman.core :refer [with-transaction]]
             [clojure.java.io :as io]
             [clojure.data.json :as json]))
 
@@ -21,12 +22,13 @@
 (defn save-territories! [request]
   (let [tempfile (-> request :params :territories :tempfile)]
     (try
-      (db/delete-all-territories!)
-      (doseq [territory (-> tempfile
+      (let [territories (-> tempfile
                             slurp
                             json/read-str
                             domain/geojson-to-territories)]
-        (db/create-territory! territory))
+        (with-transaction [_ db/*conn*]
+                          (db/delete-all-territories!)
+                          (dorun (map db/create-territory! territories))))
       (finally
         (io/delete-file tempfile))))
   (redirect "/territories"))
