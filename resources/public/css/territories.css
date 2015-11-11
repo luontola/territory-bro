@@ -1,2 +1,64 @@
+.territory {
+    page-break-inside: avoid;
+    border: 1px solid Black;
+    width: 14.5cm;
+    height: 9.5cm;
+    padding: 0.3cm 0.7cm;
+    margin-bottom: 0.3cm;
+    font-size: 12pt;
+}
+
+.territory .title {
+    text-align: center;
+    font-size: 110%;
+    font-weight: bold;
+}
+
+.territory .title-label {
+    float: left;
+    font-weight: bold;
+    margin-right: 2ex;
+    margin-bottom: 0.5em;
+}
+
+.territory .title-value {
+    float: left;
+}
+
+.territory .city {
+    float: left;
+}
+
+.territory .number {
+    float: right;
+}
+
+.territory .map {
+    clear: left;
+    float: left;
+    width: 7cm;
+    height: 6.3cm;
+}
+
+.territory .addresses {
+    clear: right;
+    float: right;
+    width: 5.5cm;
+    margin-left: 0.5cm;
+    margin-top: 2cm;
+    white-space: pre-line;
+}
+
+.territory .footer {
+    clear: both;
+    padding-top: 0.3cm;
+    text-align: center;
+    font-size: 60%;
+    font-weight: bold;
+}
+
 @media print {
+    .territories-import {
+        display: none;
+    }
 }
