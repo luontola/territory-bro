@@ -37,9 +37,7 @@
 
 (defn transactional* [f]
   (conman/with-transaction
-    ; TODO wait for conman >0.2.4
-    ;[t-conn *conn* :isolation :serializable]
-    [t-conn *conn*]
+    [t-conn *conn* :isolation :serializable]
     (f)))
 
 (defmacro transactional [& body]
