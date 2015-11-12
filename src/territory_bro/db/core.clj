@@ -16,7 +16,7 @@
 (conman/bind-connection *conn* "sql/queries.sql")
 
 (defn create-territory! [opts]
-  (-create-territory! (update opts :area json/write-str)))
+  (-create-territory! (update opts :location json/write-str)))
 
 (def pool-spec
   {:adapter    :postgresql

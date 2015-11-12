@@ -5,8 +5,9 @@
     (throw (IllegalArgumentException. (str "Not a FeatureCollection: " geojson))))
   (let [crs (get geojson "crs")]
     (map (fn [feature]
-           {:name    (get-in feature ["properties" "name"])
-            :address (get-in feature ["properties" "address"])
-            :area    (assoc (get feature "geometry")
-                       "crs" crs)})
+           {:number   (get-in feature ["properties" "number"])
+            :address  (get-in feature ["properties" "address"])
+            :region   (get-in feature ["properties" "region"])
+            :location (assoc (get feature "geometry")
+                        "crs" crs)})
          (get geojson "features"))))

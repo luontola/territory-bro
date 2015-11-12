@@ -8,11 +8,11 @@
 
     <div class="city">
         <div class="title-label">Paikkakunta</div>
-        <div class="title-value">Vuosaari</div>
+        <div class="title-value">{{ territory.region }}</div>
     </div>
     <div class="number">
         <div class="title-label">Alue nro</div>
-        <div class="title-value">{{ territory.name }}</div>
+        <div class="title-value">{{ territory.number }}</div>
     </div>
 
     <div id="map-{{ territory.id }}" class="map"></div>
@@ -42,7 +42,7 @@
 {% script "/assets/openlayers/ol.js" %}
 {% for territory in territories %}
 <script type="text/javascript">
-    territoryBro.initTerritoryMap('map-{{ territory.id }}', '{{ territory.area }}');
+    territoryBro.initTerritoryMap('map-{{ territory.id }}', '{{ territory.location }}');
 </script>
 {% endfor %}
 {% endblock %}

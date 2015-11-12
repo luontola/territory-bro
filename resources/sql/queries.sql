@@ -1,6 +1,6 @@
 -- name: -create-territory!
-INSERT INTO territory (id, name, address, area)
-VALUES (nextval('territory_id_seq'), :name, :address, ST_GeomFromGeoJSON(:area));
+INSERT INTO territory (id, number, address, region, location)
+VALUES (nextval('territory_id_seq'), :number, :address, :region, ST_GeomFromGeoJSON(:location));
 
 -- name: delete-all-territories!
 DELETE FROM territory;
@@ -8,7 +8,8 @@ DELETE FROM territory;
 -- name: find-territories
 SELECT
   id,
-  name,
+  number,
   address,
-  ST_AsText(area) AS area
+  region,
+  ST_AsText(location) AS location
 FROM territory;
