@@ -1,6 +1,4 @@
 var territoryBro = (function () {
-  var MAX_ZOOM = 18;
-
   function initTerritoryMap(elementId, areaWkt) {
     var territoryArea = new ol.format.WKT().readFeature(areaWkt);
     territoryArea.getGeometry().transform('EPSG:4326', 'EPSG:3857');
@@ -29,15 +27,21 @@ var territoryBro = (function () {
 
     var map = new ol.Map({
       target: elementId,
+      pixelRatio: 2, // render at high DPI for printing
       layers: [streetsLayer, territoryLayer],
       view: new ol.View({
         center: ol.proj.fromLonLat([0.0, 0.0]),
-        zoom: 1
+        zoom: 1,
+        // show more surrounding area for small territories
+        maxZoom: 18
       })
     });
     var view = map.getView();
+    // render at a higher zoom level for high DPI
+    // XXX: resets when window is resize or map.updateSize() is called
+    map.setSize(map.getSize().map(function (x) { return x*2; }));
+    // zoom and center on the territory
     view.fit(territorySource.getExtent(), map.getSize());
-    view.setZoom(Math.min(MAX_ZOOM, view.getZoom()));
   }
 
   return {
