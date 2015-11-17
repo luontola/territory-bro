@@ -17,7 +17,7 @@
 
     <div id="map-{{ territory.id }}" class="map"></div>
 
-    <div class="addresses">{{ territory.address }}</div>
+    <div class="addresses">{{ territory.address|semicolon-to-newline }}</div>
 
     <div class="footer">
         Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä.

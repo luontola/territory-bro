@@ -7,11 +7,11 @@
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
             [environ.core :refer [env]]))
 
-
 (declare ^:dynamic *app-context*)
-(parser/set-resource-path!  (clojure.java.io/resource "templates"))
+(parser/set-resource-path! (clojure.java.io/resource "templates"))
 (parser/add-tag! :csrf-field (fn [_ _] (anti-forgery-field)))
 (filters/add-filter! :markdown (fn [content] [:safe (md-to-html-string content)]))
+(filters/add-filter! :semicolon-to-newline (fn [text] (clojure.string/replace text ";" "\n")))
 
 (defn render
   "renders the HTML template located relative to resources/templates"
