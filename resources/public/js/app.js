@@ -36,12 +36,23 @@ var territoryBro = (function () {
         maxZoom: 18
       })
     });
-    var view = map.getView();
+
     // render at a higher zoom level for high DPI
-    // XXX: resets when window is resize or map.updateSize() is called
-    map.setSize(map.getSize().map(function (x) { return x*2; }));
+    var updateSize = map.updateSize;
+    map.updateSize = function () {
+      updateSize.call(this);
+      this.setSize(this.getSize().map(function (x) {
+        return x * 2;
+      }));
+    };
+    map.updateSize();
+    // XXX: the canvas size resets when the window is resized
+    window.addEventListener('resize', function (e) {
+      map.updateSize();
+    });
+
     // zoom and center on the territory
-    view.fit(territorySource.getExtent(), map.getSize());
+    map.getView().fit(territorySource.getExtent(), map.getSize());
   }
 
   return {
