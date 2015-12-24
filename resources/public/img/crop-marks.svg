@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+     width="5cm" height="5cm">
+  <line x1="2mm"  y1="0mm"
+        x2="48mm" y2="0mm"
+        stroke="black"
+        stroke-width="1pt"/>
+  <line x1="50mm" y1="2mm"
+        x2="50mm" y2="48mm"
+        stroke="black"
+        stroke-width="1pt"/>
+  <line x1="2mm"  y1="50mm"
+        x2="48mm" y2="50mm"
+        stroke="black"
+        stroke-width="1pt"/>
+  <line x1="0mm"  y1="2mm"
+        x2="0mm"  y2="48mm"
+        stroke="black"
+        stroke-width="1pt"/>
+</svg>
