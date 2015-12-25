@@ -3,26 +3,32 @@
 <h2>Territories</h2>
 
 {% for territory in territories %}
-<div class="territory">
-    <div class="title">Aluekartta</div>
+<div class="croppable-territory-card">
+    <div class="crop-mark-top-left"></div>
+    <div class="crop-mark-top-right"></div>
+    <div class="territory-card">
+        <div class="title">Aluekartta</div>
 
-    <div class="city">
-        <div class="title-label">Paikkakunta</div>
-        <div class="title-value">{{ territory.region }}</div>
+        <div class="city">
+            <div class="title-label">Paikkakunta</div>
+            <div class="title-value">{{ territory.region }}</div>
+        </div>
+        <div class="number">
+            <div class="title-label">Alue nro</div>
+            <div class="title-value">{{ territory.number }}</div>
+        </div>
+
+        <div id="map-{{ territory.id }}" class="map"></div>
+
+        <div class="addresses">{{ territory.address|semicolon-to-newline }}</div>
+
+        <div class="footer">
+            Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä.
+            <br>Joka kerta kun alue on käyty läpi, ilmoita siitä veljelle, joka hoitaa aluekarttoja.
+        </div>
     </div>
-    <div class="number">
-        <div class="title-label">Alue nro</div>
-        <div class="title-value">{{ territory.number }}</div>
-    </div>
-
-    <div id="map-{{ territory.id }}" class="map"></div>
-
-    <div class="addresses">{{ territory.address|semicolon-to-newline }}</div>
-
-    <div class="footer">
-        Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä.
-        <br>Joka kerta kun alue on käyty läpi, ilmoita siitä veljelle, joka hoitaa aluekarttoja.
-    </div>
+    <div class="crop-mark-bottom-left"></div>
+    <div class="crop-mark-bottom-right"></div>
 </div>
 {% endfor %}
 

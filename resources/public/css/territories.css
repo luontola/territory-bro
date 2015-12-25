@@ -1,46 +1,80 @@
-.territory {
+.croppable-territory-card {
     page-break-inside: avoid;
-    border: 1px solid Black;
-    width: 14.5cm;
-    height: 9.5cm;
-    padding: 0.3cm 0.7cm;
+    display: grid;
+    grid-template-columns: 0.7cm 14.5cm 0.7cm;
+    grid-template-rows: 0.7cm 9.5cm 0.7cm;
     margin-bottom: 0.3cm;
+    -webkit-print-color-adjust: exact;
+}
+
+.crop-mark-top-left {
+    grid-column: 1;
+    grid-row: 1;
+    background-image: url(/img/crop-marks.svg);
+    background-position: bottom right;
+}
+
+.crop-mark-top-right {
+    grid-column: 3;
+    grid-row: 1;
+    background-image: url(/img/crop-marks.svg);
+    background-position: bottom left;
+}
+
+.crop-mark-bottom-left {
+    grid-column: 1;
+    grid-row: 3;
+    background-image: url(/img/crop-marks.svg);
+    background-position: top right;
+}
+
+.crop-mark-bottom-right {
+    grid-column: 3;
+    grid-row: 3;
+    background-image: url(/img/crop-marks.svg);
+    background-position: top left;
+}
+
+.territory-card {
+    grid-column: 2;
+    grid-row: 2;
+    padding: 0.3cm 0.7cm;
     font-size: 12pt;
 }
 
-.territory .title {
+.territory-card .title {
     text-align: center;
     font-size: 110%;
     font-weight: bold;
 }
 
-.territory .title-label {
+.territory-card .title-label {
     float: left;
     font-weight: bold;
     margin-right: 2ex;
     margin-bottom: 0.5em;
 }
 
-.territory .title-value {
+.territory-card .title-value {
     float: left;
 }
 
-.territory .city {
+.territory-card .city {
     float: left;
 }
 
-.territory .number {
+.territory-card .number {
     float: right;
 }
 
-.territory .map {
+.territory-card .map {
     clear: left;
     float: left;
     width: 7cm;
     height: 6.3cm;
 }
 
-.territory .addresses {
+.territory-card .addresses {
     clear: right;
     float: right;
     width: 5.5cm;
@@ -49,7 +83,7 @@
     white-space: pre-line;
 }
 
-.territory .footer {
+.territory-card .footer {
     clear: both;
     padding-top: 0.3cm;
     text-align: center;
