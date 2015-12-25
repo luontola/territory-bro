@@ -4,36 +4,55 @@
     grid-template-columns: 0.7cm 14.5cm 0.7cm;
     grid-template-rows: 0.7cm 9.5cm 0.7cm;
     margin-bottom: 0.3cm;
-    -webkit-print-color-adjust: exact;
 }
+
+/* Crop Marks */
 
 .crop-mark-top-left {
     grid-column: 1;
     grid-row: 1;
-    background-image: url(/img/crop-marks.svg);
-    background-position: bottom right;
+}
+
+.crop-mark-top-left img {
+    transform: rotate(180deg);
+    width: 100%;
+    height: 100%;
 }
 
 .crop-mark-top-right {
     grid-column: 3;
     grid-row: 1;
-    background-image: url(/img/crop-marks.svg);
-    background-position: bottom left;
+}
+
+.crop-mark-top-right img {
+    transform: rotate(270deg);
+    width: 100%;
+    height: 100%;
 }
 
 .crop-mark-bottom-left {
     grid-column: 1;
     grid-row: 3;
-    background-image: url(/img/crop-marks.svg);
-    background-position: top right;
+}
+
+.crop-mark-bottom-left img {
+    transform: rotate(90deg);
+    width: 100%;
+    height: 100%;
 }
 
 .crop-mark-bottom-right {
     grid-column: 3;
     grid-row: 3;
-    background-image: url(/img/crop-marks.svg);
-    background-position: top left;
 }
+
+.crop-mark-bottom-right img {
+    transform: rotate(0deg);
+    width: 100%;
+    height: 100%;
+}
+
+/* Territory Card */
 
 .territory-card {
     grid-column: 2;
