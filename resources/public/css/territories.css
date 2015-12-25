@@ -1,8 +1,14 @@
+:root {
+    --territory-card-width: 14.5cm;
+    --territory-card-height: 9.5cm;
+    --crop-mark-size: 0.7cm;
+}
+
 .croppable-territory-card {
     page-break-inside: avoid;
     display: grid;
-    grid-template-columns: 0.7cm 14.5cm 0.7cm;
-    grid-template-rows: 0.7cm 9.5cm 0.7cm;
+    grid-template-columns: var(--crop-mark-size) var(--territory-card-width) var(--crop-mark-size);
+    grid-template-rows: var(--crop-mark-size) var(--territory-card-height) var(--crop-mark-size);
     margin-bottom: 0.3cm;
 }
 
