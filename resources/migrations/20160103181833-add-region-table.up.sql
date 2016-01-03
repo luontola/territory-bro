@@ -1,0 +1,5 @@
+CREATE TABLE region (
+  id       SERIAL PRIMARY KEY NOT NULL,
+  name     VARCHAR(1000)      NOT NULL DEFAULT '',
+  location GEOGRAPHY(POLYGON, 4326)
+);

@@ -86,7 +86,6 @@ var territoryBro = (function () {
       })
     });
 
-    // TODO: remove me; streets layer is only for debugging
     var streetsLayer = new ol.layer.Tile({
       source: new ol.source.OSM()
     });
@@ -94,7 +93,7 @@ var territoryBro = (function () {
     var map = new ol.Map({
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
-      layers: [streetsLayer, regionLayer, territoryLayer],
+      layers: [/*streetsLayer,*/ regionLayer, territoryLayer],
       controls: [],
       interactions: [],
       view: new ol.View({

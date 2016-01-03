@@ -51,8 +51,7 @@
 {% for territory in territories %}
 <script type="text/javascript">
     territoryBro.initTerritoryMap('map-{{ territory.id }}', '{{ territory.location }}');
-    // TODO: draw surrounding regions instead of territory.location
-    territoryBro.initTerritoryMiniMap('minimap-{{ territory.id }}', '{{ territory.center }}', '{{ territory.location }}');
+    territoryBro.initTerritoryMiniMap('minimap-{{ territory.id }}', '{{ territory.center }}', '{{ territory.region-map }}');
 </script>
 {% endfor %}
 {% endblock %}
