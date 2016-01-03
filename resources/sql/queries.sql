@@ -11,5 +11,6 @@ SELECT
   number,
   address,
   region,
-  ST_AsText(location) AS location
+  ST_AsText(location)                          AS location,
+  ST_AsText(ST_Centroid(location :: GEOMETRY)) AS center
 FROM territory;

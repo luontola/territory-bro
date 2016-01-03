@@ -20,6 +20,8 @@
 
         <div id="map-{{ territory.id }}" class="map"></div>
 
+        <div id="minimap-{{ territory.id }}" class="minimap"></div>
+
         <div class="addresses">{{ territory.address|semicolon-to-newline }}</div>
 
         <div class="footer">
@@ -49,6 +51,8 @@
 {% for territory in territories %}
 <script type="text/javascript">
     territoryBro.initTerritoryMap('map-{{ territory.id }}', '{{ territory.location }}');
+    // TODO: draw surrounding regions instead of territory.location
+    territoryBro.initTerritoryMiniMap('minimap-{{ territory.id }}', '{{ territory.center }}', '{{ territory.location }}');
 </script>
 {% endfor %}
 {% endblock %}
