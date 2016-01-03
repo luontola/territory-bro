@@ -18,7 +18,11 @@ FROM
   territory AS t,
   region AS r
 WHERE ST_Intersects(t.location, r.location)
-GROUP BY t.id;
+GROUP BY t.id
+ORDER BY
+  -- XXX: natural sorting hack based on http://stackoverflow.com/a/9482849/62130
+  SUBSTRING(t.number FROM '^(\d+)') :: INTEGER,
+  t.number;
 
 -- name: find-regions
 SELECT
