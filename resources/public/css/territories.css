@@ -88,8 +88,9 @@
 
 .territory-card .minimap {
     float: right;
-    width: 1.5cm;
-    height: 1.5cm;
+    /* The canvas must be at least 1.7cm in size, or Chrome will reduce its print resolution */
+    width: 1.7cm;
+    height: 1.7cm;
 }
 
 .territory-card .map {
