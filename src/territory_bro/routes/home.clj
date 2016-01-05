@@ -6,7 +6,8 @@
             [ring.util.response :refer [redirect]]
             [ring.util.http-response :refer [ok]]
             [clojure.java.io :as io]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json])
+  (:import (java.time LocalDate)))
 
 (defn home-page []
   (layout/render
@@ -16,7 +17,8 @@
   (layout/render "about.html"))
 
 (defn territories-page []
-  (layout/render "territories.html" {:territories (db/find-territories)}))
+  (layout/render "territories.html" {:territories (db/find-territories)
+                                     :today       (LocalDate/now)}))
 
 (defn save-territories! [request]
   (let [tempfile (-> request :params :territories :tempfile)]
