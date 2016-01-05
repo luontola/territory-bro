@@ -65,6 +65,7 @@
     grid-row: content;
     padding: 0.3cm 0.7cm;
     font-size: 12pt;
+    border: 1px solid lightgray;
 }
 
 .territory-card .title {
@@ -81,13 +82,13 @@
 }
 
 .territory-card .number {
-    float: left;
+    float: right;
     font-size: 180%;
     font-weight: bold;
 }
 
 .territory-card .minimap {
-    float: right;
+    float: left;
     /* The canvas must be at least 1.7cm in size, or Chrome will reduce its print resolution */
     width: 1.7cm;
     height: 1.7cm;
@@ -97,7 +98,7 @@
     clear: left;
     float: left;
     width: 7cm;
-    height: 6.3cm;
+    height: 6.1cm;
 }
 
 .territory-card .addresses {
@@ -120,6 +121,10 @@
 @media print {
     .territories-import, h2 {
         display: none;
+    }
+
+    .territory-card {
+        border: none;
     }
 
     /* Undo Bootstrap's layout styles */
