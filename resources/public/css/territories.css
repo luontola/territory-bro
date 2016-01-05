@@ -2,6 +2,9 @@
     --territory-card-width: 14.5cm;
     --territory-card-height: 9.5cm;
     --crop-mark-size: 0.7cm;
+    --map-width: 7cm;
+    --map-height: 6.1cm;
+    --map-height-negative: -6.1cm;
 }
 
 .croppable-territory-card {
@@ -97,8 +100,8 @@
 .territory-card .map {
     clear: left;
     float: left;
-    width: 7cm;
-    height: 6.1cm;
+    width: var(--map-width);
+    height: var(--map-height);
 }
 
 .territory-card .addresses {
@@ -113,14 +116,29 @@
 .territory-card .disclaimer {
     clear: left;
     float: left;
-    width: 7cm;
+    /* relative div wrapping an absolute div; avoids taking space from other elements
+       http://stackoverflow.com/questions/6040005/relatively-position-an-element-without-it-taking-up-space-in-document-flow/6040258#6040258 */
+    position: relative;
+    width: 0;
+    height: 0;
+    /* text style */
     text-align: center;
     font-size: 40%;
+    white-space: nowrap; /* if the disclaimer is long, keep it all in one line */
+}
+
+.territory-card .disclaimer > div {
+    transform: rotate(90deg);
+    transform-origin: left top;
+    position: absolute;
+    left: 0;
+    top: var(--map-height-negative); /* XXX: cannot combine CSS3 variables and calc() */
+    width: var(--map-height);
 }
 
 .territory-card .footer {
     clear: both;
-    padding-top: 0.1cm;
+    padding-top: 0.3cm;
     text-align: center;
     font-size: 60%;
     font-weight: bold;
