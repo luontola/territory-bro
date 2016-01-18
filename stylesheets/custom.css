@@ -1,0 +1,7 @@
+
+/* our custom styles */
+
+header .active {
+  color: rgba(0, 0, 0, 0.5);
+  border-color: rgba(0, 0, 0, 0.2);
+}
