@@ -55,7 +55,7 @@ var territoryBro = (function () {
         maxZoom: 18
       })
     });
-    useHighDpiMaps(map);
+    //useHighDpiMaps(map);
     map.getView().fit(territoryLayer.getSource().getExtent(), map.getSize());
   }
 
