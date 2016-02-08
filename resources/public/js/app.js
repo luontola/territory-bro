@@ -46,17 +46,21 @@ var territoryBro = (function () {
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
       layers: [streetsLayer, territoryLayer],
-      controls: [],
-      interactions: [],
       view: new ol.View({
         center: ol.proj.fromLonLat([0.0, 0.0]),
         zoom: 1,
-        // show more surrounding area for small territories
-        maxZoom: 18
+        minResolution: 1.25, // prevent zooming too close, show more surrounding for small territories
+        zoomFactor: 1.1 // zoom in small steps to enable fine tuning
       })
     });
     //useHighDpiMaps(map);
-    map.getView().fit(territoryLayer.getSource().getExtent(), map.getSize());
+    map.getView().fit(
+      territoryLayer.getSource().getExtent(),
+      map.getSize(),
+      {
+        padding: [20, 20, 20, 20]
+      }
+    );
   }
 
   function initTerritoryMiniMap(elementId, territoryWkt, regionWkt) {
@@ -66,7 +70,7 @@ var territoryBro = (function () {
       }),
       style: new ol.style.Style({
         image: new ol.style.Circle({
-          radius: 8,
+          radius: 3.5,
           fill: new ol.style.Fill({
             color: 'rgba(0, 0, 0, 1.0)'
           })
@@ -81,7 +85,9 @@ var territoryBro = (function () {
       style: new ol.style.Style({
         stroke: new ol.style.Stroke({
           color: 'rgba(0, 0, 0, 1.0)',
-          width: 1.5
+          width: 2,
+          lineDash: [1, 10],
+          lineCap: 'round'
         })
       })
     });
@@ -93,7 +99,7 @@ var territoryBro = (function () {
     var map = new ol.Map({
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
-      layers: [/*streetsLayer,*/ regionLayer, territoryLayer],
+      layers: [streetsLayer, regionLayer, territoryLayer],
       controls: [],
       interactions: [],
       view: new ol.View({
@@ -101,8 +107,15 @@ var territoryBro = (function () {
         zoom: 1
       })
     });
-    useHighDpiMaps(map);
-    map.getView().fit(regionLayer.getSource().getExtent(), map.getSize());
+    //useHighDpiMaps(map);
+    map.getView().fit(
+      regionLayer.getSource().getExtent(),
+      map.getSize(),
+      {
+        padding: [5, 5, 5, 5],
+        constrainResolution: false
+      }
+    );
   }
 
   return {
