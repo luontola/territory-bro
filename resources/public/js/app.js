@@ -29,8 +29,8 @@ var territoryBro = (function () {
       }),
       style: new ol.style.Style({
         stroke: new ol.style.Stroke({
-          color: 'rgba(255, 0, 0, 1.0)',
-          width: 3
+          color: 'rgba(255, 0, 0, 0.6)',
+          width: 2.0
         }),
         fill: new ol.style.Fill({
           color: 'rgba(255, 0, 0, 0.1)'
