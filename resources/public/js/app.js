@@ -41,6 +41,13 @@ var territoryBro = (function () {
     var streetsLayer = new ol.layer.Tile({
       source: new ol.source.OSM()
     });
+    // high DPI spike
+    streetsLayer = new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
+        tileSize: [512, 512]
+      })
+    });
 
     var map = new ol.Map({
       target: elementId,
@@ -94,6 +101,13 @@ var territoryBro = (function () {
 
     var streetsLayer = new ol.layer.Tile({
       source: new ol.source.OSM()
+    });
+    // high DPI spike
+    streetsLayer = new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
+        tileSize: [512, 512]
+      })
     });
 
     var map = new ol.Map({
