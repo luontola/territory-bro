@@ -10,14 +10,15 @@
   (:import (java.time LocalDate)))
 
 (defn home-page []
-  (layout/render
-    "home.html" {:docs (-> "docs/docs.md" io/resource slurp)}))
+  (layout/render "home.html"
+                 {:docs (-> "docs/docs.md" io/resource slurp)}))
 
-(defn territories-page []
-  (layout/render "territories.html" {:territories (db/find-territories)
-                                     :today       (LocalDate/now)}))
+(defn territory-cards-page []
+  (layout/render "territory-cards.html"
+                 {:territories (db/find-territories)
+                  :today       (LocalDate/now)}))
 
-(defn save-territories! [request]
+(defn import-territories! [request]
   (let [tempfile (-> request :params :territories :tempfile)]
     (try
       (let [territories (-> tempfile
@@ -29,9 +30,9 @@
           (dorun (map db/create-territory! territories))))
       (finally
         (io/delete-file tempfile))))
-  (redirect "/territories"))
+  (redirect "/territory-cards"))
 
 (defroutes home-routes
            (GET "/" [] (home-page))
-           (GET "/territories" [] (territories-page))
-           (POST "/territories" request (save-territories! request)))
+           (GET "/territory-cards" [] (territory-cards-page))
+           (POST "/import-territories" request (import-territories! request)))
