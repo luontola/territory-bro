@@ -19,7 +19,7 @@
                  [bouncer "0.3.3"]
                  [prone "0.8.2"]
                  [org.clojure/tools.nrepl "0.2.12"]
-                 [org.webjars/bootstrap "3.3.5"]
+                 [org.webjars.npm/purecss "0.6.0"]
                  [org.webjars/jquery "2.1.4"]
                  [org.webjars/openlayers "3.10.1"]
                  [migratus "0.8.7"]

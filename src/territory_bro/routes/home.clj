@@ -13,9 +13,6 @@
   (layout/render
     "home.html" {:docs (-> "docs/docs.md" io/resource slurp)}))
 
-(defn about-page []
-  (layout/render "about.html"))
-
 (defn territories-page []
   (layout/render "territories.html" {:territories (db/find-territories)
                                      :today       (LocalDate/now)}))
@@ -36,6 +33,5 @@
 
 (defroutes home-routes
            (GET "/" [] (home-page))
-           (GET "/about" [] (about-page))
            (GET "/territories" [] (territories-page))
            (POST "/territories" request (save-territories! request)))

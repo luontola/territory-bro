@@ -1,25 +1,23 @@
-# territory-bro
+# Territory Bro
 
-FIXME
+Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.
 
-## Prerequisites
+For more information, see <http://territorybro.com>
 
-You will need [Leiningen][lein] 2.0 or above installed.
-
-The territory card UI uses [CSS varibles][css-var] and [Grid layout][css-grid],
-which are only supported by Chrome 48 (now in beta) when you enable
-"Experimental Web Platform features" in chrome://flags
-
-[lein]: https://github.com/technomancy/leiningen
-[css-var]: http://caniuse.com/#feat=css-variables
-[css-grid]: http://caniuse.com/#feat=css-grid
 
 ## Running
 
-To start a web server for the application, run:
+Install [PostgreSQL](http://www.postgresql.org/)
+
+Install [Leiningen](https://github.com/technomancy/leiningen)
+
+Start the application with:
 
     lein run
 
+
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2015-2016, [Esko Luontola](http://luontola.fi)
+
+This software is released under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).

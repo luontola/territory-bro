@@ -145,7 +145,7 @@
 }
 
 @media print {
-    .territories-import, h2 {
+    .territories-import, h1 {
         display: none;
     }
 
@@ -153,13 +153,7 @@
         border: none;
     }
 
-    /* Undo Bootstrap's layout styles */
-    body, .container {
-        padding: 0;
-        margin: 0;
-    }
-
-    .navbar {
+    nav {
         display: none;
     }
 }

@@ -1,36 +1,10 @@
-<div class="bs-callout bs-callout-danger">
+Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.
 
-### Database Configuration is Required
+For more information, see <http://territorybro.com>
 
-Before continuing please follow the steps below to configure your database connection and run the necessary migrations.
+## System Requirements
 
-* Create the database for your application.
-* Update the connection URL in the `profiles.clj` file with your database name and login.
-* Run `lein run migrate` in the root of the project to create the tables.
-* Restart the application.
-
-</div>
-
-### Managing Your Middleware
-
-Request middleware functions are located under the `territory-bro.middleware` namespace.
-
-This namespace is reserved for any custom middleware for the application. Some default middleware is
-already defined here.
-
-The two function for organizing the middleware are called `wrap-dev` and `wrap-base`.
-
-Any middleware that you only wish to run in development mode should be added inside the `wrap-dev` function.
-This middleware will only be invoked when the environment contains the `:dev` key with a truthy value.
-
-### Here are some links to get started
-
-1. [HTML templating](http://www.luminusweb.net/docs/html_templating.md)
-2. [Accessing the database](http://www.luminusweb.net/docs/database.md)
-3. [Serving static resources](http://www.luminusweb.net/docs/static_resources.md)
-4. [Setting response types](http://www.luminusweb.net/docs/responses.md)
-5. [Defining routes](http://www.luminusweb.net/docs/routes.md)
-6. [Adding middleware](http://www.luminusweb.net/docs/middleware.md)
-7. [Sessions and cookies](http://www.luminusweb.net/docs/sessions_cookies.md)
-8. [Security](http://www.luminusweb.net/docs/security.md)
-9. [Deploying the application](http://www.luminusweb.net/docs/deployment.md)
+The territory card UI uses [CSS varibles](http://caniuse.com/#feat=css-variables)
+and [Grid layout](http://caniuse.com/#feat=css-grid),
+which are only supported by Chrome 48 when you enable
+"Experimental Web Platform features" in chrome://flags
