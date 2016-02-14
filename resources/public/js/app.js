@@ -132,8 +132,64 @@ var territoryBro = (function () {
     );
   }
 
+  function initNeighborhoodMap(elementId, territoryNumber, territoryWkt) {
+    var territoryLayer = new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: [wktToFeature(territoryWkt)]
+      }),
+      style: new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: 'rgba(255, 0, 0, 0.6)',
+          width: 2.0
+        }),
+        fill: new ol.style.Fill({
+          color: 'rgba(255, 0, 0, 0.1)'
+        }),
+        text: new ol.style.Text({
+          text: territoryNumber,
+          font: 'bold 180% sans-serif',
+          fill: new ol.style.Fill({color: 'rgba(0, 0, 0, 1.0)'}),
+          stroke: new ol.style.Stroke({color: 'rgba(255, 255, 255, 1.0)', width: 3.0})
+        })
+      })
+    });
+
+    var streetsLayer = new ol.layer.Tile({
+      source: new ol.source.OSM()
+    });
+    // high DPI spike
+    streetsLayer = new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
+        tileSize: [512, 512]
+      })
+    });
+
+    var map = new ol.Map({
+      target: elementId,
+      pixelRatio: 2, // render at high DPI for printing
+      layers: [streetsLayer, territoryLayer],
+      view: new ol.View({
+        center: ol.proj.fromLonLat([0.0, 0.0]),
+        zoom: 1,
+        minResolution: 1.25, // prevent zooming too close, show more surrounding for small territories
+        zoomFactor: 1.1 // zoom in small steps to enable fine tuning
+      })
+    });
+    //useHighDpiMaps(map);
+    map.getView().fit(
+      territoryLayer.getSource().getExtent(),
+      map.getSize(),
+      {
+        padding: [100, 100, 100, 100],
+        minResolution: 6.0
+      }
+    );
+  }
+
   return {
     initTerritoryMap: initTerritoryMap,
-    initTerritoryMiniMap: initTerritoryMiniMap
+    initTerritoryMiniMap: initTerritoryMiniMap,
+    initNeighborhoodMap: initNeighborhoodMap
   };
 })();

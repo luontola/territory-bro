@@ -18,6 +18,10 @@
                  {:territories (db/find-territories)
                   :today       (LocalDate/now)}))
 
+(defn neighborhood-maps-page []
+  (layout/render "neighborhood-maps.html"
+                 {:territories (db/find-territories)}))
+
 (defn import-territories! [request]
   (let [tempfile (-> request :params :territories :tempfile)]
     (try
@@ -35,4 +39,5 @@
 (defroutes home-routes
            (GET "/" [] (home-page))
            (GET "/territory-cards" [] (territory-cards-page))
+           (GET "/neighborhood-maps" [] (neighborhood-maps-page))
            (POST "/import-territories" request (import-territories! request)))

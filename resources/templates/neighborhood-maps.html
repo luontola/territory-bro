@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Neighborhood Maps</h1>
+
+{% for territory in territories %}
+<div class="croppable-territory-card">
+    <div class="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""></div>
+    <div class="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""></div>
+    <div id="neighborhood-map-{{ territory.id }}" class="crop-area neighborhood-map"></div>
+    <div class="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""></div>
+    <div class="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""></div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block page-scripts %}
+{% style "/assets/openlayers/ol.css" %}
+{% script "/assets/openlayers/ol.js" %}
+{% for territory in territories %}
+<script type="text/javascript">
+    territoryBro.initNeighborhoodMap('neighborhood-map-{{ territory.id }}', '{{ territory.number }}', '{{ territory.location }}');
+</script>
+{% endfor %}
+{% endblock %}

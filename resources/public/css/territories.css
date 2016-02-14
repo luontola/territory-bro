@@ -61,6 +61,10 @@
     height: 100%;
 }
 
+.crop-area {
+    border: 1px solid lightgray;
+}
+
 /* Territory Card */
 
 .territory-card {
@@ -68,7 +72,6 @@
     grid-row: content;
     padding: 0.3cm 0.7cm;
     font-size: 12pt;
-    border: 1px solid lightgray;
 }
 
 .territory-card .title {
@@ -144,12 +147,21 @@
     font-weight: bold;
 }
 
+/* Neighborhood Map */
+
+.neighborhood-map {
+    grid-column: content;
+    grid-row: content;
+    padding: 0.5cm;
+}
+
+
 @media print {
     .territories-import, h1 {
         display: none;
     }
 
-    .territory-card {
+    .crop-area {
         border: none;
     }
 
