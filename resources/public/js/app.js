@@ -181,8 +181,8 @@ var territoryBro = (function () {
       territoryLayer.getSource().getExtent(),
       map.getSize(),
       {
-        padding: [100, 100, 100, 100],
-        minResolution: 6.0
+        padding: [5, 5, 5, 5],
+        minResolution: 3.0
       }
     );
   }
