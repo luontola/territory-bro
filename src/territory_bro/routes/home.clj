@@ -24,6 +24,11 @@
   (layout/render "neighborhood-maps.html"
                  {:territories (db/find-territories)}))
 
+(defn region-maps-page []
+  (layout/render "region-maps.html"
+                 {:regions          (db/find-regions)
+                  :territories-json (json/write-str (db/find-territories))}))
+
 (defn import-territories! [request]
   (let [tempfile (-> request :params :territories :tempfile)]
     (try
@@ -42,4 +47,5 @@
            (GET "/" [] (overview-page))
            (GET "/territory-cards" [] (territory-cards-page))
            (GET "/neighborhood-maps" [] (neighborhood-maps-page))
+           (GET "/region-maps" [] (region-maps-page))
            (POST "/import-territories" request (import-territories! request)))

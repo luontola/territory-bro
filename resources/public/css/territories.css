@@ -155,6 +155,30 @@
     padding: 0.5cm;
 }
 
+/* Region Map */
+
+.region-page {
+    page-break-inside: avoid;
+    /* A4 paper size */
+    width: 210mm;
+    height: 297mm;
+    padding: 20mm;
+    /*border: 1px solid Red;*/
+}
+
+.region-page .name {
+    height: 12mm;
+    font-size: 9mm;
+    font-weight: bold;
+    text-align: center;
+    /*border: 1px solid blue;*/
+}
+
+.region-map {
+    width: 100%;
+    /* XXX: just tweaked until it looked right; the browser does some unwanted scaling */
+    height: 303mm;
+}
 
 @media print {
     .no-print {
