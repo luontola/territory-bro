@@ -34,7 +34,7 @@
           (dorun (map db/create-territory! territories))))
       (finally
         (io/delete-file tempfile))))
-  (redirect "/territory-cards"))
+  (redirect "/"))
 
 (defroutes home-routes
            (GET "/" [] (home-page))

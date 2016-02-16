@@ -5,4 +5,12 @@
 
 {{docs|markdown}}
 
+<h2>Import</h2>
+
+<form action="/import-territories" method="post" enctype="multipart/form-data">
+    {% csrf-field %}
+    <p>Territories GeoJSON: <input type="file" name="territories"></p>
+    <button type="submit" class="btn btn-primary">Import</button>
+</form>
+
 {% endblock %}

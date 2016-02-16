@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block content %}
 <h1>Territory Cards</h1>
 
@@ -32,16 +33,6 @@
     <div class="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""></div>
 </div>
 {% endfor %}
-
-<div class="territories-import">
-    <h2>Import</h2>
-
-    <form action="/import-territories" method="post" enctype="multipart/form-data">
-        {% csrf-field %}
-        <p>Territories GeoJSON: <input type="file" name="territories"></p>
-        <button type="submit" class="btn btn-primary">Import</button>
-    </form>
-</div>
 {% endblock %}
 
 {% block page-scripts %}
