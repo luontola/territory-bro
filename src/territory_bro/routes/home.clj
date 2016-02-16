@@ -9,8 +9,8 @@
             [clojure.data.json :as json])
   (:import (java.time LocalDate)))
 
-(defn home-page []
-  (layout/render "home.html"
+(defn overview-page []
+  (layout/render "overview.html"
                  {:docs (-> "docs/docs.md" io/resource slurp)}))
 
 (defn territory-cards-page []
@@ -37,7 +37,7 @@
   (redirect "/"))
 
 (defroutes home-routes
-           (GET "/" [] (home-page))
+           (GET "/" [] (overview-page))
            (GET "/territory-cards" [] (territory-cards-page))
            (GET "/neighborhood-maps" [] (neighborhood-maps-page))
            (POST "/import-territories" request (import-territories! request)))
