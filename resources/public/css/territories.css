@@ -162,7 +162,7 @@
     /* A4 paper size */
     width: 210mm;
     height: 297mm;
-    padding: 20mm;
+    /*padding: 20mm;*/
     /*border: 1px solid Red;*/
 }
 
@@ -177,7 +177,7 @@
 .region-map {
     width: 100%;
     /* XXX: just tweaked until it looked right; the browser does some unwanted scaling */
-    height: 303mm;
+    height: 282mm;
 }
 
 @media print {
