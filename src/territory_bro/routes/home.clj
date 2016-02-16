@@ -11,7 +11,9 @@
 
 (defn overview-page []
   (layout/render "overview.html"
-                 {:docs (-> "docs/docs.md" io/resource slurp)}))
+                 {:docs            (-> "docs/docs.md" io/resource slurp)
+                  :territory-count (db/count-territories)
+                  :region-count    (db/count-regions)}))
 
 (defn territory-cards-page []
   (layout/render "territory-cards.html"

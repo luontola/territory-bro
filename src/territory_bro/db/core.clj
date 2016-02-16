@@ -18,6 +18,12 @@
 (defn create-territory! [opts]
   (-create-territory! (update opts :location json/write-str)))
 
+(defn count-territories []
+  (:count (first (-count-territories))))
+
+(defn count-regions []
+  (:count (first (-count-regions))))
+
 (def pool-spec
   {:adapter    :postgresql
    :init-size  1

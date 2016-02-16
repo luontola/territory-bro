@@ -5,6 +5,10 @@ VALUES (nextval('territory_id_seq'), :number, :address, :region, ST_GeomFromGeoJ
 -- name: delete-all-territories!
 DELETE FROM territory;
 
+-- name: -count-territories
+SELECT count(*)
+FROM territory;
+
 -- name: find-territories
 SELECT
   t.id,
@@ -23,6 +27,10 @@ ORDER BY
   -- XXX: natural sorting hack based on http://stackoverflow.com/a/9482849/62130
   SUBSTRING(t.number FROM '^(\d+)') :: INTEGER,
   t.number;
+
+-- name: -count-regions
+SELECT count(*)
+FROM region;
 
 -- name: find-regions
 SELECT

@@ -7,6 +7,8 @@
 
 <h2>Import</h2>
 
+<p>The database has currently {{territory-count}} territories and {{region-count}} regions.</p>
+
 <form action="/import-territories" method="post" enctype="multipart/form-data">
     {% csrf-field %}
     <p>Territories GeoJSON: <input type="file" name="territories"></p>
