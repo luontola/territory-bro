@@ -157,15 +157,11 @@
 
 
 @media print {
-    h1 {
+    .no-print {
         display: none;
     }
 
     .crop-area {
         border: none;
-    }
-
-    nav {
-        display: none;
     }
 }
