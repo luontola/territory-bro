@@ -40,8 +40,15 @@
 {% script "/assets/openlayers/ol.js" %}
 {% for territory in territories %}
 <script type="text/javascript">
-    territoryBro.initTerritoryMap('map-{{ territory.id }}', '{{ territory.location }}');
-    territoryBro.initTerritoryMiniMap('minimap-{{ territory.id }}', '{{ territory.center }}', '{{ territory.region-map }}');
+    territoryBro.initTerritoryMap(
+            'map-{{ territory.id }}',
+            '{{ territory.location }}');
+    territoryBro.initTerritoryMiniMap(
+            'minimap-{{ territory.id }}',
+            '{{ territory.center }}',
+            '{{ territory.minimap-viewport }}',
+            '{{ territory.congregation }}',
+            '{{ territory.subregions }}');
 </script>
 {% endfor %}
 {% endblock %}

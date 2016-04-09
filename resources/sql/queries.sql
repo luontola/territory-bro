@@ -15,13 +15,22 @@ SELECT
   t.number,
   t.address,
   t.region,
-  ST_AsText(t.location)                                   AS location,
-  ST_AsText(ST_Centroid(t.location :: GEOMETRY))          AS center,
-  ST_AsText(ST_Multi(ST_Collect(r.location :: GEOMETRY))) AS "region-map"
+  ST_AsText(t.location)                                              AS location,
+  ST_AsText(ST_Centroid(t.location :: GEOMETRY))                     AS center,
+  ST_AsText(ST_Multi(ST_Collect(viewport.location :: GEOMETRY)))     AS "minimap-viewport",
+  ST_AsText(ST_Multi(ST_Collect(congregation.location :: GEOMETRY))) AS "congregation",
+  ST_AsText(ST_Multi(ST_Collect(subregion.location :: GEOMETRY)))    AS "subregions"
 FROM
-  territory AS t,
-  region AS r
-WHERE ST_Intersects(t.location, r.location)
+  territory AS t
+  LEFT OUTER JOIN region AS viewport
+    ON ST_Intersects(t.location, viewport.location)
+       AND viewport.minimap_viewport = TRUE
+  LEFT OUTER JOIN region AS congregation
+    ON ST_Intersects(t.location, congregation.location)
+       AND congregation.congregation = TRUE
+  LEFT OUTER JOIN region AS subregion
+    ON ST_Intersects(t.location, subregion.location)
+       AND subregion.subregion = TRUE
 GROUP BY t.id
 ORDER BY
   -- XXX: natural sorting hack based on http://stackoverflow.com/a/9482849/62130

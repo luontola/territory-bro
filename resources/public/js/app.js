@@ -70,7 +70,7 @@ var territoryBro = (function () {
     );
   }
 
-  function initTerritoryMiniMap(elementId, territoryWkt, regionWkt) {
+  function initTerritoryMiniMap(elementId, territoryWkt, viewportWkt, congregationWkt, subregionsWkt) {
     var territoryLayer = new ol.layer.Vector({
       source: new ol.source.Vector({
         features: [wktToFeature(territoryWkt)]
@@ -85,9 +85,25 @@ var territoryBro = (function () {
       })
     });
 
-    var regionLayer = new ol.layer.Vector({
+    var viewportSource = new ol.source.Vector({
+      features: [wktToFeature(viewportWkt)]
+    });
+
+    var congregationLayer = new ol.layer.Vector({
       source: new ol.source.Vector({
-        features: [wktToFeature(regionWkt)]
+        features: [wktToFeature(congregationWkt)]
+      }),
+      style: new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: 'rgba(0, 0, 0, 1.0)',
+          width: 1.0
+        })
+      })
+    });
+
+    var subregionsLayer = new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: [wktToFeature(subregionsWkt)]
       }),
       style: new ol.style.Style({
         stroke: new ol.style.Stroke({
@@ -113,7 +129,7 @@ var territoryBro = (function () {
     var map = new ol.Map({
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
-      layers: [streetsLayer, regionLayer, territoryLayer],
+      layers: [streetsLayer, subregionsLayer, congregationLayer, territoryLayer],
       controls: [],
       interactions: [],
       view: new ol.View({
@@ -123,10 +139,10 @@ var territoryBro = (function () {
     });
     //useHighDpiMaps(map);
     map.getView().fit(
-      regionLayer.getSource().getExtent(),
+      viewportSource.getExtent(),
       map.getSize(),
       {
-        padding: [5, 5, 5, 5],
+        padding: [1, 1, 1, 1], // minimum padding where the congregation lines still show up
         constrainResolution: false
       }
     );
