@@ -14,4 +14,4 @@ navigation:
     url: https://github.com/orfjackal/territory-bro
 
 # Build settings
-markdown: redcarpet
+markdown: kramdown
