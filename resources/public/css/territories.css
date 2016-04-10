@@ -107,6 +107,11 @@
     height: var(--map-height);
 }
 
+.territory-card .minimap canvas,
+.territory-card .map canvas {
+    border-radius: 2mm;
+}
+
 .territory-card .addresses {
     clear: right;
     float: right;
@@ -125,7 +130,7 @@
     width: 0;
     height: 0;
     /* text style */
-    text-align: right;
+    text-align: center;
     font-size: 6px;
     white-space: nowrap; /* if the disclaimer is long, keep it all in one line */
 }
@@ -153,6 +158,11 @@
     grid-column: content;
     grid-row: content;
     padding: 0.5cm;
+}
+
+.neighborhood-map .map-attribution {
+    /* for some reason the attribution text is closer to the edge in the neighborhood map */
+    margin-bottom: 3px;
 }
 
 /* Region Map */
