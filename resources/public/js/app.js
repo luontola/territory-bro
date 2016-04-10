@@ -6,43 +6,10 @@ var territoryBro = (function () {
     return feature;
   }
 
-  function useHighDpiMaps(map) {
-    // render at a higher zoom level for high DPI
-    var updateSize = map.updateSize;
-    map.updateSize = function () {
-      updateSize.call(this);
-      this.setSize(this.getSize().map(function (x) {
-        return x * 2;
-      }));
-    };
-    map.updateSize();
-    // XXX: the canvas size resets when the window is resized
-    window.addEventListener('resize', function (e) {
-      map.updateSize();
-    });
-  }
-
-  function initTerritoryMap(elementId, territoryWkt) {
-    var territoryLayer = new ol.layer.Vector({
-      source: new ol.source.Vector({
-        features: [wktToFeature(territoryWkt)]
-      }),
-      style: new ol.style.Style({
-        stroke: new ol.style.Stroke({
-          color: 'rgba(255, 0, 0, 0.6)',
-          width: 2.0
-        }),
-        fill: new ol.style.Fill({
-          color: 'rgba(255, 0, 0, 0.1)'
-        })
-      })
-    });
-
-    var streetsLayer = new ol.layer.Tile({
-      source: new ol.source.OSM()
-    });
-    // high DPI spike
-    streetsLayer = new ol.layer.Tile({
+  function makeStreetsLayer() {
+    return new ol.layer.Tile({
+      //source: new ol.source.OSM()
+      // high DPI spike
       source: new ol.source.XYZ({
         url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
         tileSize: [512, 512],
@@ -51,17 +18,58 @@ var territoryBro = (function () {
         ]
       })
     });
+  }
 
+  function makeControls() {
     var attribution = new ol.control.Attribution({
       className: 'map-attribution',
       collapsible: false
+    });
+    return ol.control.defaults({attribution: false}).extend([attribution]);
+  }
+
+  // visual style
+
+  function territoryStrokeStyle() {
+    return new ol.style.Stroke({
+      color: 'rgba(255, 0, 0, 0.6)',
+      width: 2.0
+    });
+  }
+
+  function territoryFillStyle() {
+    return new ol.style.Fill({
+      color: 'rgba(255, 0, 0, 0.1)'
+    });
+  }
+
+  function territoryTextStyle(territoryNumber, fontSize) {
+    return new ol.style.Text({
+      text: territoryNumber,
+      font: 'bold ' + fontSize + ' sans-serif',
+      fill: new ol.style.Fill({color: 'rgba(0, 0, 0, 1.0)'}),
+      stroke: new ol.style.Stroke({color: 'rgba(255, 255, 255, 1.0)', width: 3.0})
+    });
+  }
+
+  // map constructors
+
+  function initTerritoryMap(elementId, territoryWkt) {
+    var territoryLayer = new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: [wktToFeature(territoryWkt)]
+      }),
+      style: new ol.style.Style({
+        stroke: territoryStrokeStyle(),
+        fill: territoryFillStyle()
+      })
     });
 
     var map = new ol.Map({
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
-      layers: [streetsLayer, territoryLayer],
-      controls: ol.control.defaults({attribution: false}).extend([attribution]),
+      layers: [makeStreetsLayer(), territoryLayer],
+      controls: makeControls(),
       view: new ol.View({
         center: ol.proj.fromLonLat([0.0, 0.0]),
         zoom: 1,
@@ -69,7 +77,6 @@ var territoryBro = (function () {
         zoomFactor: 1.1 // zoom in small steps to enable fine tuning
       })
     });
-    //useHighDpiMaps(map);
     map.getView().fit(
       territoryLayer.getSource().getExtent(),
       map.getSize(),
@@ -124,24 +131,10 @@ var territoryBro = (function () {
       })
     });
 
-    var streetsLayer = new ol.layer.Tile({
-      source: new ol.source.OSM()
-    });
-    // high DPI spike
-    streetsLayer = new ol.layer.Tile({
-      source: new ol.source.XYZ({
-        url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-        tileSize: [512, 512],
-        attributions: [
-          ol.source.OSM.ATTRIBUTION
-        ]
-      })
-    });
-
     var map = new ol.Map({
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
-      layers: [streetsLayer, subregionsLayer, congregationLayer, territoryLayer],
+      layers: [makeStreetsLayer(), subregionsLayer, congregationLayer, territoryLayer],
       controls: [],
       interactions: [],
       view: new ol.View({
@@ -149,7 +142,6 @@ var territoryBro = (function () {
         zoom: 1
       })
     });
-    //useHighDpiMaps(map);
     map.getView().fit(
       viewportSource.getExtent(),
       map.getSize(),
@@ -166,46 +158,17 @@ var territoryBro = (function () {
         features: [wktToFeature(territoryWkt)]
       }),
       style: new ol.style.Style({
-        stroke: new ol.style.Stroke({
-          color: 'rgba(255, 0, 0, 0.6)',
-          width: 2.0
-        }),
-        fill: new ol.style.Fill({
-          color: 'rgba(255, 0, 0, 0.1)'
-        }),
-        text: new ol.style.Text({
-          text: territoryNumber,
-          font: 'bold 180% sans-serif',
-          fill: new ol.style.Fill({color: 'rgba(0, 0, 0, 1.0)'}),
-          stroke: new ol.style.Stroke({color: 'rgba(255, 255, 255, 1.0)', width: 3.0})
-        })
+        stroke: territoryStrokeStyle(),
+        fill: territoryFillStyle(),
+        text: territoryTextStyle(territoryNumber, '180%')
       })
-    });
-
-    var streetsLayer = new ol.layer.Tile({
-      source: new ol.source.OSM()
-    });
-    // high DPI spike
-    streetsLayer = new ol.layer.Tile({
-      source: new ol.source.XYZ({
-        url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-        tileSize: [512, 512],
-        attributions: [
-          ol.source.OSM.ATTRIBUTION
-        ]
-      })
-    });
-
-    var attribution = new ol.control.Attribution({
-      className: 'map-attribution',
-      collapsible: false
     });
 
     var map = new ol.Map({
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
-      layers: [streetsLayer, territoryLayer],
-      controls: ol.control.defaults({attribution: false}).extend([attribution]),
+      layers: [makeStreetsLayer(), territoryLayer],
+      controls: makeControls(),
       view: new ol.View({
         center: ol.proj.fromLonLat([0.0, 0.0]),
         zoom: 1,
@@ -213,7 +176,6 @@ var territoryBro = (function () {
         zoomFactor: 1.1 // zoom in small steps to enable fine tuning
       })
     });
-    //useHighDpiMaps(map);
     map.getView().fit(
       territoryLayer.getSource().getExtent(),
       map.getSize(),
@@ -249,45 +211,18 @@ var territoryBro = (function () {
       }),
       style: function (feature, resolution) {
         var style = new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: 'rgba(255, 0, 0, 0.6)',
-            width: 2.0
-          }),
-          text: new ol.style.Text({
-            text: feature.get('number'),
-            font: 'bold 5mm sans-serif',
-            fill: new ol.style.Fill({color: 'rgba(0, 0, 0, 1.0)'}),
-            stroke: new ol.style.Stroke({color: 'rgba(255, 255, 255, 1.0)', width: 3.0})
-          })
+          stroke: territoryStrokeStyle(),
+          text: territoryTextStyle(feature.get('number'), '5mm')
         });
         return [style];
       }
     });
 
-    var streetsLayer = new ol.layer.Tile({
-      source: new ol.source.OSM()
-    });
-    // high DPI spike
-    streetsLayer = new ol.layer.Tile({
-      source: new ol.source.XYZ({
-        url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-        tileSize: [512, 512],
-        attributions: [
-          ol.source.OSM.ATTRIBUTION
-        ]
-      })
-    });
-
-    var attribution = new ol.control.Attribution({
-      className: 'map-attribution',
-      collapsible: false
-    });
-
     var map = new ol.Map({
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
-      layers: [streetsLayer, regionLayer, territoryLayer],
-      controls: ol.control.defaults({attribution: false}).extend([attribution]),
+      layers: [makeStreetsLayer(), regionLayer, territoryLayer],
+      controls: makeControls(),
       view: new ol.View({
         center: ol.proj.fromLonLat([0.0, 0.0]),
         zoom: 1,
@@ -295,7 +230,6 @@ var territoryBro = (function () {
         zoomFactor: 1.1 // zoom in small steps to enable fine tuning
       })
     });
-    //useHighDpiMaps(map);
     map.getView().fit(
       regionLayer.getSource().getExtent(),
       map.getSize(),
