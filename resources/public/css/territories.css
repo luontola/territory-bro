@@ -125,8 +125,8 @@
     width: 0;
     height: 0;
     /* text style */
-    text-align: center;
-    font-size: 40%;
+    text-align: right;
+    font-size: 6px;
     white-space: nowrap; /* if the disclaimer is long, keep it all in one line */
 }
 
@@ -180,6 +180,41 @@
     height: 282mm;
 }
 
+/* Map Attribution; customize OpenLayers defaults to be printing friendly */
+
+.map-attribution {
+    text-align: right;
+    bottom: 0;
+    right: 0;
+    font-size: 6px;
+    padding: 2px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.map-attribution ul {
+    margin: 0;
+    padding: 0;
+}
+
+.map-attribution li {
+    display: inline;
+    list-style: none;
+    line-height: inherit;
+}
+
+.map-attribution a {
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+.map-attribution button,
+.map-attribution img {
+    display: none !important;
+}
+
+/* Printing */
+
 @media print {
     .no-print {
         display: none;
@@ -187,5 +222,9 @@
 
     .crop-area {
         border: none;
+    }
+
+    .map-attribution {
+        display: block !important;
     }
 }

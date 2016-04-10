@@ -45,14 +45,23 @@ var territoryBro = (function () {
     streetsLayer = new ol.layer.Tile({
       source: new ol.source.XYZ({
         url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-        tileSize: [512, 512]
+        tileSize: [512, 512],
+        attributions: [
+          ol.source.OSM.ATTRIBUTION
+        ]
       })
+    });
+
+    var attribution = new ol.control.Attribution({
+      className: 'map-attribution',
+      collapsible: false
     });
 
     var map = new ol.Map({
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
       layers: [streetsLayer, territoryLayer],
+      controls: ol.control.defaults({attribution: false}).extend([attribution]),
       view: new ol.View({
         center: ol.proj.fromLonLat([0.0, 0.0]),
         zoom: 1,
@@ -122,7 +131,10 @@ var territoryBro = (function () {
     streetsLayer = new ol.layer.Tile({
       source: new ol.source.XYZ({
         url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-        tileSize: [512, 512]
+        tileSize: [512, 512],
+        attributions: [
+          ol.source.OSM.ATTRIBUTION
+        ]
       })
     });
 
@@ -177,14 +189,23 @@ var territoryBro = (function () {
     streetsLayer = new ol.layer.Tile({
       source: new ol.source.XYZ({
         url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-        tileSize: [512, 512]
+        tileSize: [512, 512],
+        attributions: [
+          ol.source.OSM.ATTRIBUTION
+        ]
       })
+    });
+
+    var attribution = new ol.control.Attribution({
+      className: 'map-attribution',
+      collapsible: false
     });
 
     var map = new ol.Map({
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
       layers: [streetsLayer, territoryLayer],
+      controls: ol.control.defaults({attribution: false}).extend([attribution]),
       view: new ol.View({
         center: ol.proj.fromLonLat([0.0, 0.0]),
         zoom: 1,
@@ -250,14 +271,23 @@ var territoryBro = (function () {
     streetsLayer = new ol.layer.Tile({
       source: new ol.source.XYZ({
         url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-        tileSize: [512, 512]
+        tileSize: [512, 512],
+        attributions: [
+          ol.source.OSM.ATTRIBUTION
+        ]
       })
+    });
+
+    var attribution = new ol.control.Attribution({
+      className: 'map-attribution',
+      collapsible: false
     });
 
     var map = new ol.Map({
       target: elementId,
       pixelRatio: 2, // render at high DPI for printing
       layers: [streetsLayer, regionLayer, territoryLayer],
+      controls: ol.control.defaults({attribution: false}).extend([attribution]),
       view: new ol.View({
         center: ol.proj.fromLonLat([0.0, 0.0]),
         zoom: 1,
