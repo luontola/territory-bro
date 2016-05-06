@@ -12,6 +12,7 @@
 <form action="/import-territories" method="post" enctype="multipart/form-data">
     {% csrf-field %}
     <p>Territories GeoJSON: <input type="file" name="territories"></p>
+    <p>Regions GeoJSON: <input type="file" name="regions"></p>
     <button type="submit" class="btn btn-primary">Import</button>
 </form>
 {% endblock %}

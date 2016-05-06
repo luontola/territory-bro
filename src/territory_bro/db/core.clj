@@ -21,6 +21,9 @@
 (defn count-territories []
   (:count (first (-count-territories))))
 
+(defn create-region! [opts]
+  (-create-region! (update opts :location json/write-str)))
+
 (defn count-regions []
   (:count (first (-count-regions))))
 

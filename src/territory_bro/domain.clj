@@ -12,7 +12,7 @@
 
 (defn feature-to-region [feature]
   {:name             (get-in feature [:properties "name"])
-   :minimap-viewport (= "t" (get-in feature [:properties "minimap_viewport"]))
+   :minimap_viewport (= "t" (get-in feature [:properties "minimap_viewport"]))
    :congregation     (= "t" (get-in feature [:properties "congregation"]))
    :subregion        (= "t" (get-in feature [:properties "subregion"]))
    :location         (get feature :geometry)})

@@ -17,9 +17,9 @@ SELECT
   t.region,
   ST_AsText(t.location)                                              AS location,
   ST_AsText(ST_Centroid(t.location :: GEOMETRY))                     AS center,
-  ST_AsText(ST_Multi(ST_Collect(viewport.location :: GEOMETRY)))     AS "minimap-viewport",
-  ST_AsText(ST_Multi(ST_Collect(congregation.location :: GEOMETRY))) AS "congregation",
-  ST_AsText(ST_Multi(ST_Collect(subregion.location :: GEOMETRY)))    AS "subregions"
+  ST_AsText(ST_Multi(ST_Collect(viewport.location :: GEOMETRY)))     AS minimap_viewport,
+  ST_AsText(ST_Multi(ST_Collect(congregation.location :: GEOMETRY))) AS congregation,
+  ST_AsText(ST_Multi(ST_Collect(subregion.location :: GEOMETRY)))    AS subregions
 FROM
   territory AS t
   LEFT OUTER JOIN region AS viewport
@@ -36,6 +36,13 @@ ORDER BY
   -- XXX: natural sorting hack based on http://stackoverflow.com/a/9482849/62130
   SUBSTRING(t.number FROM '^(\d+)') :: INTEGER,
   t.number;
+
+-- name: -create-region!
+INSERT INTO region (id, name, minimap_viewport, congregation, subregion, location)
+VALUES (nextval('region_id_seq'), :name, :minimap_viewport, :congregation, :subregion, ST_GeomFromGeoJSON(:location));
+
+-- name: delete-all-regions!
+DELETE FROM region;
 
 -- name: -count-regions
 SELECT count(*)

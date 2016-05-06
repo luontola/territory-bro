@@ -37,13 +37,20 @@
         (io/delete-file tempfile)))))
 
 (defn import-territories! [request]
-  (let [territories-geojson (read-file-upload request :territories)]
-    (when (not-empty territories-geojson)
+  (let [geojson (read-file-upload request :territories)]
+    (when (not-empty geojson)
       (db/transactional
         (db/delete-all-territories!)
-        (dorun (map db/create-territory! (-> territories-geojson
+        (dorun (map db/create-territory! (-> geojson
                                              json/read-str
                                              domain/geojson-to-territories))))))
+  (let [geojson (read-file-upload request :regions)]
+    (when (not-empty geojson)
+      (db/transactional
+        (db/delete-all-regions!)
+        (dorun (map db/create-region! (-> geojson
+                                          json/read-str
+                                          domain/geojson-to-regions))))))
   (redirect "/"))
 
 (defroutes home-routes

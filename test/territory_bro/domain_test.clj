@@ -32,7 +32,7 @@
                               "geometry"   {"type" "Polygon", "coordinates" [[[25.1224283, 60.2180387], [25.125388, 60.217563], [25.1278867, 60.2156996]]]}}]}]
 
     (is (= {:name             "Rastila"
-            :minimap-viewport false
+            :minimap_viewport false
             :congregation     false
             :subregion        true
             :location         {"type"        "Polygon"
