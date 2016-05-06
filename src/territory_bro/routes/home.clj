@@ -53,9 +53,16 @@
                                           domain/geojson-to-regions))))))
   (redirect "/"))
 
+(defn clear-database! []
+  (db/transactional
+    (db/delete-all-territories!)
+    (db/delete-all-regions!))
+  (redirect "/"))
+
 (defroutes home-routes
            (GET "/" [] (overview-page))
            (GET "/territory-cards" [] (territory-cards-page))
            (GET "/neighborhood-maps" [] (neighborhood-maps-page))
            (GET "/region-maps" [] (region-maps-page))
-           (POST "/import-territories" request (import-territories! request)))
+           (POST "/import-territories" request (import-territories! request))
+           (POST "/clear-database" [] (clear-database!)))
