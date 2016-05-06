@@ -9,3 +9,13 @@
 
 (defn geojson-to-territories [geojson]
   (map feature-to-territory (geojson/explode-feature-collection geojson)))
+
+(defn feature-to-region [feature]
+  {:name             (get-in feature [:properties "name"])
+   :minimap-viewport (= "t" (get-in feature [:properties "minimap_viewport"]))
+   :congregation     (= "t" (get-in feature [:properties "congregation"]))
+   :subregion        (= "t" (get-in feature [:properties "subregion"]))
+   :location         (get feature :geometry)})
+
+(defn geojson-to-regions [geojson]
+  (map feature-to-region (geojson/explode-feature-collection geojson)))

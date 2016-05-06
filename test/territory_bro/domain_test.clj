@@ -9,21 +9,36 @@
                              "properties" {"name" "urn:ogc:def:crs:OGC:1.3:CRS84"}},
                  "features" [{"type"       "Feature",
                               "properties" {"number" "330", "address" "Iiluodontie 1 A-C", "region" "Vuosaari"},
-                              "geometry"   {"type" "Polygon", "coordinates" [[[25.145782335183817 60.20474739390362] [25.146270369915616 60.20480723285933] [25.146904181255607 60.204092307671814] [25.146149945761014 60.20400097249475] [25.145782335183817 60.20474739390362]]]}}
-                             {"type"       "Feature",
-                              "properties" {"number" "304", "address" "Iiluodontie 3", "region" "Vuosaari"},
-                              "geometry"   {"type" "Polygon", "coordinates" [[[25.14611191708061 60.20499619726613] [25.14673939030721 60.20511272477442] [25.146986576729812 60.20481038227502] [25.146365441616616 60.204700152545676] [25.14611191708061 60.20499619726613]]]}}]}
-        territories (geojson-to-territories geojson)]
+                              "geometry"   {"type" "Polygon", "coordinates" [[[25.145782335183817 60.20474739390362] [25.146270369915616 60.20480723285933] [25.146904181255607 60.204092307671814]]]}}]}]
 
-    (testing "as many territories as features"
-      (is (seq? territories))
-      (is (= 2 (count territories))))
+    (is (= {:number   "330"
+            :address  "Iiluodontie 1 A-C"
+            :region   "Vuosaari"
+            :location {"type" "Polygon"
+                       "coordinates"
+                              [[[25.145782335183817 60.20474739390362]
+                                [25.146270369915616 60.20480723285933]
+                                [25.146904181255607 60.204092307671814]]],
+                       "crs"  {"type"       "name"
+                               "properties" {"name" "urn:ogc:def:crs:OGC:1.3:CRS84"}}}}
+           (first (geojson-to-territories geojson))))))
 
-    (testing "territory fields"
-      (let [territory (first territories)]
-        (is (= "330" (:number territory)))
-        (is (= "Iiluodontie 1 A-C" (:address territory)))
-        (is (= "Vuosaari" (:region territory)))
-        (is (= "Polygon" (get-in territory [:location "type"])))
-        (is (get-in territory [:location "coordinates"]))
-        (is (get-in territory [:location "crs"]))))))
+(deftest test-geojson-to-regions
+  (let [geojson {"type"     "FeatureCollection",
+                 "crs"      {"type"       "name",
+                             "properties" {"name" "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+                 "features" [{"type"       "Feature",
+                              "properties" {"id" 5, "name" "Rastila", "minimap_viewport" "f", "congregation" "f", "subregion" "t"},
+                              "geometry"   {"type" "Polygon", "coordinates" [[[25.1224283, 60.2180387], [25.125388, 60.217563], [25.1278867, 60.2156996]]]}}]}]
+
+    (is (= {:name             "Rastila"
+            :minimap-viewport false
+            :congregation     false
+            :subregion        true
+            :location         {"type"        "Polygon"
+                               "coordinates" [[[25.1224283 60.2180387]
+                                               [25.125388 60.217563]
+                                               [25.1278867 60.2156996]]]
+                               "crs"         {"type"       "name"
+                                              "properties" {"name" "urn:ogc:def:crs:OGC:1.3:CRS84"}}}}
+           (first (geojson-to-regions geojson))))))
