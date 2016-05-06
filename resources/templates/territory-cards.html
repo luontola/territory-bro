@@ -11,7 +11,7 @@
         <div class="number">{{ territory.number }}</div>
         <div id="minimap-{{ territory.id }}" class="minimap"></div>
 
-        <div class="title">Aluekortti</div>
+        <div class="title">{{ i18n.territory-card.title }}</div>
         <div class="region">{{ territory.region }}</div>
 
         <div id="map-{{ territory.id }}" class="map"></div>
@@ -21,10 +21,7 @@
             <div>Printed {{ today }} with TerritoryBro.com</div>
         </div>
 
-        <div class="footer">
-            Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä.
-            <br>Joka kerta kun alue on käyty läpi, ilmoita siitä veljelle, joka hoitaa aluekarttoja.
-        </div>
+        <div class="footer">{{ i18n.territory-card.footer1 }}<br>{{ i18n.territory-card.footer2 }}</div>
     </div>
     <div class="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""></div>
     <div class="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""></div>

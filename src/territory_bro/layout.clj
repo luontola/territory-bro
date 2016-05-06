@@ -19,6 +19,16 @@
   (or (-> request :params :lang available-languages)
       default-language))
 
+(def i18n {"en" {:territory-card {:title   "Territory Map Card"
+                                  :footer1 "Please keep this card in the envelope. Do not soil, mark or bend it."
+                                  :footer2 "Each time the territory is covered, please inform the brother who cares for the territory files."}}
+           "fi" {:territory-card {:title   "Aluekortti"
+                                  :footer1 "Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä."
+                                  :footer2 "Joka kerta kun alue on käyty läpi, ilmoita siitä veljelle, joka hoitaa aluekarttoja."}}
+           "pt" {:territory-card {:title   "Cartão de mapa de território"
+                                  :footer1 "Guarde este cartão no envelope. Tome cuidado para não o manchar, marcar ou dobrar."
+                                  :footer2 "Cada vez que o território for coberto, por favor informe o irmão que cuida do arquivo dos territórios."}}})
+
 (defn render
   "renders the HTML template located relative to resources/templates"
   [template request & [params]]
@@ -29,6 +39,7 @@
         (assoc params
           :page template
           :lang (current-language request)
+          :i18n (get i18n (current-language request))
           :uri (:uri request)
           :dev (env :dev)
           :csrf-token *anti-forgery-token*
