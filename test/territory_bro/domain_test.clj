@@ -26,8 +26,4 @@
         (is (= "Vuosaari" (:region territory)))
         (is (= "Polygon" (get-in territory [:location "type"])))
         (is (get-in territory [:location "coordinates"]))
-        (is (get-in territory [:location "crs"]))))
-
-    (testing "requires FeatureCollection"
-      (is (thrown? IllegalArgumentException
-                   (geojson-to-territories (assoc geojson "type" "WrongType")))))))
+        (is (get-in territory [:location "crs"]))))))
