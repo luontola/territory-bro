@@ -13,15 +13,23 @@
 (filters/add-filter! :markdown (fn [content] [:safe (md-to-html-string content)]))
 (filters/add-filter! :semicolon-to-newline (fn [text] (clojure.string/replace text ";" "\n")))
 
+(def available-languages #{"en" "fi" "pt"})
+(def default-language "en")
+(defn current-language [request]
+  (or (-> request :params :lang available-languages)
+      default-language))
+
 (defn render
   "renders the HTML template located relative to resources/templates"
-  [template & [params]]
+  [template request & [params]]
   (content-type
     (ok
       (parser/render-file
         template
         (assoc params
           :page template
+          :lang (current-language request)
+          :uri (:uri request)
           :dev (env :dev)
           :csrf-token *anti-forgery-token*
           :servlet-context *app-context*)))

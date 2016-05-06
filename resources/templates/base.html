@@ -10,11 +10,16 @@
 
 <nav class="no-print">
     <ul>
-        <li><a href="{{servlet-context}}/">Overview</a></li>
-        <li><a href="{{servlet-context}}/territory-cards">Territory Cards</a></li>
-        <li><a href="{{servlet-context}}/neighborhood-maps">Neighborhood Maps</a></li>
-        <li><a href="{{servlet-context}}/region-maps">Region Maps</a></li>
+        <li><a href="{{servlet-context}}/?lang={{lang}}">Overview</a></li>
+        <li><a href="{{servlet-context}}/territory-cards?lang={{lang}}">Territory Cards</a></li>
+        <li><a href="{{servlet-context}}/neighborhood-maps?lang={{lang}}">Neighborhood Maps</a></li>
+        <li><a href="{{servlet-context}}/region-maps?lang={{lang}}">Region Maps</a></li>
     </ul>
+    <p>Change language:
+        <a href="{{uri}}?lang=en">English</a>
+        <a href="{{uri}}?lang=fi">Finnish</a>
+        <a href="{{uri}}?lang=pt">Portuguese</a>
+    </p>
 </nav>
 
 <div class="container">

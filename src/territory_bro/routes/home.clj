@@ -9,23 +9,27 @@
             [clojure.data.json :as json])
   (:import (java.time LocalDate)))
 
-(defn overview-page []
+(defn overview-page [request]
   (layout/render "overview.html"
+                 request
                  {:docs            (-> "docs/docs.md" io/resource slurp)
                   :territory-count (db/count-territories)
                   :region-count    (db/count-regions)}))
 
-(defn territory-cards-page []
+(defn territory-cards-page [request]
   (layout/render "territory-cards.html"
+                 request
                  {:territories (db/find-territories)
                   :today       (LocalDate/now)}))
 
-(defn neighborhood-maps-page []
+(defn neighborhood-maps-page [request]
   (layout/render "neighborhood-maps.html"
+                 request
                  {:territories (db/find-territories)}))
 
-(defn region-maps-page []
+(defn region-maps-page [request]
   (layout/render "region-maps.html"
+                 request
                  {:regions          (db/find-regions)
                   :territories-json (json/write-str (db/find-territories))}))
 
@@ -60,9 +64,9 @@
   (redirect "/"))
 
 (defroutes home-routes
-           (GET "/" [] (overview-page))
-           (GET "/territory-cards" [] (territory-cards-page))
-           (GET "/neighborhood-maps" [] (neighborhood-maps-page))
-           (GET "/region-maps" [] (region-maps-page))
+           (GET "/" request (overview-page request))
+           (GET "/territory-cards" request (territory-cards-page request))
+           (GET "/neighborhood-maps" request (neighborhood-maps-page request))
+           (GET "/region-maps" request (region-maps-page request))
            (POST "/import-territories" request (import-territories! request))
            (POST "/clear-database" [] (clear-database!)))
