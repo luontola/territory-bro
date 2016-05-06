@@ -35,7 +35,8 @@
   :migratus {:store :database}
 
   :plugins [[lein-environ "1.0.1"]
-            [migratus-lein "0.2.0"]]
+            [migratus-lein "0.2.0"]
+            [com.jakemccrary/lein-test-refresh "0.14.0"]]
   :profiles
   {:uberjar {:omit-source true
              :env {:production true}
