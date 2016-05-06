@@ -29,18 +29,21 @@
                  {:regions          (db/find-regions)
                   :territories-json (json/write-str (db/find-territories))}))
 
-(defn import-territories! [request]
-  (let [tempfile (-> request :params :territories :tempfile)]
+(defn- read-file-upload [request param]
+  (let [tempfile (-> request :params param :tempfile)]
     (try
-      (let [territories (-> tempfile
-                            slurp
-                            json/read-str
-                            domain/geojson-to-territories)]
-        (db/transactional
-          (db/delete-all-territories!)
-          (dorun (map db/create-territory! territories))))
+      (slurp tempfile)
       (finally
-        (io/delete-file tempfile))))
+        (io/delete-file tempfile)))))
+
+(defn import-territories! [request]
+  (let [territories-geojson (read-file-upload request :territories)]
+    (when (not-empty territories-geojson)
+      (db/transactional
+        (db/delete-all-territories!)
+        (dorun (map db/create-territory! (-> territories-geojson
+                                             json/read-str
+                                             domain/geojson-to-territories))))))
   (redirect "/"))
 
 (defroutes home-routes
