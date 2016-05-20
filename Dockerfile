@@ -1,6 +1,6 @@
-FROM java:8-jre
+FROM java:8-jre-alpine
 
-RUN useradd --system --create-home --home-dir /app app
+RUN adduser -S -h /app app
 
 EXPOSE 8080
 
