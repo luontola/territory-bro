@@ -1,4 +1,4 @@
-FROM java:8
+FROM java:8-jre
 
 RUN useradd --system --create-home --home-dir /app app
 
