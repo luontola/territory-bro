@@ -31,4 +31,4 @@ Print it on thick paper, cut with a sharp knife and ruler along the crop marks, 
 
 ## Learn More
 
-To start creating new territory cards for your congregation, read more from [Getting Started](/getting-started/).
+To start creating new territory cards for your congregation, read more from the [User Guide](/guide/).
