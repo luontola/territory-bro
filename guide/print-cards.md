@@ -5,9 +5,9 @@ title: Printing Territory Cards
 
 # Printing Territory Cards
 
-TODO: video
+<iframe width="560" height="315" src="https://www.youtube.com/embed/WSxMMV6CpPg?list=PLSADDT9dzgRCEEopQhYLrdjVOfyfrC-Iz" frameborder="0" allowfullscreen></iframe>
 
-TODO: importing
+<!-- TODO: importing -->
 
 The territory cards will show up properly only with the latest [Chrome web browser](https://www.google.com/chrome/browser/desktop/index.html) when the *Experimental Web Platform features* flag is enabled on the `chrome://flags` configuration page.
 

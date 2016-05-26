@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Getting Started
+title: Registering an Account
 ---
 
 # Registering an Account
