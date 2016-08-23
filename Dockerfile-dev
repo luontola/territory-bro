@@ -14,24 +14,17 @@ RUN apt-get update \
 		nodejs \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Leiningen
-ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/local/bin/lein
-RUN chmod 755 /usr/local/bin/lein
-
-# JavaScript tools
-RUN npm install webpack -g
-
 RUN adduser --disabled-password --home /home/dev dev
-RUN mkdir /project && chown dev:dev /project
-USER dev
-WORKDIR /project
-
-# Pre-download Leiningen
-RUN lein version
-
+ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /home/dev/bin/lein
+RUN chmod a+x /home/dev/bin/lein
+COPY docker/dev/.bash_history /home/dev/
+COPY docker/dev/.npmrc /home/dev/
+RUN mkdir -p /project /home/dev/.m2 /home/dev/.lein \
+	&& chown -R dev:dev /project /home/dev
 ENV EDITOR=nano
 
 EXPOSE 8080
-ENV PORT=8080
 
+USER dev
+WORKDIR /project
 CMD ["bash", "--login"]

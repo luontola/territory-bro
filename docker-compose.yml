@@ -6,7 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile-dev
     ports:
-     - "5000:5000"
+     - "8080:8080"
     volumes:
      - .:/project
      - $HOME/.m2/repository:/home/dev/.m2/repository
+     - $HOME/.lein/self-installs:/home/dev/.lein/self-installs

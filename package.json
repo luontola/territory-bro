@@ -1,0 +1,32 @@
+{
+  "name": "territory-bro",
+  "version": "1.0.0",
+  "description": "Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "css-loader": "0.23.1",
+    "style-loader": "0.13.1"
+  },
+  "devDependencies": {
+    "webpack": "1.13.2",
+    "webpack-dev-server": "1.15.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node_modules/.bin/webpack --progress --colors",
+    "autobuild": "node_modules/.bin/webpack --progress --colors --watch",
+    "start": "node_modules/.bin/webpack-dev-server --content-base web --host 0.0.0.0 --progress --colors"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orfjackal/territory-bro.git"
+  },
+  "author": "Esko Luontola",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/orfjackal/territory-bro/issues"
+  },
+  "homepage": "https://github.com/orfjackal/territory-bro#readme"
+}
