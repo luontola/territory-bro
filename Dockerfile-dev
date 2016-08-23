@@ -1,0 +1,37 @@
+FROM ubuntu:latest
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		curl \
+		git \
+		less \
+		man \
+		nano \
+		openjdk-8-jdk \
+		wget \
+	&& curl -sL https://deb.nodesource.com/setup_6.x | bash - \
+	&& apt-get install -y --no-install-recommends \
+		nodejs \
+	&& rm -rf /var/lib/apt/lists/*
+
+# Leiningen
+ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/local/bin/lein
+RUN chmod 755 /usr/local/bin/lein
+
+# JavaScript tools
+RUN npm install webpack -g
+
+RUN adduser --disabled-password --home /home/dev dev
+RUN mkdir /project && chown dev:dev /project
+USER dev
+WORKDIR /project
+
+# Pre-download Leiningen
+RUN lein version
+
+ENV EDITOR=nano
+
+EXPOSE 8080
+ENV PORT=8080
+
+CMD ["bash", "--login"]
