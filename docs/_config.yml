@@ -1,0 +1,17 @@
+# Site settings
+title: Territory Bro
+tagline: Territory card management made easy
+description: Tool for managing territory cards in the congregations of Jehovah's Witnesses.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "http://territorybro.com" # the base hostname & protocol for your site
+
+navigation:
+  - title: Introduction
+    url: /
+  - title: User Guide
+    url: /guide/
+  - title: GitHub Project
+    url: https://github.com/orfjackal/territory-bro
+
+# Build settings
+markdown: kramdown

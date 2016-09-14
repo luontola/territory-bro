@@ -1,0 +1,11 @@
+<header class="page-header">
+    <h1 class="project-name"><a href="{{ "/" | prepend: site.baseurl }}">{{ site.title }}</a></h1>
+    <h2 class="project-tagline">{{ site.tagline }}</h2>
+{% for nav in site.navigation %}
+{%    if page.url == nav.url %}
+    <a href="{{ nav.url }}" class="btn active">{{ nav.title }}</a>
+{%    else %}
+    <a href="{{ nav.url }}" class="btn">{{ nav.title }}</a>
+{%    endif %}
+{% endfor %}
+</header>
