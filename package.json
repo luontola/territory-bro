@@ -15,9 +15,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node_modules/.bin/webpack --progress --colors",
-    "autobuild": "node_modules/.bin/webpack --progress --colors --watch",
-    "start": "node_modules/.bin/webpack-dev-server --content-base web --host 0.0.0.0 --progress --colors"
+    "build": "webpack --progress --colors",
+    "autobuild": "webpack --progress --colors --watch",
+    "start": "webpack-dev-server --content-base web --host 0.0.0.0 --progress --colors"
   },
   "repository": {
     "type": "git",
