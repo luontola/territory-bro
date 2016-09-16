@@ -13,6 +13,9 @@ btn_login.addEventListener('click', function() {
   lock.show();
 });
 
+var btn_logout = document.getElementById('btn-logout');
+btn_logout.addEventListener('click', logout);
+
 function loadUserProfile(idToken) {
   if (!idToken) {
     idToken = localStorage.getItem('id_token');
@@ -31,9 +34,17 @@ function loadUserProfile(idToken) {
   });
 }
 
+function logout() {
+  localStorage.removeItem('id_token');
+  window.location.href = "/";
+};
+
 function showUserProfile(profile) {
-  var description = "Logged in as " + profile.name + " (" + profile.email + ", " + profile.user_id + ")";
-  document.getElementById('status').value = description;
+  var status = document.getElementById('status');
+  status.textContent = "Logged in as " + profile.name + ", " + profile.email + " (" + profile.user_id + ")";
+  var avatar = document.getElementById('avatar')
+  avatar.src = profile.picture;
+  avatar.style.display = 'block';
 };
 
 loadUserProfile();
