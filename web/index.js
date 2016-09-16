@@ -8,14 +8,6 @@ lock.on("authenticated", function(authResult) {
   loadUserProfile(authResult.idToken)
 });
 
-var btn_login = document.getElementById('btn-login');
-btn_login.addEventListener('click', function() {
-  lock.show();
-});
-
-var btn_logout = document.getElementById('btn-logout');
-btn_logout.addEventListener('click', logout);
-
 function loadUserProfile(idToken) {
   if (!idToken) {
     idToken = localStorage.getItem('id_token');
@@ -47,4 +39,16 @@ function showUserProfile(profile) {
   avatar.style.display = 'block';
 };
 
-loadUserProfile();
+function init() {
+  var btn_login = document.getElementById('btn-login');
+  btn_login.addEventListener('click', function() {
+    lock.show();
+  });
+
+  var btn_logout = document.getElementById('btn-logout');
+  btn_logout.addEventListener('click', logout);
+
+  loadUserProfile();
+}
+
+init();
