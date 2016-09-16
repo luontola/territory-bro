@@ -6,6 +6,7 @@
     "test": "test"
   },
   "dependencies": {
+    "auth0-lock": "10.2.2",
     "css-loader": "0.23.1",
     "style-loader": "0.13.1"
   },
