@@ -1,11 +1,11 @@
-require("./style.css");
-var Auth0Lock = require("auth0-lock").default;
-var Lockr = require("lockr");
-require("whatwg-fetch");
+import "./style.css";
+import "whatwg-fetch";
+import Auth0Lock from "auth0-lock";
+import Lockr from "lockr";
 
 var lock = new Auth0Lock('8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi', 'luontola.eu.auth0.com');
 
-lock.on("authenticated", function (authResult) {
+lock.on("authenticated", authResult => {
   console.log("authResult", authResult);
   loadUserProfile(authResult.idToken)
 });
@@ -17,7 +17,7 @@ function loadUserProfile(idToken) {
   if (!idToken) {
     return;
   }
-  lock.getProfile(idToken, function (error, profile) {
+  lock.getProfile(idToken, (error, profile) => {
     if (error) {
       console.log("auth error", error);
       return;
@@ -45,12 +45,10 @@ function showUserProfile(profile) {
 
 function init() {
   var btn_login = document.getElementById('btn-login');
-  btn_login.addEventListener('click', function () {
-    lock.show();
-  });
+  btn_login.addEventListener('click', () => lock.show());
 
   var btn_logout = document.getElementById('btn-logout');
-  btn_logout.addEventListener('click', logout);
+  btn_logout.addEventListener('click', () => logout());
 
   loadUserProfile();
   loadTerritories();
@@ -66,15 +64,9 @@ function loadTerritories() {
       'Authorization': 'Bearer ' + Lockr.get('id_token')
     }
   })
-    .then(function (response) {
-      return response.json()
-    })
-    .then(function (json) {
-      console.log('parsed json', json)
-    })
-    .catch(function (ex) {
-      console.log('parsing failed', ex)
-    })
+    .then(response => response.json())
+    .then(json => console.log('parsed json', json))
+    .catch(ex => console.log('parsing failed', ex))
 }
 
 init();
