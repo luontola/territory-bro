@@ -1,7 +1,7 @@
 (ns territory-bro.handler
   (:require [compojure.core :refer [defroutes routes wrap-routes]]
             [territory-bro.layout :refer [error-page]]
-            [territory-bro.routes.home :refer [home-routes]]
+            [territory-bro.routes :refer [home-routes]]
             [territory-bro.middleware :as middleware]
             [territory-bro.db.core :as db]
             [compojure.route :as route]

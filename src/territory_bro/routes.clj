@@ -1,4 +1,4 @@
-(ns territory-bro.routes.home
+(ns territory-bro.routes
   (:require [territory-bro.db.core :as db]
             [territory-bro.domain :as domain]
             [territory-bro.layout :as layout]
