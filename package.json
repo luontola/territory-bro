@@ -12,7 +12,8 @@
     "lockr": "0.8.4",
     "openlayers": "3.18.2",
     "purecss": "0.6.0",
-    "style-loader": "0.13.1"
+    "style-loader": "0.13.1",
+    "whatwg-fetch": "1.0.0"
   },
   "devDependencies": {
     "webpack": "1.13.2",

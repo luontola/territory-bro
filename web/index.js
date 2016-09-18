@@ -1,10 +1,11 @@
 require("./style.css");
 var Auth0Lock = require("auth0-lock").default;
 var Lockr = require("lockr");
+require("whatwg-fetch");
 
 var lock = new Auth0Lock('8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi', 'luontola.eu.auth0.com');
 
-lock.on("authenticated", function(authResult) {
+lock.on("authenticated", function (authResult) {
   console.log("authResult", authResult);
   loadUserProfile(authResult.idToken)
 });
@@ -16,7 +17,7 @@ function loadUserProfile(idToken) {
   if (!idToken) {
     return;
   }
-  lock.getProfile(idToken, function(error, profile) {
+  lock.getProfile(idToken, function (error, profile) {
     if (error) {
       console.log("auth error", error);
       return;
@@ -44,7 +45,7 @@ function showUserProfile(profile) {
 
 function init() {
   var btn_login = document.getElementById('btn-login');
-  btn_login.addEventListener('click', function() {
+  btn_login.addEventListener('click', function () {
     lock.show();
   });
 
@@ -52,6 +53,28 @@ function init() {
   btn_logout.addEventListener('click', logout);
 
   loadUserProfile();
+  loadTerritories();
+}
+
+function loadTerritories() {
+  // TODO
+  fetch('/api/territories', {
+    method: 'get',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + Lockr.get('id_token')
+    }
+  })
+    .then(function (response) {
+      return response.json()
+    })
+    .then(function (json) {
+      console.log('parsed json', json)
+    })
+    .catch(function (ex) {
+      console.log('parsing failed', ex)
+    })
 }
 
 init();
