@@ -1,5 +1,6 @@
 require("./style.css");
 var Auth0Lock = require("auth0-lock").default;
+var Lockr = require("lockr");
 
 var lock = new Auth0Lock('8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi', 'luontola.eu.auth0.com');
 
@@ -10,7 +11,7 @@ lock.on("authenticated", function(authResult) {
 
 function loadUserProfile(idToken) {
   if (!idToken) {
-    idToken = localStorage.getItem('id_token');
+    idToken = Lockr.get('id_token');
   }
   if (!idToken) {
     return;
@@ -21,23 +22,25 @@ function loadUserProfile(idToken) {
       return;
     }
     console.log("profile", profile);
-    localStorage.setItem('id_token', idToken);
+    Lockr.set('id_token', idToken);
+    Lockr.set('profile', profile);
     showUserProfile(profile);
   });
 }
 
 function logout() {
-  localStorage.removeItem('id_token');
+  Lockr.rm('id_token');
+  Lockr.rm('profile');
   window.location.href = "/";
-};
+}
 
 function showUserProfile(profile) {
   var status = document.getElementById('status');
   status.textContent = "Logged in as " + profile.name + ", " + profile.email + " (" + profile.user_id + ")";
-  var avatar = document.getElementById('avatar')
+  var avatar = document.getElementById('avatar');
   avatar.src = profile.picture;
   avatar.style.display = 'block';
-};
+}
 
 function init() {
   var btn_login = document.getElementById('btn-login');

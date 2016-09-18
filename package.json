@@ -9,6 +9,7 @@
     "auth0-lock": "10.2.2",
     "css-loader": "0.23.1",
     "jquery": "3.1.0",
+    "lockr": "0.8.4",
     "openlayers": "3.18.2",
     "purecss": "0.6.0",
     "style-loader": "0.13.1"
