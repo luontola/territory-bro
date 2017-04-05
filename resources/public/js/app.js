@@ -79,7 +79,6 @@ var territoryBro = (function () {
     });
     map.getView().fit(
       territoryLayer.getSource().getExtent(),
-      map.getSize(),
       {
         padding: [20, 20, 20, 20]
       }
@@ -144,7 +143,6 @@ var territoryBro = (function () {
     });
     map.getView().fit(
       viewportSource.getExtent(),
-      map.getSize(),
       {
         padding: [1, 1, 1, 1], // minimum padding where the congregation lines still show up
         constrainResolution: false
@@ -178,7 +176,6 @@ var territoryBro = (function () {
     });
     map.getView().fit(
       territoryLayer.getSource().getExtent(),
-      map.getSize(),
       {
         padding: [5, 5, 5, 5],
         minResolution: 3.0
@@ -232,7 +229,6 @@ var territoryBro = (function () {
     });
     map.getView().fit(
       regionLayer.getSource().getExtent(),
-      map.getSize(),
       {
         padding: [5, 5, 5, 5],
         minResolution: 3.0

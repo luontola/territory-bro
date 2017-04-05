@@ -2,6 +2,9 @@ import "./style.css";
 import "whatwg-fetch";
 import Auth0Lock from "auth0-lock";
 import Lockr from "lockr";
+import React from "react";
+import ReactDOM from "react-dom";
+import HelloForm from "./HelloForm";
 
 var lock = new Auth0Lock('8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi', 'luontola.eu.auth0.com');
 
@@ -70,3 +73,8 @@ function loadTerritories() {
 }
 
 init();
+
+ReactDOM.render(
+  <HelloForm/>,
+  document.getElementById('root')
+);

@@ -21,7 +21,7 @@
                  [org.clojure/tools.nrepl "0.2.12"]
                  [org.webjars.npm/purecss "0.6.0"]
                  [org.webjars/jquery "2.1.4"]
-                 [org.webjars/openlayers "3.10.1"]
+                 [org.webjars/openlayers "4.0.1"]
                  [migratus "0.8.7"]
                  [conman "0.2.5"]
                  [org.postgresql/postgresql "9.4-1203-jdbc41"]
