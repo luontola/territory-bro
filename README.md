@@ -7,11 +7,19 @@ For more information, see <http://territorybro.com>
 
 ## Running
 
-Install [PostgreSQL](http://www.postgresql.org/)
+Install [PostgreSQL](http://www.postgresql.org/) or [Docker](https://www.docker.com/)
 
 Install [Leiningen](https://github.com/technomancy/leiningen)
 
-Start the application with:
+Start the database:
+
+    docker-compose up -d db
+
+Run database migrations:
+
+    lein migratus
+
+Start the application:
 
     lein run
 

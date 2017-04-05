@@ -1,5 +1,14 @@
 version: '2'
 services:
+
+  db:
+    image: mdillon/postgis:9.6
+    environment:
+      POSTGRES_USER: territorybro
+      POSTGRES_PASSWORD: territorybro
+    ports:
+    - "5432:5432"
+
   dev:
     image: luontola/territory-bro-dev
     build:
