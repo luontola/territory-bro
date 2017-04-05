@@ -18,6 +18,6 @@ Start the application with:
 
 ## License
 
-Copyright © 2015-2016, [Esko Luontola](http://luontola.fi)
+Copyright © 2015-2017, [Esko Luontola](http://luontola.fi)
 
 This software is released under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).

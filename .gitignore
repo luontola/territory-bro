@@ -2,8 +2,6 @@
 /node_modules/
 /.lein-*
 /.nrepl-port
-/.idea/
-/*.iml
 /.vagrant/
 /profiles.clj
 .DS_Store
