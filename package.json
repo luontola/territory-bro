@@ -45,7 +45,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "NODE_ENV=production webpack --progress --colors -p",
     "autobuild": "webpack --progress --colors --watch",
-    "start": "webpack-dev-server --content-base web --host 0.0.0.0 --progress --colors",
+    "start": "webpack-dev-server --content-base web/html --host 0.0.0.0 --progress --colors",
     "analyze": "source-map-explorer target/webpack/bundle.js"
   },
   "repository": {

@@ -15,7 +15,7 @@ function getEntrySources() {
 
 module.exports = {
   entry: getEntrySources(
-    './web/index.js'
+    './web/js/index.js'
   ),
   output: {
     path: path.resolve(__dirname, 'target/webpack'),
