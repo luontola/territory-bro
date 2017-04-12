@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+     width="10mm" height="10mm">
+    <line x1="2mm" y1="0mm"
+          x2="8mm" y2="0mm"
+          stroke="black"
+          stroke-width="1pt"/>
+    <line x1="0mm" y1="2mm"
+          x2="0mm" y2="8mm"
+          stroke="black"
+          stroke-width="1pt"/>
+</svg>

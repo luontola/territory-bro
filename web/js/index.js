@@ -1,15 +1,13 @@
-// Copyright © 2016-2017 Esko Luontola
+// Copyright © 2015-2017 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import "babel-polyfill";
-import "purecss/build/pure-min.css";
-import "../css/layout.css";
 import React from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
-import {createStore, applyMiddleware} from "redux";
-import createLogger from "redux-logger";
+import {applyMiddleware, createStore} from "redux";
+import {createLogger} from "redux-logger";
 import reducers from "./reducers";
 import history from "./history";
 import router from "./router";

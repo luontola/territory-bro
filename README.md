@@ -23,6 +23,10 @@ Start the application:
 
     lein run
 
+Start the web frontend:
+
+    npm install
+    npm start
 
 ## License
 

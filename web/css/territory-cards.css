@@ -1,0 +1,236 @@
+:root {
+    --territory-card-width: 14.5cm;
+    --territory-card-height: 9.5cm;
+    --crop-mark-size: 0.7cm;
+    --map-width: 7cm;
+    --map-height: 6.1cm;
+    --map-height-negative: -6.1cm;
+}
+
+.croppable-territory-card {
+    page-break-inside: avoid;
+    display: grid;
+    grid-template-columns: [crop-left] var(--crop-mark-size) [content] var(--territory-card-width) [crop-right] var(--crop-mark-size);
+    grid-template-rows: [crop-top] var(--crop-mark-size) [content] var(--territory-card-height) [crop-bottom] var(--crop-mark-size);
+    margin-bottom: 0.3cm;
+}
+
+/* Crop Marks */
+
+.crop-mark-top-left {
+    grid-column: crop-left;
+    grid-row: crop-top;
+}
+
+.crop-mark-top-left img {
+    transform: rotate(180deg);
+    width: 100%;
+    height: 100%;
+}
+
+.crop-mark-top-right {
+    grid-column: crop-right;
+    grid-row: crop-top;
+}
+
+.crop-mark-top-right img {
+    transform: rotate(270deg);
+    width: 100%;
+    height: 100%;
+}
+
+.crop-mark-bottom-left {
+    grid-column: crop-left;
+    grid-row: crop-bottom;
+}
+
+.crop-mark-bottom-left img {
+    transform: rotate(90deg);
+    width: 100%;
+    height: 100%;
+}
+
+.crop-mark-bottom-right {
+    grid-column: crop-right;
+    grid-row: crop-bottom;
+}
+
+.crop-mark-bottom-right img {
+    transform: rotate(0deg);
+    width: 100%;
+    height: 100%;
+}
+
+.crop-area {
+    border: 1px solid lightgray;
+}
+
+/* Territory Card */
+
+.territory-card {
+    grid-column: content;
+    grid-row: content;
+    padding: 0.3cm 0.7cm;
+    font-size: 12pt;
+}
+
+.territory-card .title {
+    text-align: center;
+    font-size: 110%;
+    font-weight: bold;
+    margin: 0 2cm;
+}
+
+.territory-card .region {
+    text-align: center;
+    padding-bottom: 0.2cm;
+    margin: 0 2cm;
+}
+
+.territory-card .number {
+    float: right;
+    font-size: 180%;
+    font-weight: bold;
+}
+
+.territory-card .minimap {
+    float: left;
+    /* The canvas must be at least 1.7cm in size, or Chrome will reduce its print resolution */
+    width: 1.7cm;
+    height: 1.7cm;
+}
+
+.territory-card .map {
+    clear: left;
+    float: left;
+    width: var(--map-width);
+    height: var(--map-height);
+}
+
+.territory-card .minimap canvas,
+.territory-card .map canvas {
+    border-radius: 2mm;
+}
+
+.territory-card .addresses {
+    clear: right;
+    float: right;
+    width: 5.5cm;
+    margin-left: 0.5cm;
+    margin-top: 1cm;
+    white-space: pre-line;
+}
+
+.territory-card .disclaimer {
+    clear: left;
+    float: left;
+    /* relative div wrapping an absolute div; avoids taking space from other elements
+       http://stackoverflow.com/questions/6040005/relatively-position-an-element-without-it-taking-up-space-in-document-flow/6040258#6040258 */
+    position: relative;
+    width: 0;
+    height: 0;
+    /* text style */
+    text-align: center;
+    font-size: 6px;
+    white-space: nowrap; /* if the disclaimer is long, keep it all in one line */
+}
+
+.territory-card .disclaimer > div {
+    transform: rotate(90deg);
+    transform-origin: left top;
+    position: absolute;
+    left: 0;
+    top: var(--map-height-negative); /* XXX: cannot combine CSS3 variables and calc() */
+    width: var(--map-height);
+}
+
+.territory-card .footer {
+    clear: both;
+    padding-top: 0.3cm;
+    text-align: center;
+    font-size: 60%;
+    font-weight: bold;
+}
+
+/* Neighborhood Map */
+
+.neighborhood-map {
+    grid-column: content;
+    grid-row: content;
+    padding: 0.5cm;
+}
+
+.neighborhood-map .map-attribution {
+    /* for some reason the attribution text is closer to the edge in the neighborhood map */
+    margin-bottom: 3px;
+}
+
+/* Region Map */
+
+.region-page {
+    page-break-inside: avoid;
+    /* A4 paper size */
+    width: 210mm;
+    height: 297mm;
+    /*padding: 20mm;*/
+    /*border: 1px solid Red;*/
+}
+
+.region-page .name {
+    height: 12mm;
+    font-size: 9mm;
+    font-weight: bold;
+    text-align: center;
+    /*border: 1px solid blue;*/
+}
+
+.region-map {
+    width: 100%;
+    /* XXX: just tweaked until it looked right; the browser does some unwanted scaling */
+    height: 282mm;
+}
+
+/* Map Attribution; customize OpenLayers defaults to be printing friendly */
+
+.map-attribution {
+    text-align: right;
+    bottom: 0;
+    right: 0;
+    font-size: 6px;
+    padding: 2px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.map-attribution ul {
+    margin: 0;
+    padding: 0;
+}
+
+.map-attribution li {
+    display: inline;
+    list-style: none;
+    line-height: inherit;
+}
+
+.map-attribution a {
+    color: inherit !important;
+    text-decoration: none !important;
+}
+
+.map-attribution button,
+.map-attribution img {
+    display: none !important;
+}
+
+/* Printing */
+
+@media print {
+    .crop-area {
+        border: none;
+    }
+
+    .map-attribution {
+        display: block !important;
+    }
+}
