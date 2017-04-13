@@ -13,7 +13,7 @@
     "history": "4.6.1",
     "jquery": "3.2.1",
     "lockr": "0.8.4",
-    "lodash": "4.17.4",
+    "lodash-es": "4.17.4",
     "openlayers": "4.0.1",
     "path-to-regexp": "1.7.0",
     "purecss": "0.6.2",

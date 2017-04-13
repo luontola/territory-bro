@@ -4,8 +4,8 @@
 
 import {api} from "./util";
 import alphanumSort from "alphanum-sort";
-import sortBy from "lodash/sortBy";
-import findIndex from "lodash/findIndex";
+import sortBy from "lodash-es/sortBy";
+import findIndex from "lodash-es/findIndex";
 
 function sortTerritories(territories) {
   const numbers = alphanumSort(territories.map(t => t.number));
