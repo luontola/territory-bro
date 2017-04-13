@@ -19,19 +19,22 @@ const routes = [
     path: '/territory-cards',
     async action() {
       const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
-      // TODO: remove debug logging
-      console.log("territories", territories);
-      console.log("regions", regions);
       return <TerritoryCardsPage territories={territories} regions={regions}/>;
     }
   },
   {
     path: '/neighborhood-maps',
-    action: () => <NeighborhoodMapsPage />
+    async action() {
+      const territories = await getTerritories();
+      return <NeighborhoodMapsPage territories={territories}/>;
+    }
   },
   {
     path: '/region-maps',
-    action: () => <RegionMapsPage />
+    async action() {
+      const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
+      return <RegionMapsPage territories={territories} regions={regions}/>;
+    }
   },
   {
     path: '/error',

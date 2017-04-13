@@ -20,16 +20,16 @@ class TerritoryCard extends React.Component {
     const {territory} = this.props;
     const today = moment().format('YYYY-MM-DD');
     return (
-      <div key={territory.id} className="croppable-territory-card">
+      <div className="croppable-territory-card">
         <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
         <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
         <div className="crop-area territory-card">
           <div className="number">{territory.number}</div>
-          <div id={`minimap-${territory.id}`} className="minimap" ref={el => this.minimap = el}/>
+          <div className="minimap" ref={el => this.minimap = el}/>
 
           <div className="title">{ i18n.en['territory-card.title'] }</div>
           <div className="region">{territory.region}</div>
-          <div id={`map-${territory.id}`} className="map" ref={el => this.map = el}/>
+          <div className="map" ref={el => this.map = el}/>
           <div className="addresses">{territory.address.replace(';', '\n')}</div>
 
           <div className="disclaimer">

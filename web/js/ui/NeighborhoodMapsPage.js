@@ -5,18 +5,33 @@
 import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
+import {initNeighborhoodMap} from "../maps";
 
-let NeighborhoodMapsPage = () => (
+class NeighborhoodMap extends React.Component {
+  componentDidMount() {
+    const {territory} = this.props;
+    initNeighborhoodMap(this.map, territory);
+  }
+
+  render() {
+    return (
+      <div className="croppable-territory-card">
+        <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
+        <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
+        <div className="crop-area neighborhood-map" ref={el => this.map = el}/>
+        <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
+        <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
+      </div>
+    );
+  }
+}
+
+let NeighborhoodMapsPage = ({territories}) => (
   <Layout>
     <h1 className="no-print">Neighborhood Maps</h1>
-
-    <div className="croppable-territory-card">
-      <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div id="neighborhood-map-{{ territory.id }}" className="crop-area neighborhood-map"/>
-      <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
-    </div>
+    {territories.map(territory =>
+      <NeighborhoodMap key={territory.id} territory={territory}/>
+    )}
   </Layout>
 );
 

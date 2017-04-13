@@ -180,7 +180,10 @@ export function initTerritoryMiniMap(element, territory, regions) {
   );
 }
 
-export function initNeighborhoodMap(element, territoryNumber, territoryWkt) {
+export function initNeighborhoodMap(element, territory) {
+  const territoryNumber = territory.number;
+  const territoryWkt = territory.location;
+
   const territoryLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
       features: [wktToFeature(territoryWkt)]
