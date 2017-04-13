@@ -24,9 +24,11 @@ function renderComponent(component) {
 function render(location) {
   router.resolve(routes, location)
     .then(renderComponent)
-    .catch(error =>
+    .catch(error => {
+      console.error("Error in rendering " + location.pathname + "\n", error);
       router.resolve(routes, {...location, error})
-        .then(renderComponent));
+        .then(renderComponent);
+    });
 }
 
 render(history.location);
