@@ -46,7 +46,7 @@ class TerritoryCard extends React.Component {
   }
 }
 
-let TerritoryCardsPage = ({territories, regions}) => (
+const TerritoryCardsPage = ({territories, regions}) => (
   <Layout>
     <h1 className="no-print">Territory Cards</h1>
     {territories.map(territory =>

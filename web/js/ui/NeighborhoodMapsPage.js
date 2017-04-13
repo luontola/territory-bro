@@ -26,7 +26,7 @@ class NeighborhoodMap extends React.Component {
   }
 }
 
-let NeighborhoodMapsPage = ({territories}) => (
+const NeighborhoodMapsPage = ({territories}) => (
   <Layout>
     <h1 className="no-print">Neighborhood Maps</h1>
     {territories.map(territory =>

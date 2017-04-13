@@ -216,12 +216,10 @@ export function initNeighborhoodMap(element, territory) {
   );
 }
 
-export function initRegionMap(element, regionWkt, territories) {
-  console.log(element, regionWkt, territories);
-
+export function initRegionMap(element, region, territories) {
   const regionLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
-      features: [wktToFeature(regionWkt)]
+      features: [wktToFeature(region.location)]
     }),
     style: new ol.style.Style({
       stroke: new ol.style.Stroke({

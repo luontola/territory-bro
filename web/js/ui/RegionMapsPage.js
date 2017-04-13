@@ -5,15 +5,33 @@
 import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
+import {initRegionMap} from "../maps";
 
-let RegionMapsPage = () => (
+class RegionMap extends React.Component {
+  componentDidMount() {
+    const {region, territories} = this.props;
+    initRegionMap(this.map, region, territories);
+  }
+
+  render() {
+    const {region} = this.props;
+    return (
+      <div className="region-page crop-area">
+        <div className="name">{region.name}</div>
+        <div className="region-map" ref={el => this.map = el}/>
+      </div>
+    );
+  }
+}
+
+const RegionMapsPage = ({territories, regions}) => (
   <Layout>
     <h1 className="no-print">Region Maps</h1>
-
-    <div className="region-page crop-area">
-      <div className="name">{ 'region.name' }</div>
-      <div id="region-map-{{ region.id }}" className="region-map"/>
-    </div>
+    {regions
+      .filter(region => region.congregation || region.subregion)
+      .map(region =>
+        <RegionMap key={region.id} region={region} territories={territories}/>
+      )}
   </Layout>
 );
 
