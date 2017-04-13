@@ -6,6 +6,7 @@ import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
 import moment from "moment";
+import i18n from "../i18n";
 
 let TerritoryCardsPage = ({territories, regions}) => {
   const today = moment().format('YYYY-MM-DD');
@@ -25,17 +26,17 @@ let TerritoryCardsPage = ({territories, regions}) => {
             <div className="number">{territory.number}</div>
             <div id={`minimap-${territory.id}`} className="minimap"/>
 
-            <div className="title">{ 'i18n.territory-card.title' }</div>
-            <div className="region">{ 'territory.region' }</div>
-
+            <div className="title">{ i18n.en['territory-card.title'] }</div>
+            <div className="region">{territory.region}</div>
             <div id={`map-${territory.id}`} className="map"/>
-            <div className="addresses">{ 'territory.address|semicolon-to-newline' }</div>
+            <div className="addresses">{territory.address.replace(';', '\n')}</div>
 
             <div className="disclaimer">
               <div>Printed {today} with TerritoryBro.com</div>
             </div>
 
-            <div className="footer">{ 'i18n.territory-card.footer1' }<br/>{ 'i18n.territory-card.footer2' }</div>
+            <div className="footer">{i18n.en['territory-card.footer1']}
+              <br/>{i18n.en['territory-card.footer2']}</div>
           </div>
           <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
           <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
