@@ -30,7 +30,7 @@ class TerritoryCard extends React.Component {
           <div className="title">{ i18n.en['territory-card.title'] }</div>
           <div className="region">{territory.region}</div>
           <div className="map" ref={el => this.map = el}/>
-          <div className="addresses">{territory.address.replace(';', '\n')}</div>
+          <div className="addresses">{territory.address}</div>
 
           <div className="disclaimer">
             <div>Printed {today} with TerritoryBro.com</div>
