@@ -4,11 +4,12 @@
 
 import {api} from "./util";
 import alphanumSort from "alphanum-sort";
-import _ from "lodash";
+import sortBy from "lodash/sortBy";
+import findIndex from "lodash/findIndex";
 
 function sortTerritories(territories) {
   const numbers = alphanumSort(territories.map(t => t.number));
-  return _.sortBy(territories, t => _.findIndex(numbers, n => n === t.number))
+  return sortBy(territories, t => findIndex(numbers, n => n === t.number))
 }
 
 export async function getTerritories() {
@@ -17,7 +18,7 @@ export async function getTerritories() {
 }
 
 function sortRegions(regions) {
-  return _.sortBy(regions, r => r.name.toLowerCase());
+  return sortBy(regions, r => r.name.toLowerCase());
 }
 
 export async function getRegions() {
