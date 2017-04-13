@@ -5,7 +5,7 @@
 import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
-import moment from "moment";
+import formatDate from "date-fns/format";
 import i18n from "../i18n";
 import {initTerritoryMap, initTerritoryMiniMap} from "../maps";
 
@@ -18,7 +18,7 @@ class TerritoryCard extends React.Component {
 
   render() {
     const {territory} = this.props;
-    const today = moment().format('YYYY-MM-DD');
+    const today = formatDate(new Date(), 'YYYY-MM-DD');
     return (
       <div className="croppable-territory-card">
         <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
