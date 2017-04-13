@@ -1,8 +1,13 @@
+; Copyright © 2015-2017 Esko Luontola
+; This software is released under the Apache License 2.0.
+; The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
 (ns territory-bro.routes
   (:require [territory-bro.db.core :as db]
             [territory-bro.domain :as domain]
             [territory-bro.layout :as layout]
             [compojure.core :refer [defroutes GET POST]]
+            [compojure.api.sweet :as api]
             [ring.util.response :refer [redirect]]
             [ring.util.http-response :refer [ok]]
             [clojure.java.io :as io]
@@ -19,19 +24,19 @@
 (defn territory-cards-page [request]
   (layout/render "territory-cards.html"
                  request
-                 {:territories (db/find-territories)
+                 {:territories (db/find-territories-with-regions)
                   :today       (LocalDate/now)}))
 
 (defn neighborhood-maps-page [request]
   (layout/render "neighborhood-maps.html"
                  request
-                 {:territories (db/find-territories)}))
+                 {:territories (db/find-territories-with-regions)}))
 
 (defn region-maps-page [request]
   (layout/render "region-maps.html"
                  request
                  {:regions          (db/find-regions)
-                  :territories-json (json/write-str (db/find-territories))}))
+                  :territories-json (json/write-str (db/find-territories-with-regions))}))
 
 (defn- read-file-upload [request param]
   (let [tempfile (-> request :params param :tempfile)]
@@ -70,3 +75,11 @@
            (GET "/region-maps" request (region-maps-page request))
            (POST "/import-territories" request (import-territories! request))
            (POST "/clear-database" [] (clear-database!)))
+
+(api/defapi api-routes
+  (api/GET "/api/hello" [name]                              ; TODO: remove spike code
+    (ok {:message (str "Hello, " name)}))
+  (api/GET "/api/territories" []
+    (ok (db/find-territories)))
+  (api/GET "/api/regions" []
+    (ok (db/find-regions))))

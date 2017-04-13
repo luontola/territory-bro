@@ -1,7 +1,11 @@
+; Copyright © 2015-2017 Esko Luontola
+; This software is released under the Apache License 2.0.
+; The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
 (ns territory-bro.handler
   (:require [compojure.core :refer [defroutes routes wrap-routes]]
             [territory-bro.layout :refer [error-page]]
-            [territory-bro.routes :refer [home-routes]]
+            [territory-bro.routes :refer [home-routes api-routes]]
             [territory-bro.middleware :as middleware]
             [territory-bro.db.core :as db]
             [compojure.route :as route]
@@ -20,9 +24,9 @@
   (timbre/merge-config!
     {:level     (if (env :dev) :trace :info)
      :appenders {:rotor (rotor/rotor-appender
-                          {:path "territory_bro.log"
+                          {:path     "territory_bro.log"
                            :max-size (* 512 1024)
-                           :backlog 10})}})
+                           :backlog  10})}})
 
   (if (env :dev) (parser/cache-off!))
   (db/connect!)
@@ -42,9 +46,10 @@
 (def app-routes
   (routes
     (wrap-routes #'home-routes middleware/wrap-csrf)
+    #'api-routes
     (route/not-found
       (:body
         (error-page {:status 404
-                     :title "page not found"})))))
+                     :title  "page not found"})))))
 
 (def app (middleware/wrap-base #'app-routes))

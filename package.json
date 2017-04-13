@@ -6,6 +6,7 @@
     "test": "test"
   },
   "dependencies": {
+    "alphanum-sort": "1.0.2",
     "auth0-lock": "10.14.0",
     "axios": "0.16.0",
     "history": "4.6.1",
@@ -21,6 +22,7 @@
     "redux": "3.6.0",
     "redux-form": "6.6.1",
     "redux-logger": "3.0.1",
+    "underscore": "1.8.3",
     "uuid": "3.0.1",
     "whatwg-fetch": "2.0.3"
   },

@@ -5,34 +5,44 @@
 import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
+import moment from "moment";
 
-let TerritoryCardsPage = () => (
-  <Layout>
-    <h1 className="no-print">Territory Cards</h1>
+let TerritoryCardsPage = ({territories, regions}) => {
+  const today = moment().format('YYYY-MM-DD');
 
-    <div className="croppable-territory-card">
-      <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className="crop-area territory-card">
-        <div className="number">{ 'territory.number' }</div>
-        <div id="minimap-{{ territory.id }}" className="minimap"/>
+  // TODO: remove debug logging
+  console.log("territories", territories);
+  console.log("regions", regions);
 
-        <div className="title">{ 'i18n.territory-card.title' }</div>
-        <div className="region">{ 'territory.region' }</div>
+  return (
+    <Layout>
+      <h1 className="no-print">Territory Cards</h1>
+      {territories.map(territory => (
+        <div key={territory.id} className="croppable-territory-card">
+          <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
+          <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
+          <div className="crop-area territory-card">
+            <div className="number">{territory.number}</div>
+            <div id={`minimap-${territory.id}`} className="minimap"/>
 
-        <div id="map-{{ territory.id }}" className="map"/>
-        <div className="addresses">{ 'territory.address|semicolon-to-newline' }</div>
+            <div className="title">{ 'i18n.territory-card.title' }</div>
+            <div className="region">{ 'territory.region' }</div>
 
-        <div className="disclaimer">
-          <div>Printed { 'today' } with TerritoryBro.com</div>
+            <div id={`map-${territory.id}`} className="map"/>
+            <div className="addresses">{ 'territory.address|semicolon-to-newline' }</div>
+
+            <div className="disclaimer">
+              <div>Printed {today} with TerritoryBro.com</div>
+            </div>
+
+            <div className="footer">{ 'i18n.territory-card.footer1' }<br/>{ 'i18n.territory-card.footer2' }</div>
+          </div>
+          <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
+          <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
         </div>
-
-        <div className="footer">{ 'i18n.territory-card.footer1' }<br/>{ 'i18n.territory-card.footer2' }</div>
-      </div>
-      <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
-    </div>
-  </Layout>
-);
+      ))}
+    </Layout>
+  );
+};
 
 export {TerritoryCardsPage};

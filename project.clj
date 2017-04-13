@@ -1,3 +1,7 @@
+; Copyright © 2015-2017 Esko Luontola
+; This software is released under the Apache License 2.0.
+; The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
 (defproject territory-bro "0.1.0-SNAPSHOT"
 
   :description "FIXME: write description"
@@ -16,6 +20,7 @@
                   :exclusions [ring/ring-jetty-adapter]]
                  [metosin/ring-middleware-format "0.6.0"]
                  [metosin/ring-http-response "0.6.5"]
+                 [metosin/compojure-api "1.1.10"]
                  [bouncer "0.3.3"]
                  [prone "0.8.2"]
                  [org.clojure/tools.nrepl "0.2.12"]
@@ -47,7 +52,6 @@
                                  [ring/ring-devel "1.4.0"]
                                  [pjstadig/humane-test-output "0.7.0"]
                                  [mvxcvi/puget "1.0.0"]]
-                  
                   
                   :repl-options {:init-ns territory-bro.core}
                   :injections [(require 'pjstadig.humane-test-output)

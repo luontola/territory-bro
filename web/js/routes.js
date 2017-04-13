@@ -8,6 +8,7 @@ import {OverviewPage} from "./ui/OverviewPage";
 import {TerritoryCardsPage} from "./ui/TerritoryCardsPage";
 import {NeighborhoodMapsPage} from "./ui/NeighborhoodMapsPage";
 import {RegionMapsPage} from "./ui/RegionMapsPage";
+import {getRegions, getTerritories} from "./api";
 
 const routes = [
   {
@@ -16,7 +17,10 @@ const routes = [
   },
   {
     path: '/territory-cards',
-    action: () => <TerritoryCardsPage />
+    async action() {
+      const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
+      return <TerritoryCardsPage territories={territories} regions={regions}/>;
+    }
   },
   {
     path: '/neighborhood-maps',

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: clojure-msgpack:1.1.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/clojure-msgpack/clojure-msgpack/1.1.2/clojure-msgpack-1.1.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

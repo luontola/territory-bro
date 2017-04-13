@@ -9,7 +9,7 @@ DELETE FROM territory;
 SELECT count(*)
 FROM territory;
 
--- name: find-territories
+-- name: find-territories-with-regions
 SELECT
   t.id,
   t.number,
@@ -37,6 +37,16 @@ ORDER BY
   SUBSTRING(t.number FROM '^(\d+)') :: INTEGER,
   t.number;
 
+-- name: find-territories
+SELECT
+  id,
+  number,
+  address,
+  region,
+  ST_AsText(location) AS location
+FROM
+  territory;
+
 -- name: -create-region!
 INSERT INTO region (id, name, minimap_viewport, congregation, subregion, location)
 VALUES (nextval('region_id_seq'), :name, :minimap_viewport, :congregation, :subregion, ST_GeomFromGeoJSON(:location));
@@ -52,5 +62,8 @@ FROM region;
 SELECT
   id,
   name,
+  minimap_viewport,
+  congregation,
+  subregion,
   ST_AsText(location) AS location
 FROM region;
