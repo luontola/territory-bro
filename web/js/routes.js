@@ -19,6 +19,9 @@ const routes = [
     path: '/territory-cards',
     async action() {
       const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
+      // TODO: remove debug logging
+      console.log("territories", territories);
+      console.log("regions", regions);
       return <TerritoryCardsPage territories={territories} regions={regions}/>;
     }
   },

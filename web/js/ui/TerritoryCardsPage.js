@@ -7,43 +7,57 @@ import React from "react";
 import {Layout} from "./Layout";
 import moment from "moment";
 import i18n from "../i18n";
+import {initTerritoryMap} from "../maps";
 
-let TerritoryCardsPage = ({territories, regions}) => {
-  const today = moment().format('YYYY-MM-DD');
+class TerritoryCard extends React.Component {
+  constructor(props) {
+    super(props);
+    this.today = moment().format('YYYY-MM-DD');
+  }
 
-  // TODO: remove debug logging
-  console.log("territories", territories);
-  console.log("regions", regions);
+  componentDidMount() {
+    const territory = this.props.territory;
+    initTerritoryMap(this.map, territory.location);
+    //initTerritoryMiniMap(this.minimap, territory.center, territory.minimap_viewport, territory.congregation, territory.subregions);
+  }
 
-  return (
-    <Layout>
-      <h1 className="no-print">Territory Cards</h1>
-      {territories.map(territory => (
-        <div key={territory.id} className="croppable-territory-card">
-          <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
-          <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
-          <div className="crop-area territory-card">
-            <div className="number">{territory.number}</div>
-            <div id={`minimap-${territory.id}`} className="minimap"/>
+  render() {
+    const territory = this.props.territory;
+    const today = this.today;
+    return (
+      <div key={territory.id} className="croppable-territory-card">
+        <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
+        <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
+        <div className="crop-area territory-card">
+          <div className="number">{territory.number}</div>
+          <div id={`minimap-${territory.id}`} className="minimap" ref={el => this.minimap = el}/>
 
-            <div className="title">{ i18n.en['territory-card.title'] }</div>
-            <div className="region">{territory.region}</div>
-            <div id={`map-${territory.id}`} className="map"/>
-            <div className="addresses">{territory.address.replace(';', '\n')}</div>
+          <div className="title">{ i18n.en['territory-card.title'] }</div>
+          <div className="region">{territory.region}</div>
+          <div id={`map-${territory.id}`} className="map" ref={el => this.map = el}/>
+          <div className="addresses">{territory.address.replace(';', '\n')}</div>
 
-            <div className="disclaimer">
-              <div>Printed {today} with TerritoryBro.com</div>
-            </div>
-
-            <div className="footer">{i18n.en['territory-card.footer1']}
-              <br/>{i18n.en['territory-card.footer2']}</div>
+          <div className="disclaimer">
+            <div>Printed {today} with TerritoryBro.com</div>
           </div>
-          <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
-          <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
+
+          <div className="footer">{i18n.en['territory-card.footer1']}
+            <br/>{i18n.en['territory-card.footer2']}</div>
         </div>
-      ))}
-    </Layout>
-  );
-};
+        <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
+        <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
+      </div>
+    );
+  }
+}
+
+let TerritoryCardsPage = ({territories, regions}) => (
+  <Layout>
+    <h1 className="no-print">Territory Cards</h1>
+    {territories.map(territory =>
+      <TerritoryCard territory={territory} key={territory.id}/>
+    )}
+  </Layout>
+);
 
 export {TerritoryCardsPage};
