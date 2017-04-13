@@ -12,6 +12,7 @@
     "history": "4.6.1",
     "jquery": "3.2.1",
     "lockr": "0.8.4",
+    "lodash": "4.17.4",
     "moment": "2.18.1",
     "openlayers": "4.0.1",
     "path-to-regexp": "1.7.0",
@@ -22,7 +23,6 @@
     "redux": "3.6.0",
     "redux-form": "6.6.1",
     "redux-logger": "3.0.1",
-    "underscore": "1.8.3",
     "uuid": "3.0.1",
     "whatwg-fetch": "2.0.3"
   },

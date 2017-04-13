@@ -4,10 +4,10 @@
 
 import {api} from "./util";
 import alphanumSort from "alphanum-sort";
-import _ from "underscore";
+import _ from "lodash";
 
 function sortTerritories(territories) {
-  const numbers = alphanumSort(_.pluck(territories, 'number'));
+  const numbers = alphanumSort(territories.map(t => t.number));
   return _.sortBy(territories, t => _.findIndex(numbers, n => n === t.number))
 }
 
