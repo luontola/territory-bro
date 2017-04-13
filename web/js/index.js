@@ -5,8 +5,9 @@
 import "babel-polyfill";
 import React from "react";
 import ReactDOM from "react-dom";
-import {Provider} from "react-redux";
-import {applyMiddleware, createStore} from "redux";
+import Provider from "react-redux/es/components/Provider";
+import applyMiddleware from "redux/es/applyMiddleware";
+import createStore from "redux/es/createStore";
 import {createLogger} from "redux-logger";
 import reducers from "./reducers";
 import history from "./history";
