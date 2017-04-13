@@ -13,7 +13,10 @@ import {getRegions, getTerritories} from "./api";
 const routes = [
   {
     path: '/',
-    action: () => <OverviewPage territoryCount={0} regionCount={0}/> // TODO: actual counts
+    async action() {
+      const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
+      return <OverviewPage territoryCount={territories.length} regionCount={regions.length}/>;
+    }
   },
   {
     path: '/territory-cards',
