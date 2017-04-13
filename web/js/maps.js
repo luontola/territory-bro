@@ -2,6 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+import "openlayers/dist/ol.css";
 import ol from "openlayers";
 
 export function wktToFeature(wkt) {
@@ -58,7 +59,8 @@ function territoryTextStyle(territoryNumber, fontSize) {
 
 // map constructors
 
-export function initTerritoryMap(elementId, territoryWkt) {
+export function initTerritoryMap(element, territory) {
+  const territoryWkt = territory.location;
   const territoryLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
       features: [wktToFeature(territoryWkt)]
@@ -70,7 +72,7 @@ export function initTerritoryMap(elementId, territoryWkt) {
   });
 
   const map = new ol.Map({
-    target: elementId,
+    target: element,
     pixelRatio: 2, // render at high DPI for printing
     layers: [makeStreetsLayer(), territoryLayer],
     controls: makeControls(),
@@ -89,7 +91,31 @@ export function initTerritoryMap(elementId, territoryWkt) {
   );
 }
 
-export function initTerritoryMiniMap(elementId, territoryWkt, viewportWkt, congregationWkt, subregionsWkt) {
+export function initTerritoryMiniMap(element, territory, regions) {
+  const wkt = new ol.format.WKT();
+  const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoint();
+  const territoryWkt = wkt.writeGeometry(centerPoint);
+  // TODO: handle it gracefully if one of the following is not initialized
+  let viewportWkt;
+  let congregationWkt;
+  let subregionsWkt;
+  const territoryCoordinate = centerPoint.getCoordinates();
+  regions.forEach(region => {
+    const regionGeom = wkt.readFeature(region.location).getGeometry();
+    if (regionGeom.intersectsCoordinate(territoryCoordinate)) {
+      if (region.minimap_viewport) {
+        viewportWkt = region.location;
+      }
+      if (region.congregation) {
+        congregationWkt = region.location;
+      }
+      if (region.subregion) {
+        // TODO: support multiple (nested) subregions
+        subregionsWkt = region.location;
+      }
+    }
+  });
+
   const territoryLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
       features: [wktToFeature(territoryWkt)]
@@ -135,7 +161,7 @@ export function initTerritoryMiniMap(elementId, territoryWkt, viewportWkt, congr
   });
 
   const map = new ol.Map({
-    target: elementId,
+    target: element,
     pixelRatio: 2, // render at high DPI for printing
     layers: [makeStreetsLayer(), subregionsLayer, congregationLayer, territoryLayer],
     controls: [],
@@ -154,7 +180,7 @@ export function initTerritoryMiniMap(elementId, territoryWkt, viewportWkt, congr
   );
 }
 
-export function initNeighborhoodMap(elementId, territoryNumber, territoryWkt) {
+export function initNeighborhoodMap(element, territoryNumber, territoryWkt) {
   const territoryLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
       features: [wktToFeature(territoryWkt)]
@@ -167,7 +193,7 @@ export function initNeighborhoodMap(elementId, territoryNumber, territoryWkt) {
   });
 
   const map = new ol.Map({
-    target: elementId,
+    target: element,
     pixelRatio: 2, // render at high DPI for printing
     layers: [makeStreetsLayer(), territoryLayer],
     controls: makeControls(),
@@ -187,8 +213,8 @@ export function initNeighborhoodMap(elementId, territoryNumber, territoryWkt) {
   );
 }
 
-export function initRegionMap(elementId, regionWkt, territories) {
-  console.log(elementId, regionWkt, territories);
+export function initRegionMap(element, regionWkt, territories) {
+  console.log(element, regionWkt, territories);
 
   const regionLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
@@ -220,7 +246,7 @@ export function initRegionMap(elementId, regionWkt, territories) {
   });
 
   const map = new ol.Map({
-    target: elementId,
+    target: element,
     pixelRatio: 2, // render at high DPI for printing
     layers: [makeStreetsLayer(), regionLayer, territoryLayer],
     controls: makeControls(),

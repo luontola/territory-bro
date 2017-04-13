@@ -7,23 +7,18 @@ import React from "react";
 import {Layout} from "./Layout";
 import moment from "moment";
 import i18n from "../i18n";
-import {initTerritoryMap} from "../maps";
+import {initTerritoryMap, initTerritoryMiniMap} from "../maps";
 
 class TerritoryCard extends React.Component {
-  constructor(props) {
-    super(props);
-    this.today = moment().format('YYYY-MM-DD');
-  }
-
   componentDidMount() {
-    const territory = this.props.territory;
-    initTerritoryMap(this.map, territory.location);
-    //initTerritoryMiniMap(this.minimap, territory.center, territory.minimap_viewport, territory.congregation, territory.subregions);
+    const {territory, regions} = this.props;
+    initTerritoryMap(this.map, territory);
+    initTerritoryMiniMap(this.minimap, territory, regions);
   }
 
   render() {
-    const territory = this.props.territory;
-    const today = this.today;
+    const {territory} = this.props;
+    const today = moment().format('YYYY-MM-DD');
     return (
       <div key={territory.id} className="croppable-territory-card">
         <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
@@ -55,7 +50,7 @@ let TerritoryCardsPage = ({territories, regions}) => (
   <Layout>
     <h1 className="no-print">Territory Cards</h1>
     {territories.map(territory =>
-      <TerritoryCard territory={territory} key={territory.id}/>
+      <TerritoryCard key={territory.id} territory={territory} regions={regions}/>
     )}
   </Layout>
 );
