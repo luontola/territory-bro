@@ -2,6 +2,8 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+/* @flow */
+
 import React from "react";
 import {ErrorPage} from "./ui/ErrorPage";
 import {OverviewPage} from "./ui/OverviewPage";
@@ -9,8 +11,9 @@ import {TerritoryCardsPage} from "./ui/TerritoryCardsPage";
 import {NeighborhoodMapsPage} from "./ui/NeighborhoodMapsPage";
 import {RegionMapsPage} from "./ui/RegionMapsPage";
 import {getRegions, getTerritories} from "./api";
+import type {ErrorMessage, Route} from "./router";
 
-const routes = [
+const routes: Array<Route> = [
   {
     path: '/',
     async action() {
@@ -41,7 +44,7 @@ const routes = [
   },
   {
     path: '/error',
-    action: ({error}) => <ErrorPage error={error}/>
+    action: ({error}: { error: ErrorMessage }) => <ErrorPage error={error}/>
   },
 ];
 

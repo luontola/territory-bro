@@ -2,12 +2,17 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+/* @flow */
+
 import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
 import {initRegionMap} from "../maps";
+import type {Region, Territory} from "../api";
 
 class RegionMap extends React.Component {
+  map: HTMLDivElement;
+
   componentDidMount() {
     const {region, territories} = this.props;
     initRegionMap(this.map, region, territories);
@@ -24,7 +29,10 @@ class RegionMap extends React.Component {
   }
 }
 
-const RegionMapsPage = ({territories, regions}) => (
+const RegionMapsPage = ({territories, regions}: {
+  territories: Array<Territory>,
+  regions: Array<Region>
+}) => (
   <Layout>
     <h1 className="no-print">Region Maps</h1>
     {regions

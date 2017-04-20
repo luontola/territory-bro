@@ -2,10 +2,12 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+/* @flow */
+
 import React from "react";
 import {Layout} from "./Layout";
 
-let OverviewPage = ({territoryCount, regionCount}) => (
+let OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, regionCount: number }) => (
   <Layout>
     <h1>Territory Bro</h1>
 

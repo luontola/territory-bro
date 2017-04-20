@@ -1,6 +1,8 @@
-// Copyright © 2016-2017 Esko Luontola
+// Copyright © 2015-2017 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
+/* @flow */
 
 import {describe, it} from "mocha";
 import {expect} from "chai";
@@ -62,11 +64,11 @@ describe("router", () => {
       const routes = [
         {path: '/foo', action: (context) => context},
       ];
-      const context = {pathname: '/foo', bar: 123};
+      const context = {pathname: '/foo', bar: '123'};
 
       return router.resolve(routes, context)
         .then(page => {
-          expect(page).to.eql({pathname: '/foo', bar: 123, params: {}});
+          expect(page).to.eql({pathname: '/foo', bar: '123', params: {}});
         });
     });
 
@@ -87,7 +89,7 @@ describe("router", () => {
         {path: '/normal', action: () => 'normal page'},
         {path: '/error', action: () => 'error page'},
       ];
-      const context = {pathname: '/normal', error: {}};
+      const context = {pathname: '/normal', error: {message: 'error message'}};
 
       return router.resolve(routes, context)
         .then(page => {

@@ -2,10 +2,13 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+/* @flow */
+
 import "openlayers/dist/ol.css";
 import ol from "openlayers";
+import type {Region, Territory} from "./api";
 
-export function wktToFeature(wkt) {
+export function wktToFeature(wkt: string): ol.Feature {
   const feature = new ol.format.WKT().readFeature(wkt);
   feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
   return feature;
@@ -48,7 +51,7 @@ function territoryFillStyle() {
   });
 }
 
-function territoryTextStyle(territoryNumber, fontSize) {
+function territoryTextStyle(territoryNumber: string, fontSize: string) {
   return new ol.style.Text({
     text: territoryNumber,
     font: 'bold ' + fontSize + ' sans-serif',
@@ -59,7 +62,8 @@ function territoryTextStyle(territoryNumber, fontSize) {
 
 // map constructors
 
-export function initTerritoryMap(element, territory) {
+export function initTerritoryMap(element: HTMLDivElement,
+                                 territory: Territory): void {
   const territoryWkt = territory.location;
   const territoryLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
@@ -91,14 +95,16 @@ export function initTerritoryMap(element, territory) {
   );
 }
 
-export function initTerritoryMiniMap(element, territory, regions) {
+export function initTerritoryMiniMap(element: HTMLDivElement,
+                                     territory: Territory,
+                                     regions: Array<Region>): void {
   const wkt = new ol.format.WKT();
   const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoint();
   const territoryWkt = wkt.writeGeometry(centerPoint);
   // TODO: handle it gracefully if one of the following is not initialized
-  let viewportWkt;
-  let congregationWkt;
-  let subregionsWkt;
+  let viewportWkt = '';
+  let congregationWkt = '';
+  let subregionsWkt = '';
   const territoryCoordinate = centerPoint.getCoordinates();
   regions.forEach(region => {
     const regionGeom = wkt.readFeature(region.location).getGeometry();
@@ -180,7 +186,8 @@ export function initTerritoryMiniMap(element, territory, regions) {
   );
 }
 
-export function initNeighborhoodMap(element, territory) {
+export function initNeighborhoodMap(element: HTMLDivElement,
+                                    territory: Territory): void {
   const territoryNumber = territory.number;
   const territoryWkt = territory.location;
 
@@ -216,7 +223,9 @@ export function initNeighborhoodMap(element, territory) {
   );
 }
 
-export function initRegionMap(element, region, territories) {
+export function initRegionMap(element: HTMLDivElement,
+                              region: Region,
+                              territories: Array<Territory>): void {
   const regionLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
       features: [wktToFeature(region.location)]

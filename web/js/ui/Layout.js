@@ -2,12 +2,17 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+/* @flow */
+
 import "purecss/build/pure-min.css";
 import "../../css/layout.css";
+import type {Children} from "react";
 import React from "react";
 import {Link} from "./Link";
 
-const Layout = ({children}) => (
+type Props = { children?: Children }
+
+const Layout = ({children}: Props) => (
   <div id="layout">
 
     <nav className="no-print">

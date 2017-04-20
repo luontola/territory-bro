@@ -2,14 +2,20 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+/* @flow */
+
 import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
 import formatDate from "date-fns/format";
 import i18n from "../i18n";
 import {initTerritoryMap, initTerritoryMiniMap} from "../maps";
+import type {Region, Territory} from "../api";
 
 class TerritoryCard extends React.Component {
+  map: HTMLDivElement;
+  minimap: HTMLDivElement;
+
   componentDidMount() {
     const {territory, regions} = this.props;
     initTerritoryMap(this.map, territory);
@@ -46,7 +52,10 @@ class TerritoryCard extends React.Component {
   }
 }
 
-const TerritoryCardsPage = ({territories, regions}) => (
+const TerritoryCardsPage = ({territories, regions}: {
+  territories: Array<Territory>,
+  regions: Array<Region>
+}) => (
   <Layout>
     <h1 className="no-print">Territory Cards</h1>
     {territories.map(territory =>

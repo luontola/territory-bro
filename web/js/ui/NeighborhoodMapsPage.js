@@ -2,12 +2,17 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+/* @flow */
+
 import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
 import {initNeighborhoodMap} from "../maps";
+import type {Territory} from "../api";
 
 class NeighborhoodMap extends React.Component {
+  map: HTMLDivElement;
+
   componentDidMount() {
     const {territory} = this.props;
     initNeighborhoodMap(this.map, territory);
@@ -26,7 +31,7 @@ class NeighborhoodMap extends React.Component {
   }
 }
 
-const NeighborhoodMapsPage = ({territories}) => (
+const NeighborhoodMapsPage = ({territories}: { territories: Array<Territory> }) => (
   <Layout>
     <h1 className="no-print">Neighborhood Maps</h1>
     {territories.map(territory =>

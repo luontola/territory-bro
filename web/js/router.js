@@ -1,10 +1,16 @@
-// Copyright © 2016-2017 Esko Luontola
+// Copyright © 2015-2017 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+/* @flow */
+
 import toRegex from "path-to-regexp";
 
-export function matchURI(path, uri) {
+export type ErrorMessage = { message: string, status?: number }
+export type RoutingContext = { pathname: string, error?: ErrorMessage, [string]: string };
+export type Route = { path: string, action: Function }
+
+export function matchURI(path: string, uri: string): ?{ [string]: string } {
   const keys = [];
   const pattern = toRegex(path, keys); // TODO: Use caching
   const match = pattern.exec(uri);
@@ -18,7 +24,7 @@ export function matchURI(path, uri) {
   return params;
 }
 
-async function resolve(routes, context) {
+async function resolve(routes: Array<Route>, context: RoutingContext): Promise<mixed> {
   for (const route of routes) {
     const uri = context.error ? '/error' : context.pathname;
     const params = matchURI(route.path, uri);
@@ -30,7 +36,7 @@ async function resolve(routes, context) {
       return result;
     }
   }
-  const error = new Error('Not found');
+  const error: ErrorMessage = new Error('Not found');
   error.status = 404;
   throw error;
 }
