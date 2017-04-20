@@ -12,8 +12,8 @@ export type Route = { path: string, action: Function }
 
 export function matchURI(path: string, uri: string): ?{ [string]: string } {
   const keys = [];
-  const pattern = toRegex(path, keys); // TODO: Use caching
-  const match = pattern.exec(uri);
+  const pattern: RegExp = toRegex(path, keys); // TODO: Use caching
+  const match: string[] = pattern.exec(uri);
   if (!match) {
     return null;
   }

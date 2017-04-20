@@ -17,9 +17,12 @@ export type Territory = {
   location: string,
 }
 
-function sortTerritories(territories) {
-  const numbers = alphanumSort(territories.map(t => t.number));
-  return sortBy(territories, t => findIndex(numbers, n => n === t.number))
+// TODO: create library definitions for alphanum-sort and lodash-es, so that we can remove all this type noise
+// https://flow.org/en/docs/libdefs/creation/
+
+function sortTerritories(territories: Array<Territory>): Array<Territory> {
+  const numbers: Array<string> = alphanumSort(territories.map((t: Territory) => t.number));
+  return sortBy(territories, (t: Territory) => findIndex(numbers, (n: string) => n === t.number))
 }
 
 export async function getTerritories(): Promise<Array<Territory>> {
@@ -36,8 +39,8 @@ export type Region = {
   location: string,
 }
 
-function sortRegions(regions) {
-  return sortBy(regions, r => r.name.toLowerCase());
+function sortRegions(regions: Array<Region>): Array<Region> {
+  return sortBy(regions, (r: Region) => r.name.toLowerCase());
 }
 
 export async function getRegions(): Promise<Array<Region>> {

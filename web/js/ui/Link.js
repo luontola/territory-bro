@@ -8,11 +8,12 @@ import type {Children} from "react";
 import React from "react";
 import history from "../history";
 
-function handleClick(event) {
+function handleClick(event: MouseEvent) {
   event.preventDefault();
+  const target = ((event.currentTarget: any): HTMLAnchorElement);
   history.push({
-    pathname: event.currentTarget.pathname,
-    search: event.currentTarget.search
+    pathname: target.pathname,
+    search: target.search
   });
 }
 
