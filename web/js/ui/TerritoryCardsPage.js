@@ -8,9 +8,9 @@ import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
 import formatDate from "date-fns/format";
-import i18n from "../i18n";
 import {initTerritoryMap, initTerritoryMiniMap} from "../maps";
 import type {Region, Territory} from "../api";
+import {FormattedMessage} from "react-intl";
 
 class TerritoryCard extends React.Component {
   map: HTMLDivElement;
@@ -33,7 +33,10 @@ class TerritoryCard extends React.Component {
           <div className="number">{territory.number}</div>
           <div className="minimap" ref={el => this.minimap = el}/>
 
-          <div className="title">{ i18n.en['territory-card.title'] }</div>
+          <div className="title">
+            <FormattedMessage id="TerritoryCard.title"
+                              defaultMessage="Territory Map Card"/>
+          </div>
           <div className="region">{territory.region}</div>
           <div className="map" ref={el => this.map = el}/>
           <div className="addresses">{territory.address}</div>
@@ -42,8 +45,13 @@ class TerritoryCard extends React.Component {
             <div>Printed {today} with TerritoryBro.com</div>
           </div>
 
-          <div className="footer">{i18n.en['territory-card.footer1']}
-            <br/>{i18n.en['territory-card.footer2']}</div>
+          <div className="footer">
+            <FormattedMessage id="TerritoryCard.footer1"
+                              defaultMessage="Please keep this card in the envelope. Do not soil, mark or bend it."/>
+            <br/>
+            <FormattedMessage id="TerritoryCard.footer2"
+                              defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files"/>
+          </div>
         </div>
         <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
         <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>

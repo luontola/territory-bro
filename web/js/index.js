@@ -15,13 +15,26 @@ import reducers from "./reducers";
 import history from "./history";
 import router from "./router";
 import routes from "./routes";
+import {addLocaleData, IntlProvider} from "react-intl";
+import en from "react-intl/locale-data/en";
+import fi from "react-intl/locale-data/fi";
+import pt from "react-intl/locale-data/pt";
+
+addLocaleData([...en, ...fi, ...pt]);
+const usersLocale = navigator.language;
+const translationsForUsersLocale = {};
 
 const logger = createLogger();
 const store = createStore(reducers, applyMiddleware(logger));
 const root = document.getElementById('root');
 
 function renderComponent(component) {
-  ReactDOM.render(<Provider store={store}>{component}</Provider>, root);
+  ReactDOM.render(
+    <IntlProvider locale={usersLocale} messages={translationsForUsersLocale}>
+      <Provider store={store}>
+        {component}
+      </Provider>
+    </IntlProvider>, root);
 }
 
 function render(location) {
