@@ -12,6 +12,7 @@
     "date-fns": "1.28.3",
     "history": "4.6.1",
     "jquery": "3.2.1",
+    "js-cookie": "2.1.4",
     "lockr": "0.8.4",
     "lodash-es": "4.17.4",
     "openlayers": "4.1.0",

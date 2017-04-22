@@ -9,6 +9,7 @@ import "../../css/layout.css";
 import type {Children} from "react";
 import React from "react";
 import {Link} from "./Link";
+import {changeLanguage} from "../intl";
 
 type Props = { children?: Children }
 
@@ -23,9 +24,9 @@ const Layout = ({children}: Props) => (
         <li><Link to="/region-maps">Region Maps</Link></li>
       </ul>
       <p>Change language:
-        {' '}<a href="#">English</a>
-        {' '}<a href="#">Finnish</a>
-        {' '}<a href="#">Portuguese</a>
+        {' '}<a href="#" onClick={() => changeLanguage('en')}>English</a>
+        {' '}<a href="#" onClick={() => changeLanguage('fi')}>Finnish</a>
+        {' '}<a href="#" onClick={() => changeLanguage('pt')}>Portuguese</a>
       </p>
     </nav>
 

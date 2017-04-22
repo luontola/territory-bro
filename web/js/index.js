@@ -15,14 +15,8 @@ import reducers from "./reducers";
 import history from "./history";
 import router from "./router";
 import routes from "./routes";
-import {addLocaleData, IntlProvider} from "react-intl";
-import en from "react-intl/locale-data/en";
-import fi from "react-intl/locale-data/fi";
-import pt from "react-intl/locale-data/pt";
-
-addLocaleData([...en, ...fi, ...pt]);
-const usersLocale = navigator.language;
-const translationsForUsersLocale = {};
+import {IntlProvider} from "react-intl";
+import {language, messages} from "./intl";
 
 const logger = createLogger();
 const store = createStore(reducers, applyMiddleware(logger));
@@ -30,7 +24,7 @@ const root = document.getElementById('root');
 
 function renderComponent(component) {
   ReactDOM.render(
-    <IntlProvider locale={usersLocale} messages={translationsForUsersLocale}>
+    <IntlProvider locale={language} messages={messages}>
       <Provider store={store}>
         {component}
       </Provider>

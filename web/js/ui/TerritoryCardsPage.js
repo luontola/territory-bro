@@ -50,7 +50,7 @@ class TerritoryCard extends React.Component {
                               defaultMessage="Please keep this card in the envelope. Do not soil, mark or bend it."/>
             <br/>
             <FormattedMessage id="TerritoryCard.footer2"
-                              defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files"/>
+                              defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files."/>
           </div>
         </div>
         <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
