@@ -8,9 +8,18 @@ import React from "react";
 import {Layout} from "./Layout";
 import type {ErrorMessage} from "../router";
 
+function formatErrorMessage(error) {
+  let message = 'Error';
+  if (error.status) {
+    message += ' ' + error.status;
+  }
+  message += ': ' + error.message;
+  return message;
+}
+
 let ErrorPage = ({error}: { error: ErrorMessage }) => (
   <Layout>
-    <h1>Error {error.status}: {error.message}</h1>
+    <h1>{formatErrorMessage(error)}</h1>
   </Layout>
 );
 
