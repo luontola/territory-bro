@@ -45,7 +45,9 @@
 
 (def app-routes
   (routes
-    (wrap-routes #'home-routes middleware/wrap-csrf)
+    ; TODO: CSRF token for API
+    #_(wrap-routes #'home-routes middleware/wrap-csrf)
+    #'home-routes
     #'api-routes
     (route/not-found
       (:body

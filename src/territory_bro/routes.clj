@@ -73,8 +73,8 @@
            (GET "/territory-cards" request (territory-cards-page request))
            (GET "/neighborhood-maps" request (neighborhood-maps-page request))
            (GET "/region-maps" request (region-maps-page request))
-           (POST "/import-territories" request (import-territories! request))
-           (POST "/clear-database" [] (clear-database!)))
+           (POST "/api/import-territories" request (import-territories! request))
+           (POST "/api/clear-database" [] (clear-database!)))
 
 (api/defapi api-routes
   (api/GET "/api/hello" [name]                              ; TODO: remove spike code

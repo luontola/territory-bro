@@ -9,12 +9,12 @@
 
 <p>The database has currently {{territory-count}} territories and {{region-count}} regions.</p>
 
-<form action="/clear-database" method="post">
+<form action="/api/clear-database" method="post">
     {% csrf-field %}
     <button type="submit" class="btn btn-primary">Delete All</button>
 </form>
 
-<form action="/import-territories" method="post" enctype="multipart/form-data">
+<form action="/api/import-territories" method="post" enctype="multipart/form-data">
     {% csrf-field %}
     <p>Territories GeoJSON: <input type="file" name="territories"></p>
     <p>Regions GeoJSON: <input type="file" name="regions"></p>

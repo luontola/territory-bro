@@ -25,11 +25,11 @@ let OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, reg
 
     <p>The database has currently {territoryCount} territories and {regionCount} regions.</p>
 
-    <form action="/clear-database" method="post">
+    <form action="/api/clear-database" method="post">
       <button type="submit" className="btn btn-primary">Delete All</button>
     </form>
 
-    <form action="/import-territories" method="post" encType="multipart/form-data">
+    <form action="/api/import-territories" method="post" encType="multipart/form-data">
       <p>Territories GeoJSON: <input type="file" name="territories"/></p>
       <p>Regions GeoJSON: <input type="file" name="regions"/></p>
       <button type="submit" className="btn btn-primary">Import</button>
