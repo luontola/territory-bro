@@ -11,7 +11,6 @@ WORKDIR /app
 
 USER app
 
-# TODO: optimize memory use, should run in under 100 MB heap
-CMD ["java", "-Xmx500m", "-XX:MaxMetaspaceSize=64m", "-jar", "territory-bro.jar"]
+CMD ["java", "-Xmx50m", "-XX:MaxMetaspaceSize=64m", "-jar", "territory-bro.jar"]
 
 COPY target/territory-bro.jar /app/territory-bro.jar
