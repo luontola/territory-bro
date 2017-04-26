@@ -1,12 +1,20 @@
 {
   "presets": [
-    ["es2015", {"modules": false}],
+    [
+      "env", {
+      "targets": {
+        "browsers": ["last 2 versions"]
+      },
+      "modules": false,
+      "useBuiltIns": true,
+      "debug": false
+    }
+    ],
     "react",
     "flow"
   ],
   "plugins": [
     "transform-object-rest-spread",
-    "transform-async-to-generator",
     ["react-intl", {"messagesDir": "./target/messages/"}]
   ]
 }
