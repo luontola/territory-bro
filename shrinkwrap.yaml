@@ -240,7 +240,7 @@ packages:
       babel-types: 6.24.1
       babylon: 6.17.0
       convert-source-map: 1.5.0
-      debug: 2.6.4
+      debug: 2.6.5
       json5: 0.5.1
       lodash: 4.17.4
       minimatch: 3.0.3
@@ -548,7 +548,7 @@ packages:
     dependencies:
       babel-runtime: 6.23.0
       core-js: 2.4.1
-      regenerator-runtime: 0.10.3
+      regenerator-runtime: 0.10.4
     resolution: 8364ca62df8eafb830499f699177466c3b03499d
   /babel-preset-env/1.4.0:
     dependencies:
@@ -613,7 +613,7 @@ packages:
   /babel-runtime/6.23.0:
     dependencies:
       core-js: 2.4.1
-      regenerator-runtime: 0.10.3
+      regenerator-runtime: 0.10.4
     resolution: 0a9489f144de70efb3ce4300accdb329e2fc543b
   /babel-template/6.24.1:
     dependencies:
@@ -630,7 +630,7 @@ packages:
       babel-runtime: 6.23.0
       babel-types: 6.24.1
       babylon: 6.17.0
-      debug: 2.6.4
+      debug: 2.6.5
       globals: 9.17.0
       invariant: 2.2.2
       lodash: 4.17.4
@@ -1199,6 +1199,10 @@ packages:
     dependencies:
       ms: 0.7.3
     resolution: 7586a9b3c39741c0282ae33445c4e8ac74734fe0
+  /debug/2.6.5:
+    dependencies:
+      ms: 0.7.3
+    resolution: 7a76247781acd4ef2a85f0fb8abf763cd1af249e
   /decamelize/1.2.0: f6534d15148269b20352e7bee26f501f9a191290
   /decompress-zip/0.3.0:
     dependencies:
@@ -1583,7 +1587,7 @@ packages:
     resolution: 8bf788dca97c01001ce1142713f9c3a5ea6abff5
   /follow-redirects/1.2.3:
     dependencies:
-      debug: 2.6.4
+      debug: 2.6.5
     resolution: 01abaeca85e3609837d9fcda3167a7e42fdaca21
   /for-in/1.0.2: 81068d295a8142ec0ac726c6e2200c30fb6d5e80
   /for-own/0.1.5:
@@ -2066,7 +2070,7 @@ packages:
   /jsonify/0.0.0: 2c74b6ee41d93ca51b7b5aaee8f503631d252a73
   /jsonp/0.2.1:
     dependencies:
-      debug: 2.6.4
+      debug: 2.6.5
     resolution: a65b4fa0f10bda719a05441ea7b94c55f3e15bae
   /jsonparse/1.3.0: 85fc245b1d9259acc6941960b905adf64e7de0e8
   /jsonpointer/4.0.1: 4fd92cb34e0e9db3c89c8622ecf51f9b978c6cb9
@@ -2223,7 +2227,7 @@ packages:
     dependencies:
       async: 1.5.2
       consolidate: 0.14.5
-      debug: 2.6.4
+      debug: 2.6.5
       extend: 3.0.0
       fs-readdir-recursive: 1.0.0
       is-utf8: 0.2.1
@@ -2565,7 +2569,7 @@ packages:
   /portfinder/1.0.13:
     dependencies:
       async: 1.5.2
-      debug: 2.6.4
+      debug: 2.6.5
       mkdirp: 0.5.1
     resolution: bb32ecd87c27104ae6ee44b5a3ccbf0ebb1aede9
   /postcss-calc/5.3.1:
@@ -2948,7 +2952,7 @@ packages:
       symbol-observable: 1.0.4
     resolution: 887c2b3d0b9bd86eca2be70571c27654c19e188d
   /regenerate/1.3.2: d1941c67bad437e1be76433add5b385f95b19260
-  /regenerator-runtime/0.10.3: 8c4367a904b51ea62a908ac310bf99ff90a82a3e
+  /regenerator-runtime/0.10.4: 74cb6598d3ba2eb18694e968a40e2b3b4df9cf93
   /regenerator-runtime/0.9.6: d33eb95d0d2001a4be39659707c51b0cb71ce029
   /regenerator-transform/0.9.11:
     dependencies:
@@ -3192,7 +3196,7 @@ packages:
     resolution: b8af9caba00949e568e369f1327ea9be9ea2461b
   /sockjs-client/1.1.2:
     dependencies:
-      debug: 2.6.4
+      debug: 2.6.5
       eventsource: 0.1.6
       faye-websocket: 0.11.1
       inherits: 2.0.3
@@ -3238,7 +3242,7 @@ packages:
   /spdx-license-ids/1.2.2: c9df7a3424594ade6bd11900d596696dc06bac57
   /spdy-transport/2.0.18:
     dependencies:
-      debug: 2.6.4
+      debug: 2.6.5
       hpack.js: 2.1.6
       obuf: 1.1.1
       readable-stream: 2.2.9
@@ -3246,7 +3250,7 @@ packages:
     resolution: 43fc9c56be2cccc12bb3e2754aa971154e836ea6
   /spdy/3.4.4:
     dependencies:
-      debug: 2.6.4
+      debug: 2.6.5
       handle-thing: 1.2.5
       http-deceiver: 1.2.7
       select-hose: 2.0.0
@@ -3334,7 +3338,7 @@ packages:
     dependencies:
       component-emitter: 1.2.1
       cookiejar: 2.1.1
-      debug: 2.6.4
+      debug: 2.6.5
       extend: 3.0.0
       form-data: 2.1.4
       formidable: 1.1.1
