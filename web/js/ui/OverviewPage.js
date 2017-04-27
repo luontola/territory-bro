@@ -18,8 +18,9 @@ let OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, reg
     <h2>System Requirements</h2>
 
     <p>The territory card UI uses <a href="http://caniuse.com/#feat=css-variables">CSS varibles</a> and <a
-      href="http://caniuse.com/#feat=css-grid">Grid layout</a>, which are only supported by Chrome 48 when you enable
-      "Experimental Web Platform features" in chrome://flags</p>
+      href="http://caniuse.com/#feat=css-grid">Grid layout</a>, which might not be supported by all web browsers.
+      Use the latest version of Chrome or Firefox for best results. There are also differences in the image quality
+      of PDFs, so compare various web browsers before printing your territory cards.</p>
 
     <h2>Import</h2>
 
