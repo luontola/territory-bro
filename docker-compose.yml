@@ -18,6 +18,10 @@ services:
       DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro
     ports:
     - "8081:8080"
+    networks:
+      default:
+        aliases:
+          - territory-bro-api
 
   db:
     image: mdillon/postgis:9.6
