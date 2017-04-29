@@ -7,23 +7,22 @@
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
 
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [com.taoensso/timbre "4.1.4"]
-                 [environ "1.0.1"]
+  :dependencies [[com.taoensso/timbre "4.1.4"]
                  [compojure "1.4.0"]
-                 [ring/ring-defaults "0.1.5"]
-                 [ring "1.4.0"
-                  :exclusions [ring/ring-jetty-adapter]]
-                 [metosin/ring-middleware-format "0.6.0"]
-                 [metosin/ring-http-response "0.6.5"]
-                 [metosin/compojure-api "1.1.10"]           ; TODO: replace with liberator?
-                 [org.clojure/data.json "0.2.6"]
-                 [prone "0.8.2"]
-                 [org.clojure/tools.nrepl "0.2.12"]         ; TODO: not needed in production?
-                 [migratus "0.8.7"]
                  [conman "0.2.5"]
+                 [environ "1.0.1"]
+                 [metosin/compojure-api "1.1.10"]           ; TODO: replace with liberator?
+                 [metosin/ring-http-response "0.6.5"]
+                 [metosin/ring-middleware-format "0.6.0"]
+                 [migratus "0.8.7"]
+                 [org.clojure/clojure "1.7.0"]
+                 [org.clojure/data.json "0.2.6"]
+                 [org.clojure/tools.nrepl "0.2.12"]         ; TODO: not needed in production?
+                 [org.immutant/web "2.1.0"]
                  [org.postgresql/postgresql "9.4-1203-jdbc41"]
-                 [org.immutant/web "2.1.0"]]
+                 [prone "0.8.2"]
+                 [ring "1.4.0" :exclusions [ring/ring-jetty-adapter]]
+                 [ring/ring-defaults "0.1.5"]]
 
   :min-lein-version "2.0.0"
   :uberjar-name "territory-bro.jar"
@@ -32,19 +31,19 @@
   :main territory-bro.core
   :migratus {:store :database}
 
-  :plugins [[lein-environ "1.0.1"]
-            [migratus-lein "0.2.0"]
-            [com.jakemccrary/lein-test-refresh "0.14.0"]]
+  :plugins [[com.jakemccrary/lein-test-refresh "0.14.0"]
+            [lein-environ "1.0.1"]
+            [migratus-lein "0.2.0"]]
   :profiles
   {:uberjar       {:omit-source true
                    :env         {:production true}
                    :aot         :all}
    :dev           [:project/dev :profiles/dev]
    :test          [:project/test :profiles/test]
-   :project/dev   {:dependencies [[ring/ring-mock "0.3.0"]
-                                  [ring/ring-devel "1.4.0"]
+   :project/dev   {:dependencies [[mvxcvi/puget "1.0.0"]
                                   [pjstadig/humane-test-output "0.7.0"]
-                                  [mvxcvi/puget "1.0.0"]]
+                                  [ring/ring-devel "1.4.0"]
+                                  [ring/ring-mock "0.3.0"]]
 
                    :repl-options {:init-ns territory-bro.core}
                    :injections   [(require 'pjstadig.humane-test-output)
