@@ -11,7 +11,7 @@
                  [compojure "1.5.2"]
                  [conman "0.2.5"]                           ; TODO: figure out how to upgrade, API has changed
                  [environ "1.1.0"]
-                 [metosin/compojure-api "1.1.10"]           ; TODO: replace with liberator?
+                 [liberator "0.14.1"]
                  [metosin/ring-http-response "0.8.2"]
                  [metosin/ring-middleware-format "0.6.0"]
                  [migratus "0.9.0"]

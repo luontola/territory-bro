@@ -5,8 +5,8 @@
 (ns territory-bro.routes
   (:require [territory-bro.db.core :as db]
             [territory-bro.domain :as domain]
-            [compojure.core :refer [defroutes GET POST]]
-            [compojure.api.sweet :as api]
+            [compojure.core :refer [defroutes GET POST ANY]]
+            [liberator.core :refer [defresource]]
             [ring.util.response :refer [redirect]]
             [ring.util.http-response :refer [ok]]
             [clojure.java.io :as io]
@@ -43,15 +43,19 @@
     (db/delete-all-regions!))
   (redirect "/"))
 
+(defresource territories
+  :available-media-types ["application/json"]
+  :handle-ok (fn [_] (db/find-territories)))
+
+(defresource regions
+  :available-media-types ["application/json"]
+  :handle-ok (fn [_] (db/find-regions)))
+
 (defroutes home-routes
            (GET "/" request {:status  200
                              :headers {"Content-Type" "text/html; charset=utf-8"}
                              :body    "Territory Bro"})
+           (ANY "/api/territories" [] territories)
+           (ANY "/api/regions" [] regions)
            (POST "/api/import-territories" request (import-territories! request))
            (POST "/api/clear-database" [] (clear-database!)))
-
-(api/defapi api-routes
-  (api/GET "/api/territories" []
-    (ok (db/find-territories)))
-  (api/GET "/api/regions" []
-    (ok (db/find-regions))))

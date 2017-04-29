@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: ring-middleware-format:0.7.0">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/ring-middleware-format/ring-middleware-format/0.7.0/ring-middleware-format-0.7.0.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

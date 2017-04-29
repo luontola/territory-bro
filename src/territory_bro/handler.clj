@@ -5,7 +5,7 @@
 (ns territory-bro.handler
   (:require [compojure.core :refer [defroutes routes wrap-routes]]
             [territory-bro.layout :refer [error-page]]
-            [territory-bro.routes :refer [home-routes api-routes]]
+            [territory-bro.routes :refer [home-routes]]
             [territory-bro.middleware :as middleware]
             [territory-bro.db.core :as db]
             [compojure.route :as route]
@@ -46,7 +46,6 @@
     ; TODO: CSRF token for API
     #_(wrap-routes #'home-routes middleware/wrap-csrf)
     #'home-routes
-    #'api-routes
     (route/not-found
       (:body
         (error-page {:status 404
