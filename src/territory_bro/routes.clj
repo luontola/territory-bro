@@ -5,7 +5,6 @@
 (ns territory-bro.routes
   (:require [territory-bro.db.core :as db]
             [territory-bro.domain :as domain]
-            [territory-bro.layout :as layout]
             [compojure.core :refer [defroutes GET POST]]
             [compojure.api.sweet :as api]
             [ring.util.response :refer [redirect]]
@@ -13,30 +12,6 @@
             [clojure.java.io :as io]
             [clojure.data.json :as json])
   (:import (java.time LocalDate)))
-
-(defn overview-page [request]
-  (layout/render "overview.html"
-                 request
-                 {:docs            (-> "docs/docs.md" io/resource slurp)
-                  :territory-count (db/count-territories)
-                  :region-count    (db/count-regions)}))
-
-(defn territory-cards-page [request]
-  (layout/render "territory-cards.html"
-                 request
-                 {:territories (db/find-territories-with-regions)
-                  :today       (LocalDate/now)}))
-
-(defn neighborhood-maps-page [request]
-  (layout/render "neighborhood-maps.html"
-                 request
-                 {:territories (db/find-territories-with-regions)}))
-
-(defn region-maps-page [request]
-  (layout/render "region-maps.html"
-                 request
-                 {:regions          (db/find-regions)
-                  :territories-json (json/write-str (db/find-territories-with-regions))}))
 
 (defn- read-file-upload [request param]
   (let [tempfile (-> request :params param :tempfile)]
@@ -69,16 +44,13 @@
   (redirect "/"))
 
 (defroutes home-routes
-           (GET "/" request (overview-page request))
-           (GET "/territory-cards" request (territory-cards-page request))
-           (GET "/neighborhood-maps" request (neighborhood-maps-page request))
-           (GET "/region-maps" request (region-maps-page request))
+           (GET "/" request {:status  200
+                             :headers {"Content-Type" "text/html; charset=utf-8"}
+                             :body    "Territory Bro"})
            (POST "/api/import-territories" request (import-territories! request))
            (POST "/api/clear-database" [] (clear-database!)))
 
 (api/defapi api-routes
-  (api/GET "/api/hello" [name]                              ; TODO: remove spike code
-    (ok {:message (str "Hello, " name)}))
   (api/GET "/api/territories" []
     (ok (db/find-territories)))
   (api/GET "/api/regions" []

@@ -1,33 +1,20 @@
+; Copyright © 2015-2017 Esko Luontola
+; This software is released under the Apache License 2.0.
+; The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
 (ns territory-bro.middleware
   (:require [territory-bro.util :as util]
-            [territory-bro.layout :refer [*app-context* error-page]]
+            [territory-bro.layout :refer [error-page]]
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
-            [selmer.middleware :refer [wrap-error-page]]
             [prone.middleware :refer [wrap-exceptions]]
             [ring.middleware.flash :refer [wrap-flash]]
             [immutant.web.middleware :refer [wrap-session]]
             [ring.middleware.reload :as reload]
-            [ring.middleware.webjars :refer [wrap-webjars]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
             [ring.middleware.format :refer [wrap-restful-format]])
   (:import [javax.servlet ServletContext]))
-
-(defn wrap-context [handler]
-  (fn [request]
-    (binding [*app-context*
-              (if-let [context (:servlet-context request)]
-                ;; If we're not inside a servlet environment
-                ;; (for example when using mock requests), then
-                ;; .getContextPath might not exist
-                (try (.getContextPath ^ServletContext context)
-                     (catch IllegalArgumentException _ context))
-                ;; if the context is not specified in the request
-                ;; we check if one has been specified in the environment
-                ;; instead
-                (:app-context env))]
-      (handler request))))
 
 (defn wrap-internal-error [handler]
   (fn [req]
@@ -50,7 +37,6 @@
   (if (env :dev)
     (-> handler
         reload/wrap-reload
-        wrap-error-page
         wrap-exceptions)
     handler))
 
@@ -70,12 +56,10 @@
       wrap-sqlexception-chain
       wrap-dev
       wrap-formats
-      wrap-webjars
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
         (-> site-defaults
             (assoc-in [:security :anti-forgery] false)
             (dissoc :session)))
-      wrap-context
       wrap-internal-error))

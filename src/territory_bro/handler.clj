@@ -11,7 +11,6 @@
             [compojure.route :as route]
             [taoensso.timbre :as timbre]
             [taoensso.timbre.appenders.3rd-party.rotor :as rotor]
-            [selmer.parser :as parser]
             [environ.core :refer [env]]))
 
 (defn init
@@ -28,7 +27,6 @@
                            :max-size (* 512 1024)
                            :backlog  10})}})
 
-  (if (env :dev) (parser/cache-off!))
   (db/connect!)
   (timbre/info (str
                  "\n-=[territory-bro started successfully"
