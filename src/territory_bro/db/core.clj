@@ -1,3 +1,7 @@
+; Copyright © 2015-2017 Esko Luontola
+; This software is released under the Apache License 2.0.
+; The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
 (ns territory-bro.db.core
   (:require
     [cheshire.core :refer [generate-string parse-string]]
@@ -6,10 +10,9 @@
     [environ.core :refer [env]]
     [clojure.data.json :as json])
   (:import org.postgresql.util.PGobject
-           org.postgresql.jdbc4.Jdbc4Array
            clojure.lang.IPersistentMap
            clojure.lang.IPersistentVector
-           [java.sql Date Timestamp PreparedStatement]))
+           [java.sql Date Timestamp PreparedStatement Array]))
 
 (defonce ^:dynamic *conn* (atom nil))
 
@@ -61,9 +64,6 @@
 
   Timestamp
   (result-set-read-column [v _ _] (to-date v))
-
-  Jdbc4Array
-  (result-set-read-column [v _ _] (vec (.getArray v)))
 
   PGobject
   (result-set-read-column [pgobj _metadata _index]

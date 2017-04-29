@@ -7,22 +7,22 @@
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
 
-  :dependencies [[com.taoensso/timbre "4.1.4"]
-                 [compojure "1.4.0"]
-                 [conman "0.2.5"]
-                 [environ "1.0.1"]
+  :dependencies [[com.taoensso/timbre "4.10.0"]
+                 [compojure "1.5.2"]
+                 [conman "0.2.5"]                           ; TODO: figure out how to upgrade, API has changed
+                 [environ "1.1.0"]
                  [metosin/compojure-api "1.1.10"]           ; TODO: replace with liberator?
-                 [metosin/ring-http-response "0.6.5"]
+                 [metosin/ring-http-response "0.8.2"]
                  [metosin/ring-middleware-format "0.6.0"]
-                 [migratus "0.8.7"]
-                 [org.clojure/clojure "1.7.0"]
+                 [migratus "0.9.0"]
+                 [org.clojure/clojure "1.8.0"]
                  [org.clojure/data.json "0.2.6"]
-                 [org.clojure/tools.nrepl "0.2.12"]         ; TODO: not needed in production?
-                 [org.immutant/web "2.1.0"]
-                 [org.postgresql/postgresql "9.4-1203-jdbc41"]
-                 [prone "0.8.2"]
-                 [ring "1.4.0" :exclusions [ring/ring-jetty-adapter]]
-                 [ring/ring-defaults "0.1.5"]]
+                 [org.clojure/tools.nrepl "0.2.13"]         ; TODO: not needed in production?
+                 [org.immutant/web "2.1.6"]
+                 [org.postgresql/postgresql "42.0.0"]
+                 [prone "1.1.4"]
+                 [ring "1.5.1" :exclusions [ring/ring-jetty-adapter]]
+                 [ring/ring-defaults "0.2.3"]]
 
   :min-lein-version "2.0.0"
   :uberjar-name "territory-bro.jar"
@@ -32,6 +32,7 @@
   :migratus {:store :database}
 
   :plugins [[com.jakemccrary/lein-test-refresh "0.14.0"]
+            [lein-ancient "0.6.10"]
             [lein-environ "1.0.1"]
             [migratus-lein "0.2.0"]]
   :profiles
@@ -40,9 +41,9 @@
                    :aot         :all}
    :dev           [:project/dev :profiles/dev]
    :test          [:project/test :profiles/test]
-   :project/dev   {:dependencies [[mvxcvi/puget "1.0.0"]
-                                  [pjstadig/humane-test-output "0.7.0"]
-                                  [ring/ring-devel "1.4.0"]
+   :project/dev   {:dependencies [[mvxcvi/puget "1.0.1"]
+                                  [pjstadig/humane-test-output "0.8.1"]
+                                  [ring/ring-devel "1.5.1"]
                                   [ring/ring-mock "0.3.0"]]
 
                    :repl-options {:init-ns territory-bro.core}
