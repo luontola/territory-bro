@@ -15,16 +15,26 @@ export function wktToFeature(wkt: string): ol.Feature {
 }
 
 function makeStreetsLayer() {
-  return new ol.layer.Tile({
-    //source: new ol.source.OSM()
+  const mmlTaustakartta = new ol.source.XYZ({
+    url: '//tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
+    tileSize: [256, 256],
+    attributions: [
+      new ol.Attribution({
+        html: '&copy; Maanmittauslaitos'
+      })
+    ]
+  });
+  const osmHighDpi = new ol.source.XYZ({
     // high DPI spike
-    source: new ol.source.XYZ({
-      url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-      tileSize: [512, 512],
-      attributions: [
-        ol.source.OSM.ATTRIBUTION
-      ]
-    })
+    url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
+    tileSize: [512, 512],
+    attributions: [
+      ol.source.OSM.ATTRIBUTION
+    ]
+  });
+  const osm = new ol.source.OSM();
+  return new ol.layer.Tile({
+    source: osmHighDpi
   });
 }
 
