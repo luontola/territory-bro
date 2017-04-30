@@ -7,6 +7,7 @@
 import "openlayers/dist/ol.css";
 import ol from "openlayers";
 import type {Region, Territory} from "./api";
+import zipObject from "lodash-es/zipObject";
 
 export const mapRasters = [
   {
@@ -39,6 +40,8 @@ export const mapRasters = [
     })
   },
 ];
+
+const mapRastersById = zipObject(mapRasters.map(m => m.id), mapRasters);
 
 export function wktToFeature(wkt: string): ol.Feature {
   const feature = new ol.format.WKT().readFeature(wkt);
@@ -190,10 +193,13 @@ export function initTerritoryMiniMap(element: HTMLDivElement,
     })
   });
 
+  const streetLayer = new ol.layer.Tile({
+    source: mapRastersById.osmHighDpi.source
+  });
   const map = new ol.Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
-    layers: [makeStreetsLayer(), subregionsLayer, congregationLayer, territoryLayer],
+    layers: [streetLayer, subregionsLayer, congregationLayer, territoryLayer],
     controls: [],
     interactions: [],
     view: new ol.View({
