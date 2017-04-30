@@ -8,6 +8,38 @@ import "openlayers/dist/ol.css";
 import ol from "openlayers";
 import type {Region, Territory} from "./api";
 
+export const mapRasters = [
+  {
+    id: 'osm',
+    name: "OpenStreetMap",
+    source: new ol.source.OSM()
+  },
+  {
+    id: 'osmHighDpi',
+    name: "OpenStreetMap (High DPI)",
+    source: new ol.source.XYZ({
+      url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
+      tileSize: [512, 512],
+      attributions: [
+        ol.source.OSM.ATTRIBUTION
+      ]
+    })
+  },
+  {
+    id: 'mmlTaustakartta',
+    name: "Maanmittauslaitos taustakarttasarja",
+    source: new ol.source.XYZ({
+      url: '//tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
+      tileSize: [256, 256],
+      attributions: [
+        new ol.Attribution({
+          html: '&copy; Maanmittauslaitos'
+        })
+      ]
+    })
+  },
+];
+
 export function wktToFeature(wkt: string): ol.Feature {
   const feature = new ol.format.WKT().readFeature(wkt);
   feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
@@ -15,26 +47,8 @@ export function wktToFeature(wkt: string): ol.Feature {
 }
 
 function makeStreetsLayer() {
-  const mmlTaustakartta = new ol.source.XYZ({
-    url: '//tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
-    tileSize: [256, 256],
-    attributions: [
-      new ol.Attribution({
-        html: '&copy; Maanmittauslaitos'
-      })
-    ]
-  });
-  const osmHighDpi = new ol.source.XYZ({
-    // high DPI spike
-    url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-    tileSize: [512, 512],
-    attributions: [
-      ol.source.OSM.ATTRIBUTION
-    ]
-  });
-  const osm = new ol.source.OSM();
   return new ol.layer.Tile({
-    source: osmHighDpi
+    source: mapRasters[1].source
   });
 }
 
