@@ -9,7 +9,12 @@ import ol from "openlayers";
 import type {Region, Territory} from "./api";
 import zipObject from "lodash-es/zipObject";
 
-export const mapRasters = [
+export type MapRaster = {
+  id: string,
+  name: string,
+  source: ol.source.Source,
+}
+export const mapRasters: Array<MapRaster> = [
   {
     id: 'osm',
     name: "OpenStreetMap",
@@ -42,6 +47,7 @@ export const mapRasters = [
 ];
 
 const mapRastersById = zipObject(mapRasters.map(m => m.id), mapRasters);
+export const defaultMapRaster: MapRaster = mapRastersById.osmHighDpi;
 
 export function wktToFeature(wkt: string): ol.Feature {
   const feature = new ol.format.WKT().readFeature(wkt);
@@ -90,7 +96,7 @@ function territoryTextStyle(territoryNumber: string, fontSize: string) {
 // map constructors
 
 export function initTerritoryMap(element: HTMLDivElement,
-                                 territory: Territory): void {
+                                 territory: Territory): ol.Map {
   const territoryWkt = territory.location;
   const territoryLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
@@ -120,6 +126,7 @@ export function initTerritoryMap(element: HTMLDivElement,
       padding: [20, 20, 20, 20]
     }
   );
+  return map;
 }
 
 export function initTerritoryMiniMap(element: HTMLDivElement,

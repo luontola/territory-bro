@@ -8,18 +8,37 @@ import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
 import formatDate from "date-fns/format";
+import type {MapRaster} from "../maps";
 import {initTerritoryMap, initTerritoryMiniMap} from "../maps";
 import type {Region, Territory} from "../api";
 import {FormattedMessage} from "react-intl";
+import PrintOptionsForm, {getMapRaster} from "./PrintOptionsForm";
+import {connect} from "react-redux";
+import ol from "openlayers";
 
 class TerritoryCard extends React.Component {
-  map: HTMLDivElement;
-  minimap: HTMLDivElement;
+  mapElement: HTMLDivElement;
+  minimapElement: HTMLDivElement;
+  map: ol.Map;
 
   componentDidMount() {
-    const {territory, regions} = this.props;
-    initTerritoryMap(this.map, territory);
-    initTerritoryMiniMap(this.minimap, territory, regions);
+    const {territory, regions, mapRaster} = this.props;
+    this.map = initTerritoryMap(this.mapElement, territory);
+    initTerritoryMiniMap(this.minimapElement, territory, regions);
+    this.setStreetLayerRaster(mapRaster);
+  }
+
+  componentDidUpdate() {
+    const {mapRaster} = this.props;
+    this.setStreetLayerRaster(mapRaster);
+  }
+
+  setStreetLayerRaster(mapRaster) {
+    // TODO: spike code, extract a nicer facade for customizing the map
+    const streetLayerIndex = 0;
+    this.map.getLayers().setAt(streetLayerIndex, new ol.layer.Tile({
+      source: mapRaster.source
+    }));
   }
 
   render() {
@@ -31,14 +50,14 @@ class TerritoryCard extends React.Component {
         <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
         <div className="crop-area territory-card">
           <div className="number">{territory.number}</div>
-          <div className="minimap" ref={el => this.minimap = el}/>
+          <div className="minimap" ref={el => this.minimapElement = el}/>
 
           <div className="title">
             <FormattedMessage id="TerritoryCard.title"
                               defaultMessage="Territory Map Card"/>
           </div>
           <div className="region">{territory.region}</div>
-          <div className="map" ref={el => this.map = el}/>
+          <div className="map" ref={el => this.mapElement = el}/>
           <div className="addresses">{territory.address}</div>
 
           <div className="disclaimer">
@@ -60,16 +79,28 @@ class TerritoryCard extends React.Component {
   }
 }
 
-const TerritoryCardsPage = ({territories, regions}: {
+let TerritoryCardsPage = ({territories, regions, mapRaster}: {
   territories: Array<Territory>,
-  regions: Array<Region>
+  regions: Array<Region>,
+  mapRaster: MapRaster,
 }) => (
   <Layout>
-    <h1 className="no-print">Territory Cards</h1>
+    <div className="no-print">
+      <h1>Territory Cards</h1>
+      <PrintOptionsForm/>
+    </div>
     {territories.map(territory =>
-      <TerritoryCard key={territory.id} territory={territory} regions={regions}/>
+      <TerritoryCard key={territory.id} territory={territory} regions={regions} mapRaster={mapRaster}/>
     )}
   </Layout>
 );
+
+function mapStateToProps(state) {
+  return {
+    mapRaster: getMapRaster(state),
+  };
+}
+
+TerritoryCardsPage = connect(mapStateToProps)(TerritoryCardsPage);
 
 export {TerritoryCardsPage};
