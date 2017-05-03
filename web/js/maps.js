@@ -96,7 +96,7 @@ function territoryTextStyle(territoryNumber: string, fontSize: string) {
 // map constructors
 
 export function initTerritoryMap(element: HTMLDivElement,
-                                 territory: Territory): ol.Map {
+                                 territory: Territory): * {
   const territoryWkt = territory.location;
   const territoryLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
@@ -107,11 +107,12 @@ export function initTerritoryMap(element: HTMLDivElement,
       fill: territoryFillStyle()
     })
   });
+  const streetsLayer = makeStreetsLayer();
 
   const map = new ol.Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
-    layers: [makeStreetsLayer(), territoryLayer],
+    layers: [streetsLayer, territoryLayer],
     controls: makeControls(),
     view: new ol.View({
       center: ol.proj.fromLonLat([0.0, 0.0]),
@@ -126,7 +127,12 @@ export function initTerritoryMap(element: HTMLDivElement,
       padding: [20, 20, 20, 20]
     }
   );
-  return map;
+
+  return {
+    setStreetsLayerRaster(mapRaster: MapRaster): void {
+      streetsLayer.setSource(mapRaster.source);
+    },
+  }
 }
 
 export function initTerritoryMiniMap(element: HTMLDivElement,

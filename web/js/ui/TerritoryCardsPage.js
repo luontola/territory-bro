@@ -14,31 +14,22 @@ import type {Region, Territory} from "../api";
 import {FormattedMessage} from "react-intl";
 import PrintOptionsForm, {getMapRaster} from "./PrintOptionsForm";
 import {connect} from "react-redux";
-import ol from "openlayers";
 
 class TerritoryCard extends React.Component {
   mapElement: HTMLDivElement;
   minimapElement: HTMLDivElement;
-  map: ol.Map;
+  map: *;
 
   componentDidMount() {
     const {territory, regions, mapRaster} = this.props;
     this.map = initTerritoryMap(this.mapElement, territory);
     initTerritoryMiniMap(this.minimapElement, territory, regions);
-    this.setStreetLayerRaster(mapRaster);
+    this.map.setStreetsLayerRaster(mapRaster);
   }
 
   componentDidUpdate() {
     const {mapRaster} = this.props;
-    this.setStreetLayerRaster(mapRaster);
-  }
-
-  setStreetLayerRaster(mapRaster) {
-    // TODO: spike code, extract a nicer facade for customizing the map
-    const streetLayerIndex = 0;
-    this.map.getLayers().setAt(streetLayerIndex, new ol.layer.Tile({
-      source: mapRaster.source
-    }));
+    this.map.setStreetsLayerRaster(mapRaster);
   }
 
   render() {
