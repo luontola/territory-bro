@@ -279,7 +279,7 @@ export function initNeighborhoodMap(element: HTMLDivElement,
 
 export function initRegionMap(element: HTMLDivElement,
                               region: Region,
-                              territories: Array<Territory>): void {
+                              territories: Array<Territory>): * {
   const regionLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
       features: [wktToFeature(region.location)]
@@ -309,10 +309,12 @@ export function initRegionMap(element: HTMLDivElement,
     }
   });
 
+  const streetsLayer = makeStreetsLayer();
+
   const map = new ol.Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
-    layers: [makeStreetsLayer(), regionLayer, territoryLayer],
+    layers: [streetsLayer, regionLayer, territoryLayer],
     controls: makeControls(),
     view: new ol.View({
       center: ol.proj.fromLonLat([0.0, 0.0]),
@@ -328,4 +330,10 @@ export function initRegionMap(element: HTMLDivElement,
       minResolution: 3.0
     }
   );
+
+  return {
+    setStreetsLayerRaster(mapRaster: MapRaster): void {
+      streetsLayer.setSource(mapRaster.source);
+    },
+  }
 }

@@ -7,40 +7,49 @@
 import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
-import {initRegionMap} from "../maps";
 import type {Region, Territory} from "../api";
+import RegionMap from "./RegionMap";
+import PrintOptionsForm, {getMapRaster} from "./PrintOptionsForm";
+import {connect} from "react-redux";
+import type {MapRaster} from "../maps";
 
-class RegionPrintout extends React.Component {
-  map: HTMLDivElement;
-
-  componentDidMount() {
-    const {region, territories} = this.props;
-    initRegionMap(this.map, region, territories);
-  }
-
-  render() {
-    const {region} = this.props;
-    return (
-      <div className="region-page crop-area">
-        <div className="name">{region.name}</div>
-        <div className="region-map" ref={el => this.map = el}/>
-      </div>
-    );
-  }
-}
-
-const RegionPrintoutsPage = ({territories, regions}: {
+const RegionPrintout = ({region, territories, mapRaster}: {
+  region: Region,
   territories: Array<Territory>,
-  regions: Array<Region>
+  mapRaster: MapRaster,
+}) => (
+  <div className="region-page crop-area">
+    <div className="name">{region.name}</div>
+    <div className="region-map">
+      <RegionMap region={region} territories={territories} mapRaster={mapRaster}/>
+    </div>
+  </div>
+);
+
+let RegionPrintoutsPage = ({regions, territories, mapRaster}: {
+  regions: Array<Region>,
+  territories: Array<Territory>,
+  mapRaster: MapRaster,
 }) => (
   <Layout>
-    <h1 className="no-print">Region Maps</h1>
+    <div className="no-print">
+      <h1>Region Maps</h1>
+      <PrintOptionsForm/>
+    </div>
     {regions
       .filter(region => region.congregation || region.subregion)
       .map(region =>
-        <RegionPrintout key={region.id} region={region} territories={territories}/>
+        <RegionPrintout key={region.id} region={region} territories={territories} mapRaster={mapRaster}/>
       )}
   </Layout>
 );
+
+function mapStateToProps(state) {
+  return {
+    mapRaster: getMapRaster(state),
+  };
+}
+
+RegionPrintoutsPage = connect(mapStateToProps)(RegionPrintoutsPage);
 
 export {RegionPrintoutsPage};
