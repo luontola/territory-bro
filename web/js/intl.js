@@ -34,7 +34,7 @@ const languagePreference: string[] = [
   Cookies.get('lang'),
   ...(navigator.languages || []),
   navigator.language,
-  navigator.userLanguage, // Internet Explorer
+  (navigator: any).userLanguage, // Internet Explorer
 ];
 
 export const language: string = languagePreference.find(getMessages) || 'en';
