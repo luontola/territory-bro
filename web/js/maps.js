@@ -98,6 +98,7 @@ function territoryTextStyle(territoryNumber: string, fontSize: string) {
 export function initTerritoryMap(element: HTMLDivElement,
                                  territory: Territory): * {
   const territoryWkt = territory.location;
+
   const territoryLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
       features: [wktToFeature(territoryWkt)]
@@ -107,6 +108,7 @@ export function initTerritoryMap(element: HTMLDivElement,
       fill: territoryFillStyle()
     })
   });
+
   const streetsLayer = makeStreetsLayer();
 
   const map = new ol.Map({
@@ -209,6 +211,7 @@ export function initTerritoryMiniMap(element: HTMLDivElement,
   const streetLayer = new ol.layer.Tile({
     source: mapRastersById.osmHighDpi.source
   });
+
   const map = new ol.Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
@@ -230,7 +233,7 @@ export function initTerritoryMiniMap(element: HTMLDivElement,
 }
 
 export function initNeighborhoodMap(element: HTMLDivElement,
-                                    territory: Territory): void {
+                                    territory: Territory): * {
   const territoryNumber = territory.number;
   const territoryWkt = territory.location;
 
@@ -245,10 +248,12 @@ export function initNeighborhoodMap(element: HTMLDivElement,
     })
   });
 
+  const streetsLayer = makeStreetsLayer();
+
   const map = new ol.Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
-    layers: [makeStreetsLayer(), territoryLayer],
+    layers: [streetsLayer, territoryLayer],
     controls: makeControls(),
     view: new ol.View({
       center: ol.proj.fromLonLat([0.0, 0.0]),
@@ -264,6 +269,12 @@ export function initNeighborhoodMap(element: HTMLDivElement,
       minResolution: 3.0
     }
   );
+
+  return {
+    setStreetsLayerRaster(mapRaster: MapRaster): void {
+      streetsLayer.setSource(mapRaster.source);
+    },
+  }
 }
 
 export function initRegionMap(element: HTMLDivElement,

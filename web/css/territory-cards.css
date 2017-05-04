@@ -160,11 +160,6 @@
     padding: 0.5cm;
 }
 
-.neighborhood-map .map-attribution {
-    /* for some reason the attribution text is closer to the edge in the neighborhood map */
-    margin-bottom: 3px;
-}
-
 /* Region Map */
 
 .region-page {

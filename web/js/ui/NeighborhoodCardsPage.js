@@ -7,37 +7,48 @@
 import "../../css/territory-cards.css";
 import React from "react";
 import {Layout} from "./Layout";
-import {initNeighborhoodMap} from "../maps";
+import type {MapRaster} from "../maps";
 import type {Territory} from "../api";
+import NeighborhoodMap from "./NeighborhoodMap";
+import PrintOptionsForm, {getMapRaster} from "./PrintOptionsForm";
+import {connect} from "react-redux";
 
-class NeighborhoodCard extends React.Component {
-  map: HTMLDivElement;
+const NeighborhoodCard = ({territory, mapRaster}: {
+  territory: Territory,
+  mapRaster: MapRaster,
+}) => (
+  <div className="croppable-territory-card">
+    <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
+    <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
+    <div className="crop-area neighborhood-map">
+      <NeighborhoodMap territory={territory} mapRaster={mapRaster}/>
+    </div>
+    <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
+    <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
+  </div>
+);
 
-  componentDidMount() {
-    const {territory} = this.props;
-    initNeighborhoodMap(this.map, territory);
-  }
-
-  render() {
-    return (
-      <div className="croppable-territory-card">
-        <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
-        <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
-        <div className="crop-area neighborhood-map" ref={el => this.map = el}/>
-        <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
-        <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
-      </div>
-    );
-  }
-}
-
-const NeighborhoodCardsPage = ({territories}: { territories: Array<Territory> }) => (
+let NeighborhoodCardsPage = ({territories, mapRaster}: {
+  territories: Array<Territory>,
+  mapRaster: MapRaster,
+}) => (
   <Layout>
-    <h1 className="no-print">Neighborhood Maps</h1>
+    <div className="no-print">
+      <h1>Neighborhood Maps</h1>
+      <PrintOptionsForm/>
+    </div>
     {territories.map(territory =>
-      <NeighborhoodCard key={territory.id} territory={territory}/>
+      <NeighborhoodCard key={territory.id} territory={territory} mapRaster={mapRaster}/>
     )}
   </Layout>
 );
+
+function mapStateToProps(state) {
+  return {
+    mapRaster: getMapRaster(state),
+  };
+}
+
+NeighborhoodCardsPage = connect(mapStateToProps)(NeighborhoodCardsPage);
 
 export {NeighborhoodCardsPage};
