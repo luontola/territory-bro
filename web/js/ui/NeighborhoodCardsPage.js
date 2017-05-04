@@ -10,7 +10,7 @@ import {Layout} from "./Layout";
 import {initNeighborhoodMap} from "../maps";
 import type {Territory} from "../api";
 
-class NeighborhoodMap extends React.Component {
+class NeighborhoodCard extends React.Component {
   map: HTMLDivElement;
 
   componentDidMount() {
@@ -31,13 +31,13 @@ class NeighborhoodMap extends React.Component {
   }
 }
 
-const NeighborhoodMapsPage = ({territories}: { territories: Array<Territory> }) => (
+const NeighborhoodCardsPage = ({territories}: { territories: Array<Territory> }) => (
   <Layout>
     <h1 className="no-print">Neighborhood Maps</h1>
     {territories.map(territory =>
-      <NeighborhoodMap key={territory.id} territory={territory}/>
+      <NeighborhoodCard key={territory.id} territory={territory}/>
     )}
   </Layout>
 );
 
-export {NeighborhoodMapsPage};
+export {NeighborhoodCardsPage};

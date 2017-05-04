@@ -8,8 +8,8 @@ import React from "react";
 import {ErrorPage} from "./ui/ErrorPage";
 import {OverviewPage} from "./ui/OverviewPage";
 import {TerritoryCardsPage} from "./ui/TerritoryCardsPage";
-import {NeighborhoodMapsPage} from "./ui/NeighborhoodMapsPage";
-import {RegionMapsPage} from "./ui/RegionMapsPage";
+import {NeighborhoodCardsPage} from "./ui/NeighborhoodCardsPage";
+import {RegionPrintoutsPage} from "./ui/RegionPrintoutsPage";
 import {getRegions, getTerritories} from "./api";
 import type {ErrorMessage, Route} from "./router";
 
@@ -32,14 +32,14 @@ const routes: Array<Route> = [
     path: '/neighborhood-maps',
     async action() {
       const territories = await getTerritories();
-      return <NeighborhoodMapsPage territories={territories}/>;
+      return <NeighborhoodCardsPage territories={territories}/>;
     }
   },
   {
     path: '/region-maps',
     async action() {
       const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
-      return <RegionMapsPage territories={territories} regions={regions}/>;
+      return <RegionPrintoutsPage territories={territories} regions={regions}/>;
     }
   },
   {

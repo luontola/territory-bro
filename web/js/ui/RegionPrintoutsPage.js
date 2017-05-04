@@ -10,7 +10,7 @@ import {Layout} from "./Layout";
 import {initRegionMap} from "../maps";
 import type {Region, Territory} from "../api";
 
-class RegionMap extends React.Component {
+class RegionPrintout extends React.Component {
   map: HTMLDivElement;
 
   componentDidMount() {
@@ -29,7 +29,7 @@ class RegionMap extends React.Component {
   }
 }
 
-const RegionMapsPage = ({territories, regions}: {
+const RegionPrintoutsPage = ({territories, regions}: {
   territories: Array<Territory>,
   regions: Array<Region>
 }) => (
@@ -38,9 +38,9 @@ const RegionMapsPage = ({territories, regions}: {
     {regions
       .filter(region => region.congregation || region.subregion)
       .map(region =>
-        <RegionMap key={region.id} region={region} territories={territories}/>
+        <RegionPrintout key={region.id} region={region} territories={territories}/>
       )}
   </Layout>
 );
 
-export {RegionMapsPage};
+export {RegionPrintoutsPage};
