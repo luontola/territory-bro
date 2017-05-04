@@ -12,7 +12,6 @@ import type {Territory} from "../api";
 
 export default class NeighborhoodMap extends React.Component {
   props: {
-    className?: string,
     territory: Territory,
     mapRaster: MapRaster,
   };
@@ -31,9 +30,8 @@ export default class NeighborhoodMap extends React.Component {
   }
 
   render() {
-    const {className} = this.props;
     return (
-      <div style={{width: '100%', height: '100%'}} className={className} ref={el => this.element = el}/>
+      <div style={{width: '100%', height: '100%'}} ref={el => this.element = el}/>
     );
   }
 }
