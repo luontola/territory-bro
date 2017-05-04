@@ -25,7 +25,8 @@ export const mapRasters: Array<MapRaster> = [
     name: "World - OpenStreetMap (High DPI)",
     source: new ol.source.XYZ({
       url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-      tileSize: [512, 512],
+      tileSize: [256, 256],
+      tilePixelRatio: 2,
       attributions: [
         ol.source.OSM.ATTRIBUTION
       ]
