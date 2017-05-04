@@ -45,6 +45,20 @@ export const mapRasters: Array<MapRaster> = [
       ]
     })
   },
+  {
+    id: 'mmlTaustakarttaHighDpi',
+    name: "Finland - Maanmittauslaitos taustakarttasarja (High DPI)",
+    source: new ol.source.XYZ({
+      url: '//tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
+      tileSize: [128, 128],
+      tilePixelRatio: 2,
+      attributions: [
+        new ol.Attribution({
+          html: '&copy; Maanmittauslaitos'
+        })
+      ]
+    })
+  },
 ];
 
 const mapRastersById = zipObject(mapRasters.map(m => m.id), mapRasters);
