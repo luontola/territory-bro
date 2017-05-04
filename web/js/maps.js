@@ -200,11 +200,8 @@ export function initTerritoryMiniMap(element: HTMLDivElement,
       features: [wktToFeature(subregionsWkt)]
     }),
     style: new ol.style.Style({
-      stroke: new ol.style.Stroke({
-        color: 'rgba(0, 0, 0, 1.0)',
-        width: 1.0,
-        lineDash: [1, 4],
-        lineCap: 'round'
+      fill: new ol.style.Fill({
+        color: 'rgba(0, 0, 0, 0.3)'
       })
     })
   });
