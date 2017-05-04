@@ -17,12 +17,12 @@ export type MapRaster = {
 export const mapRasters: Array<MapRaster> = [
   {
     id: 'osm',
-    name: "OpenStreetMap",
+    name: "World - OpenStreetMap",
     source: new ol.source.OSM()
   },
   {
     id: 'osmHighDpi',
-    name: "OpenStreetMap (High DPI)",
+    name: "World - OpenStreetMap (High DPI)",
     source: new ol.source.XYZ({
       url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
       tileSize: [512, 512],
@@ -33,7 +33,7 @@ export const mapRasters: Array<MapRaster> = [
   },
   {
     id: 'mmlTaustakartta',
-    name: "Maanmittauslaitos taustakarttasarja",
+    name: "Finland - Maanmittauslaitos taustakarttasarja",
     source: new ol.source.XYZ({
       url: '//tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
       tileSize: [256, 256],
