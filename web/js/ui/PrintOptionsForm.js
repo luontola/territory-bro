@@ -21,8 +21,14 @@ let PrintOptionsForm = ({handleSubmit}) => (
       </Field></p>
   </form>
 );
-PrintOptionsForm = reduxForm({form: formName})(PrintOptionsForm);
+
+PrintOptionsForm = reduxForm({
+  form: formName,
+  destroyOnUnmount: false,
+})(PrintOptionsForm);
+
 PrintOptionsForm = connect(mapStateToProps)(PrintOptionsForm);
+
 export default PrintOptionsForm;
 
 function mapStateToProps() {
