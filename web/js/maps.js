@@ -170,12 +170,19 @@ export function initTerritoryMiniMap(element: HTMLDivElement,
       features: [wktToFeature(territoryWkt)]
     }),
     style: new ol.style.Style({
-      image: new ol.style.Circle({
-        radius: 3.5,
-        fill: new ol.style.Fill({
-          color: 'rgba(0, 0, 0, 1.0)'
-        })
-      })
+      image: new ol.style.Icon({
+        src: '/img/minimap-territory.svg',
+        imgSize: [10, 10],
+        snapToPixel: true,
+      }),
+      // XXX: Circle does not yet support HiDPI, so we need to use SVG instead. See https://github.com/openlayers/openlayers/issues/1574
+      // image: new ol.style.Circle({
+      //   radius: 3.5,
+      //   fill: new ol.style.Fill({
+      //     color: 'rgba(0, 0, 0, 1.0)'
+      //   }),
+      //   snapToPixel: true,
+      // })
     })
   });
 
