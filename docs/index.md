@@ -26,7 +26,7 @@ Territory Bro will print the territory cards along with their metadata (e.g. ter
 
 Print it on thick paper, cut with a sharp knife and ruler along the crop marks, and you're done!
 
-![A sample territory card](/examples/card.png)
+![A sample territory card](/examples/card.jpg)
 
 
 ## Learn More
