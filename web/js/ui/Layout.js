@@ -24,9 +24,9 @@ const Layout = ({children}: Props) => (
         <li><Link to="/region-maps">Region Maps</Link></li>
       </ul>
       <p>Change language:
-        {' '}<a href="#" onClick={() => changeLanguage('en')}>English</a>
-        {' '}<a href="#" onClick={() => changeLanguage('fi')}>Finnish</a>
-        {' '}<a href="#" onClick={() => changeLanguage('pt')}>Portuguese</a>
+        {' '}<a href="#" onClick={handleLanguageChange('en')}>English</a>
+        {' '}<a href="#" onClick={handleLanguageChange('fi')}>Finnish</a>
+        {' '}<a href="#" onClick={handleLanguageChange('pt')}>Portuguese</a>
       </p>
     </nav>
 
@@ -36,5 +36,12 @@ const Layout = ({children}: Props) => (
 
   </div>
 );
+
+function handleLanguageChange(lang) {
+  return (event) => {
+    event.preventDefault();
+    changeLanguage(lang);
+  }
+}
 
 export default Layout;
