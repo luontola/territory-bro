@@ -8,7 +8,7 @@ import "purecss/build/pure-min.css";
 import "../../css/layout.css";
 import type {Children} from "react";
 import React from "react";
-import {Link} from "./Link";
+import Link from "./Link";
 import {changeLanguage} from "../intl";
 
 type Props = { children?: Children }
@@ -37,4 +37,4 @@ const Layout = ({children}: Props) => (
   </div>
 );
 
-export {Layout};
+export default Layout;

@@ -4,29 +4,13 @@
 
 /* @flow */
 
-import "../../css/territory-cards.css";
 import React from "react";
-import {Layout} from "./Layout";
+import Layout from "./Layout";
 import type {MapRaster} from "../maps";
 import type {Territory} from "../api";
-import NeighborhoodMap from "./NeighborhoodMap";
 import PrintOptionsForm, {getMapRaster} from "./PrintOptionsForm";
 import {connect} from "react-redux";
-
-const NeighborhoodCard = ({territory, mapRaster}: {
-  territory: Territory,
-  mapRaster: MapRaster,
-}) => (
-  <div className="croppable-territory-card">
-    <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
-    <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
-    <div className="crop-area neighborhood-map">
-      <NeighborhoodMap territory={territory} mapRaster={mapRaster}/>
-    </div>
-    <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
-    <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
-  </div>
-);
+import NeighborhoodCard from "./NeighborhoodCard";
 
 let NeighborhoodCardsPage = ({territories, mapRaster}: {
   territories: Array<Territory>,
@@ -51,4 +35,4 @@ function mapStateToProps(state) {
 
 NeighborhoodCardsPage = connect(mapStateToProps)(NeighborhoodCardsPage);
 
-export {NeighborhoodCardsPage};
+export default NeighborhoodCardsPage;

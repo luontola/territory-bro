@@ -5,7 +5,7 @@
 /* @flow */
 
 import React from "react";
-import {Layout} from "./Layout";
+import Layout from "./Layout";
 import type {ErrorMessage} from "../router";
 
 function formatErrorMessage(error) {
@@ -17,10 +17,10 @@ function formatErrorMessage(error) {
   return message;
 }
 
-let ErrorPage = ({error}: { error: ErrorMessage }) => (
+const ErrorPage = ({error}: { error: ErrorMessage }) => (
   <Layout>
     <h1>{formatErrorMessage(error)}</h1>
   </Layout>
 );
 
-export {ErrorPage};
+export default ErrorPage;

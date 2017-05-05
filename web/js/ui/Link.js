@@ -23,4 +23,4 @@ const Link = ({to, children, ...props}: Props) => (
   <a href={to} onClick={handleClick} {...props}>{children}</a>
 );
 
-export {Link};
+export default Link;

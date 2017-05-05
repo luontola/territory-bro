@@ -5,9 +5,9 @@
 /* @flow */
 
 import React from "react";
-import {Layout} from "./Layout";
+import Layout from "./Layout";
 
-let OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, regionCount: number }) => (
+const OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, regionCount: number }) => (
   <Layout>
     <h1>Territory Bro</h1>
 
@@ -38,4 +38,4 @@ let OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, reg
   </Layout>
 );
 
-export {OverviewPage};
+export default OverviewPage;
