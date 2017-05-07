@@ -12,6 +12,7 @@ import TerritoryMap from "./TerritoryMap";
 import TerritoryMiniMap from "./TerritoryMiniMap";
 import type {Region, Territory} from "../api";
 import type {MapRaster} from "../maps";
+import CropMarks from "./CropMarks";
 
 const TerritoryCard = ({territory, regions, mapRaster}: {
   territory: Territory,
@@ -20,36 +21,30 @@ const TerritoryCard = ({territory, regions, mapRaster}: {
 }) => {
   const today = formatDate(new Date(), 'YYYY-MM-DD');
   return (
-    <div className="croppable-territory-card">
-      <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className="crop-area territory-card">
-        <div className="number">{territory.number}</div>
-        <TerritoryMiniMap className="minimap" territory={territory} regions={regions}/>
+    <CropMarks className="territory-card">
+      <div className="number">{territory.number}</div>
+      <TerritoryMiniMap className="minimap" territory={territory} regions={regions}/>
 
-        <div className="title">
-          <FormattedMessage id="TerritoryCard.title"
-                            defaultMessage="Territory Map Card"/>
-        </div>
-        <div className="region">{territory.region}</div>
-        <TerritoryMap className="map" territory={territory} mapRaster={mapRaster}/>
-        <div className="addresses">{territory.address}</div>
-
-        <div className="disclaimer">
-          <div>Printed {today} with TerritoryBro.com</div>
-        </div>
-
-        <div className="footer">
-          <FormattedMessage id="TerritoryCard.footer1"
-                            defaultMessage="Please keep this card in the envelope. Do not soil, mark or bend it."/>
-          <br/>
-          <FormattedMessage id="TerritoryCard.footer2"
-                            defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files."/>
-        </div>
+      <div className="title">
+        <FormattedMessage id="TerritoryCard.title"
+                          defaultMessage="Territory Map Card"/>
       </div>
-      <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
-    </div>
+      <div className="region">{territory.region}</div>
+      <TerritoryMap className="map" territory={territory} mapRaster={mapRaster}/>
+      <div className="addresses">{territory.address}</div>
+
+      <div className="disclaimer">
+        <div>Printed {today} with TerritoryBro.com</div>
+      </div>
+
+      <div className="footer">
+        <FormattedMessage id="TerritoryCard.footer1"
+                          defaultMessage="Please keep this card in the envelope. Do not soil, mark or bend it."/>
+        <br/>
+        <FormattedMessage id="TerritoryCard.footer2"
+                          defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files."/>
+      </div>
+    </CropMarks>
   );
 };
 

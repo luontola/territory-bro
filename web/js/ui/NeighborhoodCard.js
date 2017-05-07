@@ -9,20 +9,15 @@ import React from "react";
 import type {MapRaster} from "../maps";
 import type {Territory} from "../api";
 import NeighborhoodMap from "./NeighborhoodMap";
+import CropMarks from "./CropMarks";
 
 const NeighborhoodCard = ({territory, mapRaster}: {
   territory: Territory,
   mapRaster: MapRaster,
 }) => (
-  <div className="croppable-territory-card">
-    <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
-    <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
-    <div className="crop-area neighborhood-map">
-      <NeighborhoodMap territory={territory} mapRaster={mapRaster}/>
-    </div>
-    <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
-    <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
-  </div>
+  <CropMarks className="neighborhood-map">
+    <NeighborhoodMap territory={territory} mapRaster={mapRaster}/>
+  </CropMarks>
 );
 
 export default NeighborhoodCard;
