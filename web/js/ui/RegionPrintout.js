@@ -9,18 +9,19 @@ import React from "react";
 import type {Region, Territory} from "../api";
 import RegionMap from "./RegionMap";
 import type {MapRaster} from "../maps";
+import A4PrintFrame from "./A4PrintFrame";
 
 const RegionPrintout = ({region, territories, mapRaster}: {
   region: Region,
   territories: Array<Territory>,
   mapRaster: MapRaster,
 }) => (
-  <div className="region-page crop-area">
+  <A4PrintFrame>
     <div className="name">{region.name}</div>
     <div className="region-map">
       <RegionMap region={region} territories={territories} mapRaster={mapRaster}/>
     </div>
-  </div>
+  </A4PrintFrame>
 );
 
 export default RegionPrintout;
