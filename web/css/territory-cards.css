@@ -99,22 +99,6 @@
     padding: 0.5cm;
 }
 
-/* Region Map */
-
-.region-page .name {
-    height: 12mm;
-    font-size: 9mm;
-    font-weight: bold;
-    text-align: center;
-    /*border: 1px solid blue;*/
-}
-
-.region-map {
-    width: 100%;
-    /* XXX: just tweaked until it looked right; the browser does some unwanted scaling */
-    height: 282mm;
-}
-
 /* Map Attribution; customize OpenLayers defaults to be printing friendly */
 
 .map-attribution {

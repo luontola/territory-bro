@@ -4,7 +4,6 @@
 
 /* @flow */
 
-import "../../css/territory-cards.css";
 import React from "react";
 import styles from "./A4PrintFrame.css";
 
@@ -15,12 +14,10 @@ import styles from "./A4PrintFrame.css";
 
 const A4PrintFrame = ({children}: {
   children?: React.Element<*>,
-}) => {
-  return (
-    <div className={styles.cropArea + " region-page"}>
-      {children}
-    </div>
-  );
-};
+}) => (
+  <div className={styles.cropArea}>
+    {children}
+  </div>
+);
 
 export default A4PrintFrame;

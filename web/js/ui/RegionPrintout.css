@@ -1,0 +1,13 @@
+
+.name {
+    height: 12mm;
+    font-size: 9mm;
+    font-weight: bold;
+    text-align: center;
+}
+
+.map {
+    width: 100%;
+    /* XXX: just tweaked until it looked right; the browser does some unwanted scaling */
+    height: 282mm;
+}
