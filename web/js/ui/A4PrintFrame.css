@@ -1,5 +1,5 @@
 
-:local(.cropArea) {
+.cropArea {
     page-break-inside: avoid;
     /* A4 paper size */
     width: 210mm;
@@ -8,7 +8,7 @@
 }
 
 @media print {
-    :local(.cropArea) {
+    .cropArea {
         border-color: transparent;
     }
 }

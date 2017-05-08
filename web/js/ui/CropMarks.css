@@ -1,5 +1,5 @@
 
-:local(.root) {
+.root {
     --crop-area-width: 14.5cm;
     --crop-area-height: 9.5cm;
     --crop-mark-size: 0.7cm;
@@ -10,58 +10,58 @@
     margin-bottom: 0.3cm;
 }
 
-:local(.topLeft) {
+.topLeft {
     grid-column: crop-left;
     grid-row: crop-top;
 }
 
-:local(.topLeft) > img {
+.topLeft > img {
     transform: rotate(180deg);
     width: 100%;
     height: 100%;
 }
 
-:local(.topRight) {
+.topRight {
     grid-column: crop-right;
     grid-row: crop-top;
 }
 
-:local(.topRight) > img {
+.topRight > img {
     transform: rotate(270deg);
     width: 100%;
     height: 100%;
 }
 
-:local(.bottomLeft) {
+.bottomLeft {
     grid-column: crop-left;
     grid-row: crop-bottom;
 }
 
-:local(.bottomLeft) > img {
+.bottomLeft > img {
     transform: rotate(90deg);
     width: 100%;
     height: 100%;
 }
 
-:local(.bottomRight) {
+.bottomRight {
     grid-column: crop-right;
     grid-row: crop-bottom;
 }
 
-:local(.bottomRight) > img {
+.bottomRight > img {
     transform: rotate(0deg);
     width: 100%;
     height: 100%;
 }
 
-:local(.cropArea) {
+.cropArea {
     grid-column: crop-area;
     grid-row: crop-area;
     border: 1px solid lightgray;
 }
 
 @media print {
-    :local(.cropArea) {
+    .cropArea {
         border-color: transparent;
     }
 }

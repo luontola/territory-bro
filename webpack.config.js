@@ -33,12 +33,19 @@ module.exports = {
         use: ['babel-loader'],
       },
       {
+        // local scoped CSS
         test: /\.css$/,
+        exclude: /web\/css|node_modules/,
         use: [
           'style-loader',
-          // TODO: set modules=true to enable local scoped CSS by default
-          {loader: 'css-loader', options: {modules: false, localIdentName: '[name]__[local]--[hash:base64:5]'}},
+          {loader: 'css-loader', options: {modules: true, localIdentName: '[name]__[local]--[hash:base64:5]'}},
         ],
+      },
+      {
+        // global scoped CSS
+        test: /\.css$/,
+        include: /web\/css|node_modules/,
+        use: ['style-loader', 'css-loader'],
       },
     ]
   },
