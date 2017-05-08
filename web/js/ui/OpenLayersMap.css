@@ -1,6 +1,12 @@
+
+.root {
+    width: 100%;
+    height: 100%;
+}
+
 /* Map Attribution; customize OpenLayers defaults to be printing friendly */
 
-.map-attribution {
+.root :global .map-attribution {
     text-align: right;
     bottom: 0;
     right: 0;
@@ -10,31 +16,29 @@
     background-color: rgba(255, 255, 255, 0.6) !important;
 }
 
-.map-attribution ul {
+.root :global .map-attribution ul {
     margin: 0;
     padding: 0;
 }
 
-.map-attribution li {
+.root :global .map-attribution li {
     display: inline;
     list-style: none;
     line-height: inherit;
 }
 
-.map-attribution a {
+.root :global .map-attribution a {
     color: inherit !important;
     text-decoration: none !important;
 }
 
-.map-attribution button,
-.map-attribution img {
+.root :global .map-attribution button,
+.root :global .map-attribution img {
     display: none !important;
 }
 
-/* Printing */
-
 @media print {
-    .map-attribution {
+    .root :global .map-attribution {
         display: block !important;
     }
 }

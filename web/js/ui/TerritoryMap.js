@@ -4,19 +4,18 @@
 
 /* @flow */
 
-import "../../css/territory-cards.css";
 import React from "react";
 import type {MapRaster} from "../maps";
 import {initTerritoryMap} from "../maps";
 import type {Territory} from "../api";
+import OpenLayersMap from "./OpenLayersMap";
 
-export default class TerritoryMap extends React.Component {
+export default class TerritoryMap extends OpenLayersMap {
   props: {
     territory: Territory,
     mapRaster: MapRaster,
     className?: string,
   };
-  element: HTMLDivElement;
   map: *;
 
   componentDidMount() {
@@ -28,12 +27,5 @@ export default class TerritoryMap extends React.Component {
   componentDidUpdate() {
     const {mapRaster} = this.props;
     this.map.setStreetsLayerRaster(mapRaster);
-  }
-
-  render() {
-    const {className} = this.props;
-    return (
-      <div className={className} ref={el => this.element = el}/>
-    );
   }
 }

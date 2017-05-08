@@ -4,28 +4,20 @@
 
 /* @flow */
 
-import "../../css/territory-cards.css";
 import React from "react";
 import {initTerritoryMiniMap} from "../maps";
 import type {Region, Territory} from "../api";
+import OpenLayersMap from "./OpenLayersMap";
 
-export default class TerritoryMiniMap extends React.Component {
+export default class TerritoryMiniMap extends OpenLayersMap {
   props: {
     territory: Territory,
     regions: Array<Region>,
     className?: string,
   };
-  element: HTMLDivElement;
 
   componentDidMount() {
     const {territory, regions} = this.props;
     initTerritoryMiniMap(this.element, territory, regions);
-  }
-
-  render() {
-    const {className} = this.props;
-    return (
-      <div className={className} ref={el => this.element = el}/>
-    );
   }
 }
