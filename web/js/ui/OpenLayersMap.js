@@ -11,10 +11,8 @@ export default class OpenLayersMap extends React.Component {
   element: HTMLDivElement;
 
   render() {
-    const {className} = this.props;
-    // TODO: get rid of the className parameter to avoid precedence clashes
     return (
-      <div className={styles.root + ' ' + className} ref={el => this.element = el}/>
+      <div className={styles.root} ref={el => this.element = el}/>
     );
   }
 }

@@ -21,16 +21,25 @@ const TerritoryCard = ({territory, regions, mapRaster}: {
 }) => {
   const today = formatDate(new Date(), 'YYYY-MM-DD');
   return (
-    <CropMarks className={styles.root + " territory-card"}>
+    <CropMarks className={styles.root}>
+
       <div className={styles.number}>{territory.number}</div>
-      <TerritoryMiniMap className={styles.minimap} territory={territory} regions={regions}/>
+
+      <div className={styles.minimap}>
+        <TerritoryMiniMap territory={territory} regions={regions}/>
+      </div>
 
       <div className={styles.title}>
         <FormattedMessage id="TerritoryCard.title"
                           defaultMessage="Territory Map Card"/>
       </div>
+
       <div className={styles.region}>{territory.region}</div>
-      <TerritoryMap className={styles.map} territory={territory} mapRaster={mapRaster}/>
+
+      <div className={styles.map}>
+        <TerritoryMap territory={territory} mapRaster={mapRaster}/>
+      </div>
+
       <div className={styles.addresses}>{territory.address}</div>
 
       <div className={styles.disclaimer}>
@@ -44,6 +53,7 @@ const TerritoryCard = ({territory, regions, mapRaster}: {
         <FormattedMessage id="TerritoryCard.footer2"
                           defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files."/>
       </div>
+
     </CropMarks>
   );
 };

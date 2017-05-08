@@ -14,7 +14,6 @@ export default class TerritoryMap extends OpenLayersMap {
   props: {
     territory: Territory,
     mapRaster: MapRaster,
-    className?: string,
   };
   map: *;
 

@@ -13,7 +13,6 @@ export default class TerritoryMiniMap extends OpenLayersMap {
   props: {
     territory: Territory,
     regions: Array<Region>,
-    className?: string,
   };
 
   componentDidMount() {
