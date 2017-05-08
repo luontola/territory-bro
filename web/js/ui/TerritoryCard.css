@@ -1,0 +1,85 @@
+
+.root {
+    --map-width: 7cm;
+    --map-height: 6.1cm;
+    --map-height-negative: -6.1cm;
+    padding: 0.3cm 0.7cm;
+    font-size: 12pt;
+}
+
+.number {
+    float: right;
+    font-size: 180%;
+    font-weight: bold;
+}
+
+.title {
+    text-align: center;
+    font-size: 110%;
+    font-weight: bold;
+    margin: 0 2cm;
+}
+
+.region {
+    text-align: center;
+    padding-bottom: 0.2cm;
+    margin: 0 2cm;
+}
+
+.minimap {
+    float: left;
+    /* The canvas must be at least 1.7cm in size, or Chrome will reduce its print resolution */
+    width: 1.7cm;
+    height: 1.7cm;
+}
+
+.map {
+    clear: left;
+    float: left;
+    width: var(--map-width);
+    height: var(--map-height);
+}
+
+.minimap canvas, .map canvas {
+    border-radius: 2mm;
+}
+
+.addresses {
+    clear: right;
+    float: right;
+    width: 5.5cm;
+    margin-left: 0.5cm;
+    margin-top: 1cm;
+    white-space: pre-line;
+}
+
+.disclaimer {
+    clear: left;
+    float: left;
+    /* relative div wrapping an absolute div; avoids taking space from other elements
+       http://stackoverflow.com/questions/6040005/relatively-position-an-element-without-it-taking-up-space-in-document-flow/6040258#6040258 */
+    position: relative;
+    width: 0;
+    height: 0;
+    /* text style */
+    text-align: center;
+    font-size: 6px;
+    white-space: nowrap; /* if the disclaimer is long, keep it all in one line */
+}
+
+.disclaimer > div {
+    transform: rotate(90deg);
+    transform-origin: left top;
+    position: absolute;
+    left: 0;
+    top: var(--map-height-negative); /* XXX: cannot combine CSS3 variables and calc() */
+    width: var(--map-height);
+}
+
+.footer {
+    clear: both;
+    padding-top: 0.3cm;
+    text-align: center;
+    font-size: 60%;
+    font-weight: bold;
+}

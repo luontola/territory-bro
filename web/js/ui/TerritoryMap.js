@@ -6,9 +6,16 @@
 
 import "../../css/territory-cards.css";
 import React from "react";
+import type {MapRaster} from "../maps";
 import {initTerritoryMap} from "../maps";
+import type {Territory} from "../api";
 
 export default class TerritoryMap extends React.Component {
+  props: {
+    territory: Territory,
+    mapRaster: MapRaster,
+    className?: string,
+  };
   element: HTMLDivElement;
   map: *;
 

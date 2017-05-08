@@ -4,7 +4,6 @@
 
 /* @flow */
 
-import "../../css/territory-cards.css";
 import React from "react";
 import formatDate from "date-fns/format";
 import {FormattedMessage} from "react-intl";
@@ -13,6 +12,7 @@ import TerritoryMiniMap from "./TerritoryMiniMap";
 import type {Region, Territory} from "../api";
 import type {MapRaster} from "../maps";
 import CropMarks from "./CropMarks";
+import styles from "./TerritoryCard.css";
 
 const TerritoryCard = ({territory, regions, mapRaster}: {
   territory: Territory,
@@ -21,23 +21,23 @@ const TerritoryCard = ({territory, regions, mapRaster}: {
 }) => {
   const today = formatDate(new Date(), 'YYYY-MM-DD');
   return (
-    <CropMarks className="territory-card">
-      <div className="number">{territory.number}</div>
-      <TerritoryMiniMap className="minimap" territory={territory} regions={regions}/>
+    <CropMarks className={styles.root + " territory-card"}>
+      <div className={styles.number}>{territory.number}</div>
+      <TerritoryMiniMap className={styles.minimap} territory={territory} regions={regions}/>
 
-      <div className="title">
+      <div className={styles.title}>
         <FormattedMessage id="TerritoryCard.title"
                           defaultMessage="Territory Map Card"/>
       </div>
-      <div className="region">{territory.region}</div>
-      <TerritoryMap className="map" territory={territory} mapRaster={mapRaster}/>
-      <div className="addresses">{territory.address}</div>
+      <div className={styles.region}>{territory.region}</div>
+      <TerritoryMap className={styles.map} territory={territory} mapRaster={mapRaster}/>
+      <div className={styles.addresses}>{territory.address}</div>
 
-      <div className="disclaimer">
+      <div className={styles.disclaimer}>
         <div>Printed {today} with TerritoryBro.com</div>
       </div>
 
-      <div className="footer">
+      <div className={styles.footer}>
         <FormattedMessage id="TerritoryCard.footer1"
                           defaultMessage="Please keep this card in the envelope. Do not soil, mark or bend it."/>
         <br/>

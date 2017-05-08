@@ -7,8 +7,14 @@
 import "../../css/territory-cards.css";
 import React from "react";
 import {initTerritoryMiniMap} from "../maps";
+import type {Region, Territory} from "../api";
 
 export default class TerritoryMiniMap extends React.Component {
+  props: {
+    territory: Territory,
+    regions: Array<Region>,
+    className?: string,
+  };
   element: HTMLDivElement;
 
   componentDidMount() {
