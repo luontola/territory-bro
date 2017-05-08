@@ -25,8 +25,8 @@ Start the application:
 
 Start the web frontend:
 
-    npm install
-    npm start
+    yarn install
+    yarn start
 
 ## License
 
