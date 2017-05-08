@@ -6,8 +6,8 @@
 
 import "../../css/territory-cards.css";
 import React from "react";
+import styles from "./A4PrintFrame.css";
 
-// TODO: use local CSS
 // TODO: parameterize the printout size?
 // TODO: use @page CSS to remove print margins
 // https://developer.mozilla.org/en/docs/Web/CSS/@page
@@ -17,7 +17,7 @@ const A4PrintFrame = ({children}: {
   children?: React.Element<*>,
 }) => {
   return (
-    <div className="region-page crop-area">
+    <div className={styles.cropArea + " region-page"}>
       {children}
     </div>
   );

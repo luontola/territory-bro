@@ -1,3 +1,7 @@
+// Copyright © 2015-2017 Esko Luontola
+// This software is released under the Apache License 2.0.
+// The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
 const path = require('path');
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -30,7 +34,11 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
+        use: [
+          'style-loader',
+          // TODO: set modules=true to enable local scoped CSS by default
+          {loader: 'css-loader', options: {modules: false, localIdentName: '[name]__[local]--[hash:base64:5]'}},
+        ],
       },
     ]
   },

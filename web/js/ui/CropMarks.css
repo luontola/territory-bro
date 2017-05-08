@@ -1,0 +1,67 @@
+
+:local(.root) {
+    --crop-area-width: 14.5cm;
+    --crop-area-height: 9.5cm;
+    --crop-mark-size: 0.7cm;
+    page-break-inside: avoid;
+    display: grid;
+    grid-template-columns: [crop-left] var(--crop-mark-size) [crop-area] var(--crop-area-width) [crop-right] var(--crop-mark-size);
+    grid-template-rows: [crop-top] var(--crop-mark-size) [crop-area] var(--crop-area-height) [crop-bottom] var(--crop-mark-size);
+    margin-bottom: 0.3cm;
+}
+
+:local(.topLeft) {
+    grid-column: crop-left;
+    grid-row: crop-top;
+}
+
+:local(.topLeft) > img {
+    transform: rotate(180deg);
+    width: 100%;
+    height: 100%;
+}
+
+:local(.topRight) {
+    grid-column: crop-right;
+    grid-row: crop-top;
+}
+
+:local(.topRight) > img {
+    transform: rotate(270deg);
+    width: 100%;
+    height: 100%;
+}
+
+:local(.bottomLeft) {
+    grid-column: crop-left;
+    grid-row: crop-bottom;
+}
+
+:local(.bottomLeft) > img {
+    transform: rotate(90deg);
+    width: 100%;
+    height: 100%;
+}
+
+:local(.bottomRight) {
+    grid-column: crop-right;
+    grid-row: crop-bottom;
+}
+
+:local(.bottomRight) > img {
+    transform: rotate(0deg);
+    width: 100%;
+    height: 100%;
+}
+
+:local(.cropArea) {
+    grid-column: crop-area;
+    grid-row: crop-area;
+    border: 1px solid lightgray;
+}
+
+@media print {
+    :local(.cropArea) {
+        border-color: transparent;
+    }
+}

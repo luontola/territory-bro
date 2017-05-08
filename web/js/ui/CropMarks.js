@@ -4,10 +4,9 @@
 
 /* @flow */
 
-import "../../css/territory-cards.css";
 import React from "react";
+import styles from "./CropMarks.css";
 
-// TODO: use local CSS
 // TODO: use webpack for the images, preferably minimize and embed them
 // TODO: parameterize the printout size?
 
@@ -16,12 +15,12 @@ const CropMarks = ({children, className}: {
   className: string,
 }) => {
   return (
-    <div className="croppable-territory-card">
-      <div className="crop-mark-top-left"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className="crop-mark-top-right"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className={"crop-area " + className}>{children}</div>
-      <div className="crop-mark-bottom-left"><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className="crop-mark-bottom-right"><img src="/img/crop-mark.svg" alt=""/></div>
+    <div className={styles.root}>
+      <div className={styles.topLeft}><img src="/img/crop-mark.svg" alt=""/></div>
+      <div className={styles.topRight}><img src="/img/crop-mark.svg" alt=""/></div>
+      <div className={styles.cropArea + ' ' + className}>{children}</div>
+      <div className={styles.bottomLeft}><img src="/img/crop-mark.svg" alt=""/></div>
+      <div className={styles.bottomRight}><img src="/img/crop-mark.svg" alt=""/></div>
     </div>
   );
 };

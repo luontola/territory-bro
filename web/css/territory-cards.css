@@ -1,68 +1,7 @@
 :root {
-    --territory-card-width: 14.5cm;
-    --territory-card-height: 9.5cm;
-    --crop-mark-size: 0.7cm;
     --map-width: 7cm;
     --map-height: 6.1cm;
     --map-height-negative: -6.1cm;
-}
-
-.croppable-territory-card {
-    page-break-inside: avoid;
-    display: grid;
-    grid-template-columns: [crop-left] var(--crop-mark-size) [content] var(--territory-card-width) [crop-right] var(--crop-mark-size);
-    grid-template-rows: [crop-top] var(--crop-mark-size) [content] var(--territory-card-height) [crop-bottom] var(--crop-mark-size);
-    margin-bottom: 0.3cm;
-}
-
-/* Crop Marks */
-
-.crop-mark-top-left {
-    grid-column: crop-left;
-    grid-row: crop-top;
-}
-
-.crop-mark-top-left img {
-    transform: rotate(180deg);
-    width: 100%;
-    height: 100%;
-}
-
-.crop-mark-top-right {
-    grid-column: crop-right;
-    grid-row: crop-top;
-}
-
-.crop-mark-top-right img {
-    transform: rotate(270deg);
-    width: 100%;
-    height: 100%;
-}
-
-.crop-mark-bottom-left {
-    grid-column: crop-left;
-    grid-row: crop-bottom;
-}
-
-.crop-mark-bottom-left img {
-    transform: rotate(90deg);
-    width: 100%;
-    height: 100%;
-}
-
-.crop-mark-bottom-right {
-    grid-column: crop-right;
-    grid-row: crop-bottom;
-}
-
-.crop-mark-bottom-right img {
-    transform: rotate(0deg);
-    width: 100%;
-    height: 100%;
-}
-
-.crop-area {
-    border: 1px solid lightgray;
 }
 
 /* Territory Card */
@@ -162,15 +101,6 @@
 
 /* Region Map */
 
-.region-page {
-    page-break-inside: avoid;
-    /* A4 paper size */
-    width: 210mm;
-    height: 297mm;
-    /*padding: 20mm;*/
-    /*border: 1px solid Red;*/
-}
-
 .region-page .name {
     height: 12mm;
     font-size: 9mm;
@@ -221,10 +151,6 @@
 /* Printing */
 
 @media print {
-    .crop-area {
-        border: none;
-    }
-
     .map-attribution {
         display: block !important;
     }
