@@ -5,7 +5,7 @@
 /* @flow */
 
 import "purecss/build/pure-min.css";
-import "../../css/layout.css";
+import "./Layout.css";
 import type {Children} from "react";
 import React from "react";
 import Link from "./Link";

@@ -1,7 +1,5 @@
-/* Printing */
-
 @media print {
-    .no-print {
+    :global .no-print {
         display: none;
     }
 }

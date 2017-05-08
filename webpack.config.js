@@ -35,7 +35,7 @@ module.exports = {
       {
         // local scoped CSS
         test: /\.css$/,
-        exclude: /web\/css|node_modules/,
+        exclude: /node_modules/,
         use: [
           'style-loader',
           {loader: 'css-loader', options: {modules: true, localIdentName: '[name]__[local]--[hash:base64:5]'}},
@@ -44,7 +44,7 @@ module.exports = {
       {
         // global scoped CSS
         test: /\.css$/,
-        include: /web\/css|node_modules/,
+        include: /node_modules/,
         use: ['style-loader', 'css-loader'],
       },
     ]
