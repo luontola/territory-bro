@@ -4,18 +4,18 @@
 
 /* @flow */
 
-import "../../css/territory-cards.css";
 import React from "react";
 import type {MapRaster} from "../maps";
 import type {Territory} from "../api";
 import NeighborhoodMap from "./NeighborhoodMap";
 import CropMarks from "./CropMarks";
+import styles from "./NeighborhoodCard.css";
 
 const NeighborhoodCard = ({territory, mapRaster}: {
   territory: Territory,
   mapRaster: MapRaster,
 }) => (
-  <CropMarks className="neighborhood-map">
+  <CropMarks className={styles.root}>
     <NeighborhoodMap territory={territory} mapRaster={mapRaster}/>
   </CropMarks>
 );

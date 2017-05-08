@@ -91,14 +91,6 @@
     font-weight: bold;
 }
 
-/* Neighborhood Map */
-
-.neighborhood-map {
-    grid-column: content;
-    grid-row: content;
-    padding: 0.5cm;
-}
-
 /* Map Attribution; customize OpenLayers defaults to be printing friendly */
 
 .map-attribution {
