@@ -2,7 +2,6 @@
 /node_modules/
 /.lein-*
 /.nrepl-port
-/.vagrant/
 /profiles.clj
 .DS_Store
 *.tmp
