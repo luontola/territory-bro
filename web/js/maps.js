@@ -6,7 +6,6 @@
 
 import "openlayers/dist/ol.css";
 import ol from "openlayers";
-import type {Region, Territory} from "./api";
 import zipObject from "lodash-es/zipObject";
 
 export type MapRaster = {
@@ -70,13 +69,13 @@ export function wktToFeature(wkt: string): ol.Feature {
   return feature;
 }
 
-function makeStreetsLayer() {
+export function makeStreetsLayer() {
   return new ol.layer.Tile({
-    source: mapRasters[1].source
+    source: defaultMapRaster.source
   });
 }
 
-function makeControls() {
+export function makeControls() {
   const attribution = new ol.control.Attribution({
     className: 'map-attribution',
     collapsible: false
@@ -86,273 +85,24 @@ function makeControls() {
 
 // visual style
 
-function territoryStrokeStyle() {
+export function territoryStrokeStyle() {
   return new ol.style.Stroke({
     color: 'rgba(255, 0, 0, 0.6)',
     width: 2.0
   });
 }
 
-function territoryFillStyle() {
+export function territoryFillStyle() {
   return new ol.style.Fill({
     color: 'rgba(255, 0, 0, 0.1)'
   });
 }
 
-function territoryTextStyle(territoryNumber: string, fontSize: string) {
+export function territoryTextStyle(territoryNumber: string, fontSize: string) {
   return new ol.style.Text({
     text: territoryNumber,
     font: 'bold ' + fontSize + ' sans-serif',
     fill: new ol.style.Fill({color: 'rgba(0, 0, 0, 1.0)'}),
     stroke: new ol.style.Stroke({color: 'rgba(255, 255, 255, 1.0)', width: 3.0})
   });
-}
-
-// map constructors
-
-export function initTerritoryMap(element: HTMLDivElement,
-                                 territory: Territory): * {
-  const territoryWkt = territory.location;
-
-  const territoryLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: [wktToFeature(territoryWkt)]
-    }),
-    style: new ol.style.Style({
-      stroke: territoryStrokeStyle(),
-      fill: territoryFillStyle()
-    })
-  });
-
-  const streetsLayer = makeStreetsLayer();
-
-  const map = new ol.Map({
-    target: element,
-    pixelRatio: 2, // render at high DPI for printing
-    layers: [streetsLayer, territoryLayer],
-    controls: makeControls(),
-    view: new ol.View({
-      center: ol.proj.fromLonLat([0.0, 0.0]),
-      zoom: 1,
-      minResolution: 1.25, // prevent zooming too close, show more surrounding for small territories
-      zoomFactor: 1.1 // zoom in small steps to enable fine tuning
-    })
-  });
-  map.getView().fit(
-    territoryLayer.getSource().getExtent(),
-    {
-      padding: [20, 20, 20, 20]
-    }
-  );
-
-  return {
-    setStreetsLayerRaster(mapRaster: MapRaster): void {
-      streetsLayer.setSource(mapRaster.source);
-    },
-  }
-}
-
-export function initTerritoryMiniMap(element: HTMLDivElement,
-                                     territory: Territory,
-                                     regions: Array<Region>): void {
-  const wkt = new ol.format.WKT();
-  const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoint();
-  const territoryWkt = wkt.writeGeometry(centerPoint);
-  // TODO: handle it gracefully if one of the following is not initialized
-  let viewportWkt = '';
-  let congregationWkt = '';
-  let subregionsWkt = '';
-  const territoryCoordinate = centerPoint.getCoordinates();
-  regions.forEach(region => {
-    const regionGeom = wkt.readFeature(region.location).getGeometry();
-    if (regionGeom.intersectsCoordinate(territoryCoordinate)) {
-      if (region.minimap_viewport) {
-        viewportWkt = region.location;
-      }
-      if (region.congregation) {
-        congregationWkt = region.location;
-      }
-      if (region.subregion) {
-        // TODO: support multiple (nested) subregions
-        subregionsWkt = region.location;
-      }
-    }
-  });
-
-  const territoryLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: [wktToFeature(territoryWkt)]
-    }),
-    style: new ol.style.Style({
-      image: new ol.style.Icon({
-        src: '/img/minimap-territory.svg',
-        imgSize: [10, 10],
-        snapToPixel: true,
-      }),
-      // XXX: Circle does not yet support HiDPI, so we need to use SVG instead. See https://github.com/openlayers/openlayers/issues/1574
-      // image: new ol.style.Circle({
-      //   radius: 3.5,
-      //   fill: new ol.style.Fill({
-      //     color: 'rgba(0, 0, 0, 1.0)'
-      //   }),
-      //   snapToPixel: true,
-      // })
-    })
-  });
-
-  const viewportSource = new ol.source.Vector({
-    features: [wktToFeature(viewportWkt)]
-  });
-
-  const congregationLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: [wktToFeature(congregationWkt)]
-    }),
-    style: new ol.style.Style({
-      stroke: new ol.style.Stroke({
-        color: 'rgba(0, 0, 0, 1.0)',
-        width: 1.0
-      })
-    })
-  });
-
-  const subregionsLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: [wktToFeature(subregionsWkt)]
-    }),
-    style: new ol.style.Style({
-      fill: new ol.style.Fill({
-        color: 'rgba(0, 0, 0, 0.3)'
-      })
-    })
-  });
-
-  const streetLayer = new ol.layer.Tile({
-    source: mapRastersById.osmHighDpi.source
-  });
-
-  const map = new ol.Map({
-    target: element,
-    pixelRatio: 2, // render at high DPI for printing
-    layers: [streetLayer, subregionsLayer, congregationLayer, territoryLayer],
-    controls: [],
-    interactions: [],
-    view: new ol.View({
-      center: ol.proj.fromLonLat([0.0, 0.0]),
-      zoom: 1
-    })
-  });
-  map.getView().fit(
-    viewportSource.getExtent(),
-    {
-      padding: [1, 1, 1, 1], // minimum padding where the congregation lines still show up
-      constrainResolution: false
-    }
-  );
-}
-
-export function initNeighborhoodMap(element: HTMLDivElement,
-                                    territory: Territory): * {
-  const territoryNumber = territory.number;
-  const territoryWkt = territory.location;
-
-  const territoryLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: [wktToFeature(territoryWkt)]
-    }),
-    style: new ol.style.Style({
-      stroke: territoryStrokeStyle(),
-      fill: territoryFillStyle(),
-      text: territoryTextStyle(territoryNumber, '180%')
-    })
-  });
-
-  const streetsLayer = makeStreetsLayer();
-
-  const map = new ol.Map({
-    target: element,
-    pixelRatio: 2, // render at high DPI for printing
-    layers: [streetsLayer, territoryLayer],
-    controls: makeControls(),
-    view: new ol.View({
-      center: ol.proj.fromLonLat([0.0, 0.0]),
-      zoom: 1,
-      minResolution: 1.25, // prevent zooming too close, show more surrounding for small territories
-      zoomFactor: 1.1 // zoom in small steps to enable fine tuning
-    })
-  });
-  map.getView().fit(
-    territoryLayer.getSource().getExtent(),
-    {
-      padding: [5, 5, 5, 5],
-      minResolution: 3.0
-    }
-  );
-
-  return {
-    setStreetsLayerRaster(mapRaster: MapRaster): void {
-      streetsLayer.setSource(mapRaster.source);
-    },
-  }
-}
-
-export function initRegionMap(element: HTMLDivElement,
-                              region: Region,
-                              territories: Array<Territory>): * {
-  const regionLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: [wktToFeature(region.location)]
-    }),
-    style: new ol.style.Style({
-      stroke: new ol.style.Stroke({
-        color: 'rgba(0, 0, 0, 0.6)',
-        width: 4.0
-      })
-    })
-  });
-
-  const territoryLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-      features: territories.map(function (territory) {
-        const feature = wktToFeature(territory.location);
-        feature.set('number', territory.number);
-        return feature;
-      })
-    }),
-    style: function (feature, resolution) {
-      const style = new ol.style.Style({
-        stroke: territoryStrokeStyle(),
-        text: territoryTextStyle(feature.get('number'), '5mm')
-      });
-      return [style];
-    }
-  });
-
-  const streetsLayer = makeStreetsLayer();
-
-  const map = new ol.Map({
-    target: element,
-    pixelRatio: 2, // render at high DPI for printing
-    layers: [streetsLayer, regionLayer, territoryLayer],
-    controls: makeControls(),
-    view: new ol.View({
-      center: ol.proj.fromLonLat([0.0, 0.0]),
-      zoom: 1,
-      minResolution: 1.25, // prevent zooming too close, show more surrounding for small territories
-      zoomFactor: 1.1 // zoom in small steps to enable fine tuning
-    })
-  });
-  map.getView().fit(
-    regionLayer.getSource().getExtent(),
-    {
-      padding: [5, 5, 5, 5],
-      minResolution: 3.0
-    }
-  );
-
-  return {
-    setStreetsLayerRaster(mapRaster: MapRaster): void {
-      streetsLayer.setSource(mapRaster.source);
-    },
-  }
 }
