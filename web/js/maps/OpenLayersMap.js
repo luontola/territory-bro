@@ -4,6 +4,7 @@
 
 /* @flow */
 
+import "openlayers/dist/ol.css";
 import React from "react";
 import styles from "./OpenLayersMap.css";
 

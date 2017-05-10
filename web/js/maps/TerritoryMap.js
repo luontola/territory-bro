@@ -6,8 +6,8 @@
 
 import React from "react";
 import ol from "openlayers";
-import type {MapRaster} from "../maps";
-import {makeControls, makeStreetsLayer, territoryFillStyle, territoryStrokeStyle, wktToFeature} from "../maps";
+import type {MapRaster} from "./mapOptions";
+import {makeControls, makeStreetsLayer, territoryFillStyle, territoryStrokeStyle, wktToFeature} from "./mapOptions";
 import type {Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 

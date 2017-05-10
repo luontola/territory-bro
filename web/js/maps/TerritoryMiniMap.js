@@ -6,7 +6,7 @@
 
 import React from "react";
 import ol from "openlayers";
-import {makeStreetsLayer, wktToFeature} from "../maps";
+import {makeStreetsLayer, wktToFeature} from "./mapOptions";
 import type {Region, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 

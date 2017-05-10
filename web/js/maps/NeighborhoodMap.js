@@ -6,7 +6,7 @@
 
 import React from "react";
 import ol from "openlayers";
-import type {MapRaster} from "../maps";
+import type {MapRaster} from "./mapOptions";
 import {
   makeControls,
   makeStreetsLayer,
@@ -14,7 +14,7 @@ import {
   territoryStrokeStyle,
   territoryTextStyle,
   wktToFeature
-} from "../maps";
+} from "./mapOptions";
 import type {Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 

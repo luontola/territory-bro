@@ -6,8 +6,8 @@
 
 import React from "react";
 import type {Region, Territory} from "../api";
-import RegionMap from "./RegionMap";
-import type {MapRaster} from "../maps";
+import RegionMap from "../maps/RegionMap";
+import type {MapRaster} from "../maps/mapOptions";
 import A4PrintFrame from "./A4PrintFrame";
 import styles from "./RegionPrintout.css";
 

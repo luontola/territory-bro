@@ -6,11 +6,11 @@
 
 import React from "react";
 import Layout from "./Layout";
-import type {MapRaster} from "../maps";
+import type {MapRaster} from "../maps/mapOptions";
 import type {Territory} from "../api";
-import PrintOptionsForm, {getMapRaster} from "./PrintOptionsForm";
+import PrintOptionsForm, {getMapRaster} from "../prints/PrintOptionsForm";
 import {connect} from "react-redux";
-import NeighborhoodCard from "./NeighborhoodCard";
+import NeighborhoodCard from "../prints/NeighborhoodCard";
 
 let NeighborhoodCardsPage = ({territories, mapRaster}: {
   territories: Array<Territory>,

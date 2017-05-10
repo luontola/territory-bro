@@ -1,8 +1,8 @@
-// Copyright © 2016 Esko Luontola
+// Copyright © 2015-2017 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {RESERVATION_OFFER_RECEIVED, RESERVATION_MADE} from "./reservationActions";
+import {RESERVATION_MADE, RESERVATION_OFFER_RECEIVED} from "./reservationActions";
 
 const reservation = (state = {}, action) => {
   switch (action.type) {

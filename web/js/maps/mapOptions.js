@@ -4,7 +4,6 @@
 
 /* @flow */
 
-import "openlayers/dist/ol.css";
 import ol from "openlayers";
 import zipObject from "lodash-es/zipObject";
 

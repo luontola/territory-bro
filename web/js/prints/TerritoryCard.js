@@ -7,10 +7,10 @@
 import React from "react";
 import formatDate from "date-fns/format";
 import {FormattedMessage} from "react-intl";
-import TerritoryMap from "./TerritoryMap";
-import TerritoryMiniMap from "./TerritoryMiniMap";
+import TerritoryMap from "../maps/TerritoryMap";
+import TerritoryMiniMap from "../maps/TerritoryMiniMap";
 import type {Region, Territory} from "../api";
-import type {MapRaster} from "../maps";
+import type {MapRaster} from "../maps/mapOptions";
 import CropMarks from "./CropMarks";
 import styles from "./TerritoryCard.css";
 

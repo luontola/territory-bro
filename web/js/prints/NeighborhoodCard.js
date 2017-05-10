@@ -5,9 +5,9 @@
 /* @flow */
 
 import React from "react";
-import type {MapRaster} from "../maps";
+import type {MapRaster} from "../maps/mapOptions";
 import type {Territory} from "../api";
-import NeighborhoodMap from "./NeighborhoodMap";
+import NeighborhoodMap from "../maps/NeighborhoodMap";
 import CropMarks from "./CropMarks";
 import styles from "./NeighborhoodCard.css";
 

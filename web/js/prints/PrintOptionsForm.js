@@ -6,8 +6,8 @@
 
 import React from "react";
 import {Field, formValueSelector, reduxForm} from "redux-form";
-import type {MapRaster} from "../maps";
-import {defaultMapRaster, mapRasters} from "../maps";
+import type {MapRaster} from "../maps/mapOptions";
+import {defaultMapRaster, mapRasters} from "../maps/mapOptions";
 import {connect} from "react-redux";
 
 const formName = 'printOptions';

@@ -5,11 +5,11 @@
 /* @flow */
 
 import React from "react";
-import ErrorPage from "./ui/ErrorPage";
-import OverviewPage from "./ui/OverviewPage";
-import TerritoryCardsPage from "./ui/TerritoryCardsPage";
-import NeighborhoodCardsPage from "./ui/NeighborhoodCardsPage";
-import RegionPrintoutsPage from "./ui/RegionPrintoutsPage";
+import ErrorPage from "./pages/ErrorPage";
+import OverviewPage from "./pages/OverviewPage";
+import TerritoryCardsPage from "./pages/TerritoryCardsPage";
+import NeighborhoodCardsPage from "./pages/NeighborhoodCardsPage";
+import RegionPrintoutsPage from "./pages/RegionPrintoutsPage";
 import {getRegions, getTerritories} from "./api";
 import type {ErrorMessage, Route} from "./router";
 
