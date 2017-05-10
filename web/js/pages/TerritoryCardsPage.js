@@ -20,7 +20,7 @@ let TerritoryCardsPage = ({territories, regions, mapRaster}: {
   <Layout>
     <div className="no-print">
       <h1>Territory Cards</h1>
-      <PrintOptionsForm/>
+      <PrintOptionsForm territories={territories} regions={regions}/>
     </div>
     {territories.map(territory =>
       <TerritoryCard key={territory.id} territory={territory} regions={regions} mapRaster={mapRaster}/>

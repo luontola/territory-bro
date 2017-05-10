@@ -7,19 +7,20 @@
 import React from "react";
 import Layout from "./Layout";
 import type {MapRaster} from "../maps/mapOptions";
-import type {Territory} from "../api";
+import type {Region, Territory} from "../api";
 import PrintOptionsForm, {getMapRaster} from "../prints/PrintOptionsForm";
 import {connect} from "react-redux";
 import NeighborhoodCard from "../prints/NeighborhoodCard";
 
-let NeighborhoodCardsPage = ({territories, mapRaster}: {
+let NeighborhoodCardsPage = ({territories, regions, mapRaster}: {
   territories: Array<Territory>,
+  regions: Array<Region>,
   mapRaster: MapRaster,
 }) => (
   <Layout>
     <div className="no-print">
       <h1>Neighborhood Maps</h1>
-      <PrintOptionsForm/>
+      <PrintOptionsForm territories={territories} regions={regions}/>
     </div>
     {territories.map(territory =>
       <NeighborhoodCard key={territory.id} territory={territory} mapRaster={mapRaster}/>

@@ -12,15 +12,15 @@ import {connect} from "react-redux";
 import type {MapRaster} from "../maps/mapOptions";
 import RegionPrintout from "../prints/RegionPrintout";
 
-let RegionPrintoutsPage = ({regions, territories, mapRaster}: {
-  regions: Array<Region>,
+let RegionPrintoutsPage = ({territories, regions, mapRaster}: {
   territories: Array<Territory>,
+  regions: Array<Region>,
   mapRaster: MapRaster,
 }) => (
   <Layout>
     <div className="no-print">
       <h1>Region Maps</h1>
-      <PrintOptionsForm/>
+      <PrintOptionsForm territories={territories} regions={regions}/>
     </div>
     {regions
       .filter(region => region.congregation || region.subregion)

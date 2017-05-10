@@ -31,8 +31,8 @@ const routes: Array<Route> = [
   {
     path: '/neighborhood-maps',
     async action() {
-      const territories = await getTerritories();
-      return <NeighborhoodCardsPage territories={territories}/>;
+      const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
+      return <NeighborhoodCardsPage territories={territories} regions={regions}/>;
     }
   },
   {
