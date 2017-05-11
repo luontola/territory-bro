@@ -10,6 +10,7 @@ import type {MapRaster} from "../maps/mapOptions";
 import {defaultMapRaster, mapRasters} from "../maps/mapOptions";
 import {connect} from "react-redux";
 import type {Region, Territory} from "../api";
+import type {State} from "../reducers";
 
 const formName = 'printOptions';
 const selector = formValueSelector(formName);
@@ -50,10 +51,11 @@ PrintOptionsForm = connect(mapStateToProps)(PrintOptionsForm);
 
 export default PrintOptionsForm;
 
-function mapStateToProps(state, ownProps) {
+function mapStateToProps(state: State) {
   // TODO: filter territories based on selected region
   return {
-    regions: ownProps.regions.filter(r => r.congregation || r.subregion),
+    territories: state.api.territories,
+    regions: state.api.regions.filter(r => r.congregation || r.subregion),
     initialValues: {
       mapRaster: defaultMapRaster.id,
       regions: [],
@@ -62,14 +64,15 @@ function mapStateToProps(state, ownProps) {
   }
 }
 
-export function getSelectedMapRaster(state: {}): MapRaster {
+export function getSelectedMapRaster(state: State): MapRaster {
   const id = selector(state, 'mapRaster');
   return mapRasters.find(map => map.id === id) || defaultMapRaster;
 }
 
-export function filterSelectedRegions(state: {}, regions: Array<Region>): Array<Region> {
+export function getSelectedRegions(state: State): Array<Region> {
   const formValues = selector(state, 'regions') || [];
   const ids = new Set(formValues.map(str => parseInt(str, 10)));
+  const regions = state.api.regions;
   if (ids.size === 0) {
     return regions;
   } else {
@@ -77,9 +80,10 @@ export function filterSelectedRegions(state: {}, regions: Array<Region>): Array<
   }
 }
 
-export function filterSelectedTerritories(state: {}, territories: Array<Territory>): Array<Territory> {
+export function getSelectedTerritories(state: State): Array<Territory> {
   const formValues = selector(state, 'territories') || [];
   const ids = new Set(formValues.map(str => parseInt(str, 10)));
+  const territories = state.api.territories;
   if (ids.size === 0) {
     return territories;
   } else {

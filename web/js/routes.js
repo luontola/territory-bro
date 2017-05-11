@@ -12,34 +12,35 @@ import NeighborhoodCardsPage from "./pages/NeighborhoodCardsPage";
 import RegionPrintoutsPage from "./pages/RegionPrintoutsPage";
 import {getRegions, getTerritories} from "./api";
 import type {ErrorMessage, Route} from "./router";
+import {regionsLoaded, territoriesLoaded} from "./apiActions";
 
 const routes: Array<Route> = [
   {
     path: '/',
-    async action() {
-      const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
-      return <OverviewPage territoryCount={territories.length} regionCount={regions.length}/>;
+    async action({store}) {
+      await fetchAll(store);
+      return <OverviewPage/>;
     }
   },
   {
     path: '/territory-cards',
-    async action() {
-      const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
-      return <TerritoryCardsPage territories={territories} regions={regions}/>;
+    async action({store}) {
+      await fetchAll(store);
+      return <TerritoryCardsPage/>;
     }
   },
   {
     path: '/neighborhood-maps',
-    async action() {
-      const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
-      return <NeighborhoodCardsPage territories={territories} regions={regions}/>;
+    async action({store}) {
+      await fetchAll(store);
+      return <NeighborhoodCardsPage/>;
     }
   },
   {
     path: '/region-maps',
-    async action() {
-      const [territories, regions] = await Promise.all([getTerritories(), getRegions()]);
-      return <RegionPrintoutsPage territories={territories} regions={regions}/>;
+    async action({store}) {
+      await fetchAll(store);
+      return <RegionPrintoutsPage/>;
     }
   },
   {
@@ -49,3 +50,21 @@ const routes: Array<Route> = [
 ];
 
 export default routes;
+
+async function fetchAll(store) {
+  await Promise.all([
+    fetchTerritories(store),
+    fetchRegions(store)
+  ]);
+}
+
+async function fetchTerritories(store) {
+  const territories = await getTerritories();
+  store.dispatch(territoriesLoaded(territories));
+}
+
+async function fetchRegions(store) {
+  const regions = await getRegions();
+  store.dispatch(regionsLoaded(regions));
+}
+

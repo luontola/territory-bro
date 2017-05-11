@@ -7,21 +7,20 @@
 import React from "react";
 import Layout from "./Layout";
 import type {MapRaster} from "../maps/mapOptions";
-import type {Region, Territory} from "../api";
-import PrintOptionsForm, {filterSelectedTerritories, getSelectedMapRaster} from "../prints/PrintOptionsForm";
+import type {Territory} from "../api";
+import PrintOptionsForm, {getSelectedMapRaster, getSelectedTerritories} from "../prints/PrintOptionsForm";
 import {connect} from "react-redux";
 import NeighborhoodCard from "../prints/NeighborhoodCard";
+import type {State} from "../reducers";
 
-let NeighborhoodCardsPage = ({territories, regions, selectedTerritories, mapRaster}: {
-  territories: Array<Territory>,
-  regions: Array<Region>,
+let NeighborhoodCardsPage = ({selectedTerritories, mapRaster}: {
   selectedTerritories: Array<Territory>,
   mapRaster: MapRaster,
 }) => (
   <Layout>
     <div className="no-print">
       <h1>Neighborhood Maps</h1>
-      <PrintOptionsForm territories={territories} regions={regions}/>
+      <PrintOptionsForm/>
     </div>
     {selectedTerritories.map(territory =>
       <NeighborhoodCard key={territory.id} territory={territory} mapRaster={mapRaster}/>
@@ -29,9 +28,9 @@ let NeighborhoodCardsPage = ({territories, regions, selectedTerritories, mapRast
   </Layout>
 );
 
-function mapStateToProps(state, ownProps) {
+function mapStateToProps(state: State) {
   return {
-    selectedTerritories: filterSelectedTerritories(state, ownProps.territories),
+    selectedTerritories: getSelectedTerritories(state),
     mapRaster: getSelectedMapRaster(state),
   };
 }

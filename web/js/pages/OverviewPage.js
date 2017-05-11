@@ -6,8 +6,10 @@
 
 import React from "react";
 import Layout from "./Layout";
+import type {State} from "../reducers";
+import {connect} from "react-redux";
 
-const OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, regionCount: number }) => (
+let OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, regionCount: number }) => (
   <Layout>
     <h1>Territory Bro</h1>
 
@@ -37,5 +39,14 @@ const OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, r
     </form>
   </Layout>
 );
+
+function mapStateToProps(state: State) {
+  return {
+    territoryCount: state.api.territories.length,
+    regionCount: state.api.regions.length,
+  };
+}
+
+OverviewPage = connect(mapStateToProps)(OverviewPage);
 
 export default OverviewPage;

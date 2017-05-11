@@ -6,9 +6,19 @@
 
 import toRegex from "path-to-regexp";
 
-export type ErrorMessage = { message: string, status?: number }
-export type RoutingContext = { pathname: string, error?: ErrorMessage, [string]: string };
-export type Route = { path: string, action: Function }
+export type ErrorMessage = {
+  message: string,
+  status?: number,
+}
+export type RoutingContext = {
+  pathname: string,
+  error?: ErrorMessage,
+  [string]: string,
+};
+export type Route = {
+  path: string,
+  action: Function,
+}
 
 export function matchURI(path: string, uri: string): ?{ [string]: string } {
   const keys = [];

@@ -8,30 +8,31 @@ import React from "react";
 import Layout from "./Layout";
 import type {MapRaster} from "../maps/mapOptions";
 import type {Region, Territory} from "../api";
-import PrintOptionsForm, {filterSelectedTerritories, getSelectedMapRaster} from "../prints/PrintOptionsForm";
+import PrintOptionsForm, {getSelectedMapRaster, getSelectedTerritories} from "../prints/PrintOptionsForm";
 import {connect} from "react-redux";
 import TerritoryCard from "../prints/TerritoryCard";
+import type {State} from "../reducers";
 
-let TerritoryCardsPage = ({territories, regions, selectedTerritories, mapRaster}: {
-  territories: Array<Territory>,
-  regions: Array<Region>,
+let TerritoryCardsPage = ({allRegions, selectedTerritories, mapRaster}: {
+  allRegions: Array<Region>,
   selectedTerritories: Array<Territory>,
   mapRaster: MapRaster,
 }) => (
   <Layout>
     <div className="no-print">
       <h1>Territory Cards</h1>
-      <PrintOptionsForm territories={territories} regions={regions}/>
+      <PrintOptionsForm/>
     </div>
     {selectedTerritories.map(territory =>
-      <TerritoryCard key={territory.id} territory={territory} regions={regions} mapRaster={mapRaster}/>
+      <TerritoryCard key={territory.id} territory={territory} regions={allRegions} mapRaster={mapRaster}/>
     )}
   </Layout>
 );
 
-function mapStateToProps(state, ownProps) {
+function mapStateToProps(state: State) {
   return {
-    selectedTerritories: filterSelectedTerritories(state, ownProps.territories),
+    allRegions: state.api.regions,
+    selectedTerritories: getSelectedTerritories(state),
     mapRaster: getSelectedMapRaster(state),
   };
 }

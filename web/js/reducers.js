@@ -5,10 +5,16 @@
 /* @flow */
 
 import combineReducers from "redux/es/combineReducers";
-import reservation from "./reservationReducer";
+import type {ApiState} from "./apiReducer";
+import api from "./apiReducer";
 import {reducer as form} from "redux-form";
 
+export type State = {
+  api: ApiState,
+  form: any
+}
+
 export default combineReducers({
-  reservation,
+  api,
   form,
 });

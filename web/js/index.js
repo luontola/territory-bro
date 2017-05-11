@@ -32,11 +32,11 @@ function renderComponent(component) {
 }
 
 function render(location) {
-  router.resolve(routes, location)
+  router.resolve(routes, {...location, store})
     .then(renderComponent)
     .catch(error => {
       console.error("Error in rendering " + location.pathname + "\n", error);
-      router.resolve(routes, {...location, error})
+      router.resolve(routes, {...location, store, error})
         .then(renderComponent);
     });
 }
