@@ -7,14 +7,15 @@
 import React from "react";
 import Layout from "./Layout";
 import type {Region, Territory} from "../api";
-import PrintOptionsForm, {getMapRaster} from "../prints/PrintOptionsForm";
+import PrintOptionsForm, {filterSelectedRegions, getSelectedMapRaster} from "../prints/PrintOptionsForm";
 import {connect} from "react-redux";
 import type {MapRaster} from "../maps/mapOptions";
 import RegionPrintout from "../prints/RegionPrintout";
 
-let RegionPrintoutsPage = ({territories, regions, mapRaster}: {
+let RegionPrintoutsPage = ({territories, regions, selectedRegions, mapRaster}: {
   territories: Array<Territory>,
   regions: Array<Region>,
+  selectedRegions: Array<Region>,
   mapRaster: MapRaster,
 }) => (
   <Layout>
@@ -22,17 +23,16 @@ let RegionPrintoutsPage = ({territories, regions, mapRaster}: {
       <h1>Region Maps</h1>
       <PrintOptionsForm territories={territories} regions={regions}/>
     </div>
-    {regions
-      .filter(region => region.congregation || region.subregion)
-      .map(region =>
-        <RegionPrintout key={region.id} region={region} territories={territories} mapRaster={mapRaster}/>
-      )}
+    {selectedRegions.map(region =>
+      <RegionPrintout key={region.id} region={region} territories={territories} mapRaster={mapRaster}/>
+    )}
   </Layout>
 );
 
-function mapStateToProps(state) {
+function mapStateToProps(state, ownProps) {
   return {
-    mapRaster: getMapRaster(state),
+    selectedRegions: filterSelectedRegions(state, ownProps.regions),
+    mapRaster: getSelectedMapRaster(state),
   };
 }
 

@@ -28,15 +28,13 @@ let PrintOptionsForm = ({territories, regions, handleSubmit}: {
     <p><b>Regions</b>
       <br/>
       <Field name="regions" component="select" multiple size={7}>
-        {regions
-          .filter(r => r.congregation || r.subregion)
-          .map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+        {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
       </Field>
     </p>
 
     <p><b>Territories</b>
       <br/>
-      <Field name="regions" component="select" multiple size={7}>
+      <Field name="territories" component="select" multiple size={7}>
         {territories.map(t => <option key={t.id} value={t.id}>{t.number}</option>)}
       </Field>
     </p>
@@ -52,15 +50,39 @@ PrintOptionsForm = connect(mapStateToProps)(PrintOptionsForm);
 
 export default PrintOptionsForm;
 
-function mapStateToProps() {
+function mapStateToProps(state, ownProps) {
+  // TODO: filter territories based on selected region
   return {
+    regions: ownProps.regions.filter(r => r.congregation || r.subregion),
     initialValues: {
       mapRaster: defaultMapRaster.id,
+      regions: [],
+      territories: [],
     }
   }
 }
 
-export function getMapRaster(state: {}): MapRaster {
+export function getSelectedMapRaster(state: {}): MapRaster {
   const id = selector(state, 'mapRaster');
   return mapRasters.find(map => map.id === id) || defaultMapRaster;
+}
+
+export function filterSelectedRegions(state: {}, regions: Array<Region>): Array<Region> {
+  const formValues = selector(state, 'regions') || [];
+  const ids = new Set(formValues.map(str => parseInt(str, 10)));
+  if (ids.size === 0) {
+    return regions;
+  } else {
+    return regions.filter(r => ids.has(r.id));
+  }
+}
+
+export function filterSelectedTerritories(state: {}, territories: Array<Territory>): Array<Territory> {
+  const formValues = selector(state, 'territories') || [];
+  const ids = new Set(formValues.map(str => parseInt(str, 10)));
+  if (ids.size === 0) {
+    return territories;
+  } else {
+    return territories.filter(r => ids.has(r.id));
+  }
 }

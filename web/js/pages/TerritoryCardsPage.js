@@ -8,13 +8,14 @@ import React from "react";
 import Layout from "./Layout";
 import type {MapRaster} from "../maps/mapOptions";
 import type {Region, Territory} from "../api";
-import PrintOptionsForm, {getMapRaster} from "../prints/PrintOptionsForm";
+import PrintOptionsForm, {filterSelectedTerritories, getSelectedMapRaster} from "../prints/PrintOptionsForm";
 import {connect} from "react-redux";
 import TerritoryCard from "../prints/TerritoryCard";
 
-let TerritoryCardsPage = ({territories, regions, mapRaster}: {
+let TerritoryCardsPage = ({territories, regions, selectedTerritories, mapRaster}: {
   territories: Array<Territory>,
   regions: Array<Region>,
+  selectedTerritories: Array<Territory>,
   mapRaster: MapRaster,
 }) => (
   <Layout>
@@ -22,15 +23,16 @@ let TerritoryCardsPage = ({territories, regions, mapRaster}: {
       <h1>Territory Cards</h1>
       <PrintOptionsForm territories={territories} regions={regions}/>
     </div>
-    {territories.map(territory =>
+    {selectedTerritories.map(territory =>
       <TerritoryCard key={territory.id} territory={territory} regions={regions} mapRaster={mapRaster}/>
     )}
   </Layout>
 );
 
-function mapStateToProps(state) {
+function mapStateToProps(state, ownProps) {
   return {
-    mapRaster: getMapRaster(state),
+    selectedTerritories: filterSelectedTerritories(state, ownProps.territories),
+    mapRaster: getSelectedMapRaster(state),
   };
 }
 
