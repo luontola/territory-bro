@@ -31,8 +31,7 @@ const RuralTerritoryCard = ({territory, regions, mapRaster}: {
         </div>
 
         <div className={styles.title}>
-          <FormattedMessage id="RuralTerritoryCard.title"
-                            defaultMessage="Territory Map Card"/>
+          <FormattedMessage id="TerritoryCard.title"/>
         </div>
 
         <div className={styles.region}>{territory.region}</div>

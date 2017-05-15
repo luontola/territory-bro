@@ -44,15 +44,6 @@
     border-radius: 2mm;
 }
 
-.addresses {
-    clear: right;
-    float: right;
-    width: 5.5cm;
-    margin-left: 0.5cm;
-    margin-top: 1cm;
-    white-space: pre-line;
-}
-
 .disclaimer {
     clear: left;
     float: left;
@@ -74,12 +65,4 @@
     left: 0;
     top: var(--map-height-negative); /* XXX: cannot combine CSS3 variables and calc() */
     width: var(--map-height);
-}
-
-.footer {
-    clear: both;
-    padding-top: 0.3cm;
-    text-align: center;
-    font-size: 60%;
-    font-weight: bold;
 }
