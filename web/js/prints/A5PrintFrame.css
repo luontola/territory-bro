@@ -1,0 +1,14 @@
+
+.cropArea {
+    page-break-inside: avoid;
+    /* A5 paper size */
+    width: 210mm;
+    height: 148mm;
+    border: 1px solid lightgray;
+}
+
+@media print {
+    .cropArea {
+        border-color: transparent;
+    }
+}

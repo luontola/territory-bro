@@ -13,6 +13,7 @@ import RegionPrintoutsPage from "./pages/RegionPrintoutsPage";
 import {getRegions, getTerritories} from "./api";
 import type {ErrorMessage, Route} from "./router";
 import {regionsLoaded, territoriesLoaded} from "./apiActions";
+import RuralTerritoryCardsPage from "./pages/RuralTerritoryCardsPage";
 
 const routes: Array<Route> = [
   {
@@ -34,6 +35,13 @@ const routes: Array<Route> = [
     async action({store}) {
       await fetchAll(store);
       return <NeighborhoodCardsPage/>;
+    }
+  },
+  {
+    path: '/rural-territory-cards',
+    async action({store}) {
+      await fetchAll(store);
+      return <RuralTerritoryCardsPage/>;
     }
   },
   {
