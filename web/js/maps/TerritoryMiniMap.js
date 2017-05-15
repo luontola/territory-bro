@@ -88,7 +88,7 @@ function initTerritoryMiniMap(element: HTMLDivElement,
 
   const subregionsLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
-      features: [wktToFeature(subregionsWkt)]
+      features: subregionsWkt ? [wktToFeature(subregionsWkt)] : []
     }),
     style: new ol.style.Style({
       fill: new ol.style.Fill({
