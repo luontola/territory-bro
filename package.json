@@ -38,6 +38,7 @@
     "babel-preset-env": "1.4.0",
     "babel-preset-flow": "6.23.0",
     "babel-preset-react": "6.24.1",
+    "babel-register": "6.24.1",
     "chai": "3.5.0",
     "cross-env": "4.0.0",
     "css-loader": "0.28.0",
@@ -54,7 +55,8 @@
     "webpack-dev-server": "2.4.4"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env NODE_ENV=test mocha --compilers js:babel-register --require ./web/js/test_setup.js 'web/js/**/*.test.js'",
+    "autotest": "yarn run test -- --watch",
     "build": "cross-env NODE_ENV=production webpack --progress --colors -p",
     "build:langs": "babel-node --presets es2015 scripts/translator.js",
     "autobuild": "webpack --progress --colors --watch",

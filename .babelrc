@@ -2,9 +2,7 @@
   "presets": [
     [
       "env", {
-      "targets": {
-        "browsers": ["last 2 versions"]
-      },
+      "targets": {"browsers": ["last 2 versions"]},
       "modules": false,
       "useBuiltIns": true,
       "debug": false
@@ -16,5 +14,14 @@
   "plugins": [
     "transform-object-rest-spread",
     ["react-intl", {"messagesDir": "./target/messages/"}]
-  ]
+  ],
+  "env": {
+    "test": {
+      "presets": [
+        ["env", {"targets": {"node": "current"}}],
+        "react",
+        "flow"
+      ]
+    }
+  }
 }
