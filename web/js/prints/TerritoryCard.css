@@ -2,7 +2,6 @@
 .root {
     --map-width: 7cm;
     --map-height: 6.1cm;
-    --map-height-negative: -6.1cm;
     padding: 0.3cm 0.7cm;
     font-size: 12pt;
 }
@@ -51,29 +50,6 @@
     margin-left: 0.5cm;
     margin-top: 1cm;
     white-space: pre-line;
-}
-
-.disclaimer {
-    clear: left;
-    float: left;
-    /* relative div wrapping an absolute div; avoids taking space from other elements
-       http://stackoverflow.com/questions/6040005/relatively-position-an-element-without-it-taking-up-space-in-document-flow/6040258#6040258 */
-    position: relative;
-    width: 0;
-    height: 0;
-    /* text style */
-    text-align: center;
-    font-size: 6px;
-    white-space: nowrap; /* if the disclaimer is long, keep it all in one line */
-}
-
-.disclaimer > div {
-    transform: rotate(90deg);
-    transform-origin: left top;
-    position: absolute;
-    left: 0;
-    top: var(--map-height-negative); /* XXX: cannot combine CSS3 variables and calc() */
-    width: var(--map-height);
 }
 
 .footer {

@@ -5,7 +5,6 @@
 /* @flow */
 
 import React from "react";
-import formatDate from "date-fns/format";
 import {FormattedMessage} from "react-intl";
 import TerritoryMap from "../maps/TerritoryMap";
 import TerritoryMiniMap from "../maps/TerritoryMiniMap";
@@ -13,39 +12,36 @@ import type {Region, Territory} from "../api";
 import type {MapRaster} from "../maps/mapOptions";
 import styles from "./RuralTerritoryCard.css";
 import A5PrintFrame from "./A5PrintFrame";
+import PrintDateNotice from "./PrintDateNotice";
 
 const RuralTerritoryCard = ({territory, regions, mapRaster}: {
   territory: Territory,
   regions: Array<Region>,
   mapRaster: MapRaster
-}) => {
-  const today = formatDate(new Date(), 'YYYY-MM-DD');
-  return (
-    <A5PrintFrame>
-      <div className={styles.root}>
+}) => (
+  <A5PrintFrame>
+    <div className={styles.root}>
 
-        <div className={styles.number}>{territory.number}</div>
+      <div className={styles.number}>{territory.number}</div>
 
-        <div className={styles.minimap}>
-          <TerritoryMiniMap territory={territory} regions={regions}/>
-        </div>
-
-        <div className={styles.title}>
-          <FormattedMessage id="TerritoryCard.title"/>
-        </div>
-
-        <div className={styles.region}>{territory.region}</div>
-
-        <div className={styles.map}>
-          <TerritoryMap territory={territory} mapRaster={mapRaster}/>
-        </div>
-
-        <div className={styles.disclaimer}>
-          <div>Printed {today} with TerritoryBro.com</div>
-        </div>
+      <div className={styles.minimap}>
+        <TerritoryMiniMap territory={territory} regions={regions}/>
       </div>
-    </A5PrintFrame>
-  );
-};
+
+      <div className={styles.title}>
+        <FormattedMessage id="TerritoryCard.title"/>
+      </div>
+
+      <div className={styles.region}>{territory.region}</div>
+
+      <div className={styles.map}>
+        <PrintDateNotice>
+          <TerritoryMap territory={territory} mapRaster={mapRaster}/>
+        </PrintDateNotice>
+      </div>
+
+    </div>
+  </A5PrintFrame>
+);
 
 export default RuralTerritoryCard;

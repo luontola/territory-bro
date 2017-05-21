@@ -5,7 +5,6 @@
 /* @flow */
 
 import React from "react";
-import formatDate from "date-fns/format";
 import {FormattedMessage} from "react-intl";
 import TerritoryMap from "../maps/TerritoryMap";
 import TerritoryMiniMap from "../maps/TerritoryMiniMap";
@@ -13,49 +12,45 @@ import type {Region, Territory} from "../api";
 import type {MapRaster} from "../maps/mapOptions";
 import CropMarks from "./CropMarks";
 import styles from "./TerritoryCard.css";
+import PrintDateNotice from "./PrintDateNotice";
 
 const TerritoryCard = ({territory, regions, mapRaster}: {
   territory: Territory,
   regions: Array<Region>,
   mapRaster: MapRaster
-}) => {
-  const today = formatDate(new Date(), 'YYYY-MM-DD');
-  return (
-    <CropMarks className={styles.root}>
+}) => (
+  <CropMarks className={styles.root}>
 
-      <div className={styles.number}>{territory.number}</div>
+    <div className={styles.number}>{territory.number}</div>
 
-      <div className={styles.minimap}>
-        <TerritoryMiniMap territory={territory} regions={regions}/>
-      </div>
+    <div className={styles.minimap}>
+      <TerritoryMiniMap territory={territory} regions={regions}/>
+    </div>
 
-      <div className={styles.title}>
-        <FormattedMessage id="TerritoryCard.title"
-                          defaultMessage="Territory Map Card"/>
-      </div>
+    <div className={styles.title}>
+      <FormattedMessage id="TerritoryCard.title"
+                        defaultMessage="Territory Map Card"/>
+    </div>
 
-      <div className={styles.region}>{territory.region}</div>
+    <div className={styles.region}>{territory.region}</div>
 
-      <div className={styles.map}>
+    <div className={styles.map}>
+      <PrintDateNotice>
         <TerritoryMap territory={territory} mapRaster={mapRaster}/>
-      </div>
+      </PrintDateNotice>
+    </div>
 
-      <div className={styles.addresses}>{territory.address}</div>
+    <div className={styles.addresses}>{territory.address}</div>
 
-      <div className={styles.disclaimer}>
-        <div>Printed {today} with TerritoryBro.com</div>
-      </div>
+    <div className={styles.footer}>
+      <FormattedMessage id="TerritoryCard.footer1"
+                        defaultMessage="Please keep this card in the envelope. Do not soil, mark or bend it."/>
+      <br/>
+      <FormattedMessage id="TerritoryCard.footer2"
+                        defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files."/>
+    </div>
 
-      <div className={styles.footer}>
-        <FormattedMessage id="TerritoryCard.footer1"
-                          defaultMessage="Please keep this card in the envelope. Do not soil, mark or bend it."/>
-        <br/>
-        <FormattedMessage id="TerritoryCard.footer2"
-                          defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files."/>
-      </div>
-
-    </CropMarks>
-  );
-};
+  </CropMarks>
+);
 
 export default TerritoryCard;
