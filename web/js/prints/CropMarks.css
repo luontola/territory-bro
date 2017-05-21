@@ -57,11 +57,11 @@
 .cropArea {
     grid-column: crop-area;
     grid-row: crop-area;
-    border: 1px solid lightgray;
+    outline: 1px solid lightgray;
 }
 
 @media print {
     .cropArea {
-        border-color: transparent;
+        outline: none;
     }
 }

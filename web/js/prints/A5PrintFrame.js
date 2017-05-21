@@ -8,9 +8,6 @@ import React from "react";
 import styles from "./A5PrintFrame.css";
 
 // TODO: parameterize the printout size?
-// TODO: use @page CSS to remove print margins
-// https://developer.mozilla.org/en/docs/Web/CSS/@page
-// https://www.smashingmagazine.com/2015/01/designing-for-print-with-css/
 
 const A5PrintFrame = ({children}: {
   children?: React.Element<*>,

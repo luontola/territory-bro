@@ -1,5 +1,19 @@
+body {
+    margin: 0 12px;
+}
+
 @media print {
+    body {
+        margin: 0;
+    }
+
     :global .no-print {
         display: none;
     }
+}
+
+@page {
+    size: A4 portrait;
+    margin: 0;
+    padding: 0;
 }
