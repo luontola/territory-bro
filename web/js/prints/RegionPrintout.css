@@ -4,8 +4,9 @@
     height: 100%;
     /* layout */
     display: grid;
-    grid-template-columns: [center] auto;
-    grid-template-rows: [header] 12mm [content] auto;
+    --page-margin: 8mm;
+    grid-template-columns: var(--page-margin) [center] auto var(--page-margin);
+    grid-template-rows: var(--page-margin) [header] 14mm [content] auto var(--page-margin);
 }
 
 .name {
