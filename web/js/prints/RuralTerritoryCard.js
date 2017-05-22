@@ -22,17 +22,22 @@ const RuralTerritoryCard = ({territory, regions, mapRaster}: {
   <A5PrintFrame>
     <div className={styles.root}>
 
-      <div className={styles.number}>{territory.number}</div>
-
       <div className={styles.minimap}>
         <TerritoryMiniMap territory={territory} regions={regions}/>
       </div>
 
-      <div className={styles.title}>
-        <FormattedMessage id="TerritoryCard.title"/>
+      <div className={styles.header}>
+        <div className={styles.title}>
+          <FormattedMessage id="TerritoryCard.title"/>
+        </div>
+        <div className={styles.region}>
+          {territory.region}
+        </div>
       </div>
 
-      <div className={styles.region}>{territory.region}</div>
+      <div className={styles.number}>
+        {territory.number}
+      </div>
 
       <div className={styles.map}>
         <PrintDateNotice>

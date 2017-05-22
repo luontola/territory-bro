@@ -1,42 +1,47 @@
 
 .root {
-    --map-width: 100%;
-    --map-height: 12cm;
-    padding: 0.3cm 0.7cm;
-    font-size: 12pt;
+    /* full page printout */
+    flex: 1;
+    /* print margins */
+    margin: 8mm;
+    /* layout */
+    --minmap-size: 17mm;
+    display: grid;
+    grid-template-columns: var(--minmap-size) auto var(--minmap-size);
+    grid-template-rows: var(--minmap-size) auto;
+    grid-template-areas:
+            "minimap header number"
+            "map map map";
 }
 
-.number {
-    float: right;
-    font-size: 180%;
-    font-weight: bold;
+.header {
+    grid-area: header;
 }
 
 .title {
     text-align: center;
-    font-size: 110%;
+    font-size: 18px;
     font-weight: bold;
-    margin: 0 2cm;
 }
 
 .region {
     text-align: center;
-    padding-bottom: 0.2cm;
-    margin: 0 2cm;
+    font-size: 16px;
+}
+
+.number {
+    grid-area: number;
+    text-align: right;
+    font-size: 30px;
+    font-weight: bold;
 }
 
 .minimap {
-    float: left;
-    /* The canvas must be at least 1.7cm in size, or Chrome will reduce its print resolution */
-    width: 1.7cm;
-    height: 1.7cm;
+    grid-area: minimap;
 }
 
 .map {
-    clear: left;
-    float: left;
-    width: var(--map-width);
-    height: var(--map-height);
+    grid-area: map;
 }
 
 .minimap canvas, .map canvas {
