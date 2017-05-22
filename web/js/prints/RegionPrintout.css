@@ -1,16 +1,17 @@
 
 .root {
-    width: 100%;
-    height: 100%;
+    /* full page printout */
+    flex: 1;
+    /* print margins */
+    margin: 8mm;
     /* layout */
     display: grid;
-    --page-margin: 8mm;
-    grid-template-columns: var(--page-margin) [center] auto var(--page-margin);
-    grid-template-rows: var(--page-margin) [header] 14mm [content] auto var(--page-margin);
+    grid-template-columns: [main] auto;
+    grid-template-rows: [header] 14mm [content] auto;
 }
 
 .name {
-    grid-column: center;
+    grid-column: main;
     grid-row: header;
     /* text style */
     font-size: 9mm;
@@ -19,6 +20,6 @@
 }
 
 .map {
-    grid-column: center;
+    grid-column: main;
     grid-row: content;
 }

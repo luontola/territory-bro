@@ -3,14 +3,17 @@
     page-break-inside: avoid;
     /* A4 portrait */
     width: 210mm;
-    /* XXX: should be 297mm, but Firefox leaves then empty pages in between */
-    height: 296.5mm;
+    height: 296.5mm; /* XXX: should be 297mm, but Firefox leaves then empty pages in between */
+    /* enable the children to fill all space */
+    display: flex;
+    /* add print preview markers */
     outline: 1px solid lightgray;
     margin-bottom: 8px;
 }
 
 @media print {
     .cropArea {
+        /* remove print preview markers */
         outline: none;
         margin: 0;
     }
