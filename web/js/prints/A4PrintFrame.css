@@ -3,7 +3,8 @@
     page-break-inside: avoid;
     /* A4 portrait */
     width: 210mm;
-    height: 297mm;
+    /* XXX: should be 297mm, but Firefox leaves then empty pages in between */
+    height: 296.5mm;
     outline: 1px solid lightgray;
     margin-bottom: 8px;
 }
