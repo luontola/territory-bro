@@ -17,9 +17,11 @@ const RegionPrintout = ({region, territories, mapRaster}: {
   mapRaster: MapRaster,
 }) => (
   <A4PrintFrame>
-    <div className={styles.name}>{region.name}</div>
-    <div className={styles.map}>
-      <RegionMap region={region} territories={territories} mapRaster={mapRaster}/>
+    <div className={styles.root}>
+      <div className={styles.name}>{region.name}</div>
+      <div className={styles.map}>
+        <RegionMap region={region} territories={territories} mapRaster={mapRaster}/>
+      </div>
     </div>
   </A4PrintFrame>
 );

@@ -1,13 +1,23 @@
 
+.root {
+    width: 100%;
+    height: 100%;
+    /* layout */
+    display: grid;
+    grid-template-columns: [center] auto;
+    grid-template-rows: [header] 12mm [content] auto;
+}
+
 .name {
-    height: 12mm;
+    grid-column: center;
+    grid-row: header;
+    /* text style */
     font-size: 9mm;
     font-weight: bold;
     text-align: center;
 }
 
 .map {
-    width: 100%;
-    /* XXX: just tweaked until it looked right; the browser does some unwanted scaling */
-    height: 282mm;
+    grid-column: center;
+    grid-row: content;
 }
