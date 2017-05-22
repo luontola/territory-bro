@@ -16,6 +16,7 @@
 
 .header {
     grid-area: header;
+    align-self: start; /* different from TerritoryCard because margins are bigger */
 }
 
 .title {
@@ -31,7 +32,7 @@
 
 .number {
     grid-area: number;
-    text-align: right;
+    justify-self: end;
     font-size: 30px;
     font-weight: bold;
 }
