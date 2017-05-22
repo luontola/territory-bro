@@ -22,18 +22,23 @@ const TerritoryCard = ({territory, regions, mapRaster}: {
   <CropMarks>
     <div className={styles.root}>
 
-      <div className={styles.number}>{territory.number}</div>
-
       <div className={styles.minimap}>
         <TerritoryMiniMap territory={territory} regions={regions}/>
       </div>
 
-      <div className={styles.title}>
-        <FormattedMessage id="TerritoryCard.title"
-                          defaultMessage="Territory Map Card"/>
+      <div className={styles.header}>
+        <div className={styles.title}>
+          <FormattedMessage id="TerritoryCard.title"
+                            defaultMessage="Territory Map Card"/>
+        </div>
+        <div className={styles.region}>
+          {territory.region}
+        </div>
       </div>
 
-      <div className={styles.region}>{territory.region}</div>
+      <div className={styles.number}>
+        {territory.number}
+      </div>
 
       <div className={styles.map}>
         <PrintDateNotice>
@@ -50,6 +55,7 @@ const TerritoryCard = ({territory, regions, mapRaster}: {
         <FormattedMessage id="TerritoryCard.footer2"
                           defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files."/>
       </div>
+
     </div>
   </CropMarks>
 );
