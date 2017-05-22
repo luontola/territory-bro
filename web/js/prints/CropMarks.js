@@ -10,15 +10,14 @@ import styles from "./CropMarks.css";
 // TODO: use webpack for the images, preferably minimize and embed them
 // TODO: parameterize the printout size?
 
-const CropMarks = ({children, className}: {
+const CropMarks = ({children}: {
   children?: React.Element<*>,
-  className: string,
 }) => {
   return (
     <div className={styles.root}>
       <div className={styles.topLeft}><img src="/img/crop-mark.svg" alt=""/></div>
       <div className={styles.topRight}><img src="/img/crop-mark.svg" alt=""/></div>
-      <div className={styles.cropArea + ' ' + className}>{children}</div>
+      <div className={styles.cropArea}>{children}</div>
       <div className={styles.bottomLeft}><img src="/img/crop-mark.svg" alt=""/></div>
       <div className={styles.bottomRight}><img src="/img/crop-mark.svg" alt=""/></div>
     </div>

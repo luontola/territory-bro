@@ -1,18 +1,21 @@
 
 .root {
+    page-break-inside: avoid;
+    /* layout */
     --crop-area-width: 14.5cm;
     --crop-area-height: 9.5cm;
     --crop-mark-size: 0.7cm;
-    page-break-inside: avoid;
     display: grid;
-    grid-template-columns: [crop-left] var(--crop-mark-size) [crop-area] var(--crop-area-width) [crop-right] var(--crop-mark-size);
-    grid-template-rows: [crop-top] var(--crop-mark-size) [crop-area] var(--crop-area-height) [crop-bottom] var(--crop-mark-size);
-    margin-bottom: 0.3cm;
+    grid-template-columns: var(--crop-mark-size) var(--crop-area-width) var(--crop-mark-size);
+    grid-template-rows: var(--crop-mark-size) var(--crop-area-height) var(--crop-mark-size);
+    grid-template-areas:
+            "top-left . top-right"
+            ". content ."
+            "bottom-left . bottom-right";
 }
 
 .topLeft {
-    grid-column: crop-left;
-    grid-row: crop-top;
+    grid-area: top-left;
 }
 
 .topLeft > img {
@@ -22,8 +25,7 @@
 }
 
 .topRight {
-    grid-column: crop-right;
-    grid-row: crop-top;
+    grid-area: top-right;
 }
 
 .topRight > img {
@@ -33,8 +35,7 @@
 }
 
 .bottomLeft {
-    grid-column: crop-left;
-    grid-row: crop-bottom;
+    grid-area: bottom-left;
 }
 
 .bottomLeft > img {
@@ -44,8 +45,7 @@
 }
 
 .bottomRight {
-    grid-column: crop-right;
-    grid-row: crop-bottom;
+    grid-area: bottom-right;
 }
 
 .bottomRight > img {
@@ -55,13 +55,22 @@
 }
 
 .cropArea {
-    grid-column: crop-area;
-    grid-row: crop-area;
+    grid-area: content;
+    /* enable the children to fill all space */
+    display: flex;
+    /* add print preview markers */
     outline: 1px solid lightgray;
 }
 
 @media print {
+    .root {
+        /* print margins */
+        padding-top: 8mm; /* XXX: padding instead of margin, because else only first page has top margin */
+        margin-left: 8mm;
+    }
+
     .cropArea {
+        /* remove print preview markers */
         outline: none;
     }
 }

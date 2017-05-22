@@ -15,8 +15,10 @@ const NeighborhoodCard = ({territory, mapRaster}: {
   territory: Territory,
   mapRaster: MapRaster,
 }) => (
-  <CropMarks className={styles.root}>
-    <NeighborhoodMap territory={territory} mapRaster={mapRaster}/>
+  <CropMarks>
+    <div className={styles.root}>
+      <NeighborhoodMap territory={territory} mapRaster={mapRaster}/>
+    </div>
   </CropMarks>
 );
 

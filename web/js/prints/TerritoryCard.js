@@ -19,37 +19,38 @@ const TerritoryCard = ({territory, regions, mapRaster}: {
   regions: Array<Region>,
   mapRaster: MapRaster
 }) => (
-  <CropMarks className={styles.root}>
+  <CropMarks>
+    <div className={styles.root}>
 
-    <div className={styles.number}>{territory.number}</div>
+      <div className={styles.number}>{territory.number}</div>
 
-    <div className={styles.minimap}>
-      <TerritoryMiniMap territory={territory} regions={regions}/>
+      <div className={styles.minimap}>
+        <TerritoryMiniMap territory={territory} regions={regions}/>
+      </div>
+
+      <div className={styles.title}>
+        <FormattedMessage id="TerritoryCard.title"
+                          defaultMessage="Territory Map Card"/>
+      </div>
+
+      <div className={styles.region}>{territory.region}</div>
+
+      <div className={styles.map}>
+        <PrintDateNotice>
+          <TerritoryMap territory={territory} mapRaster={mapRaster}/>
+        </PrintDateNotice>
+      </div>
+
+      <div className={styles.addresses}>{territory.address}</div>
+
+      <div className={styles.footer}>
+        <FormattedMessage id="TerritoryCard.footer1"
+                          defaultMessage="Please keep this card in the envelope. Do not soil, mark or bend it."/>
+        <br/>
+        <FormattedMessage id="TerritoryCard.footer2"
+                          defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files."/>
+      </div>
     </div>
-
-    <div className={styles.title}>
-      <FormattedMessage id="TerritoryCard.title"
-                        defaultMessage="Territory Map Card"/>
-    </div>
-
-    <div className={styles.region}>{territory.region}</div>
-
-    <div className={styles.map}>
-      <PrintDateNotice>
-        <TerritoryMap territory={territory} mapRaster={mapRaster}/>
-      </PrintDateNotice>
-    </div>
-
-    <div className={styles.addresses}>{territory.address}</div>
-
-    <div className={styles.footer}>
-      <FormattedMessage id="TerritoryCard.footer1"
-                        defaultMessage="Please keep this card in the envelope. Do not soil, mark or bend it."/>
-      <br/>
-      <FormattedMessage id="TerritoryCard.footer2"
-                        defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files."/>
-    </div>
-
   </CropMarks>
 );
 

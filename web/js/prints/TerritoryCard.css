@@ -1,5 +1,6 @@
 
 .root {
+    flex: 1;
     --map-width: 7cm;
     --map-height: 6.1cm;
     padding: 0.3cm 0.7cm;
