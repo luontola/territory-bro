@@ -15,36 +15,27 @@
 }
 
 .header {
-    grid-area: header;
-    align-self: start; /* different from TerritoryCard because margins are bigger */
+    composes: header from "./TerritoryCard.css";
+    /* our margins are bigger than in TerritoryCard , so this looks better */
+    align-self: start;
 }
 
 .title {
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
+    composes: title from "./TerritoryCard.css";
 }
 
 .region {
-    text-align: center;
-    font-size: 16px;
+    composes: region from "./TerritoryCard.css";
 }
 
 .number {
-    grid-area: number;
-    justify-self: end;
-    font-size: 30px;
-    font-weight: bold;
+    composes: number from "./TerritoryCard.css";
 }
 
 .minimap {
-    grid-area: minimap;
+    composes: minimap from "./TerritoryCard.css";
 }
 
 .map {
-    grid-area: map;
-}
-
-.minimap canvas, .map canvas {
-    border-radius: 2mm;
+    composes: map from "./TerritoryCard.css";
 }
