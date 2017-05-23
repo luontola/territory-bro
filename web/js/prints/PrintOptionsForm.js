@@ -11,8 +11,8 @@ import {connect} from "react-redux";
 import type {Region, Territory} from "../api";
 import type {State} from "../reducers";
 
-const defaultMapRasterId = 'osmHighDpi';
-const formName = 'printOptions';
+export const defaultMapRasterId = 'osmHighDpi';
+export const formName = 'printOptions';
 const selector = formValueSelector(formName);
 
 let PrintOptionsForm = ({mapRasters, territories, regions, handleSubmit}: {
