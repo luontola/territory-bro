@@ -5,7 +5,6 @@
 /* @flow */
 
 import ol from "openlayers";
-import zipObject from "lodash-es/zipObject";
 
 export type MapRaster = {
   id: string,
@@ -59,9 +58,6 @@ export const mapRasters: Array<MapRaster> = [
   },
 ];
 
-const mapRastersById = zipObject(mapRasters.map(m => m.id), mapRasters);
-export const defaultMapRaster: MapRaster = mapRastersById.osmHighDpi;
-
 export function wktToFeature(wkt: string): ol.Feature {
   const feature = new ol.format.WKT().readFeature(wkt);
   feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
@@ -70,7 +66,7 @@ export function wktToFeature(wkt: string): ol.Feature {
 
 export function makeStreetsLayer() {
   return new ol.layer.Tile({
-    source: defaultMapRaster.source
+    source: new ol.source.OSM()
   });
 }
 
