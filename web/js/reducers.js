@@ -4,7 +4,7 @@
 
 /* @flow */
 
-import combineReducers from "redux/es/combineReducers";
+import combineReducers from "redux/lib/combineReducers";
 import type {ApiState} from "./apiReducer";
 import api from "./apiReducer";
 import type {ConfigState} from "./configReducer";
