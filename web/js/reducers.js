@@ -7,14 +7,18 @@
 import combineReducers from "redux/es/combineReducers";
 import type {ApiState} from "./apiReducer";
 import api from "./apiReducer";
+import type {ConfigState} from "./configReducer";
+import config from "./configReducer";
 import {reducer as form} from "redux-form";
 
 export type State = {
   api: ApiState,
+  config: ConfigState,
   form: any
 }
 
 export default combineReducers({
   api,
+  config,
   form,
 });

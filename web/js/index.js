@@ -17,6 +17,8 @@ import router from "./router";
 import routes from "./routes";
 import {IntlProvider} from "react-intl";
 import {language, messages} from "./intl";
+import {mapRastersLoaded} from "./configActions";
+import {mapRasters} from "./maps/mapOptions";
 
 const logger = createLogger();
 const store = createStore(reducers, applyMiddleware(logger));
@@ -40,6 +42,8 @@ function render(location) {
         .then(renderComponent);
     });
 }
+
+store.dispatch(mapRastersLoaded(mapRasters));
 
 render(history.location);
 history.listen((location, action) => {

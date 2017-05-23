@@ -7,7 +7,6 @@
 import React from "react";
 import {Field, formValueSelector, reduxForm} from "redux-form";
 import type {MapRaster} from "../maps/mapOptions";
-import {mapRasters} from "../maps/mapOptions";
 import {connect} from "react-redux";
 import type {Region, Territory} from "../api";
 import type {State} from "../reducers";
@@ -16,7 +15,8 @@ const defaultMapRasterId = 'osmHighDpi';
 const formName = 'printOptions';
 const selector = formValueSelector(formName);
 
-let PrintOptionsForm = ({territories, regions, handleSubmit}: {
+let PrintOptionsForm = ({mapRasters, territories, regions, handleSubmit}: {
+  mapRasters: Array<MapRaster>,
   territories: Array<Territory>,
   regions: Array<Region>,
   handleSubmit: any
@@ -55,6 +55,7 @@ export default PrintOptionsForm;
 function mapStateToProps(state: State) {
   // TODO: filter territories based on selected region
   return {
+    mapRasters: state.config.mapRasters,
     territories: state.api.territories,
     regions: state.api.regions.filter(r => r.congregation || r.subregion),
     initialValues: {
@@ -67,7 +68,7 @@ function mapStateToProps(state: State) {
 
 export function getSelectedMapRaster(state: State): MapRaster {
   const id = selector(state, 'mapRaster') || defaultMapRasterId;
-  const mapRaster = mapRasters.find(map => map.id === id);
+  const mapRaster = state.config.mapRasters.find(map => map.id === id);
   if (!mapRaster) {
     throw new Error(`MapRaster not found: ${id}`);
   }
