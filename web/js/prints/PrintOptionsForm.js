@@ -16,18 +16,18 @@ export const formName = 'printOptions';
 const selector = formValueSelector(formName);
 
 let PrintOptionsForm = ({
-                          territoriesVisible = true,
-                          regionsVisible = true,
-                          mapRasters,
-                          territories,
-                          regions,
+                          territoriesVisible = false,
+                          regionsVisible = false,
+                          availableMapRasters,
+                          availableTerritories,
+                          availableRegions,
                           handleSubmit
                         }: {
   territoriesVisible: boolean,
   regionsVisible: boolean,
-  mapRasters: Array<MapRaster>,
-  territories: Array<Territory>,
-  regions: Array<Region>,
+  availableMapRasters: Array<MapRaster>,
+  availableTerritories: Array<Territory>,
+  availableRegions: Array<Region>,
   handleSubmit: any
 }) => (
   <form onSubmit={handleSubmit} className="pure-form pure-form-stacked">
@@ -38,7 +38,8 @@ let PrintOptionsForm = ({
         <div className="pure-u-1 pure-u-md-1-3">
           <label htmlFor="mapRaster">Map Raster</label>
           <Field id="mapRaster" name="mapRaster" component="select" className="pure-input-1">
-            {mapRasters.map(map => <option value={map.id} key={map.id}>{map.name}</option>)}
+            {availableMapRasters.map(mapRaster =>
+              <option key={mapRaster.id} value={mapRaster.id}>{mapRaster.name}</option>)}
           </Field>
         </div>
 
@@ -46,7 +47,8 @@ let PrintOptionsForm = ({
         <div className="pure-u-1 pure-u-md-1-3">
           <label htmlFor="regions">Regions</label>
           <Field id="regions" name="regions" component="select" multiple size={7} className="pure-input-1">
-            {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+            {availableRegions.map(region =>
+              <option key={region.id} value={region.id}>{region.name}</option>)}
           </Field>
         </div>
         }
@@ -55,7 +57,8 @@ let PrintOptionsForm = ({
         <div className="pure-u-1 pure-u-md-1-3">
           <label htmlFor="territories">Territories</label>
           <Field id="territories" name="territories" component="select" multiple size={7} className="pure-input-1">
-            {territories.map(t => <option key={t.id} value={t.id}>{t.number}</option>)}
+            {availableTerritories.map(territory =>
+              <option key={territory.id} value={territory.id}>{territory.number}</option>)}
           </Field>
         </div>
         }
@@ -77,11 +80,9 @@ export default PrintOptionsForm;
 function mapStateToProps(state: State) {
   // TODO: filter territories based on selected region
   return {
-    // available form values
-    mapRasters: state.config.mapRasters,
-    territories: state.api.territories,
-    regions: state.api.regions.filter(r => r.congregation || r.subregion),
-    // default form values
+    availableMapRasters: state.config.mapRasters,
+    availableTerritories: state.api.territories,
+    availableRegions: state.api.regions.filter(r => r.congregation || r.subregion),
     initialValues: {
       mapRaster: defaultMapRasterId,
       regions: [],

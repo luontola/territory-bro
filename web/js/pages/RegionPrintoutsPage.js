@@ -21,7 +21,7 @@ let RegionPrintoutsPage = ({allTerritories, selectedRegions, mapRaster}: {
   <Layout>
     <div className="no-print">
       <h1>Region Maps</h1>
-      <PrintOptionsForm territoriesVisible={false}/>
+      <PrintOptionsForm regionsVisible={true}/>
     </div>
     {selectedRegions.map(region =>
       <RegionPrintout key={region.id} region={region} territories={allTerritories} mapRaster={mapRaster}/>
