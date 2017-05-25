@@ -21,25 +21,34 @@ let PrintOptionsForm = ({mapRasters, territories, regions, handleSubmit}: {
   regions: Array<Region>,
   handleSubmit: any
 }) => (
-  <form onSubmit={handleSubmit}>
-    <p><b>Map Raster </b>
-      <Field name="mapRaster" component="select">
-        {mapRasters.map(map => <option value={map.id} key={map.id}>{map.name}</option>)}
-      </Field></p>
+  <form onSubmit={handleSubmit} className="pure-form pure-form-stacked">
+    <fieldset>
+      <legend>Print Options</legend>
+      <div className="pure-g">
 
-    <p><b>Regions</b>
-      <br/>
-      <Field name="regions" component="select" multiple size={7}>
-        {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-      </Field>
-    </p>
+        <div className="pure-u-1 pure-u-md-1-3">
+          <label htmlFor="mapRaster">Map Raster</label>
+          <Field id="mapRaster" name="mapRaster" component="select" className="pure-input-1">
+            {mapRasters.map(map => <option value={map.id} key={map.id}>{map.name}</option>)}
+          </Field>
+        </div>
 
-    <p><b>Territories</b>
-      <br/>
-      <Field name="territories" component="select" multiple size={7}>
-        {territories.map(t => <option key={t.id} value={t.id}>{t.number}</option>)}
-      </Field>
-    </p>
+        <div className="pure-u-1 pure-u-md-1-3">
+          <label htmlFor="regions">Regions</label>
+          <Field id="regions" name="regions" component="select" multiple size={7} className="pure-input-1">
+            {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+          </Field>
+        </div>
+
+        <div className="pure-u-1 pure-u-md-1-3">
+          <label htmlFor="territories">Territories</label>
+          <Field id="territories" name="territories" component="select" multiple size={7} className="pure-input-1">
+            {territories.map(t => <option key={t.id} value={t.id}>{t.number}</option>)}
+          </Field>
+        </div>
+
+      </div>
+    </fieldset>
   </form>
 );
 

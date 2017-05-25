@@ -5,6 +5,7 @@
 /* @flow */
 
 import "purecss/build/pure-min.css";
+import "purecss/build/grids-responsive-min.css";
 import "./Layout.css";
 import type {Children} from "react";
 import React from "react";
