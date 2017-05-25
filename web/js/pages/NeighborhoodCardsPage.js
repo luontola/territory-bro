@@ -20,7 +20,7 @@ let NeighborhoodCardsPage = ({selectedTerritories, mapRaster}: {
   <Layout>
     <div className="no-print">
       <h1>Neighborhood Maps</h1>
-      <PrintOptionsForm/>
+      <PrintOptionsForm regionsVisible={false}/>
     </div>
     {selectedTerritories.map(territory =>
       <NeighborhoodCard key={territory.id} territory={territory} mapRaster={mapRaster}/>

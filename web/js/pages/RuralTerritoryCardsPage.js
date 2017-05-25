@@ -21,7 +21,7 @@ let RuralTerritoryCardsPage = ({allRegions, selectedTerritories, mapRaster}: {
   <Layout>
     <div className="no-print">
       <h1>Territory Cards</h1>
-      <PrintOptionsForm/>
+      <PrintOptionsForm regionsVisible={false}/>
     </div>
     {selectedTerritories.map(territory =>
       <RuralTerritoryCard key={territory.id} territory={territory} regions={allRegions} mapRaster={mapRaster}/>
