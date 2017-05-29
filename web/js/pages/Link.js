@@ -17,10 +17,11 @@ function handleClick(event: MouseEvent) {
   });
 }
 
-type Props = { to: string, children?: Children }
-
-const Link = ({to, children, ...props}: Props) => (
-  <a href={to} onClick={handleClick} {...props}>{children}</a>
+const Link = ({href, children, ...props}: {
+  href: string,
+  children?: Children
+}) => (
+  <a href={href} onClick={handleClick} {...props}>{children}</a>
 );
 
 export default Link;

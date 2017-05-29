@@ -31,11 +31,11 @@ class Layout extends React.Component {
 
         <nav className="no-print">
           <ul>
-            <li><Link to="/">Overview</Link></li>
-            <li><Link to="/territory-cards">Territory Cards</Link></li>
-            <li><Link to="/neighborhood-maps">Neighborhood Maps</Link></li>
-            <li><Link to="/rural-territory-cards">Rural Territory Cards</Link></li>
-            <li><Link to="/region-maps">Region Maps</Link></li>
+            <li><Link href="/">Overview</Link></li>
+            <li><Link href="/territory-cards">Territory Cards</Link></li>
+            <li><Link href="/neighborhood-maps">Neighborhood Maps</Link></li>
+            <li><Link href="/rural-territory-cards">Rural Territory Cards</Link></li>
+            <li><Link href="/region-maps">Region Maps</Link></li>
           </ul>
           <p>Change language:
             {' '}<a href="#" onClick={handleLanguageChange('en')}>English</a>
