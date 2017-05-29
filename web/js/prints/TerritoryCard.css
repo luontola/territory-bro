@@ -32,6 +32,7 @@
 
 .number {
     grid-area: number;
+    align-self: center;
     justify-self: end;
     font-size: 30px;
     font-weight: bold;
@@ -52,7 +53,7 @@
 .addresses {
     grid-area: addresses;
     margin-left: 5mm;
-    margin-top: 1cm;
+    align-self: center;
     white-space: pre-line;
 }
 

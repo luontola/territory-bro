@@ -16,8 +16,6 @@
 
 .header {
     composes: header from "./TerritoryCard.css";
-    /* our margins are bigger than in TerritoryCard , so this looks better */
-    align-self: start;
 }
 
 .title {
