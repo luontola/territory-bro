@@ -13,14 +13,16 @@ import type {MapRaster} from "../maps/mapOptions";
 import RegionPrintout from "../prints/RegionPrintout";
 import type {State} from "../reducers";
 
+const title = "Region Maps";
+
 let RegionPrintoutsPage = ({allTerritories, selectedRegions, mapRaster}: {
   allTerritories: Array<Territory>,
   selectedRegions: Array<Region>,
   mapRaster: MapRaster,
 }) => (
-  <Layout>
+  <Layout title={title}>
     <div className="no-print">
-      <h1>Region Maps</h1>
+      <h1>{title}</h1>
       <PrintOptionsForm regionsVisible={true}/>
     </div>
     {selectedRegions.map(region =>

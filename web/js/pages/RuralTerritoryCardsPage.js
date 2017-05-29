@@ -13,14 +13,16 @@ import {connect} from "react-redux";
 import type {State} from "../reducers";
 import RuralTerritoryCard from "../prints/RuralTerritoryCard";
 
+const title = "Rural Territory Cards";
+
 let RuralTerritoryCardsPage = ({allRegions, selectedTerritories, mapRaster}: {
   allRegions: Array<Region>,
   selectedTerritories: Array<Territory>,
   mapRaster: MapRaster,
 }) => (
-  <Layout>
+  <Layout title={title}>
     <div className="no-print">
-      <h1>Rural Territory Cards</h1>
+      <h1>{title}</h1>
       <PrintOptionsForm territoriesVisible={true}/>
     </div>
     {selectedTerritories.map(territory =>

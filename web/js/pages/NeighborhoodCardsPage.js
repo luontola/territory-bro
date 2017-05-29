@@ -13,13 +13,15 @@ import {connect} from "react-redux";
 import NeighborhoodCard from "../prints/NeighborhoodCard";
 import type {State} from "../reducers";
 
+const title = "Neighborhood Maps";
+
 let NeighborhoodCardsPage = ({selectedTerritories, mapRaster}: {
   selectedTerritories: Array<Territory>,
   mapRaster: MapRaster,
 }) => (
-  <Layout>
+  <Layout title={title}>
     <div className="no-print">
-      <h1>Neighborhood Maps</h1>
+      <h1>{title}</h1>
       <PrintOptionsForm territoriesVisible={true}/>
     </div>
     {selectedTerritories.map(territory =>

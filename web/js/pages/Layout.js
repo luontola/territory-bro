@@ -12,32 +12,46 @@ import React from "react";
 import Link from "./Link";
 import {changeLanguage} from "../intl";
 
-type Props = { children?: Children }
+class Layout extends React.Component {
+  props: {
+    title?: string,
+    children?: Children,
+  };
 
-const Layout = ({children}: Props) => (
-  <div id="layout">
+  componentDidMount() {
+    const {title} = this.props;
+    const site = "Territory Bro";
+    document.title = (title ? `${title} - ${site}` : site);
+  }
 
-    <nav className="no-print">
-      <ul>
-        <li><Link to="/">Overview</Link></li>
-        <li><Link to="/territory-cards">Territory Cards</Link></li>
-        <li><Link to="/neighborhood-maps">Neighborhood Maps</Link></li>
-        <li><Link to="/rural-territory-cards">Rural Territory Cards</Link></li>
-        <li><Link to="/region-maps">Region Maps</Link></li>
-      </ul>
-      <p>Change language:
-        {' '}<a href="#" onClick={handleLanguageChange('en')}>English</a>
-        {' '}<a href="#" onClick={handleLanguageChange('fi')}>Finnish</a>
-        {' '}<a href="#" onClick={handleLanguageChange('pt')}>Portuguese</a>
-      </p>
-    </nav>
+  render() {
+    const {children} = this.props;
+    return (
+      <div id="layout">
 
-    <div className="container">
-      {children}
-    </div>
+        <nav className="no-print">
+          <ul>
+            <li><Link to="/">Overview</Link></li>
+            <li><Link to="/territory-cards">Territory Cards</Link></li>
+            <li><Link to="/neighborhood-maps">Neighborhood Maps</Link></li>
+            <li><Link to="/rural-territory-cards">Rural Territory Cards</Link></li>
+            <li><Link to="/region-maps">Region Maps</Link></li>
+          </ul>
+          <p>Change language:
+            {' '}<a href="#" onClick={handleLanguageChange('en')}>English</a>
+            {' '}<a href="#" onClick={handleLanguageChange('fi')}>Finnish</a>
+            {' '}<a href="#" onClick={handleLanguageChange('pt')}>Portuguese</a>
+          </p>
+        </nav>
 
-  </div>
-);
+        <div className="container">
+          {children}
+        </div>
+
+      </div>
+    );
+  }
+}
 
 function handleLanguageChange(lang) {
   return (event) => {
