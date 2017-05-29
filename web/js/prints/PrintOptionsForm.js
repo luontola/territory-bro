@@ -58,7 +58,9 @@ let PrintOptionsForm = ({
           <label htmlFor="territories">Territories</label>
           <Field id="territories" name="territories" component="select" multiple size={7} className="pure-input-1">
             {availableTerritories.map(territory =>
-              <option key={territory.id} value={territory.id}>{territory.number}</option>)}
+              <option key={territory.id} value={territory.id}>
+                {territory.region ? `${territory.number} - ${territory.region}` : territory.number}
+              </option>)}
           </Field>
         </div>
         }
