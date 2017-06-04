@@ -54,8 +54,8 @@ describe("PrintOptionsForm", () => {
       store.dispatch(regionsLoaded(regions));
     });
 
-    it("defaults to all regions", () => {
-      expect(getSelectedRegions(store.getState())).to.eql(regions);
+    it("defaults to first region", () => {
+      expect(getSelectedRegions(store.getState())).to.eql([region1]);
     });
 
     it("changes with form selection", () => {
@@ -63,9 +63,9 @@ describe("PrintOptionsForm", () => {
       expect(getSelectedRegions(store.getState())).to.eql([region1, region3]);
     });
 
-    it("empty selection implies all regions", () => {
+    it("empty selection implies no regions", () => {
       store.dispatch(change(formName, 'regions', []));
-      expect(getSelectedRegions(store.getState())).to.eql(regions);
+      expect(getSelectedRegions(store.getState())).to.eql([]);
     });
   });
 
@@ -78,8 +78,8 @@ describe("PrintOptionsForm", () => {
       store.dispatch(territoriesLoaded(territories));
     });
 
-    it("defaults to all territories", () => {
-      expect(getSelectedTerritories(store.getState())).to.eql(territories);
+    it("defaults to first territory", () => {
+      expect(getSelectedTerritories(store.getState())).to.eql([territory1]);
     });
 
     it("changes with form selection", () => {
@@ -87,9 +87,9 @@ describe("PrintOptionsForm", () => {
       expect(getSelectedTerritories(store.getState())).to.eql([territory1, territory3]);
     });
 
-    it("empty selection implies all territories", () => {
+    it("empty selection implies no territories", () => {
       store.dispatch(change(formName, 'territories', []));
-      expect(getSelectedTerritories(store.getState())).to.eql(territories);
+      expect(getSelectedTerritories(store.getState())).to.eql([]);
     });
   });
 });
@@ -99,7 +99,18 @@ function rasterStub(mapRaster: any): MapRaster {
 }
 
 function regionStub(region: any): Region {
-  return region;
+  const base: Region = {
+    id: 0,
+    name: "",
+    minimap_viewport: true,
+    congregation: true,
+    subregion: true,
+    location: "",
+  };
+  return {
+    ...base,
+    ...region
+  };
 }
 
 function territoryStub(territory: any): Territory {

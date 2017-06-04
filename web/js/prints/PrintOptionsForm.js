@@ -10,6 +10,7 @@ import type {MapRaster} from "../maps/mapOptions";
 import {connect} from "react-redux";
 import type {Region, Territory} from "../api";
 import type {State} from "../reducers";
+import take from "lodash/take";
 
 export const defaultMapRasterId = 'osmHighDpi';
 export const formName = 'printOptions';
@@ -19,15 +20,15 @@ let PrintOptionsForm = ({
                           territoriesVisible = false,
                           regionsVisible = false,
                           availableMapRasters,
-                          availableTerritories,
                           availableRegions,
+                          availableTerritories,
                           handleSubmit
                         }: {
   territoriesVisible: boolean,
   regionsVisible: boolean,
   availableMapRasters: Array<MapRaster>,
-  availableTerritories: Array<Territory>,
   availableRegions: Array<Region>,
+  availableTerritories: Array<Territory>,
   handleSubmit: any
 }) => (
   <form onSubmit={handleSubmit} className="pure-form pure-form-stacked">
@@ -80,18 +81,19 @@ PrintOptionsForm = connect(mapStateToProps)(PrintOptionsForm);
 export default PrintOptionsForm;
 
 function mapStateToProps(state: State) {
-  // TODO: filter territories based on selected region
   return {
     availableMapRasters: state.config.mapRasters,
-    availableTerritories: state.api.territories,
-    availableRegions: state.api.regions.filter(r => r.congregation || r.subregion),
+    availableRegions: getAvailableRegions(state),
+    availableTerritories: getAvailableTerritories(state),
     initialValues: {
       mapRaster: defaultMapRasterId,
-      regions: [],
-      territories: [],
+      regions: getDefaultRegions(state),
+      territories: getDefaultTerritories(state),
     }
   }
 }
+
+// map rasters
 
 export function getSelectedMapRaster(state: State): MapRaster {
   const id = selector(state, 'mapRaster') || defaultMapRasterId;
@@ -102,24 +104,36 @@ export function getSelectedMapRaster(state: State): MapRaster {
   return mapRaster;
 }
 
+// regions
+
+function getAvailableRegions(state: State): Array<Region> {
+  return state.api.regions.filter(r => r.congregation || r.subregion);
+}
+
+function getDefaultRegions(state: State): Array<number> {
+  const regions = getAvailableRegions(state);
+  return take(regions, 1).map(r => r.id);
+}
+
 export function getSelectedRegions(state: State): Array<Region> {
-  const formValues = selector(state, 'regions') || [];
+  const formValues = selector(state, 'regions') || getDefaultRegions(state);
   const ids = new Set(formValues.map(str => parseInt(str, 10)));
-  const regions = state.api.regions;
-  if (ids.size === 0) {
-    return regions;
-  } else {
-    return regions.filter(r => ids.has(r.id));
-  }
+  return state.api.regions.filter(r => ids.has(r.id));
+}
+
+// territories
+
+function getAvailableTerritories(state: State): Array<Territory> {
+  return state.api.territories;
+}
+
+function getDefaultTerritories(state: State): Array<number> {
+  const territories = getAvailableTerritories(state);
+  return take(territories, 1).map(t => t.id);
 }
 
 export function getSelectedTerritories(state: State): Array<Territory> {
-  const formValues = selector(state, 'territories') || [];
+  const formValues = selector(state, 'territories') || getDefaultTerritories(state);
   const ids = new Set(formValues.map(str => parseInt(str, 10)));
-  const territories = state.api.territories;
-  if (ids.size === 0) {
-    return territories;
-  } else {
-    return territories.filter(r => ids.has(r.id));
-  }
+  return state.api.territories.filter(r => ids.has(r.id));
 }
