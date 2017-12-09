@@ -21,7 +21,7 @@ Run database migrations:
 
 Start the application:
 
-    lein run
+    lein run -- 8081
 
 Start the web frontend:
 
