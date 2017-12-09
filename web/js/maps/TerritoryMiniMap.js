@@ -48,6 +48,12 @@ function initTerritoryMiniMap(element: HTMLDivElement,
       }
     }
   });
+  if (!congregationWkt) {
+    throw new Error(`The territory number ${territory.number} is not inside the congregation boundary. Make sure that a region has the congregation=t flag enabled.`);
+  }
+  if (!viewportWkt) {
+    throw new Error(`The territory number ${territory.number} is not inside a minimap viewport. Make sure that a region has the minimap_viewport=t flag enabled. It can also be the same region as the congregation boundary.`);
+  }
 
   const territoryLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
