@@ -34,3 +34,10 @@ CREATE SCHEMA $username AUTHORIZATION $username;
 
 CREATE EXTENSION postgis;
 " | psql -h $dbhost -U master territorybro
+
+cat resources/migrations/*.up.sql | PGPASSWORD=$password psql -h $dbhost -U $username $username
+
+cp -v resources/template-territories.qgs $username-territories.qgs
+sed -i -e "s/HOST_GOES_HERE/$dbhost/g" $username-territories.qgs
+sed -i -e "s/USERNAME_GOES_HERE/$username/g" $username-territories.qgs
+sed -i -e "s/PASSWORD_GOES_HERE/$password/g" $username-territories.qgs
