@@ -5,16 +5,20 @@
 /* @flow */
 
 import React from "react";
-import {changeLanguage} from "../intl";
+import {changeLanguage, languagesByCode} from "../intl";
+import toPairs from "lodash-es/toPairs";
+import sortBy from "lodash-es/sortBy";
+
+const sortedLanguages = sortBy(toPairs(languagesByCode), ([code, name]) => name);
 
 const LanguageSelection = () => (
-  <p>Change language:
-    {' '}<a href="#" onClick={handleLanguageChange('en')}>English</a>
-    {' '}<a href="#" onClick={handleLanguageChange('fi')}>Finnish</a>
-    {' '}<a href="#" onClick={handleLanguageChange('it')}>Italian</a>
-    {' '}<a href="#" onClick={handleLanguageChange('pt')}>Portuguese</a>
-    {' '}<a href="#" onClick={handleLanguageChange('es')}>Spanish</a>
-  </p>
+  <React.Fragment>
+    <p>Change language:</p>
+    <ul>
+      {sortedLanguages.map(([code, name]) =>
+        <li key={code}><a href="#" onClick={handleLanguageChange(code)}>{name}</a></li>)}
+    </ul>
+  </React.Fragment>
 );
 
 function handleLanguageChange(lang) {

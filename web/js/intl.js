@@ -19,6 +19,14 @@ import translations from "./translations.json";
 
 addLocaleData([...en, ...es, ...fi, ...it, ...pt]);
 
+export const languagesByCode = {
+  en: "English",
+  es: "Spanish",
+  fi: "Finnish",
+  it: "Italian",
+  pt: "Portuguese",
+};
+
 function getMessages(language: string): {} {
   return translations[language] || translations[withoutRegionCode(language)];
 }
