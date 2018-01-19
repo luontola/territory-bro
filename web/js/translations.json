@@ -4,6 +4,11 @@
     "TerritoryCard.footer1": "Please keep this card in the envelope. Do not soil, mark or bend it.",
     "TerritoryCard.footer2": "Each time the territory is covered, please inform the brother who cares for the territory files."
   },
+  "es": {
+    "TerritoryCard.title": "Tarjeta del Mapa del Territorio",
+    "TerritoryCard.footer1": "Sirvase mantener esta tarjeta en el sobre. No la manche, ni doble. Cada vez que se haya trabajado",
+    "TerritoryCard.footer2": "completamente el territorio, sirvase informarlo al hermano que atiende los archivos del territorio."
+  },
   "fi": {
     "TerritoryCard.title": "Aluekortti",
     "TerritoryCard.footer1": "Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä.",

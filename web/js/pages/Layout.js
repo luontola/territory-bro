@@ -1,4 +1,4 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -41,6 +41,7 @@ class Layout extends React.Component {
             {' '}<a href="#" onClick={handleLanguageChange('en')}>English</a>
             {' '}<a href="#" onClick={handleLanguageChange('fi')}>Finnish</a>
             {' '}<a href="#" onClick={handleLanguageChange('pt')}>Portuguese</a>
+            {' '}<a href="#" onClick={handleLanguageChange('es')}>Spanish</a>
           </p>
         </nav>
 

@@ -1,4 +1,4 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,6 +7,7 @@
 import Cookies from "js-cookie";
 import {addLocaleData} from "react-intl";
 import en from "react-intl/locale-data/en";
+import es from "react-intl/locale-data/es";
 import fi from "react-intl/locale-data/fi";
 import pt from "react-intl/locale-data/pt";
 import translations from "./translations.json";
@@ -15,7 +16,7 @@ import translations from "./translations.json";
 // https://medium.freecodecamp.com/internationalization-in-react-7264738274a0
 // https://github.com/iam-peekay/inbox-react-intl/issues/1
 
-addLocaleData([...en, ...fi, ...pt]);
+addLocaleData([...en, ...es, ...fi, ...pt]);
 
 function getMessages(language: string): {} {
   return translations[language] || translations[withoutRegionCode(language)];
