@@ -9,6 +9,7 @@ import {addLocaleData} from "react-intl";
 import en from "react-intl/locale-data/en";
 import es from "react-intl/locale-data/es";
 import fi from "react-intl/locale-data/fi";
+import it from "react-intl/locale-data/it";
 import pt from "react-intl/locale-data/pt";
 import translations from "./translations.json";
 
@@ -16,7 +17,7 @@ import translations from "./translations.json";
 // https://medium.freecodecamp.com/internationalization-in-react-7264738274a0
 // https://github.com/iam-peekay/inbox-react-intl/issues/1
 
-addLocaleData([...en, ...es, ...fi, ...pt]);
+addLocaleData([...en, ...es, ...fi, ...it, ...pt]);
 
 function getMessages(language: string): {} {
   return translations[language] || translations[withoutRegionCode(language)];

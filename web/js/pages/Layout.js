@@ -40,6 +40,7 @@ class Layout extends React.Component {
           <p>Change language:
             {' '}<a href="#" onClick={handleLanguageChange('en')}>English</a>
             {' '}<a href="#" onClick={handleLanguageChange('fi')}>Finnish</a>
+            {' '}<a href="#" onClick={handleLanguageChange('it')}>Italian</a>
             {' '}<a href="#" onClick={handleLanguageChange('pt')}>Portuguese</a>
             {' '}<a href="#" onClick={handleLanguageChange('es')}>Spanish</a>
           </p>
