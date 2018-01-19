@@ -10,7 +10,7 @@ import "./Layout.css";
 import type {Children} from "react";
 import React from "react";
 import Link from "./Link";
-import {changeLanguage} from "../intl";
+import LanguageSelection from "./LanguageSelection";
 
 class Layout extends React.Component {
   props: {
@@ -37,13 +37,7 @@ class Layout extends React.Component {
             <li><Link href="/rural-territory-cards">Rural Territory Cards</Link></li>
             <li><Link href="/region-maps">Region Maps</Link></li>
           </ul>
-          <p>Change language:
-            {' '}<a href="#" onClick={handleLanguageChange('en')}>English</a>
-            {' '}<a href="#" onClick={handleLanguageChange('fi')}>Finnish</a>
-            {' '}<a href="#" onClick={handleLanguageChange('it')}>Italian</a>
-            {' '}<a href="#" onClick={handleLanguageChange('pt')}>Portuguese</a>
-            {' '}<a href="#" onClick={handleLanguageChange('es')}>Spanish</a>
-          </p>
+          <LanguageSelection/>
         </nav>
 
         <div className="container">
@@ -52,13 +46,6 @@ class Layout extends React.Component {
 
       </div>
     );
-  }
-}
-
-function handleLanguageChange(lang) {
-  return (event) => {
-    event.preventDefault();
-    changeLanguage(lang);
   }
 }
 
