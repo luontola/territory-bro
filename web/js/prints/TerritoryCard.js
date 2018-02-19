@@ -49,11 +49,8 @@ const TerritoryCard = ({territory, regions, mapRaster}: {
       <div className={styles.addresses}>{territory.address}</div>
 
       <div className={styles.footer}>
-        <FormattedMessage id="TerritoryCard.footer1"
-                          defaultMessage="Please keep this card in the envelope. Do not soil, mark or bend it."/>
-        <br/>
-        <FormattedMessage id="TerritoryCard.footer2"
-                          defaultMessage="Each time the territory is covered, please inform the brother who cares for the territory files."/>
+        <FormattedMessage id="TerritoryCard.footer"
+                          defaultMessage={"Please keep this card in the envelope. Do not soil, mark or bend it. \n Each time the territory is covered, please inform the brother who cares for the territory files."}/>
       </div>
 
     </div>
