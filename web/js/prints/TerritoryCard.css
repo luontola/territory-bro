@@ -36,6 +36,7 @@
     justify-self: end;
     font-size: 30px;
     font-weight: bold;
+    white-space: nowrap;
 }
 
 .minimap {
