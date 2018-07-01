@@ -1,2 +1,11 @@
-.git
-node_modules
+/target/
+/node_modules/
+/.lein-*
+/.nrepl-port
+/profiles.clj
+.DS_Store
+*.tmp
+*.bak
+*.log
+*.qgs~
+/.git/

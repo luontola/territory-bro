@@ -1,9 +1,14 @@
 {
   "name": "territory-bro",
-  "version": "1.0.0",
+  "version": "1.0.0-SNAPSHOT",
   "description": "Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.",
-  "directories": {
-    "test": "test"
+  "homepage": "https://territorybro.com",
+  "author": "Esko Luontola (http://luontola.fi)",
+  "license": "Apache-2.0",
+  "bugs": "https://github.com/orfjackal/territory-bro/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orfjackal/territory-bro.git"
   },
   "dependencies": {
     "alphanum-sort": "1.0.2",
@@ -55,6 +60,10 @@
     "webpack": "2.6.1",
     "webpack-dev-server": "2.4.5"
   },
+  "engines": {
+    "node": ">= 10.0.0",
+    "yarn": ">= 1.0.0"
+  },
   "scripts": {
     "test": "cross-env NODE_ENV=test mocha --compilers js:babel-register --require ./web/js/test_setup.js 'web/js/**/*.test.js'",
     "autotest": "yarn run test --watch",
@@ -66,15 +75,5 @@
     "flow-typed": "flow-typed",
     "flow-coverage": "flow-coverage-report -i 'web/js/**/*.js' -t html -t text -o target/flow-coverage/",
     "analyze": "source-map-explorer target/webpack/bundle.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/orfjackal/territory-bro.git"
-  },
-  "author": "Esko Luontola",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/orfjackal/territory-bro/issues"
-  },
-  "homepage": "https://github.com/orfjackal/territory-bro#readme"
+  }
 }
