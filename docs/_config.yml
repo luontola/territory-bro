@@ -11,7 +11,7 @@ navigation:
   - title: User Guide
     url: /guide/
   - title: GitHub Project
-    url: https://github.com/orfjackal/territory-bro
+    url: https://github.com/luontola/territory-bro
 
 # Build settings
 markdown: kramdown
