@@ -11,6 +11,10 @@
     "TerritoryCard.title": "Aluekortti",
     "TerritoryCard.footer": "Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä. \n Joka kerta kun alue on käyty läpi, ilmoita siitä veljelle, joka hoitaa aluekarttoja."
   },
+  "id": {
+    "TerritoryCard.title": "Kartu Peta Daerah",
+    "TerritoryCard.footer": "Mohon simpan kartu ini di dalam amplop. Jangan sampai kotor, tercoret atau terlipat. \n Jika daerah selesai dikerjakan, mohon beritahu saudara yang bertanggung jawab atas arsip daerah."
+  },
   "it": {
     "TerritoryCard.title": "Piantina del territorio",
     "TerritoryCard.footer": "Tenete questa cartolina nella busta. Non la sciupate, non vi fate segni e non la piegate. Ogni volta che \n il territorio è stato percorso interamente, informate il fratello che si occupa dello schedario dei territori."
