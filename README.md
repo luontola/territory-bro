@@ -11,6 +11,8 @@ Install [PostgreSQL](https://www.postgresql.org/) or [Docker](https://www.docker
 
 Install [Leiningen](https://github.com/technomancy/leiningen)
 
+Install [Node.js](https://nodejs.org/) and [Yarn](https://yarnpkg.com/)
+
 Start the database:
 
     docker-compose up -d db
@@ -27,6 +29,9 @@ Start the web frontend:
 
     yarn install
     yarn start
+
+The server will run at http://localhost:8080/
+
 
 ## License
 
