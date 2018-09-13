@@ -1,17 +1,16 @@
-; Copyright © 2015-2017 Esko Luontola
+; Copyright © 2015-2018 Esko Luontola
 ; This software is released under the Apache License 2.0.
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.routes
-  (:require [territory-bro.db.core :as db]
-            [territory-bro.domain :as domain]
+  (:require [clojure.data.json :as json]
+            [clojure.java.io :as io]
             [compojure.core :refer [defroutes GET POST ANY]]
             [liberator.core :refer [defresource]]
-            [ring.util.response :refer [redirect]]
             [ring.util.http-response :refer [ok]]
-            [clojure.java.io :as io]
-            [clojure.data.json :as json])
-  (:import (java.time LocalDate)))
+            [ring.util.response :refer [redirect]]
+            [territory-bro.db.core :as db]
+            [territory-bro.domain :as domain]))
 
 (defn- read-file-upload [request param]
   (let [tempfile (-> request :params param :tempfile)]
@@ -24,23 +23,23 @@
   (let [geojson (read-file-upload request :territories)]
     (when (not-empty geojson)
       (db/transactional
-        (db/delete-all-territories!)
-        (dorun (map db/create-territory! (-> geojson
-                                             json/read-str
-                                             domain/geojson-to-territories))))))
+       (db/delete-all-territories!)
+       (dorun (map db/create-territory! (-> geojson
+                                            json/read-str
+                                            domain/geojson-to-territories))))))
   (let [geojson (read-file-upload request :regions)]
     (when (not-empty geojson)
       (db/transactional
-        (db/delete-all-regions!)
-        (dorun (map db/create-region! (-> geojson
-                                          json/read-str
-                                          domain/geojson-to-regions))))))
+       (db/delete-all-regions!)
+       (dorun (map db/create-region! (-> geojson
+                                         json/read-str
+                                         domain/geojson-to-regions))))))
   (redirect "/"))
 
 (defn clear-database! []
   (db/transactional
-    (db/delete-all-territories!)
-    (db/delete-all-regions!))
+   (db/delete-all-territories!)
+   (db/delete-all-regions!))
   (redirect "/"))
 
 (defresource territories
@@ -52,10 +51,10 @@
   :handle-ok (fn [_] (db/find-regions)))
 
 (defroutes home-routes
-           (GET "/" request {:status  200
-                             :headers {"Content-Type" "text/html; charset=utf-8"}
-                             :body    "Territory Bro"})
-           (ANY "/api/territories" [] territories)
-           (ANY "/api/regions" [] regions)
-           (POST "/api/import-territories" request (import-territories! request))
-           (POST "/api/clear-database" [] (clear-database!)))
+  (GET "/" request {:status 200
+                    :headers {"Content-Type" "text/html; charset=utf-8"}
+                    :body "Territory Bro"})
+  (ANY "/api/territories" [] territories)
+  (ANY "/api/regions" [] regions)
+  (POST "/api/import-territories" request (import-territories! request))
+  (POST "/api/clear-database" [] (clear-database!)))

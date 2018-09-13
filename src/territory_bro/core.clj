@@ -1,10 +1,14 @@
+; Copyright © 2015-2018 Esko Luontola
+; This software is released under the Apache License 2.0.
+; The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
 (ns territory-bro.core
-  (:require [territory-bro.handler :refer [app init destroy]]
+  (:require [clojure.tools.nrepl.server :as nrepl]
+            [environ.core :refer [env]]
             [immutant.web :as immutant]
-            [territory-bro.db.migrations :as migrations]
-            [clojure.tools.nrepl.server :as nrepl]
             [taoensso.timbre :as timbre]
-            [environ.core :refer [env]])
+            [territory-bro.db.migrations :as migrations]
+            [territory-bro.handler :refer [app init destroy]])
   (:gen-class))
 
 (defonce nrepl-server (atom nil))
@@ -14,7 +18,7 @@
     (cond
       (string? port) (Integer/parseInt port)
       (number? port) port
-      :else          (throw (Exception. (str "invalid port value: " port))))))
+      :else (throw (Exception. (str "invalid port value: " port))))))
 
 (defn stop-nrepl []
   (when-let [server @nrepl-server]
