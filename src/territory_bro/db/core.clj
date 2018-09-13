@@ -1,18 +1,19 @@
-; Copyright © 2015-2017 Esko Luontola
+; Copyright © 2015-2018 Esko Luontola
 ; This software is released under the Apache License 2.0.
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.db.core
-  (:require
-    [cheshire.core :refer [generate-string parse-string]]
-    [clojure.java.jdbc :as jdbc]
-    [conman.core :as conman]
-    [environ.core :refer [env]]
-    [clojure.data.json :as json])
+  (:require [cheshire.core :refer [generate-string parse-string]]
+            [clojure.data.json :as json]
+            [clojure.java.jdbc :as jdbc]
+            [conman.core :as conman]
+            [environ.core :refer [env]]
+            [ring.util.codec :refer [form-decode]])
   (:import org.postgresql.util.PGobject
            clojure.lang.IPersistentMap
            clojure.lang.IPersistentVector
-           [java.sql Date Timestamp PreparedStatement Array]))
+           (java.sql Date Timestamp PreparedStatement)
+           (java.net URI)))
 
 (defonce ^:dynamic *conn* (atom nil))
 
@@ -30,27 +31,24 @@
 (defn count-regions []
   (:count (first (-count-regions))))
 
-(def pool-spec
-  {:adapter    :postgresql
-   :init-size  1
-   :min-idle   1
-   :max-idle   4
-   :max-active 32})
-
 (defn connect! []
-  (conman/connect!
-    *conn*
-    (assoc
-      pool-spec
-      :jdbc-url (env :database-url))))
+  ;; XXX: conman doesn't read the password from the jdbc url, so we must do it ourselves
+  (let [query-params (-> (env :database-url)
+                         URI.
+                         .getSchemeSpecificPart
+                         URI.
+                         .getQuery
+                         form-decode)
+        pool-spec {:jdbc-url (env :database-url)
+                   :password (get query-params "password")}]
+    (reset! *conn* (conman/connect! pool-spec))))
 
 (defn disconnect! []
   (conman/disconnect! *conn*))
 
 (defn transactional* [f]
-  (conman/with-transaction
-    [t-conn *conn* :isolation :serializable]
-    (f)))
+  (conman/with-transaction [*conn* {:isolation :serializable}]
+                           (f)))
 
 (defmacro transactional [& body]
   `(transactional* (fn [] ~@body)))
@@ -82,8 +80,8 @@
 
 (defn to-pg-json [value]
   (doto (PGobject.)
-    (.setType "jsonb")
-    (.setValue (generate-string value))))
+        (.setType "jsonb")
+        (.setValue (generate-string value))))
 
 (extend-protocol jdbc/ISQLValue
   IPersistentMap
