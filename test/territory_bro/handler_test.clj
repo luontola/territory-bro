@@ -5,7 +5,7 @@
 (ns territory-bro.handler-test
   (:require [clojure.test :refer :all]
             [ring.mock.request :refer :all]
-            [territory-bro.db.core :as db]
+            [territory-bro.db :as db]
             [territory-bro.db.migrations :as migrations]
             [territory-bro.handler :refer :all]))
 

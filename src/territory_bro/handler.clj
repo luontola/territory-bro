@@ -8,7 +8,7 @@
             [environ.core :refer [env]]
             [taoensso.timbre :as timbre]
             [taoensso.timbre.appenders.3rd-party.rotor :as rotor]
-            [territory-bro.db.core :as db]
+            [territory-bro.db :as db]
             [territory-bro.layout :refer [error-page]]
             [territory-bro.middleware :as middleware]
             [territory-bro.routes :refer [home-routes]]))

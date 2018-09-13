@@ -9,7 +9,7 @@
             [liberator.core :refer [defresource]]
             [ring.util.http-response :refer [ok]]
             [ring.util.response :refer [redirect]]
-            [territory-bro.db.core :as db]
+            [territory-bro.db :as db]
             [territory-bro.domain :as domain]))
 
 (defn- read-file-upload [request param]

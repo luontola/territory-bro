@@ -2,12 +2,12 @@
 ; This software is released under the Apache License 2.0.
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.db.core-test
+(ns territory-bro.db-test
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
             [conman.core :refer [with-transaction]]
             [environ.core :refer [env]]
-            [territory-bro.db.core :as db]
+            [territory-bro.db :as db]
             [territory-bro.db.migrations :as migrations]))
 
 (use-fixtures

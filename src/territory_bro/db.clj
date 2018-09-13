@@ -2,7 +2,7 @@
 ; This software is released under the Apache License 2.0.
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.db.core
+(ns territory-bro.db
   (:require [cheshire.core :refer [generate-string parse-string]]
             [clojure.data.json :as json]
             [clojure.java.jdbc :as jdbc]
