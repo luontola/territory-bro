@@ -28,33 +28,33 @@
   :uberjar-name "territory-bro.jar"
   :jvm-opts ["-server"]
 
-  :main territory-bro.core
+  :main territory-bro.main
   :migratus {:store :database}
 
   :plugins [[com.jakemccrary/lein-test-refresh "0.14.0"]
             [lein-ancient "0.6.15"]
             [lein-environ "1.0.1"]
             [migratus-lein "0.5.7"]]
-  :profiles
-  {:uberjar {:omit-source true
-             :env {:production true}
-             :aot :all}
-   :dev [:project/dev :profiles/dev]
-   :test [:project/test :profiles/test]
-   :project/dev {:dependencies [[mvxcvi/puget "1.0.2"]
-                                [pjstadig/humane-test-output "0.8.3"]
-                                [ring/ring-devel "1.7.0"]
-                                [ring/ring-mock "0.3.2"]]
 
-                 :repl-options {:init-ns territory-bro.core}
-                 :injections [(require 'pjstadig.humane-test-output)
-                              (pjstadig.humane-test-output/activate!)]
-                 ;;when :nrepl-port is set the application starts the nREPL server on load
-                 :env {:dev true
-                       :port 3000
-                       :nrepl-port 7000}}
-   :project/test {:env {:test true
-                        :port 3001
-                        :nrepl-port 7001}}
-   :profiles/dev {}
-   :profiles/test {}})
+  :profiles {:uberjar {:omit-source true
+                       :env {:production true}
+                       :aot :all}
+             :dev [:project/dev :profiles/dev]
+             :test [:project/test :profiles/test]
+             :project/dev {:dependencies [[mvxcvi/puget "1.0.2"]
+                                          [pjstadig/humane-test-output "0.8.3"]
+                                          [ring/ring-devel "1.7.0"]
+                                          [ring/ring-mock "0.3.2"]]
+
+                           :repl-options {:init-ns territory-bro.main}
+                           :injections [(require 'pjstadig.humane-test-output)
+                                        (pjstadig.humane-test-output/activate!)]
+                           ;;when :nrepl-port is set the application starts the nREPL server on load
+                           :env {:dev true
+                                 :port 3000
+                                 :nrepl-port 7000}}
+             :project/test {:env {:test true
+                                  :port 3001
+                                  :nrepl-port 7001}}
+             :profiles/dev {}
+             :profiles/test {}})
