@@ -19,11 +19,11 @@ Start the database:
 
 Run database migrations:
 
-    lein migratus
+    lein run migrate
 
 Start the application:
 
-    lein run -- 8081
+    lein run
 
 Start the web frontend:
 

@@ -3,15 +3,14 @@
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.middleware
-  (:require [environ.core :refer [env]]
+  (:require [clojure.tools.logging :as log]
             [immutant.web.middleware :refer [wrap-session]]
-            [prone.middleware :refer [wrap-exceptions]]
             [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [ring.middleware.flash :refer [wrap-flash]]
             [ring.middleware.format :refer [wrap-restful-format]]
-            [ring.middleware.reload :as reload]
-            [taoensso.timbre :as timbre]
+            [territory-bro.config :refer [env]]
+            [territory-bro.env :refer [defaults]]
             [territory-bro.layout :refer [error-page]]
             [territory-bro.util :as util]))
 
@@ -20,7 +19,7 @@
     (try
       (handler req)
       (catch Throwable t
-        (timbre/error t)
+        (log/error t (.getMessage t))
         (error-page {:status 500
                      :title "Something very bad has happened!"
                      :message "We've dispatched a team of highly trained gnomes to take care of the problem."})))))
@@ -32,13 +31,6 @@
       (catch Throwable t
         (throw (util/fix-sqlexception-chain t))))))
 
-(defn wrap-dev [handler]
-  (if (env :dev)
-    (-> handler
-        reload/wrap-reload
-        wrap-exceptions)
-    handler))
-
 (defn wrap-csrf [handler]
   (wrap-anti-forgery
    handler
@@ -49,10 +41,8 @@
   (wrap-restful-format handler {:formats [:json-kw :transit-json :transit-msgpack]}))
 
 (defn wrap-base [handler]
-  (-> handler
+  (-> ((:middleware defaults) handler)
       wrap-sqlexception-chain
-      wrap-dev
-      wrap-formats
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults

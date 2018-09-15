@@ -3,70 +3,71 @@
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.main
-  (:require [clojure.tools.nrepl.server :as nrepl]
-            [environ.core :refer [env]]
-            [immutant.web :as immutant]
-            [taoensso.timbre :as timbre]
-            [territory-bro.db.migrations :as migrations]
-            [territory-bro.handler :refer [app init destroy]])
+  (:refer-clojure :exclude [parse-opts])
+  (:require [clojure.tools.cli :refer [parse-opts]]
+            [clojure.tools.logging :as log]
+            [luminus-migrations.core :as migrations]
+            [luminus.http-server :as http]
+            [luminus.repl-server :as repl]
+            [mount.core :as mount]
+            [territory-bro.config :refer [env]]
+            [territory-bro.handler :as handler])
   (:gen-class))
 
-(defonce nrepl-server (atom nil))
+(def cli-options
+  [["-p" "--port PORT" "Port number"
+    :parse-fn #(Integer/parseInt %)]])
 
-(defn parse-port [port]
-  (when port
-    (cond
-      (string? port) (Integer/parseInt port)
-      (number? port) port
-      :else (throw (Exception. (str "invalid port value: " port))))))
+(mount/defstate ^{:on-reload :noop} http-server
+  :start
+  (http/start
+   (-> env
+       (assoc :handler #'handler/app)
+       (update :io-threads #(or % (* 2 (.availableProcessors (Runtime/getRuntime)))))
+       (update :port #(or (-> env :options :port) %))))
+  :stop
+  (http/stop http-server))
 
-(defn stop-nrepl []
-  (when-let [server @nrepl-server]
-    (nrepl/stop-server server)))
+(mount/defstate ^{:on-reload :noop} repl-server
+  :start
+  (when (env :nrepl-port)
+    (repl/start {:bind (env :nrepl-bind)
+                 :port (env :nrepl-port)}))
+  :stop
+  (when repl-server
+    (repl/stop repl-server)))
 
-(defn start-nrepl
-  "Start a network repl for debugging when the :nrepl-port is set in the environment."
-  []
-  (if @nrepl-server
-    (timbre/error "nREPL is already running!")
-    (when-let [port (env :nrepl-port)]
-      (try
-        (->> port
-             (parse-port)
-             (nrepl/start-server :port)
-             (reset! nrepl-server))
-        (timbre/info "nREPL server started on port" port)
-        (catch Throwable t
-          (timbre/error t "failed to start nREPL"))))))
-
-(defn http-port [port]
-  (parse-port (or port (env :port) 3000)))
-
-(defonce http-server (atom nil))
-
-(defn start-http-server [port]
-  (init)
-  (reset! http-server (immutant/run app :host "0.0.0.0" :port port)))
-
-(defn stop-http-server []
-  (when @http-server
-    (destroy)
-    (immutant/stop @http-server)
-    (reset! http-server nil)))
 
 (defn stop-app []
-  (stop-nrepl)
-  (stop-http-server)
+  (doseq [component (:stopped (mount/stop))]
+    (log/info component "stopped"))
   (shutdown-agents))
 
-(defn start-app [[port]]
-  (.addShutdownHook (Runtime/getRuntime) (Thread. stop-app))
-  (start-nrepl)
-  (start-http-server (http-port port))
-  (timbre/info "server started on port:" (:port @http-server)))
+(defn start-app [args]
+  (doseq [component (-> args
+                        (parse-opts cli-options)
+                        mount/start-with-args
+                        :started)]
+    (log/info component "started"))
+  (.addShutdownHook (Runtime/getRuntime) (Thread. stop-app)))
 
 (defn -main [& args]
+  (mount/start #'territory-bro.config/env)
   (cond
-    (some #{"migrate" "rollback"} args) (migrations/migrate args)
-    :else (start-app args)))
-  
+    (nil? (:database-url env))
+    (do
+      (log/error "Database configuration not found, :database-url must be set before running")
+      (System/exit 1))
+
+    (some #{"init"} args)
+    (do
+      (migrations/init (select-keys env [:database-url :init-script]))
+      (System/exit 0))
+
+    (migrations/migration? args)
+    (do
+      (migrations/migrate args (select-keys env [:database-url]))
+      (System/exit 0))
+
+    :else
+    (start-app args)))

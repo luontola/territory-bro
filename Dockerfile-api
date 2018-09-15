@@ -32,4 +32,4 @@ ENV PORT=8080 \
     DATABASE_URL="jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
 CMD ["java", "-Xmx50m", "-XX:MaxMetaspaceSize=64m", "-jar", "territory-bro.jar"]
 
-COPY --from=builder /project/target/territory-bro.jar /app/territory-bro.jar
+COPY --from=builder /project/target/uberjar/territory-bro.jar /app/territory-bro.jar

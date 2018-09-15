@@ -5,16 +5,11 @@
 (ns territory-bro.handler-test
   (:require [clojure.test :refer :all]
             [ring.mock.request :refer :all]
-            [territory-bro.db :as db]
-            [territory-bro.db.migrations :as migrations]
-            [territory-bro.handler :refer :all]))
+            [territory-bro.handler :refer [app]]
+            [territory-bro.testing :refer [api-fixture transaction-rollback-fixture]]))
 
-(use-fixtures
- :once
- (fn [f]
-   (db/connect!)
-   (migrations/migrate ["migrate"])
-   (f)))
+(use-fixtures :once api-fixture)
+(use-fixtures :each transaction-rollback-fixture)
 
 (deftest test-app
   (testing "main route"

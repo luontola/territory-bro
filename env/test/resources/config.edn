@@ -1,0 +1,2 @@
+{:port 8082
+ :database-url "jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"}

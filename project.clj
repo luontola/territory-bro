@@ -7,54 +7,56 @@
   :description "Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses."
   :url "https://territorybro.com"
 
-  :dependencies [[com.taoensso/timbre "4.10.0"]
-                 [compojure "1.6.1"]
+  :dependencies [[compojure "1.6.1"]
                  [conman "0.8.2"]
-                 [environ "1.1.0"]
+                 [cprop "0.1.11"]
                  [liberator "0.15.2"]
+                 [luminus-immutant "0.2.4"]
+                 [luminus-migrations "0.5.0"]
+                 [luminus-nrepl "0.1.4"]
                  [metosin/ring-http-response "0.9.0"]
                  [metosin/ring-middleware-format "0.6.0"]
-                 [migratus "1.0.9"]
+                 [mount "0.1.12"]
                  [org.clojure/clojure "1.9.0"]
                  [org.clojure/data.json "0.2.6"]
-                 [org.clojure/tools.nrepl "0.2.13"] ; TODO: remove, not needed in production?
-                 [org.immutant/web "2.1.10"]
+                 [org.clojure/tools.cli "0.3.7"]
+                 [org.clojure/tools.logging "0.4.1"]
                  [org.postgresql/postgresql "42.2.5"]
-                 [prone "1.6.0"]
-                 [ring "1.7.0" :exclusions [ring/ring-jetty-adapter]]
-                 [ring/ring-defaults "0.3.2"]]
+                 [ring/ring-core "1.7.0"]
+                 [ring/ring-defaults "0.3.2"]
+                 [selmer "1.11.7"]]
 
   :min-lein-version "2.0.0"
-  :uberjar-name "territory-bro.jar"
-  :jvm-opts ["-server"]
 
-  :main territory-bro.main
-  :migratus {:store :database}
+  :source-paths ["src"]
+  :test-paths ["test"]
+  :resource-paths ["resources"]
+  :target-path "target/%s/"
+  :main ^:skip-aot territory-bro.main
 
   :plugins [[com.jakemccrary/lein-test-refresh "0.14.0"]
-            [lein-ancient "0.6.15"]
-            [lein-environ "1.0.1"]
-            [migratus-lein "0.5.7"]]
+            [lein-ancient "0.6.15"]]
 
   :profiles {:uberjar {:omit-source true
-                       :env {:production true}
-                       :aot :all}
+                       :aot :all
+                       :uberjar-name "territory-bro.jar"
+                       :source-paths ["env/prod/clj"]
+                       :resource-paths ["env/prod/resources"]}
+
              :dev [:project/dev :profiles/dev]
              :test [:project/test :profiles/test]
-             :project/dev {:dependencies [[mvxcvi/puget "1.0.2"]
+
+             :project/dev {:dependencies [[bananaoomarang/ring-debug-logging "1.1.0"]
                                           [pjstadig/humane-test-output "0.8.3"]
+                                          [prone "1.6.0"]
                                           [ring/ring-devel "1.7.0"]
                                           [ring/ring-mock "0.3.2"]]
 
-                           :repl-options {:init-ns territory-bro.main}
+                           :source-paths ["env/dev/clj"]
+                           :resource-paths ["env/dev/resources"]
+                           :repl-options {:init-ns user}
                            :injections [(require 'pjstadig.humane-test-output)
-                                        (pjstadig.humane-test-output/activate!)]
-                           ;;when :nrepl-port is set the application starts the nREPL server on load
-                           :env {:dev true
-                                 :port 3000
-                                 :nrepl-port 7000}}
-             :project/test {:env {:test true
-                                  :port 3001
-                                  :nrepl-port 7001}}
+                                        (pjstadig.humane-test-output/activate!)]}
+             :project/test {:resource-paths ["env/test/resources"]}
              :profiles/dev {}
              :profiles/test {}})
