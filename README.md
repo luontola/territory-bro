@@ -7,34 +7,61 @@ For more information, see <https://territorybro.com>
 
 ## Running
 
-Install [PostgreSQL](https://www.postgresql.org/) or [Docker](https://www.docker.com/)
+The easiest way to run this application is to use [Docker](https://www.docker.com/products/docker-desktop).
 
-Install [Leiningen](https://github.com/technomancy/leiningen)
+Start the database and run database migration scripts to initialize the database
 
-Install [Node.js](https://nodejs.org/) and [Yarn](https://yarnpkg.com/)
+    docker-compose pull
+    docker-compose up -d db
+    docker-compose run --rm api migrate
 
-Start the database:
+Start the application
+
+    docker-compose up -d
+
+The application will run at http://localhost:8080
+
+Stop the application
+
+    docker-compose stop
+
+Stop the application and remove all data
+
+    docker-compose down
+
+
+## Developing
+
+The tools for developing this project are
+[Docker](https://www.docker.com/),
+[Java SE 8 JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html),
+[Leiningen](https://github.com/technomancy/leiningen),
+[Node.js](https://nodejs.org/) and
+[Yarn](https://yarnpkg.com/).
+It might also be useful to have the [PostgreSQL](https://www.postgresql.org/) command line tools, even if you run the database with Docker.
+
+Start the database
 
     docker-compose up -d db
 
-Run database migrations:
+Run database migrations
 
     lein run migrate
 
-Start the application:
+Start the API backend
 
     lein run
 
-Start the web frontend:
+Start the web frontend
 
     yarn install
     yarn start
 
-The server will run at http://localhost:8080/
+The application will run at http://localhost:8080
 
 
 ## License
 
-Copyright © 2015-2017, [Esko Luontola](http://luontola.fi)
+Copyright © 2015-2018, [Esko Luontola](http://www.luontola.fi)
 
 This software is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
