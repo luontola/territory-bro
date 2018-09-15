@@ -10,7 +10,8 @@
 
 (defn wrap-dev [handler]
   (-> handler
-      wrap-with-logger
+      ;; FIXME: wrap-with-logger will read the body destructively so that the handler cannot anymore read it
+      #_wrap-with-logger
       wrap-reload
       wrap-error-page
       ;; FIXME: prone fails to load its own css, so the error pages are useless
