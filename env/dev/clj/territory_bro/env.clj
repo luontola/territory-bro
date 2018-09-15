@@ -11,8 +11,8 @@
   {:init
    (fn []
      (parser/cache-off!)
-     (log/info "\n-=[territory-bro started successfully using the development profile]=-"))
+     (log/info "started using development profile"))
    :stop
    (fn []
-     (log/info "\n-=[territory-bro has shut down successfully]=-"))
+     (log/info "shut down"))
    :middleware wrap-dev})

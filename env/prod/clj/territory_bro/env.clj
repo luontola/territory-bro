@@ -8,8 +8,8 @@
 (def defaults
   {:init
    (fn []
-     (log/info "\n-=[territory-bro started successfully]=-"))
+     (log/info "started using production profile"))
    :stop
    (fn []
-     (log/info "\n-=[territory-bro has shut down successfully]=-"))
+     (log/info "shut down"))
    :middleware identity})
