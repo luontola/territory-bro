@@ -2,9 +2,12 @@
 set -eux
 
 docker-compose up -d db
-./scripts/build-uberjar.sh
+
+lein clean
+lein test
+lein uberjar
+
 yarn install
 yarn run flow check
 yarn run test
 yarn run build
-docker-compose build --pull

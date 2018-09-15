@@ -59,6 +59,12 @@ Start the web frontend
 
 The application will run at http://localhost:8080
 
+Run tests
+
+    lein test
+    yarn run flow check
+    yarn run test
+
 
 ## License
 

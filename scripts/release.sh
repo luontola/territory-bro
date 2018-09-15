@@ -6,7 +6,7 @@ TAG="${1:-$DEFAULT_TAG}"
 echo TAG=$TAG
 set -x
 
-./scripts/build.sh
+docker-compose build --pull
 
 docker tag "luontola/territory-bro-api" "luontola/territory-bro-api:$TAG"
 docker tag "luontola/territory-bro-web" "luontola/territory-bro-web:$TAG"
