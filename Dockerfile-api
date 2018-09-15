@@ -16,7 +16,10 @@ COPY --chown=app project.clj /project/
 RUN lein deps
 
 # do the build
-COPY --chown=app . /project/
+COPY --chown=app env /project/env
+COPY --chown=app resources /project/resources
+COPY --chown=app test /project/test
+COPY --chown=app src /project/src
 RUN lein uberjar
 
 # ------------------------------------------------------------
