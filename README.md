@@ -4,6 +4,8 @@ Territory Bro is a tool for managing territory cards in the congregations of Jeh
 
 For more information, see <https://territorybro.com>
 
+[![CI Build Status](https://travis-ci.org/luontola/cqrs-hotel.svg?branch=master)](https://travis-ci.org/luontola/cqrs-hotel)
+
 
 ## Running
 
