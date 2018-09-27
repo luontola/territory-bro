@@ -21,7 +21,7 @@ services:
     environment:
       DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro
     mem_reservation: 150m
-    mem_limit: 150m
+    mem_limit: 200m
     ports:
     - "8081:8080"
 
