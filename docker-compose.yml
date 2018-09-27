@@ -20,8 +20,8 @@ services:
     image: luontola/territory-bro-api
     environment:
       DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro
-    mem_reservation: 100m
-    mem_limit: 100m
+    mem_reservation: 150m
+    mem_limit: 150m
     ports:
     - "8081:8080"
 

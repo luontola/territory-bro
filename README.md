@@ -36,7 +36,7 @@ Stop the application and remove all data
 
 The tools for developing this project are
 [Docker](https://www.docker.com/),
-[Java SE 8 JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html),
+[Java 11 JDK](http://jdk.java.net/11/),
 [Leiningen](https://github.com/technomancy/leiningen),
 [Node.js](https://nodejs.org/) and
 [Yarn](https://yarnpkg.com/).

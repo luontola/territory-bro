@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk AS builder
+FROM openjdk:11-jdk AS builder
 
 # tools
 ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/local/bin/lein
@@ -24,7 +24,7 @@ RUN lein uberjar
 
 # ------------------------------------------------------------
 
-FROM openjdk:8-jre-slim
+FROM openjdk:11-jre-slim
 
 RUN adduser --system --home /app app
 WORKDIR /app
@@ -33,7 +33,6 @@ USER app
 EXPOSE 8080
 ENV PORT=8080 \
     DATABASE_URL="jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
-# TODO: Java 10 has different parameters for Docker support. See http://royvanrijn.com/blog/2018/05/java-and-docker-memory-limits/
-ENTRYPOINT ["java", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-jar", "territory-bro.jar"]
+ENTRYPOINT ["java", "-jar", "territory-bro.jar"]
 
 COPY --from=builder /project/target/uberjar/territory-bro.jar /app/territory-bro.jar
