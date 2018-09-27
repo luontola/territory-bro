@@ -33,6 +33,7 @@ USER app
 EXPOSE 8080
 ENV PORT=8080 \
     DATABASE_URL="jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
-ENTRYPOINT ["java", "-Xmx50m", "-XX:MaxMetaspaceSize=64m", "-jar", "territory-bro.jar"]
+# TODO: Java 10 has different parameters for Docker support. See http://royvanrijn.com/blog/2018/05/java-and-docker-memory-limits/
+ENTRYPOINT ["java", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-jar", "territory-bro.jar"]
 
 COPY --from=builder /project/target/uberjar/territory-bro.jar /app/territory-bro.jar
