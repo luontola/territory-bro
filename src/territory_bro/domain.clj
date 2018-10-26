@@ -14,11 +14,15 @@
 (defn geojson-to-territories [geojson]
   (map feature-to-territory (geojson/explode-feature-collection geojson)))
 
+(defn- parse-boolean [value]
+  (or (= true value)
+      (= "t" value)))
+
 (defn feature-to-region [feature]
   {:name (get-in feature [:properties "name"])
-   :minimap_viewport (= "t" (get-in feature [:properties "minimap_viewport"]))
-   :congregation (= "t" (get-in feature [:properties "congregation"]))
-   :subregion (= "t" (get-in feature [:properties "subregion"]))
+   :minimap_viewport (parse-boolean (get-in feature [:properties "minimap_viewport"]))
+   :congregation (parse-boolean (get-in feature [:properties "congregation"]))
+   :subregion (parse-boolean (get-in feature [:properties "subregion"]))
    :location (get feature :geometry)})
 
 (defn geojson-to-regions [geojson]

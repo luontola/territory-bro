@@ -28,21 +28,32 @@
            (first (geojson-to-territories geojson))))))
 
 (deftest test-geojson-to-regions
-  (let [geojson {"type" "FeatureCollection",
-                 "crs" {"type" "name",
-                        "properties" {"name" "urn:ogc:def:crs:OGC:1.3:CRS84"}},
-                 "features" [{"type" "Feature",
-                              "properties" {"id" 5, "name" "Rastila", "minimap_viewport" "f", "congregation" "f", "subregion" "t"},
-                              "geometry" {"type" "Polygon", "coordinates" [[[25.1224283, 60.2180387], [25.125388, 60.217563], [25.1278867, 60.2156996]]]}}]}]
+  (let [expected-region {:name "Rastila"
+                         :minimap_viewport false
+                         :congregation false
+                         :subregion true
+                         :location {"type" "Polygon"
+                                    "coordinates" [[[25.1224283 60.2180387]
+                                                    [25.125388 60.217563]
+                                                    [25.1278867 60.2156996]]]
+                                    "crs" {"type" "name"
+                                           "properties" {"name" "urn:ogc:def:crs:OGC:1.3:CRS84"}}}}]
 
-    (is (= {:name "Rastila"
-            :minimap_viewport false
-            :congregation false
-            :subregion true
-            :location {"type" "Polygon"
-                       "coordinates" [[[25.1224283 60.2180387]
-                                       [25.125388 60.217563]
-                                       [25.1278867 60.2156996]]]
-                       "crs" {"type" "name"
-                              "properties" {"name" "urn:ogc:def:crs:OGC:1.3:CRS84"}}}}
-           (first (geojson-to-regions geojson))))))
+    (testing "QGIS 2 format"
+      (let [geojson {"type" "FeatureCollection",
+                     "crs" {"type" "name",
+                            "properties" {"name" "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+                     "features" [{"type" "Feature",
+                                  "properties" {"id" 5, "name" "Rastila", "minimap_viewport" "f", "congregation" "f", "subregion" "t"},
+                                  "geometry" {"type" "Polygon", "coordinates" [[[25.1224283, 60.2180387], [25.125388, 60.217563], [25.1278867, 60.2156996]]]}}]}]
+        (is (= expected-region (first (geojson-to-regions geojson))))))
+
+    (testing "QGIS 3 format"
+      (let [geojson {"type" "FeatureCollection",
+                     "name" "test regions",
+                     "crs" {"type" "name",
+                            "properties" {"name" "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+                     "features" [{"type" "Feature",
+                                  "properties" {"id" 5, "name" "Rastila", "minimap_viewport" false, "congregation" false, "subregion" true},
+                                  "geometry" {"type" "Polygon", "coordinates" [[[25.1224283 60.2180387] [25.125388 60.217563] [25.1278867 60.2156996]]]}}]}]
+        (is (= expected-region (first (geojson-to-regions geojson))))))))
