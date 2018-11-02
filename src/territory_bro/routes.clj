@@ -13,6 +13,10 @@
             [territory-bro.db :as db]
             [territory-bro.domain :as domain]))
 
+(defn- tenant [request]
+  (if-let [tenant (get-in request [:headers "x-tenant"])]
+    (keyword tenant)))
+
 (defn- read-file-upload [request param]
   (let [tempfile (-> request :params param :tempfile)]
     (try
@@ -21,38 +25,46 @@
         (io/delete-file tempfile)))))
 
 (defn import-territories! [request]
-  (let [geojson (read-file-upload request :territories)]
-    (when (not-empty geojson)
-      (log/info "Importing territories")
-      (db/transactional
-       (db/delete-all-territories!)
-       (dorun (map db/create-territory! (-> geojson
-                                            json/read-str
-                                            domain/geojson-to-territories))))))
-  (let [geojson (read-file-upload request :regions)]
-    (when (not-empty geojson)
-      (log/info "Importing regions")
-      (db/transactional
-       (db/delete-all-regions!)
-       (dorun (map db/create-region! (-> geojson
-                                         json/read-str
-                                         domain/geojson-to-regions))))))
+  ; TODO: not needed for tenants, remove this method after the tenant system is complete
+  (db/as-tenant nil
+    (let [geojson (read-file-upload request :territories)]
+      (when (not-empty geojson)
+        (log/info "Importing territories")
+        (db/transactional
+         (db/query :delete-all-territories!)
+         (dorun (map db/create-territory! (-> geojson
+                                              json/read-str
+                                              domain/geojson-to-territories))))))
+    (let [geojson (read-file-upload request :regions)]
+      (when (not-empty geojson)
+        (log/info "Importing regions")
+        (db/transactional
+         (db/query :delete-all-regions!)
+         (dorun (map db/create-region! (-> geojson
+                                           json/read-str
+                                           domain/geojson-to-regions)))))))
   (redirect "/"))
 
 (defn clear-database! []
-  (log/info "Clearing the database")
-  (db/transactional
-   (db/delete-all-territories!)
-   (db/delete-all-regions!))
+  ; TODO: not needed for tenants, remove this method after the tenant system is complete
+  (db/as-tenant nil
+    (log/info "Clearing the database")
+    (db/transactional
+     (db/query :delete-all-territories!)
+     (db/query :delete-all-regions!)))
   (redirect "/"))
 
 (defresource territories
   :available-media-types ["application/json"]
-  :handle-ok (fn [_] (db/find-territories)))
+  :handle-ok (fn [{:keys [request]}]
+               (db/as-tenant (tenant request)
+                 (db/query :find-territories))))
 
 (defresource regions
   :available-media-types ["application/json"]
-  :handle-ok (fn [_] (db/find-regions)))
+  :handle-ok (fn [{:keys [request]}]
+               (db/as-tenant (tenant request)
+                 (db/query :find-regions))))
 
 (defroutes home-routes
   (GET "/" request {:status 200

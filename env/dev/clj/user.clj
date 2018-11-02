@@ -22,12 +22,6 @@
   (stop)
   (start))
 
-(defn restart-db []
-  (mount/stop #'territory-bro.db/*db*)
-  (mount/start #'territory-bro.db/*db*)
-  (binding [*ns* 'territory-bro.db]
-    (conman/bind-connection territory-bro.db/*db* "sql/queries.sql")))
-
 (defn reset-db []
   (migrations/migrate ["reset"] (select-keys env [:database-url])))
 

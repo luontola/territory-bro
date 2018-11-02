@@ -29,7 +29,8 @@
              :tenant {:foo {:database-url "foo url"}
                       :bar {:database-url "bar url"}}}]
     (testing "default database"
-      (is (= "default url" (database-url env))))
+      (is (= "default url" (database-url env)))
+      (is (= "default url" (database-url env nil))))
 
     (testing "tenant database"
       (is (= "foo url" (database-url env :foo)))

@@ -10,33 +10,47 @@
             [conman.core :as conman]
             [mount.core :as mount]
             [ring.util.codec :refer [form-decode]]
-            [territory-bro.config :refer [env]])
+            [territory-bro.config :as config :refer [env]])
   (:import (java.sql Date Timestamp PreparedStatement Array)
            clojure.lang.IPersistentMap
            clojure.lang.IPersistentVector
            org.postgresql.util.PGobject))
 
-(mount/defstate ^:dynamic *db*
-  :start (if-let [jdbc-url (env :database-url)]
-           (conman/connect! {:jdbc-url jdbc-url})
-           (do
-             (log/warn "database connection URL was not found, please set :database-url in your config")
-             *db*))
-  :stop (conman/disconnect! *db*))
+(def ^:dynamic *db*)
 
-(conman/bind-connection *db* "sql/queries.sql")
+(def queries (conman/bind-connection-map nil "sql/queries.sql"))
+
+(defn as-tenant* [tenant f]
+  ; TODO: connection pooling
+  (let [database-url (config/database-url config/env tenant)]
+    (binding [*db* (conman/connect! {:jdbc-url database-url})]
+      (try
+        (f)
+        (finally
+          (conman/disconnect! *db*))))))
+
+(defmacro as-tenant [tenant & body]
+  `(as-tenant* ~tenant (fn [] ~@body)))
+
+(defn query
+  ([query-id]
+   (query query-id {}))
+  ([query-id params]
+   (if-let [query-fn (get-in queries [:fns query-id :fn])]
+     (query-fn *db* params)
+     (throw (IllegalArgumentException. (str "query not found " query-id))))))
 
 (defn create-territory! [opts]
-  (-create-territory! (update opts :location json/write-str)))
+  (query :create-territory! (update opts :location json/write-str)))
 
 (defn count-territories []
-  (:count (first (-count-territories))))
+  (:count (first (query :count-territories))))
 
 (defn create-region! [opts]
-  (-create-region! (update opts :location json/write-str)))
+  (query :create-region! (update opts :location json/write-str)))
 
 (defn count-regions []
-  (:count (first (-count-regions))))
+  (:count (first (query :count-regions))))
 
 (defn transactional* [f]
   (conman/with-transaction [*db* {:isolation :serializable}] (f)))

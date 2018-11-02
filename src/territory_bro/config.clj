@@ -23,6 +23,10 @@
                      (source/from-env)))
 
 (defn database-url
-  ([env] (:database-url env))
-  ([env tenant] (or (get-in env [:tenant tenant :database-url])
-                    (throw (IllegalArgumentException. (str "tenant not found: " tenant))))))
+  ([env]
+   (database-url env nil))
+  ([env tenant]
+   (if (nil? tenant)
+     (:database-url env)
+     (or (get-in env [:tenant tenant :database-url])
+         (throw (IllegalArgumentException. (str "tenant not found: " tenant)))))))
