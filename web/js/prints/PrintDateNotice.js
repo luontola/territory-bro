@@ -1,16 +1,18 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 /* @flow */
 
-import React from "react";
+import * as React from 'react';
 import styles from "./PrintDateNotice.css";
 import formatDate from "date-fns/format";
 
-const PrintDateNotice = ({children}: {
-  children?: React.Element<*>,
-}) => {
+type Props = {
+  children?: React.Node,
+};
+
+const PrintDateNotice = ({children}: Props) => {
   const today = formatDate(new Date(), 'YYYY-MM-DD');
   return (
     <div className={styles.root}>

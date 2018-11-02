@@ -7,17 +7,16 @@
 import "purecss/build/pure-min.css";
 import "purecss/build/grids-responsive-min.css";
 import "./Layout.css";
-import type {Children} from "react";
-import React from "react";
+import * as React from 'react';
 import Link from "./Link";
 import LanguageSelection from "./LanguageSelection";
 
-class Layout extends React.Component {
-  props: {
-    title?: string,
-    children?: Children,
-  };
+type Props = {
+  title?: string,
+  children?: React.Node,
+}
 
+class Layout extends React.Component<Props> {
   componentDidMount() {
     const {title} = this.props;
     const site = "Territory Bro";

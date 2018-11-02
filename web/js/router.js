@@ -1,4 +1,4 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -23,11 +23,11 @@ export type Route = {
 export function matchURI(path: string, uri: string): ?{ [string]: string } {
   const keys = [];
   const pattern: RegExp = toRegex(path, keys); // TODO: Use caching
-  const match: string[] = pattern.exec(uri);
+  const match: ?string[] = pattern.exec(uri);
   if (!match) {
     return null;
   }
-  const params = Object.create(null);
+  const params: { [string]: string } = /* :: {} || */ Object.create(null);
   for (let i = 1; i < match.length; i++) {
     params[keys[i - 1].name] = (match[i] !== undefined ? match[i] : undefined);
   }

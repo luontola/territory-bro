@@ -22,11 +22,12 @@ import {
 import type {Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 
-export default class NeighborhoodMap extends OpenLayersMap {
-  props: {
-    territory: Territory,
-    mapRaster: MapRaster,
-  };
+type Props = {
+  territory: Territory,
+  mapRaster: MapRaster,
+};
+
+export default class NeighborhoodMap extends OpenLayersMap<Props> {
   map: *;
 
   componentDidMount() {

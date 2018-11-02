@@ -18,12 +18,12 @@ import {makeStreetsLayer, wktToFeature} from "./mapOptions";
 import type {Region, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 
-export default class TerritoryMiniMap extends OpenLayersMap {
-  props: {
-    territory: Territory,
-    regions: Array<Region>,
-  };
+type Props = {
+  territory: Territory,
+  regions: Array<Region>,
+};
 
+export default class TerritoryMiniMap extends OpenLayersMap<Props> {
   componentDidMount() {
     const {territory, regions} = this.props;
     initTerritoryMiniMap(this.element, territory, regions);

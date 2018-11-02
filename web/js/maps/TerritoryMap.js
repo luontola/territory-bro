@@ -15,11 +15,12 @@ import {makeControls, makeStreetsLayer, territoryFillStyle, territoryStrokeStyle
 import type {Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 
-export default class TerritoryMap extends OpenLayersMap {
-  props: {
-    territory: Territory,
-    mapRaster: MapRaster,
-  };
+type Props = {
+  territory: Territory,
+  mapRaster: MapRaster,
+};
+
+export default class TerritoryMap extends OpenLayersMap<Props> {
   map: *;
 
   componentDidMount() {

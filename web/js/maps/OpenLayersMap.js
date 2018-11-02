@@ -8,12 +8,18 @@ import "ol/ol.css";
 import React from "react";
 import styles from "./OpenLayersMap.css";
 
-export default class OpenLayersMap extends React.Component {
+type Props = {}
+
+export default class OpenLayersMap<Props> extends React.Component<Props> {
   element: HTMLDivElement;
 
   render() {
     return (
-      <div className={styles.root} ref={el => this.element = el}/>
+      <div className={styles.root} ref={el => {
+        if (el) {
+          this.element = el;
+        }
+      }}/>
     );
   }
 }
