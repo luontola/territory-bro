@@ -21,3 +21,8 @@
                      (mount/args)
                      (source/from-system-props)
                      (source/from-env)))
+
+(defn database-url
+  ([env] (:database-url env))
+  ([env tenant] (or (get-in env [:tenant tenant :database-url])
+                    (throw (IllegalArgumentException. (str "tenant not found: " tenant))))))

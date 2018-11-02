@@ -9,7 +9,8 @@
             [territory-bro.config :refer [env]]
             [conman.core :as conman]
             [territory-bro.db :as db]
-            [clojure.java.jdbc :as jdbc]))
+            [clojure.java.jdbc :as jdbc])
+  (:import (java.util.regex Pattern)))
 
 (defn api-fixture [f]
   (mount/start
@@ -24,3 +25,6 @@
   (conman/with-transaction [db/*db* {:isolation :serializable}]
     (jdbc/db-set-rollback-only! db/*db*)
     (f)))
+
+(defn re-equals [s]
+  (re-pattern (clojure.core/str "^" (Pattern/quote s) "$")))
