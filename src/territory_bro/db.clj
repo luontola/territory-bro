@@ -68,7 +68,7 @@
   ([query-id params]
    (if-let [query-fn (get-in queries [:fns query-id :fn])]
      (query-fn *db* params)
-     (throw (IllegalArgumentException. (str "query not found " query-id))))))
+     (throw (IllegalArgumentException. (str "query " query-id " not found"))))))
 
 (defn create-territory! [opts]
   (query :create-territory! (update opts :location json/write-str)))
