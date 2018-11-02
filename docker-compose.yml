@@ -31,6 +31,6 @@ services:
       POSTGRES_USER: territorybro
       POSTGRES_PASSWORD: territorybro
     mem_reservation: 30m
-    mem_limit: 50m
+    mem_limit: 150m
     ports:
     - "5432:5432"
