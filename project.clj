@@ -17,6 +17,7 @@
                  [metosin/ring-http-response "0.9.0"]
                  [metosin/ring-middleware-format "0.6.0"]
                  [mount "0.1.12"]
+                 [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.9.0"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.cli "0.3.7"]
@@ -49,7 +50,7 @@
              :project/dev {:dependencies [[bananaoomarang/ring-debug-logging "1.1.0"]
                                           [pjstadig/humane-test-output "0.8.3"]
                                           [prone "1.6.0"]
-                                          [ring/ring-devel "1.7.0"]
+                                          [ring/ring-devel "1.7.0" :exclusions [ns-tracker]]
                                           [ring/ring-mock "0.3.2"]]
 
                            :source-paths ["env/dev/clj"]
