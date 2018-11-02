@@ -22,19 +22,3 @@
 
   (testing "multiple overrides are all applied in order"
     (is (= {:a 2, :b 3} (override-defaults {:a 1, :b 1} {:a 2, :b 2} {:b 3})))))
-
-(deftest database-url-test
-  (let [env {:database-url "default url"
-             :tenant {:foo {:database-url "foo url"}
-                      :bar {:database-url "bar url"}}}]
-    (testing "default database"
-      (is (= "default url" (database-url env)))
-      (is (= "default url" (database-url env nil))))
-
-    (testing "tenant database"
-      (is (= "foo url" (database-url env :foo)))
-      (is (= "bar url" (database-url env :bar))))
-
-    (testing "unknown tenant is an error"
-      (is (thrown-with-msg? IllegalArgumentException (re-equals "tenant not found: :no-such-tenant")
-                            (database-url env :no-such-tenant))))))

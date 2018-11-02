@@ -16,6 +16,7 @@
 (defn api-fixture [f]
   (mount/start
    #'territory-bro.config/env
+   #'territory-bro.db/databases
    #'territory-bro.handler/app)
   (migrations/migrate ["migrate"] (select-keys env [:database-url]))
   (db/as-tenant nil

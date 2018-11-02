@@ -10,24 +10,54 @@
             [conman.core :as conman]
             [mount.core :as mount]
             [ring.util.codec :refer [form-decode]]
-            [territory-bro.config :as config :refer [env]])
+            [territory-bro.config :refer [env]])
   (:import (java.sql Date Timestamp PreparedStatement Array)
            clojure.lang.IPersistentMap
            clojure.lang.IPersistentVector
-           org.postgresql.util.PGobject))
+           org.postgresql.util.PGobject
+           (com.zaxxer.hikari HikariDataSource)))
+
+; Since there are tens of tenants, we don't want to keep connections open to all of them all the time.
+; See hikari-cp.core/default-datasource-options for available options.
+(def datasource-options {:minimum-idle 0
+                         :maximum-pool-size 2})
+
+(defn connect! [database-url]
+  (log/info "Connect" database-url)
+  (conman/connect! (merge datasource-options
+                          {:jdbc-url database-url})))
+
+(defn disconnect! [connection]
+  (log/info "Disconnect" (if-let [ds (:datasource connection)]
+                           (.getJdbcUrl ^HikariDataSource ds)))
+  (conman/disconnect! connection))
+
+(defn connect-all! []
+  {:default (connect! (:database-url env))
+   :tenant (into {} (map (fn [[tenant config]]
+                           [tenant (connect! (:database-url config))])
+                         (:tenant env)))})
+
+(defn disconnect-all! [databases]
+  (disconnect! (:default databases))
+  (doseq [config (vals (:tenant databases))]
+    (disconnect! config)))
+
+(mount/defstate databases
+  :start (connect-all!)
+  :stop (disconnect-all! databases))
 
 (def ^:dynamic *db*)
 
 (def queries (conman/bind-connection-map nil "sql/queries.sql"))
 
 (defn as-tenant* [tenant f]
-  ; TODO: connection pooling
-  (let [database-url (config/database-url config/env tenant)]
-    (binding [*db* (conman/connect! {:jdbc-url database-url})]
-      (try
-        (f)
-        (finally
-          (conman/disconnect! *db*))))))
+  (binding [*db* (if (nil? tenant)
+                   (or (get databases :default)
+                       (throw (IllegalArgumentException. "default database connection not found")))
+                   (or (get-in databases [:tenant tenant])
+                       (throw (IllegalArgumentException. (str "database connection for tenant " tenant " not found")))))]
+    (f)))
 
 (defmacro as-tenant [tenant & body]
   `(as-tenant* ~tenant (fn [] ~@body)))
