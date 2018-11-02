@@ -1,4 +1,4 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -14,9 +14,9 @@ import {
   getSelectedTerritories
 } from "./PrintOptionsForm";
 import reducers from "../reducers";
-import createStore from "redux/lib/createStore";
+import {createStore} from "redux";
 import {mapRastersLoaded} from "../configActions";
-import {change} from "redux-form/lib/actions";
+import {change} from "redux-form";
 import {regionsLoaded, territoriesLoaded} from "../apiActions";
 import type {Region, Territory} from "../api";
 import type {MapRaster} from "../maps/mapOptions";

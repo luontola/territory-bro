@@ -1,11 +1,16 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 /* @flow */
 
 import React from "react";
-import ol from "openlayers";
+import {Map, View} from "ol";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector"
+import Style from "ol/style/Style";
+import Stroke from "ol/style/Stroke";
+import {fromLonLat} from "ol/proj";
 import type {MapRaster} from "./mapOptions";
 import {makeControls, makeStreetsLayer, territoryStrokeStyle, territoryTextStyle, wktToFeature} from "./mapOptions";
 import type {Region, Territory} from "../api";
@@ -34,20 +39,20 @@ export default class RegionMap extends OpenLayersMap {
 function initRegionMap(element: HTMLDivElement,
                        region: Region,
                        territories: Array<Territory>): * {
-  const regionLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
+  const regionLayer = new VectorLayer({
+    source: new VectorSource({
       features: [wktToFeature(region.location)]
     }),
-    style: new ol.style.Style({
-      stroke: new ol.style.Stroke({
+    style: new Style({
+      stroke: new Stroke({
         color: 'rgba(0, 0, 0, 0.6)',
         width: 4.0
       })
     })
   });
 
-  const territoryLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
+  const territoryLayer = new VectorLayer({
+    source: new VectorSource({
       features: territories.map(function (territory) {
         const feature = wktToFeature(territory.location);
         feature.set('number', territory.number);
@@ -55,7 +60,7 @@ function initRegionMap(element: HTMLDivElement,
       })
     }),
     style: function (feature, resolution) {
-      const style = new ol.style.Style({
+      const style = new Style({
         stroke: territoryStrokeStyle(),
         text: territoryTextStyle(feature.get('number'), '5mm')
       });
@@ -65,13 +70,13 @@ function initRegionMap(element: HTMLDivElement,
 
   const streetsLayer = makeStreetsLayer();
 
-  const map = new ol.Map({
+  const map = new Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
     layers: [streetsLayer, regionLayer, territoryLayer],
     controls: makeControls(),
-    view: new ol.View({
-      center: ol.proj.fromLonLat([0.0, 0.0]),
+    view: new View({
+      center: fromLonLat([0.0, 0.0]),
       zoom: 1,
       minResolution: 1.25, // prevent zooming too close, show more surrounding for small territories
       zoomFactor: 1.1 // zoom in small steps to enable fine tuning

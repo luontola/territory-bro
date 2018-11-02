@@ -1,26 +1,26 @@
 {
   "presets": [
     [
-      "env", {
+      "@babel/preset-env", {
       "targets": {"browsers": ["last 2 versions"]},
       "modules": false,
-      "useBuiltIns": true,
+      "useBuiltIns": "entry",
       "debug": false
     }
     ],
-    "react",
-    "flow"
+    "@babel/react",
+    "@babel/flow"
   ],
   "plugins": [
-    "transform-object-rest-spread",
+    "@babel/plugin-proposal-object-rest-spread",
     ["react-intl", {"messagesDir": "./target/messages/"}]
   ],
   "env": {
     "test": {
       "presets": [
-        ["env", {"targets": {"node": "current"}}],
-        "react",
-        "flow"
+        ["@babel/env", {"targets": {"node": "current"}}],
+        "@babel/react",
+        "@babel/flow"
       ]
     }
   }

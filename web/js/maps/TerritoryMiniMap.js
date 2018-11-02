@@ -1,11 +1,19 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 /* @flow */
 
 import React from "react";
-import ol from "openlayers";
+import {Map, View} from "ol";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector"
+import Style from "ol/style/Style";
+import Stroke from "ol/style/Stroke";
+import Fill from "ol/style/Fill";
+import Icon from "ol/style/Icon";
+import {fromLonLat} from "ol/proj";
+import WKT from "ol/format/WKT";
 import {makeStreetsLayer, wktToFeature} from "./mapOptions";
 import type {Region, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
@@ -25,7 +33,7 @@ export default class TerritoryMiniMap extends OpenLayersMap {
 function initTerritoryMiniMap(element: HTMLDivElement,
                               territory: Territory,
                               regions: Array<Region>): void {
-  const wkt = new ol.format.WKT();
+  const wkt = new WKT();
   const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoint();
   const territoryWkt = wkt.writeGeometry(centerPoint);
   // TODO: handle it gracefully if one of the following is not initialized
@@ -55,12 +63,12 @@ function initTerritoryMiniMap(element: HTMLDivElement,
     throw new Error(`The territory number ${territory.number} is not inside a minimap viewport. Make sure that a region has the minimap_viewport=t flag enabled. It can also be the same region as the congregation boundary.`);
   }
 
-  const territoryLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
+  const territoryLayer = new VectorLayer({
+    source: new VectorSource({
       features: [wktToFeature(territoryWkt)]
     }),
-    style: new ol.style.Style({
-      image: new ol.style.Icon({
+    style: new Style({
+      image: new Icon({
         src: '/img/minimap-territory.svg',
         imgSize: [10, 10],
         snapToPixel: true,
@@ -76,28 +84,28 @@ function initTerritoryMiniMap(element: HTMLDivElement,
     })
   });
 
-  const viewportSource = new ol.source.Vector({
+  const viewportSource = new VectorSource({
     features: [wktToFeature(viewportWkt)]
   });
 
-  const congregationLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
+  const congregationLayer = new VectorLayer({
+    source: new VectorSource({
       features: [wktToFeature(congregationWkt)]
     }),
-    style: new ol.style.Style({
-      stroke: new ol.style.Stroke({
+    style: new Style({
+      stroke: new Stroke({
         color: 'rgba(0, 0, 0, 1.0)',
         width: 1.0
       })
     })
   });
 
-  const subregionsLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
+  const subregionsLayer = new VectorLayer({
+    source: new VectorSource({
       features: subregionsWkt ? [wktToFeature(subregionsWkt)] : []
     }),
-    style: new ol.style.Style({
-      fill: new ol.style.Fill({
+    style: new Style({
+      fill: new Fill({
         color: 'rgba(0, 0, 0, 0.3)'
       })
     })
@@ -105,14 +113,14 @@ function initTerritoryMiniMap(element: HTMLDivElement,
 
   const streetLayer = makeStreetsLayer();
 
-  const map = new ol.Map({
+  const map = new Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
     layers: [streetLayer, subregionsLayer, congregationLayer, territoryLayer],
     controls: [],
     interactions: [],
-    view: new ol.View({
-      center: ol.proj.fromLonLat([0.0, 0.0]),
+    view: new View({
+      center: fromLonLat([0.0, 0.0]),
       zoom: 1
     })
   });

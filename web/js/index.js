@@ -1,15 +1,14 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 /* @flow */
 
-import "babel-polyfill";
+import "@babel/polyfill"
 import React from "react";
 import ReactDOM from "react-dom";
-import Provider from "react-redux/es/components/Provider";
-import applyMiddleware from "redux/es/applyMiddleware";
-import createStore from "redux/es/createStore";
+import {Provider} from "react-redux";
+import {applyMiddleware, createStore} from "redux";
 import {createLogger} from "redux-logger";
 import reducers from "./reducers";
 import history from "./history";
@@ -23,6 +22,9 @@ import {mapRasters} from "./maps/mapOptions";
 const logger = createLogger();
 const store = createStore(reducers, applyMiddleware(logger));
 const root = document.getElementById('root');
+if (root === null) {
+  throw new Error('root element not found');
+}
 
 function renderComponent(component) {
   ReactDOM.render(
