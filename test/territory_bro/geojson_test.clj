@@ -4,7 +4,6 @@
 
 (ns territory-bro.geojson-test
   (:require [clojure.test :refer :all]
-            [ring.mock.request :refer :all]
             [territory-bro.geojson :refer :all]))
 
 (deftest test-explode-feature-collection

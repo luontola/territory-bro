@@ -4,7 +4,6 @@
 
 (ns territory-bro.config-test
   (:require [clojure.test :refer :all]
-            [ring.mock.request :refer :all]
             [territory-bro.config :refer :all]
             [territory-bro.testing :refer [re-equals]]))
 
