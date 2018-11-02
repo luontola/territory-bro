@@ -10,12 +10,15 @@
             [liberator.core :refer [defresource]]
             [ring.util.http-response :refer [ok]]
             [ring.util.response :refer [redirect]]
+            [territory-bro.config :refer [env]]
             [territory-bro.db :as db]
             [territory-bro.domain :as domain]))
 
-(defn- tenant [request]
+(defn find-tenant [request env]
   (if-let [tenant (get-in request [:headers "x-tenant"])]
-    (keyword tenant)))
+    (let [tenant (keyword tenant)]
+      (when (contains? (:tenant env) tenant)
+        tenant))))
 
 (defn- read-file-upload [request param]
   (let [tempfile (-> request :params param :tempfile)]
@@ -57,13 +60,13 @@
 (defresource territories
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
-               (db/as-tenant (tenant request)
+               (db/as-tenant (find-tenant request env)
                  (db/query :find-territories))))
 
 (defresource regions
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
-               (db/as-tenant (tenant request)
+               (db/as-tenant (find-tenant request env)
                  (db/query :find-regions))))
 
 (defroutes home-routes
