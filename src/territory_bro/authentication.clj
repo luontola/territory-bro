@@ -20,8 +20,8 @@
 (defn- fetch-public-key [^DecodedJWT jwt]
   (.getPublicKey (.get jwk-provider (.getKeyId jwt))))
 
-(defn- decode-base64 [^String base64-str]
-  (-> (Base64/getDecoder)
+(defn- decode-base64url [^String base64-str]
+  (-> (Base64/getUrlDecoder)
       (.decode base64-str)
       (String. StandardCharsets/UTF_8)))
 
@@ -31,5 +31,5 @@
     (-> (Algorithm/RSA256 pubkey nil)
         (.verify jwt))
     (-> (.getPayload jwt)
-        (decode-base64)
+        (decode-base64url)
         (json/read-str :key-fn keyword))))
