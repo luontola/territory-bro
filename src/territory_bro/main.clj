@@ -54,7 +54,7 @@
 (defn -main [& args]
   (mount/start #'territory-bro.config/env)
   (cond
-    (nil? (:database-url env))
+    (nil? (env :database-url))
     (do
       (log/error "Database configuration not found, :database-url must be set before running")
       (System/exit 1))

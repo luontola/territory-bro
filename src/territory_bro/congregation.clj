@@ -7,7 +7,7 @@
 
 (defn my-congregations []
   ; TODO: authorization
-  (->> (keys (:tenant env))
+  (->> (keys (env :tenant))
        (map (fn [id] {:id id
                       ; TODO: human-readable name
                       :name (.toUpperCase (name id))}))))

@@ -6,7 +6,6 @@
   (:require [compojure.core :refer [routes wrap-routes]]
             [compojure.route :as route]
             [mount.core :as mount]
-            [territory-bro.config :refer [env]]
             [territory-bro.env :refer [defaults]]
             [territory-bro.layout :refer [error-page]]
             [territory-bro.middleware :as middleware]
