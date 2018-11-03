@@ -82,3 +82,7 @@ export async function getRegions(congregationId: ?string): Promise<Array<Region>
 export async function loginWithIdToken(idToken: string) {
   await api.post('/api/login', {idToken});
 }
+
+export async function logout() {
+  await api.post('/api/logout');
+}

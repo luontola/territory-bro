@@ -67,6 +67,11 @@
     (-> (response "OK")
         (assoc :session (auth/save-user (:session request) jwt)))))
 
+(defn logout []
+  (log/info "Logout")
+  (-> (response "OK")
+      (assoc :session nil)))
+
 (defresource settings
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
@@ -98,6 +103,7 @@
 (defroutes home-routes
   (GET "/" [] (response "Territory Bro"))
   (POST "/api/login" request (login request))
+  (POST "/api/logout" [] (logout))
   (ANY "/api/settings" [] settings)
   (ANY "/api/my-congregations" [] my-congregations)
   (ANY "/api/territories" [] territories)

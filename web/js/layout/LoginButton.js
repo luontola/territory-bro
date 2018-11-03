@@ -8,9 +8,7 @@ import React from "react";
 import {openLoginDialog} from "../authentication";
 
 const LoginButton = () => (
-  <React.Fragment>
-    <button onClick={openLoginDialog}>Login</button>
-  </React.Fragment>
+  <button onClick={openLoginDialog}>Login</button>
 );
 
 export default LoginButton;

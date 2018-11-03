@@ -8,6 +8,7 @@ import React from "react";
 import type {State} from "../reducers";
 import connect from "react-redux/es/connect/connect";
 import LoginButton from "./LoginButton";
+import LogoutButton from "./LogoutButton";
 
 type Props = {
   loggedIn: boolean,
@@ -18,7 +19,7 @@ let AuthenticationPanel = ({loggedIn, fullName}: Props) => {
   if (loggedIn) {
     return (
       <p>
-        Logged in as {fullName}
+        Logged in as {fullName} <LogoutButton/>
       </p>
     );
   } else {
