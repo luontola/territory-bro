@@ -46,7 +46,7 @@ async function resolve(routes: Array<Route>, context: RoutingContext): Promise<m
       return result;
     }
   }
-  const error: ErrorMessage = new Error('Not found');
+  const error: ErrorMessage = new Error('Page Not Found');
   error.status = 404;
   throw error;
 }

@@ -1,4 +1,4 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -55,7 +55,7 @@ describe("router", () => {
           expect.fail(page, null, "did not expect a match");
         }, error => {
           expect(error).to.be.instanceOf(Error);
-          expect(error).to.have.property('message', 'Not found');
+          expect(error).to.have.property('message', 'Page Not Found');
           expect(error).to.have.property('status', 404);
         });
     });

@@ -36,14 +36,36 @@ function renderComponent(component) {
     </IntlProvider>, root);
 }
 
-function render(location) {
-  router.resolve(routes, {...location, store})
-    .then(renderComponent)
-    .catch(error => {
-      console.error("Error in rendering " + location.pathname + "\n", error);
-      router.resolve(routes, {...location, store, error})
-        .then(renderComponent);
-    });
+async function renderNormalPage(location) {
+  const route = await router.resolve(routes, {...location, store});
+  renderComponent(route);
+}
+
+async function renderErrorPage(location, error) {
+  console.error("Error in rendering " + location.pathname + "\n", error);
+  const route = await router.resolve(routes, {...location, store, error});
+  renderComponent(route);
+}
+
+function handleRedirect(location, {redirect, replace}) {
+  console.info('Redirecting from', location, 'to', redirect);
+  if (replace) {
+    history.replace(redirect);
+  } else {
+    history.push(redirect);
+  }
+}
+
+async function render(location) {
+  try {
+    await renderNormalPage(location);
+  } catch (error) {
+    if (error.redirect) {
+      handleRedirect(location, error);
+    } else {
+      await renderErrorPage(location, error);
+    }
+  }
 }
 
 const congregationId = savedCongregationId();

@@ -54,6 +54,16 @@ const routes: Array<Route> = [
     }
   },
   {
+    path: '/login-callback',
+    async action() {
+      //handleAuthentication();
+      throw {
+        redirect: {pathname: '/'},
+        replace: true,
+      };
+    }
+  },
+  {
     path: '/error',
     action: ({error}: { error: ErrorMessage }) => <ErrorPage error={error}/>
   },
