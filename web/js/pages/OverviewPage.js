@@ -9,7 +9,13 @@ import Layout from "../layout/Layout";
 import type {State} from "../reducers";
 import {connect} from "react-redux";
 
-let OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, regionCount: number }) => (
+type Props = {
+  territoryCount: number,
+  regionCount: number,
+  loggedIn: boolean,
+}
+
+let OverviewPage = ({territoryCount, regionCount, loggedIn}: Props) => (
   <Layout>
     <h1>Territory Bro</h1>
 
@@ -28,22 +34,29 @@ let OverviewPage = ({territoryCount, regionCount}: { territoryCount: number, reg
 
     <p>The database has currently {territoryCount} territories and {regionCount} regions.</p>
 
-    <form action="/api/clear-database" method="post">
-      <button type="submit" className="btn btn-primary">Delete All</button>
-    </form>
+    {loggedIn ?
+      <p>Importing is disabled.</p>
+      :
+      <React.Fragment>
+        <form action="/api/clear-database" method="post">
+          <button type="submit" className="btn btn-primary">Delete All</button>
+        </form>
 
-    <form action="/api/import-territories" method="post" encType="multipart/form-data">
-      <p>Territories GeoJSON: <input type="file" name="territories"/></p>
-      <p>Regions GeoJSON: <input type="file" name="regions"/></p>
-      <button type="submit" className="btn btn-primary">Import</button>
-    </form>
+        <form action="/api/import-territories" method="post" encType="multipart/form-data">
+          <p>Territories GeoJSON: <input type="file" name="territories"/></p>
+          <p>Regions GeoJSON: <input type="file" name="regions"/></p>
+          <button type="submit" className="btn btn-primary">Import</button>
+        </form>
+      </React.Fragment>
+    }
   </Layout>
 );
 
-function mapStateToProps(state: State) {
+function mapStateToProps(state: State): Props {
   return {
     territoryCount: state.api.territories.length,
     regionCount: state.api.regions.length,
+    loggedIn: state.api.authenticated,
   };
 }
 
