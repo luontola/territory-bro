@@ -10,9 +10,10 @@
             [liberator.core :refer [defresource]]
             [ring.util.http-response :refer [ok]]
             [ring.util.response :refer [redirect]]
+            [territory-bro.authentication :as auth]
             [territory-bro.config :refer [env]]
-            [territory-bro.db :as db]
             [territory-bro.congregation :as congregation]
+            [territory-bro.db :as db]
             [territory-bro.domain :as domain]))
 
 (defn find-tenant [request env]
@@ -58,6 +59,17 @@
      (db/query :delete-all-regions!)))
   (redirect "/"))
 
+;; TODO: not really a resource, but a command
+(defresource login
+  :allowed-methods [:post]
+  :available-media-types ["application/json"]
+  :post! (fn [{:keys [request]}]
+           (let [id-token (get-in request [:params :idToken])
+                 jwt (auth/decode-jwt id-token)]
+             ;; TODO: create session, save allowed tenants in session
+             (prn 'jwt jwt))
+           nil))
+
 (defresource my-congregations
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
@@ -76,9 +88,10 @@
                  (db/query :find-regions))))
 
 (defroutes home-routes
-  (GET "/" request {:status 200
-                    :headers {"Content-Type" "text/html; charset=utf-8"}
-                    :body "Territory Bro"})
+  (GET "/" [] {:status 200
+               :headers {"Content-Type" "text/html; charset=utf-8"}
+               :body "Territory Bro"})
+  (ANY "/api/login" [] login)
   (ANY "/api/my-congregations" [] my-congregations)
   (ANY "/api/territories" [] territories)
   (ANY "/api/regions" [] regions)

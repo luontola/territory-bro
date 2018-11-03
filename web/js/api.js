@@ -70,3 +70,7 @@ export async function getRegions(congregationId: ?string): Promise<Array<Region>
   const response = await api.get('/api/regions', requestConfig(congregationId));
   return sortRegions(response.data);
 }
+
+export async function loginWithIdToken(idToken: string) {
+  await api.post('/api/login', {idToken});
+}
