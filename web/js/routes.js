@@ -16,6 +16,7 @@ import {myCongregationsLoaded, regionsLoaded, territoriesLoaded} from "./apiActi
 import RuralTerritoryCardsPage from "./pages/RuralTerritoryCardsPage";
 import type {State} from "./reducers";
 import {changeCongregation} from "./congregation";
+import {handleAuthentication} from "./authentication";
 
 const routes: Array<Route> = [
   {
@@ -56,7 +57,7 @@ const routes: Array<Route> = [
   {
     path: '/login-callback',
     async action() {
-      //handleAuthentication();
+      await handleAuthentication();
       throw {
         redirect: {pathname: '/'},
         replace: true,
