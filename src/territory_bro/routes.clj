@@ -9,7 +9,7 @@
             [compojure.core :refer [defroutes GET POST ANY]]
             [liberator.core :refer [defresource]]
             [ring.util.http-response :refer [ok]]
-            [ring.util.response :refer [redirect]]
+            [ring.util.response :refer [redirect response]]
             [territory-bro.authentication :as auth]
             [territory-bro.config :refer [env]]
             [territory-bro.congregation :as congregation]
@@ -59,16 +59,14 @@
      (db/query :delete-all-regions!)))
   (redirect "/"))
 
-;; TODO: not really a resource, but a command
-(defresource login
-  :allowed-methods [:post]
-  :available-media-types ["application/json"]
-  :post! (fn [{:keys [request]}]
-           (let [id-token (get-in request [:params :idToken])
-                 jwt (auth/decode-jwt id-token)]
-             ;; TODO: create session, save allowed tenants in session
-             (prn 'jwt jwt))
-           nil))
+(defn login [request]
+  (let [id-token (get-in request [:params :idToken])
+        jwt (auth/decode-jwt id-token)]
+    (when (auth/jwt-expired? jwt)
+      (throw (ex-info "JWT expired" {:jwt jwt})))
+    (log/info "Login using JWT" jwt)
+    (-> (response "OK")
+        (assoc :session (auth/save-user (:session request) jwt)))))
 
 (defresource my-congregations
   :available-media-types ["application/json"]
@@ -88,10 +86,8 @@
                  (db/query :find-regions))))
 
 (defroutes home-routes
-  (GET "/" [] {:status 200
-               :headers {"Content-Type" "text/html; charset=utf-8"}
-               :body "Territory Bro"})
-  (ANY "/api/login" [] login)
+  (GET "/" [] (response "Territory Bro"))
+  (POST "/api/login" request (login request))
   (ANY "/api/my-congregations" [] my-congregations)
   (ANY "/api/territories" [] territories)
   (ANY "/api/regions" [] regions)

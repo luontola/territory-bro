@@ -11,6 +11,7 @@
            (com.auth0.jwt.algorithms Algorithm)
            (com.auth0.jwt.interfaces DecodedJWT)
            (java.nio.charset StandardCharsets)
+           (java.time Instant)
            (java.util Base64)))
 
 (mount/defstate ^:dynamic ^JwkProvider jwk-provider
@@ -33,3 +34,15 @@
     (-> (.getPayload jwt)
         (decode-base64url)
         (json/read-str :key-fn keyword))))
+
+(defn jwt-expired?
+  ([jwt]
+   (jwt-expired? jwt (Instant/now)))
+  ([jwt ^Instant now]
+   (< (:exp jwt) (.getEpochSecond now))))
+
+(def ^:dynamic *user*)
+
+(defn save-user [session jwt]
+  (assoc session :user (select-keys jwt [:name :sub])))
+

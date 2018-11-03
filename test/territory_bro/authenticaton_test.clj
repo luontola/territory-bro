@@ -6,7 +6,8 @@
   (:require [clojure.test :refer :all]
             [territory-bro.authentication :refer :all])
   (:import (com.auth0.jwk JwkProvider Jwk)
-           (java.util Map)))
+           (java.util Map)
+           (java.time Instant)))
 
 ;; key cached from https://luontola.eu.auth0.com/.well-known/jwks.json
 (def jwk {"alg" "RS256",
@@ -30,3 +31,13 @@
     (let [decoded (decode-jwt "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IlJqWTFNekEzTlRKR1JrTTFRVGt5TlVaRk1UazNOa1UyT1Rjd1FVRXdSakV6TWpSQ1FUQkNOQSJ9.eyJnaXZlbl9uYW1lIjoiRXNrbyIsImZhbWlseV9uYW1lIjoiTHVvbnRvbGEiLCJuaWNrbmFtZSI6ImVza28ubHVvbnRvbGEiLCJuYW1lIjoiRXNrbyBMdW9udG9sYSIsInBpY3R1cmUiOiJodHRwczovL2xoNi5nb29nbGV1c2VyY29udGVudC5jb20vLUFtRHYtVlZoUUJVL0FBQUFBQUFBQUFJL0FBQUFBQUFBQWVJL2JIUDhsVk5ZMWFBL3Bob3RvLmpwZyIsImxvY2FsZSI6ImVuLUdCIiwidXBkYXRlZF9hdCI6IjIwMTgtMTEtMDNUMTY6MTY6NDcuNTAyWiIsImlzcyI6Imh0dHBzOi8vbHVvbnRvbGEuZXUuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTAyODgzMjM3Nzk0NDUxMTExNDU5IiwiYXVkIjoiOHRWa2Rmbnc4eW5aNnJYTm5kRDZlWjZFcnNIZElnUGkiLCJpYXQiOjE1NDEyNjE4MDcsImV4cCI6MTU0MTI5NzgwNywibm9uY2UiOiI5UGlFemxtTDk3d0xudTFBLVVPakZ-VFAyekVYU3dvLSJ9.v3avK87uM7ncT3Bx8aJ7NbbCaOjgv_TQ9lRR6hs6CTFteA3yhbZpX0isB3_2Lxf46AsqVEWWFvY-Afslc_32_UzLfaWEPH5HwQwRAwUW9m34tx-RYhNtP02jFAmJIZG-akhz0TYlEzcblU1tOKJbLFuVHyRAOWKRSvlJXioVDfqEdsApNAI78-aoEjhf3ouLzDQVl15AfPBP8Czmp2wmwRfD_2ES66e-_q7cm9zzkcWTjub0wLmiNhDCQfnZJxfA9r5XUQLThbUFHHPnSx-QfLqP8tXmMLm9B9BV8J7G1humG8gaCycq_Q-9ieSDAjpvZ8C5ePTNLVOga4j-MaaFtA")]
       (is (= {:name "Esko Luontola"}
              (select-keys decoded [:name]))))))
+
+(deftest jwt-expired-test
+  (testing "expire time in past"
+    (is (true? (jwt-expired? {:exp 1})))
+    (is (true? (jwt-expired? {:exp 1530000000} (Instant/ofEpochSecond 1540000000)))))
+  (testing "expire time now"
+    (is (false? (jwt-expired? {:exp 1540000000} (Instant/ofEpochSecond 1540000000)))))
+  (testing "expire time in future"
+    (is (false? (jwt-expired? {:exp Integer/MAX_VALUE})))
+    (is (false? (jwt-expired? {:exp 1550000000} (Instant/ofEpochSecond 1540000000))))))
