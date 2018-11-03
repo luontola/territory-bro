@@ -10,9 +10,9 @@ import OverviewPage from "./pages/OverviewPage";
 import TerritoryCardsPage from "./pages/TerritoryCardsPage";
 import NeighborhoodCardsPage from "./pages/NeighborhoodCardsPage";
 import RegionPrintoutsPage from "./pages/RegionPrintoutsPage";
-import {getMyCongregations, getRegions, getTerritories} from "./api";
+import {getRegions, getSettings, getTerritories} from "./api";
 import type {ErrorMessage, Route} from "./router";
-import {myCongregationsLoaded, regionsLoaded, territoriesLoaded} from "./apiActions";
+import {myCongregationsLoaded, regionsLoaded, territoriesLoaded, userLoggedIn} from "./apiActions";
 import RuralTerritoryCardsPage from "./pages/RuralTerritoryCardsPage";
 import type {State} from "./reducers";
 import {changeCongregation} from "./congregation";
@@ -82,8 +82,11 @@ async function fetchAll(store) {
 
 
 async function fetchMyCongregations(store) {
-  const congregations = await getMyCongregations();
-  store.dispatch(myCongregationsLoaded(congregations));
+  const settings = await getSettings();
+  if (settings.user.authenticated) {
+    store.dispatch(userLoggedIn(settings.user.name || '(unknown)'));
+  }
+  store.dispatch(myCongregationsLoaded(settings.congregations));
 
   const state: State = store.getState();
   if (state.config.congregationId === null && state.api.congregations.length > 0) {

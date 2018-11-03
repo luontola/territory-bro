@@ -67,6 +67,14 @@
     (-> (response "OK")
         (assoc :session (auth/save-user (:session request) jwt)))))
 
+(defresource settings
+  :available-media-types ["application/json"]
+  :handle-ok (fn [{:keys [request]}]
+               (auth/with-authenticated-user request
+                 {:user (assoc (select-keys auth/*user* [:name])
+                          :authenticated (not (nil? auth/*user*)))
+                  :congregations (congregation/my-congregations)})))
+
 (defresource my-congregations
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
@@ -90,6 +98,7 @@
 (defroutes home-routes
   (GET "/" [] (response "Territory Bro"))
   (POST "/api/login" request (login request))
+  (ANY "/api/settings" [] settings)
   (ANY "/api/my-congregations" [] my-congregations)
   (ANY "/api/territories" [] territories)
   (ANY "/api/regions" [] regions)

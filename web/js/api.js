@@ -25,8 +25,16 @@ export type Congregation = {
   name: string,
 }
 
-export async function getMyCongregations(): Promise<Array<Congregation>> {
-  const response = await api.get('/api/my-congregations');
+export type Settings = {
+  user: {
+    authenticated: boolean,
+    name: ?string,
+  },
+  congregations: Array<Congregation>,
+}
+
+export async function getSettings(): Promise<Settings> {
+  const response = await api.get('/api/settings');
   return response.data
 }
 

@@ -11,14 +11,14 @@ import LoginButton from "./LoginButton";
 
 type Props = {
   loggedIn: boolean,
-  name: ?string,
+  fullName: ?string,
 };
 
-let AuthenticationPanel = ({loggedIn, name}: Props) => {
+let AuthenticationPanel = ({loggedIn, fullName}: Props) => {
   if (loggedIn) {
     return (
       <p>
-        Logged in as {name}
+        Logged in as {fullName}
       </p>
     );
   } else {
@@ -32,8 +32,8 @@ let AuthenticationPanel = ({loggedIn, name}: Props) => {
 
 function mapStateToProps(state: State) {
   return {
-    loggedIn: state.api.congregations.length > 0,
-    name: "X", // TODO: get the name from server
+    loggedIn: state.api.authenticated,
+    fullName: state.api.userFullName,
   };
 }
 
