@@ -15,11 +15,13 @@
            clojure.lang.IPersistentMap
            clojure.lang.IPersistentVector
            org.postgresql.util.PGobject
-           (com.zaxxer.hikari HikariDataSource)))
+           (com.zaxxer.hikari HikariDataSource)
+           (java.time Duration)))
 
 ; Since there are tens of tenants, we don't want to keep connections open to all of them all the time.
 ; See hikari-cp.core/default-datasource-options for available options.
-(def datasource-options {:minimum-idle 0
+(def datasource-options {:idle-timeout (-> (Duration/ofSeconds 60) (.toMillis))
+                         :minimum-idle 0
                          :maximum-pool-size 2})
 
 (defn connect! [database-url]
