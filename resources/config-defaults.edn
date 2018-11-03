@@ -4,4 +4,5 @@
  :nrepl-port nil
  :database-url nil
  :auth0-domain nil
+ :super-admin nil
  :tenant {}}

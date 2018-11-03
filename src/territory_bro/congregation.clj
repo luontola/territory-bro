@@ -3,11 +3,15 @@
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.congregation
-  (:require [territory-bro.config :refer [env]]))
+  (:require [territory-bro.config :refer [env]]
+            [territory-bro.authentication :as auth]))
+
+(defn- format-tenant [id]
+  ; TODO: human-readable name
+  {:id id
+   :name (.toUpperCase (name id))})
 
 (defn my-congregations []
-  ; TODO: authorization
-  (->> (keys (env :tenant))
-       (map (fn [id] {:id id
-                      ; TODO: human-readable name
-                      :name (.toUpperCase (name id))}))))
+  (->> (auth/authorized-tenants)
+       (map format-tenant)
+       (sort-by #(.toUpperCase (:name %)))))

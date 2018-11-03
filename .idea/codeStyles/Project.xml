@@ -17,6 +17,7 @@
   :re-frame.core/reg-event-db 1000
   :re-frame.core/reg-sub 1000
   :secretary.core/defroute :only-indent
+  :territory-bro.authentication/with-authenticated-user 1
   :territory-bro.db/as-tenant 1
 }</ClojureCodeStyleSettings>
     <JavaCodeStyleSettings>

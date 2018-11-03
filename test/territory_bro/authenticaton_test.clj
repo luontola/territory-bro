@@ -41,3 +41,16 @@
   (testing "expire time in future"
     (is (false? (jwt-expired? {:exp Integer/MAX_VALUE})))
     (is (false? (jwt-expired? {:exp 1550000000} (Instant/ofEpochSecond 1540000000))))))
+
+(deftest super-admin-test
+  (let [env {:super-admin "super"}]
+    (testing "not authenticated"
+      (is (false? (super-admin? nil env))))
+    (testing "authenticated as normal user"
+      (is (false? (super-admin? {:sub "normal"} env))))
+    (testing "authenticated as super admin"
+      (is (true? (super-admin? {:sub "super"} env)))))
+  (testing "no super admin defined"
+    (let [env {:super-admin nil}]
+      (is (false? (super-admin? nil env)))
+      (is (false? (super-admin? {:sub "normal"} env))))))

@@ -17,10 +17,12 @@ type Props = {
 
 let CongregationSelection = ({currentCongregationId, congregations}: Props) => (
   <React.Fragment>
+    {congregations.length > 0 &&
     <select onChange={handleCongregationChange} value={currentCongregationId}>
       {congregations.map(({id, name}) =>
         <option key={id} value={id}>{name}</option>)}
     </select>
+    }
   </React.Fragment>
 );
 

@@ -5,7 +5,7 @@
 (ns territory-bro.authentication
   (:require [clojure.data.json :as json]
             [mount.core :as mount]
-            [territory-bro.config :refer [envx]])
+            [territory-bro.config :refer [env envx]])
   (:import (com.auth0.jwk JwkProviderBuilder JwkProvider)
            (com.auth0.jwt JWT)
            (com.auth0.jwt.algorithms Algorithm)
@@ -46,3 +46,26 @@
 (defn save-user [session jwt]
   (assoc session :user (select-keys jwt [:name :sub])))
 
+(defn with-authenticated-user* [request f]
+  (binding [*user* (get-in request [:session :user])]
+    (f)))
+
+(defmacro with-authenticated-user [request & body]
+  `(with-authenticated-user* ~request (fn [] ~@body)))
+
+(defn super-admin?
+  ([]
+   (super-admin? *user* env))
+  ([user env]
+   (if-let [super-admin (env :super-admin)]
+     (= (:sub user) super-admin)
+     false)))
+
+(defn- permission-to-view-tenant? [id]
+  ; TODO: fine-grained authorization
+  (super-admin?))
+
+(defn authorized-tenants []
+  (->> (keys (env :tenant))
+       (filter permission-to-view-tenant?)
+       (doall)))

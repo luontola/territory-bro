@@ -7,12 +7,11 @@
             [territory-bro.routes :refer :all]))
 
 (deftest find-tenant-test
-  (let [env {:tenant {:foo nil
-                      :bar nil}}]
+  (let [tenants [:foo :bar]]
     (testing "valid tenant"
-      (is (= :foo (find-tenant {:headers {"x-tenant" "foo"}} env)))
-      (is (= :bar (find-tenant {:headers {"x-tenant" "bar"}} env))))
+      (is (= :foo (find-tenant {:headers {"x-tenant" "foo"}} tenants)))
+      (is (= :bar (find-tenant {:headers {"x-tenant" "bar"}} tenants))))
     (testing "invalid tenant"
-      (is (= nil (find-tenant {:headers {"x-tenant" "gazonk"}} env))))
+      (is (= nil (find-tenant {:headers {"x-tenant" "gazonk"}} tenants))))
     (testing "unspecified tenant"
-      (is (= nil (find-tenant {:headers {}} env))))))
+      (is (= nil (find-tenant {:headers {}} tenants))))))

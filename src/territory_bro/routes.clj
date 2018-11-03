@@ -11,15 +11,14 @@
             [ring.util.http-response :refer [ok]]
             [ring.util.response :refer [redirect response]]
             [territory-bro.authentication :as auth]
-            [territory-bro.config :refer [env]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.domain :as domain]))
 
-(defn find-tenant [request env]
+(defn find-tenant [request tenants]
   (if-let [tenant (get-in request [:headers "x-tenant"])]
     (let [tenant (keyword tenant)]
-      (when (contains? (:tenant env) tenant)
+      (when (some #(= tenant %) tenants)
         tenant))))
 
 (defn- read-file-upload [request param]
@@ -71,19 +70,22 @@
 (defresource my-congregations
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
-               (congregation/my-congregations)))
+               (auth/with-authenticated-user request
+                 (congregation/my-congregations))))
 
 (defresource territories
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
-               (db/as-tenant (find-tenant request env)
-                 (db/query :find-territories))))
+               (auth/with-authenticated-user request
+                 (db/as-tenant (find-tenant request (auth/authorized-tenants))
+                   (db/query :find-territories)))))
 
 (defresource regions
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
-               (db/as-tenant (find-tenant request env)
-                 (db/query :find-regions))))
+               (auth/with-authenticated-user request
+                 (db/as-tenant (find-tenant request (auth/authorized-tenants))
+                   (db/query :find-regions)))))
 
 (defroutes home-routes
   (GET "/" [] (response "Territory Bro"))
