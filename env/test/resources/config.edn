@@ -1,2 +1,3 @@
 {:port 8082
- :database-url "jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"}
+ :database-url "jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
+ :auth0-domain "luontola.eu.auth0.com"}

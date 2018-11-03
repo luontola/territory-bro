@@ -7,7 +7,9 @@
   :description "Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses."
   :url "https://territorybro.com"
 
-  :dependencies [[compojure "1.6.1"]
+  :dependencies [[com.auth0/java-jwt "3.4.1"]
+                 [com.auth0/jwks-rsa "0.6.1"]
+                 [compojure "1.6.1"]
                  [conman "0.8.2"]
                  [cprop "0.1.11"]
                  [liberator "0.15.2"]
