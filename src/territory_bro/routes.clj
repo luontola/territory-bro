@@ -12,6 +12,7 @@
             [ring.util.response :refer [redirect]]
             [territory-bro.config :refer [env]]
             [territory-bro.db :as db]
+            [territory-bro.congregation :as congregation]
             [territory-bro.domain :as domain]))
 
 (defn find-tenant [request env]
@@ -57,6 +58,11 @@
      (db/query :delete-all-regions!)))
   (redirect "/"))
 
+(defresource my-congregations
+  :available-media-types ["application/json"]
+  :handle-ok (fn [{:keys [request]}]
+               (congregation/my-congregations)))
+
 (defresource territories
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
@@ -73,6 +79,7 @@
   (GET "/" request {:status 200
                     :headers {"Content-Type" "text/html; charset=utf-8"}
                     :body "Territory Bro"})
+  (ANY "/api/my-congregations" [] my-congregations)
   (ANY "/api/territories" [] territories)
   (ANY "/api/regions" [] regions)
   (POST "/api/import-territories" request (import-territories! request))

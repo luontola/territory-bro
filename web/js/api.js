@@ -1,4 +1,4 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,6 +8,16 @@ import {api} from "./util";
 import alphanumSort from "alphanum-sort";
 import sortBy from "lodash-es/sortBy";
 import findIndex from "lodash-es/findIndex";
+
+export type Congregation = {
+  id: string,
+  name: string,
+}
+
+export async function getMyCongregations(): Promise<Array<Congregation>> {
+  const response = await api.get('/api/my-congregations');
+  return response.data
+}
 
 export type Territory = {
   id: number,

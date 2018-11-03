@@ -10,6 +10,7 @@ import "./Layout.css";
 import * as React from 'react';
 import Link from "./Link";
 import LanguageSelection from "./LanguageSelection";
+import CongregationSelection from "./CongregationSelection";
 
 type Props = {
   title?: string,
@@ -29,6 +30,7 @@ class Layout extends React.Component<Props> {
       <div id="layout">
 
         <nav className="no-print">
+          <CongregationSelection/>
           <ul>
             <li><Link href="/">Overview</Link></li>
             <li><Link href="/territory-cards">Territory Cards</Link></li>

@@ -1,10 +1,17 @@
-// Copyright © 2015-2017 Esko Luontola
+// Copyright © 2015-2018 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 /* @flow */
 
-import type {Region, Territory} from "./api";
+import type {Congregation, Region, Territory} from "./api";
+
+export type MyCongregationsLoadedAction = { type: 'MY_CONGREGATIONS_LOADED', congregations: Array<Congregation> }
+export const MY_CONGREGATIONS_LOADED = 'MY_CONGREGATIONS_LOADED';
+export const myCongregationsLoaded = (congregations: Array<Congregation>): MyCongregationsLoadedAction => ({
+  type: MY_CONGREGATIONS_LOADED,
+  congregations
+});
 
 export type TerritoriesLoadedAction = { type: 'TERRITORIES_LOADED', territories: Array<Territory> }
 export const TERRITORIES_LOADED = 'TERRITORIES_LOADED';
@@ -21,5 +28,6 @@ export const regionsLoaded = (regions: Array<Region>): RegionsLoadedAction => ({
 });
 
 export type ApiAction =
+  | MyCongregationsLoadedAction
   | TerritoriesLoadedAction
   | RegionsLoadedAction;

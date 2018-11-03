@@ -16,8 +16,9 @@ import router from "./router";
 import routes from "./routes";
 import {IntlProvider} from "react-intl";
 import {language, messages} from "./intl";
-import {mapRastersLoaded} from "./configActions";
+import {congregationChanged, mapRastersLoaded} from "./configActions";
 import {mapRasters} from "./maps/mapOptions";
+import {savedCongregationId} from "./congregation";
 
 const logger = createLogger();
 const store = createStore(reducers, applyMiddleware(logger));
@@ -45,6 +46,10 @@ function render(location) {
     });
 }
 
+const congregationId = savedCongregationId();
+if (congregationId) {
+  store.dispatch(congregationChanged(congregationId));
+}
 store.dispatch(mapRastersLoaded(mapRasters));
 
 render(history.location);
