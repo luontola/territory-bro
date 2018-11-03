@@ -9,6 +9,17 @@ import alphanumSort from "alphanum-sort";
 import sortBy from "lodash-es/sortBy";
 import findIndex from "lodash-es/findIndex";
 
+function requestConfig(congregationId: ?string) {
+  const config = {
+    headers: {}
+  };
+  if (congregationId) {
+    config.headers['X-Tenant'] = congregationId;
+  }
+  return config;
+}
+
+
 export type Congregation = {
   id: string,
   name: string,
@@ -18,6 +29,7 @@ export async function getMyCongregations(): Promise<Array<Congregation>> {
   const response = await api.get('/api/my-congregations');
   return response.data
 }
+
 
 export type Territory = {
   id: number,
@@ -35,10 +47,11 @@ function sortTerritories(territories: Array<Territory>): Array<Territory> {
   return sortBy(territories, (t: Territory) => findIndex(numbers, (n: string) => n === t.number))
 }
 
-export async function getTerritories(): Promise<Array<Territory>> {
-  const response = await api.get('/api/territories');
+export async function getTerritories(congregationId: ?string): Promise<Array<Territory>> {
+  const response = await api.get('/api/territories', requestConfig(congregationId));
   return sortTerritories(response.data);
 }
+
 
 export type Region = {
   id: number,
@@ -53,7 +66,7 @@ function sortRegions(regions: Array<Region>): Array<Region> {
   return sortBy(regions, (r: Region) => r.name.toLowerCase());
 }
 
-export async function getRegions(): Promise<Array<Region>> {
-  const response = await api.get('/api/regions');
+export async function getRegions(congregationId: ?string): Promise<Array<Region>> {
+  const response = await api.get('/api/regions', requestConfig(congregationId));
   return sortRegions(response.data);
 }

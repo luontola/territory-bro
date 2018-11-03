@@ -81,12 +81,14 @@ async function fetchMyCongregations(store) {
 }
 
 async function fetchTerritories(store) {
-  const territories = await getTerritories();
+  const state: State = store.getState();
+  const territories = await getTerritories(state.config.congregationId);
   store.dispatch(territoriesLoaded(territories));
 }
 
 async function fetchRegions(store) {
-  const regions = await getRegions();
+  const state: State = store.getState();
+  const regions = await getRegions(state.config.congregationId);
   store.dispatch(regionsLoaded(regions));
 }
 
