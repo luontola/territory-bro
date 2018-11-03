@@ -26,6 +26,10 @@ export type Congregation = {
 }
 
 export type Settings = {
+  auth0: {
+    domain: string,
+    clientId: string,
+  },
   user: {
     authenticated: boolean,
     name: ?string,

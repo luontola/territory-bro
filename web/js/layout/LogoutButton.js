@@ -8,7 +8,7 @@ import React from "react";
 import {logout} from "../api";
 
 const LogoutButton = () => (
-  <button onClick={handleClick}>Logout</button>
+  <button type="button" onClick={handleClick}>Logout</button>
 );
 
 async function handleClick() {

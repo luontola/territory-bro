@@ -5,10 +5,29 @@
 /* @flow */
 
 import React from "react";
-import {openLoginDialog} from "../authentication";
+import {buildAuthenticator} from "../authentication";
+import type {State} from "../reducers";
+import connect from "react-redux/es/connect/connect";
 
-const LoginButton = () => (
-  <button onClick={openLoginDialog}>Login</button>
+type Props = {
+  auth0Domain: string,
+  auth0ClientId: string,
+}
+
+let LoginButton = ({auth0Domain, auth0ClientId}: Props) => (
+  <button type="button" onClick={() => {
+    const auth = buildAuthenticator(auth0Domain, auth0ClientId);
+    auth.login();
+  }}>Login</button>
 );
+
+function mapStateToProps(state: State) {
+  return {
+    auth0Domain: state.api.auth0Domain,
+    auth0ClientId: state.api.auth0ClientId,
+  };
+}
+
+LoginButton = connect(mapStateToProps)(LoginButton);
 
 export default LoginButton;

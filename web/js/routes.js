@@ -12,11 +12,11 @@ import NeighborhoodCardsPage from "./pages/NeighborhoodCardsPage";
 import RegionPrintoutsPage from "./pages/RegionPrintoutsPage";
 import {getRegions, getSettings, getTerritories} from "./api";
 import type {ErrorMessage, Route} from "./router";
-import {myCongregationsLoaded, regionsLoaded, territoriesLoaded, userLoggedIn} from "./apiActions";
+import {configured, myCongregationsLoaded, regionsLoaded, territoriesLoaded, userLoggedIn} from "./apiActions";
 import RuralTerritoryCardsPage from "./pages/RuralTerritoryCardsPage";
 import type {State} from "./reducers";
 import {changeCongregation} from "./congregation";
-import {handleAuthentication} from "./authentication";
+import {buildAuthenticator} from "./authentication";
 
 const routes: Array<Route> = [
   {
@@ -56,8 +56,14 @@ const routes: Array<Route> = [
   },
   {
     path: '/login-callback',
-    async action() {
-      await handleAuthentication();
+    async action({store}) {
+      let state: State = store.getState();
+      if (!(state.api.auth0Domain && state.api.auth0ClientId)) {
+        await fetchSettings(store);
+        state = store.getState();
+      }
+      const auth = buildAuthenticator(state.api.auth0Domain, state.api.auth0ClientId);
+      await auth.handleAuthentication();
       throw {
         redirect: {pathname: '/'},
         replace: true,
@@ -73,16 +79,17 @@ const routes: Array<Route> = [
 export default routes;
 
 async function fetchAll(store) {
+  await fetchSettings(store);
   await Promise.all([
-    fetchMyCongregations(store),
     fetchTerritories(store),
     fetchRegions(store)
   ]);
 }
 
 
-async function fetchMyCongregations(store) {
+async function fetchSettings(store) {
   const settings = await getSettings();
+  store.dispatch(configured(settings.auth0.domain, settings.auth0.clientId));
   if (settings.user.authenticated) {
     store.dispatch(userLoggedIn(settings.user.name || '(unknown)'));
   }

@@ -5,10 +5,12 @@
 /* @flow */
 
 import type {ApiAction} from "./apiActions";
-import {MY_CONGREGATIONS_LOADED, REGIONS_LOADED, TERRITORIES_LOADED, USER_LOGGED_IN} from "./apiActions";
+import {CONFIGURED, MY_CONGREGATIONS_LOADED, REGIONS_LOADED, TERRITORIES_LOADED, USER_LOGGED_IN} from "./apiActions";
 import type {Congregation, Region, Territory} from "./api";
 
 export type ApiState = {
+  +auth0Domain: string,
+  +auth0ClientId: string,
   +authenticated: boolean,
   +userFullName: ?string,
   +congregations: Array<Congregation>,
@@ -17,6 +19,8 @@ export type ApiState = {
 };
 
 const defaultState: ApiState = {
+  auth0Domain: '',
+  auth0ClientId: '',
   authenticated: false,
   userFullName: null,
   congregations: [],
@@ -26,6 +30,12 @@ const defaultState: ApiState = {
 
 export default (state: ApiState = defaultState, action: ApiAction): ApiState => {
   switch (action.type) {
+    case CONFIGURED:
+      return {
+        ...state,
+        auth0Domain: action.auth0Domain,
+        auth0ClientId: action.auth0ClientId,
+      };
     case USER_LOGGED_IN:
       return {
         ...state,

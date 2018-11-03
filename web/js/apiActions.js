@@ -6,6 +6,14 @@
 
 import type {Congregation, Region, Territory} from "./api";
 
+export type ConfiguredAction = { type: 'CONFIGURED', auth0Domain: string, auth0ClientId: string };
+export const CONFIGURED = 'CONFIGURED';
+export const configured = (auth0Domain: string, auth0ClientId: string): ConfiguredAction => ({
+  type: CONFIGURED,
+  auth0Domain,
+  auth0ClientId,
+});
+
 export type UserLoggedInAction = { type: 'USER_LOGGED_IN', fullName: string };
 export const USER_LOGGED_IN = 'USER_LOGGED_IN';
 export const userLoggedIn = (fullName: string): UserLoggedInAction => ({
@@ -35,6 +43,7 @@ export const regionsLoaded = (regions: Array<Region>): RegionsLoadedAction => ({
 });
 
 export type ApiAction =
+  | ConfiguredAction
   | UserLoggedInAction
   | MyCongregationsLoadedAction
   | TerritoriesLoadedAction

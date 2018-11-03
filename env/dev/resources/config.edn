@@ -4,4 +4,5 @@
  :nrepl-port 7000
  :database-url "jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
  :auth0-domain "luontola.eu.auth0.com"
+ :auth0-client-id "8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"
  :super-admin "google-oauth2|102883237794451111459"}
