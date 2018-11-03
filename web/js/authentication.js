@@ -19,7 +19,6 @@ const webAuth = new auth0.WebAuth({
 function findAuthResult() {
   return new Promise((resolve, reject) => {
     webAuth.parseHash(function (err, authResult) {
-      console.log("auth result", err, authResult);
       if (err) {
         console.warn("Authentication failed", err);
         reject(new Error("Authentication failed"));

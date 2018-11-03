@@ -11,7 +11,7 @@ import * as React from 'react';
 import Link from "./Link";
 import LanguageSelection from "./LanguageSelection";
 import CongregationSelection from "./CongregationSelection";
-import LoginButton from "./LoginButton";
+import AuthenticationPanel from "./AuthenticationPanel";
 
 type Props = {
   title?: string,
@@ -31,7 +31,7 @@ class Layout extends React.Component<Props> {
       <div id="layout">
 
         <nav className="no-print">
-          <p><LoginButton/></p>
+          <AuthenticationPanel/>
           <CongregationSelection/>
           <ul>
             <li><Link href="/">Overview</Link></li>
