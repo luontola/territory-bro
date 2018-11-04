@@ -44,7 +44,7 @@
 (def ^:dynamic *user*)
 
 (defn save-user [session jwt]
-  (assoc session :user (select-keys jwt [:name :sub])))
+  (assoc session :user (select-keys jwt [:sub :name :email :email_verified :picture])))
 
 (defn with-authenticated-user* [request f]
   (binding [*user* (get-in request [:session :user])]

@@ -10,8 +10,7 @@ export function buildAuthenticator(auth0Domain: string, auth0ClientId: string) {
     domain: auth0Domain,
     clientID: auth0ClientId,
     responseType: 'id_token',
-    // TODO: Usage of scope 'openid profile' is not recommended. See https://auth0.com/docs/scopes for more details.
-    scope: 'openid profile',
+    scope: 'openid email name picture',
     redirectUri: `${window.location.origin}/login-callback`,
   });
 
