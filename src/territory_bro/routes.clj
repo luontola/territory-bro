@@ -14,7 +14,8 @@
             [territory-bro.config :refer [envx]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
-            [territory-bro.domain :as domain]))
+            [territory-bro.domain :as domain]
+            [territory-bro.jwt :as jwt]))
 
 (defn find-tenant [request tenants]
   (if-let [tenant (get-in request [:headers "x-tenant"])]
@@ -61,8 +62,9 @@
 
 (defn login [request]
   (let [id-token (get-in request [:params :idToken])
-        jwt (auth/decode-jwt id-token)]
-    (when (auth/jwt-expired? jwt)
+        jwt (jwt/validate id-token)]
+    ;; TODO: extract validation
+    (when (jwt/expired? jwt)
       (throw (ex-info "JWT expired" {:jwt jwt})))
     (log/info "Login using JWT" jwt)
     (-> (response "OK")
