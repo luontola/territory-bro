@@ -2,7 +2,7 @@ FROM node:11 AS builder
 
 # flow depends on libelf.so.1
 RUN apt-get update && \
-    apt-get install -y libelf1 && \
+    apt-get install -y libelf1 zopfli && \
     rm -rf /var/lib/apt/lists/*
 
 # working directory
@@ -24,14 +24,22 @@ RUN yarn run flow check && \
     yarn run test && \
     yarn run build --no-progress --no-colors
 
+# offline compress static resources
+RUN find /project/web/html /project/target/webpack \
+        -type f \
+        -regextype posix-extended \
+        -iregex '.*\.(html?|js|map|css|svg|otf|ttf|txt|json)' \
+        -exec zopfli '{}' \;
+
 # ------------------------------------------------------------
 
 FROM nginx:1.15-alpine
 
 COPY web/docker/nginx-default.conf.template /etc/nginx/conf.d/default.conf.template
+
 COPY web/docker/docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
 
-COPY web/html /usr/share/nginx/html
+COPY --from=builder /project/web/html /usr/share/nginx/html
 COPY --from=builder /project/target/webpack /usr/share/nginx/html

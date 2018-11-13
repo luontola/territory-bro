@@ -2,8 +2,15 @@ server_tokens off;
 proxy_hide_header "X-Powered-By";
 
 server {
-  listen       80;
+  listen  80;
   server_name  localhost;
+
+  # offline compressed static resources
+  gzip_static  on;
+
+  # dynamically compressed proxied content
+  gzip  on;
+  gzip_types  application/json;
 
   location / {
     root   /usr/share/nginx/html;
