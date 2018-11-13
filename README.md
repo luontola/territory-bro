@@ -67,6 +67,11 @@ Run tests
     yarn run flow check
     yarn run test
 
+Running tests automatically on change
+
+    lein test-refresh
+    yarn run autotest    
+
 
 ## License
 
