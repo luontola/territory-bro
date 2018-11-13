@@ -11,11 +11,12 @@
             [ring.util.http-response :refer [ok]]
             [ring.util.response :refer [redirect response]]
             [territory-bro.authentication :as auth]
-            [territory-bro.config :refer [envx]]
+            [territory-bro.config :refer [env]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.domain :as domain]
-            [territory-bro.jwt :as jwt]))
+            [territory-bro.jwt :as jwt]
+            [territory-bro.util :refer [getx]]))
 
 (defn find-tenant [request tenants]
   (if-let [tenant (get-in request [:headers "x-tenant"])]
@@ -79,8 +80,8 @@
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
                (auth/with-authenticated-user request
-                 {:auth0 {:domain (envx :auth0-domain)
-                          :clientId (envx :auth0-client-id)}
+                 {:auth0 {:domain (getx env :auth0-domain)
+                          :clientId (getx env :auth0-client-id)}
                   :user (assoc (select-keys auth/*user* [:name])
                           :authenticated (not (nil? auth/*user*)))
                   :congregations (congregation/my-congregations)})))

@@ -10,7 +10,8 @@
             [conman.core :as conman]
             [mount.core :as mount]
             [ring.util.codec :refer [form-decode]]
-            [territory-bro.config :refer [env envx]])
+            [territory-bro.config :refer [env]]
+            [territory-bro.util :refer [getx]])
   (:import (java.sql Date Timestamp PreparedStatement Array)
            clojure.lang.IPersistentMap
            clojure.lang.IPersistentVector
@@ -35,10 +36,10 @@
   (conman/disconnect! connection))
 
 (defn connect-all! []
-  {:default (connect! (envx :database-url))
+  {:default (connect! (getx env :database-url))
    :tenant (into {} (map (fn [[tenant config]]
                            [tenant (connect! (:database-url config))])
-                         (env :tenant)))})
+                         (get env :tenant)))})
 
 (defn disconnect-all! [databases]
   (disconnect! (:default databases))

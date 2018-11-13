@@ -21,9 +21,3 @@
                      (mount/args)
                      (source/from-system-props)
                      (source/from-env)))
-
-(defn envx [key]
-  (let [value (env key)]
-    (if (nil? value)
-      (throw (ex-info (str key " is not configured") {:key key}))
-      value)))

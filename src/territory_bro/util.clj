@@ -1,3 +1,7 @@
+; Copyright © 2015-2018 Esko Luontola
+; This software is released under the Apache License 2.0.
+; The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
 (ns territory-bro.util
   (:import (java.sql SQLException)))
 
@@ -12,3 +16,9 @@
   (when (instance? Throwable e)
     (fix-sqlexception-chain (.getCause e)))
   e)
+
+(defn getx [map key]
+  (let [value (get map key)]
+    (if (nil? value)
+      (throw (IllegalArgumentException. (str "key " key " is missing")))
+      value)))

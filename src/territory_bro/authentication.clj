@@ -30,6 +30,6 @@
   (super-admin?))
 
 (defn authorized-tenants []
-  (->> (keys (env :tenant))
+  (->> (keys (get env :tenant))
        (filter permission-to-view-tenant?)
        (doall)))

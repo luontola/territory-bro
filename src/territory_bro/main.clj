@@ -30,9 +30,9 @@
 
 (mount/defstate ^{:on-reload :noop} repl-server
   :start
-  (when (env :nrepl-port)
-    (repl/start {:bind (env :nrepl-bind)
-                 :port (env :nrepl-port)}))
+  (when (get env :nrepl-port)
+    (repl/start {:bind (get env :nrepl-bind)
+                 :port (get env :nrepl-port)}))
   :stop
   (when repl-server
     (repl/stop repl-server)))
@@ -54,7 +54,7 @@
 (defn -main [& args]
   (mount/start #'territory-bro.config/env)
   (cond
-    (nil? (env :database-url))
+    (nil? (get env :database-url))
     (do
       (log/error "Database configuration not found, :database-url must be set before running")
       (System/exit 1))

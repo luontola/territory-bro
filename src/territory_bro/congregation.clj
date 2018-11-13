@@ -3,8 +3,7 @@
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.congregation
-  (:require [territory-bro.config :refer [env]]
-            [territory-bro.authentication :as auth]))
+  (:require [territory-bro.authentication :as auth]))
 
 (defn- format-tenant [id]
   ; TODO: human-readable name

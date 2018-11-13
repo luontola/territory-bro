@@ -4,8 +4,10 @@
 
 (ns territory-bro.util-test
   (:require [clojure.test :refer :all]
-            [territory-bro.util :refer :all])
-  (:import (java.sql SQLException)))
+            [territory-bro.util :refer :all]
+            [territory-bro.testing :refer [re-equals]])
+  (:import (java.sql SQLException)
+           (clojure.lang ExceptionInfo)))
 
 (deftest test-fix-sqlexception-chain
   (testing "returns argument"
@@ -49,3 +51,19 @@
       (fix-sqlexception-chain e)
       (is (= next1 (.getCause e)))
       (is (= next2 (.getCause next1))))))
+
+(deftest getx-test
+  (testing "returns the value when the key exists"
+    (is (= "some value" (getx {:some-key "some value"} :some-key))))
+
+  (testing "supports all boolean values"
+    (is (= true (getx {:some-key true} :some-key)))
+    (is (= false (getx {:some-key false} :some-key))))
+
+  (testing "throws an exception when key doesn't exist"
+    (is (thrown-with-msg? IllegalArgumentException (re-equals "key :some-key is missing")
+                          (getx {} :some-key))))
+
+  (testing "throws an exception when the value is nil"
+    (is (thrown-with-msg? IllegalArgumentException (re-equals "key :some-key is missing")
+                          (getx {:some-key nil} :some-key)))))

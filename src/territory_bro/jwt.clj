@@ -5,7 +5,8 @@
 (ns territory-bro.jwt
   (:require [clojure.data.json :as json]
             [mount.core :as mount]
-            [territory-bro.config :refer [envx]])
+            [territory-bro.config :refer [env]]
+            [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwk JwkProviderBuilder JwkProvider)
            (com.auth0.jwt JWT)
            (com.auth0.jwt.algorithms Algorithm)
@@ -15,7 +16,7 @@
            (java.util Base64)))
 
 (mount/defstate ^:dynamic ^JwkProvider jwk-provider
-  :start (-> (JwkProviderBuilder. ^String (envx :auth0-domain))
+  :start (-> (JwkProviderBuilder. ^String (getx env :auth0-domain))
              (.build)))
 
 (defn- fetch-public-key [^DecodedJWT jwt]

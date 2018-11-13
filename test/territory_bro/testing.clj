@@ -28,5 +28,5 @@
     (jdbc/db-set-rollback-only! db/*db*)
     (f)))
 
-(defn re-equals [s]
-  (re-pattern (clojure.core/str "^" (Pattern/quote s) "$")))
+(defn re-equals [^String s]
+  (re-pattern (str "^" (Pattern/quote s) "$")))
