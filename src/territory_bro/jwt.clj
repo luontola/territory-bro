@@ -8,36 +8,39 @@
             [territory-bro.config :refer [env]]
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwk JwkProviderBuilder JwkProvider)
-           (com.auth0.jwt JWT)
+           (com.auth0.jwt JWT JWTVerifier$BaseVerification)
            (com.auth0.jwt.algorithms Algorithm)
-           (com.auth0.jwt.interfaces DecodedJWT)
+           (com.auth0.jwt.interfaces Clock)
            (java.nio.charset StandardCharsets)
            (java.time Instant)
-           (java.util Base64)))
+           (java.util Base64 Date)))
 
 (mount/defstate ^:dynamic ^JwkProvider jwk-provider
   :start (-> (JwkProviderBuilder. ^String (getx env :auth0-domain))
              (.build)))
 
-(defn- fetch-public-key [^DecodedJWT jwt]
-  (.getPublicKey (.get jwk-provider (.getKeyId jwt))))
+(defn- fetch-public-key [jwt]
+  (let [key-id (.getKeyId (JWT/decode jwt))]
+    (.getPublicKey (.get jwk-provider key-id))))
 
 (defn- decode-base64url [^String base64-str]
   (-> (Base64/getUrlDecoder)
       (.decode base64-str)
       (String. StandardCharsets/UTF_8)))
 
-(defn validate [jwt-str]
-  (let [jwt (JWT/decode jwt-str)
-        pubkey (fetch-public-key jwt)]
-    ;; verify signature
-    (-> (Algorithm/RSA256 pubkey nil)
-        (.verify jwt))
-    ;; TODO: validate token expiration (extract the code from t-b.routes/login)
-    ;; TODO: validate token issuer
-    ;; TODO: validate token audience
-    ; https://auth0.com/docs/tokens/id-token#validate-an-id-token
-    (-> (.getPayload jwt)
+(defn validate [jwt env]
+  (let [public-key (fetch-public-key jwt)
+        algorithm (Algorithm/RSA256 public-key nil)
+        clock (reify Clock
+                (getToday [_]
+                  (Date/from ((getx env :now)))))
+        verifier (-> (JWT/require algorithm)
+                     (.withIssuer (getx env :jwt-issuer))
+                     (.withAudience (into-array String [(getx env :jwt-audience)]))
+                     (->> (cast JWTVerifier$BaseVerification))
+                     (.build clock))]
+    (-> (.verify verifier jwt)
+        (.getPayload)
         (decode-base64url)
         (json/read-str :key-fn keyword))))
 

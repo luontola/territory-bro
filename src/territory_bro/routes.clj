@@ -63,10 +63,7 @@
 
 (defn login [request]
   (let [id-token (get-in request [:params :idToken])
-        jwt (jwt/validate id-token)]
-    ;; TODO: extract validation
-    (when (jwt/expired? jwt)
-      (throw (ex-info "JWT expired" {:jwt jwt})))
+        jwt (jwt/validate id-token env)]
     (log/info "Login using JWT" jwt)
     (-> (response "OK")
         (assoc :session (auth/save-user (:session request) jwt)))))
