@@ -3,33 +3,19 @@
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.authentication
-  (:require [territory-bro.config :refer [env]]))
+  (:require [territory-bro.config :refer [env]]
+            [territory-bro.permissions :as perm]))
 
 (def ^:dynamic *user*)
 
-(defn save-user [session jwt]
-  (assoc session :user (select-keys jwt [:sub :name :email :email_verified :picture])))
+(defn user-session [jwt env]
+  {::user (assoc (select-keys jwt [:sub :name :email :email_verified :picture])
+            :permissions (perm/user-permissions jwt env))})
 
 (defn with-authenticated-user* [request f]
-  (binding [*user* (get-in request [:session :user])]
-    (f)))
+  (binding [*user* (get-in request [:session ::user])]
+    (binding [perm/*permissions* (:permissions *user*)]
+      (f))))
 
 (defmacro with-authenticated-user [request & body]
   `(with-authenticated-user* ~request (fn [] ~@body)))
-
-(defn super-admin?
-  ([]
-   (super-admin? *user* env))
-  ([user env]
-   (if-let [super-admin (env :super-admin)]
-     (= (:sub user) super-admin)
-     false)))
-
-(defn- permission-to-view-tenant? [id]
-  ; TODO: fine-grained authorization
-  (super-admin?))
-
-(defn authorized-tenants []
-  (->> (keys (get env :tenant))
-       (filter permission-to-view-tenant?)
-       (doall)))

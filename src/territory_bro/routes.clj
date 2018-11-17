@@ -16,6 +16,7 @@
             [territory-bro.db :as db]
             [territory-bro.domain :as domain]
             [territory-bro.jwt :as jwt]
+            [territory-bro.permissions :as perm]
             [territory-bro.util :refer [getx]]))
 
 (defn find-tenant [request tenants]
@@ -63,14 +64,16 @@
 
 (defn login [request]
   (let [id-token (get-in request [:params :idToken])
-        jwt (jwt/validate id-token env)]
-    (log/info "Login using JWT" jwt)
-    (-> (response "OK")
-        (assoc :session (auth/save-user (:session request) jwt)))))
+        jwt (jwt/validate id-token env)
+        session (merge (:session request)
+                       (auth/user-session jwt env))]
+    (log/info "Logged in using JWT" jwt)
+    (-> (response "Logged in")
+        (assoc :session session))))
 
 (defn logout []
-  (log/info "Logout")
-  (-> (response "OK")
+  (log/info "Logged out")
+  (-> (response "Logged out")
       (assoc :session nil)))
 
 (defresource settings
@@ -93,15 +96,23 @@
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
                (auth/with-authenticated-user request
-                 (db/as-tenant (find-tenant request (auth/authorized-tenants))
-                   (db/query :find-territories)))))
+                 (let [tenant (find-tenant request (perm/visible-congregations))]
+                   (assert (or (nil? tenant) ;; TODO: remove default tenant support
+                               (perm/can-view-territories? tenant))
+                           (str "cannot view territories of " tenant))
+                   (db/as-tenant tenant
+                     (db/query :find-territories))))))
 
 (defresource regions
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
                (auth/with-authenticated-user request
-                 (db/as-tenant (find-tenant request (auth/authorized-tenants))
-                   (db/query :find-regions)))))
+                 (let [tenant (find-tenant request (perm/visible-congregations))]
+                   (assert (or (nil? tenant) ;; TODO: remove default tenant support
+                               (perm/can-view-territories? tenant))
+                           (str "cannot view regions of " tenant))
+                   (db/as-tenant tenant
+                     (db/query :find-regions))))))
 
 (defroutes home-routes
   (GET "/" [] (response "Territory Bro"))

@@ -27,7 +27,10 @@
 
 (deftest enrich-env-test
   (let [env (enrich-env {:auth0-domain "example.eu.auth0.com"
-                         :auth0-client-id "m14ziOMuEVgHB4LIzoLKeDXazSReXCZo"})]
+                         :auth0-client-id "m14ziOMuEVgHB4LIzoLKeDXazSReXCZo"
+                         :tenant {:no-admins {}
+                                  :one-admin {:admins "facebook|123456"}
+                                  :two-admins {:admins "facebook|123456 google-oauth2|123456"}}})]
     (testing ":now is a function which returns current time"
       (let [result ((getx env :now))]
         (is (instance? Instant result))
@@ -41,4 +44,19 @@
 
     (testing ":jwt-audience is the Auth0 Client ID"
       (is (= "m14ziOMuEVgHB4LIzoLKeDXazSReXCZo"
-             (getx env :jwt-audience))))))
+             (getx env :jwt-audience))))
+
+    (testing "tenant admins are converted to a set"
+      (is (= #{}
+             (get-in env [:tenant :no-admins :admins])))
+      (is (= #{"facebook|123456"}
+             (get-in env [:tenant :one-admin :admins])))
+      (is (= #{"facebook|123456" "google-oauth2|123456"}
+             (get-in env [:tenant :two-admins :admins]))))))
+
+(deftest whitespace-separated-list-test
+  (is (= [] (whitespace-separated-list nil)))
+  (is (= [] (whitespace-separated-list "")))
+  (is (= ["abc"] (whitespace-separated-list "abc")))
+  (is (= ["abc" "def"] (whitespace-separated-list "abc def")))
+  (is (= ["abc" "def"] (whitespace-separated-list "   abc  \t def  "))))
