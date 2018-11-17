@@ -11,7 +11,7 @@ export function buildAuthenticator(auth0Domain: string, auth0ClientId: string) {
     clientID: auth0ClientId,
     responseType: 'id_token',
     scope: 'openid email name picture',
-    redirectUri: `${window.location.origin}/login-callback`,
+    redirectUri: `${window.location.origin}/login-callback?return=${window.location.pathname}`,
   });
 
   function findAuthResult() {

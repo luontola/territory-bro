@@ -30,9 +30,11 @@ export type Settings = {
     domain: string,
     clientId: string,
   },
+  supportEmail: string,
   user: {
     authenticated: boolean,
     name: ?string,
+    sub: ?string,
   },
   congregations: Array<Congregation>,
 }

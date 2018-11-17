@@ -11,7 +11,9 @@ import type {Congregation, Region, Territory} from "./api";
 export type ApiState = {
   +auth0Domain: string,
   +auth0ClientId: string,
+  +supportEmail: string,
   +authenticated: boolean,
+  +userId: ?string,
   +userFullName: ?string,
   +congregations: Array<Congregation>,
   +territories: Array<Territory>,
@@ -21,7 +23,9 @@ export type ApiState = {
 const defaultState: ApiState = {
   auth0Domain: '',
   auth0ClientId: '',
+  supportEmail: '',
   authenticated: false,
+  userId: null,
   userFullName: null,
   congregations: [],
   territories: [],
@@ -35,12 +39,14 @@ export default (state: ApiState = defaultState, action: ApiAction): ApiState => 
         ...state,
         auth0Domain: action.auth0Domain,
         auth0ClientId: action.auth0ClientId,
+        supportEmail: action.supportEmail,
       };
     case USER_LOGGED_IN:
       return {
         ...state,
         authenticated: true,
-        userFullName: action.fullName
+        userId: action.userId,
+        userFullName: action.fullName,
       };
     case MY_CONGREGATIONS_LOADED:
       return {

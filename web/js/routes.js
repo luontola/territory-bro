@@ -17,6 +17,7 @@ import RuralTerritoryCardsPage from "./pages/RuralTerritoryCardsPage";
 import type {State} from "./reducers";
 import {changeCongregation} from "./congregation";
 import {buildAuthenticator} from "./authentication";
+import RegistrationPage from "./pages/RegistrationPage";
 
 const routes: Array<Route> = [
   {
@@ -55,6 +56,22 @@ const routes: Array<Route> = [
     }
   },
   {
+    path: '/register',
+    async action({store}) {
+      await fetchSettings(store);
+      const state = store.getState();
+      if (state.api.authenticated) {
+        return <RegistrationPage/>
+      } else {
+        const auth0Domain = state.api.auth0Domain;
+        const auth0ClientId = state.api.auth0ClientId;
+        const auth = buildAuthenticator(auth0Domain, auth0ClientId);
+        auth.login();
+        return <p>Please wait, you will be redirected...</p>
+      }
+    }
+  },
+  {
     path: '/login-callback',
     async action({store}) {
       let state: State = store.getState();
@@ -64,8 +81,9 @@ const routes: Array<Route> = [
       }
       const auth = buildAuthenticator(state.api.auth0Domain, state.api.auth0ClientId);
       await auth.handleAuthentication();
+      const params = new URLSearchParams(document.location.search.substring(1));
       throw {
-        redirect: {pathname: '/'},
+        redirect: {pathname: params.get('return') || '/'},
         replace: true,
       };
     }
@@ -89,9 +107,9 @@ async function fetchAll(store) {
 
 async function fetchSettings(store) {
   const settings = await getSettings();
-  store.dispatch(configured(settings.auth0.domain, settings.auth0.clientId));
+  store.dispatch(configured(settings.auth0.domain, settings.auth0.clientId, settings.supportEmail));
   if (settings.user.authenticated) {
-    store.dispatch(userLoggedIn(settings.user.name || '(unknown)'));
+    store.dispatch(userLoggedIn(settings.user.sub || '', settings.user.name || ''));
   }
   store.dispatch(myCongregationsLoaded(settings.congregations));
 

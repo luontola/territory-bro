@@ -9,6 +9,7 @@ import type {State} from "../reducers";
 import connect from "react-redux/es/connect/connect";
 import LoginButton from "./LoginButton";
 import LogoutButton from "./LogoutButton";
+import RegisterButton from "./RegisterButton";
 
 type Props = {
   loggedIn: boolean,
@@ -19,13 +20,13 @@ let AuthenticationPanel = ({loggedIn, fullName}: Props) => {
   if (loggedIn) {
     return (
       <p>
-        Logged in as {fullName} <LogoutButton/>
+        Logged in as {fullName} <LogoutButton/> <RegisterButton/>
       </p>
     );
   } else {
     return (
       <p>
-        <LoginButton/>
+        <LoginButton/> <RegisterButton/>
       </p>
     );
   }

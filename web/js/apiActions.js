@@ -6,19 +6,21 @@
 
 import type {Congregation, Region, Territory} from "./api";
 
-export type ConfiguredAction = { type: 'CONFIGURED', auth0Domain: string, auth0ClientId: string };
+export type ConfiguredAction = { type: 'CONFIGURED', auth0Domain: string, auth0ClientId: string, supportEmail: string };
 export const CONFIGURED = 'CONFIGURED';
-export const configured = (auth0Domain: string, auth0ClientId: string): ConfiguredAction => ({
+export const configured = (auth0Domain: string, auth0ClientId: string, supportEmail: string): ConfiguredAction => ({
   type: CONFIGURED,
   auth0Domain,
   auth0ClientId,
+  supportEmail,
 });
 
-export type UserLoggedInAction = { type: 'USER_LOGGED_IN', fullName: string };
+export type UserLoggedInAction = { type: 'USER_LOGGED_IN', userId: string, fullName: string };
 export const USER_LOGGED_IN = 'USER_LOGGED_IN';
-export const userLoggedIn = (fullName: string): UserLoggedInAction => ({
+export const userLoggedIn = (userId: string, fullName: string): UserLoggedInAction => ({
   type: USER_LOGGED_IN,
-  fullName
+  userId,
+  fullName,
 });
 
 export type MyCongregationsLoadedAction = { type: 'MY_CONGREGATIONS_LOADED', congregations: Array<Congregation> };

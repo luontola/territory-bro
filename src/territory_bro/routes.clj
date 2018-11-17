@@ -82,7 +82,8 @@
                (auth/with-authenticated-user request
                  {:auth0 {:domain (getx env :auth0-domain)
                           :clientId (getx env :auth0-client-id)}
-                  :user (assoc (select-keys auth/*user* [:name])
+                  :supportEmail (getx env :support-email)
+                  :user (assoc (select-keys auth/*user* [:name :sub])
                           :authenticated (not (nil? auth/*user*)))
                   :congregations (congregation/my-congregations)})))
 
