@@ -10,13 +10,15 @@ import connect from "react-redux/es/connect/connect";
 import LoginButton from "./LoginButton";
 import LogoutButton from "./LogoutButton";
 import RegisterButton from "./RegisterButton";
+import DevLoginButton from "./DevLoginButton";
 
 type Props = {
+  dev: boolean,
   loggedIn: boolean,
   fullName: ?string,
 };
 
-let AuthenticationPanel = ({loggedIn, fullName}: Props) => {
+let AuthenticationPanel = ({dev, loggedIn, fullName}: Props) => {
   if (loggedIn) {
     return (
       <p>
@@ -26,7 +28,7 @@ let AuthenticationPanel = ({loggedIn, fullName}: Props) => {
   } else {
     return (
       <p>
-        <LoginButton/> <RegisterButton/>
+        <LoginButton/> {dev && <DevLoginButton/>} <RegisterButton/>
       </p>
     );
   }
@@ -34,6 +36,7 @@ let AuthenticationPanel = ({loggedIn, fullName}: Props) => {
 
 function mapStateToProps(state: State) {
   return {
+    dev: state.api.dev,
     loggedIn: state.api.authenticated,
     fullName: state.api.userFullName,
   };

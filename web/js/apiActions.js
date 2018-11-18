@@ -6,10 +6,11 @@
 
 import type {Congregation, Region, Territory} from "./api";
 
-export type ConfiguredAction = { type: 'CONFIGURED', auth0Domain: string, auth0ClientId: string, supportEmail: string };
+export type ConfiguredAction = { type: 'CONFIGURED', dev: boolean, auth0Domain: string, auth0ClientId: string, supportEmail: string };
 export const CONFIGURED = 'CONFIGURED';
-export const configured = (auth0Domain: string, auth0ClientId: string, supportEmail: string): ConfiguredAction => ({
+export const configured = (dev: boolean, auth0Domain: string, auth0ClientId: string, supportEmail: string): ConfiguredAction => ({
   type: CONFIGURED,
+  dev,
   auth0Domain,
   auth0ClientId,
   supportEmail,

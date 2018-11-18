@@ -107,7 +107,7 @@ async function fetchAll(store) {
 
 async function fetchSettings(store) {
   const settings = await getSettings();
-  store.dispatch(configured(settings.auth0.domain, settings.auth0.clientId, settings.supportEmail));
+  store.dispatch(configured(settings.dev, settings.auth0.domain, settings.auth0.clientId, settings.supportEmail));
   if (settings.user.authenticated) {
     store.dispatch(userLoggedIn(settings.user.sub || '', settings.user.name || ''));
   }

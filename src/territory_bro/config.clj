@@ -35,7 +35,7 @@
              :jwt-audience (getx env :auth0-client-id)
              :tenant (enrich-tenants (:tenant env))))
 
-(mount/defstate env
+(mount/defstate ^:dynamic env
   :start
   (enrich-env
    (override-defaults (cprop/load-config :resource "config-defaults.edn"

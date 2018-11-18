@@ -9,7 +9,7 @@
             [compojure.core :refer [defroutes GET POST ANY]]
             [liberator.core :refer [defresource]]
             [ring.util.http-response :refer [ok]]
-            [ring.util.response :refer [redirect response]]
+            [ring.util.response :refer [redirect response not-found]]
             [territory-bro.authentication :as auth]
             [territory-bro.config :refer [env]]
             [territory-bro.congregation :as congregation]
@@ -71,6 +71,16 @@
     (-> (response "Logged in")
         (assoc :session session))))
 
+(defn dev-login [request]
+  (if (getx env :dev)
+    (let [fake-jwt (:params request)
+          session (merge (:session request)
+                         (auth/user-session fake-jwt env))]
+      (log/info "Developer login as" fake-jwt)
+      (-> (response "Logged in")
+          (assoc :session session)))
+    (not-found "Dev mode disabled")))
+
 (defn logout []
   (log/info "Logged out")
   (-> (response "Logged out")
@@ -80,7 +90,8 @@
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
                (auth/with-authenticated-user request
-                 {:auth0 {:domain (getx env :auth0-domain)
+                 {:dev (getx env :dev)
+                  :auth0 {:domain (getx env :auth0-domain)
                           :clientId (getx env :auth0-client-id)}
                   :supportEmail (getx env :support-email)
                   :user (assoc (select-keys auth/*user* [:name :sub])
@@ -118,6 +129,7 @@
 (defroutes home-routes
   (GET "/" [] (response "Territory Bro"))
   (POST "/api/login" request (login request))
+  (POST "/api/dev-login" request (dev-login request))
   (POST "/api/logout" [] (logout))
   (ANY "/api/settings" [] settings)
   (ANY "/api/my-congregations" [] my-congregations)

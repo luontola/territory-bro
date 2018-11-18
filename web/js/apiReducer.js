@@ -9,6 +9,7 @@ import {CONFIGURED, MY_CONGREGATIONS_LOADED, REGIONS_LOADED, TERRITORIES_LOADED,
 import type {Congregation, Region, Territory} from "./api";
 
 export type ApiState = {
+  +dev: boolean,
   +auth0Domain: string,
   +auth0ClientId: string,
   +supportEmail: string,
@@ -21,6 +22,7 @@ export type ApiState = {
 };
 
 const defaultState: ApiState = {
+  dev: false,
   auth0Domain: '',
   auth0ClientId: '',
   supportEmail: '',
@@ -37,6 +39,7 @@ export default (state: ApiState = defaultState, action: ApiAction): ApiState => 
     case CONFIGURED:
       return {
         ...state,
+        dev: action.dev,
         auth0Domain: action.auth0Domain,
         auth0ClientId: action.auth0ClientId,
         supportEmail: action.supportEmail,

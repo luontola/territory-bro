@@ -4,6 +4,8 @@
 
 (ns territory-bro.routes-test
   (:require [clojure.test :refer :all]
+            [territory-bro.authentication :as auth]
+            [territory-bro.config :refer [env]]
             [territory-bro.routes :refer :all]))
 
 (deftest find-tenant-test
@@ -15,3 +17,26 @@
       (is (= nil (find-tenant {:headers {"x-tenant" "gazonk"}} tenants))))
     (testing "unspecified tenant"
       (is (= nil (find-tenant {:headers {}} tenants))))))
+
+(deftest dev-login-test
+  (testing "authenticates as anybody in dev mode"
+    (binding [env {:dev true}]
+      (is (= {:status 200,
+              :headers {},
+              :body "Logged in",
+              :session {::auth/user {:sub "sub",
+                                     :name "name",
+                                     :email "email",
+                                     :permissions {}}}}
+             (dev-login {:params {:sub "sub"
+                                  :name "name"
+                                  :email "email"}})))))
+
+  (testing "is disabled when not in dev mode"
+    (binding [env {:dev false}]
+      (is (= {:status 404
+              :headers {}
+              :body "Dev mode disabled"}
+             (dev-login {:params {:sub "sub"
+                                  :name "name"
+                                  :email "email"}}))))))

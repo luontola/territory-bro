@@ -26,6 +26,7 @@ export type Congregation = {
 }
 
 export type Settings = {
+  dev: boolean,
   auth0: {
     domain: string,
     clientId: string,
@@ -87,6 +88,10 @@ export async function getRegions(congregationId: ?string): Promise<Array<Region>
 
 export async function loginWithIdToken(idToken: string) {
   await api.post('/api/login', {idToken});
+}
+
+export async function devLogin() {
+  await api.post('/api/dev-login', {sub: "developer", name: "Developer", email: "developer@example.com"});
 }
 
 export async function logout() {
