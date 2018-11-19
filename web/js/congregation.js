@@ -8,7 +8,11 @@ export function savedCongregationId(): ?string {
   return Lockr.get('congregationId');
 }
 
-export function changeCongregation(congregationId: string) {
+export function saveCongregationId(congregationId: string) {
   Lockr.set('congregationId', congregationId);
+}
+
+export function changeCongregation(congregationId: string) {
+  saveCongregationId(congregationId);
   window.location.reload();
 }

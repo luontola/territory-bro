@@ -15,9 +15,10 @@ import type {ErrorMessage, Route} from "./router";
 import {configured, myCongregationsLoaded, regionsLoaded, territoriesLoaded, userLoggedIn} from "./apiActions";
 import RuralTerritoryCardsPage from "./pages/RuralTerritoryCardsPage";
 import type {State} from "./reducers";
-import {changeCongregation} from "./congregation";
+import {saveCongregationId, savedCongregationId} from "./congregation";
 import {buildAuthenticator} from "./authentication";
 import RegistrationPage from "./pages/RegistrationPage";
+import {congregationChanged} from "./configActions";
 
 const routes: Array<Route> = [
   {
@@ -113,9 +114,11 @@ async function fetchSettings(store) {
   }
   store.dispatch(myCongregationsLoaded(settings.congregations));
 
-  const state: State = store.getState();
-  if (state.config.congregationId === null && state.api.congregations.length > 0) {
-    changeCongregation(state.api.congregations[0].id);
+  const previousCongregationId = savedCongregationId();
+  const congregation = settings.congregations.find(c => c.id === previousCongregationId) || settings.congregations[0];
+  if (congregation) {
+    saveCongregationId(congregation.id);
+    store.dispatch(congregationChanged(congregation.id));
   }
 }
 
