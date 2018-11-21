@@ -12,10 +12,60 @@ import {connect} from "react-redux";
 type Props = {
   territoryCount: number,
   regionCount: number,
+  congregationIds: Array<string>,
+  supportEmail: string,
   loggedIn: boolean,
 }
 
-let OverviewPage = ({territoryCount, regionCount, loggedIn}: Props) => (
+function QgisProjectSection({territoryCount, regionCount, congregationIds, supportEmail}) {
+  return (
+    <React.Fragment>
+      <h2>QGIS Project</h2>
+
+      <p>Your congregation's database has currently {territoryCount} territories and {regionCount} regions.</p>
+
+      <p>To add and edit the territories in your database, first download and install <a href="https://qgis.org/">
+        QGIS 3.4 (Long Term Release)</a>.</p>
+
+      <p>Then download the QGIS project file for your congregation and open it in QGIS:</p>
+
+      <ul>
+        {congregationIds.map(congregationId =>
+          <li key={congregationId}>
+            <a href={`/api/download-qgis-project/${congregationId}`} rel="nofollow">
+              {congregationId}-territories.qgs</a></li>
+        )}
+      </ul>
+
+      <p>For more help, read the guides at <a
+        href="https://territorybro.com/guide/">https://territorybro.com/guide/</a> or ask <a
+        href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+      </p>
+    </React.Fragment>
+  );
+}
+
+function ImportSection({territoryCount, regionCount}) {
+  return (
+    <React.Fragment>
+      <h2>Import</h2>
+
+      <p>The database has currently {territoryCount} territories and {regionCount} regions.</p>
+
+      <form action="/api/clear-database" method="post">
+        <button type="submit" className="btn btn-primary">Delete All</button>
+      </form>
+
+      <form action="/api/import-territories" method="post" encType="multipart/form-data">
+        <p>Territories GeoJSON: <input type="file" name="territories"/></p>
+        <p>Regions GeoJSON: <input type="file" name="regions"/></p>
+        <button type="submit" className="btn btn-primary">Import</button>
+      </form>
+    </React.Fragment>
+  );
+}
+
+let OverviewPage = ({territoryCount, regionCount, congregationIds, supportEmail, loggedIn}: Props) => (
   <Layout>
     <h1>Territory Bro</h1>
 
@@ -23,25 +73,13 @@ let OverviewPage = ({territoryCount, regionCount, loggedIn}: Props) => (
 
     <p>For more information, see <a href="http://territorybro.com">http://territorybro.com</a></p>
 
-    <h2>Import</h2>
-
-    <p>The database has currently {territoryCount} territories and {regionCount} regions.</p>
-
-    {loggedIn ?
-      <p>Importing is disabled when logged in. You can now print your congregation territory cards directly,
-        without the need for an import step.</p>
-      :
-      <React.Fragment>
-        <form action="/api/clear-database" method="post">
-          <button type="submit" className="btn btn-primary">Delete All</button>
-        </form>
-
-        <form action="/api/import-territories" method="post" encType="multipart/form-data">
-          <p>Territories GeoJSON: <input type="file" name="territories"/></p>
-          <p>Regions GeoJSON: <input type="file" name="regions"/></p>
-          <button type="submit" className="btn btn-primary">Import</button>
-        </form>
-      </React.Fragment>
+    {loggedIn && congregationIds.length > 0 ?
+      <QgisProjectSection territoryCount={territoryCount}
+                          regionCount={regionCount}
+                          congregationIds={congregationIds}
+                          supportEmail={supportEmail}/> :
+      <ImportSection territoryCount={territoryCount}
+                     regionCount={regionCount}/>
     }
   </Layout>
 );
@@ -50,6 +88,8 @@ function mapStateToProps(state: State): Props {
   return {
     territoryCount: state.api.territories.length,
     regionCount: state.api.regions.length,
+    congregationIds: state.api.congregations.map(c => c.id),
+    supportEmail: state.api.supportEmail,
     loggedIn: state.api.authenticated,
   };
 }
