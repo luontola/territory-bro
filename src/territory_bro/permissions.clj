@@ -12,7 +12,8 @@
         congregation-admins (get-in env [:tenant congregation-id :admins])]
     (if (or (= super-admin user-id)
             (contains? congregation-admins user-id))
-      #{:view-territories}
+      #{:view-territories
+        :modify-territories}
       nil)))
 
 (defn user-permissions [jwt env]
@@ -29,8 +30,16 @@
   ([permissions]
    (keys permissions)))
 
+;; TODO: deduplicate
+
 (defn can-view-territories?
   ([congregation-id]
    (can-view-territories? congregation-id *permissions*))
   ([congregation-id permissions]
    (boolean (get-in permissions [congregation-id :view-territories]))))
+
+(defn can-modify-territories?
+  ([congregation-id]
+   (can-modify-territories? congregation-id *permissions*))
+  ([congregation-id permissions]
+   (boolean (get-in permissions [congregation-id :modify-territories]))))

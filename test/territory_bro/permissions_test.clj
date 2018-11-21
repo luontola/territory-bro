@@ -16,12 +16,15 @@
              (perm/user-permissions {:sub "user"} env))))
 
     (testing "congregation admin"
-      (is (= {:congregation1 #{:view-territories}}
+      (is (= {:congregation1 #{:view-territories
+                               :modify-territories}}
              (perm/user-permissions {:sub "admin1a"} env))))
 
     (testing "super admin"
-      (is (= {:congregation1 #{:view-territories}
-              :congregation2 #{:view-territories}}
+      (is (= {:congregation1 #{:view-territories
+                               :modify-territories}
+              :congregation2 #{:view-territories
+                               :modify-territories}}
              (perm/user-permissions {:sub "superadmin"} env))))))
 
 (deftest visible-congregations-test
@@ -35,3 +38,8 @@
   (is (true? (perm/can-view-territories? :congregation1 {:congregation1 #{:view-territories}})))
   (is (false? (perm/can-view-territories? :congregation1 {:congregation1 #{}})))
   (is (false? (perm/can-view-territories? :congregation1 {}))))
+
+(deftest can-modify-territories?-test
+  (is (true? (perm/can-modify-territories? :congregation1 {:congregation1 #{:modify-territories}})))
+  (is (false? (perm/can-modify-territories? :congregation1 {:congregation1 #{}})))
+  (is (false? (perm/can-modify-territories? :congregation1 {}))))
