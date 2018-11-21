@@ -13,7 +13,7 @@ const LogoutButton = () => (
 
 async function handleClick() {
   await logout();
-  window.location.reload();
+  window.location.href = '/';
 }
 
 export default LogoutButton;
