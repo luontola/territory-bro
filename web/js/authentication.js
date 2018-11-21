@@ -10,7 +10,7 @@ export function buildAuthenticator(auth0Domain: string, auth0ClientId: string) {
     domain: auth0Domain,
     clientID: auth0ClientId,
     responseType: 'id_token',
-    scope: 'openid email name picture',
+    scope: 'openid email profile',
     redirectUri: `${window.location.origin}/login-callback?return=${window.location.pathname}`,
   });
 
