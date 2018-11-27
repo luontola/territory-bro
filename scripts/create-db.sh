@@ -37,17 +37,20 @@ CREATE EXTENSION postgis;
 
 cat resources/migrations/*.up.sql | PGPASSWORD=$password psql -h $dbhost -U $username $username
 
+# Bash 4 would have a shortcut, but macOS has Bash 3
+# https://stackoverflow.com/questions/11392189/how-to-convert-a-string-from-uppercase-to-lowercase-in-bash
+username_upper=$(echo "$username" | tr '[:lower:]' '[:upper:]')
 echo "
 Kubernetes config:
 
-        - name: TENANT__${username^^}__DATABASE_URL
+        - name: TENANT__${username_upper}__DATABASE_URL
           value: jdbc:postgresql://${dbhost}/${username}?user=${username}&password=${password}
-        - name: TENANT__${username^^}__DATABASE_HOST
+        - name: TENANT__${username_upper}__DATABASE_HOST
           value: ${dbhost}
-        - name: TENANT__${username^^}__DATABASE_USERNAME
+        - name: TENANT__${username_upper}__DATABASE_USERNAME
           value: ${username}
-        - name: TENANT__${username^^}__DATABASE_PASSWORD
+        - name: TENANT__${username_upper}__DATABASE_PASSWORD
           value: ${password}
-        - name: TENANT__${username^^}__ADMINS
+        - name: TENANT__${username_upper}__ADMINS
           value: 
 "
