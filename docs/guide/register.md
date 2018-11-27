@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Registering an Account
+permalink: /guide/register
 ---
 
 # Registering an Account

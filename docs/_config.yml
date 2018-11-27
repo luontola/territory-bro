@@ -8,6 +8,8 @@ url: "http://territorybro.com" # the base hostname & protocol for your site
 navigation:
   - title: Introduction
     url: /
+  - title: Get Started
+    url: /guide/register
   - title: User Guide
     url: /guide/
   - title: GitHub Project

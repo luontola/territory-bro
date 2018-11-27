@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Drawing Territories on Map
+permalink: /guide/draw-territories
 ---
 
 # Drawing Territories on Map

@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Drawing Regions on Map
+permalink: /guide/draw-regions
 ---
 
 # Drawing Regions on Map

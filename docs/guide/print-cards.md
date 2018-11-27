@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Printing Territory Cards
+permalink: /guide/print-cards
 ---
 
 # Printing Territory Cards
