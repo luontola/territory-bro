@@ -37,7 +37,17 @@ CREATE EXTENSION postgis;
 
 cat resources/migrations/*.up.sql | PGPASSWORD=$password psql -h $dbhost -U $username $username
 
-cp -v resources/template-territories.qgs $username-territories.qgs
-sed -i -e "s/HOST_GOES_HERE/$dbhost/g" $username-territories.qgs
-sed -i -e "s/USERNAME_GOES_HERE/$username/g" $username-territories.qgs
-sed -i -e "s/PASSWORD_GOES_HERE/$password/g" $username-territories.qgs
+echo "
+Kubernetes config:
+
+        - name: TENANT__${username^^}__DATABASE_URL
+          value: jdbc:postgresql://${dbhost}/${username}?user=${username}&password=${password}
+        - name: TENANT__${username^^}__DATABASE_HOST
+          value: ${dbhost}
+        - name: TENANT__${username^^}__DATABASE_USERNAME
+          value: ${username}
+        - name: TENANT__${username^^}__DATABASE_PASSWORD
+          value: ${password}
+        - name: TENANT__${username^^}__ADMINS
+          value: 
+"
