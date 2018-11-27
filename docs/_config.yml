@@ -12,6 +12,8 @@ navigation:
     url: /guide/register
   - title: User Guide
     url: /guide/
+  - title: Updates
+    url: https://groups.google.com/forum/#!forum/territory-bro-announcements
   - title: GitHub Project
     url: https://github.com/luontola/territory-bro
 
