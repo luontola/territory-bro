@@ -1,4 +1,6 @@
-; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2018 Esko Luontola
+;; This software is released under the Apache License 2.0.
+;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 ; This software is released under the Apache License 2.0.
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -21,10 +23,10 @@
 (mount/defstate ^{:on-reload :noop} http-server
   :start
   (http/start
-   (-> env
-       (assoc :handler #'handler/app)
-       (update :io-threads #(or % (* 2 (.availableProcessors (Runtime/getRuntime)))))
-       (update :port #(or (-> env :options :port) %))))
+    (-> env
+        (assoc :handler #'handler/app)
+        (update :io-threads #(or % (* 2 (.availableProcessors (Runtime/getRuntime)))))
+        (update :port #(or (-> env :options :port) %))))
   :stop
   (http/stop http-server))
 

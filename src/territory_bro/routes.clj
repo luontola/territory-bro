@@ -42,18 +42,18 @@
       (when (not-empty geojson)
         (log/info "Importing territories")
         (db/transactional
-         (db/query :delete-all-territories!)
-         (dorun (map db/create-territory! (-> geojson
-                                              json/read-str
-                                              domain/geojson-to-territories))))))
+          (db/query :delete-all-territories!)
+          (dorun (map db/create-territory! (-> geojson
+                                               json/read-str
+                                               domain/geojson-to-territories))))))
     (let [geojson (read-file-upload request :regions)]
       (when (not-empty geojson)
         (log/info "Importing regions")
         (db/transactional
-         (db/query :delete-all-regions!)
-         (dorun (map db/create-region! (-> geojson
-                                           json/read-str
-                                           domain/geojson-to-regions)))))))
+          (db/query :delete-all-regions!)
+          (dorun (map db/create-region! (-> geojson
+                                            json/read-str
+                                            domain/geojson-to-regions)))))))
   (res/redirect "/"))
 
 (defn clear-database! []
@@ -61,8 +61,8 @@
   (db/as-tenant nil
     (log/info "Clearing the database")
     (db/transactional
-     (db/query :delete-all-territories!)
-     (db/query :delete-all-regions!)))
+      (db/query :delete-all-territories!)
+      (db/query :delete-all-regions!)))
   (res/redirect "/"))
 
 (defn login [request]

@@ -1,4 +1,6 @@
-; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2018 Esko Luontola
+;; This software is released under the Apache License 2.0.
+;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 ; This software is released under the Apache License 2.0.
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -38,8 +40,8 @@
 (mount/defstate ^:dynamic env
   :start
   (enrich-env
-   (override-defaults (cprop/load-config :resource "config-defaults.edn"
-                                         :merge [(source/from-resource "config.edn")])
-                      (mount/args)
-                      (source/from-system-props)
-                      (source/from-env))))
+    (override-defaults (cprop/load-config :resource "config-defaults.edn"
+                                          :merge [(source/from-resource "config.edn")])
+                       (mount/args)
+                       (source/from-system-props)
+                       (source/from-env))))
