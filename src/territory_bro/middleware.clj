@@ -8,24 +8,24 @@
   (:require [clojure.tools.logging :as log]
             [immutant.web.middleware :refer [wrap-session]]
             [ring.logger :as logger]
-            [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-            [ring.middleware.flash :refer [wrap-flash]]
             [ring.middleware.format :refer [wrap-restful-format]]
             [territory-bro.config :refer [env]]
             [territory-bro.env :refer [defaults]]
-            [territory-bro.layout :refer [error-page]]
-            [territory-bro.util :as util]))
+            [territory-bro.util :as util]
+            [ring.util.http-response :refer [internal-server-error]]
+            [ring.util.response :as response]))
 
 (defn wrap-internal-error [handler]
   (fn [req]
     (try
       (handler req)
       (catch Throwable t
-        (log/error t (.getMessage t))
-        (error-page {:status 500
-                     :title "Something very bad has happened!"
-                     :message "We've dispatched a team of highly trained gnomes to take care of the problem."})))))
+        ;; The stack trace is already logged by ring.logger if it originated from application code
+        ;; and otherwise it's from some ring middleware whose stack trace is not interesting.
+        (log/error "Uncaught exception:" (.toString t))
+        (-> (internal-server-error "Internal Server Error")
+            (response/content-type "text/html; charset=utf-8"))))))
 
 (defn wrap-sqlexception-chain [handler]
   (fn [req]
@@ -34,23 +34,15 @@
       (catch Throwable t
         (throw (util/fix-sqlexception-chain t))))))
 
-(defn wrap-csrf [handler]
-  (wrap-anti-forgery
-   handler
-   {:error-response (error-page {:status 403
-                                 :title "Invalid anti-forgery token"})}))
-
 (defn wrap-formats [handler]
+  ;; TODO: is this needed or is liberator self-sufficient?
   (wrap-restful-format handler {:formats [:json-kw :transit-json :transit-msgpack]}))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
       wrap-sqlexception-chain
       (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
-      wrap-flash
-      (wrap-session {:cookie-attrs {:http-only true}})
-      (wrap-defaults
-       (-> site-defaults
-           (assoc-in [:security :anti-forgery] false)
-           (dissoc :session)))
+      (wrap-defaults (-> site-defaults
+                         (assoc-in [:security :anti-forgery] false) ; TODO: enable CSRF
+                         (assoc-in [:session :flash] false)))
       wrap-internal-error))

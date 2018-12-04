@@ -29,8 +29,7 @@
                  [org.postgresql/postgresql "42.2.5"]
                  [ring-logger "1.0.1"]
                  [ring/ring-core "1.7.0"]
-                 [ring/ring-defaults "0.3.2"]
-                 [selmer "1.11.7"]]
+                 [ring/ring-defaults "0.3.2"]]
 
   :min-lein-version "2.0.0"
 
@@ -54,7 +53,6 @@
 
              :project/dev {:dependencies [[bananaoomarang/ring-debug-logging "1.1.0"]
                                           [pjstadig/humane-test-output "0.8.3"]
-                                          [prone "1.6.0"]
                                           [ring/ring-devel "1.7.0" :exclusions [ns-tracker]]
                                           [ring/ring-mock "0.3.2"]]
 

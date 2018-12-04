@@ -1,4 +1,6 @@
-; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2018 Esko Luontola
+;; This software is released under the Apache License 2.0.
+;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 ; This software is released under the Apache License 2.0.
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -154,7 +156,7 @@
             (res/content-type "application/octet-stream")
             (res/header "Content-Disposition" (str "attachment; filename=\"" file-name "\"")))))))
 
-(defroutes home-routes
+(defroutes api-routes
   (GET "/" [] (http-res/ok "Territory Bro"))
   (POST "/api/login" request (login request))
   (POST "/api/dev-login" request (dev-login request))
