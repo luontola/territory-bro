@@ -1,4 +1,6 @@
-; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2018 Esko Luontola
+;; This software is released under the Apache License 2.0.
+;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 ; This software is released under the Apache License 2.0.
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -25,6 +27,7 @@
                  [org.clojure/tools.cli "0.3.7"]
                  [org.clojure/tools.logging "0.4.1"]
                  [org.postgresql/postgresql "42.2.5"]
+                 [ring-logger "1.0.1"]
                  [ring/ring-core "1.7.0"]
                  [ring/ring-defaults "0.3.2"]
                  [selmer "1.11.7"]]

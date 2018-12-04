@@ -1,10 +1,13 @@
-; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2018 Esko Luontola
+;; This software is released under the Apache License 2.0.
+;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 ; This software is released under the Apache License 2.0.
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.middleware
   (:require [clojure.tools.logging :as log]
             [immutant.web.middleware :refer [wrap-session]]
+            [ring.logger :as logger]
             [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [ring.middleware.flash :refer [wrap-flash]]
@@ -43,6 +46,7 @@
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
       wrap-sqlexception-chain
+      (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults

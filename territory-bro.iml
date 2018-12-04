@@ -135,6 +135,7 @@
     <orderEntry type="library" name="Leiningen: prone:1.6.0" level="project" />
     <orderEntry type="library" name="Leiningen: realize:1.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: riddley:0.1.12" level="project" />
+    <orderEntry type="library" name="Leiningen: ring-logger:1.0.1" level="project" />
     <orderEntry type="library" name="Leiningen: ring/ring-anti-forgery:1.3.0" level="project" />
     <orderEntry type="library" name="Leiningen: ring/ring-codec:1.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: ring/ring-core:1.7.0" level="project" />
