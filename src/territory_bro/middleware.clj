@@ -43,6 +43,7 @@
       wrap-sqlexception-chain
       (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
       (wrap-defaults (-> site-defaults
+                         (assoc :proxy true)
                          (assoc-in [:security :anti-forgery] false) ; TODO: enable CSRF
                          (assoc-in [:session :flash] false)))
       wrap-internal-error))
