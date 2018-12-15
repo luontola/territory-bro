@@ -1,4 +1,6 @@
-; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2018 Esko Luontola
+;; This software is released under the Apache License 2.0.
+;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 ; This software is released under the Apache License 2.0.
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -72,18 +74,6 @@
    (if-let [query-fn (get-in queries [:fns query-id :fn])]
      (query-fn *db* params)
      (throw (IllegalArgumentException. (str "query " query-id " not found"))))))
-
-(defn create-territory! [opts]
-  (query :create-territory! (update opts :location json/write-str)))
-
-(defn count-territories []
-  (:count (first (query :count-territories))))
-
-(defn create-region! [opts]
-  (query :create-region! (update opts :location json/write-str)))
-
-(defn count-regions []
-  (:count (first (query :count-regions))))
 
 (defn transactional* [f]
   (conman/with-transaction [*db* {:isolation :serializable}] (f)))

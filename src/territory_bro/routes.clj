@@ -5,8 +5,7 @@
 ; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.routes
-  (:require [clojure.data.json :as json]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [compojure.core :refer [defroutes GET POST ANY]]
@@ -17,7 +16,6 @@
             [territory-bro.config :refer [env]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
-            [territory-bro.domain :as domain]
             [territory-bro.jwt :as jwt]
             [territory-bro.permissions :as perm]
             [territory-bro.util :refer [getx]]))
@@ -27,43 +25,6 @@
     (let [tenant (keyword tenant)]
       (when (some #(= tenant %) tenants)
         tenant))))
-
-(defn- read-file-upload [request param]
-  (let [tempfile (-> request :params param :tempfile)]
-    (try
-      (slurp tempfile)
-      (finally
-        (io/delete-file tempfile)))))
-
-(defn import-territories! [request]
-  ; TODO: not needed for tenants, remove this method after the tenant system is complete
-  (db/as-tenant nil
-    (let [geojson (read-file-upload request :territories)]
-      (when (not-empty geojson)
-        (log/info "Importing territories")
-        (db/transactional
-          (db/query :delete-all-territories!)
-          (dorun (map db/create-territory! (-> geojson
-                                               json/read-str
-                                               domain/geojson-to-territories))))))
-    (let [geojson (read-file-upload request :regions)]
-      (when (not-empty geojson)
-        (log/info "Importing regions")
-        (db/transactional
-          (db/query :delete-all-regions!)
-          (dorun (map db/create-region! (-> geojson
-                                            json/read-str
-                                            domain/geojson-to-regions)))))))
-  (res/redirect "/"))
-
-(defn clear-database! []
-  ; TODO: not needed for tenants, remove this method after the tenant system is complete
-  (db/as-tenant nil
-    (log/info "Clearing the database")
-    (db/transactional
-      (db/query :delete-all-territories!)
-      (db/query :delete-all-regions!)))
-  (res/redirect "/"))
 
 (defn login [request]
   (let [id-token (get-in request [:params :idToken])
@@ -165,6 +126,4 @@
   (ANY "/api/my-congregations" [] my-congregations)
   (ANY "/api/territories" [] territories)
   (ANY "/api/regions" [] regions)
-  (GET "/api/download-qgis-project/:tenant" request (download-qgis-project request))
-  (POST "/api/import-territories" request (import-territories! request))
-  (POST "/api/clear-database" [] (clear-database!)))
+  (GET "/api/download-qgis-project/:tenant" request (download-qgis-project request)))

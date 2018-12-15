@@ -45,26 +45,6 @@ function QgisProjectSection({territoryCount, regionCount, congregationIds, suppo
   );
 }
 
-function ImportSection({territoryCount, regionCount}) {
-  return (
-    <React.Fragment>
-      <h2>Import</h2>
-
-      <p>The database has currently {territoryCount} territories and {regionCount} regions.</p>
-
-      <form action="/api/clear-database" method="post">
-        <button type="submit" className="btn btn-primary">Delete All</button>
-      </form>
-
-      <form action="/api/import-territories" method="post" encType="multipart/form-data">
-        <p>Territories GeoJSON: <input type="file" name="territories"/></p>
-        <p>Regions GeoJSON: <input type="file" name="regions"/></p>
-        <button type="submit" className="btn btn-primary">Import</button>
-      </form>
-    </React.Fragment>
-  );
-}
-
 let OverviewPage = ({territoryCount, regionCount, congregationIds, supportEmail, loggedIn}: Props) => (
   <Layout>
     <h1>Territory Bro</h1>
@@ -73,13 +53,11 @@ let OverviewPage = ({territoryCount, regionCount, congregationIds, supportEmail,
 
     <p>For more information, see <a href="http://territorybro.com">http://territorybro.com</a></p>
 
-    {loggedIn && congregationIds.length > 0 ?
-      <QgisProjectSection territoryCount={territoryCount}
-                          regionCount={regionCount}
-                          congregationIds={congregationIds}
-                          supportEmail={supportEmail}/> :
-      <ImportSection territoryCount={territoryCount}
-                     regionCount={regionCount}/>
+    {loggedIn && congregationIds.length > 0 &&
+    <QgisProjectSection territoryCount={territoryCount}
+                        regionCount={regionCount}
+                        congregationIds={congregationIds}
+                        supportEmail={supportEmail}/>
     }
   </Layout>
 );
