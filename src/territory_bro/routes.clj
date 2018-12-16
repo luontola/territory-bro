@@ -20,6 +20,10 @@
             [territory-bro.permissions :as perm]
             [territory-bro.util :refer [getx]]))
 
+(defn require-logged-in! []
+  (if-not auth/*user*
+    (http-res/unauthorized! "not logged in")))
+
 (defn find-tenant [request tenants]
   (if-let [tenant (get-in request [:headers "x-tenant"])]
     (let [tenant (keyword tenant)]
@@ -66,16 +70,17 @@
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
                (auth/with-authenticated-user request
+                 (require-logged-in!)
                  (congregation/my-congregations))))
 
 (defresource territories
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
                (auth/with-authenticated-user request
+                 (require-logged-in!)
                  (let [tenant (find-tenant request (perm/visible-congregations))]
-                   (assert (or (nil? tenant) ;; TODO: remove default tenant support
-                               (perm/can-view-territories? tenant))
-                           (str "cannot view territories of " tenant))
+                   (if-not (perm/can-view-territories? tenant)
+                     (http-res/forbidden! (str "cannot view territories of " tenant)))
                    (db/as-tenant tenant
                      (db/query :find-territories))))))
 
@@ -83,10 +88,10 @@
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
                (auth/with-authenticated-user request
+                 (require-logged-in!)
                  (let [tenant (find-tenant request (perm/visible-congregations))]
-                   (assert (or (nil? tenant) ;; TODO: remove default tenant support
-                               (perm/can-view-territories? tenant))
-                           (str "cannot view regions of " tenant))
+                   (if-not (perm/can-view-territories? tenant)
+                     (http-res/forbidden! (str "cannot view regions of " tenant)))
                    (db/as-tenant tenant
                      (db/query :find-regions))))))
 
@@ -103,13 +108,13 @@
 
 (defn download-qgis-project [request]
   (auth/with-authenticated-user request
+    (require-logged-in!)
     (let [tenant (keyword (get-in request [:params :tenant]))
           ;; TODO: deduplicate with find-tenant
           tenant (when (some #(= tenant %) (perm/visible-congregations))
                    tenant)]
-      (assert (and tenant
-                   (perm/can-modify-territories? tenant))
-              (str "cannot modify territories of " tenant))
+      (if-not (perm/can-modify-territories? tenant)
+        (http-res/forbidden! (str "cannot modify territories of " tenant)))
       (let [content (generate-qgis-project (select-keys (get-in env [:tenant tenant])
                                                         [:database-host :database-username :database-password]))
             file-name (str (name tenant) "-territories.qgs")]

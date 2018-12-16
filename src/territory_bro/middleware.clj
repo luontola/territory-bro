@@ -10,11 +10,12 @@
             [ring.logger :as logger]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [ring.middleware.format :refer [wrap-restful-format]]
+            [ring.middleware.http-response :refer [wrap-http-response]]
+            [ring.util.http-response :refer [internal-server-error]]
+            [ring.util.response :as response]
             [territory-bro.config :refer [env]]
             [territory-bro.env :refer [defaults]]
-            [territory-bro.util :as util]
-            [ring.util.http-response :refer [internal-server-error]]
-            [ring.util.response :as response]))
+            [territory-bro.util :as util]))
 
 (defn wrap-internal-error [handler]
   (fn [req]
@@ -41,6 +42,7 @@
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
       wrap-sqlexception-chain
+      wrap-http-response
       (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
       (wrap-defaults (-> site-defaults
                          (assoc :proxy true)

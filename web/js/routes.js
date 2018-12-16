@@ -124,12 +124,18 @@ async function fetchSettings(store) {
 
 async function fetchTerritories(store) {
   const state: State = store.getState();
+  if (!state.api.authenticated) {
+    return;
+  }
   const territories = await getTerritories(state.config.congregationId);
   store.dispatch(territoriesLoaded(territories));
 }
 
 async function fetchRegions(store) {
   const state: State = store.getState();
+  if (!state.api.authenticated) {
+    return;
+  }
   const regions = await getRegions(state.config.congregationId);
   store.dispatch(regionsLoaded(regions));
 }
