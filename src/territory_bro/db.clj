@@ -6,10 +6,10 @@
 
 (ns ^{:resource-deps ["sql/queries.sql"]} territory-bro.db
   (:require [cheshire.core :refer [generate-string parse-string]]
-            [clojure.data.json :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [conman.core :as conman]
+            [hikari-cp.core :as hikari-cp]
             [mount.core :as mount]
             [ring.util.codec :refer [form-decode]]
             [territory-bro.config :refer [env]]
@@ -25,12 +25,20 @@
 ; See hikari-cp.core/default-datasource-options for available options.
 (def datasource-options {:idle-timeout (-> (Duration/ofSeconds 60) (.toMillis))
                          :minimum-idle 0
-                         :maximum-pool-size 2})
+                         :maximum-pool-size 2
+                         :initialization-fail-timeout -1})
+
+(defn my-connect! [pool-spec]
+  ;; XXX: the hikari-cp wrapper doesn't support setInitializationFailTimeout
+  (let [{:keys [initialization-fail-timeout]} pool-spec
+        config (hikari-cp/datasource-config (conman/make-config pool-spec))]
+    (when initialization-fail-timeout (.setInitializationFailTimeout config initialization-fail-timeout))
+    {:datasource (HikariDataSource. config)}))
 
 (defn connect! [database-url]
   (log/info "Connect" database-url)
-  (conman/connect! (merge datasource-options
-                          {:jdbc-url database-url})))
+  (my-connect! (merge datasource-options
+                      {:jdbc-url database-url})))
 
 (defn disconnect! [connection]
   (log/info "Disconnect" (if-let [ds (:datasource connection)]
