@@ -72,6 +72,11 @@ Running tests automatically on change
     lein test-refresh
     yarn run autotest    
 
+Download dependency sources
+
+    lein pom
+    mvn dependency:sources
+
 
 ## License
 
