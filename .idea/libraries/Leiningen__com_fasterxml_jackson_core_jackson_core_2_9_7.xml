@@ -4,6 +4,8 @@
       <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-core/2.9.7/jackson-core-2.9.7.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-core/2.9.7/jackson-core-2.9.7-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

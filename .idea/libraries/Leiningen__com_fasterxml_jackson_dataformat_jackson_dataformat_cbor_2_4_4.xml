@@ -4,6 +4,8 @@
       <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.4.4/jackson-dataformat-cbor-2.4.4.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/2.4.4/jackson-dataformat-cbor-2.4.4-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
