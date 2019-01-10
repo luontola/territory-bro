@@ -11,6 +11,7 @@ import es from "react-intl/locale-data/es";
 import fi from "react-intl/locale-data/fi";
 import id from "react-intl/locale-data/id";
 import it from "react-intl/locale-data/it";
+import nl from "react-intl/locale-data/nl";
 import pt from "react-intl/locale-data/pt";
 import translations from "./translations.json";
 
@@ -18,7 +19,7 @@ import translations from "./translations.json";
 // https://medium.freecodecamp.com/internationalization-in-react-7264738274a0
 // https://github.com/iam-peekay/inbox-react-intl/issues/1
 
-addLocaleData([...en, ...es, ...fi, ...id, ...it, ...pt]);
+addLocaleData([...en, ...es, ...fi, ...id, ...it, ...nl, ...pt]);
 
 export const languagesByCode = {
   en: "English",
@@ -26,6 +27,7 @@ export const languagesByCode = {
   fi: "Finnish",
   id: "Indonesian",
   it: "Italian",
+  nl: "Dutch",
   pt: "Portuguese",
 };
 

@@ -19,6 +19,10 @@
     "TerritoryCard.title": "Piantina del territorio",
     "TerritoryCard.footer": "Tenete questa cartolina nella busta. Non la sciupate, non vi fate segni e non la piegate. Ogni volta che \n il territorio è stato percorso interamente, informate il fratello che si occupa dello schedario dei territori."
   },
+  "nl": {
+    "TerritoryCard.title": "Gebiedskaart",
+    "TerritoryCard.footer": "Gelieve deze kaart in het plastic etui te bewaren. Bevlek, beschrijf of vouw deze kaart niet. \n Gelieve iedere keer dat het gebied bewerkt is, de broeder die voor het gebiedssysteem zorgt, hierover in te lichten."
+  },
   "pt": {
     "TerritoryCard.title": "Cartão de mapa de território",
     "TerritoryCard.footer": "Guarde este cartão no envelope. Tome cuidado para não o manchar, marcar ou dobrar. \n Cada vez que o território for coberto, por favor informe o irmão que cuida do arquivo dos territórios."
