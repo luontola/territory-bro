@@ -1,9 +1,6 @@
 #!/bin/bash
 set -eu
 
-echo -n "Database hostname: "
-read dbhost
-
 echo -n "New account username: "
 read username
 if [[ ! $username =~ ^[a-z0-9]+$ ]]; then
@@ -14,6 +11,9 @@ fi
 echo -n "New account password: "
 read -s password
 echo
+
+echo -n "Database hostname: "
+read dbhost
 
 echo "
 CREATE USER $username WITH PASSWORD '$password';
