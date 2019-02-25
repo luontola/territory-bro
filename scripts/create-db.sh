@@ -12,6 +12,15 @@ echo -n "New account password: "
 read -s password
 echo
 
+if [[ "$password" == "" ]]; then
+    echo "ERROR: Empty password"
+    exit 1
+fi
+if [[ "$password" == "$username" ]]; then
+    echo "ERROR: Same username and password"
+    exit 1
+fi
+
 echo -n "Database hostname: "
 read dbhost
 
