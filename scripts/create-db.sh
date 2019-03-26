@@ -50,16 +50,11 @@ cat resources/migrations/*.up.sql | PGPASSWORD=$password psql -h $dbhost -U $use
 # https://stackoverflow.com/questions/11392189/how-to-convert-a-string-from-uppercase-to-lowercase-in-bash
 username_upper=$(echo "$username" | tr '[:lower:]' '[:upper:]')
 echo "
-Kubernetes config:
+Compose config:
 
-        - name: TENANT__${username_upper}__DATABASE_URL
-          value: jdbc:postgresql://${dbhost}/${username}?user=${username}&password=${password}
-        - name: TENANT__${username_upper}__DATABASE_HOST
-          value: ${dbhost}
-        - name: TENANT__${username_upper}__DATABASE_USERNAME
-          value: ${username}
-        - name: TENANT__${username_upper}__DATABASE_PASSWORD
-          value: ${password}
-        - name: TENANT__${username_upper}__ADMINS
-          value: 
+        TENANT__${username_upper}__DATABASE_URL: jdbc:postgresql://${dbhost}/${username}?user=${username}&password=${password}
+        TENANT__${username_upper}__DATABASE_HOST: ${dbhost}
+        TENANT__${username_upper}__DATABASE_USERNAME: ${username}
+        TENANT__${username_upper}__DATABASE_PASSWORD: ${password}
+        TENANT__${username_upper}__ADMINS: 
 "
