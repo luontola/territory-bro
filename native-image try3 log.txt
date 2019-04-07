@@ -1,0 +1,165 @@
+bash-4.2# native-image --report-unsupported-elements-at-runtime --allow-incomplete-classpath --static \
+> -H:IncludeResources='config.*edn$' \
+> -H:IncludeResources='logback.*xml$' \
+> -H:IncludeResources='template-territories.qgs$' \
+> -H:IncludeResources='migrations/.*$' \
+> --no-server --verbose -jar territory-bro.jar 
+Executing [
+/opt/graalvm-ce-1.0.0-rc10/bin/java \
+-XX:+UnlockExperimentalVMOptions \
+-XX:+EnableJVMCI \
+-XX:-UseJVMCICompiler \
+-Dtruffle.TrustAllTruffleRuntimeProviders=true \
+-d64 \
+-noverify \
+-XX:-UseJVMCIClassLoader \
+-Xss10m \
+-Xms1g \
+-Xmx14g \
+-Duser.country=US \
+-Duser.language=en \
+-Dgraalvm.version=1.0.0-rc10 \
+-Dorg.graalvm.version=1.0.0-rc10 \
+-Dcom.oracle.graalvm.isaot=true \
+-Djvmci.class.path.append=/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/graal.jar \
+-Xbootclasspath/a:/opt/graalvm-ce-1.0.0-rc10/jre/lib/boot/graal-sdk.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/boot/graaljs-scriptengine.jar \
+-cp \
+/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/objectfile.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/svm.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/pointsto.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/graal-management.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/jvmci-hotspot.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/graal.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/jvmci-api.jar \
+com.oracle.svm.hosted.NativeImageGeneratorRunner \
+-watchpid \
+401 \
+-H:Path=/project \
+-H:+ReportUnsupportedElementsAtRuntime \
+-H:+AllowIncompleteClasspath \
+-H:Kind=STATIC_EXECUTABLE \
+-H:IncludeResources=config.*edn$ \
+-H:IncludeResources=logback.*xml$ \
+-H:IncludeResources=template-territories.qgs$ \
+-H:IncludeResources=migrations/.*$ \
+-H:Class=territory_bro.main \
+-H:Name=territory-bro \
+-H:CLibraryPath=/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/clibraries/linux-amd64 \
+-imagecp \
+/opt/graalvm-ce-1.0.0-rc10/jre/lib/boot/graal-sdk.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/boot/graaljs-scriptengine.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/objectfile.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/svm.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/pointsto.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/graal-management.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/jvmci-hotspot.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/graal.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/jvmci-api.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/library-support.jar:/project:/project/territory-bro.jar
+]
+[territory-bro:402]    classlist:   7,810.43 ms
+[territory-bro:402]        (cap):     902.83 ms
+[territory-bro:402]        setup:   2,291.05 ms
+[territory-bro:402]   (typeflow): 192,474.87 ms
+[territory-bro:402]    (objects):  47,281.95 ms
+[territory-bro:402]   (features):     609.78 ms
+[territory-bro:402]     analysis: 242,617.13 ms
+[territory-bro:402]     universe:   1,560.24 ms
+[territory-bro:402]      (parse):   4,277.72 ms
+[territory-bro:402]     (inline):   2,702.64 ms
+[territory-bro:402]    (compile):  21,032.49 ms
+[territory-bro:402]      compile:  31,229.63 ms
+[territory-bro:402]        image:   7,617.80 ms
+[territory-bro:402]        write:     901.44 ms
+[territory-bro:402]      [total]: 294,201.94 ms
+bash-4.2# ls -lh
+total 100M
+-rwxr-xr-x 1 root root 66M Dec 17 20:04 territory-bro
+-rw-r--r-- 1 5001 5001 35M Dec 17 19:51 territory-bro.jar
+bash-4.2# 
+
+
+
+
+
+----------------
+
+
+Attaching to territory-bro_dev_1
+dev_1  | Exception in thread "main" java.lang.RuntimeException: could not start [#'territory-bro.db/databases] due to
+dev_1  | 	at java.lang.Throwable.<init>(Throwable.java:287)
+dev_1  | 2018-12-17 20:06:00,011 [main] INFO  territory-bro.db - Connect jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro 
+dev_1  | 	at java.lang.Exception.<init>(Exception.java:84)
+dev_1  | 	at java.lang.RuntimeException.<init>(RuntimeException.java:80)
+dev_1  | 	at mount.core$up$fn__3267.invoke(core.cljc:92)
+dev_1  | 	at mount.core$up.invokeStatic(core.cljc:92)
+dev_1  | 	at mount.core$up.invoke(core.cljc:90)
+dev_1  | 	at mount.core$bring.invokeStatic(core.cljc:242)
+dev_1  | 	at mount.core$bring.invoke(core.cljc:234)
+dev_1  | 	at mount.core$start.invokeStatic(core.cljc:284)
+dev_1  | 	at mount.core$start.doInvoke(core.cljc:276)
+dev_1  | 	at clojure.lang.RestFn.invoke(RestFn.java:397)
+dev_1  | 	at mount.core$start_with_args.invokeStatic(core.cljc:384)
+dev_1  | 	at mount.core$start_with_args.doInvoke(core.cljc:380)
+dev_1  | 	at clojure.lang.RestFn.invoke(RestFn.java:410)
+dev_1  | 	at territory_bro.main$start_app.invokeStatic(main.clj:49)
+dev_1  | 	at territory_bro.main$start_app.invoke(main.clj:48)
+dev_1  | 	at territory_bro.main$_main.invokeStatic(main.clj:75)
+dev_1  | 	at territory_bro.main$_main.doInvoke(main.clj:56)
+dev_1  | 	at clojure.lang.RestFn.invoke(RestFn.java:397)
+dev_1  | 	at clojure.lang.AFn.applyToHelper(AFn.java:152)
+dev_1  | 	at clojure.lang.RestFn.applyTo(RestFn.java:132)
+dev_1  | 	at territory_bro.main.main(Unknown Source)
+dev_1  | 	at com.oracle.svm.core.JavaMainWrapper.run(JavaMainWrapper.java:164)
+dev_1  | Caused by: java.lang.IllegalArgumentException: No matching method found: startsWith for class java.lang.String
+dev_1  | 	at java.lang.Throwable.<init>(Throwable.java:265)
+dev_1  | 	at java.lang.Exception.<init>(Exception.java:66)
+dev_1  | 	at java.lang.RuntimeException.<init>(RuntimeException.java:62)
+dev_1  | 	at java.lang.IllegalArgumentException.<init>(IllegalArgumentException.java:52)
+dev_1  | 	at clojure.lang.Reflector.invokeMatchingMethod(Reflector.java:53)
+dev_1  | 	at clojure.lang.Reflector.invokeInstanceMethod(Reflector.java:28)
+dev_1  | 	at to_jdbc_uri.core$to_jdbc_uri.invokeStatic(core.clj:41)
+dev_1  | 	at to_jdbc_uri.core$to_jdbc_uri.invoke(core.clj:36)
+dev_1  | 	at clojure.core$update.invokeStatic(core.clj:6116)
+dev_1  | 	at clojure.core$update.invoke(core.clj:6108)
+dev_1  | 	at conman.core$format_url.invokeStatic(core.clj:133)
+dev_1  | 	at conman.core$format_url.invoke(core.clj:131)
+dev_1  | 	at conman.core$make_config.invokeStatic(core.clj:140)
+dev_1  | 	at conman.core$make_config.invoke(core.clj:136)
+dev_1  | 	at territory_bro.db$my_connect_BANG_.invokeStatic(db.clj:34)
+dev_1  | 	at territory_bro.db$my_connect_BANG_.invoke(db.clj:31)
+dev_1  | 	at territory_bro.db$connect_BANG_.invokeStatic(db.clj:40)
+dev_1  | 	at territory_bro.db$connect_BANG_.invoke(db.clj:38)
+dev_1  | 	at territory_bro.db$connect_all_BANG_.invokeStatic(db.clj:49)
+dev_1  | 	at territory_bro.db$connect_all_BANG_.invoke(db.clj:48)
+dev_1  | 	at territory_bro.db$fn__3725.invokeStatic(db.clj:60)
+dev_1  | 	at territory_bro.db$fn__3725.invoke(db.clj:59)
+dev_1  | 	at mount.core$record_BANG_.invokeStatic(core.cljc:86)
+dev_1  | 	at mount.core$record_BANG_.invoke(core.cljc:85)
+dev_1  | 	at mount.core$up$fn__3267.invoke(core.cljc:93)
+dev_1  | 	... 19 more
+
+
+----
+
+
+(defn to-jdbc-uri
+  "Convert a non-JDBC URI to a JDBC one."
+  [uri]
+  (when (empty? uri)
+    (throw (Exception. "URI connection string cannot be empty!")))
+  (if (.startsWith uri "jdbc")    <<<<< line 41 ERROR!
+    uri
+    (let [parsed-uri (java.net.URI. uri)]
+      (case (.getScheme parsed-uri)
+        ("postgres" "postgresql") (format-jdbc-uri parsed-uri "postgresql") ; Heroku uses postgres://, RedHat OpenShift uses postgresql://
+        "mysql" (format-jdbc-uri parsed-uri "mysql")
+        (throw (Exception. (str "Unsupported URI: " uri " please, submit an issue request and we'll try to add it. Pull requests also welcome")))))))
+
+
+-----
+
+
+        47: aload_0
+        48: ldc           #45                 // String startsWith
+        50: iconst_1
+        51: anewarray     #47                 // class java/lang/Object
+        54: dup
+        55: iconst_0
+        56: ldc           #49                 // String jdbc
+        58: aastore
+        59: invokestatic  #55                 // Method clojure/lang/Reflector.invokeInstanceMethod:(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;
+
+
+-----
+
+
+* apparently native-image optimized away the String.startsWith method
+	* add type hints?
+* switch to Golang or JavaScript
+

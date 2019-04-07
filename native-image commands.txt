@@ -1,0 +1,17 @@
+
+gcloud compute ssh instance-1
+gcloud compute scp target/uberjar/territory-bro.jar instance-1:~/
+gcloud compute scp instance-1:~/territory-bro ./
+
+docker run -it --rm -v "$(pwd):/project" oracle/graalvm-ce:1.0.0-rc10 bash
+
+cd /project
+native-image --report-unsupported-elements-at-runtime --allow-incomplete-classpath --static \
+	-H:IncludeResources='config.*edn$' \
+	-H:IncludeResources='logback.*xml$' \
+	-H:IncludeResources='template-territories.qgs$' \
+	-H:IncludeResources='migrations/.*$' \
+	--no-server --verbose -jar territory-bro.jar 
+
+
+# native-image default limits: 13 CPUs, 15GB RAM

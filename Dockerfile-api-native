@@ -1,0 +1,8 @@
+FROM scratch
+
+EXPOSE 8080
+ENV PORT=8080 \
+    DATABASE_URL="jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
+ENTRYPOINT ["/territory-bro"]
+
+COPY territory-bro /territory-bro

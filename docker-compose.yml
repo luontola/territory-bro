@@ -43,3 +43,25 @@ services:
     mem_limit: 150m
     ports:
       - "5432:5432"
+
+  dev:
+    #image: oracle/graalvm-ce:1.0.0-rc10
+    build:
+      context: .
+      dockerfile: Dockerfile-api-native
+    #volumes:
+    #  - .:/project
+    environment:
+      AUTH0_DOMAIN: luontola.eu.auth0.com
+      AUTH0_CLIENT_ID: 8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi
+      SUPER_ADMIN:
+      SUPPORT_EMAIL: support@example.com
+      DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro
+      TENANT__TESTING__DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro
+      TENANT__TESTING__DATABASE_HOST: db
+      TENANT__TESTING__DATABASE_USERNAME: territorybro
+      TENANT__TESTING__DATABASE_PASSWORD: territorybro
+      TENANT__TESTING__ADMINS: google-oauth2|102883237794451111459
+      PORT: 8080
+    ports:
+      - "8081:8080"

@@ -1,0 +1,112 @@
+bash-4.2# native-image --report-unsupported-elements-at-runtime --allow-incomplete-classpath --static --no-server --verbose -jar territory-bro.jar 
+Executing [
+/opt/graalvm-ce-1.0.0-rc10/bin/java \
+-XX:+UnlockExperimentalVMOptions \
+-XX:+EnableJVMCI \
+-XX:-UseJVMCICompiler \
+-Dtruffle.TrustAllTruffleRuntimeProviders=true \
+-d64 \
+-noverify \
+-XX:-UseJVMCIClassLoader \
+-Xss10m \
+-Xms1g \
+-Xmx14g \
+-Duser.country=US \
+-Duser.language=en \
+-Dgraalvm.version=1.0.0-rc10 \
+-Dorg.graalvm.version=1.0.0-rc10 \
+-Dcom.oracle.graalvm.isaot=true \
+-Djvmci.class.path.append=/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/graal.jar \
+-Xbootclasspath/a:/opt/graalvm-ce-1.0.0-rc10/jre/lib/boot/graal-sdk.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/boot/graaljs-scriptengine.jar \
+-cp \
+/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/objectfile.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/svm.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/pointsto.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/graal-management.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/jvmci-hotspot.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/graal.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/jvmci-api.jar \
+com.oracle.svm.hosted.NativeImageGeneratorRunner \
+-watchpid \
+250 \
+-H:Path=/project \
+-H:+ReportUnsupportedElementsAtRuntime \
+-H:+AllowIncompleteClasspath \
+-H:Kind=STATIC_EXECUTABLE \
+-H:Class=territory_bro.main \
+-H:Name=territory-bro \
+-H:CLibraryPath=/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/clibraries/linux-amd64 \
+-imagecp \
+/opt/graalvm-ce-1.0.0-rc10/jre/lib/boot/graal-sdk.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/boot/graaljs-scriptengine.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/objectfile.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/svm.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/builder/pointsto.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/graal-management.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/jvmci-hotspot.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/graal.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/jvmci-api.jar:/opt/graalvm-ce-1.0.0-rc10/jre/lib/svm/library-support.jar:/project:/project/territory-bro.jar
+]
+[territory-bro:251]    classlist:   7,998.00 ms
+[territory-bro:251]        (cap):     888.86 ms
+[territory-bro:251]        setup:   2,149.89 ms
+[territory-bro:251]   (typeflow): 193,413.37 ms
+[territory-bro:251]    (objects):  47,293.59 ms
+[territory-bro:251]   (features):     595.79 ms
+[territory-bro:251]     analysis: 243,673.95 ms
+[territory-bro:251]     universe:  16,070.51 ms
+[territory-bro:251]      (parse):   5,086.41 ms
+[territory-bro:251]     (inline):   2,687.27 ms
+[territory-bro:251]    (compile):  22,426.97 ms
+[territory-bro:251]      compile:  33,584.16 ms
+[territory-bro:251]        image:   8,250.23 ms
+[territory-bro:251]        write:     938.65 ms
+[territory-bro:251]      [total]: 312,822.85 ms
+bash-4.2# ls -lh
+total 100M
+-rwxr-xr-x 1 root root 65M Dec 17 19:40 territory-bro
+-rw-r--r-- 1 5001 5001 35M Dec 17 19:34 territory-bro.jar
+bash-4.2# 
+
+
+
+
+
+
+
+-----------
+
+
+Attaching to territory-bro_dev_1
+dev_1  | Exception in thread "main" java.lang.RuntimeException: could not start [#'territory-bro.config/env] due to
+dev_1  | 	at java.lang.Throwable.<init>(Throwable.java:287)
+dev_1  | 	at java.lang.Exception.<init>(Exception.java:84)
+dev_1  | 	at java.lang.RuntimeException.<init>(RuntimeException.java:80)
+dev_1  | 	at mount.core$up$fn__3267.invoke(core.cljc:92)
+dev_1  | 	at mount.core$up.invokeStatic(core.cljc:92)
+dev_1  | 	at mount.core$up.invoke(core.cljc:90)
+dev_1  | 	at mount.core$bring.invokeStatic(core.cljc:242)
+dev_1  | 	at mount.core$bring.invoke(core.cljc:234)
+dev_1  | 	at mount.core$start.invokeStatic(core.cljc:284)
+dev_1  | 	at mount.core$start.doInvoke(core.cljc:276)
+dev_1  | 	at clojure.lang.RestFn.invoke(RestFn.java:408)
+dev_1  | 	at territory_bro.main$_main.invokeStatic(main.clj:57)
+dev_1  | 	at territory_bro.main$_main.doInvoke(main.clj:56)
+dev_1  | 	at clojure.lang.RestFn.invoke(RestFn.java:397)
+dev_1  | 	at clojure.lang.AFn.applyToHelper(AFn.java:152)
+dev_1  | 	at clojure.lang.RestFn.applyTo(RestFn.java:132)
+dev_1  | 	at territory_bro.main.main(Unknown Source)
+dev_1  | 	at com.oracle.svm.core.JavaMainWrapper.run(JavaMainWrapper.java:164)
+dev_1  | Caused by: java.util.MissingResourceException: resource "config.edn" not found on the resource path
+dev_1  | 	at java.lang.Throwable.<init>(Throwable.java:265)
+dev_1  | 	at java.lang.Exception.<init>(Exception.java:66)
+dev_1  | 	at java.lang.RuntimeException.<init>(RuntimeException.java:62)
+dev_1  | 	at java.util.MissingResourceException.<init>(MissingResourceException.java:61)
+dev_1  | 	at cprop.source$from_resource.invokeStatic(source.cljc:171)
+dev_1  | 	at cprop.source$from_resource.invoke(source.cljc:159)
+dev_1  | 	at territory_bro.config$fn__3694.invokeStatic(config.clj:44)
+dev_1  | 	at territory_bro.config$fn__3694.invoke(config.clj:40)
+dev_1  | 	at mount.core$record_BANG_.invokeStatic(core.cljc:86)
+dev_1  | 	at mount.core$record_BANG_.invoke(core.cljc:85)
+dev_1  | 	at mount.core$up$fn__3267.invoke(core.cljc:93)
+dev_1  | 	... 14 more
+
+
+
+------------
+
+
+https://github.com/oracle/graal/blob/master/substratevm/RESOURCES.md
+
+* add -H:IncludeResources='config.*edn$' option
+* (repeat for all resources)
+
+
+
+
