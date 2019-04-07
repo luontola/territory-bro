@@ -1,4 +1,4 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 ; This software is released under the Apache License 2.0.
@@ -9,22 +9,22 @@
   :description "Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses."
   :url "https://territorybro.com"
 
-  :dependencies [[com.auth0/java-jwt "3.4.1"]
-                 [com.auth0/jwks-rsa "0.6.1"]
+  :dependencies [[com.auth0/java-jwt "3.8.0"]
+                 [com.auth0/jwks-rsa "0.8.0"]
                  [compojure "1.6.1"]
                  [conman "0.8.3"]
                  [cprop "0.1.13"]
-                 [liberator "0.15.2"]
-                 [luminus-immutant "0.2.4"]
-                 [luminus-migrations "0.6.3"]
-                 [luminus-nrepl "0.1.4"]
+                 [liberator "0.15.3"]
+                 [luminus-immutant "0.2.5"]
+                 [luminus-migrations "0.6.5"]
+                 [luminus-nrepl "0.1.6"]
                  [metosin/ring-http-response "0.9.1"]
                  [metosin/ring-middleware-format "0.6.0"]
-                 [mount "0.1.15"]
+                 [mount "0.1.16"]
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.10.0"]
                  [org.clojure/data.json "0.2.6"]
-                 [org.clojure/tools.cli "0.4.1"]
+                 [org.clojure/tools.cli "0.4.2"]
                  [org.clojure/tools.logging "0.4.1"]
                  [org.postgresql/postgresql "42.2.5"]
                  [ring-logger "1.0.1"]

@@ -1,6 +1,6 @@
-; Copyright © 2015-2018 Esko Luontola
-; This software is released under the Apache License 2.0.
-; The license text is at http://www.apache.org/licenses/LICENSE-2.0
+;; Copyright © 2015-2019 Esko Luontola
+;; This software is released under the Apache License 2.0.
+;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.jwt
   (:require [clojure.data.json :as json]
@@ -35,7 +35,7 @@
                 (getToday [_]
                   (Date/from ((getx env :now)))))
         verifier (-> (JWT/require algorithm)
-                     (.withIssuer (getx env :jwt-issuer))
+                     (.withIssuer (into-array String [(getx env :jwt-issuer)]))
                      (.withAudience (into-array String [(getx env :jwt-audience)]))
                      (->> (cast JWTVerifier$BaseVerification))
                      (.build clock))]

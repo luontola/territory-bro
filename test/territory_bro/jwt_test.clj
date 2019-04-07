@@ -1,6 +1,6 @@
-; Copyright © 2015-2018 Esko Luontola
-; This software is released under the Apache License 2.0.
-; The license text is at http://www.apache.org/licenses/LICENSE-2.0
+;; Copyright © 2015-2019 Esko Luontola
+;; This software is released under the Apache License 2.0.
+;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.jwt-test
   (:require [clojure.test :refer :all]
@@ -52,7 +52,7 @@
                             (jwt/validate token (assoc env :now #(Instant/parse "2018-11-04T16:17:00.000Z"))))))
 
     (testing "validates token issuer"
-      (is (thrown-with-msg? InvalidClaimException #"The Claim 'iss' value doesn't match the required one."
+      (is (thrown-with-msg? InvalidClaimException #"The Claim 'iss' value doesn't match the required issuer."
                             (jwt/validate token (assoc env :jwt-issuer "x")))))
 
     (testing "validates token audience"
