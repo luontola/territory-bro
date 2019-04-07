@@ -77,6 +77,8 @@
                (auth/with-authenticated-user request
                  (require-logged-in!)
                  (let [tenant (find-tenant request (perm/visible-congregations))]
+                   (if-not tenant
+                     (http-res/bad-request! (str "no such tenant: " tenant)))
                    (if-not (perm/can-view-territories? tenant)
                      (http-res/forbidden! (str "cannot view territories of " tenant)))
                    (db/as-tenant tenant
@@ -88,6 +90,8 @@
                (auth/with-authenticated-user request
                  (require-logged-in!)
                  (let [tenant (find-tenant request (perm/visible-congregations))]
+                   (if-not tenant
+                     (http-res/bad-request! (str "no such tenant: " tenant)))
                    (if-not (perm/can-view-territories? tenant)
                      (http-res/forbidden! (str "cannot view regions of " tenant)))
                    (db/as-tenant tenant
