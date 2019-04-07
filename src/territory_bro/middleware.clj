@@ -1,4 +1,4 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -9,10 +9,10 @@
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [ring.middleware.format :refer [wrap-restful-format]]
             [ring.middleware.http-response :refer [wrap-http-response]]
+            [ring.middleware.reload :refer [wrap-reload]]
             [ring.util.http-response :refer [internal-server-error]]
             [ring.util.response :as response]
             [territory-bro.config :refer [env]]
-            [territory-bro.env :refer [defaults]]
             [territory-bro.util :as util]))
 
 (defn wrap-internal-error [handler]
@@ -38,7 +38,9 @@
   (wrap-restful-format handler {:formats [:json-kw :transit-json :transit-msgpack]}))
 
 (defn wrap-base [handler]
-  (-> ((:middleware defaults) handler)
+  (-> handler
+      (cond->
+        (:dev env) (wrap-reload {:dirs ["src" "resources"]}))
       wrap-sqlexception-chain
       wrap-http-response
       (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
