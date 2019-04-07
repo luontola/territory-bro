@@ -19,7 +19,7 @@
   :start (-> (JwkProviderBuilder. ^String (getx env :auth0-domain))
              (.build)))
 
-(defn- fetch-public-key [jwt]
+(defn- fetch-public-key [^String jwt]
   (let [key-id (.getKeyId (JWT/decode jwt))]
     (.getPublicKey (.get jwk-provider key-id))))
 
@@ -28,7 +28,7 @@
       (.decode base64-str)
       (String. StandardCharsets/UTF_8)))
 
-(defn validate [jwt env]
+(defn validate [^String jwt env]
   (let [public-key (fetch-public-key jwt)
         algorithm (Algorithm/RSA256 public-key nil)
         clock (reify Clock

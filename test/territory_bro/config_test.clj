@@ -35,7 +35,7 @@
       (let [result ((getx env :now))]
         (is (instance? Instant result))
         (is (< (- (System/currentTimeMillis)
-                  (.toEpochMilli result))
+                  (.toEpochMilli ^Instant result))
                100))))
 
     (testing ":jwt-issuer is https://YOUR_AUTH0_DOMAIN/"
