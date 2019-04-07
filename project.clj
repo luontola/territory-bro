@@ -17,13 +17,14 @@
                  [luminus-migrations "0.6.5"]
                  [luminus-nrepl "0.1.6"]
                  [metosin/ring-http-response "0.9.1"]
-                 [metosin/ring-middleware-format "0.6.0"]
+                 [metosin/ring-middleware-format "0.6.0"] ;; TODO: replace with newer library
                  [mount "0.1.16"]
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.10.0"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.cli "0.4.2"]
                  [org.clojure/tools.logging "0.4.1"]
+                 [org.clojure/tools.reader "1.3.2"] ;; XXX: overrides old version from metosin/ring-middleware-format
                  [org.postgresql/postgresql "42.2.5"]
                  [ring-logger "1.0.1"]
                  [ring/ring-core "1.7.1"]
@@ -41,11 +42,14 @@
   :plugins [[com.jakemccrary/lein-test-refresh "0.14.0"]
             [lein-ancient "0.6.15"]]
 
+  :aliases {"kaocha" ["with-profile" "+kaocha,+test" "run" "-m" "kaocha.runner"]}
+
   :profiles {:uberjar {:omit-source true
                        :aot :all
                        :uberjar-name "territory-bro.jar"
-                       :source-paths ["env/prod/clj"]
                        :resource-paths ["env/prod/resources"]}
+
+             :kaocha {:dependencies [[lambdaisland/kaocha "0.0-413"]]}
 
              :dev [:project/dev :profiles/dev]
              :test [:project/test :profiles/test]

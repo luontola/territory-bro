@@ -1,4 +1,4 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,6 +8,7 @@
 
 ; TODO
 (deftest my-congregations-test
+  (is true)
   (testing "lists congregations to which the user has access")
   (testing "hides congregations to which the user has no access")
   (testing "superadmin can access all congregations"))
