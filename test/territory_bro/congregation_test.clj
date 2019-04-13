@@ -24,26 +24,37 @@
 (defn ^"[Ljava.lang.String;" strings [& strings]
   (into-array String strings))
 
+(defn ^Flyway master-db-migrations [schema]
+  (-> (Flyway/configure)
+      (.dataSource (get-in db/databases [:default :datasource]))
+      (.schemas (strings schema))
+      (.locations (strings "classpath:migration/master"))
+      (.load)))
+
+(defn ^Flyway tenant-db-migrations [schema]
+  (-> (Flyway/configure)
+      (.dataSource (get-in db/databases [:default :datasource]))
+      (.schemas (strings schema))
+      (.locations (strings "classpath:migration/tenant"))
+      (.load)))
+
 (deftest my-congregations-test
-  (let [flyway (-> (Flyway/configure)
-                   (.dataSource (get-in db/databases [:default :datasource]))
-                   (.schemas (strings "test_master"))
-                   (.locations (strings "classpath:migration/master"))
-                   (.load))]
-    (.migrate flyway)
+  (let [master (master-db-migrations "test_master")
+        tenant (tenant-db-migrations "test_tenant")]
+    (.migrate master)
+    (.migrate tenant)
 
     (let [conn (:default db/databases)]
       (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-        (prn '--------------)
-        (jdbc/execute! conn ["set search_path to test_master"])
-        (prn 'before (jdbc/query conn ["select * from foo"]))
-        (prn 'insert (jdbc/execute! conn ["insert into foo (foo_id) values (default)"]))
-        (prn 'after (jdbc/query conn ["select * from foo"]))
-        (prn '----------)))
+        (jdbc/execute! conn ["set search_path to test_tenant,test_master"])
+        (is (= [] (jdbc/query conn ["select * from foo"])))
+        (is (= {:foo_id 1} (jdbc/execute! conn ["insert into foo (foo_id) values (default)"] {:return-keys true})))
+        (is (= {:bar_id 1} (jdbc/execute! conn ["insert into bar (bar_id) values (default)"] {:return-keys true})))
+        (is (= [{:foo_id 1}] (jdbc/query conn ["select * from foo"])))))
 
-    (.clean flyway))
+    (.clean tenant)
+    (.clean master))
 
-  (is true)
   (testing "lists congregations to which the user has access")
   (testing "hides congregations to which the user has no access")
   (testing "superadmin can access all congregations"))
