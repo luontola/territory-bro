@@ -22,9 +22,9 @@
   (mount/stop))
 
 (defn rollback-db-fixture [f]
-  (binding [db/*db* (:default db/databases)]
-    (conman/with-transaction [db/*db* {:isolation :serializable}]
-      (jdbc/db-set-rollback-only! db/*db*)
+  (binding [db/*conn* (:default db/databases)]
+    (conman/with-transaction [db/*conn* {:isolation :serializable}]
+      (jdbc/db-set-rollback-only! db/*conn*)
       (f))))
 
 (use-fixtures :once test-db-fixture)

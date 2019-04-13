@@ -1,4 +1,4 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -58,16 +58,16 @@
   :start (connect-all!)
   :stop (disconnect-all! databases))
 
-(def ^:dynamic *db*)
+(def ^:dynamic *conn*)
 
 (def queries (conman/bind-connection-map nil "sql/queries.sql"))
 
 (defn as-tenant* [tenant f]
-  (binding [*db* (if (nil? tenant)
-                   (or (get databases :default)
-                       (throw (IllegalArgumentException. "default database connection not found")))
-                   (or (get-in databases [:tenant tenant])
-                       (throw (IllegalArgumentException. (str "database connection for tenant " tenant " not found")))))]
+  (binding [*conn* (if (nil? tenant)
+                     (or (get databases :default)
+                         (throw (IllegalArgumentException. "default database connection not found")))
+                     (or (get-in databases [:tenant tenant])
+                         (throw (IllegalArgumentException. (str "database connection for tenant " tenant " not found")))))]
     (f)))
 
 (defmacro as-tenant [tenant & body]
@@ -78,11 +78,11 @@
    (query query-id {}))
   ([query-id params]
    (if-let [query-fn (get-in queries [:fns query-id :fn])]
-     (query-fn *db* params)
+     (query-fn *conn* params)
      (throw (IllegalArgumentException. (str "query " query-id " not found"))))))
 
 (defn transactional* [f]
-  (conman/with-transaction [*db* {:isolation :serializable}] (f)))
+  (conman/with-transaction [*conn* {:isolation :serializable}] (f)))
 
 (defmacro transactional [& body]
   `(transactional* (fn [] ~@body)))
