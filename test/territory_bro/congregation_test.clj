@@ -41,6 +41,8 @@
 (deftest my-congregations-test
   (let [master (master-db-migrations "test_master")
         tenant (tenant-db-migrations "test_tenant")]
+    (.clean tenant)
+    (.clean master)
     (.migrate master)
     (.migrate tenant)
 
@@ -50,10 +52,7 @@
         (is (= [] (jdbc/query conn ["select * from foo"])))
         (is (= {:foo_id 1} (jdbc/execute! conn ["insert into foo (foo_id) values (default)"] {:return-keys true})))
         (is (= {:bar_id 1} (jdbc/execute! conn ["insert into bar (bar_id) values (default)"] {:return-keys true})))
-        (is (= [{:foo_id 1}] (jdbc/query conn ["select * from foo"])))))
-
-    (.clean tenant)
-    (.clean master))
+        (is (= [{:foo_id 1}] (jdbc/query conn ["select * from foo"]))))))
 
   (testing "lists congregations to which the user has access")
   (testing "hides congregations to which the user has no access")
