@@ -29,17 +29,17 @@
   (-> (Flyway/configure)
       (.dataSource (get-in db/databases [:default :datasource]))
       (.schemas (strings schema))
-      (.locations (strings "classpath:migration/master"))
+      (.locations (strings "classpath:db/flyway/master"))
       (.load)))
 
 (defn ^Flyway tenant-db-migrations [schema]
   (-> (Flyway/configure)
       (.dataSource (get-in db/databases [:default :datasource]))
       (.schemas (strings schema))
-      (.locations (strings "classpath:migration/tenant"))
+      (.locations (strings "classpath:db/flyway/tenant"))
       (.load)))
 
-(def queries (hugsql/map-of-db-fns "sql/congregation.sql"))
+(def queries (hugsql/map-of-db-fns "db/hugsql/congregation.sql"))
 
 (defn query [conn name & params]
   (let [query-fn (get-in queries [name :fn])]
