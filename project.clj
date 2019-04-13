@@ -9,6 +9,7 @@
 
   :dependencies [[com.auth0/java-jwt "3.8.0"]
                  [com.auth0/jwks-rsa "0.8.0"]
+                 [com.layerware/hugsql "0.4.9"]
                  [compojure "1.6.1"]
                  [conman "0.8.3"]
                  [cprop "0.1.13"]

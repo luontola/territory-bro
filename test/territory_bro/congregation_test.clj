@@ -5,6 +5,7 @@
 (ns territory-bro.congregation-test
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
+            [hugsql.core :as hugsql]
             [mount.core :as mount]
             [territory-bro.config :as config]
             [territory-bro.congregation :refer :all]
@@ -38,6 +39,13 @@
       (.locations (strings "classpath:migration/tenant"))
       (.load)))
 
+(def queries (hugsql/map-of-db-fns "sql/congregation.sql"))
+
+(defn query [conn name & params]
+  (let [query-fn (get-in queries [name :fn])]
+    (assert query-fn (str "query not found: " name))
+    (apply query-fn conn params)))
+
 (deftest my-congregations-test
   (let [master (master-db-migrations "test_master")
         tenant (tenant-db-migrations "test_tenant")]
@@ -52,7 +60,8 @@
         (is (= [] (jdbc/query conn ["select * from foo"])))
         (is (= {:foo_id 1} (jdbc/execute! conn ["insert into foo (foo_id) values (default)"] {:return-keys true})))
         (is (= {:bar_id 1} (jdbc/execute! conn ["insert into bar (bar_id) values (default)"] {:return-keys true})))
-        (is (= [{:foo_id 1}] (jdbc/query conn ["select * from foo"]))))))
+        (is (= [{:foo_id 1}] (jdbc/query conn ["select * from foo"])))
+        (is (= [{:foo_id 1}] (query conn :find-foos))))))
 
   (testing "lists congregations to which the user has access")
   (testing "hides congregations to which the user has no access")
