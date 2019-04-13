@@ -3,14 +3,16 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.congregation-test
-  (:require [clojure.java.jdbc :as jdbc]
+  (:require [clojure.java.io :as io]
+            [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]
             [mount.core :as mount]
             [territory-bro.config :as config]
             [territory-bro.congregation :refer :all]
             [territory-bro.db :as db])
-  (:import (org.flywaydb.core Flyway)))
+  (:import (java.net URL)
+           (org.flywaydb.core Flyway)))
 
 (defn db-fixture [f]
   (mount/stop) ; during interactive development, app might be running when tests start
@@ -39,10 +41,22 @@
       (.locations (strings "classpath:db/flyway/tenant"))
       (.load)))
 
-(def queries (hugsql/map-of-db-fns "db/hugsql/congregation.sql"))
+(def queries (atom {:resource (io/resource "db/hugsql/congregation.sql")}))
+
+(defn load-queries []
+  ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
+  (let [{:keys [queries resource last-modified]} @queries
+        current-last-modified (-> ^URL resource
+                                  (.openConnection)
+                                  (.getLastModified))]
+    (if (= last-modified current-last-modified)
+      queries
+      (:queries (reset! queries {:resource resource
+                                 :queries (hugsql/map-of-db-fns resource)
+                                 :last-modified current-last-modified})))))
 
 (defn query [conn name & params]
-  (let [query-fn (get-in queries [name :fn])]
+  (let [query-fn (get-in (load-queries) [name :fn])]
     (assert query-fn (str "query not found: " name))
     (apply query-fn conn params)))
 
