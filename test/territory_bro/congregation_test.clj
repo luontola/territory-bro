@@ -5,35 +5,43 @@
 (ns territory-bro.congregation-test
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
-            [conman.core :as conman]
-            [luminus-migrations.core :as migrations]
             [mount.core :as mount]
             [territory-bro.config :as config]
             [territory-bro.congregation :refer :all]
-            [territory-bro.db :as db]))
+            [territory-bro.db :as db])
+  (:import (org.flywaydb.core Flyway)))
 
-(defn test-db-fixture [f]
+(defn db-fixture [f]
   (mount/stop) ; during interactive development, app might be running when tests start
   (mount/start-with-args {:test true}
                          #'config/env
                          #'db/databases)
-  ;(migrations/migrate ["reset"] {:database-url config/env})
   (f)
   (mount/stop))
 
-(defn rollback-db-fixture [f]
-  (binding [db/*conn* (:default db/databases)]
-    (conman/with-transaction [db/*conn* {:isolation :serializable}]
-      (jdbc/db-set-rollback-only! db/*conn*)
-      (f))))
+(use-fixtures :once db-fixture)
 
-(use-fixtures :once test-db-fixture)
-(use-fixtures :each rollback-db-fixture)
-
-; TODO: init database with https://flywaydb.org
+(defn ^"[Ljava.lang.String;" strings [& strings]
+  (into-array String strings))
 
 (deftest my-congregations-test
-  (assert (= [{:test 1}] (jdbc/query db/*db* ["select 1 as test"])))
+  (let [flyway (-> (Flyway/configure)
+                   (.dataSource (get-in db/databases [:default :datasource]))
+                   (.schemas (strings "test_master"))
+                   (.locations (strings "classpath:migration/master"))
+                   (.load))]
+    (.migrate flyway)
+
+    (let [conn (:default db/databases)]
+      (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
+        (prn '--------------)
+        (jdbc/execute! conn ["set search_path to test_master"])
+        (prn 'before (jdbc/query conn ["select * from foo"]))
+        (prn 'insert (jdbc/execute! conn ["insert into foo (foo_id) values (default)"]))
+        (prn 'after (jdbc/query conn ["select * from foo"]))
+        (prn '----------)))
+
+    (.clean flyway))
 
   (is true)
   (testing "lists congregations to which the user has access")
