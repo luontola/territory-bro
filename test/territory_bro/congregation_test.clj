@@ -61,6 +61,12 @@
     (assert query-fn (str "query not found: " name))
     (apply query-fn conn params)))
 
+(defn create-congregation! [conn name schema-name]
+  (let [id (:congregation_id (first (query conn :create-congregation
+                                           {:name name
+                                            :schema_name schema-name})))]
+    id))
+
 (deftest congregations-test
   (let [master (master-db-migrations "test_master")
         tenant (tenant-db-migrations "test_tenant")]
@@ -79,8 +85,7 @@
       (is (= [] (query conn :get-congregations))))
 
     (testing "Create congregation"
-      (let [id (:congregation_id (first (query conn :create-congregation
-                                          {:name "foo" :schema_name "foo_schema"})))]
+      (let [id (create-congregation! conn "foo" "foo_schema")]
         (is id)
         (is (= [{:congregation_id id, :name "foo", :schema_name "foo_schema"}]
                (query conn :get-congregations))))))
