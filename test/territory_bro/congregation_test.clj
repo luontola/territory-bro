@@ -79,9 +79,6 @@
   (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
 
     (jdbc/execute! conn ["set search_path to test_tenant,test_master"])
-    (is (= [] (jdbc/query conn ["select * from foo"])))
-    (is (= {:bar_id 1} (jdbc/execute! conn ["insert into bar (bar_id) values (default)"] {:return-keys true})))
-    (is (= [{:bar_id 1}] (jdbc/query conn ["select * from bar"])))
 
     (testing "No congregations"
       (is (= [] (query conn :get-congregations))))
