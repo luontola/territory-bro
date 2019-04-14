@@ -69,6 +69,11 @@
     (.migrate tenant)
     id))
 
+(defn delete-congregations! [conn]
+  (doseq [congregation (jdbc/query conn ["select schema_name from congregation"])]
+    (jdbc/execute! conn [(str "drop schema " (:schema_name congregation) " cascade")]))
+  (jdbc/execute! conn ["delete from congregation"]))
+
 (deftest congregations-test
   (let [master (master-db-migrations "test_master")
         tenant (tenant-db-migrations "test_tenant")]
@@ -89,9 +94,9 @@
         (is (= [{:congregation_id id, :name "foo", :schema_name "foo_schema"}]
                (query conn :get-congregations)))
         (is (= [] (jdbc/query conn ["select * from foo_schema.territory"]))
-            "should create congregation schema"))))
+            "should create congregation schema")))
+    (delete-congregations! conn))
 
-  ;; TODO Remove test schemas
   (testing "lists congregations to which the user has access")
   (testing "hides congregations to which the user has no access")
   (testing "superadmin can access all congregations"))
