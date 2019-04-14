@@ -41,19 +41,20 @@
       (.locations (strings "classpath:db/flyway/tenant"))
       (.load)))
 
-(def queries (atom {:resource (io/resource "db/hugsql/congregation.sql")}))
+(def congregation-queries (atom {:resource (io/resource "db/hugsql/congregation.sql")}))
 
 (defn load-queries []
   ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
-  (let [{:keys [queries resource last-modified]} @queries
+  (let [{:keys [queries resource last-modified]} @congregation-queries
         current-last-modified (-> ^URL resource
                                   (.openConnection)
                                   (.getLastModified))]
     (if (= last-modified current-last-modified)
       queries
-      (:queries (reset! queries {:resource resource
-                                 :queries (hugsql/map-of-db-fns resource)
-                                 :last-modified current-last-modified})))))
+      (:queries (reset! congregation-queries
+                        {:resource resource
+                         :queries (hugsql/map-of-db-fns resource)
+                         :last-modified current-last-modified})))))
 
 (defn query [conn name & params]
   (let [query-fn (get-in (load-queries) [name :fn])]
