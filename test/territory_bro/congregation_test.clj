@@ -64,7 +64,9 @@
 (defn create-congregation! [conn name schema-name]
   (let [id (:congregation_id (first (query conn :create-congregation
                                            {:name name
-                                            :schema_name schema-name})))]
+                                            :schema_name schema-name})))
+        tenant (tenant-db-migrations schema-name)]
+    (.migrate tenant)
     id))
 
 (deftest congregations-test
@@ -88,8 +90,11 @@
       (let [id (create-congregation! conn "foo" "foo_schema")]
         (is id)
         (is (= [{:congregation_id id, :name "foo", :schema_name "foo_schema"}]
-               (query conn :get-congregations))))))
+               (query conn :get-congregations)))
+        (is (= [] (jdbc/query conn ["select * from foo_schema.territory"]))
+            "should create congregation schema"))))
 
+  ;; TODO Remove test schemas
   (testing "lists congregations to which the user has access")
   (testing "hides congregations to which the user has no access")
   (testing "superadmin can access all congregations"))
