@@ -61,7 +61,7 @@
     (assert query-fn (str "query not found: " name))
     (apply query-fn conn params)))
 
-(deftest my-congregations-test
+(deftest congregations-test
   (let [master (master-db-migrations "test_master")
         tenant (tenant-db-migrations "test_tenant")]
     (.clean tenant)
@@ -73,10 +73,14 @@
       (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
         (jdbc/execute! conn ["set search_path to test_tenant,test_master"])
         (is (= [] (jdbc/query conn ["select * from foo"])))
-        (is (= [{:foo_id 1}] (query conn :create-foo {:name "hello"})))
-        (is (= [{:foo_id 1, :name "hello"}] (query conn :find-foos)))
         (is (= {:bar_id 1} (jdbc/execute! conn ["insert into bar (bar_id) values (default)"] {:return-keys true})))
         (is (= [{:bar_id 1}] (jdbc/query conn ["select * from bar"]))))))
+
+  ;; TODO: create congregation
+
+  (testing "No congregations"
+    (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
+      (is (= [] (query conn :get-congregations)))))
 
   (testing "lists congregations to which the user has access")
   (testing "hides congregations to which the user has no access")
