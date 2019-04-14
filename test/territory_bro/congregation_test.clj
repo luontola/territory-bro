@@ -67,20 +67,23 @@
     (.clean tenant)
     (.clean master)
     (.migrate master)
-    (.migrate tenant)
+    (.migrate tenant))
+  (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
 
-    (let [conn (:default db/databases)]
-      (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-        (jdbc/execute! conn ["set search_path to test_tenant,test_master"])
-        (is (= [] (jdbc/query conn ["select * from foo"])))
-        (is (= {:bar_id 1} (jdbc/execute! conn ["insert into bar (bar_id) values (default)"] {:return-keys true})))
-        (is (= [{:bar_id 1}] (jdbc/query conn ["select * from bar"]))))))
+    (jdbc/execute! conn ["set search_path to test_tenant,test_master"])
+    (is (= [] (jdbc/query conn ["select * from foo"])))
+    (is (= {:bar_id 1} (jdbc/execute! conn ["insert into bar (bar_id) values (default)"] {:return-keys true})))
+    (is (= [{:bar_id 1}] (jdbc/query conn ["select * from bar"])))
 
-  ;; TODO: create congregation
+    (testing "No congregations"
+      (is (= [] (query conn :get-congregations))))
 
-  (testing "No congregations"
-    (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-      (is (= [] (query conn :get-congregations)))))
+    (testing "Create congregation"
+      (let [id (:congregation_id (first (query conn :create-congregation
+                                          {:name "foo" :schema_name "foo_schema"})))]
+        (is id)
+        (is (= [{:congregation_id id, :name "foo", :schema_name "foo_schema"}]
+               (query conn :get-congregations))))))
 
   (testing "lists congregations to which the user has access")
   (testing "hides congregations to which the user has no access")
