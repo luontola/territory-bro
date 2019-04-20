@@ -49,7 +49,8 @@
                         mount/start-with-args
                         :started)]
     (log/info component "started"))
-  (.addShutdownHook (Runtime/getRuntime) (Thread. stop-app)))
+  (-> (Runtime/getRuntime)
+      (.addShutdownHook (Thread. ^Runnable stop-app))))
 
 (defn -main [& args]
   (mount/start #'territory-bro.config/env)

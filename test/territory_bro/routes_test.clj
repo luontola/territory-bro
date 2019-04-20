@@ -1,4 +1,4 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -34,7 +34,7 @@
 
   (testing "is disabled when not in dev mode"
     (binding [env {:dev false}]
-      (is (= {:status 404
+      (is (= {:status 403
               :headers {}
               :body "Dev mode disabled"}
              (dev-login {:params {:sub "sub"

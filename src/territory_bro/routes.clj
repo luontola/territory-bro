@@ -9,8 +9,8 @@
             [clojure.tools.logging :as log]
             [compojure.core :refer [defroutes GET POST ANY]]
             [liberator.core :refer [defresource]]
-            [ring.util.http-response :as http-res]
-            [ring.util.response :as res]
+            [ring.util.http-response :refer :all]
+            [ring.util.response :as response]
             [territory-bro.authentication :as auth]
             [territory-bro.config :refer [env]]
             [territory-bro.congregation :as congregation]
@@ -18,12 +18,11 @@
             [territory-bro.jwt :as jwt]
             [territory-bro.permissions :as perm]
             [territory-bro.util :refer [getx]])
-  (:import (com.auth0.jwt.exceptions JWTVerificationException)
-           (java.util UUID)))
+  (:import (com.auth0.jwt.exceptions JWTVerificationException)))
 
 (defn require-logged-in! []
   (if-not auth/*user*
-    (http-res/unauthorized! "Not logged in")))
+    (unauthorized! "Not logged in")))
 
 (defn find-tenant [request tenants]
   (if-let [tenant (get-in request [:headers "x-tenant"])]
@@ -37,11 +36,11 @@
               (jwt/validate id-token env)
               (catch JWTVerificationException e
                 (log/info e "Login failed, invalid token")
-                (http-res/forbidden! "Invalid token")))
+                (forbidden! "Invalid token")))
         session (merge (:session request)
                        (auth/user-session jwt env))]
     (log/info "Logged in using JWT" jwt)
-    (-> (http-res/ok "Logged in")
+    (-> (ok "Logged in")
         (assoc :session session))))
 
 (defn dev-login [request]
@@ -50,13 +49,13 @@
           session (merge (:session request)
                          (auth/user-session fake-jwt env))]
       (log/info "Developer login as" fake-jwt)
-      (-> (http-res/ok "Logged in")
+      (-> (ok "Logged in")
           (assoc :session session)))
-    (http-res/not-found "Dev mode disabled")))
+    (forbidden "Dev mode disabled")))
 
 (defn logout []
   (log/info "Logged out")
-  (-> (http-res/ok "Logged out")
+  (-> (ok "Logged out")
       (assoc :session nil)))
 
 (defresource settings
@@ -85,9 +84,9 @@
                  (require-logged-in!)
                  (let [tenant (find-tenant request (perm/visible-congregations))]
                    (if-not tenant
-                     (http-res/bad-request! (str "no such tenant: " tenant)))
+                     (bad-request! (str "no such tenant: " tenant)))
                    (if-not (perm/can-view-territories? tenant)
-                     (http-res/forbidden! (str "cannot view territories of " tenant)))
+                     (forbidden! (str "cannot view territories of " tenant)))
                    (db/as-tenant tenant
                      (db/query :find-territories))))))
 
@@ -98,9 +97,9 @@
                  (require-logged-in!)
                  (let [tenant (find-tenant request (perm/visible-congregations))]
                    (if-not tenant
-                     (http-res/bad-request! (str "no such tenant: " tenant)))
+                     (bad-request! (str "no such tenant: " tenant)))
                    (if-not (perm/can-view-territories? tenant)
-                     (http-res/forbidden! (str "cannot view regions of " tenant)))
+                     (forbidden! (str "cannot view regions of " tenant)))
                    (db/as-tenant tenant
                      (db/query :find-regions))))))
 
@@ -123,13 +122,13 @@
           tenant (when (some #(= tenant %) (perm/visible-congregations))
                    tenant)]
       (if-not (perm/can-modify-territories? tenant)
-        (http-res/forbidden! (str "cannot modify territories of " tenant)))
+        (forbidden! (str "cannot modify territories of " tenant)))
       (let [content (generate-qgis-project (select-keys (get-in env [:tenant tenant])
                                                         [:database-host :database-username :database-password]))
             file-name (str (name tenant) "-territories.qgs")]
-        (-> (http-res/ok content)
-            (res/content-type "application/octet-stream")
-            (res/header "Content-Disposition" (str "attachment; filename=\"" file-name "\"")))))))
+        (-> (ok content)
+            (response/content-type "application/octet-stream")
+            (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\"")))))))
 
 (defn create-congregation [request]
   (auth/with-authenticated-user request
@@ -139,10 +138,10 @@
               {:name name})
       (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
         (jdbc/execute! conn [(str "set search_path to " (:database-schema env))]) ;; TODO: extract method
-        (http-res/ok {:id (congregation/create-congregation! conn name)})))))
+        (ok {:id (congregation/create-congregation! conn name)})))))
 
 (defroutes api-routes
-  (GET "/" [] (http-res/ok "Territory Bro"))
+  (GET "/" [] (ok "Territory Bro"))
   (POST "/api/login" request (login request))
   (POST "/api/dev-login" request (dev-login request))
   (POST "/api/logout" [] (logout))

@@ -8,6 +8,7 @@
             [clojure.string :as str]
             [clojure.test :refer :all]
             [ring.mock.request :refer :all]
+            [ring.util.http-predicates :refer :all]
             [territory-bro.config :as config]
             [territory-bro.fixtures :refer [db-fixture api-fixture transaction-rollback-fixture]]
             [territory-bro.jwt-test :as jwt-test]
@@ -47,42 +48,42 @@
 (defn app [request]
   (-> request router/app read-body))
 
-(defn assert-response-status [response expected-status]
-  (assert (= expected-status (:status response))
-          {:response response})
+(defn assert-response [response predicate]
+  (assert (predicate response)
+          (str "Unexpected response " response))
   response)
 
 (defn login! [app]
   (let [response (-> (request :post "/api/login")
                      (json-body {:idToken jwt-test/token})
                      app
-                     (assert-response-status 200))]
+                     (assert-response ok?))]
     {:cookies (get-cookies response)}))
 
 (defn logout! [app session]
   (-> (request :post "/api/logout")
       (merge session)
       app
-      (assert-response-status 200)))
+      (assert-response ok?)))
 
 
 (deftest basic-routes-test
   (testing "index"
     (let [response (-> (request :get "/")
                        app)]
-      (is (= 200 (:status response)))))
+      (is (ok? response))))
 
   (testing "page not found"
     (let [response (-> (request :get "/invalid")
                        app)]
-      (is (= 404 (:status response))))))
+      (is (not-found? response)))))
 
 (deftest login-test
   (testing "login with valid token"
     (let [response (-> (request :post "/api/login")
                        (json-body {:idToken jwt-test/token})
                        app)]
-      (is (= 200 (:status response)))
+      (is (ok? response))
       (is (= "Logged in" (:body response)))
       (is (= ["ring-session"] (keys (get-cookies response))))))
 
@@ -91,7 +92,7 @@
       (let [response (-> (request :post "/api/login")
                          (json-body {:idToken jwt-test/token})
                          app)]
-        (is (= 403 (:status response)))
+        (is (forbidden? response))
         (is (= "Invalid token" (:body response)))
         (is (empty? (get-cookies response))))))
 
@@ -102,7 +103,7 @@
                                      :name "Developer"
                                      :email "developer@example.com"})
                          app)]
-        (is (= 200 (:status response)))
+        (is (ok? response))
         (is (= "Logged in" (:body response)))
         (is (= ["ring-session"] (keys (get-cookies response)))))))
 
@@ -112,7 +113,7 @@
                                    :name "Developer"
                                    :email "developer@example.com"})
                        app)]
-      (is (= 404 (:status response)))
+      (is (forbidden? response))
       (is (= "Dev mode disabled" (:body response)))
       (is (empty? (get-cookies response))))))
 
@@ -120,23 +121,21 @@
   (testing "before login"
     (let [response (-> (request :get "/api/my-congregations")
                        app)]
-      (is (= 401 (:status response)))
-      (is (= "Not logged in" (:body response)))))
+      (is (unauthorized? response))))
 
   (let [session (login! app)]
     (testing "after login"
       (let [response (-> (request :get "/api/my-congregations")
                          (merge session)
                          app)]
-        (is (= 200 (:status response)))))
+        (is (ok? response))))
 
     (testing "after logout"
       (logout! app session)
       (let [response (-> (request :get "/api/my-congregations")
                          (merge session)
                          app)]
-        (is (= 401 (:status response)))
-        (is (= "Not logged in" (:body response)))))))
+        (is (unauthorized? response))))))
 
 (deftest create-congregation-test
   (let [session (login! app)
@@ -144,5 +143,11 @@
                      (json-body {:name "foo"})
                      (merge session)
                      app)]
-    (is (= 200 (:status response)))
-    (is (:id (:body response)))))
+    (is (ok? response))
+    (is (:id (:body response))))
+
+  (testing "requires login"
+    (let [response (-> (request :post "/api/create-congregation")
+                       (json-body {:name "foo"})
+                       app)]
+      (is (unauthorized? response)))))
