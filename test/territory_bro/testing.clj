@@ -10,7 +10,7 @@
             [mount.core :as mount]
             [territory-bro.config :as config :refer [env]]
             [territory-bro.db :as db]
-            [territory-bro.handler :as handler])
+            [territory-bro.router :as handler])
   (:import (java.util.regex Pattern)))
 
 (defn api-fixture [f]

@@ -1,4 +1,4 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -11,7 +11,7 @@
             [luminus.repl-server :as repl]
             [mount.core :as mount]
             [territory-bro.config :refer [env]]
-            [territory-bro.handler :as handler])
+            [territory-bro.router :as router])
   (:gen-class))
 
 (def cli-options
@@ -22,7 +22,7 @@
   :start
   (http/start
     (-> env
-        (assoc :handler #'handler/app)
+        (assoc :handler #'router/app)
         (update :io-threads #(or % (* 2 (.availableProcessors (Runtime/getRuntime)))))
         (update :port #(or (-> env :options :port) %))))
   :stop

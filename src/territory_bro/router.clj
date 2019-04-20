@@ -2,7 +2,7 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.handler
+(ns territory-bro.router
   (:require [compojure.core :refer [routes wrap-routes]]
             [compojure.route :as route]
             [mount.core :as mount]
