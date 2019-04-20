@@ -10,6 +10,7 @@
             [ring.middleware.format :refer [wrap-restful-format]]
             [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.middleware.reload :refer [wrap-reload]]
+            [ring.middleware.session.memory :as memory-session]
             [ring.util.http-response :refer [internal-server-error]]
             [ring.util.response :as response]
             [territory-bro.config :refer [env]]
@@ -47,6 +48,10 @@
         resp
         (response/content-type resp "text/plain")))))
 
+;; Avoid forgetting sessions every time the code is reloaded in development mode
+;; TODO: use mount
+(def session-store (memory-session/memory-store))
+
 (defn wrap-base [handler]
   (-> handler
       (cond->
@@ -58,5 +63,6 @@
       (wrap-defaults (-> site-defaults
                          (assoc :proxy true)
                          (assoc-in [:security :anti-forgery] false) ; TODO: enable CSRF
+                         (assoc-in [:session :store] session-store)
                          (assoc-in [:session :flash] false)))
       wrap-internal-error))

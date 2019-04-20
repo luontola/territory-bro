@@ -10,11 +10,10 @@
             [luminus-migrations.core :as migrations]
             [mount.core :as mount]
             [territory-bro.config :as config]
-            [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.jwt :as jwt]
             [territory-bro.jwt-test :as jwt-test]
-            [territory-bro.router :as handler]))
+            [territory-bro.router :as router]))
 
 (defn- delete-schemas-starting-with! [conn schema-name-prefix]
   (doseq [schema (jdbc/query conn ["select schema_name from information_schema.schemata"])
@@ -40,7 +39,7 @@
   (mount/start-with-args (merge test-env jwt-test/env)
                          #'config/env)
   (mount/start-with {#'jwt/jwk-provider jwt-test/fake-jwk-provider})
-  (mount/start #'handler/app)
+  (mount/start #'router/app)
   (db/as-tenant nil
     (f))
   (mount/stop))
