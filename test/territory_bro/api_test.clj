@@ -7,9 +7,9 @@
             [clojure.test :refer :all]
             [ring.mock.request :refer :all]
             [territory-bro.config :as config]
+            [territory-bro.fixtures :refer [api-fixture transaction-rollback-fixture]]
             [territory-bro.jwt-test :as jwt-test]
-            [territory-bro.router :refer [app]]
-            [territory-bro.testing :refer [api-fixture transaction-rollback-fixture]])
+            [territory-bro.router :refer [app]])
   (:import (java.time Instant)))
 
 (use-fixtures :once api-fixture)

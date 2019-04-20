@@ -2,7 +2,7 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.testing
+(ns territory-bro.fixtures
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
             [conman.core :as conman]
