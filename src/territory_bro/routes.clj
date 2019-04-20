@@ -21,7 +21,7 @@
 
 (defn require-logged-in! []
   (if-not auth/*user*
-    (http-res/unauthorized! "not logged in")))
+    (http-res/unauthorized! "Not logged in")))
 
 (defn find-tenant [request tenants]
   (if-let [tenant (get-in request [:headers "x-tenant"])]
