@@ -17,15 +17,15 @@
     (jdbc/execute! conn [(str "set search_path to " (:database-schema config/env))]) ;; TODO: extract method
 
     (testing "No congregations"
-      (is (= [] (congregation/query conn :get-congregations))))
+      (is (= [] (congregation/query! conn :get-congregations))))
 
     (testing "Create congregation"
-      ;; TODO: hard coded schema name
-      (let [id (congregation/create-congregation! conn "foo" (str (:database-schema config/env) "_foo"))]
+      (let [id (congregation/create-congregation! conn "the name")
+            congregation (first (congregation/query! conn :get-congregations))]
         (is id)
-        (is (= [{:congregation_id id, :name "foo", :schema_name "foo_schema"}]
-               (congregation/query conn :get-congregations)))
-        (is (= [] (jdbc/query conn ["select * from foo_schema.territory"]))
+        (is (= id (:id congregation)))
+        (is (= "the name" (:name congregation)))
+        (is (= [] (jdbc/query conn [(str "select * from " (:schema_name congregation) ".territory")]))
             "should create congregation schema"))))
 
   (testing "lists congregations to which the user has access")

@@ -1,7 +1,6 @@
 create table congregation
 (
-    congregation_id serial primary key,
-    name            text not null,
-    schema_name     text not null
+    id          uuid primary key,
+    name        text        not null,
+    schema_name varchar(63) not null
 );
-

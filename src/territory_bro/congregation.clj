@@ -4,12 +4,15 @@
 
 (ns territory-bro.congregation
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer :all]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]
+            [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.permissions :as perm])
   (:import (java.net URL)
+           (java.util UUID)
            (org.flywaydb.core Flyway)))
 
 ;; Old stuff
@@ -58,17 +61,20 @@
                          :queries (hugsql/map-of-db-fns resource)
                          :last-modified current-last-modified})))))
 
-(defn query [conn name & params]
+(defn query! [conn name & params]
   (let [query-fn (get-in (load-queries) [name :fn])]
     (assert query-fn (str "query not found: " name))
     (apply query-fn conn params)))
 
-(defn create-congregation! [conn name schema-name]
-  ;; TODO: generate schema name here
-  (let [id (:congregation_id (first (query conn :create-congregation
-                                           {:name name
-                                            :schema_name schema-name})))
-        tenant (tenant-db-migrations schema-name)]
-    (.migrate tenant)
+(defn create-congregation! [conn name]
+  (let [id (UUID/randomUUID)
+        schema-name (str (:database-schema config/env)
+                         "_"
+                         (str/replace (str id) "-" ""))
+        flyway (tenant-db-migrations schema-name)]
+    (query! conn :create-congregation {:id id
+                                       :name name
+                                       :schema_name schema-name})
+    (.migrate flyway)
     (log/info "Created congregation" id)
     id))
