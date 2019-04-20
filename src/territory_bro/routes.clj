@@ -154,7 +154,7 @@
   (POST "/api/dev-login" request (dev-login request))
   (POST "/api/logout" [] (logout))
   (ANY "/api/settings" [] settings)
-  (POST "/api/create-congregation" request (create-congregation request))
+  (POST "/api/congregations" request (create-congregation request))
   (GET "/api/congregations" request (list-congregations request))
   (ANY "/api/my-congregations" [] my-congregations)
   (ANY "/api/territories" [] territories)

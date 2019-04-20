@@ -139,7 +139,7 @@
 
 (deftest create-congregation-test
   (let [session (login! app)
-        response (-> (request :post "/api/create-congregation")
+        response (-> (request :post "/api/congregations")
                      (json-body {:name "foo"})
                      (merge session)
                      app)]
@@ -147,7 +147,7 @@
     (is (:id (:body response))))
 
   (testing "requires login"
-    (let [response (-> (request :post "/api/create-congregation")
+    (let [response (-> (request :post "/api/congregations")
                        (json-body {:name "foo"})
                        app)]
       (is (unauthorized? response)))))
