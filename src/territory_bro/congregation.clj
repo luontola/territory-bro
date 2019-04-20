@@ -22,7 +22,7 @@
 
 ;; new stuff
 
-(def query! (db/compile-queries "db/hugsql/congregation.sql"))
+(def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
 
 (defn create-congregation! [conn name]
   (let [id (UUID/randomUUID)

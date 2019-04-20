@@ -7,8 +7,7 @@
             [clojure.test :refer :all]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
-            [territory-bro.fixtures :refer [db-fixture]]
-            [territory-bro.config :as config]))
+            [territory-bro.fixtures :refer [db-fixture]]))
 
 (use-fixtures :once db-fixture)
 
@@ -16,7 +15,7 @@
   (db/with-db [conn {}]
 
     (testing "no congregations"
-      (is (= [] (congregation/query! conn :get-congregations))))
+      (is (= [] (congregation/get-congregations conn))))
 
     (testing "create congregation"
       (let [id (congregation/create-congregation! conn "the name")
