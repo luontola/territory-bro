@@ -39,4 +39,23 @@
                          (json-body {:idToken jwt-test/token})
                          app)]
         (is (= 403 (:status response)))
-        (is (= "Invalid token" (:body response)))))))
+        (is (= "Invalid token" (:body response))))))
+
+  (testing "dev login"
+    (binding [config/env (assoc config/env :dev true)]
+      (let [response (-> (request :post "/api/dev-login")
+                         (json-body {:sub "developer"
+                                     :name "Developer"
+                                     :email "developer@example.com"})
+                         app)]
+        (is (= 200 (:status response)))
+        (is (= "Logged in" (:body response))))))
+
+  (testing "dev login outside dev mode"
+    (let [response (-> (request :post "/api/dev-login")
+                       (json-body {:sub "developer"
+                                   :name "Developer"
+                                   :email "developer@example.com"})
+                       app)]
+      (is (= 404 (:status response)))
+      (is (= "Dev mode disabled" (:body response))))))
