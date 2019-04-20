@@ -5,6 +5,7 @@
 (ns territory-bro.congregation
   (:require [clojure.java.io :as io]
             [clojure.test :refer :all]
+            [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]
             [territory-bro.db :as db]
             [territory-bro.permissions :as perm])
@@ -68,4 +69,5 @@
                                             :schema_name schema-name})))
         tenant (tenant-db-migrations schema-name)]
     (.migrate tenant)
+    (log/info "Created congregation" id)
     id))

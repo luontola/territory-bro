@@ -9,10 +9,16 @@
             [luminus-migrations.core :as migrations]
             [mount.core :as mount]
             [territory-bro.config :as config]
+            [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.jwt :as jwt]
             [territory-bro.jwt-test :as jwt-test]
             [territory-bro.router :as handler]))
+
+(defn delete-all-congregations! [conn]
+  (doseq [congregation (jdbc/query conn ["select schema_name from congregation"])]
+    (jdbc/execute! conn [(str "drop schema " (:schema_name congregation) " cascade")]))
+  (jdbc/execute! conn ["delete from congregation"]))
 
 (defn api-fixture [f]
   (mount/stop) ; during interactive development, app might be running when tests start
@@ -22,8 +28,14 @@
   (mount/start #'db/databases
                #'handler/app)
   (migrations/migrate ["migrate"] (select-keys config/env [:database-url]))
-  (db/as-tenant nil
-    (f))
+  (let [master (congregation/master-db-migrations "test_master")]
+    (.migrate master)
+    (db/as-tenant nil
+      (f))
+    (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
+      (jdbc/execute! conn ["set search_path to test_master"]) ;; TODO: hard coded schema name
+      (delete-all-congregations! conn))
+    (.clean master))
   (mount/stop))
 
 (defn transaction-rollback-fixture [f]

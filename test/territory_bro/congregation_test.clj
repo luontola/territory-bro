@@ -20,11 +20,6 @@
 
 (use-fixtures :once db-fixture)
 
-(defn delete-congregations! [conn]
-  (doseq [congregation (jdbc/query conn ["select schema_name from congregation"])]
-    (jdbc/execute! conn [(str "drop schema " (:schema_name congregation) " cascade")]))
-  (jdbc/execute! conn ["delete from congregation"]))
-
 (deftest congregations-test
   (let [master (master-db-migrations "test_master")
         tenant (tenant-db-migrations "test_tenant")]
@@ -33,8 +28,7 @@
     (.migrate master)
     (.migrate tenant))
   (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-
-    (jdbc/execute! conn ["set search_path to test_tenant,test_master"])
+    (jdbc/execute! conn ["set search_path to test_tenant,test_master"]) ; TODO: hard coded shema name
 
     (testing "No congregations"
       (is (= [] (query conn :get-congregations))))
@@ -45,8 +39,7 @@
         (is (= [{:congregation_id id, :name "foo", :schema_name "foo_schema"}]
                (query conn :get-congregations)))
         (is (= [] (jdbc/query conn ["select * from foo_schema.territory"]))
-            "should create congregation schema")))
-    (delete-congregations! conn))
+            "should create congregation schema"))))
 
   (testing "lists congregations to which the user has access")
   (testing "hides congregations to which the user has no access")

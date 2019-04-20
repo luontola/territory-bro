@@ -3,13 +3,15 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.api-test
-  (:require [clojure.string :as str]
+  (:require [cheshire.core :refer [parse-stream]]
+            [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer :all]
             [ring.mock.request :refer :all]
             [territory-bro.config :as config]
             [territory-bro.fixtures :refer [api-fixture transaction-rollback-fixture]]
             [territory-bro.jwt-test :as jwt-test]
-            [territory-bro.router :refer [app]])
+            [territory-bro.router :as router])
   (:import (java.time Instant)))
 
 (use-fixtures :once api-fixture)
@@ -32,6 +34,18 @@
   (is (= {"foo" {:value "123"}
           "bar" {:value "456"}}
          (get-cookies {:headers {"Set-Cookie" ["foo=123" "bar=456"]}}))))
+
+(defn parse-json [body]
+  (cond
+    (nil? body) body
+    (string? body) body
+    :else (parse-stream (io/reader body) true)))
+
+(defn read-body [response]
+  (update response :body parse-json))
+
+(defn app [request]
+  (-> request router/app read-body))
 
 (defn assert-response-status [response expected-status]
   (assert (= expected-status (:status response))
@@ -123,3 +137,12 @@
                          app)]
         (is (= 401 (:status response)))
         (is (= "Not logged in" (:body response)))))))
+
+(deftest create-congregation-test
+  (let [session (login! app)
+        response (-> (request :post "/api/create-congregation")
+                     (json-body {:name "foo"})
+                     (merge session)
+                     app)]
+    (is (= 200 (:status response)))
+    (is (:id (:body response)))))

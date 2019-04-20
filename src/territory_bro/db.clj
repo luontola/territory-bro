@@ -23,7 +23,7 @@
 ; See hikari-cp.core/default-datasource-options for available options.
 (def datasource-options {:idle-timeout (-> (Duration/ofSeconds 60) (.toMillis))
                          :minimum-idle 0
-                         :maximum-pool-size 2
+                         :maximum-pool-size 10
                          :initialization-fail-timeout -1})
 
 (defn my-connect! [pool-spec]
