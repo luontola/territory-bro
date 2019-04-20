@@ -1,12 +1,11 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.config-test
   (:require [clojure.test :refer :all]
             [territory-bro.config :refer :all]
-            [territory-bro.testing :refer [re-equals]]
-            [territory-bro.util :refer [getx]])
+            [territory-bro.util :refer [getx re-equals]])
   (:import (java.time Instant)))
 
 (deftest override-defaults-test

@@ -1,9 +1,10 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.util
-  (:import (java.sql SQLException)))
+  (:import (java.sql SQLException)
+           (java.util.regex Pattern)))
 
 (defn fix-sqlexception-chain [e]
   (when (instance? SQLException e)
@@ -22,3 +23,6 @@
     (if (nil? value)
       (throw (IllegalArgumentException. (str "key " key " is missing")))
       value)))
+
+(defn re-equals [^String s]
+  (re-pattern (str "^" (Pattern/quote s) "$")))

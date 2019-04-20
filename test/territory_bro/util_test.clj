@@ -1,13 +1,11 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.util-test
   (:require [clojure.test :refer :all]
-            [territory-bro.util :refer :all]
-            [territory-bro.testing :refer [re-equals]])
-  (:import (java.sql SQLException)
-           (clojure.lang ExceptionInfo)))
+            [territory-bro.util :refer :all])
+  (:import (java.sql SQLException)))
 
 (deftest test-fix-sqlexception-chain
   (testing "returns argument"
