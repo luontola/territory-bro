@@ -23,7 +23,7 @@
                 [name {:value value}])))
        (into {})))
 
-(deftest test-get-cookies
+(deftest get-cookies-test
   (is (= {} (get-cookies {})))
   (is (= {"ring-session" {:value "123"}}
          (get-cookies {:headers {"Set-Cookie" ["ring-session=123"]}})))
@@ -52,7 +52,7 @@
       (assert-response-status 200)))
 
 
-(deftest test-basic-routes
+(deftest basic-routes-test
   (testing "index"
     (let [response (-> (request :get "/")
                        app)]
@@ -63,7 +63,7 @@
                        app)]
       (is (= 404 (:status response))))))
 
-(deftest test-login
+(deftest login-test
   (testing "login with valid token"
     (let [response (-> (request :post "/api/login")
                        (json-body {:idToken jwt-test/token})
@@ -102,7 +102,7 @@
       (is (= "Dev mode disabled" (:body response)))
       (is (empty? (get-cookies response))))))
 
-(deftest test-authorization
+(deftest authorization-test
   (testing "before login"
     (let [response (-> (request :get "/api/my-congregations")
                        app)]

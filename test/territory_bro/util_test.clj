@@ -7,7 +7,7 @@
             [territory-bro.util :refer :all])
   (:import (java.sql SQLException)))
 
-(deftest test-fix-sqlexception-chain
+(deftest fix-sqlexception-chain-test
   (testing "returns argument"
     (is (= nil (fix-sqlexception-chain nil)))
     (let [e (Exception.)]
