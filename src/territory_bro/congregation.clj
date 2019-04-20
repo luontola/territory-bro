@@ -64,6 +64,7 @@
     (apply query-fn conn params)))
 
 (defn create-congregation! [conn name schema-name]
+  ;; TODO: generate schema name here
   (let [id (:congregation_id (first (query conn :create-congregation
                                            {:name name
                                             :schema_name schema-name})))

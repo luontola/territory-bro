@@ -3,6 +3,7 @@
  ;; when :nrepl-port is set the application starts the nREPL server on load
  :nrepl-port nil
  :database-url nil
+ :database-schema "territorybro"
  :auth0-domain nil
  :auth0-client-id nil
  :super-admin nil

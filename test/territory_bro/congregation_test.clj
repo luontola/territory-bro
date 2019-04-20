@@ -7,20 +7,21 @@
             [clojure.test :refer :all]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
-            [territory-bro.fixtures :refer [db-fixture]]))
+            [territory-bro.fixtures :refer [db-fixture]]
+            [territory-bro.config :as config]))
 
 (use-fixtures :once db-fixture)
 
 (deftest congregations-test
   (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-    (jdbc/execute! conn ["set search_path to test_tenant,test_master"]) ; TODO: hard coded shema name
+    (jdbc/execute! conn [(str "set search_path to " (:database-schema config/env))]) ;; TODO: extract method
 
     (testing "No congregations"
       (is (= [] (congregation/query conn :get-congregations))))
 
     (testing "Create congregation"
-      ; TODO: hard coded shema name
-      (let [id (congregation/create-congregation! conn "foo" "foo_schema")]
+      ;; TODO: hard coded schema name
+      (let [id (congregation/create-congregation! conn "foo" (str (:database-schema config/env) "_foo"))]
         (is id)
         (is (= [{:congregation_id id, :name "foo", :schema_name "foo_schema"}]
                (congregation/query conn :get-congregations)))

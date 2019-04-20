@@ -135,11 +135,10 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (let [name (get-in request [:params :name])
-          ;; TODO: hard coded schema name
-          schema-name (str "congregation_" (str/replace (str (UUID/randomUUID))
-                                                        "-" ""))]
+          schema-name (str (:database-schema env) "_" (str/replace (str (UUID/randomUUID))
+                                                                   "-" ""))]
       (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-        (jdbc/execute! conn ["set search_path to test_master"]) ;; TODO: hard coded schema name
+        (jdbc/execute! conn [(str "set search_path to " (:database-schema env))]) ;; TODO: extract method
         (http-res/ok {:id (congregation/create-congregation! conn name schema-name)})))))
 
 (defroutes api-routes

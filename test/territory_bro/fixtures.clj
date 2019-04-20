@@ -21,26 +21,23 @@
           :when (str/starts-with? (:schema_name schema) schema-name-prefix)]
     (jdbc/execute! conn [(str "drop schema \"" (:schema_name schema) "\" cascade")])))
 
+(def test-env {:database-schema "test_territorybro"})
+
 (defn db-fixture [f]
-  (mount/start-with-args {:test true}
+  (mount/start-with-args test-env
                          #'config/env
                          #'db/databases)
   (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-    ;; TODO: one prefix for all test schemas
-    (delete-schemas-starting-with! conn "territorybro_test")
-    (delete-schemas-starting-with! conn "test_master")
-    (delete-schemas-starting-with! conn "test_tenant")
-    (delete-schemas-starting-with! conn "foo_schema")
-    (delete-schemas-starting-with! conn "congregation"))
+    (delete-schemas-starting-with! conn (:database-schema test-env)))
   (migrations/migrate ["migrate"] (select-keys config/env [:database-url])) ; TODO: legacy code, remove me
-  (let [master (congregation/master-db-migrations "test_master")] ;; TODO: hard coded schema name
+  (let [master (congregation/master-db-migrations (:database-schema config/env))]
     (.migrate master)
     (f))
   (mount/stop))
 
 (defn api-fixture [f]
   (mount/stop #'config/env)
-  (mount/start-with-args jwt-test/env
+  (mount/start-with-args (merge test-env jwt-test/env)
                          #'config/env)
   (mount/start-with {#'jwt/jwk-provider jwt-test/fake-jwk-provider})
   (mount/start #'handler/app)
