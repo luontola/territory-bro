@@ -151,3 +151,16 @@
                        (json-body {:name "foo"})
                        app)]
       (is (unauthorized? response)))))
+
+(deftest list-congregations-test
+  (let [session (login! app)
+        response (-> (request :get "/api/congregations")
+                     (merge session)
+                     app)]
+    (is (ok? response))
+    (is (sequential? (:body response))))
+
+  (testing "requires login"
+    (let [response (-> (request :get "/api/congregations")
+                       app)]
+      (is (unauthorized? response)))))

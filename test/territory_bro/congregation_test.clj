@@ -16,18 +16,23 @@
   (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
     (jdbc/execute! conn [(str "set search_path to " (:database-schema config/env))]) ;; TODO: extract method
 
-    (testing "No congregations"
+    (testing "no congregations"
       (is (= [] (congregation/query! conn :get-congregations))))
 
-    (testing "Create congregation"
+    (testing "create congregation"
       (let [id (congregation/create-congregation! conn "the name")
-            congregation (first (congregation/query! conn :get-congregations))]
+            congregation (congregation/get-congregation conn id)]
         (is id)
-        (is (= id (:id congregation)))
-        (is (= "the name" (:name congregation)))
-        (is (= [] (jdbc/query conn [(str "select * from " (:schema_name congregation) ".territory")]))
-            "should create congregation schema"))))
+        (is (= id (::congregation/id congregation)))
+        (is (= "the name" (::congregation/name congregation)))
+        (is (= [] (jdbc/query conn [(str "select * from " (::congregation/schema-name congregation) ".territory")]))
+            "should create congregation schema")))
 
-  (testing "lists congregations to which the user has access")
-  (testing "hides congregations to which the user has no access")
-  (testing "superadmin can access all congregations"))
+    (testing "list congregations"
+      (let [congregations (congregation/get-congregations conn)]
+        (is (not (empty? congregations)))
+        (is (contains? (set (map ::congregation/name congregations))
+                       "the name"))))
+
+    (testing "hides congregations to which the user has no access") ; TODO
+    (testing "superadmin can access all congregations"))) ; TODO

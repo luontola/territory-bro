@@ -140,6 +140,13 @@
         (jdbc/execute! conn [(str "set search_path to " (:database-schema env))]) ;; TODO: extract method
         (ok {:id (congregation/create-congregation! conn name)})))))
 
+(defn list-congregations [request]
+  (auth/with-authenticated-user request
+    (require-logged-in!)
+    (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
+      (jdbc/execute! conn [(str "set search_path to " (:database-schema env))]) ;; TODO: extract method
+      (ok (congregation/get-congregations conn)))))
+
 (defroutes api-routes
   (GET "/" [] (ok "Territory Bro"))
   (POST "/api/login" request (login request))
@@ -147,6 +154,7 @@
   (POST "/api/logout" [] (logout))
   (ANY "/api/settings" [] settings)
   (POST "/api/create-congregation" request (create-congregation request))
+  (GET "/api/congregations" request (list-congregations request))
   (ANY "/api/my-congregations" [] my-congregations)
   (ANY "/api/territories" [] territories)
   (ANY "/api/regions" [] regions)

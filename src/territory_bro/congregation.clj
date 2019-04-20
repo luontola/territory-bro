@@ -78,3 +78,19 @@
     (.migrate flyway)
     (log/info "Created congregation" id)
     id))
+
+(defn- format-congregation [row]
+  {::id (:id row)
+   ::name (:name row)
+   ::schema-name (:schema_name row)})
+
+(defn get-congregations
+  ([conn]
+   (get-congregations conn {}))
+  ([conn search]
+   (->> (query! conn :get-congregations search)
+        (map format-congregation)
+        (doall))))
+
+(defn get-congregation [conn id]
+  (first (get-congregations conn {:ids [id]})))
