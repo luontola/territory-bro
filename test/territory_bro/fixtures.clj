@@ -4,6 +4,7 @@
 
 (ns territory-bro.fixtures
   (:require [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str]
             [clojure.test :refer :all]
             [conman.core :as conman]
             [luminus-migrations.core :as migrations]
@@ -15,27 +16,36 @@
             [territory-bro.jwt-test :as jwt-test]
             [territory-bro.router :as handler]))
 
-(defn delete-all-congregations! [conn]
-  (doseq [congregation (jdbc/query conn ["select schema_name from congregation"])]
-    (jdbc/execute! conn [(str "drop schema " (:schema_name congregation) " cascade")]))
-  (jdbc/execute! conn ["delete from congregation"]))
+(defn- delete-schemas-starting-with! [conn schema-name-prefix]
+  (doseq [schema (jdbc/query conn ["select schema_name from information_schema.schemata"])
+          :when (str/starts-with? (:schema_name schema) schema-name-prefix)]
+    (jdbc/execute! conn [(str "drop schema \"" (:schema_name schema) "\" cascade")])))
+
+(defn db-fixture [f]
+  (mount/start-with-args {:test true}
+                         #'config/env
+                         #'db/databases)
+  (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
+    ;; TODO: one prefix for all test schemas
+    (delete-schemas-starting-with! conn "territorybro_test")
+    (delete-schemas-starting-with! conn "test_master")
+    (delete-schemas-starting-with! conn "test_tenant")
+    (delete-schemas-starting-with! conn "foo_schema")
+    (delete-schemas-starting-with! conn "congregation"))
+  (migrations/migrate ["migrate"] (select-keys config/env [:database-url])) ; TODO: legacy code, remove me
+  (let [master (congregation/master-db-migrations "test_master")] ;; TODO: hard coded schema name
+    (.migrate master)
+    (f))
+  (mount/stop))
 
 (defn api-fixture [f]
-  (mount/stop) ; during interactive development, app might be running when tests start
+  (mount/stop #'config/env)
   (mount/start-with-args jwt-test/env
                          #'config/env)
   (mount/start-with {#'jwt/jwk-provider jwt-test/fake-jwk-provider})
-  (mount/start #'db/databases
-               #'handler/app)
-  (migrations/migrate ["migrate"] (select-keys config/env [:database-url]))
-  (let [master (congregation/master-db-migrations "test_master")]
-    (.migrate master)
-    (db/as-tenant nil
-      (f))
-    (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-      (jdbc/execute! conn ["set search_path to test_master"]) ;; TODO: hard coded schema name
-      (delete-all-congregations! conn))
-    (.clean master))
+  (mount/start #'handler/app)
+  (db/as-tenant nil
+    (f))
   (mount/stop))
 
 (defn transaction-rollback-fixture [f]

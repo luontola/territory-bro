@@ -9,12 +9,12 @@
             [clojure.test :refer :all]
             [ring.mock.request :refer :all]
             [territory-bro.config :as config]
-            [territory-bro.fixtures :refer [api-fixture transaction-rollback-fixture]]
+            [territory-bro.fixtures :refer [db-fixture api-fixture transaction-rollback-fixture]]
             [territory-bro.jwt-test :as jwt-test]
             [territory-bro.router :as router])
   (:import (java.time Instant)))
 
-(use-fixtures :once api-fixture)
+(use-fixtures :once (join-fixtures [db-fixture api-fixture]))
 (use-fixtures :each transaction-rollback-fixture)
 
 (defn- get-cookies [response]

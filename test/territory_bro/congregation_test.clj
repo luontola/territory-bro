@@ -5,39 +5,25 @@
 (ns territory-bro.congregation-test
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
-            [mount.core :as mount]
-            [territory-bro.config :as config]
-            [territory-bro.congregation :refer :all]
-            [territory-bro.db :as db]))
-
-(defn db-fixture [f]
-  (mount/stop) ; during interactive development, app might be running when tests start
-  (mount/start-with-args {:test true}
-                         #'config/env
-                         #'db/databases)
-  (f)
-  (mount/stop))
+            [territory-bro.congregation :as congregation]
+            [territory-bro.db :as db]
+            [territory-bro.fixtures :refer [db-fixture]]))
 
 (use-fixtures :once db-fixture)
 
 (deftest congregations-test
-  (let [master (master-db-migrations "test_master")
-        tenant (tenant-db-migrations "test_tenant")]
-    (.clean tenant)
-    (.clean master)
-    (.migrate master)
-    (.migrate tenant))
   (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
     (jdbc/execute! conn ["set search_path to test_tenant,test_master"]) ; TODO: hard coded shema name
 
     (testing "No congregations"
-      (is (= [] (query conn :get-congregations))))
+      (is (= [] (congregation/query conn :get-congregations))))
 
     (testing "Create congregation"
-      (let [id (create-congregation! conn "foo" "foo_schema")]
+      ; TODO: hard coded shema name
+      (let [id (congregation/create-congregation! conn "foo" "foo_schema")]
         (is id)
         (is (= [{:congregation_id id, :name "foo", :schema_name "foo_schema"}]
-               (query conn :get-congregations)))
+               (congregation/query conn :get-congregations)))
         (is (= [] (jdbc/query conn ["select * from foo_schema.territory"]))
             "should create congregation schema"))))
 
