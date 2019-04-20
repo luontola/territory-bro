@@ -3,15 +3,12 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.congregation
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.permissions :as perm])
-  (:import (java.net URL)
-           (java.util UUID)))
+  (:import (java.util UUID)))
 
 (defn- format-tenant [id]
   ; TODO: human-readable name
@@ -25,25 +22,7 @@
 
 ;; new stuff
 
-(def congregation-queries (atom {:resource (io/resource "db/hugsql/congregation.sql")}))
-
-(defn load-queries []
-  ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
-  (let [{:keys [queries resource last-modified]} @congregation-queries
-        current-last-modified (-> ^URL resource
-                                  (.openConnection)
-                                  (.getLastModified))]
-    (if (= last-modified current-last-modified)
-      queries
-      (:queries (reset! congregation-queries
-                        {:resource resource
-                         :queries (hugsql/map-of-db-fns resource)
-                         :last-modified current-last-modified})))))
-
-(defn query! [conn name & params]
-  (let [query-fn (get-in (load-queries) [name :fn])]
-    (assert query-fn (str "query not found: " name))
-    (apply query-fn conn params)))
+(def query! (db/compile-queries "db/hugsql/congregation.sql"))
 
 (defn create-congregation! [conn name]
   (let [id (UUID/randomUUID)

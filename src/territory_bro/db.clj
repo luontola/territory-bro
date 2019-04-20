@@ -4,15 +4,18 @@
 
 (ns ^{:resource-deps ["sql/queries.sql"]} territory-bro.db
   (:require [cheshire.core :as cheshire]
+            [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [conman.core :as conman]
             [hikari-cp.core :as hikari-cp]
+            [hugsql.core :as hugsql]
             [mount.core :as mount]
             [territory-bro.config :as config]
             [territory-bro.util :refer [getx]])
   (:import (clojure.lang IPersistentMap IPersistentVector)
            (com.zaxxer.hikari HikariDataSource)
+           (java.net URL)
            (java.sql Date Timestamp PreparedStatement Array)
            (java.time Duration)
            (org.flywaydb.core Flyway)
@@ -153,3 +156,25 @@
   `(jdbc/with-db-transaction [~(first binding) (:default databases) {:isolation :serializable}]
      (jdbc/execute! ~(first binding) [(str "set search_path to " (:database-schema config/env))])
      ~@body))
+
+(defn- load-queries [queries-atom]
+  ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
+  (let [{queries :queries, resource :resource, old-last-modified :last-modified} @queries-atom
+        new-last-modified (-> ^URL resource
+                              (.openConnection)
+                              (.getLastModified))]
+    (if (= old-last-modified new-last-modified)
+      queries
+      (:queries (reset! queries-atom {:resource resource
+                                      :queries (hugsql/map-of-db-fns resource)
+                                      :last-modified new-last-modified})))))
+
+(defn- query! [conn queries name params]
+  (let [query-fn (get-in (load-queries queries) [name :fn])]
+    (assert query-fn (str "Query not found: " name))
+    (apply query-fn conn params)))
+
+(defn compile-queries [path]
+  (let [queries (atom {:resource (io/resource path)})]
+    (fn [conn name & params]
+      (query! conn queries name params))))
