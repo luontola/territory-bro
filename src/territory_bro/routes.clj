@@ -143,7 +143,10 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
-      (ok (congregation/get-congregations conn)))))
+      (ok (->> (congregation/get-congregations conn)
+               (map (fn [congregation]
+                      {:id (::congregation/id congregation)
+                       :name (::congregation/name congregation)})))))))
 
 (defroutes api-routes
   (GET "/" [] (ok "Territory Bro"))
