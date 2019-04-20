@@ -37,12 +37,23 @@
   ;; TODO: is this needed or is liberator self-sufficient?
   (wrap-restful-format handler {:formats [:json-kw :transit-json :transit-msgpack]}))
 
+(defn wrap-default-content-type [handler]
+  ;; Chrome gives an ERR_INVALID_RESPONSE error about 4xx pages
+  ;; with application/octet-stream content type, which is Ring's
+  ;; default when no content type is not defined.
+  (fn [req]
+    (let [resp (handler req)]
+      (if (response/get-header resp "Content-Type")
+        resp
+        (response/content-type resp "text/plain")))))
+
 (defn wrap-base [handler]
   (-> handler
       (cond->
         (:dev env) (wrap-reload {:dirs ["src" "resources"]}))
       wrap-sqlexception-chain
       wrap-http-response
+      wrap-default-content-type
       (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
       (wrap-defaults (-> site-defaults
                          (assoc :proxy true)
