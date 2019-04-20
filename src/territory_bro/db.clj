@@ -135,3 +135,9 @@
   (sql-value [value] (to-pg-json value))
   IPersistentVector
   (sql-value [value] (to-pg-json value)))
+
+(defmacro with-db [binding & body]
+  ;; TODO: add congregation schema to search path
+  `(jdbc/with-db-transaction [~(first binding) (:default databases) {:isolation :serializable}]
+     (jdbc/execute! ~(first binding) [(str "set search_path to " (:database-schema env))])
+     ~@body))

@@ -13,8 +13,7 @@
 (use-fixtures :once db-fixture)
 
 (deftest congregations-test
-  (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-    (jdbc/execute! conn [(str "set search_path to " (:database-schema config/env))]) ;; TODO: extract method
+  (db/with-db [conn {}]
 
     (testing "no congregations"
       (is (= [] (congregation/query! conn :get-congregations))))

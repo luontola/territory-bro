@@ -27,12 +27,12 @@
   (mount/start-with-args test-env
                          #'config/env
                          #'db/databases)
-  (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
+  (db/with-db [conn {}]
     (delete-schemas-starting-with! conn (:database-schema test-env)))
   (migrations/migrate ["migrate"] (select-keys config/env [:database-url])) ; TODO: legacy code, remove me
-  (let [master (congregation/master-db-migrations (:database-schema config/env))]
-    (.migrate master)
-    (f))
+  (-> (congregation/master-db-migrations (:database-schema config/env))
+      (.migrate))
+  (f)
   (mount/stop))
 
 (defn api-fixture [f]

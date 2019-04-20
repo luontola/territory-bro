@@ -136,15 +136,13 @@
     (let [name (get-in request [:params :name])]
       (assert (not (str/blank? name))
               {:name name})
-      (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-        (jdbc/execute! conn [(str "set search_path to " (:database-schema env))]) ;; TODO: extract method
+      (db/with-db [conn {}]
         (ok {:id (congregation/create-congregation! conn name)})))))
 
 (defn list-congregations [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
-    (jdbc/with-db-transaction [conn (:default db/databases) {:isolation :serializable}]
-      (jdbc/execute! conn [(str "set search_path to " (:database-schema env))]) ;; TODO: extract method
+    (db/with-db [conn {}]
       (ok (congregation/get-congregations conn)))))
 
 (defroutes api-routes
