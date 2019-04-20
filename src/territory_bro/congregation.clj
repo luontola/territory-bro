@@ -5,17 +5,13 @@
 (ns territory-bro.congregation
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.test :refer :all]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.permissions :as perm])
   (:import (java.net URL)
-           (java.util UUID)
-           (org.flywaydb.core Flyway)))
-
-;; Old stuff
+           (java.util UUID)))
 
 (defn- format-tenant [id]
   ; TODO: human-readable name
@@ -27,24 +23,7 @@
        (map format-tenant)
        (sort-by #(.toUpperCase (:name %)))))
 
-;; New stuff
-
-(defn ^"[Ljava.lang.String;" strings [& strings]
-  (into-array String strings))
-
-(defn ^Flyway master-db-migrations [schema]
-  (-> (Flyway/configure)
-      (.dataSource (get-in db/databases [:default :datasource]))
-      (.schemas (strings schema))
-      (.locations (strings "classpath:db/flyway/master"))
-      (.load)))
-
-(defn ^Flyway tenant-db-migrations [schema]
-  (-> (Flyway/configure)
-      (.dataSource (get-in db/databases [:default :datasource]))
-      (.schemas (strings schema))
-      (.locations (strings "classpath:db/flyway/tenant"))
-      (.load)))
+;; new stuff
 
 (def congregation-queries (atom {:resource (io/resource "db/hugsql/congregation.sql")}))
 
@@ -70,13 +49,13 @@
   (let [id (UUID/randomUUID)
         schema-name (str (:database-schema config/env)
                          "_"
-                         (str/replace (str id) "-" ""))
-        flyway (tenant-db-migrations schema-name)]
+                         (str/replace (str id) "-" ""))]
     (query! conn :create-congregation {:id id
                                        :name name
                                        :schema_name schema-name})
-    (.migrate flyway)
-    (log/info "Created congregation" id)
+    (-> (db/tenant-schema schema-name)
+        (.migrate))
+    (log/info "Congregation created:" id)
     id))
 
 (defn- format-congregation [row]

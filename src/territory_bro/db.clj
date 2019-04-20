@@ -3,21 +3,20 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns ^{:resource-deps ["sql/queries.sql"]} territory-bro.db
-  (:require [cheshire.core :refer [generate-string parse-string]]
+  (:require [cheshire.core :as cheshire]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [conman.core :as conman]
             [hikari-cp.core :as hikari-cp]
             [mount.core :as mount]
-            [ring.util.codec :refer [form-decode]]
-            [territory-bro.config :refer [env]]
+            [territory-bro.config :as config]
             [territory-bro.util :refer [getx]])
-  (:import (java.sql Date Timestamp PreparedStatement Array)
-           clojure.lang.IPersistentMap
-           clojure.lang.IPersistentVector
-           org.postgresql.util.PGobject
+  (:import (clojure.lang IPersistentMap IPersistentVector)
            (com.zaxxer.hikari HikariDataSource)
-           (java.time Duration)))
+           (java.sql Date Timestamp PreparedStatement Array)
+           (java.time Duration)
+           (org.flywaydb.core Flyway)
+           (org.postgresql.util PGobject)))
 
 ; Since there are tens of tenants, we don't want to keep connections open to all of them all the time.
 ; See hikari-cp.core/default-datasource-options for available options.
@@ -44,10 +43,10 @@
   (conman/disconnect! connection))
 
 (defn connect-all! []
-  {:default (connect! (getx env :database-url))
+  {:default (connect! (getx config/env :database-url))
    :tenant (into {} (map (fn [[tenant config]]
                            [tenant (connect! (:database-url config))])
-                         (get env :tenant)))})
+                         (get config/env :tenant)))})
 
 (defn disconnect-all! [databases]
   (disconnect! (:default databases))
@@ -81,12 +80,6 @@
      (query-fn *conn* params)
      (throw (IllegalArgumentException. (str "query " query-id " not found"))))))
 
-(defn transactional* [f]
-  (conman/with-transaction [*conn* {:isolation :serializable}] (f)))
-
-(defmacro transactional [& body]
-  `(transactional* (fn [] ~@body)))
-
 (defn to-date [sql-date]
   (-> sql-date (.getTime) (java.util.Date.)))
 
@@ -105,8 +98,8 @@
     (let [type (.getType pgobj)
           value (.getValue pgobj)]
       (case type
-        "json" (parse-string value true)
-        "jsonb" (parse-string value true)
+        "json" (cheshire/parse-string value true)
+        "jsonb" (cheshire/parse-string value true)
         "citext" (str value)
         value))))
 
@@ -118,11 +111,11 @@
 (defn to-pg-json [value]
   (doto (PGobject.)
         (.setType "jsonb")
-        (.setValue (generate-string value))))
+        (.setValue (cheshire/generate-string value))))
 
-(extend-type clojure.lang.IPersistentVector
+(extend-type IPersistentVector
   jdbc/ISQLParameter
-  (set-parameter [v ^java.sql.PreparedStatement stmt ^long idx]
+  (set-parameter [v ^PreparedStatement stmt ^long idx]
     (let [conn (.getConnection stmt)
           meta (.getParameterMetaData stmt)
           type-name (.getParameterTypeName meta idx)]
@@ -136,8 +129,27 @@
   IPersistentVector
   (sql-value [value] (to-pg-json value)))
 
+;; new stuff
+
+(defn- ^"[Ljava.lang.String;" strings [& strings]
+  (into-array String strings))
+
+(defn ^Flyway master-schema [schema]
+  (-> (Flyway/configure)
+      (.dataSource (get-in databases [:default :datasource]))
+      (.schemas (strings schema))
+      (.locations (strings "classpath:db/flyway/master"))
+      (.load)))
+
+(defn ^Flyway tenant-schema [schema]
+  (-> (Flyway/configure)
+      (.dataSource (get-in databases [:default :datasource]))
+      (.schemas (strings schema))
+      (.locations (strings "classpath:db/flyway/tenant"))
+      (.load)))
+
 (defmacro with-db [binding & body]
   ;; TODO: add congregation schema to search path
   `(jdbc/with-db-transaction [~(first binding) (:default databases) {:isolation :serializable}]
-     (jdbc/execute! ~(first binding) [(str "set search_path to " (:database-schema env))])
+     (jdbc/execute! ~(first binding) [(str "set search_path to " (:database-schema config/env))])
      ~@body))

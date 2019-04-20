@@ -30,7 +30,7 @@
   (db/with-db [conn {}]
     (delete-schemas-starting-with! conn (:database-schema test-env)))
   (migrations/migrate ["migrate"] (select-keys config/env [:database-url])) ; TODO: legacy code, remove me
-  (-> (congregation/master-db-migrations (:database-schema config/env))
+  (-> (db/master-schema (:database-schema config/env))
       (.migrate))
   (f)
   (mount/stop))
