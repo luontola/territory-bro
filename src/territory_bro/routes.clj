@@ -1,4 +1,4 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -16,7 +16,8 @@
             [territory-bro.db :as db]
             [territory-bro.jwt :as jwt]
             [territory-bro.permissions :as perm]
-            [territory-bro.util :refer [getx]]))
+            [territory-bro.util :refer [getx]])
+  (:import (com.auth0.jwt.exceptions JWTVerificationException)))
 
 (defn require-logged-in! []
   (if-not auth/*user*
@@ -30,7 +31,11 @@
 
 (defn login [request]
   (let [id-token (get-in request [:params :idToken])
-        jwt (jwt/validate id-token env)
+        jwt (try
+              (jwt/validate id-token env)
+              (catch JWTVerificationException e
+                (log/info e "Login failed, invalid token")
+                (http-res/forbidden! "Invalid token")))
         session (merge (:session request)
                        (auth/user-session jwt env))]
     (log/info "Logged in using JWT" jwt)

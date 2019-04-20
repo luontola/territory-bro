@@ -5,17 +5,38 @@
 (ns territory-bro.api-test
   (:require [clojure.test :refer :all]
             [ring.mock.request :refer :all]
+            [territory-bro.config :as config]
+            [territory-bro.jwt-test :as jwt-test]
             [territory-bro.router :refer [app]]
-            [territory-bro.testing :refer [api-fixture transaction-rollback-fixture]]))
+            [territory-bro.testing :refer [api-fixture transaction-rollback-fixture]])
+  (:import (java.time Instant)))
 
 (use-fixtures :once api-fixture)
 (use-fixtures :each transaction-rollback-fixture)
 
 (deftest test-basic-routes
   (testing "index"
-    (let [response (app (request :get "/"))]
+    (let [response (-> (request :get "/")
+                       app)]
       (is (= 200 (:status response)))))
 
   (testing "page not found"
-    (let [response (app (request :get "/invalid"))]
+    (let [response (-> (request :get "/invalid")
+                       app)]
       (is (= 404 (:status response))))))
+
+(deftest test-login
+  (testing "login with valid token"
+    (let [response (-> (request :post "/api/login")
+                       (json-body {:idToken jwt-test/token})
+                       app)]
+      (is (= 200 (:status response)))
+      (is (= "Logged in" (:body response)))))
+
+  (testing "login with expired token"
+    (binding [config/env (assoc config/env :now #(Instant/now))]
+      (let [response (-> (request :post "/api/login")
+                         (json-body {:idToken jwt-test/token})
+                         app)]
+        (is (= 403 (:status response)))
+        (is (= "Invalid token" (:body response)))))))

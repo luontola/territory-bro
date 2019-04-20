@@ -10,12 +10,16 @@
             [mount.core :as mount]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
+            [territory-bro.jwt :as jwt]
+            [territory-bro.jwt-test :as jwt-test]
             [territory-bro.router :as handler]))
 
 (defn api-fixture [f]
   (mount/stop) ; during interactive development, app might be running when tests start
-  (mount/start #'config/env
-               #'db/databases
+  (mount/start-with-args jwt-test/env
+                         #'config/env)
+  (mount/start-with {#'jwt/jwk-provider jwt-test/fake-jwk-provider})
+  (mount/start #'db/databases
                #'handler/app)
   (migrations/migrate ["migrate"] (select-keys config/env [:database-url]))
   (db/as-tenant nil
