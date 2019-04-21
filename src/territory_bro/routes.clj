@@ -4,7 +4,6 @@
 
 (ns territory-bro.routes
   (:require [clojure.java.io :as io]
-            [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [compojure.core :refer [defroutes GET POST ANY]]
@@ -17,6 +16,7 @@
             [territory-bro.db :as db]
             [territory-bro.jwt :as jwt]
             [territory-bro.permissions :as perm]
+            [territory-bro.user :as user]
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)))
 
@@ -30,6 +30,10 @@
       (when (some #(= tenant %) tenants)
         tenant))))
 
+(defn ^:dynamic save-user-from-jwt! [jwt]
+  (db/with-db [conn {}]
+    (user/save-user! conn (:sub jwt) (select-keys jwt [:name :nickname :email :email_verified :picture]))))
+
 (defn login [request]
   (let [id-token (get-in request [:params :idToken])
         jwt (try
@@ -40,6 +44,7 @@
         session (merge (:session request)
                        (auth/user-session jwt env))]
     (log/info "Logged in using JWT" jwt)
+    (save-user-from-jwt! jwt)
     (-> (ok "Logged in")
         (assoc :session session))))
 
@@ -49,6 +54,7 @@
           session (merge (:session request)
                          (auth/user-session fake-jwt env))]
       (log/info "Developer login as" fake-jwt)
+      (save-user-from-jwt! fake-jwt)
       (-> (ok "Logged in")
           (assoc :session session)))
     (forbidden "Dev mode disabled")))
@@ -67,7 +73,7 @@
                           :clientId (getx env :auth0-client-id)}
                   :supportEmail (getx env :support-email)
                   :user (assoc (select-keys auth/*user* [:name :sub])
-                          :authenticated (not (nil? auth/*user*)))
+                               :authenticated (not (nil? auth/*user*)))
                   :congregations (congregation/my-congregations)})))
 
 (defresource my-congregations

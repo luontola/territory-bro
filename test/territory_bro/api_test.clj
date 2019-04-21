@@ -10,9 +10,12 @@
             [ring.mock.request :refer :all]
             [ring.util.http-predicates :refer :all]
             [territory-bro.config :as config]
+            [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture api-fixture transaction-rollback-fixture]]
+            [territory-bro.jwt :as jwt]
             [territory-bro.jwt-test :as jwt-test]
-            [territory-bro.router :as router])
+            [territory-bro.router :as router]
+            [territory-bro.user :as user])
   (:import (java.time Instant)))
 
 (use-fixtures :once (join-fixtures [db-fixture api-fixture]))
@@ -87,6 +90,12 @@
       (is (= "Logged in" (:body response)))
       (is (= ["ring-session"] (keys (get-cookies response))))))
 
+  (testing "user is saved on login"
+    (db/with-db [conn {}]
+      (let [user (user/get-by-subject conn (:sub (jwt/validate jwt-test/token config/env)))]
+        (is user)
+        (is (= "Esko Luontola" (get-in user [::user/attributes :name]))))))
+
   (testing "login with expired token"
     (binding [config/env (assoc config/env :now #(Instant/now))]
       (let [response (-> (request :post "/api/login")
@@ -106,6 +115,12 @@
         (is (ok? response))
         (is (= "Logged in" (:body response)))
         (is (= ["ring-session"] (keys (get-cookies response)))))))
+
+  (testing "user is saved on dev login"
+    (db/with-db [conn {}]
+      (let [user (user/get-by-subject conn "developer")]
+        (is user)
+        (is (= "Developer" (get-in user [::user/attributes :name]))))))
 
   (testing "dev login outside dev mode"
     (let [response (-> (request :post "/api/dev-login")

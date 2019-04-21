@@ -20,7 +20,8 @@
 
 (deftest dev-login-test
   (testing "authenticates as anybody in dev mode"
-    (binding [env {:dev true}]
+    (binding [env {:dev true}
+              save-user-from-jwt! (fn [_])]
       (is (= {:status 200,
               :headers {},
               :body "Logged in",
