@@ -136,20 +136,25 @@
             (response/content-type "application/octet-stream")
             (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\"")))))))
 
+(defn- current-user-id [conn]
+  (::user/id (user/get-by-subject conn (:sub auth/*user*))))
+
 (defn create-congregation [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
     (let [name (get-in request [:params :name])]
-      (assert (not (str/blank? name))
+      (assert (not (str/blank? name)) ; TODO: test this
               {:name name})
       (db/with-db [conn {}]
-        (ok {:id (congregation/create-congregation! conn name)})))))
+        (let [cong-id (congregation/create-congregation! conn name)]
+          (congregation/grant-access! conn cong-id (current-user-id conn)) ; TODO: test this
+          (ok {:id cong-id}))))))
 
 (defn list-congregations [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
-      (ok (->> (congregation/get-unrestricted-congregations conn)
+      (ok (->> (congregation/get-my-congregations conn (current-user-id conn))
                (map (fn [congregation]
                       {:id (::congregation/id congregation)
                        :name (::congregation/name congregation)})))))))
