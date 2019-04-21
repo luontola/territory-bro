@@ -11,4 +11,7 @@ where 1 = 1
 /*~ (when (:ids params) */
   and id in (:v*:ids)
 /*~ ) ~*/
+/*~ (when (:subjects params) */
+  and subject in (:v*:subjects)
+/*~ ) ~*/
 ;

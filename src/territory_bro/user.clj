@@ -26,5 +26,8 @@
         (map format-user)
         (doall))))
 
-(defn get-user [conn id]
+(defn get-by-id [conn id]
   (first (get-users conn {:ids [id]})))
+
+(defn get-by-subject [conn subject]
+  (first (get-users conn {:subjects [subject]})))
