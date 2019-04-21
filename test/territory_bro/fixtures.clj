@@ -15,10 +15,10 @@
             [territory-bro.jwt-test :as jwt-test]
             [territory-bro.router :as router]))
 
-(defn- delete-schemas-starting-with! [conn schema-name-prefix]
-  (doseq [schema (jdbc/query conn ["select schema_name from information_schema.schemata"])
-          :when (str/starts-with? (:schema_name schema) schema-name-prefix)]
-    (jdbc/execute! conn [(str "drop schema \"" (:schema_name schema) "\" cascade")])))
+(defn- delete-schemas-starting-with! [conn prefix]
+  (doseq [schema (db/get-schemas conn)
+          :when (str/starts-with? schema prefix)]
+    (jdbc/execute! conn [(str "drop schema \"" schema "\" cascade")])))
 
 (def test-env {:database-schema "test_territorybro"})
 

@@ -152,6 +152,11 @@
       (.locations (strings "classpath:db/flyway/tenant"))
       (.load)))
 
+(defn get-schemas [conn]
+  (->> (jdbc/query conn ["select schema_name from information_schema.schemata"])
+       (map :schema_name)
+       (doall)))
+
 (defn set-search-path [conn schemas]
   (doseq [schema schemas]
     (assert (re-matches #"^[a-zA-Z0-9_]+$" schema)
@@ -160,10 +165,13 @@
 
 (defmacro with-db [binding & body]
   ;; TODO: add congregation schema to search path
-  `(jdbc/with-db-transaction [~(first binding) (:default databases) {:isolation :serializable}]
-     (set-search-path ~(first binding) [(:database-schema config/env)
-                                        "public"]) ; contains PostGIS types
-     ~@body))
+  (let [conn (first binding)
+        options (merge {:isolation :serializable}
+                       (second binding))]
+    `(jdbc/with-db-transaction [~conn (:default databases) ~options]
+       (set-search-path ~conn [(:database-schema config/env)
+                               "public"]) ; contains PostGIS types
+       ~@body)))
 
 (defn- load-queries [queries-atom]
   ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh

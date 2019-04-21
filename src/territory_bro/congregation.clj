@@ -29,6 +29,9 @@
         schema-name (str (:database-schema config/env)
                          "_"
                          (str/replace (str id) "-" ""))]
+    (assert (not (contains? (set (db/get-schemas conn))
+                            schema-name))
+            {:schema-name schema-name})
     (query! conn :create-congregation {:id id
                                        :name name
                                        :schema_name schema-name})

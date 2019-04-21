@@ -13,7 +13,7 @@
 (use-fixtures :once db-fixture)
 
 (deftest congregations-test
-  (db/with-db [conn {}]
+  (db/with-db [conn {:isolation :read-committed}] ; creating the schema happens in another transaction
     (jdbc/db-set-rollback-only! conn)
 
     (testing "no congregations"
@@ -25,7 +25,8 @@
         (is id)
         (is (= id (::congregation/id congregation)))
         (is (= "the name" (::congregation/name congregation)))
-        (is (= [] (jdbc/query conn [(str "select * from " (::congregation/schema-name congregation) ".territory")]))
+        (is (contains? (set (db/get-schemas conn))
+                       (::congregation/schema-name congregation))
             "should create congregation schema")))
 
     (testing "list congregations"
