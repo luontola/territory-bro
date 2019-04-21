@@ -66,17 +66,19 @@
 (defn get-my-congregation [conn cong-id user-id]
   (first (get-my-congregations conn user-id {:ids [cong-id]})))
 
-(defn add-member! [conn cong-id user-id]
-  (query! conn :add-member {:congregation cong-id
-                            :user user-id})
+;;;; User access
+
+(defn grant-access! [conn cong-id user-id]
+  (query! conn :grant-access {:congregation cong-id
+                              :user user-id})
   nil)
 
-(defn remove-member! [conn cong-id user-id]
-  (query! conn :remove-member {:congregation cong-id
+(defn revoke-access! [conn cong-id user-id]
+  (query! conn :revoke-access {:congregation cong-id
                                :user user-id})
   nil)
 
-(defn get-members [conn cong-id]
-  (->> (query! conn :get-members {:congregation cong-id})
+(defn get-users [conn cong-id]
+  (->> (query! conn :get-users {:congregation cong-id})
        (map :user)
        (doall)))

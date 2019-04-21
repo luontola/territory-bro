@@ -5,11 +5,11 @@ create table congregation
     schema_name varchar(63)   not null
 );
 
-create table congregation_membership
+create table congregation_access
 (
     congregation uuid not null references congregation (id),
     "user"       uuid not null references "user" (id),
     primary key (congregation, "user")
 );
 
-create index congregation_membership_user_idx on congregation_membership ("user", congregation);
+create index congregation_access_user_idx on congregation_access ("user", congregation);

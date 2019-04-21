@@ -6,7 +6,7 @@ where 1 = 1
   and id in (:v*:ids)
 /*~ ) ~*/
 /*~ (when (:user params) */
-  and :user in (select "user" from congregation_membership m where m.congregation = id)
+  and :user in (select "user" from congregation_access m where m.congregation = id)
 /*~ ) ~*/
 ;
 
@@ -14,16 +14,18 @@ where 1 = 1
 insert into congregation (id, name, schema_name)
 values (:id, :name, :schema_name);
 
--- :name get-members :? :*
+---- User access
+
+-- :name get-users :? :*
 select "user"
-from congregation_membership
+from congregation_access
 where congregation = :congregation;
 
--- :name add-member :!
-insert into congregation_membership ("user", congregation)
+-- :name grant-access :!
+insert into congregation_access ("user", congregation)
 values (:user, :congregation);
 
--- :name remove-member :!
-delete from congregation_membership
+-- :name revoke-access :!
+delete from congregation_access
 where "user" = :user
   and congregation = :congregation;
