@@ -42,13 +42,38 @@
    ::name (:name row)
    ::schema-name (:schema_name row)})
 
-(defn get-congregations
+(defn get-unrestricted-congregations
   ([conn]
-   (get-congregations conn {}))
+   (get-unrestricted-congregations conn {}))
   ([conn search]
    (->> (query! conn :get-congregations search)
         (map format-congregation)
         (doall))))
 
-(defn get-congregation [conn id]
-  (first (get-congregations conn {:ids [id]})))
+(defn get-unrestricted-congregation [conn cong-id]
+  (first (get-unrestricted-congregations conn {:ids [cong-id]})))
+
+(defn get-my-congregations
+  ([conn user-id]
+   (get-my-congregations conn user-id {}))
+  ([conn user-id search]
+   (get-unrestricted-congregations conn (assoc search
+                                               :user user-id))))
+
+(defn get-my-congregation [conn cong-id user-id]
+  (first (get-my-congregations conn user-id {:ids [cong-id]})))
+
+(defn add-member! [conn cong-id user-id]
+  (query! conn :add-member {:congregation cong-id
+                            :user user-id})
+  nil)
+
+(defn remove-member! [conn cong-id user-id]
+  (query! conn :remove-member {:congregation cong-id
+                               :user user-id})
+  nil)
+
+(defn get-members [conn cong-id]
+  (->> (query! conn :get-members {:congregation cong-id})
+       (map :user)
+       (doall)))
