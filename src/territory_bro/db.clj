@@ -6,6 +6,7 @@
   (:require [cheshire.core :as cheshire]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [conman.core :as conman]
             [hikari-cp.core :as hikari-cp]
@@ -151,10 +152,16 @@
       (.locations (strings "classpath:db/flyway/tenant"))
       (.load)))
 
+(defn set-search-path [conn schemas]
+  (doseq [schema schemas]
+    (assert (re-matches #"^[a-zA-Z0-9_]+$" schema)
+            {:schema schema}))
+  (jdbc/execute! conn [(str "set search_path to " (str/join "," schemas))]))
+
 (defmacro with-db [binding & body]
   ;; TODO: add congregation schema to search path
   `(jdbc/with-db-transaction [~(first binding) (:default databases) {:isolation :serializable}]
-     (jdbc/execute! ~(first binding) [(str "set search_path to " (:database-schema config/env))])
+     (set-search-path ~(first binding) [(:database-schema config/env)])
      ~@body))
 
 (defn- load-queries [queries-atom]
