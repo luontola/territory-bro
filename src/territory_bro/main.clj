@@ -38,6 +38,17 @@
   (when repl-server
     (repl/stop repl-server)))
 
+(defn migrate-database! []
+  (log/info "Migrating master schema" (:database-schema config/env))
+  (-> (db/master-schema (:database-schema config/env))
+      (.migrate))
+
+  (doseq [congregation (db/with-db [conn {}]
+                         (congregation/get-unrestricted-congregations conn))]
+    (log/info "Migrating tenant schema" (::congregation/schema-name congregation))
+    (-> (db/tenant-schema (::congregation/schema-name congregation))
+        (.migrate))))
+
 (defn stop-app []
   (doseq [component (:stopped (mount/stop))]
     (log/info component "stopped"))
@@ -46,17 +57,7 @@
 (defn start-app [args]
   (doseq [component (:started (mount/start-with-args (cli/parse-opts args cli-options)))]
     (log/info component "started"))
-
-  (log/info "Migrating master schema" (:database-schema config/env))
-  (-> (db/master-schema (:database-schema config/env))
-      (.migrate))
-
-  (doseq [congregation (db/with-db [conn {}]
-                         (congregation/get-congregations conn))]
-    (log/info "Migrating tenant schema" (::congregation/schema-name congregation))
-    (-> (db/tenant-schema (::congregation/schema-name congregation))
-        (.migrate)))
-
+  (migrate-database!)
   (-> (Runtime/getRuntime)
       (.addShutdownHook (Thread. ^Runnable stop-app)))
   (log/info "Started"))
@@ -76,6 +77,8 @@
 
     (migrations/migration? args)
     (do
+      (mount/start-with-args #'db/databases)
+      (migrate-database!)
       (migrations/migrate args (select-keys config/env [:database-url]))
       (System/exit 0))
 
