@@ -17,10 +17,9 @@
 
 (mount/defstate ^{:on-reload :noop} http-server
   :start
-  (http/start (-> config/env
-                  (assoc :handler #'router/app)
-                  (update :io-threads #(or % (* 2 (.availableProcessors (Runtime/getRuntime)))))
-                  (update :port #(or (-> config/env :options :port) %))))
+  (http/start {:handler #'router/app
+               :port (:port config/env)
+               :io-threads (* 2 (.availableProcessors (Runtime/getRuntime)))})
   :stop
   (http/stop http-server))
 
