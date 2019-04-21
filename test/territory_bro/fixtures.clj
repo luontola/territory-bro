@@ -31,6 +31,8 @@
   (migrations/migrate ["migrate"] (select-keys config/env [:database-url])) ; TODO: legacy code, remove me
   (-> (db/master-schema (:database-schema config/env))
       (.migrate))
+  (-> (db/tenant-schema (str (:database-schema config/env) "_tenant"))
+      (.migrate))
   (f)
   (mount/stop))
 

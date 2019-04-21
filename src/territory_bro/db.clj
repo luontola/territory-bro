@@ -161,7 +161,8 @@
 (defmacro with-db [binding & body]
   ;; TODO: add congregation schema to search path
   `(jdbc/with-db-transaction [~(first binding) (:default databases) {:isolation :serializable}]
-     (set-search-path ~(first binding) [(:database-schema config/env)])
+     (set-search-path ~(first binding) [(:database-schema config/env)
+                                        "public"]) ; contains PostGIS types
      ~@body))
 
 (defn- load-queries [queries-atom]
