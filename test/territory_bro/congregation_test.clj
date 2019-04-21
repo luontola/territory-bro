@@ -46,7 +46,7 @@
 
     (let [cong-id (congregation/create-congregation! conn "")
           unrelated-cong-id (congregation/create-congregation! conn "")
-          user-id (user/create-user! conn "user" {})]
+          user-id (user/save-user! conn "user" {})]
 
       (testing "cannot see congregations by default"
         (is (nil? (congregation/get-my-congregation conn cong-id user-id)))

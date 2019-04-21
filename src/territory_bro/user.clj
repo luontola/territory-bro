@@ -3,17 +3,28 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.user
-  (:require [clojure.tools.logging :as log]
-            [territory-bro.db :as db])
+  (:require [territory-bro.db :as db])
   (:import (java.util UUID)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/user.sql"))
 
-;; TODO: create if not exists
-(defn create-user! [conn subject attributes]
-  (let [id (UUID/randomUUID)]
-    (query! conn :create-user {:id id
-                               :subject subject
-                               :attributes attributes})
-    (log/info "User created:" id)
-    id))
+(defn save-user! [conn subject attributes]
+  (:id (first (query! conn :save-user {:id (UUID/randomUUID)
+                                       :subject subject
+                                       :attributes attributes}))))
+
+(defn- format-user [user]
+  {::id (:id user)
+   ::subject (:subject user)
+   ::attributes (:attributes user)})
+
+(defn get-users
+  ([conn]
+   (get-users conn {}))
+  ([conn search]
+   (->> (query! conn :get-user search)
+        (map format-user)
+        (doall))))
+
+(defn get-user [conn id]
+  (first (get-users conn {:ids [id]})))
