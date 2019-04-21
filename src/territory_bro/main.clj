@@ -15,17 +15,12 @@
             [territory-bro.congregation :as congregation])
   (:gen-class))
 
-(def ^:private cli-options
-  [["-p" "--port PORT" "Port number"
-    :parse-fn #(Integer/parseInt %)]])
-
 (mount/defstate ^{:on-reload :noop} http-server
   :start
-  (http/start
-    (-> config/env
-        (assoc :handler #'router/app)
-        (update :io-threads #(or % (* 2 (.availableProcessors (Runtime/getRuntime)))))
-        (update :port #(or (-> config/env :options :port) %))))
+  (http/start (-> config/env
+                  (assoc :handler #'router/app)
+                  (update :io-threads #(or % (* 2 (.availableProcessors (Runtime/getRuntime)))))
+                  (update :port #(or (-> config/env :options :port) %))))
   :stop
   (http/stop http-server))
 
@@ -49,21 +44,31 @@
     (-> (db/tenant-schema (::congregation/schema-name congregation))
         (.migrate))))
 
+(defn- log-mount-states [result]
+  (doseq [component (:started result)]
+    (log/info component "started"))
+  (doseq [component (:stopped result)]
+    (log/info component "stopped")))
+
 (defn stop-app []
-  (doseq [component (:stopped (mount/stop))]
-    (log/info component "stopped"))
+  (log-mount-states (mount/stop))
   (shutdown-agents))
 
-(defn start-app [args]
-  (doseq [component (:started (mount/start-with-args (cli/parse-opts args cli-options)))]
-    (log/info component "started"))
-  (migrate-database!)
-  (-> (Runtime/getRuntime)
-      (.addShutdownHook (Thread. ^Runnable stop-app)))
-  (log/info "Started"))
+(defn start-app []
+  (try
+    (log-mount-states (mount/start-without #'http-server))
+    (migrate-database!)
+    ;; start the public API only after the database is ready
+    (log-mount-states (mount/start #'http-server))
+    (doto (Runtime/getRuntime)
+          (.addShutdownHook (Thread. ^Runnable stop-app)))
+    (log/info "Started")
+    (catch Throwable t
+      (log/error t "Failed to start")
+      (stop-app))))
 
 (defn -main [& args]
-  (mount/start #'config/env)
+  (log-mount-states (mount/start #'config/env))
   (cond
     (nil? (:database-url config/env))
     (do
@@ -77,10 +82,10 @@
 
     (migrations/migration? args)
     (do
-      (mount/start-with-args #'db/databases)
+      (log-mount-states (mount/start #'db/databases))
       (migrate-database!)
       (migrations/migrate args (select-keys config/env [:database-url]))
       (System/exit 0))
 
     :else
-    (start-app args)))
+    (start-app)))
