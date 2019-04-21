@@ -33,15 +33,17 @@
     (repl/stop repl-server)))
 
 (defn migrate-database! []
-  (log/info "Migrating master schema" (:database-schema config/env))
-  (-> (db/master-schema (:database-schema config/env))
-      (.migrate))
+  (let [schema (:database-schema config/env)]
+    (log/info "Migrating master schema" schema)
+    (-> (db/master-schema schema)
+        (.migrate)))
 
   (doseq [congregation (db/with-db [conn {}]
                          (congregation/get-unrestricted-congregations conn))]
-    (log/info "Migrating tenant schema" (::congregation/schema-name congregation))
-    (-> (db/tenant-schema (::congregation/schema-name congregation))
-        (.migrate))))
+    (let [schema (::congregation/schema-name congregation)]
+      (log/info "Migrating tenant schema" schema)
+      (-> (db/tenant-schema schema)
+          (.migrate)))))
 
 (defn- log-mount-states [result]
   (doseq [component (:started result)]
