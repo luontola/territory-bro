@@ -6,8 +6,6 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.test :refer :all]
-            [conman.core :as conman]
-            [luminus-migrations.core :as migrations]
             [mount.core :as mount]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
@@ -28,7 +26,6 @@
                          #'db/databases)
   (db/with-db [conn {}]
     (delete-schemas-starting-with! conn (:database-schema test-env)))
-  (migrations/migrate ["migrate"] (select-keys config/env [:database-url])) ; TODO: legacy code, remove me
   (-> (db/master-schema (:database-schema config/env))
       (.migrate))
   (-> (db/tenant-schema (str (:database-schema config/env) "_tenant"))
@@ -42,11 +39,5 @@
                          #'config/env)
   (mount/start-with {#'jwt/jwk-provider jwt-test/fake-jwk-provider})
   (mount/start #'router/app)
-  (db/as-tenant nil
-    (f))
+  (f)
   (mount/stop))
-
-(defn transaction-rollback-fixture [f]
-  (conman/with-transaction [db/*conn* {:isolation :serializable}]
-    (jdbc/db-set-rollback-only! db/*conn*)
-    (f)))

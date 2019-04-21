@@ -11,7 +11,7 @@
             [ring.util.http-predicates :refer :all]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
-            [territory-bro.fixtures :refer [db-fixture api-fixture transaction-rollback-fixture]]
+            [territory-bro.fixtures :refer [db-fixture api-fixture]]
             [territory-bro.jwt :as jwt]
             [territory-bro.jwt-test :as jwt-test]
             [territory-bro.router :as router]
@@ -19,7 +19,6 @@
   (:import (java.time Instant)))
 
 (use-fixtures :once (join-fixtures [db-fixture api-fixture]))
-(use-fixtures :each transaction-rollback-fixture)
 
 (defn- get-cookies [response]
   (->> (get-in response [:headers "Set-Cookie"])
