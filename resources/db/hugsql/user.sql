@@ -4,7 +4,7 @@ values (:id, :subject, :attributes::jsonb)
 on conflict (subject) do update
     set attributes = :attributes::jsonb returning id;
 
--- :name get-user :? :*
+-- :name get-users :? :*
 select id, subject, attributes
 from "user"
 where 1 = 1

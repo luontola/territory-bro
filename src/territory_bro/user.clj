@@ -22,7 +22,7 @@
   ([conn]
    (get-users conn {}))
   ([conn search]
-   (->> (query! conn :get-user search)
+   (->> (query! conn :get-users search)
         (map format-user)
         (doall))))
 
