@@ -24,34 +24,60 @@
           user-id2 (user/save-user! conn "user2" {})]
 
       (gis-user/create-gis-user! conn cong-id user-id)
+      (gis-user/create-gis-user! conn cong-id user-id2)
+      (gis-user/create-gis-user! conn cong-id2 user-id)
       (gis-user/create-gis-user! conn cong-id2 user-id2)
-      (testing "create & get user"
+      (testing "create & get GIS user"
         (let [user (gis-user/get-gis-user conn cong-id user-id)]
           (is (::gis-user/username user))
           (is (= 50 (count ((::gis-user/password user)))))))
 
-      (testing "get all users"
+      (testing "get GIS users by congregation"
         (is (= #{[cong-id user-id]
-                 [cong-id2 user-id2]}
-               (->> (gis-user/get-gis-users conn)
+                 [cong-id user-id2]}
+               (->> (gis-user/get-gis-users conn {:congregation cong-id})
                     (map (juxt ::gis-user/congregation ::gis-user/user))
                     (into #{})))))
 
-      (testing "can login to the database") ; TODO
+      (testing "get GIS users by user"
+        (is (= #{[cong-id user-id]
+                 [cong-id2 user-id]}
+               (->> (gis-user/get-gis-users conn {:user user-id})
+                    (map (juxt ::gis-user/congregation ::gis-user/user))
+                    (into #{})))))
 
-      (testing "can view the congregation schema") ; TODO
-
-      (testing "cannot view the master schema") ; TODO
-
-      (testing "cannot view the public schema") ; TODO
-
-      (gis-user/delete-gis-user! conn cong-id user-id)
-      (testing "delete user"
+      (testing "delete GIS user"
+        (gis-user/delete-gis-user! conn cong-id user-id)
         (is (nil? (gis-user/get-gis-user conn cong-id user-id)))
         (is (gis-user/get-gis-user conn cong-id2 user-id2)
-            "should not delete unrelated users"))
+            "should not delete unrelated users")))))
 
-      (testing "cannot login to database after user is deleted")))) ; TODO
+(defn- create-test-data! []
+  (db/with-db [conn {}]
+    (let [cong-id (congregation/create-congregation! conn "cong")
+          cong (congregation/get-unrestricted-congregation conn cong-id)
+          user-id (user/save-user! conn "user" {})
+          _ (gis-user/create-gis-user! conn cong-id user-id)
+          gis-user (gis-user/get-gis-user conn cong-id user-id)]
+      {:cong-id cong-id
+       :user-id user-id
+       :schema (::congregation/schema-name cong)
+       :username (::gis-user/username gis-user)
+       :password ((::gis-user/password gis-user))})))
+
+(deftest gis-user-database-access-test
+  (let [{:keys [cong-id user-id schema username password]} (create-test-data!)]
+
+    (is true)
+    (testing "can login to the database") ; TODO)
+
+    (testing "can view the congregation schema") ; TODO
+
+    (testing "cannot view the master schema") ; TODO
+
+    (testing "cannot view the public schema") ; TODO
+
+    (testing "cannot login to database after user is deleted"))) ; TODO
 
 (deftest generate-password-test
   (let [a (gis-user/generate-password 10)
