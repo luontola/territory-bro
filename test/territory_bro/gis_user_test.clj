@@ -88,6 +88,10 @@
       (is (thrown-with-msg? PSQLException #"ERROR: permission denied for schema"
                             (jdbc/query db-spec [(str "select * from " (:database-schema config/env) ".congregation")]))))
 
+    (testing "cannot create objects in the public schema"
+      (is (thrown-with-msg? PSQLException #"ERROR: permission denied for schema public"
+                            (jdbc/query db-spec ["create table public.foo (id serial primary key)"]))))
+
     (testing "cannot login to database after user is deleted"
       (db/with-db [conn {}]
         (gis-user/delete-gis-user! conn cong-id user-id))
