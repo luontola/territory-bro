@@ -11,6 +11,27 @@
 
 (def ^:private query! (db/compile-queries "db/hugsql/gis-user.sql"))
 
+(defn secret [str]
+  (fn [] str))
+
+(defn- format-gis-user [gis-user]
+  {::congregation (:congregation gis-user)
+   ::user (:user gis-user)
+   ::username (:username gis-user)
+   ::password (secret (:password gis-user))})
+
+(defn get-gis-users
+  ([conn]
+   (get-gis-users conn {}))
+  ([conn search]
+   (->> (query! conn :get-gis-users search)
+        (map format-gis-user)
+        (doall))))
+
+(defn get-gis-user [conn cong-id user-id]
+  (first (get-gis-users conn {:congregation cong-id
+                              :user user-id})))
+
 (defn generate-password [length]
   (let [bytes (byte-array length)]
     (-> (SecureRandom/getInstanceStrong)
@@ -36,31 +57,9 @@
     (jdbc/execute! conn [(str "ALTER ROLE " username " VALID UNTIL 'infinity'")])
     nil))
 
-(declare get-gis-user)
 (defn delete-gis-user! [conn cong-id user-id]
   (let [username (::username (get-gis-user conn cong-id user-id))]
     (jdbc/execute! conn [(str "DROP ROLE " username)])
     (query! conn :delete-gis-user {:congregation cong-id
                                    :user user-id})
     nil))
-
-(defn secret [str]
-  (fn [] str))
-
-(defn- format-gis-user [gis-user]
-  {::congregation (:congregation gis-user)
-   ::user (:user gis-user)
-   ::username (:username gis-user)
-   ::password (secret (:password gis-user))})
-
-(defn get-gis-users
-  ([conn]
-   (get-gis-users conn {}))
-  ([conn search]
-   (->> (query! conn :get-gis-users search)
-        (map format-gis-user)
-        (doall))))
-
-(defn get-gis-user [conn cong-id user-id]
-  (first (get-gis-users conn {:congregation cong-id
-                              :user user-id})))

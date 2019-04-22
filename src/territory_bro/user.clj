@@ -8,11 +8,6 @@
 
 (def ^:private query! (db/compile-queries "db/hugsql/user.sql"))
 
-(defn save-user! [conn subject attributes]
-  (:id (first (query! conn :save-user {:id (UUID/randomUUID)
-                                       :subject subject
-                                       :attributes attributes}))))
-
 (defn- format-user [user]
   {::id (:id user)
    ::subject (:subject user)
@@ -31,3 +26,8 @@
 
 (defn get-by-subject [conn subject]
   (first (get-users conn {:subjects [subject]})))
+
+(defn save-user! [conn subject attributes]
+  (:id (first (query! conn :save-user {:id (UUID/randomUUID)
+                                       :subject subject
+                                       :attributes attributes}))))

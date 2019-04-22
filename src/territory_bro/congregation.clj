@@ -24,22 +24,6 @@
 
 (def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
 
-(defn create-congregation! [conn name]
-  (let [id (UUID/randomUUID)
-        schema-name (str (:database-schema config/env)
-                         "_"
-                         (str/replace (str id) "-" ""))]
-    (assert (not (contains? (set (db/get-schemas conn))
-                            schema-name))
-            {:schema-name schema-name})
-    (query! conn :create-congregation {:id id
-                                       :name name
-                                       :schema_name schema-name})
-    (-> (db/tenant-schema schema-name)
-        (.migrate))
-    (log/info "Congregation created:" id)
-    id))
-
 (defn- format-congregation [row]
   {::id (:id row)
    ::name (:name row)
@@ -66,7 +50,28 @@
 (defn get-my-congregation [conn cong-id user-id]
   (first (get-my-congregations conn user-id {:ids [cong-id]})))
 
+(defn create-congregation! [conn name]
+  (let [id (UUID/randomUUID)
+        schema-name (str (:database-schema config/env)
+                         "_"
+                         (str/replace (str id) "-" ""))]
+    (assert (not (contains? (set (db/get-schemas conn))
+                            schema-name))
+            {:schema-name schema-name})
+    (query! conn :create-congregation {:id id
+                                       :name name
+                                       :schema_name schema-name})
+    (-> (db/tenant-schema schema-name)
+        (.migrate))
+    (log/info "Congregation created:" id)
+    id))
+
 ;;;; User access
+
+(defn get-users [conn cong-id]
+  (->> (query! conn :get-users {:congregation cong-id})
+       (map :user)
+       (doall)))
 
 (defn grant-access! [conn cong-id user-id]
   (query! conn :grant-access {:congregation cong-id
@@ -77,8 +82,3 @@
   (query! conn :revoke-access {:congregation cong-id
                                :user user-id})
   nil)
-
-(defn get-users [conn cong-id]
-  (->> (query! conn :get-users {:congregation cong-id})
-       (map :user)
-       (doall)))
