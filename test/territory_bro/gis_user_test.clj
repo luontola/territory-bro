@@ -6,11 +6,13 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.test :refer :all]
+            [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture]]
             [territory-bro.gis-user :as gis-user]
-            [territory-bro.user :as user]))
+            [territory-bro.user :as user])
+  (:import (org.postgresql.util PSQLException)))
 
 (use-fixtures :once db-fixture)
 
@@ -66,10 +68,14 @@
        :password ((::gis-user/password gis-user))})))
 
 (deftest gis-user-database-access-test
-  (let [{:keys [cong-id user-id schema username password]} (create-test-data!)]
+  (let [{:keys [cong-id user-id schema username password]} (create-test-data!)
+        db-spec {:connection-uri (-> (:database-url config/env)
+                                     (str/replace #"\?.*" "")) ; strip username and password
+                 :user username
+                 :password password}]
 
-    (is true)
-    (testing "can login to the database") ; TODO)
+    (testing "can login to the database"
+      (is (= [{:test 1}] (jdbc/query db-spec ["select 1 as test"]))))
 
     (testing "can view the congregation schema") ; TODO
 
@@ -77,7 +83,11 @@
 
     (testing "cannot view the public schema") ; TODO
 
-    (testing "cannot login to database after user is deleted"))) ; TODO
+    (testing "cannot login to database after user is deleted"
+      (db/with-db [conn {}]
+        (gis-user/delete-gis-user! conn cong-id user-id))
+      (is (thrown-with-msg? PSQLException #"password authentication failed"
+                            (jdbc/query db-spec ["select 1 as test"]))))))
 
 (deftest generate-password-test
   (let [a (gis-user/generate-password 10)

@@ -3,8 +3,9 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis-user
-  (:require [territory-bro.db :as db]
-            [clojure.test :refer [deftest is]])
+  (:require [clojure.java.jdbc :as jdbc]
+            [clojure.test :refer [deftest is]]
+            [territory-bro.db :as db])
   (:import (java.util Base64)
            (java.security SecureRandom)))
 
@@ -30,11 +31,18 @@
                                    :user user-id
                                    :username username
                                    :password password})
+    (jdbc/execute! conn [(str "CREATE ROLE " username " WITH LOGIN")])
+    (jdbc/execute! conn [(str "ALTER ROLE " username " WITH PASSWORD '" password "'")])
+    (jdbc/execute! conn [(str "ALTER ROLE " username " VALID UNTIL 'infinity'")])
     nil))
 
+(declare get-gis-user)
 (defn delete-gis-user! [conn cong-id user-id]
-  (query! conn :delete-gis-user {:congregation cong-id
-                                 :user user-id}))
+  (let [username (::username (get-gis-user conn cong-id user-id))]
+    (jdbc/execute! conn [(str "DROP ROLE " username)])
+    (query! conn :delete-gis-user {:congregation cong-id
+                                   :user user-id})
+    nil))
 
 (defn secret [str]
   (fn [] str))
@@ -56,5 +64,3 @@
 (defn get-gis-user [conn cong-id user-id]
   (first (get-gis-users conn {:congregation cong-id
                               :user user-id})))
-
-
