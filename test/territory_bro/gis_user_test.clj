@@ -77,16 +77,21 @@
     (testing "can login to the database"
       (is (= [{:test 1}] (jdbc/query db-spec ["select 1 as test"]))))
 
-    (testing "can view the congregation schema") ; TODO
+    (testing "can view the tenant schema and the tables in it"
+      (jdbc/with-db-transaction [conn db-spec]
+        (is (jdbc/query conn [(str "select * from " schema ".territory")]))
+        (is (jdbc/query conn [(str "select * from " schema ".congregation_boundary")]))
+        (is (jdbc/query conn [(str "select * from " schema ".subregion")]))
+        (is (jdbc/query conn [(str "select * from " schema ".card_minimap_viewport")]))))
 
-    (testing "cannot view the master schema") ; TODO
-
-    (testing "cannot view the public schema") ; TODO
+    (testing "cannot view the master schema"
+      (is (thrown-with-msg? PSQLException #"ERROR: permission denied for schema"
+                            (jdbc/query db-spec [(str "select * from " (:database-schema config/env) ".congregation")]))))
 
     (testing "cannot login to database after user is deleted"
       (db/with-db [conn {}]
         (gis-user/delete-gis-user! conn cong-id user-id))
-      (is (thrown-with-msg? PSQLException #"password authentication failed"
+      (is (thrown-with-msg? PSQLException #"FATAL: password authentication failed for user"
                             (jdbc/query db-spec ["select 1 as test"]))))))
 
 (deftest generate-password-test
