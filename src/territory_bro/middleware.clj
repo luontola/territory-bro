@@ -49,8 +49,7 @@
         (response/content-type resp "text/plain")))))
 
 ;; Avoid forgetting sessions every time the code is reloaded in development mode
-;; TODO: use mount
-(def session-store (memory-session/memory-store))
+(defonce session-store (memory-session/memory-store))
 
 (defn wrap-base [handler]
   (-> handler
