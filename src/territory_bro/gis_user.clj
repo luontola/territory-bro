@@ -68,13 +68,17 @@
                               "TO " username)])
     nil))
 
+(defn drop-role-cascade! [conn role schemas]
+  (doseq [schema schemas]
+    (jdbc/execute! conn [(str "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA " schema " FROM " role)])
+    (jdbc/execute! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " role)]))
+  (jdbc/execute! conn [(str "DROP ROLE " role)]))
+
 (defn delete-gis-user! [conn cong-id user-id]
   (let [username (::username (get-gis-user conn cong-id user-id))
         schema (::congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
     (assert schema)
-    (jdbc/execute! conn [(str "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA " schema " FROM " username)])
-    (jdbc/execute! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " username)])
-    (jdbc/execute! conn [(str "DROP ROLE " username)])
+    (drop-role-cascade! conn username [schema])
     (query! conn :delete-gis-user {:congregation cong-id
                                    :user user-id})
     nil))

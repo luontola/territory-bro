@@ -9,6 +9,7 @@
             [mount.core :as mount]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
+            [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
             [territory-bro.jwt-test :as jwt-test]
             [territory-bro.router :as router]))
@@ -16,7 +17,10 @@
 (defn- delete-schemas-starting-with! [conn prefix]
   (doseq [schema (db/get-schemas conn)
           :when (str/starts-with? schema prefix)]
-    (jdbc/execute! conn [(str "drop schema \"" schema "\" cascade")])))
+    (when (:exists (first (jdbc/query conn ["SELECT to_regclass(?) AS exists" (str schema ".gis_user")])))
+      (doseq [gis-user (jdbc/query conn [(str "SELECT username FROM " schema ".gis_user")])]
+        (gis-user/drop-role-cascade! conn (:username gis-user) (db/get-schemas conn))))
+    (jdbc/execute! conn [(str "DROP SCHEMA " schema " CASCADE")])))
 
 (def test-env {:database-schema "test_territorybro"})
 
