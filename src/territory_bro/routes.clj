@@ -170,6 +170,15 @@
                       {:id (::congregation/id congregation)
                        :name (::congregation/name congregation)})))))))
 
+(defn qgis-project-file-name [name]
+  (let [name (-> name
+                 (str/replace #"[<>:\"/\\|?*]" "") ; not allowed in Windows file names
+                 (str/replace #"\s+" " "))
+        name (if (str/blank? name)
+               "territories"
+               name)]
+    (str name ".qgs")))
+
 (defn download-qgis-project2 [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -185,8 +194,7 @@
                                               :database-schema (::congregation/schema-name congregation)
                                               :database-username (::gis-user/username gis-user)
                                               :database-password ((::gis-user/password gis-user))})
-
-              file-name "territories.qgs"]
+              file-name (qgis-project-file-name (::congregation/name congregation))]
           (-> (ok content)
               (response/content-type "application/octet-stream")
               (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\""))))))))

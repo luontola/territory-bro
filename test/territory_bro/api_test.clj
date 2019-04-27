@@ -193,7 +193,7 @@
 (deftest download-qgis-project-test
   (let [session (login! app)
         response (-> (request :post "/api/congregations")
-                     (json-body {:name "foo"})
+                     (json-body {:name "Example Congregation"})
                      (merge session)
                      app
                      (assert-response ok?))
@@ -205,7 +205,7 @@
       (is (ok? response))
       (is (str/includes? (:body response) "<qgis"))
       (is (str/includes? (get-in response [:headers "Content-Disposition"])
-                         "territories.qgs")))
+                         "Example Congregation.qgs")))
 
     (testing "requires login"
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
