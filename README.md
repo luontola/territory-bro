@@ -31,6 +31,10 @@ Stop the application and remove all data
 
     docker-compose down
 
+Producing canonical XML for better diffs 
+
+    xmllint --c14n11 example.qgs > resources/template-territories.qgs
+
 
 ## Developing
 
