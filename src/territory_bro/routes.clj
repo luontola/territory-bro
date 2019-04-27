@@ -14,6 +14,7 @@
             [territory-bro.config :refer [env]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
+            [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
             [territory-bro.permissions :as perm]
             [territory-bro.user :as user]
@@ -146,8 +147,10 @@
       (assert (not (str/blank? name)) ; TODO: test this
               {:name name})
       (db/with-db [conn {}]
-        (let [cong-id (congregation/create-congregation! conn name)]
-          (congregation/grant-access! conn cong-id (current-user-id conn)) ; TODO: test this
+        (let [cong-id (congregation/create-congregation! conn name)
+              user-id (current-user-id conn)]
+          (congregation/grant-access! conn cong-id user-id)
+          (gis-user/create-gis-user! conn cong-id user-id)
           (ok {:id cong-id}))))))
 
 (defn list-congregations [request]

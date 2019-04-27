@@ -10,13 +10,16 @@
             [ring.mock.request :refer :all]
             [ring.util.http-predicates :refer :all]
             [territory-bro.config :as config]
+            [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture api-fixture]]
+            [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
             [territory-bro.jwt-test :as jwt-test]
             [territory-bro.router :as router]
             [territory-bro.user :as user])
-  (:import (java.time Instant)))
+  (:import (java.time Instant)
+           (java.util UUID)))
 
 (use-fixtures :once (join-fixtures [db-fixture api-fixture]))
 
@@ -158,7 +161,15 @@
                      (merge session)
                      app)]
     (is (ok? response))
-    (is (:id (:body response))))
+    (is (:id (:body response)))
+
+    (let [cong-id (UUID/fromString (:id (:body response)))]
+      (db/with-db [conn {}]
+        (testing "grants access to the current user"
+          (is (= 1 (count (congregation/get-users conn cong-id)))))
+
+        (testing "creates a GIS user for the current user"
+          (is (= 1 (count (gis-user/get-gis-users conn {:congregation cong-id}))))))))
 
   (testing "requires login"
     (let [response (-> (request :post "/api/congregations")
