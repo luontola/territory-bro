@@ -3,21 +3,20 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.routes
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [clojure.tools.logging :as log]
             [compojure.core :refer [defroutes GET POST ANY]]
             [liberator.core :refer [defresource]]
             [ring.util.http-response :refer :all]
             [ring.util.response :as response]
             [territory-bro.authentication :as auth]
-            [territory-bro.config :as config]
-            [territory-bro.config :refer [env]]
+            [territory-bro.config :as config :refer [env]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
             [territory-bro.permissions :as perm]
+            [territory-bro.qgis :as qgis]
             [territory-bro.user :as user]
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
@@ -112,21 +111,6 @@
                    (db/as-tenant tenant
                      (db/query :find-regions))))))
 
-(def qgis-project-template (io/resource "template-territories2.qgs"))
-
-(defn generate-qgis-project [{:keys [database-host database-name database-schema database-username database-password]}]
-  (assert database-host "host is missing")
-  (assert database-name "db name is missing")
-  (assert database-schema "schema is missing")
-  (assert database-username "username is missing")
-  (assert database-password "password is missing")
-  (-> (slurp qgis-project-template :encoding "UTF-8")
-      (str/replace "HOST_GOES_HERE" database-host)
-      (str/replace "DBNAME_GOES_HERE" database-name)
-      (str/replace "SCHEMA_GOES_HERE" database-schema)
-      (str/replace "USERNAME_GOES_HERE" database-username)
-      (str/replace "PASSWORD_GOES_HERE" database-password)))
-
 (defn download-qgis-project [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -137,7 +121,7 @@
       (if-not (perm/can-modify-territories? tenant)
         (forbidden! (str "cannot modify territories of " tenant)))
       (let [db-config (get-in env [:tenant tenant])
-            content (generate-qgis-project (-> (select-keys db-config [:database-host :database-username :database-password])
+            content (qgis/generate-project (-> (select-keys db-config [:database-host :database-username :database-password])
                                                (assoc :database-name (:database-username db-config)
                                                       :database-schema (:database-username db-config))))
             file-name (str (name tenant) "-territories.qgs")]
@@ -170,15 +154,6 @@
                       {:id (::congregation/id congregation)
                        :name (::congregation/name congregation)})))))))
 
-(defn qgis-project-file-name [name]
-  (let [name (-> name
-                 (str/replace #"[<>:\"/\\|?*]" "") ; not allowed in Windows file names
-                 (str/replace #"\s+" " "))
-        name (if (str/blank? name)
-               "territories"
-               name)]
-    (str name ".qgs")))
-
 (defn download-qgis-project2 [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -189,12 +164,12 @@
             gis-user (gis-user/get-gis-user conn cong-id user-id)]
         (when-not gis-user
           (forbidden! "No GIS access"))
-        (let [content (generate-qgis-project {:database-host (:gis-database-host config/env)
+        (let [content (qgis/generate-project {:database-host (:gis-database-host config/env)
                                               :database-name (:gis-database-name config/env)
                                               :database-schema (::congregation/schema-name congregation)
                                               :database-username (::gis-user/username gis-user)
                                               :database-password ((::gis-user/password gis-user))})
-              file-name (qgis-project-file-name (::congregation/name congregation))]
+              file-name (qgis/project-file-name (::congregation/name congregation))]
           (-> (ok content)
               (response/content-type "application/octet-stream")
               (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\""))))))))

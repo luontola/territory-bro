@@ -6,7 +6,7 @@
   (:require [clojure.test :refer :all]
             [territory-bro.authentication :as auth]
             [territory-bro.config :refer [env]]
-            [territory-bro.routes :as routes :refer :all]))
+            [territory-bro.routes :refer :all]))
 
 (deftest find-tenant-test
   (let [tenants [:foo :bar]]
@@ -41,20 +41,3 @@
              (dev-login {:params {:sub "sub"
                                   :name "name"
                                   :email "email"}}))))))
-
-(deftest qgis-file-name-test
-  (is (= "foo.qgs" (routes/qgis-project-file-name "foo")))
-
-  (testing "keeps non-ASCII characters"
-    (is (= "Ylöjärvi.qgs" (routes/qgis-project-file-name "Ylöjärvi")))
-    (is (= "東京.qgs" (routes/qgis-project-file-name "東京"))))
-
-  (testing "strips illegal characters"
-    (is (= "foobar.qgs" (routes/qgis-project-file-name "foo<>:\"/\\|?*bar"))))
-
-  (testing "normalizes whitespace"
-    (is (= "foo bar gazonk.qgs" (routes/qgis-project-file-name "foo    bar\n\tgazonk"))))
-
-  (testing "default if name is empty"
-    (is (= "territories.qgs" (routes/qgis-project-file-name "")))
-    (is (= "territories.qgs" (routes/qgis-project-file-name "/")))))
