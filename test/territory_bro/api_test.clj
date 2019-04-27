@@ -189,3 +189,35 @@
     (let [response (-> (request :get "/api/congregations")
                        app)]
       (is (unauthorized? response)))))
+
+(deftest download-qgis-project-test
+  (let [session (login! app)
+        response (-> (request :post "/api/congregations")
+                     (json-body {:name "foo"})
+                     (merge session)
+                     app
+                     (assert-response ok?))
+        cong-id (UUID/fromString (:id (:body response)))]
+
+    (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
+                       (merge session)
+                       app)]
+      (is (ok? response))
+      (is (str/includes? (:body response) "<qgis"))
+      (is (str/includes? (get-in response [:headers "Content-Disposition"])
+                         "territories.qgs")))
+
+    (testing "requires login"
+      (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
+                         app)]
+        (is (unauthorized? response))))
+
+    (testing "requires GIS access"
+      (db/with-db [conn {}]
+        (doseq [gis-user (gis-user/get-gis-users conn {:congregation cong-id})]
+          (gis-user/delete-gis-user! conn cong-id (::gis-user/user gis-user))))
+      (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
+                         (merge session)
+                         app)]
+        (is (forbidden? response))
+        (is (str/includes? (:body response) "No GIS access"))))))

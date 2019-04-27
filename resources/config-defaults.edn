@@ -4,6 +4,8 @@
  :nrepl-port nil
  :database-url nil
  :database-schema "territorybro"
+ :gis-database-host nil
+ :gis-database-name "territorybro"
  :auth0-domain nil
  :auth0-client-id nil
  :super-admin nil

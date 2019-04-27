@@ -11,6 +11,7 @@
             [ring.util.http-response :refer :all]
             [ring.util.response :as response]
             [territory-bro.authentication :as auth]
+            [territory-bro.config :as config]
             [territory-bro.config :refer [env]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
@@ -19,7 +20,8 @@
             [territory-bro.permissions :as perm]
             [territory-bro.user :as user]
             [territory-bro.util :refer [getx]])
-  (:import (com.auth0.jwt.exceptions JWTVerificationException)))
+  (:import (com.auth0.jwt.exceptions JWTVerificationException)
+           (java.util UUID)))
 
 (defn require-logged-in! []
   (if-not auth/*user*
@@ -110,14 +112,18 @@
                    (db/as-tenant tenant
                      (db/query :find-regions))))))
 
-(def qgis-project-template (io/resource "template-territories.qgs"))
+(def qgis-project-template (io/resource "template-territories2.qgs"))
 
-(defn generate-qgis-project [{:keys [database-host database-username database-password]}]
+(defn generate-qgis-project [{:keys [database-host database-name database-schema database-username database-password]}]
   (assert database-host "host is missing")
+  (assert database-name "db name is missing")
+  (assert database-schema "schema is missing")
   (assert database-username "username is missing")
   (assert database-password "password is missing")
   (-> (slurp qgis-project-template :encoding "UTF-8")
       (str/replace "HOST_GOES_HERE" database-host)
+      (str/replace "DBNAME_GOES_HERE" database-name)
+      (str/replace "SCHEMA_GOES_HERE" database-schema)
       (str/replace "USERNAME_GOES_HERE" database-username)
       (str/replace "PASSWORD_GOES_HERE" database-password)))
 
@@ -130,8 +136,10 @@
                    tenant)]
       (if-not (perm/can-modify-territories? tenant)
         (forbidden! (str "cannot modify territories of " tenant)))
-      (let [content (generate-qgis-project (select-keys (get-in env [:tenant tenant])
-                                                        [:database-host :database-username :database-password]))
+      (let [db-config (get-in env [:tenant tenant])
+            content (generate-qgis-project (-> (select-keys db-config [:database-host :database-username :database-password])
+                                               (assoc :database-name (:database-username db-config)
+                                                      :database-schema (:database-username db-config))))
             file-name (str (name tenant) "-territories.qgs")]
         (-> (ok content)
             (response/content-type "application/octet-stream")
@@ -162,6 +170,27 @@
                       {:id (::congregation/id congregation)
                        :name (::congregation/name congregation)})))))))
 
+(defn download-qgis-project2 [request]
+  (auth/with-authenticated-user request
+    (require-logged-in!)
+    (db/with-db [conn {}]
+      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+            user-id (current-user-id conn)
+            congregation (congregation/get-my-congregation conn cong-id user-id)
+            gis-user (gis-user/get-gis-user conn cong-id user-id)]
+        (when-not gis-user
+          (forbidden! "No GIS access"))
+        (let [content (generate-qgis-project {:database-host (:gis-database-host config/env)
+                                              :database-name (:gis-database-name config/env)
+                                              :database-schema (::congregation/schema-name congregation)
+                                              :database-username (::gis-user/username gis-user)
+                                              :database-password ((::gis-user/password gis-user))})
+
+              file-name "territories.qgs"]
+          (-> (ok content)
+              (response/content-type "application/octet-stream")
+              (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\""))))))))
+
 (defroutes api-routes
   (GET "/" [] (ok "Territory Bro"))
   (POST "/api/login" request (login request))
@@ -170,6 +199,7 @@
   (ANY "/api/settings" [] settings)
   (POST "/api/congregations" request (create-congregation request))
   (GET "/api/congregations" request (list-congregations request))
+  (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project2 request))
   (ANY "/api/my-congregations" [] my-congregations)
   (ANY "/api/territories" [] territories)
   (ANY "/api/regions" [] regions)

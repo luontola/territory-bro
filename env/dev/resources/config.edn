@@ -3,6 +3,7 @@
  ;; when :nrepl-port is set the application starts the nREPL server on load
  :nrepl-port 7000
  :database-url "jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
+ :gis-database-host "localhost"
  :auth0-domain "luontola.eu.auth0.com"
  :auth0-client-id "8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"
  :super-admin "developer"
