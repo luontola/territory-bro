@@ -15,7 +15,7 @@
             [territory-bro.config :as config]
             [territory-bro.util :refer [getx]])
   (:import (clojure.lang IPersistentMap IPersistentVector)
-           (com.zaxxer.hikari HikariDataSource)
+           (com.zaxxer.hikari HikariDataSource HikariConfig)
            (java.net URL)
            (java.sql Date Timestamp PreparedStatement Array)
            (java.time Duration)
@@ -32,7 +32,7 @@
 (defn my-connect! [pool-spec]
   ;; XXX: the hikari-cp wrapper doesn't support setInitializationFailTimeout
   (let [{:keys [initialization-fail-timeout]} pool-spec
-        config (hikari-cp/datasource-config (conman/make-config pool-spec))]
+        config ^HikariConfig (hikari-cp/datasource-config (conman/make-config pool-spec))]
     (when initialization-fail-timeout (.setInitializationFailTimeout config initialization-fail-timeout))
     {:datasource (HikariDataSource. config)}))
 
@@ -84,7 +84,7 @@
      (query-fn *conn* params)
      (throw (IllegalArgumentException. (str "query " query-id " not found"))))))
 
-(defn to-date [sql-date]
+(defn to-date [^java.util.Date sql-date]
   (-> sql-date (.getTime) (java.util.Date.)))
 
 (extend-protocol jdbc/IResultSetReadColumn

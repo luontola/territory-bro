@@ -6,9 +6,9 @@
   (:import (java.sql SQLException)
            (java.util.regex Pattern)))
 
-(defn fix-sqlexception-chain [e]
+(defn fix-sqlexception-chain [^Throwable e]
   (when (instance? SQLException e)
-    (if-let [next (.getNextException e)]
+    (if-let [next (.getNextException ^SQLException e)]
       (if (.getCause e)
         (.addSuppressed e next)
         (.initCause e next))))

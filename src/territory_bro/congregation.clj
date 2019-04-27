@@ -18,7 +18,7 @@
 (defn my-congregations []
   (->> (perm/visible-congregations)
        (map format-tenant)
-       (sort-by #(.toUpperCase (:name %)))))
+       (sort-by #(.toUpperCase ^String (:name %)))))
 
 ;; new stuff
 
