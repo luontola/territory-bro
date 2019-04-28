@@ -66,6 +66,9 @@
     "node": ">= 10.0.0",
     "yarn": ">= 1.0.0"
   },
+  "browserslist": [
+    "defaults"
+  ],
   "scripts": {
     "test": "cross-env NODE_ENV=test mocha --require @babel/register --require ./web/js/test_setup.js 'web/js/**/*.test.js'",
     "autotest": "yarn run test --watch",
@@ -76,6 +79,7 @@
     "flow": "flow",
     "flow-typed": "flow-typed",
     "flow-coverage": "flow-coverage-report -i 'web/js/**/*.js' -t html -t text -o target/flow-coverage/",
-    "analyze": "source-map-explorer target/webpack/bundle.js"
+    "analyze": "source-map-explorer target/webpack/bundle.js",
+    "browserslist": "browserslist"
   }
 }
