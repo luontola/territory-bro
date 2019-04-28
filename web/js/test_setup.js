@@ -4,4 +4,4 @@
 
 /* @flow */
 
-import "./polyfills";
+// polyfills should no more be needed here due to useBuiltIns=usage
