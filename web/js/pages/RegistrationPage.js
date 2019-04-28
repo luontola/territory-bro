@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,42 +6,57 @@
 
 import React from "react";
 import Layout from "../layout/Layout";
-import type {State} from "../reducers";
-import {connect} from "react-redux";
+import history from "../history";
+import {ErrorMessage, Field, Form, Formik} from "formik";
+import {createCongregation} from "../api";
 
-type Props = {
-  userId: string,
-  supportEmail: string,
-};
-
-let RegistrationPage = ({userId, supportEmail}: Props) => (
+const RegistrationPage = () => (
   <Layout>
     <h1>Registration</h1>
 
-    <p>Your user ID is <span style={{fontSize: "120%", fontWeight: "bold"}}>{userId}</span></p>
+    <h2>Join an Existing Congregation</h2>
+    <p>TODO: instructions</p>
 
-    <p>To add a new congregation to Territory Bro, send email
-      to <a href={`mailto:${supportEmail}?subject=Territory Bro Registration`}>{supportEmail}</a> and mention:</p>
-    <ul>
-      <li>your <em>user ID</em> (shown above)</li>
-      <li>the <em>name and city</em> of your congregation</li>
-      <li>the <em>language</em> of your congregation, unless Territory Bro already supports it
-        (see the "Change language" list at the top of this page)
-      </li>
-    </ul>
+    <h2>Register a New Congregation</h2>
+
+    <Formik initialValues={{congregationName: ""}}
+            validate={values => {
+              let errors = {};
+              if (!values.congregationName) {
+                errors.congregationName = "Congregation name is required.";
+              }
+              return errors;
+            }}
+            onSubmit={async (values, {setSubmitting}) => {
+              try {
+                const id = await createCongregation(values.congregationName);
+                // TODO: use short IDs
+                history.push({pathname: `/congregation/${id}`});
+              } finally {
+                setSubmitting(false)
+              }
+            }}>
+      {({isSubmitting}) => (
+        <Form className="pure-form pure-form-aligned">
+          <fieldset>
+            <div className="pure-control-group">
+              <label htmlFor="congregationName">Congregation Name</label>
+              <Field type="text" name="congregationName" id="congregationName"/>
+              <ErrorMessage name="congregationName" component="div" className="pure-form-message-inline"/>
+            </div>
+            <div className="pure-controls">
+              <button type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">
+                Register
+              </button>
+            </div>
+          </fieldset>
+        </Form>
+      )}
+    </Formik>
 
     <p>It is recommended to <a href="https://groups.google.com/forum/#!forum/territory-bro-announcements/join">subscribe
       to the announcements mailing list</a> to be notified about important updates to Territory Bro.</p>
   </Layout>
 );
-
-function mapStateToProps(state: State): Props {
-  return {
-    userId: state.api.userId || '',
-    supportEmail: state.api.supportEmail,
-  };
-}
-
-RegistrationPage = connect(mapStateToProps)(RegistrationPage);
 
 export default RegistrationPage;

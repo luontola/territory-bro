@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -96,4 +96,9 @@ export async function devLogin() {
 
 export async function logout() {
   await api.post('/api/logout');
+}
+
+export async function createCongregation(name: string) {
+  const response = await api.post('/api/congregations', {name});
+  return response.data.id;
 }
