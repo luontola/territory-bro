@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,8 +6,8 @@
 
 import React from "react";
 import {changeLanguage, languagesByCode} from "../intl";
-import toPairs from "lodash-es/toPairs";
-import sortBy from "lodash-es/sortBy";
+import toPairs from "lodash/toPairs";
+import sortBy from "lodash/sortBy";
 
 const sortedLanguages = sortBy(toPairs(languagesByCode), ([code, name]) => name);
 

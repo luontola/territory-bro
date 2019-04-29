@@ -6,8 +6,8 @@
 
 import {api} from "./util";
 import alphanumSort from "alphanum-sort";
-import sortBy from "lodash-es/sortBy";
-import findIndex from "lodash-es/findIndex";
+import sortBy from "lodash/sortBy";
+import findIndex from "lodash/findIndex";
 
 function requestConfig(congregationId: ?string) {
   const config = {

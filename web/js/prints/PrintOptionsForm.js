@@ -10,7 +10,7 @@ import type {MapRaster} from "../maps/mapOptions";
 import {connect} from "react-redux";
 import type {Region, Territory} from "../api";
 import type {State} from "../reducers";
-import take from "lodash-es/take";
+import take from "lodash/take";
 
 export const defaultMapRasterId = 'osmHighDpi';
 export const formName = 'printOptions';
