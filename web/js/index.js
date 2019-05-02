@@ -18,13 +18,10 @@ import {mapRasters} from "./maps/mapOptions";
 
 const logger = createLogger();
 const store = createStore(reducers, applyMiddleware(logger));
-const root = document.getElementById('root');
-if (root === null) {
-  throw new Error('root element not found');
-}
+const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
 
 function renderComponent(component) {
-  ReactDOM.render(
+  root.render(
     <React.StrictMode>
       <IntlProvider locale={language} messages={messages}>
         <Provider store={store}>
@@ -33,7 +30,7 @@ function renderComponent(component) {
           </React.Suspense>
         </Provider>
       </IntlProvider>
-    </React.StrictMode>, root);
+    </React.StrictMode>);
 }
 
 async function renderNormalPage(location) {
