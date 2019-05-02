@@ -16,10 +16,10 @@ import {configured, myCongregationsLoaded, regionsLoaded, territoriesLoaded, use
 import RuralTerritoryCardsPage from "./pages/RuralTerritoryCardsPage";
 import type {State} from "./reducers";
 import {saveCongregationId, savedCongregationId} from "./congregation";
-import {buildAuthenticator} from "./authentication";
 import RegistrationPage from "./pages/RegistrationPage";
 import {congregationChanged} from "./configActions";
 import CongregationPage from "./pages/CongregationPage";
+import LoginCallbackPage from "./pages/LoginCallbackPage";
 
 const routes: Array<Route> = [
   {
@@ -64,35 +64,14 @@ const routes: Array<Route> = [
   },
   {
     path: '/register',
-    async action({store}) {
-      await fetchSettings(store);
-      const state = store.getState();
-      if (state.api.authenticated) {
-        return <RegistrationPage/>
-      } else {
-        const auth0Domain = state.api.auth0Domain;
-        const auth0ClientId = state.api.auth0ClientId;
-        const auth = buildAuthenticator(auth0Domain, auth0ClientId);
-        auth.login();
-        return <p>Please wait, you will be redirected...</p>
-      }
+    async action() {
+      return <RegistrationPage/>;
     }
   },
   {
     path: '/login-callback',
-    async action({store}) {
-      let state: State = store.getState();
-      if (!(state.api.auth0Domain && state.api.auth0ClientId)) {
-        await fetchSettings(store);
-        state = store.getState();
-      }
-      const auth = buildAuthenticator(state.api.auth0Domain, state.api.auth0ClientId);
-      await auth.handleAuthentication();
-      const params = new URLSearchParams(document.location.search.substring(1));
-      throw {
-        redirect: {pathname: params.get('return') || '/'},
-        replace: true,
-      };
+    async action() {
+      return <LoginCallbackPage/>;
     }
   },
   {
