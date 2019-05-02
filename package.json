@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@luontola/react-cache": "2.0.0-alpha.2019-05-02",
+    "@reach/router": "1.2.1",
     "alphanum-sort": "1.0.2",
     "auth0-js": "9.10.2",
     "axios": "0.18.0",

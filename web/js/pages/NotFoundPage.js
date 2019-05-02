@@ -4,6 +4,13 @@
 
 /* @flow */
 
-import {createBrowserHistory} from "history";
+import React from "react";
+import Layout from "../layout/Layout";
 
-export default createBrowserHistory();
+const NotFoundPage = () => (
+  <Layout>
+    <h1>Page not found</h1>
+  </Layout>
+);
+
+export default NotFoundPage;

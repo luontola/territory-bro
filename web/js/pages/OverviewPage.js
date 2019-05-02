@@ -7,7 +7,7 @@
 import React from "react";
 import Layout from "../layout/Layout";
 import {getCongregations, getSettings} from "../api";
-import Link from "../layout/Link";
+import {Link} from "@reach/router";
 
 // TODO: move QGIS project download to congregation page
 function QgisProjectSection({territoryCount, regionCount, congregationIds, supportEmail}) {
@@ -44,10 +44,10 @@ const CongregationsList = () => {
     <>
       <h2>Congregations</h2>
       {congregations.length === 0 ?
-        <p>You have no congregations. Please <Link href={"/register"}>register</Link> one first.</p> :
+        <p>You have no congregations. Please <Link to={"/register"}>register</Link> one first.</p> :
         <ul>
           {congregations.map(cong => (
-            <li key={cong.id}><Link href={`/congregation/${cong.id}`}>{cong.name}</Link></li>
+            <li key={cong.id}><Link to={`/congregation/${cong.id}`}>{cong.name}</Link></li>
           ))}
         </ul>
       }

@@ -6,10 +6,10 @@
 
 import React from "react";
 import Layout from "../layout/Layout";
-import history from "../history";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 import {createCongregation, getSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
+import {navigate} from "@reach/router";
 
 const RegistrationPage = () => {
   const settings = getSettings();
@@ -43,7 +43,7 @@ const RegistrationPage = () => {
                 try {
                   const id = await createCongregation(values.congregationName);
                   // TODO: use short IDs
-                  history.push({pathname: `/congregation/${id}`});
+                  navigate(`/congregation/${id}`);
                 } finally {
                   setSubmitting(false)
                 }

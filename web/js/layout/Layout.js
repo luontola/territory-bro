@@ -8,11 +8,11 @@ import "purecss/build/pure-min.css";
 import "purecss/build/grids-responsive-min.css";
 import "./Layout.css";
 import * as React from 'react';
-import Link from "./Link";
 import LanguageSelection from "./LanguageSelection";
 import CongregationSelection from "./CongregationSelection";
 import AuthenticationPanel from "./AuthenticationPanel";
 import {getSettings} from "../api";
+import {Link} from "@reach/router";
 
 type Props = {
   title?: string,
@@ -37,13 +37,13 @@ class Layout extends React.Component<Props> {
           <AuthenticationPanel/>
           <CongregationSelection/>
           <ul>
-            <li><Link href="/">Overview</Link></li>
+            <li><Link to="/">Overview</Link></li>
             {loggedIn &&
             <>
-              <li><Link href="/territory-cards">Territory Cards</Link></li>
-              <li><Link href="/neighborhood-maps">Neighborhood Maps</Link></li>
-              <li><Link href="/rural-territory-cards">Rural Territory Cards</Link></li>
-              <li><Link href="/region-maps">Region Maps</Link></li>
+              <li><Link to="/territory-cards">Territory Cards</Link></li>
+              <li><Link to="/neighborhood-maps">Neighborhood Maps</Link></li>
+              <li><Link to="/rural-territory-cards">Rural Territory Cards</Link></li>
+              <li><Link to="/region-maps">Region Maps</Link></li>
             </>
             }
           </ul>
