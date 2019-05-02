@@ -21,10 +21,7 @@ function requestConfig(congregationId: ?string) {
 }
 
 
-export type Congregation = {
-  id: string,
-  name: string,
-}
+// ====== Settings & Authentication ======
 
 export type Settings = {
   dev: boolean,
@@ -38,17 +35,11 @@ export type Settings = {
     name: ?string,
     sub: ?string,
   },
-  congregations: Array<Congregation>,
-}
-
-export async function getSettings_legacy(): Promise<Settings> {
-  const response = await api.get('/api/settings');
-  return response.data
 }
 
 let SettingsCache;
 
-function refreshSettings() {
+export function refreshSettings() {
   SettingsCache = unstable_createResource(async () => {
       const response = await api.get('/api/settings');
       return response.data
@@ -61,6 +52,54 @@ refreshSettings();
 export function getSettings(): Settings {
   return SettingsCache.read();
 }
+
+export async function loginWithIdToken(idToken: string) {
+  await api.post('/api/login', {idToken});
+  refreshSettings();
+}
+
+export async function devLogin() {
+  await api.post('/api/dev-login', {sub: "developer", name: "Developer", email: "developer@example.com"});
+  refreshSettings();
+}
+
+export async function logout() {
+  await api.post('/api/logout');
+  refreshSettings();
+}
+
+
+// ====== Congregations ======
+
+export type Congregation = {
+  id: string,
+  name: string,
+}
+
+let CongregationsCache;
+
+function refreshCongregations() {
+  CongregationsCache = unstable_createResource(async () => {
+      const response = await api.get('/api/congregations');
+      return response.data;
+    }
+  );
+}
+
+refreshCongregations();
+
+export function getCongregations(): Array<Congregation> {
+  return CongregationsCache.read();
+}
+
+export async function createCongregation(name: string) {
+  const response = await api.post('/api/congregations', {name});
+  refreshCongregations();
+  return response.data.id;
+}
+
+
+// ====== Territories ======
 
 export type Territory = {
   id: number,
@@ -84,6 +123,8 @@ export async function getTerritories(congregationId: ?string): Promise<Array<Ter
 }
 
 
+// ====== Regions ======
+
 export type Region = {
   id: number,
   name: string,
@@ -100,41 +141,4 @@ function sortRegions(regions: Array<Region>): Array<Region> {
 export async function getRegions(congregationId: ?string): Promise<Array<Region>> {
   const response = await api.get('/api/regions', requestConfig(congregationId));
   return sortRegions(response.data);
-}
-
-export async function loginWithIdToken(idToken: string) {
-  await api.post('/api/login', {idToken});
-  refreshSettings();
-}
-
-export async function devLogin() {
-  await api.post('/api/dev-login', {sub: "developer", name: "Developer", email: "developer@example.com"});
-  refreshSettings();
-}
-
-export async function logout() {
-  await api.post('/api/logout');
-  refreshSettings();
-}
-
-export async function createCongregation(name: string) {
-  const response = await api.post('/api/congregations', {name});
-  refreshCongregations();
-  return response.data.id;
-}
-
-let CongregationsCache;
-
-function refreshCongregations() {
-  CongregationsCache = unstable_createResource(async () => {
-      const response = await api.get('/api/congregations');
-      return response.data;
-    }
-  );
-}
-
-refreshCongregations();
-
-export function getCongregations() {
-  return CongregationsCache.read();
 }
