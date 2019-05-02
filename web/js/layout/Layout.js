@@ -12,7 +12,7 @@ import Link from "./Link";
 import LanguageSelection from "./LanguageSelection";
 import CongregationSelection from "./CongregationSelection";
 import AuthenticationPanel from "./AuthenticationPanel";
-import {useSettings} from "../api";
+import {getSettings} from "../api";
 
 type Props = {
   title?: string,
@@ -27,7 +27,7 @@ class Layout extends React.Component<Props> {
   }
 
   render() {
-    const settings = useSettings();
+    const settings = getSettings();
     const loggedIn = settings.user.authenticated;
     const {children} = this.props;
     return (

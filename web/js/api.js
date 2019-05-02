@@ -41,7 +41,7 @@ export type Settings = {
   congregations: Array<Congregation>,
 }
 
-export async function getSettings(): Promise<Settings> {
+export async function getSettings_legacy(): Promise<Settings> {
   const response = await api.get('/api/settings');
   return response.data
 }
@@ -49,12 +49,16 @@ export async function getSettings(): Promise<Settings> {
 let SettingsCache;
 
 function refreshSettings() {
-  SettingsCache = unstable_createResource(getSettings);
+  SettingsCache = unstable_createResource(async () => {
+      const response = await api.get('/api/settings');
+      return response.data
+    }
+  );
 }
 
 refreshSettings();
 
-export function useSettings(): Settings {
+export function getSettings(): Settings {
   return SettingsCache.read();
 }
 
@@ -119,19 +123,18 @@ export async function createCongregation(name: string) {
   return response.data.id;
 }
 
-async function getCongregations() {
-  const response = await api.get('/api/congregations');
-  return response.data;
-}
-
 let CongregationsCache;
 
 function refreshCongregations() {
-  CongregationsCache = unstable_createResource(getCongregations);
+  CongregationsCache = unstable_createResource(async () => {
+      const response = await api.get('/api/congregations');
+      return response.data;
+    }
+  );
 }
 
 refreshCongregations();
 
-export function useCongregations() {
+export function getCongregations() {
   return CongregationsCache.read();
 }

@@ -10,7 +10,7 @@ import OverviewPage from "./pages/OverviewPage";
 import TerritoryCardsPage from "./pages/TerritoryCardsPage";
 import NeighborhoodCardsPage from "./pages/NeighborhoodCardsPage";
 import RegionPrintoutsPage from "./pages/RegionPrintoutsPage";
-import {getRegions, getSettings, getTerritories} from "./api";
+import {getRegions, getSettings_legacy, getTerritories} from "./api";
 import type {ErrorMessage, Route} from "./router";
 import {configured, myCongregationsLoaded, regionsLoaded, territoriesLoaded, userLoggedIn} from "./apiActions";
 import RuralTerritoryCardsPage from "./pages/RuralTerritoryCardsPage";
@@ -113,7 +113,7 @@ async function fetchAll(store) {
 
 
 async function fetchSettings(store) {
-  const settings = await getSettings();
+  const settings = await getSettings_legacy();
   store.dispatch(configured(settings.dev, settings.auth0.domain, settings.auth0.clientId, settings.supportEmail));
   if (settings.user.authenticated) {
     store.dispatch(userLoggedIn(settings.user.sub || '', settings.user.name || ''));

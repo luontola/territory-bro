@@ -6,7 +6,7 @@
 
 import React from "react";
 import Layout from "../layout/Layout";
-import {useCongregations, useSettings} from "../api";
+import {getCongregations, getSettings} from "../api";
 import Link from "../layout/Link";
 
 // TODO: move QGIS project download to congregation page
@@ -39,7 +39,7 @@ function QgisProjectSection({territoryCount, regionCount, congregationIds, suppo
 }
 
 const CongregationsList = () => {
-  const congregations = useCongregations();
+  const congregations = getCongregations();
   return (
     <>
       <h2>Congregations</h2>
@@ -56,7 +56,7 @@ const CongregationsList = () => {
 };
 
 const OverviewPage = () => {
-  const settings = useSettings();
+  const settings = getSettings();
   const loggedIn = settings.user.authenticated;
   return (
     <Layout>

@@ -9,10 +9,10 @@ import LoginButton from "./LoginButton";
 import LogoutButton from "./LogoutButton";
 import RegisterButton from "./RegisterButton";
 import DevLoginButton from "./DevLoginButton";
-import {useSettings} from "../api";
+import {getSettings} from "../api";
 
 let AuthenticationPanel = () => {
-  const settings = useSettings();
+  const settings = getSettings();
   const dev = settings.dev;
   const loggedIn = settings.user.authenticated;
   const fullName = settings.user.name;

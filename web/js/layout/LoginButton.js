@@ -6,10 +6,10 @@
 
 import React from "react";
 import {buildAuthenticator} from "../authentication";
-import {useSettings} from "../api";
+import {getSettings} from "../api";
 
 let LoginButton = () => {
-  const settings = useSettings();
+  const settings = getSettings();
   const {domain, clientId} = settings.auth0;
   return (
     <button type="button" onClick={() => {
