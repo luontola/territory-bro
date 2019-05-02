@@ -27,11 +27,13 @@ if (root === null) {
 
 function renderComponent(component) {
   ReactDOM.render(
-    <IntlProvider locale={language} messages={messages}>
-      <Provider store={store}>
-        {component}
-      </Provider>
-    </IntlProvider>, root);
+    <React.StrictMode>
+      <IntlProvider locale={language} messages={messages}>
+        <Provider store={store}>
+          {component}
+        </Provider>
+      </IntlProvider>
+    </React.StrictMode>, root);
 }
 
 async function renderNormalPage(location) {
