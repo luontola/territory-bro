@@ -8,7 +8,7 @@ import React from "react";
 import Layout from "../layout/Layout";
 import type {State} from "../reducers";
 import {connect} from "react-redux";
-import {Congregations} from "../api";
+import {useCongregations} from "../api";
 import Link from "../layout/Link";
 
 type Props = {
@@ -48,7 +48,7 @@ function QgisProjectSection({territoryCount, regionCount, congregationIds, suppo
 }
 
 const CongregationsList = () => {
-  const congregations = Congregations.read();
+  const congregations = useCongregations();
   return (
     <>
       <h2>Congregations</h2>

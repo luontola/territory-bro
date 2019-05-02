@@ -4,10 +4,10 @@
 
 import React from "react";
 import Layout from "../layout/Layout";
-import {Congregations} from "../api";
+import {useCongregations} from "../api";
 
 const CongregationPage = ({congregationId}) => {
-  const congregation = Congregations.read().find(cong => cong.id === congregationId);
+  const congregation = useCongregations().find(cong => cong.id === congregationId);
   return (
     <Layout>
       <h1>{congregation.name}</h1>

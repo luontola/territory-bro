@@ -101,12 +101,23 @@ export async function logout() {
 
 export async function createCongregation(name: string) {
   const response = await api.post('/api/congregations', {name});
+  refreshCongregations();
   return response.data.id;
 }
 
-export async function getCongregations() {
+async function getCongregations() {
   const response = await api.get('/api/congregations');
   return response.data;
 }
 
-export const Congregations = unstable_createResource(getCongregations);
+let Congregations;
+
+function refreshCongregations() {
+  Congregations = unstable_createResource(getCongregations);
+}
+
+refreshCongregations();
+
+export function useCongregations() {
+  return Congregations.read();
+}
