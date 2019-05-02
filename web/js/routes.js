@@ -135,8 +135,10 @@ async function fetchTerritories(store) {
   if (!state.api.authenticated) {
     return;
   }
-  const territories = await getTerritories(state.config.congregationId);
-  store.dispatch(territoriesLoaded(territories));
+  if (state.config.congregationId) {
+    const territories = await getTerritories(state.config.congregationId);
+    store.dispatch(territoriesLoaded(territories));
+  }
 }
 
 async function fetchRegions(store) {
@@ -144,7 +146,8 @@ async function fetchRegions(store) {
   if (!state.api.authenticated) {
     return;
   }
-  const regions = await getRegions(state.config.congregationId);
-  store.dispatch(regionsLoaded(regions));
+  if (state.config.congregationId) {
+    const regions = await getRegions(state.config.congregationId);
+    store.dispatch(regionsLoaded(regions));
+  }
 }
-
