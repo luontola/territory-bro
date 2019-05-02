@@ -2,8 +2,6 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-/* @flow */
-
 import React from "react";
 import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
@@ -30,7 +28,9 @@ function renderComponent(component) {
     <React.StrictMode>
       <IntlProvider locale={language} messages={messages}>
         <Provider store={store}>
-          {component}
+          <React.Suspense fallback={<p>Loading....</p>}>
+            {component}
+          </React.Suspense>
         </Provider>
       </IntlProvider>
     </React.StrictMode>, root);

@@ -102,3 +102,8 @@ export async function createCongregation(name: string) {
   const response = await api.post('/api/congregations', {name});
   return response.data.id;
 }
+
+export async function getCongregations() {
+  const response = await api.get('/api/congregations');
+  return response.data;
+}
