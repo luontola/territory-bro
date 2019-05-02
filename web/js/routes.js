@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -19,6 +19,7 @@ import {saveCongregationId, savedCongregationId} from "./congregation";
 import {buildAuthenticator} from "./authentication";
 import RegistrationPage from "./pages/RegistrationPage";
 import {congregationChanged} from "./configActions";
+import CongregationPage from "./pages/CongregationPage";
 
 const routes: Array<Route> = [
   {
@@ -26,6 +27,13 @@ const routes: Array<Route> = [
     async action({store}) {
       await fetchAll(store);
       return <OverviewPage/>;
+    }
+  },
+  {
+    path: '/congregation/:congregationId',
+    async action({store, params}) {
+      await fetchSettings(store);
+      return <CongregationPage congregationId={params.congregationId}/>;
     }
   },
   {
