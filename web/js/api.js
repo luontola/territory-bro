@@ -8,6 +8,7 @@ import {api} from "./util";
 import alphanumSort from "alphanum-sort";
 import sortBy from "lodash/sortBy";
 import findIndex from "lodash/findIndex";
+import {unstable_createResource} from "@luontola/react-cache";
 
 function requestConfig(congregationId: ?string) {
   const config = {
@@ -107,3 +108,5 @@ export async function getCongregations() {
   const response = await api.get('/api/congregations');
   return response.data;
 }
+
+export const Congregations = unstable_createResource(getCongregations);

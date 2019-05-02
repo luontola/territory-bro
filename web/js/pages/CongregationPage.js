@@ -4,14 +4,10 @@
 
 import React from "react";
 import Layout from "../layout/Layout";
-import {unstable_createResource} from "@luontola/react-cache";
-import {getCongregations} from "../api";
-
-const Congregations = unstable_createResource(getCongregations);
+import {Congregations} from "../api";
 
 const CongregationPage = ({congregationId}) => {
-  const congregations = Congregations.read();
-  const congregation = congregations.find(cong => cong.id === congregationId);
+  const congregation = Congregations.read().find(cong => cong.id === congregationId);
   return (
     <Layout>
       <h1>{congregation.name}</h1>
