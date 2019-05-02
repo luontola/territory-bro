@@ -7,6 +7,7 @@
 import React from "react";
 import {Field, formValueSelector, reduxForm} from "redux-form";
 import type {MapRaster} from "../maps/mapOptions";
+import {mapRasters} from "../maps/mapOptions";
 import {connect} from "react-redux";
 import type {Region, Territory} from "../api";
 import type {State} from "../reducers";
@@ -82,7 +83,7 @@ export default PrintOptionsForm;
 
 function mapStateToProps(state: State) {
   return {
-    availableMapRasters: state.config.mapRasters,
+    availableMapRasters: mapRasters,
     availableRegions: getAvailableRegions(state),
     availableTerritories: getAvailableTerritories(state),
     initialValues: {
@@ -97,7 +98,7 @@ function mapStateToProps(state: State) {
 
 export function getSelectedMapRaster(state: State): MapRaster {
   const id = selector(state, 'mapRaster') || defaultMapRasterId;
-  const mapRaster = state.config.mapRasters.find(map => map.id === id);
+  const mapRaster = mapRasters.find(map => map.id === id);
   if (!mapRaster) {
     throw new Error(`MapRaster not found: ${id}`);
   }

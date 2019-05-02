@@ -11,8 +11,6 @@ import {createLogger} from "redux-logger";
 import reducers from "./reducers";
 import {IntlProvider} from "react-intl";
 import {language, messages} from "./intl";
-import {mapRastersLoaded} from "./configActions";
-import {mapRasters} from "./maps/mapOptions";
 import OverviewPage from "./pages/OverviewPage";
 import CongregationPage from "./pages/CongregationPage";
 import RegistrationPage from "./pages/RegistrationPage";
@@ -22,8 +20,6 @@ import NotFoundPage from "./pages/NotFoundPage";
 const logger = createLogger();
 const store = createStore(reducers, applyMiddleware(logger));
 const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
-
-store.dispatch(mapRastersLoaded(mapRasters));
 
 root.render(
   <React.StrictMode>
