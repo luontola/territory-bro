@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -12,13 +12,11 @@ import Link from "./Link";
 import LanguageSelection from "./LanguageSelection";
 import CongregationSelection from "./CongregationSelection";
 import AuthenticationPanel from "./AuthenticationPanel";
-import type {State} from "../reducers";
-import connect from "react-redux/es/connect/connect";
+import {useSettings} from "../api";
 
 type Props = {
   title?: string,
   children?: React.Node,
-  loggedIn: boolean,
 }
 
 class Layout extends React.Component<Props> {
@@ -29,7 +27,9 @@ class Layout extends React.Component<Props> {
   }
 
   render() {
-    const {children, loggedIn} = this.props;
+    const settings = useSettings();
+    const loggedIn = settings.user.authenticated;
+    const {children} = this.props;
     return (
       <div id="layout">
 
@@ -61,11 +61,4 @@ class Layout extends React.Component<Props> {
   }
 }
 
-
-function mapStateToProps(state: State) {
-  return {
-    loggedIn: state.api.authenticated,
-  };
-}
-
-export default connect(mapStateToProps)(Layout);
+export default Layout;

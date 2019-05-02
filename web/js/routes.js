@@ -24,15 +24,13 @@ import CongregationPage from "./pages/CongregationPage";
 const routes: Array<Route> = [
   {
     path: '/',
-    async action({store}) {
-      await fetchAll(store);
+    async action() {
       return <OverviewPage/>;
     }
   },
   {
     path: '/congregation/:congregationId',
-    async action({store, params}) {
-      await fetchSettings(store);
+    async action({params}) {
       return <CongregationPage congregationId={params.congregationId}/>;
     }
   },

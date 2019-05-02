@@ -6,22 +6,13 @@
 
 import React from "react";
 import Layout from "../layout/Layout";
-import type {State} from "../reducers";
-import {connect} from "react-redux";
-import {useCongregations} from "../api";
+import {useCongregations, useSettings} from "../api";
 import Link from "../layout/Link";
 
-type Props = {
-  territoryCount: number,
-  regionCount: number,
-  congregationIds: Array<string>,
-  supportEmail: string,
-  loggedIn: boolean,
-}
-
+// TODO: move QGIS project download to congregation page
 function QgisProjectSection({territoryCount, regionCount, congregationIds, supportEmail}) {
   return (
-    <React.Fragment>
+    <>
       <h2>QGIS Project</h2>
 
       <p>Your congregation's database has currently {territoryCount} territories and {regionCount} regions.</p>
@@ -43,7 +34,7 @@ function QgisProjectSection({territoryCount, regionCount, congregationIds, suppo
         href="https://territorybro.com/guide/">https://territorybro.com/guide/</a> or ask <a
         href={`mailto:${supportEmail}`}>{supportEmail}</a>.
       </p>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -64,36 +55,21 @@ const CongregationsList = () => {
   );
 };
 
-let OverviewPage = ({territoryCount, regionCount, congregationIds, supportEmail, loggedIn}: Props) => (
-  <Layout>
-    <h1>Territory Bro</h1>
+const OverviewPage = () => {
+  const settings = useSettings();
+  const loggedIn = settings.user.authenticated;
+  return (
+    <Layout>
+      <h1>Territory Bro</h1>
 
-    <p>Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.</p>
+      <p>Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.</p>
 
-    <p>For more information, see <a href="http://territorybro.com">http://territorybro.com</a></p>
+      <p>For more information, see <a href="http://territorybro.com">http://territorybro.com</a></p>
 
-    {loggedIn &&
-    <CongregationsList/>}
-
-    {loggedIn && congregationIds.length > 0 &&
-    <QgisProjectSection territoryCount={territoryCount}
-                        regionCount={regionCount}
-                        congregationIds={congregationIds}
-                        supportEmail={supportEmail}/>
-    }
-  </Layout>
-);
-
-function mapStateToProps(state: State): Props {
-  return {
-    territoryCount: state.api.territories.length,
-    regionCount: state.api.regions.length,
-    congregationIds: state.api.congregations.map(c => c.id),
-    supportEmail: state.api.supportEmail,
-    loggedIn: state.api.authenticated,
-  };
-}
-
-OverviewPage = connect(mapStateToProps)(OverviewPage);
+      {loggedIn &&
+      <CongregationsList/>}
+    </Layout>
+  );
+};
 
 export default OverviewPage;

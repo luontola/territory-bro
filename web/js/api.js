@@ -46,6 +46,17 @@ export async function getSettings(): Promise<Settings> {
   return response.data
 }
 
+let SettingsCache;
+
+function refreshSettings() {
+  SettingsCache = unstable_createResource(getSettings);
+}
+
+refreshSettings();
+
+export function useSettings(): Settings {
+  return SettingsCache.read();
+}
 
 export type Territory = {
   id: number,
@@ -89,14 +100,17 @@ export async function getRegions(congregationId: ?string): Promise<Array<Region>
 
 export async function loginWithIdToken(idToken: string) {
   await api.post('/api/login', {idToken});
+  refreshSettings();
 }
 
 export async function devLogin() {
   await api.post('/api/dev-login', {sub: "developer", name: "Developer", email: "developer@example.com"});
+  refreshSettings();
 }
 
 export async function logout() {
   await api.post('/api/logout');
+  refreshSettings();
 }
 
 export async function createCongregation(name: string) {
@@ -110,14 +124,14 @@ async function getCongregations() {
   return response.data;
 }
 
-let Congregations;
+let CongregationsCache;
 
 function refreshCongregations() {
-  Congregations = unstable_createResource(getCongregations);
+  CongregationsCache = unstable_createResource(getCongregations);
 }
 
 refreshCongregations();
 
 export function useCongregations() {
-  return Congregations.read();
+  return CongregationsCache.read();
 }

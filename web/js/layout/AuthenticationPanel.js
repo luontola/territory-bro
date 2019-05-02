@@ -1,24 +1,22 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 /* @flow */
 
 import React from "react";
-import type {State} from "../reducers";
-import connect from "react-redux/es/connect/connect";
 import LoginButton from "./LoginButton";
 import LogoutButton from "./LogoutButton";
 import RegisterButton from "./RegisterButton";
 import DevLoginButton from "./DevLoginButton";
+import {useSettings} from "../api";
 
-type Props = {
-  dev: boolean,
-  loggedIn: boolean,
-  fullName: ?string,
-};
+let AuthenticationPanel = () => {
+  const settings = useSettings();
+  const dev = settings.dev;
+  const loggedIn = settings.user.authenticated;
+  const fullName = settings.user.name;
 
-let AuthenticationPanel = ({dev, loggedIn, fullName}: Props) => {
   if (loggedIn) {
     return (
       <p>
@@ -33,15 +31,5 @@ let AuthenticationPanel = ({dev, loggedIn, fullName}: Props) => {
     );
   }
 };
-
-function mapStateToProps(state: State) {
-  return {
-    dev: state.api.dev,
-    loggedIn: state.api.authenticated,
-    fullName: state.api.userFullName,
-  };
-}
-
-AuthenticationPanel = connect(mapStateToProps)(AuthenticationPanel);
 
 export default AuthenticationPanel;
