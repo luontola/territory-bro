@@ -40,7 +40,9 @@ export type Settings = {
 let SettingsCache;
 
 export function refreshSettings() {
+  console.info("Refresh settings");
   SettingsCache = unstable_createResource(async () => {
+      console.info("Fetch settings");
       const response = await api.get('/api/settings');
       return response.data
     }
@@ -79,7 +81,9 @@ export type Congregation = {
 let CongregationsCache;
 
 function refreshCongregations() {
+  console.info("Refresh congregations");
   CongregationsCache = unstable_createResource(async () => {
+      console.info("Fetch congregations");
       const response = await api.get('/api/congregations');
       return response.data;
     }

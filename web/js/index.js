@@ -4,7 +4,7 @@
 
 import React from "react";
 import ReactDOM from "react-dom";
-import {Router} from "@reach/router"
+import {globalHistory, Router} from "@reach/router"
 import {Provider} from "react-redux";
 import {applyMiddleware, createStore} from "redux";
 import {createLogger} from "redux-logger";
@@ -25,6 +25,10 @@ import RegionPrintoutsPage from "./pages/RegionPrintoutsPage";
 const logger = createLogger();
 const store = createStore(reducers, applyMiddleware(logger));
 const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
+
+globalHistory.listen(({location, action}) => {
+  console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
+});
 
 root.render(
   <React.StrictMode>
