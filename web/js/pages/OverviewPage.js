@@ -5,7 +5,6 @@
 /* @flow */
 
 import React from "react";
-import Layout from "../layout/Layout";
 import {getCongregations, getSettings} from "../api";
 import {Link} from "@reach/router";
 
@@ -59,7 +58,7 @@ const OverviewPage = () => {
   const settings = getSettings();
   const loggedIn = settings.user.authenticated;
   return (
-    <Layout>
+    <>
       <h1>Territory Bro</h1>
 
       <p>Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.</p>
@@ -68,7 +67,7 @@ const OverviewPage = () => {
 
       {loggedIn &&
       <CongregationsList/>}
-    </Layout>
+    </>
   );
 };
 

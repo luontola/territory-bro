@@ -5,7 +5,6 @@
 /* @flow */
 
 import React from "react";
-import Layout from "../layout/Layout";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 import {createCongregation, getSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
@@ -23,7 +22,7 @@ const RegistrationPage = () => {
   }
 
   return (
-    <Layout>
+    <>
       <h1>Registration</h1>
 
       <h2>Join an Existing Congregation</h2>
@@ -68,7 +67,7 @@ const RegistrationPage = () => {
 
       <p>It is recommended to <a href="https://groups.google.com/forum/#!forum/territory-bro-announcements/join">subscribe
         to the announcements mailing list</a> to be notified about important updates to Territory Bro.</p>
-    </Layout>
+    </>
   );
 };
 

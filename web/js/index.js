@@ -16,6 +16,7 @@ import CongregationPage from "./pages/CongregationPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import LoginCallbackPage from "./pages/LoginCallbackPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import Layout from "./layout/Layout";
 
 const logger = createLogger();
 const store = createStore(reducers, applyMiddleware(logger));
@@ -26,13 +27,15 @@ root.render(
     <IntlProvider locale={language} messages={messages}>
       <Provider store={store}>
         <React.Suspense fallback={<p>Loading....</p>}>
-          <Router>
-            <OverviewPage path="/"/>
-            <CongregationPage path="/congregation/:congregationId"/>
-            <RegistrationPage path="/register"/>
-            <LoginCallbackPage path="/login-callback"/>
-            <NotFoundPage default/>
-          </Router>
+          <Layout>
+            <Router>
+              <OverviewPage path="/"/>
+              <CongregationPage path="/congregation/:congregationId"/>
+              <RegistrationPage path="/register"/>
+              <LoginCallbackPage path="/login-callback"/>
+              <NotFoundPage default/>
+            </Router>
+          </Layout>
         </React.Suspense>
       </Provider>
     </IntlProvider>
