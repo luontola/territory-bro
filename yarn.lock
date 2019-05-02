@@ -827,6 +827,11 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
+"@luontola/react-cache@2.0.0-alpha.2019-05-02":
+  version "2.0.0-alpha.2019-05-02"
+  resolved "https://registry.yarnpkg.com/@luontola/react-cache/-/react-cache-2.0.0-alpha.2019-05-02.tgz#07e75dd12fbe292100bd05d0607e1833e9c4416b"
+  integrity sha512-J+mCugRpLKyS9BKUMvYtwy7fvZGTDVkGrHxFWdTNgzrD6XSljReyV/2BDYk9uRspBpGmd/PaTeXc7UUixMplmQ==
+
 "@octokit/rest@^15.2.6":
   version "15.15.1"
   resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-15.15.1.tgz#7863f50f7c5753211ea3e29e10b84c93159e9e37"
