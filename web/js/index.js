@@ -17,6 +17,10 @@ import RegistrationPage from "./pages/RegistrationPage";
 import LoginCallbackPage from "./pages/LoginCallbackPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Layout from "./layout/Layout";
+import TerritoryCardsPage from "./pages/TerritoryCardsPage";
+import NeighborhoodCardsPage from "./pages/NeighborhoodCardsPage";
+import RuralTerritoryCardsPage from "./pages/RuralTerritoryCardsPage";
+import RegionPrintoutsPage from "./pages/RegionPrintoutsPage";
 
 const logger = createLogger();
 const store = createStore(reducers, applyMiddleware(logger));
@@ -30,9 +34,13 @@ root.render(
           <Layout>
             <Router>
               <OverviewPage path="/"/>
-              <CongregationPage path="/congregation/:congregationId"/>
               <RegistrationPage path="/register"/>
               <LoginCallbackPage path="/login-callback"/>
+              <CongregationPage path="/congregation/:congregationId"/>
+              <TerritoryCardsPage path="/congregation/:congregationId/territory-cards"/>
+              <NeighborhoodCardsPage path="/congregation/:congregationId/neighborhood-maps"/>
+              <RuralTerritoryCardsPage path="/congregation/:congregationId/rural-territory-cards"/>
+              <RegionPrintoutsPage path="/congregation/:congregationId/region-maps"/>
               <NotFoundPage default/>
             </Router>
           </Layout>

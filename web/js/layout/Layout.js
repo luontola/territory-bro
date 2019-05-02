@@ -9,7 +9,6 @@ import "purecss/build/grids-responsive-min.css";
 import "./Layout.css";
 import * as React from 'react';
 import LanguageSelection from "./LanguageSelection";
-import CongregationSelection from "./CongregationSelection";
 import AuthenticationPanel from "./AuthenticationPanel";
 import {getSettings} from "../api";
 import {Link} from "@reach/router";
@@ -21,6 +20,7 @@ type Props = {
 
 class Layout extends React.Component<Props> {
   componentDidMount() {
+    // TODO: get title from H1
     const {title} = this.props;
     const site = "Territory Bro";
     document.title = (title ? `${title} - ${site}` : site);
@@ -35,17 +35,8 @@ class Layout extends React.Component<Props> {
 
         <nav className="no-print">
           <AuthenticationPanel/>
-          <CongregationSelection/>
           <ul>
             <li><Link to="/">Overview</Link></li>
-            {loggedIn &&
-            <>
-              <li><Link to="/territory-cards">Territory Cards</Link></li>
-              <li><Link to="/neighborhood-maps">Neighborhood Maps</Link></li>
-              <li><Link to="/rural-territory-cards">Rural Territory Cards</Link></li>
-              <li><Link to="/region-maps">Region Maps</Link></li>
-            </>
-            }
           </ul>
           {loggedIn &&
           <LanguageSelection/>
