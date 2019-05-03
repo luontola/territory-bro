@@ -50,6 +50,10 @@
 (defn get-my-congregation [conn cong-id user-id]
   (first (get-my-congregations conn user-id {:ids [cong-id]})))
 
+(defn use-schema [conn cong-id] ; TODO: create a better helper?
+  (let [cong (get-unrestricted-congregation conn cong-id)]
+    (db/use-tenant-schema conn (::schema-name cong))))
+
 (defn create-congregation! [conn name]
   (let [id (UUID/randomUUID)
         schema-name (str (:database-schema config/env)

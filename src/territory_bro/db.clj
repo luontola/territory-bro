@@ -163,14 +163,23 @@
             {:schema schema}))
   (jdbc/execute! conn [(str "set search_path to " (str/join "," schemas))]))
 
+(def ^:private public-schema "public") ; contains PostGIS types
+
+(defn use-master-schema [conn]
+  (set-search-path conn [(:database-schema config/env)
+                         public-schema]))
+
+(defn use-tenant-schema [conn tenant-schema]
+  (set-search-path conn [(:database-schema config/env)
+                         tenant-schema
+                         public-schema]))
+
 (defmacro with-db [binding & body]
-  ;; TODO: add congregation schema to search path
   (let [conn (first binding)
         options (merge {:isolation :serializable}
                        (second binding))]
     `(jdbc/with-db-transaction [~conn (:default databases) ~options]
-       (set-search-path ~conn [(:database-schema config/env)
-                               "public"]) ; contains PostGIS types
+       (use-master-schema ~conn)
        ~@body)))
 
 (defn- load-queries [queries-atom]
