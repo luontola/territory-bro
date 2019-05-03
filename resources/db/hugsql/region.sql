@@ -4,7 +4,7 @@ from congregation_boundary;
 
 -- :name create-congregation-boundary :!
 insert into congregation_boundary (id, location)
-values (:id, ST_GeomFromText(:location));
+values (:id, ST_Multi(ST_GeomFromText(:location)));
 
 
 -- :name get-subregions :? :*
@@ -13,7 +13,7 @@ from subregion;
 
 -- :name create-subregion :!
 insert into subregion (id, name, location)
-values (:id, :name, ST_GeomFromText(:location));
+values (:id, :name, ST_Multi(ST_GeomFromText(:location)));
 
 
 -- :name get-card-minimap-viewports :? :*

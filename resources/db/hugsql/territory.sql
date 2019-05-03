@@ -9,4 +9,4 @@ where 1 = 1
 
 -- :name create-territory :!
 insert into territory (id, number, addresses, subregion, location)
-values (:id, :number, :addresses, :subregion, ST_GeomFromText(:location));
+values (:id, :number, :addresses, :subregion, ST_Multi(ST_GeomFromText(:location)));
