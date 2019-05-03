@@ -4,10 +4,13 @@
 
 import React from "react";
 import {getCongregations} from "../api";
-import {Link} from "@reach/router";
+import {Link, redirectTo} from "@reach/router";
 
 const CongregationPage = ({congregationId}) => {
   const congregation = getCongregations().find(cong => cong.id === congregationId);
+  if (!congregation) {
+    redirectTo('/');
+  }
   return (
     <>
       <h1>{congregation.name}</h1>
