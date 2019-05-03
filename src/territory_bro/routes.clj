@@ -17,6 +17,8 @@
             [territory-bro.jwt :as jwt]
             [territory-bro.permissions :as perm]
             [territory-bro.qgis :as qgis]
+            [territory-bro.region :as region]
+            [territory-bro.territory :as territory]
             [territory-bro.user :as user]
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
@@ -154,6 +156,22 @@
                       {:id (::congregation/id congregation)
                        :name (::congregation/name congregation)})))))))
 
+(defn get-congregation [request]
+  (auth/with-authenticated-user request
+    (require-logged-in!)
+    (db/with-db [conn {}]
+      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+            congregation (congregation/get-my-congregation conn cong-id (current-user-id conn))]
+        (when-not congregation
+          (forbidden! "No congregation access"))
+        (db/use-tenant-schema conn (::congregation/schema-name congregation))
+        (ok {:id (::congregation/id congregation)
+             :name (::congregation/name congregation)
+             :territories (territory/get-territories conn)
+             :congregation-boundaries (region/get-congregation-boundaries conn)
+             :subregions (region/get-subregions conn)
+             :card-minimap-viewports (region/get-card-minimap-viewports conn)})))))
+
 (defn download-qgis-project2 [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -182,6 +200,7 @@
   (ANY "/api/settings" [] settings)
   (POST "/api/congregations" request (create-congregation request))
   (GET "/api/congregations" request (list-congregations request))
+  (GET "/api/congregation/:congregation" request (get-congregation request))
   (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project2 request))
   (ANY "/api/my-congregations" [] my-congregations)
   (ANY "/api/territories" [] territories)

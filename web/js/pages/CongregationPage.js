@@ -3,14 +3,11 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React from "react";
-import {getCongregations} from "../api";
-import {Link, redirectTo} from "@reach/router";
+import {Link} from "@reach/router";
+import {getCongregationById} from "../api";
 
 const CongregationPage = ({congregationId}) => {
-  const congregation = getCongregations().find(cong => cong.id === congregationId);
-  if (!congregation) {
-    redirectTo('/');
-  }
+  const congregation = getCongregationById(congregationId);
   return (
     <>
       <h1>{congregation.name}</h1>

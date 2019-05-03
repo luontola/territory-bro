@@ -190,6 +190,46 @@
                        app)]
       (is (unauthorized? response)))))
 
+(deftest get-congregation-test
+  (let [session (login! app)
+        response (-> (request :post "/api/congregations")
+                     (json-body {:name "foo"})
+                     (merge session)
+                     app
+                     (assert-response ok?))
+        cong-id (UUID/fromString (:id (:body response)))]
+
+    (testing "get congregation"
+      (let [response (-> (request :get (str "/api/congregation/" cong-id))
+                         (merge session)
+                         app)]
+        (is (ok? response))
+        (is (= (str cong-id) (:id (:body response))))
+        (is (sequential? (:territories (:body response))))
+        (is (sequential? (:congregation-boundaries (:body response))))
+        (is (sequential? (:subregions (:body response))))
+        (is (sequential? (:card-minimap-viewports (:body response))))))
+
+    (testing "requires login"
+      (let [response (-> (request :get (str "/api/congregation/" cong-id))
+                         app)]
+        (is (unauthorized? response))))
+
+    (testing "wrong ID"
+      (let [response (-> (request :get (str "/api/congregation/" (UUID/randomUUID)))
+                         (merge session)
+                         app)]
+        (is (forbidden? response)))) ; same as when ID exists but user has no access
+
+    (testing "no access"
+      (db/with-db [conn {}]
+        (doseq [user-id (congregation/get-users conn cong-id)]
+          (congregation/revoke-access! conn cong-id user-id)))
+      (let [response (-> (request :get (str "/api/congregation/" cong-id))
+                         (merge session)
+                         app)]
+        (is (forbidden? response))))))
+
 (deftest download-qgis-project-test
   (let [session (login! app)
         response (-> (request :post "/api/congregations")

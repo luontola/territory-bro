@@ -40,7 +40,7 @@ export type Settings = {
 let SettingsCache;
 
 export function refreshSettings() {
-  console.info("Refresh settings");
+  console.info("Reset settings cache");
   SettingsCache = unstable_createResource(async () => {
       console.info("Fetch settings");
       const response = await api.get('/api/settings');
@@ -79,21 +79,32 @@ export type Congregation = {
 }
 
 let CongregationsCache;
+let CongregationsByIdCache;
 
 function refreshCongregations() {
-  console.info("Refresh congregations");
+  console.info("Reset congregations cache");
   CongregationsCache = unstable_createResource(async () => {
       console.info("Fetch congregations");
       const response = await api.get('/api/congregations');
       return response.data;
     }
   );
+  CongregationsByIdCache = unstable_createResource(async (congregationId) => {
+      console.info(`Fetch congregation ${congregationId}`);
+      const response = await api.get(`/api/congregation/${congregationId}`);
+      return response.data;
+    }
+  )
 }
 
 refreshCongregations();
 
 export function getCongregations(): Array<Congregation> {
   return CongregationsCache.read();
+}
+
+export function getCongregationById(congregationId: string): Congregation {
+  return CongregationsByIdCache.read(congregationId);
 }
 
 export async function createCongregation(name: string) {
