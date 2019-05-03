@@ -32,6 +32,10 @@
                  [ring/ring-core "1.7.1"]
                  [ring/ring-defaults "0.3.2"]]
 
+  ;; XXX: https://repo.clojars.org is down
+  :repositories [["clojars" {:url "https://clojars.org/repo/"}]]
+  :plugin-repositories [["clojars" {:url "https://clojars.org/repo/"}]]
+
   :min-lein-version "2.0.0"
 
   :source-paths ["src"]
