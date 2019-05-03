@@ -191,6 +191,8 @@
     (apply query-fn conn params)))
 
 (defn compile-queries [path]
-  (let [queries (atom {:resource (io/resource path)})]
+  (let [resource (io/resource path)
+        _ (assert resource (str "Resource not found: " path))
+        queries (atom {:resource resource})]
     (fn [conn name & params]
       (query! conn queries name params))))
