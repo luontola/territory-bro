@@ -159,7 +159,7 @@
 
 (defn set-search-path [conn schemas]
   (doseq [schema schemas]
-    (assert (re-matches #"^[a-zA-Z0-9_]+$" schema)
+    (assert (and schema (re-matches #"^[a-zA-Z0-9_]+$" schema))
             {:schema schema}))
   (jdbc/execute! conn [(str "set search_path to " (str/join "," schemas))]))
 
