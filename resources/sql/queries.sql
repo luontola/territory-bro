@@ -1,5 +1,5 @@
 -- :name find-territories :? :*
-SELECT id, number, address, region, ST_AsText(location) AS location
+SELECT ST_AsText(location) AS location, *
 FROM territory;
 
 -- :name find-regions :? :*

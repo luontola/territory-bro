@@ -1,5 +1,5 @@
 -- :name get-territories :? :*
-select id, number, addresses, subregion, ST_AsText(location) AS location
+select id, number, addresses, subregion, meta, ST_AsText(location) AS location
 from territory
 where 1 = 1
 /*~ (when (:ids params) */
@@ -8,5 +8,5 @@ where 1 = 1
 ;
 
 -- :name create-territory :!
-insert into territory (id, number, addresses, subregion, location)
-values (:id, :number, :addresses, :subregion, ST_Multi(ST_GeomFromText(:location)));
+insert into territory (id, number, addresses, subregion, meta, location)
+values (:id, :number, :addresses, :subregion, :meta, ST_Multi(ST_GeomFromText(:location)));

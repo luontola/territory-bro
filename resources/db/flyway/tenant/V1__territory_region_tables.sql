@@ -4,6 +4,7 @@ create table territory
     number    varchar(100)  not null default '',
     addresses varchar(1000) not null default '',
     subregion varchar(1000) not null default '',
+    meta      jsonb         not null default '{}'::jsonb,
     location  geography(multipolygon, 4326)
 );
 

@@ -21,6 +21,7 @@
           territory-id (territory/create-territory! conn {::territory/number "123"
                                                           ::territory/addresses "Street 1 A"
                                                           ::territory/subregion "Somewhere"
+                                                          ::territory/meta {:foo "bar", :gazonk 42}
                                                           ::territory/location "MULTIPOLYGON(((30 20, 45 40, 10 40, 30 20)),((15 5, 40 10, 10 20, 5 10, 15 5)))"})]
 
       (testing "create new territory"
@@ -31,6 +32,7 @@
                 ::territory/number "123"
                 ::territory/addresses "Street 1 A"
                 ::territory/subregion "Somewhere"
+                ::territory/meta {:foo "bar", :gazonk 42}
                 ::territory/location "MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))"}
                (territory/get-by-id conn territory-id))))
 

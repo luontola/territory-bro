@@ -35,8 +35,14 @@
               :else (region/create-subregion! conn (:name region) (:location region))))
 
           (doseq [territory territories]
-            (territory/create-territory! conn {::territory/number (:number territory)
-                                               ::territory/addresses (:address territory)
-                                               ::territory/subregion (:region territory)
-                                               ::territory/location (:location territory)}))))))
-  (log/info "Migrated congregation" tenant))
+            (let [meta (dissoc territory :id :number :address :region :location :location_2)]
+              (territory/create-territory! conn {::territory/number (:number territory)
+                                                 ::territory/addresses (:address territory)
+                                                 ::territory/subregion (:region territory)
+                                                 ::territory/meta meta
+                                                 ::territory/location (:location territory)})))))))
+  (log/info "Migrated tenant" tenant))
+
+(comment
+  (doseq [tenant (keys (:tenant config/env))]
+    (migrate-congregation tenant)))

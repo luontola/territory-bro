@@ -10,6 +10,7 @@
     <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="999" />
     <ClojureCodeStyleSettings>{
   :clojure.core/assoc 1000
+  :clojure.core/comment 0
   :clojure.core/cond-&gt; 1
   :clojure.core/doto 0
   :conman.core/with-transaction 1

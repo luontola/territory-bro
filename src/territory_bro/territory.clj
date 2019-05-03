@@ -13,6 +13,7 @@
    ::number (:number territory)
    ::addresses (:addresses territory)
    ::subregion (:subregion territory)
+   ::meta (:meta territory)
    ::location (:location territory)})
 
 (defn get-territories
@@ -32,5 +33,7 @@
                                     :number (::number territory)
                                     :addresses (::addresses territory)
                                     :subregion (::subregion territory)
+                                    :meta (::meta territory)
                                     :location (::location territory)})
+
     id))
