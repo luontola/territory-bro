@@ -37,7 +37,7 @@
         verifier (-> (JWT/require algorithm)
                      (.withIssuer (into-array String [(getx env :jwt-issuer)]))
                      (.withAudience (into-array String [(getx env :jwt-audience)]))
-                     (->> (cast JWTVerifier$BaseVerification))
+                     (->> ^JWTVerifier$BaseVerification (cast JWTVerifier$BaseVerification))
                      (.build clock))]
     (-> (.verify verifier jwt)
         (.getPayload)
