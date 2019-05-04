@@ -11,6 +11,32 @@ import {getCongregationById} from "../api";
 import type {State} from "../reducers";
 import take from "lodash/take";
 import TerritoryCard from "./TerritoryCard";
+import NeighborhoodCard from "./NeighborhoodCard";
+import RuralTerritoryCard from "./RuralTerritoryCard";
+import RegionPrintout from "./RegionPrintout";
+
+const templates = [
+  {
+    id: 'TerritoryCard',
+    component: TerritoryCard,
+    name: 'Territory Card',
+  },
+  {
+    id: 'NeighborhoodCard',
+    component: NeighborhoodCard,
+    name: 'Neighborhood Map',
+  },
+  {
+    id: 'RuralTerritoryCard',
+    component: RuralTerritoryCard,
+    name: 'Rural Territory Card',
+  },
+  {
+    id: 'RegionPrintout',
+    component: RegionPrintout,
+    name: 'Subregion Map',
+  },
+]
 
 const PrintOptionsForm = ({congregationId, territoriesVisible = false, regionsVisible = false}) => {
   const availableMapRasters = mapRasters;
@@ -20,6 +46,7 @@ const PrintOptionsForm = ({congregationId, territoriesVisible = false, regionsVi
 
   return (
     <Formik initialValues={{
+      template: templates[0].id,
       mapRaster: 'osmHighDpi',
       regions: availableRegions.length > 0 ? [availableRegions[0].id] : [],
       territories: availableTerritories.length > 0 ? [availableTerritories[0].id] : [],
@@ -32,13 +59,22 @@ const PrintOptionsForm = ({congregationId, territoriesVisible = false, regionsVi
               <div className="pure-g">
 
                 <div className="pure-u-1 pure-u-md-1-3">
+                  <label htmlFor="mapRaster">Template</label>
+                  <Field name="template" id="template" component="select" className="pure-input-1">
+                    {templates.map(template =>
+                      <option key={template.id} value={template.id}>{template.name}</option>)}
+                  </Field>
+                </div>
+
+                <div className="pure-u-1 pure-u-md-1-3">
                   <label htmlFor="mapRaster">Map Raster</label>
                   <Field name="mapRaster" id="mapRaster" component="select" className="pure-input-1">
                     {availableMapRasters.map(mapRaster =>
                       <option key={mapRaster.id} value={mapRaster.id}>{mapRaster.name}</option>)}
                   </Field>
                 </div>
-
+              </div>
+              <div className="pure-g">
                 {regionsVisible &&
                 <div className="pure-u-1 pure-u-md-1-3">
                   <label htmlFor="regions">Subregions</label>
@@ -84,14 +120,15 @@ const PrintOptionsForm = ({congregationId, territoriesVisible = false, regionsVi
         </div>
 
         {values.territories.map(territoryId => {
+            const template = templates.find(t => t.id === values.template);
             const mapRasterId = values.mapRaster;
             const territory = availableTerritories.find(t => t.id === territoryId);
             const mapRaster = availableMapRasters.find(r => r.id === mapRasterId)
-            return <TerritoryCard key={territory.id}
-                                  congregationId={congregationId}
-                                  territoryId={territory.id}
-                                  territory={territory}
-                                  mapRaster={mapRaster}/>
+            return <template.component key={territory.id}
+                                       congregationId={congregationId}
+                                       territoryId={territory.id}
+                                       territory={territory}
+                                       mapRaster={mapRaster}/>
           }
         )}
       </>)}
