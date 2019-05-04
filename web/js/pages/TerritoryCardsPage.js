@@ -5,37 +5,19 @@
 /* @flow */
 
 import React from "react";
-import type {MapRaster} from "../maps/mapOptions";
-import type {Region, Territory} from "../api";
-import PrintOptionsForm, {getSelectedMapRaster, getSelectedTerritories} from "../prints/PrintOptionsForm";
-import {connect} from "react-redux";
-import TerritoryCard from "../prints/TerritoryCard";
-import type {State} from "../reducers";
+import PrintOptionsForm from "../prints/PrintOptionsForm";
 
-let TerritoryCardsPage = ({allRegions, selectedTerritories, mapRaster}: {
-  allRegions: Array<Region>,
-  selectedTerritories: Array<Territory>,
-  mapRaster: MapRaster,
-}) => (
-  <>
-    <div className="no-print">
-      <h1>Territory Cards</h1>
-      <PrintOptionsForm territoriesVisible={true}/>
-    </div>
-    {selectedTerritories.map(territory =>
-      <TerritoryCard key={territory.id} territory={territory} regions={allRegions} mapRaster={mapRaster}/>
-    )}
-  </>
-);
-
-function mapStateToProps(state: State) {
-  return {
-    allRegions: state.api.regions,
-    selectedTerritories: getSelectedTerritories(state),
-    mapRaster: getSelectedMapRaster(state),
-  };
-}
-
-TerritoryCardsPage = connect(mapStateToProps)(TerritoryCardsPage);
+const TerritoryCardsPage = ({congregationId}) => {
+  return (
+    <>
+      <div className="no-print">
+        <h1>Territory Cards</h1>
+      </div>
+      <PrintOptionsForm congregationId={congregationId}
+                        territoriesVisible={true}
+                        regionsVisible={true}/>
+    </>
+  );
+};
 
 export default TerritoryCardsPage;

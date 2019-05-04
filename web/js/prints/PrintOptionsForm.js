@@ -2,102 +2,109 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-/* @flow */
-
 import React from "react";
-import {Field, formValueSelector, reduxForm} from "redux-form";
+import {Field, Form, Formik} from "formik";
 import type {MapRaster} from "../maps/mapOptions";
 import {mapRasters} from "../maps/mapOptions";
-import {connect} from "react-redux";
 import type {Region, Territory} from "../api";
+import {getCongregationById} from "../api";
 import type {State} from "../reducers";
 import take from "lodash/take";
+import TerritoryCard from "./TerritoryCard";
 
-export const defaultMapRasterId = 'osmHighDpi';
-export const formName = 'printOptions';
-const selector = formValueSelector(formName);
+const PrintOptionsForm = ({congregationId, territoriesVisible = false, regionsVisible = false}) => {
+  const availableMapRasters = mapRasters;
+  const congregation = getCongregationById(congregationId);
+  const availableTerritories = congregation.territories;
+  const availableRegions = congregation.subregions;
 
-let PrintOptionsForm = ({
-                          territoriesVisible = false,
-                          regionsVisible = false,
-                          availableMapRasters,
-                          availableRegions,
-                          availableTerritories,
-                          handleSubmit
-                        }: {
-  territoriesVisible: boolean,
-  regionsVisible: boolean,
-  availableMapRasters: Array<MapRaster>,
-  availableRegions: Array<Region>,
-  availableTerritories: Array<Territory>,
-  handleSubmit: any
-}) => (
-  <form onSubmit={handleSubmit} className="pure-form pure-form-stacked">
-    <fieldset>
-      <legend>Print Options</legend>
-      <div className="pure-g">
+  return (
+    <Formik initialValues={{
+      mapRaster: 'osmHighDpi',
+      regions: availableRegions.length > 0 ? [availableRegions[0].id] : [],
+      territories: availableTerritories.length > 0 ? [availableTerritories[0].id] : [],
+    }}>{({values, setFieldValue}) => (
+      <>
+        <div className="no-print">
+          <Form className="pure-form pure-form-stacked">
+            <fieldset>
+              <legend>Print Options</legend>
+              <div className="pure-g">
 
-        <div className="pure-u-1 pure-u-md-1-3">
-          <label htmlFor="mapRaster">Map Raster</label>
-          <Field id="mapRaster" name="mapRaster" component="select" className="pure-input-1">
-            {availableMapRasters.map(mapRaster =>
-              <option key={mapRaster.id} value={mapRaster.id}>{mapRaster.name}</option>)}
-          </Field>
+                <div className="pure-u-1 pure-u-md-1-3">
+                  <label htmlFor="mapRaster">Map Raster</label>
+                  <Field name="mapRaster" id="mapRaster" component="select" className="pure-input-1">
+                    {availableMapRasters.map(mapRaster =>
+                      <option key={mapRaster.id} value={mapRaster.id}>{mapRaster.name}</option>)}
+                  </Field>
+                </div>
+
+                {regionsVisible &&
+                <div className="pure-u-1 pure-u-md-1-3">
+                  <label htmlFor="regions">Subregions</label>
+                  <Field name="regions" id="regions" component="select" multiple size={7} className="pure-input-1"
+                         onChange={event =>
+                           setFieldValue(
+                             "regions",
+                             [].slice
+                               .call(event.target.selectedOptions)
+                               .map(option => option.value)
+                           )
+                         }>
+                    {availableRegions.map(region =>
+                      <option key={region.id} value={region.id}>{region.name}</option>)}
+                  </Field>
+                </div>
+                }
+
+                {territoriesVisible &&
+                <div className="pure-u-1 pure-u-md-1-3">
+                  <label htmlFor="territories">Territories</label>
+                  <Field name="territories" id="territories" component="select" multiple size={7}
+                         className="pure-input-1"
+                         onChange={event =>
+                           setFieldValue(
+                             "territories",
+                             [].slice
+                               .call(event.target.selectedOptions)
+                               .map(option => option.value)
+                           )
+                         }>
+                    {availableTerritories.map(territory =>
+                      <option key={territory.id} value={territory.id}>
+                        {territory.subregion ? `${territory.number} - ${territory.subregion}` : territory.number}
+                      </option>)}
+                  </Field>
+                </div>
+                }
+
+              </div>
+            </fieldset>
+          </Form>
         </div>
 
-        {regionsVisible &&
-        <div className="pure-u-1 pure-u-md-1-3">
-          <label htmlFor="regions">Regions</label>
-          <Field id="regions" name="regions" component="select" multiple size={7} className="pure-input-1">
-            {availableRegions.map(region =>
-              <option key={region.id} value={region.id}>{region.name}</option>)}
-          </Field>
-        </div>
-        }
-
-        {territoriesVisible &&
-        <div className="pure-u-1 pure-u-md-1-3">
-          <label htmlFor="territories">Territories</label>
-          <Field id="territories" name="territories" component="select" multiple size={7} className="pure-input-1">
-            {availableTerritories.map(territory =>
-              <option key={territory.id} value={territory.id}>
-                {territory.region ? `${territory.number} - ${territory.region}` : territory.number}
-              </option>)}
-          </Field>
-        </div>
-        }
-
-      </div>
-    </fieldset>
-  </form>
-);
-
-PrintOptionsForm = reduxForm({
-  form: formName,
-  destroyOnUnmount: false,
-})(PrintOptionsForm);
-
-PrintOptionsForm = connect(mapStateToProps)(PrintOptionsForm);
+        {values.territories.map(territoryId => {
+            const mapRasterId = values.mapRaster;
+            const territory = availableTerritories.find(t => t.id === territoryId);
+            const mapRaster = availableMapRasters.find(r => r.id === mapRasterId)
+            return <TerritoryCard key={territory.id}
+                                  congregationId={congregationId}
+                                  territoryId={territory.id}
+                                  territory={territory}
+                                  mapRaster={mapRaster}/>
+          }
+        )}
+      </>)}
+    </Formik>
+  );
+};
 
 export default PrintOptionsForm;
-
-function mapStateToProps(state: State) {
-  return {
-    availableMapRasters: mapRasters,
-    availableRegions: getAvailableRegions(state),
-    availableTerritories: getAvailableTerritories(state),
-    initialValues: {
-      mapRaster: defaultMapRasterId,
-      regions: getDefaultRegions(state),
-      territories: getDefaultTerritories(state),
-    }
-  }
-}
 
 // map rasters
 
 export function getSelectedMapRaster(state: State): MapRaster {
-  const id = selector(state, 'mapRaster') || defaultMapRasterId;
+  const id = selector(state, 'mapRaster') || 'osmHighDpi';
   const mapRaster = mapRasters.find(map => map.id === id);
   if (!mapRaster) {
     throw new Error(`MapRaster not found: ${id}`);

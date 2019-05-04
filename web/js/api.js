@@ -92,7 +92,10 @@ function refreshCongregations() {
   CongregationsByIdCache = unstable_createResource(async (congregationId) => {
       console.info(`Fetch congregation ${congregationId}`);
       const response = await api.get(`/api/congregation/${congregationId}`);
-      return response.data;
+    const congregation = response.data;
+    congregation.territories = sortTerritories(congregation.territories);
+    congregation.subregions = sortRegions(congregation.subregions);
+    return congregation;
     }
   )
 }

@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,6 +8,7 @@ import React from "react";
 import {Map, View} from "ol";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector"
+import MultiPolygon from 'ol/geom/MultiPolygon';
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
@@ -15,53 +16,58 @@ import Icon from "ol/style/Icon";
 import {fromLonLat} from "ol/proj";
 import WKT from "ol/format/WKT";
 import {makeStreetsLayer, wktToFeature} from "./mapOptions";
-import type {Region, Territory} from "../api";
+import type {Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 
 type Props = {
   territory: Territory,
-  regions: Array<Region>,
+  congregation: any,
 };
 
 export default class TerritoryMiniMap extends OpenLayersMap<Props> {
   componentDidMount() {
-    const {territory, regions} = this.props;
-    initTerritoryMiniMap(this.element, territory, regions);
+    const {territory, congregation} = this.props;
+    initTerritoryMiniMap(this.element, territory, congregation);
   }
+}
+
+function mergeMultiPolygons(multiPolygons) {
+  const wkt = new WKT();
+  const merged = multiPolygons
+    .map(p => wkt.readFeature(p).getGeometry())
+    .reduce((a, b) => new MultiPolygon([...a.getPolygons(), ...b.getPolygons()]));
+  return wkt.writeGeometry(merged)
 }
 
 function initTerritoryMiniMap(element: HTMLDivElement,
                               territory: Territory,
-                              regions: Array<Region>): void {
+                              congregation): void {
   const wkt = new WKT();
-  const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoint();
+  const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoints().getPoint(0);
   const territoryWkt = wkt.writeGeometry(centerPoint);
-  // TODO: handle it gracefully if one of the following is not initialized
-  let viewportWkt = '';
-  let congregationWkt = '';
-  let subregionsWkt = '';
   const territoryCoordinate = centerPoint.getCoordinates();
-  regions.forEach(region => {
-    const regionGeom = wkt.readFeature(region.location).getGeometry();
-    if (regionGeom.intersectsCoordinate(territoryCoordinate)) {
-      if (region.minimap_viewport) {
-        viewportWkt = region.location;
-      }
-      if (region.congregation) {
-        congregationWkt = region.location;
-      }
-      if (region.subregion) {
-        // TODO: support multiple (nested) subregions
-        subregionsWkt = region.location;
-      }
+
+  if (congregation.congregationBoundaries.length === 0) {
+    throw new Error("Congregation boundaries not defined");
+  }
+  const congregationWkt = mergeMultiPolygons(congregation.congregationBoundaries.map(boundary => boundary.location));
+
+  let viewportWkt = '';
+  congregation.cardMinimapViewports.forEach(viewport => {
+    if (wkt.readFeature(viewport.location).getGeometry().intersectsCoordinate(territoryCoordinate)) {
+      viewportWkt = viewport.location;
     }
   });
-  if (!congregationWkt) {
-    throw new Error(`The territory number ${territory.number} is not inside the congregation boundary. Make sure that a region has the congregation=t flag enabled.`);
-  }
   if (!viewportWkt) {
-    throw new Error(`The territory number ${territory.number} is not inside a minimap viewport. Make sure that a region has the minimap_viewport=t flag enabled. It can also be the same region as the congregation boundary.`);
+    viewportWkt = congregationWkt;
   }
+
+  let subregionsWkt = '';
+  congregation.subregions.forEach(subregion => {
+    if (wkt.readFeature(subregion.location).getGeometry().intersectsCoordinate(territoryCoordinate)) {
+      subregionsWkt = subregion.location;
+    }
+  });
 
   const territoryLayer = new VectorLayer({
     source: new VectorSource({
