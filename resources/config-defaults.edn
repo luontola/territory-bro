@@ -2,6 +2,7 @@
  :port 8080
  ;; when :nrepl-port is set the application starts the nREPL server on load
  :nrepl-port nil
+ :nrepl-bind "127.0.0.1"
  :database-url nil
  :database-schema "territorybro"
  :gis-database-host nil

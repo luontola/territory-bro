@@ -19,6 +19,7 @@ services:
       dockerfile: Dockerfile-api
     image: luontola/territory-bro-api
     environment:
+      NREPL_PORT: 7000
       AUTH0_DOMAIN: luontola.eu.auth0.com
       AUTH0_CLIENT_ID: 8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi
       SUPER_ADMIN:
@@ -33,6 +34,7 @@ services:
     mem_limit: 200m
     ports:
       - "8081:8080"
+      - "7000:7000"
 
   db:
     image: mdillon/postgis:9.6
