@@ -41,3 +41,10 @@
              (dev-login {:params {:sub "sub"
                                   :name "name"
                                   :email "email"}}))))))
+
+(deftest api-format-test
+  (is (= {} (format-for-api {})))
+  (is (= {"foo" 1} (format-for-api {:foo 1})))
+  (is (= {"fooBar" 1} (format-for-api {:foo-bar 1})))
+  (is (= {"bar" 1} (format-for-api {:foo/bar 1})))
+  (is (= [{"foo" 1} {"bar" 2}] (format-for-api [{:foo 1} {:bar 2}]))))

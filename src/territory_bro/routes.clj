@@ -3,10 +3,12 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.routes
-  (:require [clojure.string :as str]
+  (:require [camel-snake-kebab.core :as csk]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [compojure.core :refer [defroutes GET POST ANY]]
             [liberator.core :refer [defresource]]
+            [medley.core :refer [map-keys]]
             [ring.util.http-response :refer :all]
             [ring.util.response :as response]
             [territory-bro.authentication :as auth]
@@ -156,6 +158,14 @@
                       {:id (::congregation/id congregation)
                        :name (::congregation/name congregation)})))))))
 
+(defn format-for-api [m]
+  (let [convert-keyword (comp csk/->camelCaseString name)
+        f (fn [x]
+            (if (map? x)
+              (map-keys convert-keyword x)
+              x))]
+    (clojure.walk/postwalk f m)))
+
 (defn get-congregation [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -165,12 +175,12 @@
         (when-not congregation
           (forbidden! "No congregation access"))
         (db/use-tenant-schema conn (::congregation/schema-name congregation))
-        (ok {:id (::congregation/id congregation)
-             :name (::congregation/name congregation)
-             :territories (territory/get-territories conn)
-             :congregation-boundaries (region/get-congregation-boundaries conn)
-             :subregions (region/get-subregions conn)
-             :card-minimap-viewports (region/get-card-minimap-viewports conn)})))))
+        (ok (format-for-api {:id (::congregation/id congregation)
+                             :name (::congregation/name congregation)
+                             :territories (territory/get-territories conn)
+                             :congregation-boundaries (region/get-congregation-boundaries conn)
+                             :subregions (region/get-subregions conn)
+                             :card-minimap-viewports (region/get-card-minimap-viewports conn)}))))))
 
 (defn download-qgis-project2 [request]
   (auth/with-authenticated-user request

@@ -206,9 +206,9 @@
         (is (ok? response))
         (is (= (str cong-id) (:id (:body response))))
         (is (sequential? (:territories (:body response))))
-        (is (sequential? (:congregation-boundaries (:body response))))
+        (is (sequential? (:congregationBoundaries (:body response))))
         (is (sequential? (:subregions (:body response))))
-        (is (sequential? (:card-minimap-viewports (:body response))))))
+        (is (sequential? (:cardMinimapViewports (:body response))))))
 
     (testing "requires login"
       (let [response (-> (request :get (str "/api/congregation/" cong-id))
