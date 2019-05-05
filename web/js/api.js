@@ -122,8 +122,8 @@ export async function createCongregation(name: string) {
 export type Territory = {
   id: number,
   number: string,
-  address: string,
-  region: string,
+  addresses: string,
+  subregion: string,
   location: string,
 }
 
