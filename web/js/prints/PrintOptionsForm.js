@@ -46,7 +46,7 @@ const PrintOptionsForm = ({congregationId}) => {
   return (
     <Formik initialValues={{
       template: templates[0].id,
-      mapRaster: 'osmHighDpi',
+      mapRaster: availableMapRasters[0].id,
       regions: availableRegions.length > 0 ? [availableRegions[0].id] : [],
       territories: availableTerritories.length > 0 ? [availableTerritories[0].id] : [],
     }}>{({values, setFieldValue}) => {

@@ -24,11 +24,6 @@ export const mapRasters: Array<MapRaster> = [
   {
     id: 'osm',
     name: "World - OpenStreetMap",
-    source: new OSM()
-  },
-  {
-    id: 'osmHighDpi',
-    name: "World - OpenStreetMap (High DPI)",
     source: new XYZ({
       url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
       tileSize: [256, 256],
@@ -37,17 +32,13 @@ export const mapRasters: Array<MapRaster> = [
     })
   },
   {
-    id: 'mmlTaustakartta',
-    name: "Finland - Maanmittauslaitos taustakarttasarja",
-    source: new XYZ({
-      url: '//tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
-      tileSize: [256, 256],
-      attributions: '&copy; Maanmittauslaitos'
-    })
+    id: 'osmBackup',
+    name: "World - OpenStreetMap (backup server, low DPI)",
+    source: new OSM()
   },
   {
-    id: 'mmlTaustakarttaHighDpi',
-    name: "Finland - Maanmittauslaitos taustakarttasarja (High DPI)",
+    id: 'mmlTaustakartta',
+    name: "Finland - Maanmittauslaitos taustakarttasarja",
     source: new XYZ({
       url: '//tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
       tileSize: [128, 128],
@@ -65,7 +56,7 @@ export function wktToFeature(wkt: string): Feature {
 
 export function makeStreetsLayer() {
   return new Tile({
-    source: new OSM()
+    source: mapRasters[0].source
   });
 }
 
