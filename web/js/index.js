@@ -5,10 +5,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import {globalHistory, Router} from "@reach/router"
-import {Provider} from "react-redux";
-import {applyMiddleware, createStore} from "redux";
-import {createLogger} from "redux-logger";
-import reducers from "./reducers";
 import {IntlProvider} from "react-intl";
 import {language, messages} from "./intl";
 import ErrorBoundary from "react-error-boundary";
@@ -20,8 +16,6 @@ import NotFoundPage from "./pages/NotFoundPage";
 import Layout from "./layout/Layout";
 import PrintoutPage from "./pages/PrintoutPage";
 
-const logger = createLogger();
-const store = createStore(reducers, applyMiddleware(logger));
 const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
 
 globalHistory.listen(({location, action}) => {
@@ -39,20 +33,18 @@ root.render(
   <React.StrictMode>
     <ErrorBoundary FallbackComponent={ErrorPage}>
       <IntlProvider locale={language} messages={messages}>
-        <Provider store={store}>
-          <React.Suspense fallback={<p>Loading....</p>}>
-            <Layout>
-              <Router>
-                <OverviewPage path="/"/>
-                <RegistrationPage path="/register"/>
-                <LoginCallbackPage path="/login-callback"/>
-                <CongregationPage path="/congregation/:congregationId"/>
-                <PrintoutPage path="/congregation/:congregationId/printouts"/>
-                <NotFoundPage default/>
-              </Router>
-            </Layout>
-          </React.Suspense>
-        </Provider>
+        <React.Suspense fallback={<p>Loading....</p>}>
+          <Layout>
+            <Router>
+              <OverviewPage path="/"/>
+              <RegistrationPage path="/register"/>
+              <LoginCallbackPage path="/login-callback"/>
+              <CongregationPage path="/congregation/:congregationId"/>
+              <PrintoutPage path="/congregation/:congregationId/printouts"/>
+              <NotFoundPage default/>
+            </Router>
+          </Layout>
+        </React.Suspense>
       </IntlProvider>
     </ErrorBoundary>
   </React.StrictMode>

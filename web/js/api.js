@@ -92,10 +92,10 @@ function refreshCongregations() {
   CongregationsByIdCache = unstable_createResource(async (congregationId) => {
       console.info(`Fetch congregation ${congregationId}`);
       const response = await api.get(`/api/congregation/${congregationId}`);
-    const congregation = response.data;
-    congregation.territories = sortTerritories(congregation.territories);
-    congregation.subregions = sortRegions(congregation.subregions);
-    return congregation;
+      const congregation = response.data;
+      congregation.territories = sortTerritories(congregation.territories);
+      congregation.subregions = sortRegions(congregation.subregions);
+      return congregation;
     }
   )
 }
@@ -135,12 +135,6 @@ function sortTerritories(territories: Array<Territory>): Array<Territory> {
   return sortBy(territories, (t: Territory) => findIndex(numbers, (n: string) => n === t.number))
 }
 
-export async function getTerritories(congregationId: ?string): Promise<Array<Territory>> {
-  const response = await api.get('/api/territories', requestConfig(congregationId));
-  return sortTerritories(response.data);
-}
-
-
 // ====== Regions ======
 
 export type Region = {
@@ -154,9 +148,4 @@ export type Region = {
 
 function sortRegions(regions: Array<Region>): Array<Region> {
   return sortBy(regions, (r: Region) => r.name.toLowerCase());
-}
-
-export async function getRegions(congregationId: ?string): Promise<Array<Region>> {
-  const response = await api.get('/api/regions', requestConfig(congregationId));
-  return sortRegions(response.data);
 }
