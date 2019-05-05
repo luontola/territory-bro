@@ -4,12 +4,18 @@
 
 import React from "react";
 import {Field, Form, Formik} from "formik";
+import {getMessages, language as defaultLanguage, languagesByCode} from "../intl";
+import {IntlProvider} from "react-intl";
 import {mapRasters} from "../maps/mapOptions";
 import {getCongregationById} from "../api";
 import TerritoryCard from "./TerritoryCard";
 import NeighborhoodCard from "./NeighborhoodCard";
 import RuralTerritoryCard from "./RuralTerritoryCard";
 import RegionPrintout from "./RegionPrintout";
+import sortBy from "lodash/sortBy";
+import toPairs from "lodash/toPairs";
+
+const sortedLanguages = sortBy(toPairs(languagesByCode), ([code, name]) => name);
 
 const templates = [
   {
@@ -46,6 +52,7 @@ const PrintOptionsForm = ({congregationId}) => {
   return (
     <Formik initialValues={{
       template: templates[0].id,
+      language: defaultLanguage,
       mapRaster: availableMapRasters[0].id,
       regions: availableRegions.length > 0 ? [availableRegions[0].id] : [],
       territories: availableTerritories.length > 0 ? [availableTerritories[0].id] : [],
@@ -66,6 +73,16 @@ const PrintOptionsForm = ({congregationId}) => {
                     <Field name="template" id="template" component="select" className="pure-input-1">
                       {templates.map(template =>
                         <option key={template.id} value={template.id}>{template.name}</option>)}
+                    </Field>
+                  </div>
+                </div>
+
+                <div className="pure-g">
+                  <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+                    <label htmlFor="language">Language</label>
+                    <Field name="language" id="language" component="select" className="pure-input-1">
+                      {sortedLanguages.map(([code, name]) =>
+                        <option key={code} value={code}>{name}</option>)}
                     </Field>
                   </div>
                 </div>
@@ -127,26 +144,30 @@ const PrintOptionsForm = ({congregationId}) => {
             </Form>
           </div>
 
-          {template.type === 'territory' &&
-          values.territories.map(territoryId => {
-              const territory = availableTerritories.find(t => t.id === territoryId);
-              return <template.component key={territory.id}
-                                         congregationId={congregationId}
-                                         territoryId={territory.id}
-                                         territory={territory}
-                                         mapRaster={mapRaster}/>;
-            }
-          )}
-          {template.type === 'region' &&
-          values.regions.map(regionId => {
-            const region = availableRegions.find(t => t.id === regionId);
-            return <template.component key={region.id}
-                                       congregationId={congregationId}
-                                       regionId={region.id}
-                                       region={region}
-                                       territories={availableTerritories}
-                                       mapRaster={mapRaster}/>;
-          })}
+          <IntlProvider locale={values.language} messages={getMessages(values.language)}>
+            <>
+              {template.type === 'territory' &&
+              values.territories.map(territoryId => {
+                  const territory = availableTerritories.find(t => t.id === territoryId);
+                  return <template.component key={territory.id}
+                                             congregationId={congregationId}
+                                             territoryId={territory.id}
+                                             territory={territory}
+                                             mapRaster={mapRaster}/>;
+                }
+              )}
+              {template.type === 'region' &&
+              values.regions.map(regionId => {
+                const region = availableRegions.find(t => t.id === regionId);
+                return <template.component key={region.id}
+                                           congregationId={congregationId}
+                                           regionId={region.id}
+                                           region={region}
+                                           territories={availableTerritories}
+                                           mapRaster={mapRaster}/>;
+              })}
+            </>
+          </IntlProvider>
         </>);
     }}
     </Formik>

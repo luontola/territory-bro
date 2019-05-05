@@ -8,9 +8,7 @@ import "purecss/build/pure-min.css";
 import "purecss/build/grids-responsive-min.css";
 import "./Layout.css";
 import * as React from 'react';
-import LanguageSelection from "./LanguageSelection";
 import AuthenticationPanel from "./AuthenticationPanel";
-import {getSettings} from "../api";
 import {Link} from "@reach/router";
 
 type Props = {
@@ -27,8 +25,6 @@ class Layout extends React.Component<Props> {
   }
 
   render() {
-    const settings = getSettings();
-    const loggedIn = settings.user.authenticated;
     const {children} = this.props;
     return (
       <div id="layout">
@@ -38,9 +34,6 @@ class Layout extends React.Component<Props> {
           <ul>
             <li><Link to="/">Overview</Link></li>
           </ul>
-          {loggedIn &&
-          <LanguageSelection/>
-          }
         </nav>
 
         <div className="container">
