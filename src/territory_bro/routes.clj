@@ -81,7 +81,9 @@
                                :authenticated (not (nil? auth/*user*)))})))
 
 (defn- current-user-id [conn]
-  (::user/id (user/get-by-subject conn (:sub auth/*user*))))
+  (let [id (::user/id (user/get-by-subject conn (:sub auth/*user*)))]
+    (assert id)
+    id))
 
 (defn create-congregation [request]
   (auth/with-authenticated-user request
