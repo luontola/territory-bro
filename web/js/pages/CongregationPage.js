@@ -11,12 +11,7 @@ const CongregationPage = ({congregationId}) => {
   return (
     <>
       <h1>{congregation.name}</h1>
-      <ul>
-        <li><Link to="territory-cards">Territory Cards</Link></li>
-        <li><Link to="neighborhood-maps">Neighborhood Maps</Link></li>
-        <li><Link to="rural-territory-cards">Rural Territory Cards</Link></li>
-        <li><Link to="region-maps">Region Maps</Link></li>
-      </ul>
+      <p><Link to="printouts">Printouts</Link></p>
     </>
   );
 };

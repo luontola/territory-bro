@@ -7,11 +7,11 @@
 import React from "react";
 import PrintOptionsForm from "../prints/PrintOptionsForm";
 
-const TerritoryCardsPage = ({congregationId}) => {
+const PrintoutPage = ({congregationId}) => {
   return (
     <>
       <div className="no-print">
-        <h1>Territory Cards</h1>
+        <h1>Printouts</h1>
       </div>
       <PrintOptionsForm congregationId={congregationId}
                         territoriesVisible={true}
@@ -20,4 +20,4 @@ const TerritoryCardsPage = ({congregationId}) => {
   );
 };
 
-export default TerritoryCardsPage;
+export default PrintoutPage;

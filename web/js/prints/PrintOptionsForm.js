@@ -4,12 +4,8 @@
 
 import React from "react";
 import {Field, Form, Formik} from "formik";
-import type {MapRaster} from "../maps/mapOptions";
 import {mapRasters} from "../maps/mapOptions";
-import type {Region, Territory} from "../api";
 import {getCongregationById} from "../api";
-import type {State} from "../reducers";
-import take from "lodash/take";
 import TerritoryCard from "./TerritoryCard";
 import NeighborhoodCard from "./NeighborhoodCard";
 import RuralTerritoryCard from "./RuralTerritoryCard";
@@ -155,48 +151,3 @@ const PrintOptionsForm = ({congregationId, territoriesVisible = false, regionsVi
 };
 
 export default PrintOptionsForm;
-
-// map rasters
-
-export function getSelectedMapRaster(state: State): MapRaster {
-  const id = selector(state, 'mapRaster') || 'osmHighDpi';
-  const mapRaster = mapRasters.find(map => map.id === id);
-  if (!mapRaster) {
-    throw new Error(`MapRaster not found: ${id}`);
-  }
-  return mapRaster;
-}
-
-// regions
-
-function getAvailableRegions(state: State): Array<Region> {
-  return state.api.regions.filter(r => r.congregation || r.subregion);
-}
-
-function getDefaultRegions(state: State): Array<number> {
-  const regions = getAvailableRegions(state);
-  return take(regions, 1).map(r => r.id);
-}
-
-export function getSelectedRegions(state: State): Array<Region> {
-  const formValues = selector(state, 'regions') || getDefaultRegions(state);
-  const ids = new Set(formValues.map(str => parseInt(str, 10)));
-  return state.api.regions.filter(r => ids.has(r.id));
-}
-
-// territories
-
-function getAvailableTerritories(state: State): Array<Territory> {
-  return state.api.territories;
-}
-
-function getDefaultTerritories(state: State): Array<number> {
-  const territories = getAvailableTerritories(state);
-  return take(territories, 1).map(t => t.id);
-}
-
-export function getSelectedTerritories(state: State): Array<Territory> {
-  const formValues = selector(state, 'territories') || getDefaultTerritories(state);
-  const ids = new Set(formValues.map(str => parseInt(str, 10)));
-  return state.api.territories.filter(r => ids.has(r.id));
-}
