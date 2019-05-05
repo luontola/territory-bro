@@ -41,6 +41,7 @@
 
 .minimap {
     grid-area: minimap;
+    margin-bottom: 0.6mm;
 }
 
 .map {
