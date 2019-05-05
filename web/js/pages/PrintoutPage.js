@@ -13,9 +13,7 @@ const PrintoutPage = ({congregationId}) => {
       <div className="no-print">
         <h1>Printouts</h1>
       </div>
-      <PrintOptionsForm congregationId={congregationId}
-                        territoriesVisible={true}
-                        regionsVisible={true}/>
+      <PrintOptionsForm congregationId={congregationId}/>
     </>
   );
 };
