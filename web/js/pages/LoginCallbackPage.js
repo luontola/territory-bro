@@ -16,10 +16,15 @@ const LoginCallbackPage = () => {
 
   useEffect(() => {
     (async () => {
-      await auth.handleAuthentication();
       const params = new URLSearchParams(document.location.search.substring(1));
       const returnPath = params.get('return') || '/';
-      navigate(returnPath, {replace: true});
+      if (settings.user.authenticated) {
+        navigate(returnPath);
+      } else {
+        await auth.handleAuthentication();
+        // XXX: full page reload because clearing the cache doesn't re-render navbar
+        window.location.href = returnPath;
+      }
     })();
   });
 
