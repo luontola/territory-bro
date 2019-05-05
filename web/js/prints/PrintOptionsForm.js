@@ -59,17 +59,19 @@ const PrintOptionsForm = ({congregationId}) => {
             <Form className="pure-form pure-form-stacked">
               <fieldset>
                 <legend>Print Options</legend>
-                <div className="pure-g">
 
-                  <div className="pure-u-1 pure-u-md-1-3">
+                <div className="pure-g">
+                  <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
                     <label htmlFor="mapRaster">Template</label>
                     <Field name="template" id="template" component="select" className="pure-input-1">
                       {templates.map(template =>
                         <option key={template.id} value={template.id}>{template.name}</option>)}
                     </Field>
                   </div>
+                </div>
 
-                  <div className="pure-u-1 pure-u-md-1-3">
+                <div className="pure-g">
+                  <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
                     <label htmlFor="mapRaster">Map Raster</label>
                     <Field name="mapRaster" id="mapRaster" component="select" className="pure-input-1">
                       {availableMapRasters.map(mapRaster =>
@@ -77,9 +79,10 @@ const PrintOptionsForm = ({congregationId}) => {
                     </Field>
                   </div>
                 </div>
+
+                {template.type === 'region' &&
                 <div className="pure-g">
-                  {template.type === 'region' &&
-                  <div className="pure-u-1 pure-u-md-1-3">
+                  <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
                     <label htmlFor="regions">Subregions</label>
                     <Field name="regions" id="regions" component="select" multiple size={7} className="pure-input-1"
                            onChange={event =>
@@ -94,10 +97,12 @@ const PrintOptionsForm = ({congregationId}) => {
                         <option key={region.id} value={region.id}>{region.name}</option>)}
                     </Field>
                   </div>
-                  }
+                </div>
+                }
 
-                  {template.type === 'territory' &&
-                  <div className="pure-u-1 pure-u-md-1-3">
+                {template.type === 'territory' &&
+                <div className="pure-g">
+                  <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
                     <label htmlFor="territories">Territories</label>
                     <Field name="territories" id="territories" component="select" multiple size={7}
                            className="pure-input-1"
@@ -115,9 +120,9 @@ const PrintOptionsForm = ({congregationId}) => {
                         </option>)}
                     </Field>
                   </div>
-                  }
-
                 </div>
+                }
+
               </fieldset>
             </Form>
           </div>
