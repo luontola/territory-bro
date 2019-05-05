@@ -20,21 +20,25 @@ const templates = [
     id: 'TerritoryCard',
     component: TerritoryCard,
     name: 'Territory Card',
+    type: 'territory',
   },
   {
     id: 'NeighborhoodCard',
     component: NeighborhoodCard,
     name: 'Neighborhood Map',
+    type: 'territory',
   },
   {
     id: 'RuralTerritoryCard',
     component: RuralTerritoryCard,
     name: 'Rural Territory Card',
+    type: 'territory',
   },
   {
     id: 'RegionPrintout',
     component: RegionPrintout,
     name: 'Subregion Map',
+    type: 'region',
   },
 ]
 
@@ -121,16 +125,30 @@ const PrintOptionsForm = ({congregationId, territoriesVisible = false, regionsVi
 
         {values.territories.map(territoryId => {
             const template = templates.find(t => t.id === values.template);
-            const mapRasterId = values.mapRaster;
             const territory = availableTerritories.find(t => t.id === territoryId);
-            const mapRaster = availableMapRasters.find(r => r.id === mapRasterId)
-            return <template.component key={territory.id}
-                                       congregationId={congregationId}
-                                       territoryId={territory.id}
-                                       territory={territory}
-                                       mapRaster={mapRaster}/>
+            const mapRasterId = values.mapRaster;
+            const mapRaster = availableMapRasters.find(r => r.id === mapRasterId);
+            return template.type === 'territory' &&
+              <template.component key={territory.id}
+                                  congregationId={congregationId}
+                                  territoryId={territory.id}
+                                  territory={territory}
+                                  mapRaster={mapRaster}/>;
           }
         )}
+        {values.regions.map(regionId => {
+          const template = templates.find(t => t.id === values.template);
+          const region = availableRegions.find(t => t.id === regionId);
+          const mapRasterId = values.mapRaster;
+          const mapRaster = availableMapRasters.find(r => r.id === mapRasterId);
+          return template.type === 'region' &&
+            <template.component key={region.id}
+                                congregationId={congregationId}
+                                regionId={region.id}
+                                region={region}
+                                territories={availableTerritories}
+                                mapRaster={mapRaster}/>;
+        })}
       </>)}
     </Formik>
   );
