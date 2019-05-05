@@ -5,17 +5,13 @@
 /* @flow */
 
 import React from "react";
-import {changeLanguage, languagesByCode} from "../intl";
-import toPairs from "lodash/toPairs";
-import sortBy from "lodash/sortBy";
-
-const sortedLanguages = sortBy(toPairs(languagesByCode), ([code, name]) => name);
+import {changeLanguage, languages} from "../intl";
 
 const LanguageSelection = () => (
   <React.Fragment>
     <p>Change language:</p>
     <ul>
-      {sortedLanguages.map(([code, name]) =>
+      {languages.map(({code, name}) =>
         <li key={code}><a href="#" onClick={handleLanguageChange(code)}>{name}</a></li>)}
     </ul>
   </React.Fragment>

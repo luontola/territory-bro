@@ -4,7 +4,7 @@
 
 import React from "react";
 import {Field, Form, Formik} from "formik";
-import {getMessages, language as defaultLanguage, languagesByCode} from "../intl";
+import {getMessages, language as defaultLanguage, languages} from "../intl";
 import {IntlProvider} from "react-intl";
 import {mapRasters} from "../maps/mapOptions";
 import {getCongregationById} from "../api";
@@ -12,10 +12,6 @@ import TerritoryCard from "./TerritoryCard";
 import NeighborhoodCard from "./NeighborhoodCard";
 import RuralTerritoryCard from "./RuralTerritoryCard";
 import RegionPrintout from "./RegionPrintout";
-import sortBy from "lodash/sortBy";
-import toPairs from "lodash/toPairs";
-
-const sortedLanguages = sortBy(toPairs(languagesByCode), ([code, name]) => name);
 
 const templates = [
   {
@@ -81,7 +77,7 @@ const PrintOptionsForm = ({congregationId}) => {
                   <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
                     <label htmlFor="language">Language</label>
                     <Field name="language" id="language" component="select" className="pure-input-1">
-                      {sortedLanguages.map(([code, name]) =>
+                      {languages.map(({code, name}) =>
                         <option key={code} value={code}>{name}</option>)}
                     </Field>
                   </div>

@@ -14,6 +14,8 @@ import it from "react-intl/locale-data/it";
 import nl from "react-intl/locale-data/nl";
 import pt from "react-intl/locale-data/pt";
 import translations from "./translations.json";
+import sortBy from "lodash/sortBy";
+import toPairs from "lodash/toPairs";
 
 // TODO: create translations.json at build time, store the english version only in JSX tags to avoid getting out of sync
 // https://medium.freecodecamp.com/internationalization-in-react-7264738274a0
@@ -21,7 +23,7 @@ import translations from "./translations.json";
 
 addLocaleData([...en, ...es, ...fi, ...id, ...it, ...nl, ...pt]);
 
-export const languagesByCode = {
+const languagesByCode = {
   en: "English",
   es: "Spanish",
   fi: "Finnish",
@@ -30,6 +32,11 @@ export const languagesByCode = {
   nl: "Dutch",
   pt: "Portuguese",
 };
+
+export const languages =
+  sortBy(
+    toPairs(languagesByCode).map(([code, name]) => ({code, name})),
+    ({name}) => name);
 
 export function getMessages(language: string): {} {
   return translations[language] || translations[withoutRegionCode(language)];
