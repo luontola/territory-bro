@@ -27,8 +27,7 @@
               :body "Logged in",
               :session {::auth/user {:sub "sub",
                                      :name "name",
-                                     :email "email",
-                                     :permissions {}}}}
+                                     :email "email"}}}
              (dev-login {:params {:sub "sub"
                                   :name "name"
                                   :email "email"}})))))

@@ -6,21 +6,8 @@
   (:require [clojure.string :as str]
             [clojure.tools.logging :as log]
             [territory-bro.config :as config]
-            [territory-bro.db :as db]
-            [territory-bro.permissions :as perm])
+            [territory-bro.db :as db])
   (:import (java.util UUID)))
-
-(defn- format-tenant [id]
-  ; TODO: human-readable name
-  {:id id
-   :name (.toUpperCase (name id))})
-
-(defn my-congregations []
-  (->> (perm/visible-congregations)
-       (map format-tenant)
-       (sort-by #(.toUpperCase ^String (:name %)))))
-
-;; new stuff
 
 (def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
 

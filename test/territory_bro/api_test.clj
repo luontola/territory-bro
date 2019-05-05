@@ -136,20 +136,20 @@
 
 (deftest authorization-test
   (testing "before login"
-    (let [response (-> (request :get "/api/my-congregations")
+    (let [response (-> (request :get "/api/congregations")
                        app)]
       (is (unauthorized? response))))
 
   (let [session (login! app)]
     (testing "after login"
-      (let [response (-> (request :get "/api/my-congregations")
+      (let [response (-> (request :get "/api/congregations")
                          (merge session)
                          app)]
         (is (ok? response))))
 
     (testing "after logout"
       (logout! app session)
-      (let [response (-> (request :get "/api/my-congregations")
+      (let [response (-> (request :get "/api/congregations")
                          (merge session)
                          app)]
         (is (unauthorized? response))))))

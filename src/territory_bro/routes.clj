@@ -12,12 +12,11 @@
             [ring.util.http-response :refer :all]
             [ring.util.response :as response]
             [territory-bro.authentication :as auth]
-            [territory-bro.config :as config :refer [env]]
+            [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
-            [territory-bro.permissions :as perm]
             [territory-bro.qgis :as qgis]
             [territory-bro.region :as region]
             [territory-bro.territory :as territory]
@@ -43,22 +42,22 @@
 (defn login [request]
   (let [id-token (get-in request [:params :idToken])
         jwt (try
-              (jwt/validate id-token env)
+              (jwt/validate id-token config/env)
               (catch JWTVerificationException e
                 (log/info e "Login failed, invalid token")
                 (forbidden! "Invalid token")))
         session (merge (:session request)
-                       (auth/user-session jwt env))]
+                       (auth/user-session jwt))]
     (log/info "Logged in using JWT" jwt)
     (save-user-from-jwt! jwt)
     (-> (ok "Logged in")
         (assoc :session session))))
 
 (defn dev-login [request]
-  (if (getx env :dev)
+  (if (getx config/env :dev)
     (let [fake-jwt (:params request)
           session (merge (:session request)
-                         (auth/user-session fake-jwt env))]
+                         (auth/user-session fake-jwt))]
       (log/info "Developer login as" fake-jwt)
       (save-user-from-jwt! fake-jwt)
       (-> (ok "Logged in")
@@ -74,64 +73,12 @@
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
                (auth/with-authenticated-user request
-                 {:dev (getx env :dev)
-                  :auth0 {:domain (getx env :auth0-domain)
-                          :clientId (getx env :auth0-client-id)}
-                  :supportEmail (getx env :support-email)
+                 {:dev (getx config/env :dev)
+                  :auth0 {:domain (getx config/env :auth0-domain)
+                          :clientId (getx config/env :auth0-client-id)}
+                  :supportEmail (getx config/env :support-email)
                   :user (assoc (select-keys auth/*user* [:name :sub])
-                               :authenticated (not (nil? auth/*user*)))
-                  :congregations (congregation/my-congregations)})))
-
-(defresource my-congregations
-  :available-media-types ["application/json"]
-  :handle-ok (fn [{:keys [request]}]
-               (auth/with-authenticated-user request
-                 (require-logged-in!)
-                 (congregation/my-congregations))))
-
-(defresource territories
-  :available-media-types ["application/json"]
-  :handle-ok (fn [{:keys [request]}]
-               (auth/with-authenticated-user request
-                 (require-logged-in!)
-                 (let [tenant (find-tenant request (perm/visible-congregations))]
-                   (if-not tenant
-                     (bad-request! (str "no such tenant: " tenant)))
-                   (if-not (perm/can-view-territories? tenant)
-                     (forbidden! (str "cannot view territories of " tenant)))
-                   (db/as-tenant tenant
-                     (db/query :find-territories))))))
-
-(defresource regions
-  :available-media-types ["application/json"]
-  :handle-ok (fn [{:keys [request]}]
-               (auth/with-authenticated-user request
-                 (require-logged-in!)
-                 (let [tenant (find-tenant request (perm/visible-congregations))]
-                   (if-not tenant
-                     (bad-request! (str "no such tenant: " tenant)))
-                   (if-not (perm/can-view-territories? tenant)
-                     (forbidden! (str "cannot view regions of " tenant)))
-                   (db/as-tenant tenant
-                     (db/query :find-regions))))))
-
-(defn download-qgis-project [request]
-  (auth/with-authenticated-user request
-    (require-logged-in!)
-    (let [tenant (keyword (get-in request [:params :tenant]))
-          ;; TODO: deduplicate with find-tenant
-          tenant (when (some #(= tenant %) (perm/visible-congregations))
-                   tenant)]
-      (if-not (perm/can-modify-territories? tenant)
-        (forbidden! (str "cannot modify territories of " tenant)))
-      (let [db-config (get-in env [:tenant tenant])
-            content (qgis/generate-project (-> (select-keys db-config [:database-host :database-username :database-password])
-                                               (assoc :database-name (:database-username db-config)
-                                                      :database-schema (:database-username db-config))))
-            file-name (str (name tenant) "-territories.qgs")]
-        (-> (ok content)
-            (response/content-type "application/octet-stream")
-            (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\"")))))))
+                               :authenticated (not (nil? auth/*user*)))})))
 
 (defn- current-user-id [conn]
   (::user/id (user/get-by-subject conn (:sub auth/*user*))))
@@ -182,7 +129,7 @@
                              :subregions (region/get-subregions conn)
                              :card-minimap-viewports (region/get-card-minimap-viewports conn)}))))))
 
-(defn download-qgis-project2 [request]
+(defn download-qgis-project [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
@@ -211,8 +158,4 @@
   (POST "/api/congregations" request (create-congregation request))
   (GET "/api/congregations" request (list-congregations request))
   (GET "/api/congregation/:congregation" request (get-congregation request))
-  (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project2 request))
-  (ANY "/api/my-congregations" [] my-congregations)
-  (ANY "/api/territories" [] territories)
-  (ANY "/api/regions" [] regions)
-  (GET "/api/download-qgis-project/:tenant" request (download-qgis-project request)))
+  (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request)))
