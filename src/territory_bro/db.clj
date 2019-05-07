@@ -10,6 +10,7 @@
             [clojure.tools.logging :as log]
             [conman.core :as conman]
             [hikari-cp.core :as hikari-cp]
+            [hugsql.adapter.clojure-java-jdbc] ; for hugsql.core/get-adapter to not crash on first usage
             [hugsql.core :as hugsql]
             [mount.core :as mount]
             [territory-bro.config :as config]
