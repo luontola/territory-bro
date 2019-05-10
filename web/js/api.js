@@ -9,6 +9,7 @@ import alphanumSort from "alphanum-sort";
 import sortBy from "lodash/sortBy";
 import findIndex from "lodash/findIndex";
 import {unstable_createResource} from "@luontola/react-cache";
+import WKT from "ol/format/WKT";
 
 function requestConfig(congregationId: ?string) {
   const config = {
@@ -95,9 +96,30 @@ function refreshCongregations() {
       const congregation = response.data;
       congregation.territories = sortTerritories(congregation.territories);
       congregation.subregions = sortRegions(congregation.subregions);
+      congregation.territories.forEach(territory => {
+        territory.enclosingSubregion = getEnclosing(territory.location,
+          congregation.subregions.map(subregion => subregion.location));
+        territory.enclosingMinimapViewport = getEnclosing(territory.location,
+          congregation.cardMinimapViewports.map(viewport => viewport.location));
+      });
       return congregation;
     }
   )
+}
+
+function getEnclosing(innerWkt, enclosingCandidateWkts) {
+  const wkt = new WKT();
+  // TODO: sort by overlapping area instead of center point
+  const centerPoint = wkt.readFeature(innerWkt).getGeometry().getInteriorPoints().getPoint(0);
+  const territoryCoordinate = centerPoint.getCoordinates();
+
+  let result = null;
+  enclosingCandidateWkts.forEach(enclosing => {
+    if (wkt.readFeature(enclosing).getGeometry().intersectsCoordinate(territoryCoordinate)) {
+      result = enclosing;
+    }
+  });
+  return result;
 }
 
 refreshCongregations();
