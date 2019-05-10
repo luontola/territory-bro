@@ -7,6 +7,7 @@
 import {api} from "./util";
 import alphanumSort from "alphanum-sort";
 import sortBy from "lodash/sortBy";
+import keyBy from "lodash/keyBy";
 import findIndex from "lodash/findIndex";
 import {unstable_createResource} from "@luontola/react-cache";
 import WKT from "ol/format/WKT";
@@ -81,6 +82,7 @@ export type Congregation = {
   congregationBoundary: ?string,
   congregationBoundaries: Array<Boundary>,
   territories: Array<Territory>,
+  getTerritoryById: (string) => Territory,
   subregions: Array<Subregion>,
   cardMinimapViewports: Array<Viewport>
 }
@@ -110,6 +112,16 @@ function refreshCongregations() {
       });
       congregation.congregationBoundary = mergeMultiPolygons(
         congregation.congregationBoundaries.map(boundary => boundary.location));
+
+      const territoriesById = keyBy(congregation.territories, 'id');
+      congregation.getTerritoryById = (territoryId) => {
+        const territory = territoriesById[territoryId];
+        if (territory) {
+          return territory;
+        } else {
+          throw Error(`Territory not found: ${territoryId}`)
+        }
+      };
       return congregation;
     }
   )

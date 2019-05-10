@@ -8,19 +8,19 @@ import React from "react";
 import {FormattedMessage} from "react-intl";
 import TerritoryMap from "../maps/TerritoryMap";
 import TerritoryMiniMap from "../maps/TerritoryMiniMap";
-import type {Territory} from "../api";
 import {getCongregationById} from "../api";
 import type {MapRaster} from "../maps/mapOptions";
 import styles from "./RuralTerritoryCard.css";
 import A5PrintFrame from "./A5PrintFrame";
 import PrintDateNotice from "./PrintDateNotice";
 
-const RuralTerritoryCard = ({territory, congregationId, mapRaster}: {
-  territory: Territory,
+const RuralTerritoryCard = ({territoryId, congregationId, mapRaster}: {
+  territoryId: string,
   congregationId: string,
   mapRaster: MapRaster
 }) => {
   const congregation = getCongregationById(congregationId);
+  const territory = congregation.getTerritoryById(territoryId);
   return (
     <A5PrintFrame>
       <div className={styles.root}>

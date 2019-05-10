@@ -144,11 +144,9 @@ const PrintOptionsForm = ({congregationId}) => {
             <>
               {template.type === 'territory' &&
               values.territories.map(territoryId => {
-                  const territory = availableTerritories.find(t => t.id === territoryId);
-                  return <template.component key={territory.id}
+                  return <template.component key={territoryId}
+                                             territoryId={territoryId}
                                              congregationId={congregationId}
-                                             territoryId={territory.id}
-                                             territory={territory}
                                              mapRaster={mapRaster}/>;
                 }
               )}
