@@ -8,7 +8,6 @@ import React from "react";
 import {Map, View} from "ol";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector"
-import MultiPolygon from 'ol/geom/MultiPolygon';
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
@@ -27,29 +26,8 @@ type Props = {
 export default class TerritoryMiniMap extends OpenLayersMap<Props> {
   componentDidMount() {
     const {territory, congregation} = this.props;
-    initTerritoryMiniMap({
-      element: this.element,
-      territoryWkt: territory.location,
-      congregationWkt: getCongregationBoundaryWkt(congregation),
-      viewportWkt: territory.enclosingMinimapViewport,
-      subregionWkt: territory.enclosingSubregion,
-    });
+    initTerritoryMiniMap({element: this.element, territory, congregation});
   }
-}
-
-function mergeMultiPolygons(multiPolygons) {
-  const wkt = new WKT();
-  const merged = multiPolygons
-    .map(p => wkt.readFeature(p).getGeometry())
-    .reduce((a, b) => new MultiPolygon([...a.getPolygons(), ...b.getPolygons()]));
-  return wkt.writeGeometry(merged)
-}
-
-export function getCongregationBoundaryWkt(congregation) {
-  if (congregation.congregationBoundaries.length === 0) {
-    throw new Error("Congregation boundaries not defined");
-  }
-  return mergeMultiPolygons(congregation.congregationBoundaries.map(boundary => boundary.location));
 }
 
 function getCenterPoint(multiPolygon) {
@@ -58,14 +36,10 @@ function getCenterPoint(multiPolygon) {
   return wkt.writeGeometry(centerPoint);
 }
 
-function initTerritoryMiniMap({element, territoryWkt, congregationWkt, viewportWkt, subregionWkt}) {
-  if (!viewportWkt) {
-    viewportWkt = congregationWkt;
-  }
-
+function initTerritoryMiniMap({element, territory, congregation}) {
   const territoryLayer = new VectorLayer({
     source: new VectorSource({
-      features: [wktToFeature(getCenterPoint(territoryWkt))]
+      features: [wktToFeature(getCenterPoint(territory.location))]
     }),
     style: new Style({
       image: new Icon({
@@ -85,12 +59,12 @@ function initTerritoryMiniMap({element, territoryWkt, congregationWkt, viewportW
   });
 
   const viewportSource = new VectorSource({
-    features: [wktToFeature(viewportWkt)]
+    features: [wktToFeature(territory.enclosingMinimapViewport || congregation.congregationBoundary)]
   });
 
   const congregationLayer = new VectorLayer({
     source: new VectorSource({
-      features: [wktToFeature(congregationWkt)]
+      features: [wktToFeature(congregation.congregationBoundary)]
     }),
     style: new Style({
       stroke: new Stroke({
@@ -102,7 +76,7 @@ function initTerritoryMiniMap({element, territoryWkt, congregationWkt, viewportW
 
   const subregionsLayer = new VectorLayer({
     source: new VectorSource({
-      features: subregionWkt ? [wktToFeature(subregionWkt)] : []
+      features: territory.enclosingSubregion ? [wktToFeature(territory.enclosingSubregion)] : []
     }),
     style: new Style({
       fill: new Fill({

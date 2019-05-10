@@ -10,6 +10,7 @@ import sortBy from "lodash/sortBy";
 import findIndex from "lodash/findIndex";
 import {unstable_createResource} from "@luontola/react-cache";
 import WKT from "ol/format/WKT";
+import MultiPolygon from "ol/geom/MultiPolygon";
 
 function requestConfig(congregationId: ?string) {
   const config = {
@@ -102,6 +103,8 @@ function refreshCongregations() {
         territory.enclosingMinimapViewport = getEnclosing(territory.location,
           congregation.cardMinimapViewports.map(viewport => viewport.location));
       });
+      congregation.congregationBoundary = mergeMultiPolygons(
+        congregation.congregationBoundaries.map(boundary => boundary.location));
       return congregation;
     }
   )
@@ -120,6 +123,17 @@ function getEnclosing(innerWkt, enclosingCandidateWkts) {
     }
   });
   return result;
+}
+
+function mergeMultiPolygons(multiPolygons) {
+  if (multiPolygons.length === 0) {
+    return null;
+  }
+  const wkt = new WKT();
+  const merged = multiPolygons
+    .map(p => wkt.readFeature(p).getGeometry())
+    .reduce((a, b) => new MultiPolygon([...a.getPolygons(), ...b.getPolygons()]));
+  return wkt.writeGeometry(merged)
 }
 
 refreshCongregations();
