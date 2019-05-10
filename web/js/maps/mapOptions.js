@@ -54,7 +54,7 @@ export function wktToFeature(wkt: string): Feature {
   return feature;
 }
 
-export function wktToFeatures(wkt: string): Array<Feature> {
+export function wktToFeatures(wkt: ?string): Array<Feature> {
   if (wkt) {
     return [wktToFeature(wkt)];
   } else {

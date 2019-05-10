@@ -78,6 +78,11 @@ export async function logout() {
 export type Congregation = {
   id: string,
   name: string,
+  congregationBoundary: ?string,
+  congregationBoundaries: Array<Boundary>,
+  territories: Array<Territory>,
+  subregions: Array<Subregion>,
+  cardMinimapViewports: Array<Viewport>
 }
 
 let CongregationsCache;
@@ -94,9 +99,9 @@ function refreshCongregations() {
   CongregationsByIdCache = unstable_createResource(async (congregationId) => {
       console.info(`Fetch congregation ${congregationId}`);
       const response = await api.get(`/api/congregation/${congregationId}`);
-      const congregation = response.data;
+      const congregation: Congregation = response.data;
       congregation.territories = sortTerritories(congregation.territories);
-      congregation.subregions = sortRegions(congregation.subregions);
+      congregation.subregions = sortSubregions(congregation.subregions);
       congregation.territories.forEach(territory => {
         territory.enclosingSubregion = getEnclosing(territory.location,
           congregation.subregions.map(subregion => subregion.location));
@@ -110,7 +115,7 @@ function refreshCongregations() {
   )
 }
 
-function getEnclosing(innerWkt, enclosingCandidateWkts) {
+function getEnclosing(innerWkt: string, enclosingCandidateWkts: Array<string>): ?string {
   const wkt = new WKT();
   // TODO: sort by overlapping area instead of center point
   const centerPoint = wkt.readFeature(innerWkt).getGeometry().getInteriorPoints().getPoint(0);
@@ -125,7 +130,7 @@ function getEnclosing(innerWkt, enclosingCandidateWkts) {
   return result;
 }
 
-function mergeMultiPolygons(multiPolygons) {
+function mergeMultiPolygons(multiPolygons: Array<string>): ?string {
   if (multiPolygons.length === 0) {
     return null;
   }
@@ -133,7 +138,7 @@ function mergeMultiPolygons(multiPolygons) {
   const merged = multiPolygons
     .map(p => wkt.readFeature(p).getGeometry())
     .reduce((a, b) => new MultiPolygon([...a.getPolygons(), ...b.getPolygons()]));
-  return wkt.writeGeometry(merged)
+  return wkt.writeGeometry(merged);
 }
 
 refreshCongregations();
@@ -161,6 +166,8 @@ export type Territory = {
   addresses: string,
   subregion: string,
   location: string,
+  enclosingSubregion: ?string,
+  enclosingMinimapViewport: ?string,
 }
 
 // TODO: create library definitions for alphanum-sort and lodash-es, so that we can remove all this type noise
@@ -173,15 +180,22 @@ function sortTerritories(territories: Array<Territory>): Array<Territory> {
 
 // ====== Regions ======
 
-export type Region = {
+export type Subregion = {
   id: number,
   name: string,
-  minimap_viewport: boolean,
-  congregation: boolean,
-  subregion: boolean,
   location: string,
 }
 
-function sortRegions(regions: Array<Region>): Array<Region> {
-  return sortBy(regions, (r: Region) => r.name.toLowerCase());
+function sortSubregions(subregions: Array<Subregion>): Array<Subregion> {
+  return sortBy(subregions, (r: Subregion) => r.name.toLowerCase());
+}
+
+export type Boundary = {
+  id: number,
+  location: string,
+}
+
+export type Viewport = {
+  id: number,
+  location: string,
 }

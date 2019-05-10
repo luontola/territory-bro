@@ -15,28 +15,28 @@ import Icon from "ol/style/Icon";
 import {fromLonLat} from "ol/proj";
 import WKT from "ol/format/WKT";
 import {makeStreetsLayer, wktToFeatures} from "./mapOptions";
-import type {Territory} from "../api";
+import type {Congregation, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 
 type Props = {
   territory: Territory,
-  congregation: any,
+  congregation: Congregation,
 };
 
 export default class TerritoryMiniMap extends OpenLayersMap<Props> {
   componentDidMount() {
     const {territory, congregation} = this.props;
-    initTerritoryMiniMap({element: this.element, territory, congregation});
+    initTerritoryMiniMap(this.element, territory, congregation);
   }
 }
 
-function getCenterPoint(multiPolygon) {
+function getCenterPoint(multiPolygon: string) {
   const wkt = new WKT();
   const centerPoint = wkt.readFeature(multiPolygon).getGeometry().getInteriorPoints().getPoint(0);
   return wkt.writeGeometry(centerPoint);
 }
 
-function initTerritoryMiniMap({element, territory, congregation}) {
+function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congregation: Congregation) {
   const territoryLayer = new VectorLayer({
     source: new VectorSource({
       features: wktToFeatures(getCenterPoint(territory.location))

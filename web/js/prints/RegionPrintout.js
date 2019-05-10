@@ -5,7 +5,7 @@
 /* @flow */
 
 import React from "react";
-import type {Region, Territory} from "../api";
+import type {Subregion, Territory} from "../api";
 import {getCongregationById} from "../api";
 import RegionMap from "../maps/RegionMap";
 import type {MapRaster} from "../maps/mapOptions";
@@ -14,7 +14,7 @@ import styles from "./RegionPrintout.css";
 
 const RegionPrintout = ({congregationId, region, territories, mapRaster}: {
   congregationId: string,
-  region: Region,
+  region: Subregion,
   territories: Array<Territory>,
   mapRaster: MapRaster,
 }) => {
