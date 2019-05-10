@@ -116,12 +116,14 @@ function refreshCongregations() {
         "MULTIPOLYGON(((180 90,180 -90,-180 -90,-180 90,180 90)))";
 
       const territoriesById = keyBy(congregation.territories, 'id');
-      congregation.getTerritoryById = (id) =>
-        territoriesById[id] || throw Error(`Territory not found: ${id}`);
+      congregation.getTerritoryById = (id) => territoriesById[id] || (() => {
+        throw Error(`Territory not found: ${id}`)
+      })();
 
       const subregionsById = keyBy(congregation.subregions, 'id');
-      congregation.getSubregionById = (id) =>
-        subregionsById[id] || throw Error(`Subregion not found: ${id}`);
+      congregation.getSubregionById = (id) => subregionsById[id] || (() => {
+        throw Error(`Subregion not found: ${id}`)
+      })();
 
       return congregation;
     }
