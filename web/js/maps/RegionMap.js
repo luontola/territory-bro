@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -12,7 +12,14 @@ import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import {fromLonLat} from "ol/proj";
 import type {MapRaster} from "./mapOptions";
-import {makeControls, makeStreetsLayer, territoryStrokeStyle, territoryTextStyle, wktToFeature} from "./mapOptions";
+import {
+  makeControls,
+  makeStreetsLayer,
+  territoryStrokeStyle,
+  territoryTextStyle,
+  wktToFeature,
+  wktToFeatures
+} from "./mapOptions";
 import type {Region, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 
@@ -42,7 +49,7 @@ function initRegionMap(element: HTMLDivElement,
                        territories: Array<Territory>): * {
   const regionLayer = new VectorLayer({
     source: new VectorSource({
-      features: [wktToFeature(region.location)]
+      features: wktToFeatures(region.location)
     }),
     style: new Style({
       stroke: new Stroke({

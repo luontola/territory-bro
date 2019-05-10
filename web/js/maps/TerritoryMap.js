@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -11,7 +11,7 @@ import VectorSource from "ol/source/Vector"
 import Style from "ol/style/Style";
 import {fromLonLat} from "ol/proj";
 import type {MapRaster} from "./mapOptions";
-import {makeControls, makeStreetsLayer, territoryFillStyle, territoryStrokeStyle, wktToFeature} from "./mapOptions";
+import {makeControls, makeStreetsLayer, territoryFillStyle, territoryStrokeStyle, wktToFeatures} from "./mapOptions";
 import type {Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 
@@ -41,7 +41,7 @@ function initTerritoryMap(element: HTMLDivElement,
 
   const territoryLayer = new VectorLayer({
     source: new VectorSource({
-      features: [wktToFeature(territoryWkt)]
+      features: wktToFeatures(territoryWkt)
     }),
     style: new Style({
       stroke: territoryStrokeStyle(),

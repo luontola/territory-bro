@@ -54,6 +54,14 @@ export function wktToFeature(wkt: string): Feature {
   return feature;
 }
 
+export function wktToFeatures(wkt: string): Array<Feature> {
+  if (wkt) {
+    return [wktToFeature(wkt)];
+  } else {
+    return []
+  }
+}
+
 export function makeStreetsLayer() {
   return new Tile({
     source: mapRasters[0].source

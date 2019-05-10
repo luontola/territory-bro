@@ -14,7 +14,7 @@ import Fill from "ol/style/Fill";
 import Icon from "ol/style/Icon";
 import {fromLonLat} from "ol/proj";
 import WKT from "ol/format/WKT";
-import {makeStreetsLayer, wktToFeature} from "./mapOptions";
+import {makeStreetsLayer, wktToFeatures} from "./mapOptions";
 import type {Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 
@@ -39,7 +39,7 @@ function getCenterPoint(multiPolygon) {
 function initTerritoryMiniMap({element, territory, congregation}) {
   const territoryLayer = new VectorLayer({
     source: new VectorSource({
-      features: [wktToFeature(getCenterPoint(territory.location))]
+      features: wktToFeatures(getCenterPoint(territory.location))
     }),
     style: new Style({
       image: new Icon({
@@ -59,12 +59,12 @@ function initTerritoryMiniMap({element, territory, congregation}) {
   });
 
   const viewportSource = new VectorSource({
-    features: [wktToFeature(territory.enclosingMinimapViewport || congregation.congregationBoundary)]
+    features: wktToFeatures(territory.enclosingMinimapViewport || congregation.congregationBoundary)
   });
 
   const congregationLayer = new VectorLayer({
     source: new VectorSource({
-      features: [wktToFeature(congregation.congregationBoundary)]
+      features: wktToFeatures(congregation.congregationBoundary)
     }),
     style: new Style({
       stroke: new Stroke({
@@ -76,7 +76,7 @@ function initTerritoryMiniMap({element, territory, congregation}) {
 
   const subregionsLayer = new VectorLayer({
     source: new VectorSource({
-      features: territory.enclosingSubregion ? [wktToFeature(territory.enclosingSubregion)] : []
+      features: wktToFeatures(territory.enclosingSubregion)
     }),
     style: new Style({
       fill: new Fill({

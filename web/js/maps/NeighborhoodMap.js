@@ -18,7 +18,7 @@ import {
   territoryFillStyle,
   territoryStrokeStyle,
   territoryTextStyle,
-  wktToFeature
+  wktToFeatures
 } from "./mapOptions";
 import type {Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
@@ -50,7 +50,7 @@ function initNeighborhoodMap(element: HTMLDivElement,
 
   const territoryLayer = new VectorLayer({
     source: new VectorSource({
-      features: [wktToFeature(territoryWkt)]
+      features: wktToFeatures(territoryWkt)
     }),
     style: new Style({
       stroke: territoryStrokeStyle(),
