@@ -27,7 +27,13 @@ type Props = {
 export default class TerritoryMiniMap extends OpenLayersMap<Props> {
   componentDidMount() {
     const {territory, congregation} = this.props;
-    initTerritoryMiniMap(this.element, territory, congregation);
+    initTerritoryMiniMap({
+      element: this.element,
+      congregationWkt: getCongregationBoundaryWkt(congregation),
+      viewportWkt: getMinimapViewportWkt(congregation, territory),
+      subregionWkt: getSubregionWkt(congregation, territory),
+      territoryCenterWkt: getTerritoryCenterWkt(territory)
+    });
   }
 }
 
@@ -39,18 +45,17 @@ function mergeMultiPolygons(multiPolygons) {
   return wkt.writeGeometry(merged)
 }
 
-function initTerritoryMiniMap(element: HTMLDivElement,
-                              territory: Territory,
-                              congregation): void {
-  const wkt = new WKT();
-  const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoints().getPoint(0);
-  const territoryWkt = wkt.writeGeometry(centerPoint);
-  const territoryCoordinate = centerPoint.getCoordinates();
-
+export function getCongregationBoundaryWkt(congregation) {
   if (congregation.congregationBoundaries.length === 0) {
     throw new Error("Congregation boundaries not defined");
   }
-  const congregationWkt = mergeMultiPolygons(congregation.congregationBoundaries.map(boundary => boundary.location));
+  return mergeMultiPolygons(congregation.congregationBoundaries.map(boundary => boundary.location));
+}
+
+export function getMinimapViewportWkt(congregation, territory) {
+  const wkt = new WKT();
+  const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoints().getPoint(0);
+  const territoryCoordinate = centerPoint.getCoordinates();
 
   let viewportWkt = '';
   congregation.cardMinimapViewports.forEach(viewport => {
@@ -58,20 +63,37 @@ function initTerritoryMiniMap(element: HTMLDivElement,
       viewportWkt = viewport.location;
     }
   });
+  return viewportWkt;
+}
+
+export function getSubregionWkt(congregation, territory) {
+  const wkt = new WKT();
+  const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoints().getPoint(0);
+  const territoryCoordinate = centerPoint.getCoordinates();
+
+  let subregionWkt = '';
+  congregation.subregions.forEach(subregion => {
+    if (wkt.readFeature(subregion.location).getGeometry().intersectsCoordinate(territoryCoordinate)) {
+      subregionWkt = subregion.location;
+    }
+  });
+  return subregionWkt;
+}
+
+function getTerritoryCenterWkt(territory) {
+  const wkt = new WKT();
+  const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoints().getPoint(0);
+  return wkt.writeGeometry(centerPoint);
+}
+
+function initTerritoryMiniMap({element, congregationWkt, viewportWkt, subregionWkt, territoryCenterWkt}) {
   if (!viewportWkt) {
     viewportWkt = congregationWkt;
   }
 
-  let subregionsWkt = '';
-  congregation.subregions.forEach(subregion => {
-    if (wkt.readFeature(subregion.location).getGeometry().intersectsCoordinate(territoryCoordinate)) {
-      subregionsWkt = subregion.location;
-    }
-  });
-
   const territoryLayer = new VectorLayer({
     source: new VectorSource({
-      features: [wktToFeature(territoryWkt)]
+      features: [wktToFeature(territoryCenterWkt)]
     }),
     style: new Style({
       image: new Icon({
@@ -108,7 +130,7 @@ function initTerritoryMiniMap(element: HTMLDivElement,
 
   const subregionsLayer = new VectorLayer({
     source: new VectorSource({
-      features: subregionsWkt ? [wktToFeature(subregionsWkt)] : []
+      features: subregionWkt ? [wktToFeature(subregionWkt)] : []
     }),
     style: new Style({
       fill: new Fill({
