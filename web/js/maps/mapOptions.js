@@ -96,6 +96,7 @@ export function territoryTextStyle(territoryNumber: string, fontSize: string) {
     text: territoryNumber,
     font: 'bold ' + fontSize + ' sans-serif',
     fill: new Fill({color: 'rgba(0, 0, 0, 1.0)'}),
-    stroke: new Stroke({color: 'rgba(255, 255, 255, 1.0)', width: 3.0})
+    stroke: new Stroke({color: 'rgba(255, 255, 255, 1.0)', width: 3.0}),
+    overflow: true,
   });
 }
