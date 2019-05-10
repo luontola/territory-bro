@@ -45,7 +45,7 @@ const TerritoryCard = ({territory, congregationId, mapRaster}: {
 
         <div className={styles.map}>
           <PrintDateNotice>
-            <TerritoryMap territory={territory} congregationId={congregationId} mapRaster={mapRaster}/>
+            <TerritoryMap territory={territory} mapRaster={mapRaster}/>
           </PrintDateNotice>
         </div>
 
