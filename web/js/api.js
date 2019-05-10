@@ -79,7 +79,7 @@ export async function logout() {
 export type Congregation = {
   id: string,
   name: string,
-  congregationBoundary: ?string,
+  location: string,
   congregationBoundaries: Array<Boundary>,
   territories: Array<Territory>,
   getTerritoryById: (string) => Territory,
@@ -110,8 +110,9 @@ function refreshCongregations() {
         territory.enclosingMinimapViewport = getEnclosing(territory.location,
           congregation.cardMinimapViewports.map(viewport => viewport.location));
       });
-      congregation.congregationBoundary = mergeMultiPolygons(
-        congregation.congregationBoundaries.map(boundary => boundary.location));
+      congregation.location = mergeMultiPolygons(
+        congregation.congregationBoundaries.map(boundary => boundary.location)) ||
+        "MULTIPOLYGON(((180 90,180 -90,-180 -90,-180 90,180 90)))";
 
       const territoriesById = keyBy(congregation.territories, 'id');
       congregation.getTerritoryById = (territoryId) => {

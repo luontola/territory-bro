@@ -59,12 +59,12 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
   });
 
   const viewportSource = new VectorSource({
-    features: wktToFeatures(territory.enclosingMinimapViewport || congregation.congregationBoundary)
+    features: wktToFeatures(territory.enclosingMinimapViewport || congregation.location)
   });
 
   const congregationLayer = new VectorLayer({
     source: new VectorSource({
-      features: wktToFeatures(congregation.congregationBoundary)
+      features: wktToFeatures(congregation.location)
     }),
     style: new Style({
       stroke: new Stroke({
