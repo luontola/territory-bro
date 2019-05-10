@@ -84,6 +84,7 @@ export type Congregation = {
   territories: Array<Territory>,
   getTerritoryById: (string) => Territory,
   subregions: Array<Subregion>,
+  getSubregionById: (string) => Subregion,
   cardMinimapViewports: Array<Viewport>
 }
 
@@ -115,14 +116,13 @@ function refreshCongregations() {
         "MULTIPOLYGON(((180 90,180 -90,-180 -90,-180 90,180 90)))";
 
       const territoriesById = keyBy(congregation.territories, 'id');
-      congregation.getTerritoryById = (territoryId) => {
-        const territory = territoriesById[territoryId];
-        if (territory) {
-          return territory;
-        } else {
-          throw Error(`Territory not found: ${territoryId}`)
-        }
-      };
+      congregation.getTerritoryById = (id) =>
+        territoriesById[id] || throw Error(`Territory not found: ${id}`);
+
+      const subregionsById = keyBy(congregation.subregions, 'id');
+      congregation.getSubregionById = (id) =>
+        subregionsById[id] || throw Error(`Subregion not found: ${id}`);
+
       return congregation;
     }
   )
@@ -174,7 +174,7 @@ export async function createCongregation(name: string) {
 // ====== Territories ======
 
 export type Territory = {
-  id: number,
+  id: string,
   number: string,
   addresses: string,
   subregion: string,
@@ -194,7 +194,7 @@ function sortTerritories(territories: Array<Territory>): Array<Territory> {
 // ====== Regions ======
 
 export type Subregion = {
-  id: number,
+  id: string,
   name: string,
   location: string,
 }
@@ -204,11 +204,11 @@ function sortSubregions(subregions: Array<Subregion>): Array<Subregion> {
 }
 
 export type Boundary = {
-  id: number,
+  id: string,
   location: string,
 }
 
 export type Viewport = {
-  id: number,
+  id: string,
   location: string,
 }

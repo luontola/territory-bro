@@ -20,11 +20,11 @@ import {
   wktToFeature,
   wktToFeatures
 } from "./mapOptions";
-import type {Subregion, Territory} from "../api";
+import type {Congregation, Subregion, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 
 type Props = {
-  region: Subregion,
+  region: Subregion | Congregation,
   territories: Array<Territory>,
   mapRaster: MapRaster,
 };
@@ -45,7 +45,7 @@ export default class RegionMap extends OpenLayersMap<Props> {
 }
 
 function initRegionMap(element: HTMLDivElement,
-                       region: Subregion,
+                       region: Subregion | Congregation,
                        territories: Array<Territory>): * {
   const regionLayer = new VectorLayer({
     source: new VectorSource({

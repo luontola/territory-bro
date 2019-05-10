@@ -35,7 +35,7 @@ const templates = [
   {
     id: 'RegionPrintout',
     component: RegionPrintout,
-    name: 'Subregion Map',
+    name: 'Region Map',
     type: 'region',
   },
 ]
@@ -44,7 +44,10 @@ const PrintOptionsForm = ({congregationId}) => {
   const availableMapRasters = mapRasters;
   const congregation = getCongregationById(congregationId);
   const availableTerritories = congregation.territories;
-  const availableRegions = congregation.subregions;
+  const availableRegions = [
+    {id: congregation.id, name: congregation.name},
+    ...congregation.subregions
+  ];
   return (
     <Formik initialValues={{
       template: templates[0].id,
@@ -96,7 +99,7 @@ const PrintOptionsForm = ({congregationId}) => {
                 {template.type === 'region' &&
                 <div className="pure-g">
                   <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
-                    <label htmlFor="regions">Subregions</label>
+                    <label htmlFor="regions">Regions</label>
                     <Field name="regions" id="regions" component="select" multiple size={7} className="pure-input-1"
                            onChange={event =>
                              setFieldValue(
@@ -152,12 +155,9 @@ const PrintOptionsForm = ({congregationId}) => {
               )}
               {template.type === 'region' &&
               values.regions.map(regionId => {
-                const region = availableRegions.find(t => t.id === regionId);
-                return <template.component key={region.id}
+                return <template.component key={regionId}
+                                           regionId={regionId}
                                            congregationId={congregationId}
-                                           regionId={region.id}
-                                           region={region}
-                                           territories={availableTerritories}
                                            mapRaster={mapRaster}/>;
               })}
             </>

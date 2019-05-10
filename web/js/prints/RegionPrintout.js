@@ -5,26 +5,26 @@
 /* @flow */
 
 import React from "react";
-import type {Subregion, Territory} from "../api";
 import {getCongregationById} from "../api";
 import RegionMap from "../maps/RegionMap";
 import type {MapRaster} from "../maps/mapOptions";
 import A4PrintFrame from "./A4PrintFrame";
 import styles from "./RegionPrintout.css";
 
-const RegionPrintout = ({congregationId, region, territories, mapRaster}: {
+const RegionPrintout = ({regionId, congregationId, mapRaster}: {
+  regionId: string,
   congregationId: string,
-  region: Subregion,
-  territories: Array<Territory>,
   mapRaster: MapRaster,
 }) => {
   const congregation = getCongregationById(congregationId);
+  const region = regionId === congregationId ? congregation
+    : congregation.getSubregionById(regionId);
   return (
     <A4PrintFrame>
       <div className={styles.root}>
         <div className={styles.name}>{region.name}</div>
         <div className={styles.map}>
-          <RegionMap region={region} territories={territories} congregationId={congregationId} mapRaster={mapRaster}/>
+          <RegionMap region={region} territories={congregation.territories} mapRaster={mapRaster}/>
         </div>
       </div>
     </A4PrintFrame>
