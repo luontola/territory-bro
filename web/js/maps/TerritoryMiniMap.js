@@ -52,32 +52,27 @@ export function getCongregationBoundaryWkt(congregation) {
   return mergeMultiPolygons(congregation.congregationBoundaries.map(boundary => boundary.location));
 }
 
-export function getMinimapViewportWkt(congregation, territory) {
+export function getEnclosing(innerWkt, enclosingCandidateWkts) {
   const wkt = new WKT();
-  const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoints().getPoint(0);
+  // TODO: sort by overlapping area instead of center point
+  const centerPoint = wkt.readFeature(innerWkt).getGeometry().getInteriorPoints().getPoint(0);
   const territoryCoordinate = centerPoint.getCoordinates();
 
-  let viewportWkt = '';
-  congregation.cardMinimapViewports.forEach(viewport => {
-    if (wkt.readFeature(viewport.location).getGeometry().intersectsCoordinate(territoryCoordinate)) {
-      viewportWkt = viewport.location;
+  let result = null;
+  enclosingCandidateWkts.forEach(enclosing => {
+    if (wkt.readFeature(enclosing).getGeometry().intersectsCoordinate(territoryCoordinate)) {
+      result = enclosing;
     }
   });
-  return viewportWkt;
+  return result;
+}
+
+export function getMinimapViewportWkt(congregation, territory) {
+  return getEnclosing(territory.location, congregation.cardMinimapViewports.map(v => v.location));
 }
 
 export function getSubregionWkt(congregation, territory) {
-  const wkt = new WKT();
-  const centerPoint = wkt.readFeature(territory.location).getGeometry().getInteriorPoints().getPoint(0);
-  const territoryCoordinate = centerPoint.getCoordinates();
-
-  let subregionWkt = '';
-  congregation.subregions.forEach(subregion => {
-    if (wkt.readFeature(subregion.location).getGeometry().intersectsCoordinate(territoryCoordinate)) {
-      subregionWkt = subregion.location;
-    }
-  });
-  return subregionWkt;
+  return getEnclosing(territory.location, congregation.subregions.map(r => r.location));
 }
 
 function getTerritoryCenterWkt(territory) {
