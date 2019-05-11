@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -14,13 +14,13 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: /node_modules/,
+        exclude: path.resolve(__dirname, 'node_modules'),
         use: ['babel-loader'],
       },
       {
         // local scoped CSS
         test: /\.css$/,
-        exclude: /node_modules/,
+        exclude: path.resolve(__dirname, 'node_modules'),
         use: [
           'style-loader',
           {loader: 'css-loader', options: {modules: true, localIdentName: '[name]__[local]--[hash:base64:5]'}},
@@ -29,7 +29,7 @@ module.exports = {
       {
         // global scoped CSS
         test: /\.css$/,
-        include: /node_modules/,
+        include: path.resolve(__dirname, 'node_modules'),
         use: ['style-loader', 'css-loader'],
       },
     ]
