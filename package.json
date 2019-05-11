@@ -55,7 +55,11 @@
     "style-loader": "0.23.1",
     "webpack": "4.30.0",
     "webpack-cli": "3.3.1",
-    "webpack-dev-server": "3.3.1"
+    "webpack-dev-server": "3.3.1",
+    "@storybook/react": "^5.0.11",
+    "@storybook/addon-actions": "^5.0.11",
+    "@storybook/addon-links": "^5.0.11",
+    "@storybook/addons": "^5.0.11"
   },
   "engines": {
     "node": ">= 10.0.0",
@@ -76,6 +80,8 @@
     "flow-typed": "flow-typed",
     "flow-coverage": "flow-coverage-report -i 'web/js/**/*.js' -t html -t text -o target/flow-coverage/",
     "analyze": "source-map-explorer target/webpack/bundle.js",
-    "browserslist": "browserslist"
+    "browserslist": "browserslist",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   }
 }
