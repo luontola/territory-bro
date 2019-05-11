@@ -94,40 +94,41 @@ let CongregationsByIdCache;
 function refreshCongregations() {
   console.info("Reset congregations cache");
   CongregationsCache = unstable_createResource(async () => {
-      console.info("Fetch congregations");
-      const response = await api.get('/api/congregations');
-      return response.data;
-    }
-  );
+    console.info("Fetch congregations");
+    const response = await api.get('/api/congregations');
+    return response.data;
+  });
   CongregationsByIdCache = unstable_createResource(async (congregationId) => {
-      console.info(`Fetch congregation ${congregationId}`);
-      const response = await api.get(`/api/congregation/${congregationId}`);
-      const congregation: Congregation = response.data;
-      congregation.territories = sortTerritories(congregation.territories);
-      congregation.subregions = sortSubregions(congregation.subregions);
-      congregation.territories.forEach(territory => {
-        territory.enclosingSubregion = getEnclosing(territory.location,
-          congregation.subregions.map(subregion => subregion.location));
-        territory.enclosingMinimapViewport = getEnclosing(territory.location,
-          congregation.cardMinimapViewports.map(viewport => viewport.location));
-      });
-      congregation.location = mergeMultiPolygons(
-        congregation.congregationBoundaries.map(boundary => boundary.location)) ||
-        "MULTIPOLYGON(((180 90,180 -90,-180 -90,-180 90,180 90)))";
+    console.info(`Fetch congregation ${congregationId}`);
+    const response = await api.get(`/api/congregation/${congregationId}`);
+    return enrichCongregation(response.data);
+  });
+}
 
-      const territoriesById = keyBy(congregation.territories, 'id');
-      congregation.getTerritoryById = (id) => territoriesById[id] || (() => {
-        throw Error(`Territory not found: ${id}`)
-      })();
+export function enrichCongregation(congregation: Congregation): Congregation {
+  congregation.territories = sortTerritories(congregation.territories);
+  congregation.subregions = sortSubregions(congregation.subregions);
+  congregation.territories.forEach(territory => {
+    territory.enclosingSubregion = getEnclosing(territory.location,
+      congregation.subregions.map(subregion => subregion.location));
+    territory.enclosingMinimapViewport = getEnclosing(territory.location,
+      congregation.cardMinimapViewports.map(viewport => viewport.location));
+  });
+  congregation.location = mergeMultiPolygons(
+    congregation.congregationBoundaries.map(boundary => boundary.location)) ||
+    "MULTIPOLYGON(((180 90,180 -90,-180 -90,-180 90,180 90)))";
 
-      const subregionsById = keyBy(congregation.subregions, 'id');
-      congregation.getSubregionById = (id) => subregionsById[id] || (() => {
-        throw Error(`Subregion not found: ${id}`)
-      })();
+  const territoriesById = keyBy(congregation.territories, 'id');
+  congregation.getTerritoryById = (id) => territoriesById[id] || (() => {
+    throw Error(`Territory not found: ${id}`)
+  })();
 
-      return congregation;
-    }
-  )
+  const subregionsById = keyBy(congregation.subregions, 'id');
+  congregation.getSubregionById = (id) => subregionsById[id] || (() => {
+    throw Error(`Subregion not found: ${id}`)
+  })();
+
+  return congregation;
 }
 
 function getEnclosing(innerWkt: string, enclosingCandidateWkts: Array<string>): ?string {

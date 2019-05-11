@@ -81,7 +81,7 @@
     "flow-coverage": "flow-coverage-report -i 'web/js/**/*.js' -t html -t text -o target/flow-coverage/",
     "analyze": "source-map-explorer target/webpack/bundle.js",
     "browserslist": "browserslist",
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "storybook": "start-storybook --port 6006 --static-dir web/html",
+    "build-storybook": "build-storybook --static-dir web/html"
   }
 }

@@ -26,7 +26,11 @@ type Props = {
 export default class TerritoryMiniMap extends OpenLayersMap<Props> {
   componentDidMount() {
     const {territory, congregation} = this.props;
-    initTerritoryMiniMap(this.element, territory, congregation);
+    if (congregation.location) {
+      initTerritoryMiniMap(this.element, territory, congregation);
+    } else {
+      this.element.innerText = "Error: Congregation boundary is not defined"
+    }
   }
 }
 
