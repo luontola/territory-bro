@@ -12,6 +12,8 @@ const CongregationPage = ({congregationId}) => {
     <>
       <h1>{congregation.name}</h1>
       <p><Link to="printouts">Printouts</Link></p>
+      {/* TODO: show download link only if the user has GIS access */}
+      <p><a href={`/api/congregation/${congregationId}/qgis-project`}>Download QGIS project</a></p>
     </>
   );
 };
