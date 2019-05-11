@@ -6,7 +6,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(def project-template (io/resource "template-territories2.qgs"))
+(def project-template (io/resource "template-territories.qgs"))
 
 (defn generate-project [{:keys [database-host database-name database-schema database-username database-password]}]
   (assert database-host "host is missing")
