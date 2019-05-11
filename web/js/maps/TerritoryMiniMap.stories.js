@@ -2,10 +2,11 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+import "../layout/defaultStyles";
 import React from 'react';
 import {storiesOf} from '@storybook/react';
 import TerritoryMiniMap from "./TerritoryMiniMap";
-import {demoCongregation, territory101} from "./testdata";
+import {demoCongregation, territory101} from "../testdata";
 
 const Box = ({children}) => (
   <div style={{width: '5cm', height: '5cm'}}>

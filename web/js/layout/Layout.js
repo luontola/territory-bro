@@ -4,9 +4,7 @@
 
 /* @flow */
 
-import "purecss/build/pure-min.css";
-import "purecss/build/grids-responsive-min.css";
-import "./Layout.css";
+import "./defaultStyles";
 import * as React from 'react';
 import AuthenticationPanel from "./AuthenticationPanel";
 import {Link} from "@reach/router";

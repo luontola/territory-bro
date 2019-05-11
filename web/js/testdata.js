@@ -2,33 +2,33 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {enrichCongregation} from "../api";
+import {enrichCongregation} from "./api";
 
 const data = {
   "id": "e473cf8c-92de-4e03-803f-a33a7fbd509d",
-  "name": "test",
+  "name": "Demo Congregation",
   "territories": [
     {
       "id": "36075e2f-c703-40f7-96df-33cd275eaa07",
       "number": "101",
-      "addresses": "",
-      "subregion": "",
+      "addresses": "Luotsikatu 10\nKatajanokankatu 3",
+      "subregion": "Katajanokka",
       "meta": {},
       "location": "MULTIPOLYGON(((24.9655745822202 60.1679034309706,24.9656020817804 60.1674884704389,24.9662804042653 60.1675067105724,24.9662620712252 60.1679262308479,24.9655745822202 60.1679034309706)))"
     },
     {
       "id": "eb771c05-139b-4023-ac65-5b9fb3ef30e1",
       "number": "102",
-      "addresses": "",
-      "subregion": "",
+      "addresses": "Kauppiaankatu 7, 8-10",
+      "subregion": "Katajanokka",
       "meta": {},
       "location": "MULTIPOLYGON(((24.9656204148205 60.16750215054,24.9656387478606 60.1671099853841,24.9663629029459 60.1671145454709,24.9663445699058 60.1675203906659,24.9656204148205 60.16750215054)),((24.9661033146067 60.167036053578,24.9661128107918 60.1666439511929,24.9667490551952 60.1666486753459,24.9667110704547 60.1670549499603,24.9661033146067 60.167036053578)))"
     },
     {
       "id": "5be622a7-6588-455c-bb9a-f9ae0616d273",
       "number": "201",
-      "addresses": "",
-      "subregion": "",
+      "addresses": "Itäinen Puistotie 11, 12\nOikotie 1",
+      "subregion": "Kaivopuisto",
       "meta": {},
       "location": "MULTIPOLYGON(((24.958648131807 60.1571240474594,24.9590776329487 60.1572539613521,24.9597850465938 60.1572665336371,24.9601640181894 60.1570150870243,24.9590860545397 60.1567175393812,24.958648131807 60.1571240474594)),((24.9594397613623 60.1576772256348,24.9597850465938 60.1574048284542,24.9604419306929 60.1575934113581,24.9600461159152 60.1578616162911,24.9594397613623 60.1576772256348)))"
     }

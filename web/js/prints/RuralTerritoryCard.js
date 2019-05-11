@@ -2,25 +2,18 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-/* @flow */
-
 import React from "react";
 import {FormattedMessage} from "react-intl";
 import TerritoryMap from "../maps/TerritoryMap";
 import TerritoryMiniMap from "../maps/TerritoryMiniMap";
 import {getCongregationById} from "../api";
-import type {MapRaster} from "../maps/mapOptions";
 import styles from "./RuralTerritoryCard.css";
 import A5PrintFrame from "./A5PrintFrame";
 import PrintDateNotice from "./PrintDateNotice";
 
-const RuralTerritoryCard = ({territoryId, congregationId, mapRaster}: {
-  territoryId: string,
-  congregationId: string,
-  mapRaster: MapRaster
-}) => {
-  const congregation = getCongregationById(congregationId);
-  const territory = congregation.getTerritoryById(territoryId);
+const RuralTerritoryCard = ({territory, territoryId, congregation, congregationId, mapRaster}) => {
+  congregation = congregation || getCongregationById(congregationId);
+  territory = territory || congregation.getTerritoryById(territoryId);
   return (
     <A5PrintFrame>
       <div className={styles.root}>
