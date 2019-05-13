@@ -5,10 +5,10 @@
     /* print margins */
     margin: 8mm;
     /* layout */
-    --minmap-size: 17mm;
+    --minimap-size: 17mm;
     display: grid;
-    grid-template-columns: var(--minmap-size) auto var(--minmap-size);
-    grid-template-rows: var(--minmap-size) auto;
+    grid-template-columns: var(--minimap-size) auto var(--minimap-size);
+    grid-template-rows: var(--minimap-size) auto;
     grid-template-areas:
             "minimap header number"
             "map map map";
