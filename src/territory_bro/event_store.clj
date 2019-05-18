@@ -32,9 +32,12 @@
         (doall))))
 
 (defn save! [conn stream-id stream-revision events]
-  (doseq [[stream-revision event] (->> events
-                                       (map-indexed (fn [idx event]
-                                                      [(+ 1 idx stream-revision) event])))]
-    (query! conn :save-event {:stream stream-id
-                              :stream_revision stream-revision
-                              :data event})))
+  (->> events
+       (map-indexed
+        (fn [idx event]
+          (let [next-revision (+ 1 idx stream-revision)
+                [result] (query! conn :save-event {:stream stream-id
+                                                   :stream_revision next-revision
+                                                   :data event})]
+            (:global_revision result))))
+       (last)))

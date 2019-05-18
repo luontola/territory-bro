@@ -22,8 +22,11 @@
                    :stuff "foo"}
                   {:event/type :event-2
                    :stuff "bar"}]]
-      (event-store/save! conn stream-1 0 events)
-      (event-store/save! conn stream-2 0 events)
+
+      (testing "create new stream"
+        (is (= 2 (event-store/save! conn stream-1 0 events)))
+        (is (= 4 (event-store/save! conn stream-2 0 events))
+            "should return the global revision of the last written event"))
 
       (testing "read stream"
         (is (= [{:event/stream-id stream-1
@@ -77,7 +80,15 @@
                  :stuff "bar"}]
                (event-store/read-all-events conn {:since 3}))))
 
-      (testing "append to stream") ; TODO
+      (testing "append to stream"
+        (is (= 5 (event-store/save! conn stream-1 2 [{:event/type :event-3
+                                                      :stuff "gazonk"}])))
+        (is (= [{:event/stream-id stream-1
+                 :event/stream-revision 3
+                 :event/global-revision 5
+                 :event/type :event-3
+                 :stuff "gazonk"}]
+               (event-store/read-stream conn stream-1 {:since 2}))))
 
       (testing "error: expected revision too low") ; TODO
 

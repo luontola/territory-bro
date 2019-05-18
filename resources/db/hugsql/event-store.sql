@@ -11,6 +11,6 @@ from event
 where global_revision > :since
 order by global_revision;
 
--- :name save-event :!
+-- :name save-event :<!
 insert into event (stream_id, stream_revision, data)
-values (:stream, :stream_revision, :data);
+values (:stream, :stream_revision, :data) returning global_revision;
