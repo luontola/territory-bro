@@ -4,11 +4,14 @@
 
 (ns territory-bro.event-store-test
   (:require [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str]
             [clojure.test :refer :all]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
-            [territory-bro.fixtures :refer [db-fixture]])
-  (:import (java.util UUID)))
+            [territory-bro.fixtures :refer [db-fixture]]
+            [territory-bro.testutil :refer [re-contains grab-exception]])
+  (:import (java.util UUID)
+           (org.postgresql.util PSQLException)))
 
 (use-fixtures :once db-fixture)
 
@@ -88,8 +91,30 @@
                  :event/global-revision 5
                  :event/type :event-3
                  :stuff "gazonk"}]
-               (event-store/read-stream conn stream-1 {:since 2}))))
+               (event-store/read-stream conn stream-1 {:since 2}))))))
 
-      (testing "error: expected revision too low") ; TODO
+  (db/with-db [conn {}]
+    (jdbc/db-set-rollback-only! conn)
+    (testing "error: expected revision too low"
+      (let [stream-id (UUID/randomUUID)]
+        (event-store/save! conn stream-id 0 [{:event/type :event-1}])
+        (let [exception (grab-exception
+                          (event-store/save! conn stream-id 0 [{:event/type :event-2}]))]
+          (is (instance? PSQLException exception))
+          (is (str/starts-with? (.getMessage exception)
+                                (str "ERROR: tried to insert stream revision 1 but it should have been 2\n"
+                                     "  Hint: The transaction might succeed if retried.")))
+          (is (= "40001" (.getSQLState exception)))))))
 
-      (testing "error: expected revision too high")))) ; TODO
+  (db/with-db [conn {}]
+    (jdbc/db-set-rollback-only! conn)
+    (testing "error: expected revision too high"
+      (let [stream-id (UUID/randomUUID)]
+        (event-store/save! conn stream-id 0 [{:event/type :event-1}])
+        (let [exception (grab-exception
+                          (event-store/save! conn stream-id 2 [{:event/type :event-2}]))]
+          (is (instance? PSQLException exception))
+          (is (str/starts-with? (.getMessage exception)
+                                (str "ERROR: tried to insert stream revision 3 but it should have been 2\n"
+                                     "  Hint: The transaction might succeed if retried.")))
+          (is (= "40001" (.getSQLState exception))))))))
