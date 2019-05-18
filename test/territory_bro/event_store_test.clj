@@ -25,7 +25,7 @@
       (event-store/save! conn stream-1 0 events)
       (event-store/save! conn stream-2 0 events)
 
-      (testing "read whole stream"
+      (testing "read stream"
         (is (= [{:event/stream-id stream-1
                  :event/stream-revision 1
                  :event/global-revision 1
@@ -46,9 +46,36 @@
                  :stuff "bar"}]
                (event-store/read-stream conn stream-1 {:since 1}))))
 
-      (testing "read all events") ; TODO
+      (testing "read all events"
+        (is (= [{:event/stream-id stream-1
+                 :event/stream-revision 1
+                 :event/global-revision 1
+                 :event/type :event-1
+                 :stuff "foo"}
+                {:event/stream-id stream-1
+                 :event/stream-revision 2
+                 :event/global-revision 2
+                 :event/type :event-2
+                 :stuff "bar"}
+                {:event/stream-id stream-2
+                 :event/stream-revision 1
+                 :event/global-revision 3
+                 :event/type :event-1
+                 :stuff "foo"}
+                {:event/stream-id stream-2
+                 :event/stream-revision 2
+                 :event/global-revision 4
+                 :event/type :event-2
+                 :stuff "bar"}]
+               (event-store/read-all-events conn))))
 
-      (testing "read all events since revision") ; TODO
+      (testing "read all events since revision"
+        (is (= [{:event/stream-id stream-2
+                 :event/stream-revision 2
+                 :event/global-revision 4
+                 :event/type :event-2
+                 :stuff "bar"}]
+               (event-store/read-all-events conn {:since 3}))))
 
       (testing "append to stream") ; TODO
 

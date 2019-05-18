@@ -23,6 +23,14 @@
         (map format-event)
         (doall))))
 
+(defn read-all-events
+  ([conn]
+   (read-all-events conn {}))
+  ([conn opts]
+   (->> (query! conn :read-all-events {:since (get opts :since 0)})
+        (map format-event)
+        (doall))))
+
 (defn save! [conn stream-id stream-revision events]
   (doseq [[stream-revision event] (->> events
                                        (map-indexed (fn [idx event]
