@@ -4,6 +4,7 @@
 
 (ns territory-bro.util-test
   (:require [clojure.test :refer :all]
+            [territory-bro.testutil :refer [re-equals]]
             [territory-bro.util :refer :all])
   (:import (java.sql SQLException)))
 

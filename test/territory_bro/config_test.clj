@@ -5,7 +5,8 @@
 (ns territory-bro.config-test
   (:require [clojure.test :refer :all]
             [territory-bro.config :refer :all]
-            [territory-bro.util :refer [getx re-equals]])
+            [territory-bro.testutil :refer [re-equals]]
+            [territory-bro.util :refer [getx]])
   (:import (java.time Instant)))
 
 (deftest override-defaults-test

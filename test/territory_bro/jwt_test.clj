@@ -5,7 +5,7 @@
 (ns territory-bro.jwt-test
   (:require [clojure.test :refer :all]
             [territory-bro.jwt :as jwt :refer :all]
-            [territory-bro.util :refer [re-equals]])
+            [territory-bro.testutil :refer [re-equals]])
   (:import (com.auth0.jwk JwkProvider Jwk)
            (java.util Map)
            (java.time Instant)

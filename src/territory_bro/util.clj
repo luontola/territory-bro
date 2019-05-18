@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.util
-  (:import (java.sql SQLException)
-           (java.util.regex Pattern)))
+  (:import (java.sql SQLException)))
 
 (defn fix-sqlexception-chain [^Throwable e]
   (when (instance? SQLException e)
@@ -23,6 +22,3 @@
     (if (nil? value)
       (throw (IllegalArgumentException. (str "key " key " is missing")))
       value)))
-
-(defn re-equals [^String s]
-  (re-pattern (str "^" (Pattern/quote s) "$")))
