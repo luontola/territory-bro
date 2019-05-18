@@ -1,11 +1,16 @@
 create or replace function append_gis_change_log() returns trigger as
 $$
+declare
+    latest_id bigint;
 begin
-    -- make sure that the IDs are committed in monotonically increasing order
     lock table gis_change_log in share row exclusive mode;
 
-    insert into gis_change_log (schema, "table", op, "user", time, old, new)
-    select tg_table_schema,
+    select coalesce(max(id), 0) into latest_id
+    from gis_change_log;
+
+    insert into gis_change_log (id, schema, "table", op, "user", time, old, new)
+    select latest_id + 1,
+           tg_table_schema,
            tg_table_name,
            tg_op,
            current_user,

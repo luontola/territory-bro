@@ -1,6 +1,6 @@
 create table gis_change_log
 (
-    id      bigserial primary key,
+    id      bigint primary key,
     schema  varchar(63) not null,
     "table" varchar(63) not null,
     op      varchar(6)  not null,
