@@ -11,6 +11,9 @@
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture]]
             [territory-bro.gis-user :as gis-user]
+            [territory-bro.region :as region]
+            [territory-bro.territory :as territory]
+            [territory-bro.testdata :as testdata]
             [territory-bro.user :as user])
   (:import (org.postgresql.util PSQLException)))
 
@@ -83,6 +86,18 @@
         (is (jdbc/query conn [(str "select * from " schema ".congregation_boundary")]))
         (is (jdbc/query conn [(str "select * from " schema ".subregion")]))
         (is (jdbc/query conn [(str "select * from " schema ".card_minimap_viewport")]))))
+
+    (testing "can modify data in the tenant schema"
+      (jdbc/with-db-transaction [conn db-spec]
+        (db/use-tenant-schema conn schema)
+        (is (territory/create-territory! conn {::territory/number "123"
+                                               ::territory/addresses "Street 1 A"
+                                               ::territory/subregion "Somewhere"
+                                               ::territory/meta {:foo "bar", :gazonk 42}
+                                               ::territory/location testdata/wkt-multi-polygon}))
+        (is (region/create-congregation-boundary! conn testdata/wkt-multi-polygon))
+        (is (region/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
+        (is (region/create-card-minimap-viewport! conn testdata/wkt-polygon))))
 
     (testing "cannot view the master schema"
       (is (thrown-with-msg? PSQLException #"ERROR: permission denied for schema"

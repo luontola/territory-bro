@@ -21,4 +21,4 @@ begin
 
     return null;
 end
-$fn$ language plpgsql;
+$fn$ language plpgsql security definer;
