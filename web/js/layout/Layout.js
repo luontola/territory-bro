@@ -34,9 +34,9 @@ class Layout extends React.Component<Props> {
           </ul>
         </nav>
 
-        <div className="container">
+        <main className="container">
           {children}
-        </div>
+        </main>
 
       </div>
     );
