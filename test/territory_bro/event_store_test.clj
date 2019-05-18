@@ -98,8 +98,8 @@
     (testing "error: expected revision too low"
       (let [stream-id (UUID/randomUUID)]
         (event-store/save! conn stream-id 0 [{:event/type :event-1}])
-        (let [exception (grab-exception
-                          (event-store/save! conn stream-id 0 [{:event/type :event-2}]))]
+        (let [^PSQLException exception (grab-exception
+                                         (event-store/save! conn stream-id 0 [{:event/type :event-2}]))]
           (is (instance? PSQLException exception))
           (is (str/starts-with? (.getMessage exception)
                                 (str "ERROR: tried to insert stream revision 1 but it should have been 2\n"
@@ -111,8 +111,8 @@
     (testing "error: expected revision too high"
       (let [stream-id (UUID/randomUUID)]
         (event-store/save! conn stream-id 0 [{:event/type :event-1}])
-        (let [exception (grab-exception
-                          (event-store/save! conn stream-id 2 [{:event/type :event-2}]))]
+        (let [^PSQLException exception (grab-exception
+                                         (event-store/save! conn stream-id 2 [{:event/type :event-2}]))]
           (is (instance? PSQLException exception))
           (is (str/starts-with? (.getMessage exception)
                                 (str "ERROR: tried to insert stream revision 3 but it should have been 2\n"
