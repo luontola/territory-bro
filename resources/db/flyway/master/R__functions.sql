@@ -1,5 +1,5 @@
 create or replace function append_gis_change_log() returns trigger as
-$fn$
+$$
 begin
     -- make sure that the IDs are committed in monotonically increasing order
     lock table gis_change_log in share row exclusive mode;
@@ -21,4 +21,19 @@ begin
 
     return null;
 end
-$fn$ language plpgsql security definer;
+$$ language plpgsql security definer;
+
+create or replace function prepare_new_event() returns trigger as
+$$
+declare
+    latest_revision bigint;
+begin
+    lock table event in share row exclusive mode;
+
+    select coalesce(max(global_revision), 0) into latest_revision
+    from event;
+
+    new.global_revision = latest_revision + 1;
+    return new;
+end;
+$$ language plpgsql;
