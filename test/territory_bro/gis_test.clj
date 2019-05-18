@@ -10,11 +10,10 @@
             [territory-bro.fixtures :refer [db-fixture]]
             [territory-bro.gis :as gis]
             [territory-bro.region :as region]
-            [territory-bro.territory :as territory]))
+            [territory-bro.territory :as territory]
+            [territory-bro.testdata :as testdata]))
 
 (use-fixtures :once db-fixture)
-
-(def dummy-location "MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))")
 
 (deftest gis-change-log-test
   (db/with-db [conn {}]
@@ -31,7 +30,7 @@
                                                               ::territory/addresses "Street 1 A"
                                                               ::territory/subregion "Somewhere"
                                                               ::territory/meta {:foo "bar", :gazonk 42}
-                                                              ::territory/location dummy-location})]
+                                                              ::territory/location testdata/wkt-multi-polygon})]
           (testing "insert"
             (let [changes (gis/get-gis-changes conn)]
               (is (= 1 (count changes)))
@@ -43,7 +42,7 @@
                             :addresses "Street 1 A"
                             :subregion "Somewhere"
                             :meta {:foo "bar", :gazonk 42}
-                            :location dummy-location}}
+                            :location testdata/wkt-multi-polygon}}
                      (-> (last changes)
                          (select-keys [:table :op :old :new]))))))
 
@@ -58,13 +57,13 @@
                             :addresses "Street 1 A"
                             :subregion "Somewhere"
                             :meta {:foo "bar", :gazonk 42}
-                            :location dummy-location}
+                            :location testdata/wkt-multi-polygon}
                       :new {:id (str territory-id)
                             :number "123"
                             :addresses "Another Street 2"
                             :subregion "Somewhere"
                             :meta {:foo "bar", :gazonk 42}
-                            :location dummy-location}}
+                            :location testdata/wkt-multi-polygon}}
                      (-> (last changes)
                          (select-keys [:table :op :old :new]))))))
 
@@ -79,25 +78,25 @@
                             :addresses "Another Street 2"
                             :subregion "Somewhere"
                             :meta {:foo "bar", :gazonk 42}
-                            :location dummy-location}
+                            :location testdata/wkt-multi-polygon}
                       :new nil}
                      (-> (last changes)
                          (select-keys [:table :op :old :new]))))))))
 
       (testing "congregation_boundary table change log"
-        (let [region-id (region/create-congregation-boundary! conn dummy-location)
+        (let [region-id (region/create-congregation-boundary! conn testdata/wkt-multi-polygon)
               changes (gis/get-gis-changes conn)]
           (is (= 4 (count changes)))
           (is (= {:table "congregation_boundary"
                   :op "INSERT"
                   :old nil
                   :new {:id (str region-id)
-                        :location dummy-location}}
+                        :location testdata/wkt-multi-polygon}}
                  (-> (last changes)
                      (select-keys [:table :op :old :new]))))))
 
       (testing "subregion table change log"
-        (let [region-id (region/create-subregion! conn "Somewhere" dummy-location)
+        (let [region-id (region/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
               changes (gis/get-gis-changes conn)]
           (is (= 5 (count changes)))
           (is (= {:table "subregion"
@@ -105,7 +104,7 @@
                   :old nil
                   :new {:id (str region-id)
                         :name "Somewhere"
-                        :location dummy-location}}
+                        :location testdata/wkt-multi-polygon}}
                  (-> (last changes)
                      (select-keys [:table :op :old :new]))))))
 

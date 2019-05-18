@@ -8,7 +8,8 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture]]
-            [territory-bro.territory :as territory]))
+            [territory-bro.territory :as territory]
+            [territory-bro.testdata :as testdata]))
 
 (use-fixtures :once db-fixture)
 
@@ -22,7 +23,7 @@
                                                           ::territory/addresses "Street 1 A"
                                                           ::territory/subregion "Somewhere"
                                                           ::territory/meta {:foo "bar", :gazonk 42}
-                                                          ::territory/location "MULTIPOLYGON(((30 20, 45 40, 10 40, 30 20)),((15 5, 40 10, 10 20, 5 10, 15 5)))"})]
+                                                          ::territory/location testdata/wkt-multi-polygon})]
 
       (testing "create new territory"
         (is territory-id))
@@ -33,7 +34,7 @@
                 ::territory/addresses "Street 1 A"
                 ::territory/subregion "Somewhere"
                 ::territory/meta {:foo "bar", :gazonk 42}
-                ::territory/location "MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))"}
+                ::territory/location testdata/wkt-multi-polygon}
                (territory/get-by-id conn territory-id))))
 
       (testing "list territories"
