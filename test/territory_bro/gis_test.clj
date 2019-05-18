@@ -23,25 +23,63 @@
       (testing "before making changes"
         (is (= [] (gis/get-gis-changes conn))))
 
-      (testing "territory table change log"
+      (testing "territory table change log,"
         (let [territory-id (territory/create-territory! conn {::territory/number "123"
                                                               ::territory/addresses "Street 1 A"
                                                               ::territory/subregion "Somewhere"
                                                               ::territory/meta {:foo "bar", :gazonk 42}
-                                                              ::territory/location "MULTIPOLYGON(((30 20, 45 40, 10 40, 30 20)),((15 5, 40 10, 10 20, 5 10, 15 5)))"})
-              changes (gis/get-gis-changes conn)]
-          (is (= 1 (count changes)))
-          (is (= {:table "territory"
-                  :op "INSERT"
-                  :new {:id (str territory-id)
-                        :number "123"
-                        :addresses "Street 1 A"
-                        :subregion "Somewhere"
-                        :meta {:foo "bar", :gazonk 42}
-                        :location "MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))"}}
-                 (-> (first changes)
-                     (select-keys [:table :op :new]))))))
-      ;; TODO: update and delete
+                                                              ::territory/location "MULTIPOLYGON(((30 20, 45 40, 10 40, 30 20)),((15 5, 40 10, 10 20, 5 10, 15 5)))"})]
+          (testing "insert"
+            (let [changes (gis/get-gis-changes conn)]
+              (is (= 1 (count changes)))
+              (is (= {:table "territory"
+                      :op "INSERT"
+                      :old nil
+                      :new {:id (str territory-id)
+                            :number "123"
+                            :addresses "Street 1 A"
+                            :subregion "Somewhere"
+                            :meta {:foo "bar", :gazonk 42}
+                            :location "MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))"}}
+                     (-> (last changes)
+                         (select-keys [:table :op :old :new]))))))
+
+          (jdbc/execute! conn ["UPDATE territory SET addresses = 'Another Street 2' WHERE id = ?" territory-id])
+          (testing "update"
+            (let [changes (gis/get-gis-changes conn)]
+              (is (= 2 (count changes)))
+              (is (= {:table "territory"
+                      :op "UPDATE"
+                      :old {:id (str territory-id)
+                            :number "123"
+                            :addresses "Street 1 A"
+                            :subregion "Somewhere"
+                            :meta {:foo "bar", :gazonk 42}
+                            :location "MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))"}
+                      :new {:id (str territory-id)
+                            :number "123"
+                            :addresses "Another Street 2"
+                            :subregion "Somewhere"
+                            :meta {:foo "bar", :gazonk 42}
+                            :location "MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))"}}
+                     (-> (last changes)
+                         (select-keys [:table :op :old :new]))))))
+
+          (jdbc/execute! conn ["DELETE FROM territory WHERE id = ?" territory-id])
+          (testing "delete"
+            (let [changes (gis/get-gis-changes conn)]
+              (is (= 3 (count changes)))
+              (is (= {:table "territory"
+                      :op "DELETE"
+                      :old {:id (str territory-id)
+                            :number "123"
+                            :addresses "Another Street 2"
+                            :subregion "Somewhere"
+                            :meta {:foo "bar", :gazonk 42}
+                            :location "MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))"}
+                      :new nil}
+                     (-> (last changes)
+                         (select-keys [:table :op :old :new]))))))))
 
       (testing "congregation_boundary table change log") ; TODO
 
