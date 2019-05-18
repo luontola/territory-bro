@@ -7,6 +7,7 @@
             [clojure.test :refer :all]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
+            [territory-bro.event-store :as event-store]
             [territory-bro.fixtures :refer [db-fixture]]
             [territory-bro.user :as user])
   (:import (java.util UUID)))
@@ -24,6 +25,13 @@
       (let [id (congregation/create-congregation! conn "the name")
             congregation (congregation/get-unrestricted-congregation conn id)]
         (is id)
+        (is (= [{:event/type :congregation.event/congregation-created
+                 :event/version 1
+                 ::congregation/id (str id) ; TODO: coerce to UUID
+                 ::congregation/name "the name"
+                 ::congregation/schema-name (::congregation/schema-name congregation)}]
+               (->> (event-store/read-stream conn id)
+                    (map #(dissoc % :event/stream-id :event/stream-revision :event/global-revision)))))
         (is (= id (::congregation/id congregation)))
         (is (= "the name" (::congregation/name congregation)))
         (is (contains? (set (db/get-schemas conn))

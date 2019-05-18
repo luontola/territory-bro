@@ -6,7 +6,10 @@
   (:require [clojure.string :as str]
             [clojure.tools.logging :as log]
             [territory-bro.config :as config]
-            [territory-bro.db :as db])
+            [territory-bro.db :as db]
+            [territory-bro.event-store :as event-store]
+            [territory-bro.permission :as permission]
+            [territory-bro.user :as user])
   (:import (java.util UUID)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
@@ -50,6 +53,11 @@
     (assert (not (contains? (set (db/get-schemas conn))
                             tenant-schema))
             {:schema-name tenant-schema})
+    (event-store/save! conn id 0 [{:event/type :congregation.event/congregation-created
+                                   :event/version 1
+                                   ::id id
+                                   ::name name
+                                   ::schema-name tenant-schema}])
     (query! conn :create-congregation {:id id
                                        :name name
                                        :schema_name tenant-schema})
@@ -66,11 +74,25 @@
        (doall)))
 
 (defn grant-access! [conn cong-id user-id]
+  (event-store/save! conn cong-id
+                     (count (event-store/read-stream conn cong-id))
+                     [{:event/type :congregation.event/permission-granted
+                       :event/version 1
+                       ::id cong-id
+                       ::user/id user-id
+                       ::permission/id :view-congregation}])
   (query! conn :grant-access {:congregation cong-id
                               :user user-id})
   nil)
 
 (defn revoke-access! [conn cong-id user-id]
+  (event-store/save! conn cong-id
+                     (count (event-store/read-stream conn cong-id))
+                     [{:event/type :congregation.event/permission-revoked
+                       :event/version 1
+                       ::id cong-id
+                       ::user/id user-id
+                       ::permission/id :view-congregation}])
   (query! conn :revoke-access {:congregation cong-id
                                :user user-id})
   nil)

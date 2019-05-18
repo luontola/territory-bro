@@ -6,7 +6,10 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.test :refer [deftest is]]
             [territory-bro.congregation :as congregation]
-            [territory-bro.db :as db])
+            [territory-bro.db :as db]
+            [territory-bro.event-store :as event-store]
+            [territory-bro.permission :as permission]
+            [territory-bro.user :as user])
   (:import (java.util Base64)
            (java.security SecureRandom)))
 
@@ -51,6 +54,19 @@
         password (generate-password 50)
         schema (::congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
     (assert schema)
+    (event-store/save! conn cong-id
+                       (count (event-store/read-stream conn cong-id))
+                       [{:event/type :congregation.event/permission-granted
+                         :event/version 1
+                         ::congregation/id cong-id
+                         ::user/id user-id
+                         ::permission/id :gis-access}
+                        {:event/type :congregation.event/gis-user-created
+                         :event/version 1
+                         ::congregation/id cong-id
+                         ::user/id user-id
+                         ::username username
+                         ::password password}])
     (query! conn :create-gis-user {:congregation cong-id
                                    :user user-id
                                    :username username
@@ -78,6 +94,18 @@
   (let [username (::username (get-gis-user conn cong-id user-id))
         schema (::congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
     (assert schema)
+    (event-store/save! conn cong-id
+                       (count (event-store/read-stream conn cong-id))
+                       [{:event/type :congregation.event/permission-revoked
+                         :event/version 1
+                         ::congregation/id cong-id
+                         ::user/id user-id
+                         ::permission/id :gis-access}
+                        {:event/type :congregation.event/gis-user-deleted
+                         :event/version 1
+                         ::congregation/id cong-id
+                         ::user/id user-id
+                         ::username username}])
     (drop-role-cascade! conn username [schema])
     (query! conn :delete-gis-user {:congregation cong-id
                                    :user user-id})
