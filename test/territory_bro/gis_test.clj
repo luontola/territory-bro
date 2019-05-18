@@ -46,8 +46,8 @@
                      (-> (last changes)
                          (select-keys [:table :op :old :new]))))))
 
-          (jdbc/execute! conn ["UPDATE territory SET addresses = 'Another Street 2' WHERE id = ?" territory-id])
           (testing "update"
+            (jdbc/execute! conn ["UPDATE territory SET addresses = 'Another Street 2' WHERE id = ?" territory-id])
             (let [changes (gis/get-gis-changes conn)]
               (is (= 2 (count changes)))
               (is (= {:table "territory"
@@ -67,8 +67,8 @@
                      (-> (last changes)
                          (select-keys [:table :op :old :new]))))))
 
-          (jdbc/execute! conn ["DELETE FROM territory WHERE id = ?" territory-id])
           (testing "delete"
+            (jdbc/execute! conn ["DELETE FROM territory WHERE id = ?" territory-id])
             (let [changes (gis/get-gis-changes conn)]
               (is (= 3 (count changes)))
               (is (= {:table "territory"
@@ -108,4 +108,14 @@
                  (-> (last changes)
                      (select-keys [:table :op :old :new]))))))
 
-      (testing "card_minimap_viewport table change log")))) ; TODO
+      (testing "card_minimap_viewport table change log"
+        (let [region-id (region/create-card-minimap-viewport! conn testdata/wkt-polygon)
+              changes (gis/get-gis-changes conn)]
+          (is (= 6 (count changes)))
+          (is (= {:table "card_minimap_viewport"
+                  :op "INSERT"
+                  :old nil
+                  :new {:id (str region-id)
+                        :location testdata/wkt-polygon}}
+                 (-> (last changes)
+                     (select-keys [:table :op :old :new])))))))))

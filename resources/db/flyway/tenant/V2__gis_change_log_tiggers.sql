@@ -15,3 +15,9 @@ create trigger subregion_change_log
     on subregion
     for each row
 execute procedure ${masterSchema}.append_gis_change_log();
+
+create trigger card_minimap_viewport_change_log
+    after insert or update or delete
+    on card_minimap_viewport
+    for each row
+execute procedure ${masterSchema}.append_gis_change_log();
