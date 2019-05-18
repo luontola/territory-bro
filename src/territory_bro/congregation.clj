@@ -43,16 +43,17 @@
 
 (defn create-congregation! [conn name]
   (let [id (UUID/randomUUID)
-        schema-name (str (:database-schema config/env)
-                         "_"
-                         (str/replace (str id) "-" ""))]
+        master-schema (:database-schema config/env)
+        tenant-schema (str master-schema
+                           "_"
+                           (str/replace (str id) "-" ""))]
     (assert (not (contains? (set (db/get-schemas conn))
-                            schema-name))
-            {:schema-name schema-name})
+                            tenant-schema))
+            {:schema-name tenant-schema})
     (query! conn :create-congregation {:id id
                                        :name name
-                                       :schema_name schema-name})
-    (-> (db/tenant-schema schema-name)
+                                       :schema_name tenant-schema})
+    (-> (db/tenant-schema tenant-schema master-schema)
         (.migrate))
     (log/info "Congregation created:" id)
     id))

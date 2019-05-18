@@ -146,11 +146,12 @@
       (.locations (strings "classpath:db/flyway/master"))
       (.load)))
 
-(defn ^Flyway tenant-schema [schema]
+(defn ^Flyway tenant-schema [schema master-schema]
   (-> (Flyway/configure)
       (.dataSource (get-in databases [:default :datasource]))
       (.schemas (strings schema))
       (.locations (strings "classpath:db/flyway/tenant"))
+      (.placeholders {"masterSchema" master-schema})
       (.load)))
 
 (defn get-schemas [conn]

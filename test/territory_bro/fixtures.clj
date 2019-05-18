@@ -28,11 +28,14 @@
   (mount/start-with-args test-env
                          #'config/env
                          #'db/databases)
+  ;; cleanup
   (db/with-db [conn {}]
     (delete-schemas-starting-with! conn (:database-schema test-env)))
+  ;; setup
   (-> (db/master-schema (:database-schema config/env))
       (.migrate))
-  (-> (db/tenant-schema (str (:database-schema config/env) "_tenant"))
+  (-> (db/tenant-schema (str (:database-schema config/env) "_tenant")
+                        (:database-schema config/env))
       (.migrate))
   (f)
   (mount/stop))
