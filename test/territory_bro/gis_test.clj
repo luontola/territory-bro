@@ -32,6 +32,7 @@
               changes (gis/get-gis-changes conn)]
           (is (= 1 (count changes)))
           (is (= {:table "territory"
+                  :op "INSERT"
                   :new {:id (str territory-id)
                         :number "123"
                         :addresses "Street 1 A"
@@ -39,7 +40,7 @@
                         :meta {:foo "bar", :gazonk 42}
                         :location "MULTIPOLYGON(((30 20,45 40,10 40,30 20)),((15 5,40 10,10 20,5 10,15 5)))"}}
                  (-> (first changes)
-                     (select-keys [:table :new]))))))
+                     (select-keys [:table :op :new]))))))
       ;; TODO: update and delete
 
       (testing "congregation_boundary table change log") ; TODO

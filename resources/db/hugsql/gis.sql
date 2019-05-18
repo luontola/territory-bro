@@ -1,5 +1,5 @@
 -- :name get-gis-changes :? :*
-select id, schema, "table", "user", time, old, new
+select id, schema, "table", op, "user", time, old, new
 from gis_change_log
 where 1 = 1
 /*~ (when (:since params) */
