@@ -96,6 +96,17 @@
                  (-> (last changes)
                      (select-keys [:table :op :old :new]))))))
 
-      (testing "subregion table change log") ; TODO
+      (testing "subregion table change log"
+        (let [region-id (region/create-subregion! conn "Somewhere" dummy-location)
+              changes (gis/get-gis-changes conn)]
+          (is (= 5 (count changes)))
+          (is (= {:table "subregion"
+                  :op "INSERT"
+                  :old nil
+                  :new {:id (str region-id)
+                        :name "Somewhere"
+                        :location dummy-location}}
+                 (-> (last changes)
+                     (select-keys [:table :op :old :new]))))))
 
       (testing "card_minimap_viewport table change log")))) ; TODO

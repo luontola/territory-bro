@@ -9,3 +9,9 @@ create trigger congregation_boundary_change_log
     on congregation_boundary
     for each row
 execute procedure ${masterSchema}.append_gis_change_log();
+
+create trigger subregion_change_log
+    after insert or update or delete
+    on subregion
+    for each row
+execute procedure ${masterSchema}.append_gis_change_log();
