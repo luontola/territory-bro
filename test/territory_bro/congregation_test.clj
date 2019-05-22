@@ -27,7 +27,7 @@
         (is id)
         (is (= [{:event/type :congregation.event/congregation-created
                  :event/version 1
-                 :congregation/id (str id) ; TODO: coerce to UUID
+                 :congregation/id id
                  :congregation/name "the name"
                  :congregation/schema-name (:congregation/schema-name congregation)}]
                (->> (event-store/read-stream conn id)

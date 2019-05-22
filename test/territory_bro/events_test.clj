@@ -22,7 +22,7 @@
 
 (deftest test-event-schema
   (testing "check specific event schema"
-    (is (nil? (s/check events/CongregationCreatedEvent valid-event))))
+    (is (nil? (s/check events/CongregationCreated valid-event))))
 
   (testing "check generic event schema"
     (is (nil? (s/check events/Event valid-event))))
