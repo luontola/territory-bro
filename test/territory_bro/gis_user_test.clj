@@ -34,21 +34,21 @@
       (gis-user/create-gis-user! conn cong-id2 user-id2)
       (testing "create & get GIS user"
         (let [user (gis-user/get-gis-user conn cong-id user-id)]
-          (is (::gis-user/username user))
-          (is (= 50 (count ((::gis-user/password user)))))))
+          (is (:gis-user/username user))
+          (is (= 50 (count ((:gis-user/password user)))))))
 
       (testing "get GIS users by congregation"
         (is (= #{[cong-id user-id]
                  [cong-id user-id2]}
                (->> (gis-user/get-gis-users conn {:congregation cong-id})
-                    (map (juxt ::gis-user/congregation ::gis-user/user))
+                    (map (juxt :congregation/id :user/id))
                     (into #{})))))
 
       (testing "get GIS users by user"
         (is (= #{[cong-id user-id]
                  [cong-id2 user-id]}
                (->> (gis-user/get-gis-users conn {:user user-id})
-                    (map (juxt ::gis-user/congregation ::gis-user/user))
+                    (map (juxt :congregation/id :user/id))
                     (into #{})))))
 
       (testing "delete GIS user"
@@ -66,9 +66,9 @@
           gis-user (gis-user/get-gis-user conn cong-id user-id)]
       {:cong-id cong-id
        :user-id user-id
-       :schema (::congregation/schema-name cong)
-       :username (::gis-user/username gis-user)
-       :password ((::gis-user/password gis-user))})))
+       :schema (:congregation/schema-name cong)
+       :username (:gis-user/username gis-user)
+       :password ((:gis-user/password gis-user))})))
 
 (deftest gis-user-database-access-test
   (let [{:keys [cong-id user-id schema username password]} (create-test-data!)
@@ -90,11 +90,11 @@
     (testing "can modify data in the tenant schema"
       (jdbc/with-db-transaction [conn db-spec]
         (db/use-tenant-schema conn schema)
-        (is (territory/create-territory! conn {::territory/number "123"
-                                               ::territory/addresses "Street 1 A"
-                                               ::territory/subregion "Somewhere"
-                                               ::territory/meta {:foo "bar", :gazonk 42}
-                                               ::territory/location testdata/wkt-multi-polygon}))
+        (is (territory/create-territory! conn {:territory/number "123"
+                                               :territory/addresses "Street 1 A"
+                                               :territory/subregion "Somewhere"
+                                               :territory/meta {:foo "bar", :gazonk 42}
+                                               :territory/location testdata/wkt-multi-polygon}))
         (is (region/create-congregation-boundary! conn testdata/wkt-multi-polygon))
         (is (region/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
         (is (region/create-card-minimap-viewport! conn testdata/wkt-polygon))))

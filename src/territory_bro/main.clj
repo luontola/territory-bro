@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.main
-  (:require [clojure.tools.cli :as cli]
-            [clojure.tools.logging :as log]
+  (:require [clojure.tools.logging :as log]
             [luminus-migrations.core :as migrations]
             [luminus.http-server :as http]
             [luminus.repl-server :as repl]
@@ -40,7 +39,7 @@
 
     (doseq [congregation (db/with-db [conn {}]
                            (congregation/get-unrestricted-congregations conn))]
-      (let [tenant-schema (::congregation/schema-name congregation)]
+      (let [tenant-schema (:congregation/schema-name congregation)]
         (log/info "Migrating tenant schema" tenant-schema)
         (-> (db/tenant-schema tenant-schema master-schema)
             (.migrate))))))

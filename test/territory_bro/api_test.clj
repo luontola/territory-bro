@@ -96,7 +96,7 @@
     (db/with-db [conn {}]
       (let [user (user/get-by-subject conn (:sub (jwt/validate jwt-test/token config/env)))]
         (is user)
-        (is (= "Esko Luontola" (get-in user [::user/attributes :name]))))))
+        (is (= "Esko Luontola" (get-in user [:user/attributes :name]))))))
 
   (testing "login with expired token"
     (binding [config/env (assoc config/env :now #(Instant/now))]
@@ -122,7 +122,7 @@
     (db/with-db [conn {}]
       (let [user (user/get-by-subject conn "developer")]
         (is user)
-        (is (= "Developer" (get-in user [::user/attributes :name]))))))
+        (is (= "Developer" (get-in user [:user/attributes :name]))))))
 
   (testing "dev login outside dev mode"
     (let [response (-> (request :post "/api/dev-login")
@@ -255,7 +255,7 @@
     (testing "requires GIS access"
       (db/with-db [conn {}]
         (doseq [gis-user (gis-user/get-gis-users conn {:congregation cong-id})]
-          (gis-user/delete-gis-user! conn cong-id (::gis-user/user gis-user))))
+          (gis-user/delete-gis-user! conn cong-id (:user/id gis-user))))
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
                          (merge session)
                          app)]

@@ -7,17 +7,15 @@
             [clojure.tools.logging :as log]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
-            [territory-bro.event-store :as event-store]
-            [territory-bro.permission :as permission]
-            [territory-bro.user :as user])
+            [territory-bro.event-store :as event-store])
   (:import (java.util UUID)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
 
 (defn- format-congregation [row]
-  {::id (:id row)
-   ::name (:name row)
-   ::schema-name (:schema_name row)})
+  {:congregation/id (:id row)
+   :congregation/name (:name row)
+   :congregation/schema-name (:schema_name row)})
 
 (defn get-unrestricted-congregations
   ([conn]
@@ -42,7 +40,7 @@
 
 (defn use-schema [conn cong-id] ; TODO: create a better helper?
   (let [cong (get-unrestricted-congregation conn cong-id)]
-    (db/use-tenant-schema conn (::schema-name cong))))
+    (db/use-tenant-schema conn (:congregation/schema-name cong))))
 
 (defn create-congregation! [conn name]
   (let [id (UUID/randomUUID)
@@ -55,9 +53,9 @@
             {:schema-name tenant-schema})
     (event-store/save! conn id 0 [{:event/type :congregation.event/congregation-created
                                    :event/version 1
-                                   ::id id
-                                   ::name name
-                                   ::schema-name tenant-schema}])
+                                   :congregation/id id
+                                   :congregation/name name
+                                   :congregation/schema-name tenant-schema}])
     (query! conn :create-congregation {:id id
                                        :name name
                                        :schema_name tenant-schema})
@@ -78,9 +76,9 @@
                      (count (event-store/read-stream conn cong-id))
                      [{:event/type :congregation.event/permission-granted
                        :event/version 1
-                       ::id cong-id
-                       ::user/id user-id
-                       ::permission/id :view-congregation}])
+                       :congregation/id cong-id
+                       :user/id user-id
+                       :permission/id :view-congregation}])
   (query! conn :grant-access {:congregation cong-id
                               :user user-id})
   nil)
@@ -90,9 +88,9 @@
                      (count (event-store/read-stream conn cong-id))
                      [{:event/type :congregation.event/permission-revoked
                        :event/version 1
-                       ::id cong-id
-                       ::user/id user-id
-                       ::permission/id :view-congregation}])
+                       :congregation/id cong-id
+                       :user/id user-id
+                       :permission/id :view-congregation}])
   (query! conn :revoke-access {:congregation cong-id
                                :user user-id})
   nil)

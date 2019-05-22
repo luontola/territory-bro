@@ -26,11 +26,11 @@
         (is (= [] (gis/get-gis-changes conn))))
 
       (testing "territory table change log,"
-        (let [territory-id (territory/create-territory! conn {::territory/number "123"
-                                                              ::territory/addresses "Street 1 A"
-                                                              ::territory/subregion "Somewhere"
-                                                              ::territory/meta {:foo "bar", :gazonk 42}
-                                                              ::territory/location testdata/wkt-multi-polygon})]
+        (let [territory-id (territory/create-territory! conn {:territory/number "123"
+                                                              :territory/addresses "Street 1 A"
+                                                              :territory/subregion "Somewhere"
+                                                              :territory/meta {:foo "bar", :gazonk 42}
+                                                              :territory/location testdata/wkt-multi-polygon})]
           (testing "insert"
             (let [changes (gis/get-gis-changes conn)]
               (is (= 1 (count changes)))

@@ -22,34 +22,34 @@
 
       (testing "create new user"
         (is user-id)
-        (is (= {::user/id user-id
-                ::user/subject "user1"
-                ::user/attributes {:name "User 1"}}
+        (is (= {:user/id user-id
+                :user/subject "user1"
+                :user/attributes {:name "User 1"}}
                (user/get-by-id conn user-id))))
 
       (testing "update existing user"
         (is (= user-id
                (user/save-user! conn "user1" {:name "new name"}))
             "should return same ID as before")
-        (is (= {::user/id user-id
-                ::user/subject "user1"
-                ::user/attributes {:name "new name"}}
+        (is (= {:user/id user-id
+                :user/subject "user1"
+                :user/attributes {:name "new name"}}
                (user/get-by-id conn user-id))
             "should update attributes"))
 
       (testing "list users"
         (is (= ["user1" "user2"]
                (->> (user/get-users conn)
-                    (map ::user/subject)
+                    (map :user/subject)
                     (sort)))))
 
       (testing "find user by ID"
-        (is (= user-id (::user/id (user/get-by-id conn user-id))))
+        (is (= user-id (:user/id (user/get-by-id conn user-id))))
         (is (nil? (user/get-by-id conn (UUID/randomUUID)))
             "not found"))
 
       (testing "find user by subject"
-        (is (= user-id (::user/id (user/get-by-subject conn "user1"))))
+        (is (= user-id (:user/id (user/get-by-subject conn "user1"))))
         (is (nil? (user/get-by-subject conn "no-such-user"))
             "not found"))
 

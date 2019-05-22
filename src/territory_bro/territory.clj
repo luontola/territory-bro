@@ -9,12 +9,12 @@
 (def ^:private query! (db/compile-queries "db/hugsql/territory.sql"))
 
 (defn- format-territory [territory]
-  {::id (:id territory)
-   ::number (:number territory)
-   ::addresses (:addresses territory)
-   ::subregion (:subregion territory)
-   ::meta (:meta territory)
-   ::location (:location territory)})
+  {:territory/id (:id territory)
+   :territory/number (:number territory)
+   :territory/addresses (:addresses territory)
+   :territory/subregion (:subregion territory)
+   :territory/meta (:meta territory)
+   :territory/location (:location territory)})
 
 (defn get-territories
   ([conn]
@@ -30,10 +30,10 @@
 (defn create-territory! [conn territory]
   (let [id (UUID/randomUUID)]
     (query! conn :create-territory {:id id
-                                    :number (::number territory)
-                                    :addresses (::addresses territory)
-                                    :subregion (::subregion territory)
-                                    :meta (::meta territory)
-                                    :location (::location territory)})
+                                    :number (:territory/number territory)
+                                    :addresses (:territory/addresses territory)
+                                    :subregion (:territory/subregion territory)
+                                    :meta (:territory/meta territory)
+                                    :location (:territory/location territory)})
 
     id))

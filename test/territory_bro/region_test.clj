@@ -22,19 +22,19 @@
 
       (testing "create & list congregation boundaries"
         (let [id (region/create-congregation-boundary! conn testdata/wkt-multi-polygon)]
-          (is (= [{::region/id id
-                   ::region/location testdata/wkt-multi-polygon}]
+          (is (= [{:region/id id
+                   :region/location testdata/wkt-multi-polygon}]
                  (region/get-congregation-boundaries conn)))))
 
       (testing "create & list subregions"
         (let [id (region/create-subregion! conn "the name" testdata/wkt-multi-polygon)]
-          (is (= [{::region/id id
-                   ::region/name "the name"
-                   ::region/location testdata/wkt-multi-polygon}]
+          (is (= [{:region/id id
+                   :region/name "the name"
+                   :region/location testdata/wkt-multi-polygon}]
                  (region/get-subregions conn)))))
 
       (testing "create & list card minimap viewports"
         (let [id (region/create-card-minimap-viewport! conn testdata/wkt-polygon)]
-          (is (= [{::region/id id
-                   ::region/location testdata/wkt-polygon}]
+          (is (= [{:region/id id
+                   :region/location testdata/wkt-polygon}]
                  (region/get-card-minimap-viewports conn))))))))

@@ -9,9 +9,9 @@
 (def ^:private query! (db/compile-queries "db/hugsql/user.sql"))
 
 (defn- format-user [user]
-  {::id (:id user)
-   ::subject (:subject user)
-   ::attributes (:attributes user)})
+  {:user/id (:id user)
+   :user/subject (:subject user)
+   :user/attributes (:attributes user)})
 
 (defn get-users
   ([conn]

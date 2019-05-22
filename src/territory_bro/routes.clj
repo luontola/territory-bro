@@ -81,7 +81,7 @@
                                :authenticated (not (nil? auth/*user*)))})))
 
 (defn- current-user-id [conn]
-  (let [id (::user/id (user/get-by-subject conn (:sub auth/*user*)))]
+  (let [id (:user/id (user/get-by-subject conn (:sub auth/*user*)))]
     (assert id)
     id))
 
@@ -104,8 +104,8 @@
     (db/with-db [conn {}]
       (ok (->> (congregation/get-my-congregations conn (current-user-id conn))
                (map (fn [congregation]
-                      {:id (::congregation/id congregation)
-                       :name (::congregation/name congregation)})))))))
+                      {:id (:congregation/id congregation)
+                       :name (:congregation/name congregation)})))))))
 
 (defn format-for-api [m]
   (let [convert-keyword (comp csk/->camelCaseString name)
@@ -123,9 +123,9 @@
             congregation (congregation/get-my-congregation conn cong-id (current-user-id conn))]
         (when-not congregation
           (forbidden! "No congregation access"))
-        (db/use-tenant-schema conn (::congregation/schema-name congregation))
-        (ok (format-for-api {:id (::congregation/id congregation)
-                             :name (::congregation/name congregation)
+        (db/use-tenant-schema conn (:congregation/schema-name congregation))
+        (ok (format-for-api {:id (:congregation/id congregation)
+                             :name (:congregation/name congregation)
                              :territories (territory/get-territories conn)
                              :congregation-boundaries (region/get-congregation-boundaries conn)
                              :subregions (region/get-subregions conn)
@@ -143,10 +143,10 @@
           (forbidden! "No GIS access"))
         (let [content (qgis/generate-project {:database-host (:gis-database-host config/env)
                                               :database-name (:gis-database-name config/env)
-                                              :database-schema (::congregation/schema-name congregation)
-                                              :database-username (::gis-user/username gis-user)
-                                              :database-password ((::gis-user/password gis-user))})
-              file-name (qgis/project-file-name (::congregation/name congregation))]
+                                              :database-schema (:congregation/schema-name congregation)
+                                              :database-username (:gis-user/username gis-user)
+                                              :database-password ((:gis-user/password gis-user))})
+              file-name (qgis/project-file-name (:congregation/name congregation))]
           (-> (ok content)
               (response/content-type "application/octet-stream")
               (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\""))))))))

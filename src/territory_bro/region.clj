@@ -10,9 +10,9 @@
 (def ^:private query! (db/compile-queries "db/hugsql/region.sql"))
 
 (defn- format-region [territory]
-  (remove-vals nil? {::id (:id territory)
-                     ::name (:name territory)
-                     ::location (:location territory)}))
+  (remove-vals nil? {:region/id (:id territory)
+                     :region/name (:name territory)
+                     :region/location (:location territory)}))
 
 (defn get-congregation-boundaries [conn]
   (->> (query! conn :get-congregation-boundaries)

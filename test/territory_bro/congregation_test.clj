@@ -27,24 +27,24 @@
         (is id)
         (is (= [{:event/type :congregation.event/congregation-created
                  :event/version 1
-                 ::congregation/id (str id) ; TODO: coerce to UUID
-                 ::congregation/name "the name"
-                 ::congregation/schema-name (::congregation/schema-name congregation)}]
+                 :congregation/id (str id) ; TODO: coerce to UUID
+                 :congregation/name "the name"
+                 :congregation/schema-name (:congregation/schema-name congregation)}]
                (->> (event-store/read-stream conn id)
                     (map #(dissoc % :event/stream-id :event/stream-revision :event/global-revision)))))
-        (is (= id (::congregation/id congregation)))
-        (is (= "the name" (::congregation/name congregation)))
+        (is (= id (:congregation/id congregation)))
+        (is (= "the name" (:congregation/name congregation)))
         (is (contains? (set (db/get-schemas conn))
-                       (::congregation/schema-name congregation))
+                       (:congregation/schema-name congregation))
             "should create congregation schema")))
 
     (let [congregations (congregation/get-unrestricted-congregations conn)]
       (testing "list congregations"
         (is (not (empty? congregations)))
-        (is (contains? (set (map ::congregation/name congregations))
+        (is (contains? (set (map :congregation/name congregations))
                        "the name")))
       (testing "get congregation by ID"
-        (let [id (::congregation/id (first congregations))]
+        (let [id (:congregation/id (first congregations))]
           (is (= (first congregations) (congregation/get-unrestricted-congregation conn id)))
           (is (nil? (congregation/get-unrestricted-congregation conn (UUID/randomUUID)))))))))
 
@@ -62,9 +62,9 @@
 
       (congregation/grant-access! conn cong-id user-id)
       (testing "can see congregations after granting access"
-        (is (= cong-id (::congregation/id (congregation/get-my-congregation conn cong-id user-id))))
+        (is (= cong-id (:congregation/id (congregation/get-my-congregation conn cong-id user-id))))
         (is (= [cong-id] (->> (congregation/get-my-congregations conn user-id)
-                              (map ::congregation/id)))))
+                              (map :congregation/id)))))
       (testing "list users"
         (is (= [user-id] (congregation/get-users conn cong-id)))
         (is (= [] (congregation/get-users conn unrelated-cong-id))

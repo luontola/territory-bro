@@ -19,26 +19,26 @@
 
     (let [cong-id (congregation/create-congregation! conn "the name")
           _ (congregation/use-schema conn cong-id)
-          territory-id (territory/create-territory! conn {::territory/number "123"
-                                                          ::territory/addresses "Street 1 A"
-                                                          ::territory/subregion "Somewhere"
-                                                          ::territory/meta {:foo "bar", :gazonk 42}
-                                                          ::territory/location testdata/wkt-multi-polygon})]
+          territory-id (territory/create-territory! conn {:territory/number "123"
+                                                          :territory/addresses "Street 1 A"
+                                                          :territory/subregion "Somewhere"
+                                                          :territory/meta {:foo "bar", :gazonk 42}
+                                                          :territory/location testdata/wkt-multi-polygon})]
 
       (testing "create new territory"
         (is territory-id))
 
       (testing "get territory by ID"
-        (is (= {::territory/id territory-id
-                ::territory/number "123"
-                ::territory/addresses "Street 1 A"
-                ::territory/subregion "Somewhere"
-                ::territory/meta {:foo "bar", :gazonk 42}
-                ::territory/location testdata/wkt-multi-polygon}
+        (is (= {:territory/id territory-id
+                :territory/number "123"
+                :territory/addresses "Street 1 A"
+                :territory/subregion "Somewhere"
+                :territory/meta {:foo "bar", :gazonk 42}
+                :territory/location testdata/wkt-multi-polygon}
                (territory/get-by-id conn territory-id))))
 
       (testing "list territories"
         (is (= ["123"]
                (->> (territory/get-territories conn)
-                    (map ::territory/number)
+                    (map :territory/number)
                     (sort))))))))

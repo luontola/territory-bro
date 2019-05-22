@@ -7,9 +7,7 @@
             [clojure.test :refer [deftest is]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
-            [territory-bro.event-store :as event-store]
-            [territory-bro.permission :as permission]
-            [territory-bro.user :as user])
+            [territory-bro.event-store :as event-store])
   (:import (java.util Base64)
            (java.security SecureRandom)))
 
@@ -19,10 +17,10 @@
   (fn [] str))
 
 (defn- format-gis-user [gis-user]
-  {::congregation (:congregation gis-user)
-   ::user (:user gis-user)
-   ::username (:username gis-user)
-   ::password (secret (:password gis-user))})
+  {:congregation/id (:congregation gis-user)
+   :user/id (:user gis-user)
+   :gis-user/username (:username gis-user)
+   :gis-user/password (secret (:password gis-user))})
 
 (defn get-gis-users
   ([conn]
@@ -52,21 +50,21 @@
 (defn create-gis-user! [conn cong-id user-id]
   (let [username (str "gis_user_" (uuid-prefix cong-id) "_" (uuid-prefix user-id))
         password (generate-password 50)
-        schema (::congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
+        schema (:congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
     (assert schema)
     (event-store/save! conn cong-id
                        (count (event-store/read-stream conn cong-id))
                        [{:event/type :congregation.event/permission-granted
                          :event/version 1
-                         ::congregation/id cong-id
-                         ::user/id user-id
-                         ::permission/id :gis-access}
+                         :congregation/id cong-id
+                         :user/id user-id
+                         :permission/id :gis-access}
                         {:event/type :congregation.event/gis-user-created
                          :event/version 1
-                         ::congregation/id cong-id
-                         ::user/id user-id
-                         ::username username
-                         ::password password}])
+                         :congregation/id cong-id
+                         :user/id user-id
+                         :gis-user/username username
+                         :gis-user/password password}])
     (query! conn :create-gis-user {:congregation cong-id
                                    :user user-id
                                    :username username
@@ -91,21 +89,21 @@
   (jdbc/execute! conn [(str "DROP ROLE " role)]))
 
 (defn delete-gis-user! [conn cong-id user-id]
-  (let [username (::username (get-gis-user conn cong-id user-id))
-        schema (::congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
+  (let [username (:gis-user/username (get-gis-user conn cong-id user-id))
+        schema (:congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
     (assert schema)
     (event-store/save! conn cong-id
                        (count (event-store/read-stream conn cong-id))
                        [{:event/type :congregation.event/permission-revoked
                          :event/version 1
-                         ::congregation/id cong-id
-                         ::user/id user-id
-                         ::permission/id :gis-access}
+                         :congregation/id cong-id
+                         :user/id user-id
+                         :permission/id :gis-access}
                         {:event/type :congregation.event/gis-user-deleted
                          :event/version 1
-                         ::congregation/id cong-id
-                         ::user/id user-id
-                         ::username username}])
+                         :congregation/id cong-id
+                         :user/id user-id
+                         :gis-user/username username}])
     (drop-role-cascade! conn username [schema])
     (query! conn :delete-gis-user {:congregation cong-id
                                    :user user-id})
