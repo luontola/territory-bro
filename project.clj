@@ -29,6 +29,7 @@
                  [org.clojure/tools.reader "1.3.2"] ;; XXX: overrides old version from metosin/ring-middleware-format
                  [org.flywaydb/flyway-core "6.0.0-beta"]
                  [org.postgresql/postgresql "42.2.5"]
+                 [prismatic/schema "1.1.10"]
                  [ring-logger "1.0.1"]
                  [ring/ring-core "1.7.1"]
                  [ring/ring-defaults "0.3.2"]]
