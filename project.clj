@@ -8,6 +8,7 @@
   :url "https://territorybro.com"
 
   :dependencies [[camel-snake-kebab "0.4.0"]
+                 [com.attendify/schema-refined "0.3.0-alpha4"]
                  [com.auth0/java-jwt "3.8.0"]
                  [com.auth0/jwks-rsa "0.8.0"]
                  [com.layerware/hugsql "0.4.9"]

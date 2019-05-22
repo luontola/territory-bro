@@ -27,6 +27,7 @@
     <orderEntry type="library" name="Leiningen: clj-yaml:0.4.0" level="project" />
     <orderEntry type="library" name="Leiningen: clojure-complete:0.2.5" level="project" />
     <orderEntry type="library" name="Leiningen: clout:2.2.1" level="project" />
+    <orderEntry type="library" name="Leiningen: com.attendify/schema-refined:0.3.0-alpha4" level="project" />
     <orderEntry type="library" name="Leiningen: com.auth0/java-jwt:3.8.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.auth0/jwks-rsa:0.8.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.carouselapps/to-jdbc-uri:0.5.0" level="project" />

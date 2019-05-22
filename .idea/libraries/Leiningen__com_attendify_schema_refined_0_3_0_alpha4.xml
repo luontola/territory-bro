@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: com.attendify/schema-refined:0.3.0-alpha4">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/attendify/schema-refined/0.3.0-alpha4/schema-refined-0.3.0-alpha4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
