@@ -9,7 +9,7 @@
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
-            [territory-bro.fixtures :refer [db-fixture]]
+            [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.region :as region]
             [territory-bro.territory :as territory]
@@ -17,7 +17,7 @@
             [territory-bro.user :as user])
   (:import (org.postgresql.util PSQLException)))
 
-(use-fixtures :once db-fixture)
+(use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
 
 (deftest gis-users-test
   (db/with-db [conn {}]

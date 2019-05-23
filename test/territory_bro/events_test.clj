@@ -17,6 +17,7 @@
 (def valid-event {:event/type :congregation.event/congregation-created
                   :event/version 1
                   :event/time (Instant/now)
+                  :event/user (UUID/randomUUID)
                   :congregation/id (UUID/randomUUID)
                   :congregation/name ""
                   :congregation/schema-name ""})
@@ -55,16 +56,31 @@
   (is (= [valid-event] (events/validate-events [valid-event])))
   (is (thrown? ExceptionInfo (events/validate-events [invalid-event]))))
 
+(def uuid-gen (gen/fmap (fn [[a b]]
+                          (UUID. a b))
+                        (gen/tuple gen/large-integer gen/large-integer)))
+(def instant-gen (gen/fmap (fn [millis]
+                             (Instant/ofEpochMilli millis))
+                           (gen/large-integer* {:min 0})))
+(def leaf-generators {UUID uuid-gen
+                      Instant instant-gen})
+(def event-user-gen (gen/tuple (gen/elements [:event/user])
+                               uuid-gen))
+(def event-system-gen (gen/tuple (gen/elements [:event/system])
+                                 gen/string-alphanumeric))
+(def dumb-event-gen (gen/one-of (->> (vals events/event-schemas)
+                                     (map #(sg/generator % leaf-generators)))))
+(def event-gen (gen/fmap (fn [[event [k v]]]
+                           (-> event
+                               (dissoc :event/user :event/system)
+                               (assoc k v)))
+                         (gen/tuple dumb-event-gen
+                                    (gen/one-of [event-user-gen event-system-gen]))))
+
 (deftest event-serialization-test
   (testing "round trip serialization"
-    (let [generators {UUID (gen/fmap (fn [[a b]]
-                                       (UUID. a b))
-                                     (gen/tuple gen/large-integer gen/large-integer))
-                      Instant (gen/fmap (fn [millis]
-                                          (Instant/ofEpochMilli millis))
-                                        (gen/large-integer* {:min 0}))}]
-      (doseq [event (sg/sample 100 events/Event generators)]
-        (is (= event (-> event events/event->json events/json->event))))))
+    (doseq [event (gen/sample event-gen 100)]
+      (is (= event (-> event events/event->json events/json->event)))))
 
   (testing "event->json validates events"
     (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown event type nil")

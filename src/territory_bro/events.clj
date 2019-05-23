@@ -3,14 +3,26 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.events
-  (:require [schema-refined.core :refer [dispatch-on]]
-            [schema-tools.core :refer [open-schema]]
+  (:require [schema-refined.core :as refined]
+            [schema-tools.core :as tools]
             [schema.coerce :as coerce]
             [schema.core :as s]
             [schema.utils]
             [territory-bro.json :as json])
   (:import (java.time Instant)
            (java.util UUID)))
+
+(def ^:dynamic *current-user* nil)
+(def ^:dynamic *current-system* nil)
+
+(defn new [type]
+  (let [event {:event/type type
+               :event/version 1
+               :event/time (Instant/now)}]
+    (cond
+      *current-user* (assoc event :event/user *current-user*)
+      *current-system* (assoc event :event/system *current-system*)
+      :else (throw (AssertionError. "user or system is required")))))
 
 (s/defschema EventBase
   {(s/optional-key :event/stream-id) UUID
@@ -72,7 +84,12 @@
    :congregation.event/gis-user-deleted GisUserDeleted})
 
 (s/defschema Event
-  (apply dispatch-on :event/type (flatten (seq event-schemas))))
+  (s/constrained
+   (apply refined/dispatch-on :event/type (flatten (seq event-schemas)))
+   (fn [event]
+     (not= (contains? event :event/user)
+           (contains? event :event/system)))
+   '(xor-required-key :event/user :event/system)))
 
 ;;; Validation
 
@@ -105,7 +122,7 @@
       (coerce/string-coercion-matcher schema)))
 
 (def ^:private coerce-event-commons
-  (coerce/coercer (open-schema EventBase) coercion-matcher))
+  (coerce/coercer (tools/open-schema EventBase) coercion-matcher))
 
 (def ^:private coerce-event-specifics
   (coerce/coercer Event coercion-matcher))

@@ -11,6 +11,7 @@
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
+            [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture api-fixture]]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.json :as json]
@@ -224,7 +225,8 @@
     (testing "no access"
       (db/with-db [conn {}]
         (doseq [user-id (congregation/get-users conn cong-id)]
-          (congregation/revoke-access! conn cong-id user-id)))
+          (binding [events/*current-system* "test"]
+            (congregation/revoke-access! conn cong-id user-id))))
       (let [response (-> (request :get (str "/api/congregation/" cong-id))
                          (merge session)
                          app)]
@@ -255,7 +257,8 @@
     (testing "requires GIS access"
       (db/with-db [conn {}]
         (doseq [gis-user (gis-user/get-gis-users conn {:congregation cong-id})]
-          (gis-user/delete-gis-user! conn cong-id (:user/id gis-user))))
+          (binding [events/*current-system* "test"]
+            (gis-user/delete-gis-user! conn cong-id (:user/id gis-user)))))
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
                          (merge session)
                          app)]

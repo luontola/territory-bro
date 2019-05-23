@@ -9,6 +9,7 @@
             [mount.core :as mount]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
+            [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
             [territory-bro.jwt-test :as jwt-test]
@@ -48,3 +49,7 @@
   (mount/start #'router/app)
   (f)
   (mount/stop))
+
+(defn event-actor-fixture [f]
+  (binding [events/*current-system* "test"]
+    (f)))

@@ -7,6 +7,7 @@
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
+            [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.region :as region]
             [territory-bro.territory :as territory]
@@ -45,4 +46,5 @@
 
 (comment
   (doseq [tenant (keys (:tenant config/env))]
-    (migrate-congregation tenant)))
+    (binding [events/*current-system* "migration"]
+      (migrate-congregation tenant))))

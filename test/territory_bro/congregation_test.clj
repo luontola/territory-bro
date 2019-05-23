@@ -8,11 +8,11 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
-            [territory-bro.fixtures :refer [db-fixture]]
+            [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
             [territory-bro.user :as user])
   (:import (java.util UUID)))
 
-(use-fixtures :once db-fixture)
+(use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
 
 (deftest congregations-test
   (db/with-db [conn {:isolation :read-committed}] ; creating the schema happens in another transaction
@@ -27,6 +27,7 @@
         (is id)
         (is (= [{:event/type :congregation.event/congregation-created
                  :event/version 1
+                 :event/system "test"
                  :congregation/id id
                  :congregation/name "the name"
                  :congregation/schema-name (:congregation/schema-name congregation)}]

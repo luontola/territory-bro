@@ -7,11 +7,11 @@
             [clojure.test :refer :all]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
-            [territory-bro.fixtures :refer [db-fixture]]
+            [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
             [territory-bro.region :as region]
             [territory-bro.testdata :as testdata]))
 
-(use-fixtures :once db-fixture)
+(use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
 
 (deftest regions-test
   (db/with-db [conn {}]

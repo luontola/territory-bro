@@ -7,9 +7,9 @@
             [clojure.test :refer [deftest is]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
-            [territory-bro.event-store :as event-store])
+            [territory-bro.event-store :as event-store]
+            [territory-bro.events :as events])
   (:import (java.security SecureRandom)
-           (java.time Instant)
            (java.util Base64)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/gis-user.sql"))
@@ -55,19 +55,15 @@
     (assert schema)
     (event-store/save! conn cong-id
                        (count (event-store/read-stream conn cong-id))
-                       [{:event/type :congregation.event/permission-granted
-                         :event/version 1
-                         :event/time (Instant/now)
-                         :congregation/id cong-id
-                         :user/id user-id
-                         :permission/id :gis-access}
-                        {:event/type :congregation.event/gis-user-created
-                         :event/version 1
-                         :event/time (Instant/now)
-                         :congregation/id cong-id
-                         :user/id user-id
-                         :gis-user/username username
-                         :gis-user/password password}])
+                       [(assoc (events/new :congregation.event/permission-granted)
+                               :congregation/id cong-id
+                               :user/id user-id
+                               :permission/id :gis-access)
+                        (assoc (events/new :congregation.event/gis-user-created)
+                               :congregation/id cong-id
+                               :user/id user-id
+                               :gis-user/username username
+                               :gis-user/password password)])
     (query! conn :create-gis-user {:congregation cong-id
                                    :user user-id
                                    :username username
@@ -97,18 +93,14 @@
     (assert schema)
     (event-store/save! conn cong-id
                        (count (event-store/read-stream conn cong-id))
-                       [{:event/type :congregation.event/permission-revoked
-                         :event/version 1
-                         :event/time (Instant/now)
-                         :congregation/id cong-id
-                         :user/id user-id
-                         :permission/id :gis-access}
-                        {:event/type :congregation.event/gis-user-deleted
-                         :event/version 1
-                         :event/time (Instant/now)
-                         :congregation/id cong-id
-                         :user/id user-id
-                         :gis-user/username username}])
+                       [(assoc (events/new :congregation.event/permission-revoked)
+                               :congregation/id cong-id
+                               :user/id user-id
+                               :permission/id :gis-access)
+                        (assoc (events/new :congregation.event/gis-user-deleted)
+                               :congregation/id cong-id
+                               :user/id user-id
+                               :gis-user/username username)])
     (drop-role-cascade! conn username [schema])
     (query! conn :delete-gis-user {:congregation cong-id
                                    :user user-id})
