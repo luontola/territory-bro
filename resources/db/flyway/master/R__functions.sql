@@ -43,6 +43,10 @@ begin
     from event
     where stream_id = new.stream_id;
 
+    if new.stream_revision is null then
+        new.stream_revision = latest_stream_revision + 1;
+    end if;
+
     if new.stream_revision != latest_stream_revision + 1 then
         raise exception 'tried to insert stream revision % but it should have been %',
             new.stream_revision,

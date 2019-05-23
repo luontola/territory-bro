@@ -89,12 +89,21 @@
                  (event-store/read-all-events conn {:since 3}))))
 
         (testing "append to stream"
-          (is (= 5 (event-store/save! conn stream-1 2 [{:event/type :event-3
-                                                        :stuff "gazonk"}])))
+          (testing "with concurrency check"
+            (is (= 5 (event-store/save! conn stream-1 2 [{:event/type :event-3
+                                                          :stuff "gazonk"}]))))
+          (testing "without concurrency check"
+            (is (= 6 (event-store/save! conn stream-1 nil [{:event/type :event-4
+                                                            :stuff "gazonk"}]))))
           (is (= [{:event/stream-id stream-1
                    :event/stream-revision 3
                    :event/global-revision 5
                    :event/type :event-3
+                   :stuff "gazonk"}
+                  {:event/stream-id stream-1
+                   :event/stream-revision 4
+                   :event/global-revision 6
+                   :event/type :event-4
                    :stuff "gazonk"}]
                  (event-store/read-stream conn stream-1 {:since 2}))))))
 

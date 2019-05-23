@@ -55,7 +55,8 @@
   (->> events
        (map-indexed
         (fn [idx event]
-          (let [next-revision (+ 1 idx stream-revision)
+          (let [next-revision (when stream-revision
+                                (+ 1 idx stream-revision))
                 [result] (query! conn :save-event {:stream stream-id
                                                    :stream_revision next-revision
                                                    :data (-> event *event->json*)})]

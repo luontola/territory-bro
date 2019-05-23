@@ -73,8 +73,7 @@
        (doall)))
 
 (defn grant-access! [conn cong-id user-id]
-  (event-store/save! conn cong-id
-                     (count (event-store/read-stream conn cong-id))
+  (event-store/save! conn cong-id nil
                      [(assoc (events/defaults)
                              :event/type :congregation.event/permission-granted
                              :congregation/id cong-id
@@ -85,8 +84,7 @@
   nil)
 
 (defn revoke-access! [conn cong-id user-id]
-  (event-store/save! conn cong-id
-                     (count (event-store/read-stream conn cong-id))
+  (event-store/save! conn cong-id nil
                      [(assoc (events/defaults)
                              :event/type :congregation.event/permission-revoked
                              :congregation/id cong-id

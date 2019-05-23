@@ -53,8 +53,7 @@
         password (generate-password 50)
         schema (:congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
     (assert schema)
-    (event-store/save! conn cong-id
-                       (count (event-store/read-stream conn cong-id))
+    (event-store/save! conn cong-id nil
                        [(assoc (events/defaults)
                                :event/type :congregation.event/permission-granted
                                :congregation/id cong-id
@@ -93,8 +92,7 @@
   (let [username (:gis-user/username (get-gis-user conn cong-id user-id))
         schema (:congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
     (assert schema)
-    (event-store/save! conn cong-id
-                       (count (event-store/read-stream conn cong-id))
+    (event-store/save! conn cong-id nil
                        [(assoc (events/defaults)
                                :event/type :congregation.event/permission-revoked
                                :congregation/id cong-id
