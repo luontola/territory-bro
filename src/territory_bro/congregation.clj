@@ -8,7 +8,8 @@
             [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store])
-  (:import (java.util UUID)))
+  (:import (java.time Instant)
+           (java.util UUID)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
 
@@ -53,6 +54,7 @@
             {:schema-name tenant-schema})
     (event-store/save! conn id 0 [{:event/type :congregation.event/congregation-created
                                    :event/version 1
+                                   :event/time (Instant/now)
                                    :congregation/id id
                                    :congregation/name name
                                    :congregation/schema-name tenant-schema}])
@@ -76,6 +78,7 @@
                      (count (event-store/read-stream conn cong-id))
                      [{:event/type :congregation.event/permission-granted
                        :event/version 1
+                       :event/time (Instant/now)
                        :congregation/id cong-id
                        :user/id user-id
                        :permission/id :view-congregation}])
@@ -88,6 +91,7 @@
                      (count (event-store/read-stream conn cong-id))
                      [{:event/type :congregation.event/permission-revoked
                        :event/version 1
+                       :event/time (Instant/now)
                        :congregation/id cong-id
                        :user/id user-id
                        :permission/id :view-congregation}])

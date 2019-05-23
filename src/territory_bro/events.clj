@@ -18,7 +18,7 @@
    (s/optional-key :event/global-revision) s/Int
    :event/type s/Keyword
    :event/version s/Int
-   (s/optional-key :event/time) Instant ;; TODO: add JSON support for Instant and make this field mandatory
+   :event/time Instant
    (s/optional-key :event/user) UUID
    (s/optional-key :event/system) s/Str})
 

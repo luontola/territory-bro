@@ -8,8 +8,9 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store])
-  (:import (java.util Base64)
-           (java.security SecureRandom)))
+  (:import (java.security SecureRandom)
+           (java.time Instant)
+           (java.util Base64)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/gis-user.sql"))
 
@@ -56,11 +57,13 @@
                        (count (event-store/read-stream conn cong-id))
                        [{:event/type :congregation.event/permission-granted
                          :event/version 1
+                         :event/time (Instant/now)
                          :congregation/id cong-id
                          :user/id user-id
                          :permission/id :gis-access}
                         {:event/type :congregation.event/gis-user-created
                          :event/version 1
+                         :event/time (Instant/now)
                          :congregation/id cong-id
                          :user/id user-id
                          :gis-user/username username
@@ -96,11 +99,13 @@
                        (count (event-store/read-stream conn cong-id))
                        [{:event/type :congregation.event/permission-revoked
                          :event/version 1
+                         :event/time (Instant/now)
                          :congregation/id cong-id
                          :user/id user-id
                          :permission/id :gis-access}
                         {:event/type :congregation.event/gis-user-deleted
                          :event/version 1
+                         :event/time (Instant/now)
                          :congregation/id cong-id
                          :user/id user-id
                          :gis-user/username username}])

@@ -31,7 +31,7 @@
                  :congregation/name "the name"
                  :congregation/schema-name (:congregation/schema-name congregation)}]
                (->> (event-store/read-stream conn id)
-                    (map #(dissoc % :event/stream-id :event/stream-revision :event/global-revision)))))
+                    (map #(dissoc % :event/stream-id :event/stream-revision :event/global-revision :event/time)))))
         (is (= id (:congregation/id congregation)))
         (is (= "the name" (:congregation/name congregation)))
         (is (contains? (set (db/get-schemas conn))
