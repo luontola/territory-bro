@@ -25,6 +25,7 @@ globalHistory.listen(({location, action}) => {
 const ErrorPage = ({componentStack, error}) => (
   <>
     <h1>Sorry, something went wrong 🥺</h1>
+    <p><a href="/">Return to the front page and try again</a></p>
     <pre>{`${error.stack}\n\nThe error is located at:${componentStack}`}</pre>
   </>
 );
