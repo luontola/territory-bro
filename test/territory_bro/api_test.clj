@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.api-test
-  (:require [cheshire.core :refer [parse-stream]]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer :all]
             [ring.mock.request :refer :all]
@@ -14,6 +13,7 @@
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture api-fixture]]
             [territory-bro.gis-user :as gis-user]
+            [territory-bro.json :as json]
             [territory-bro.jwt :as jwt]
             [territory-bro.jwt-test :as jwt-test]
             [territory-bro.router :as router]
@@ -45,7 +45,7 @@
   (cond
     (nil? body) body
     (string? body) body
-    :else (parse-stream (io/reader body) true)))
+    :else (json/parse-string (slurp (io/reader body)))))
 
 (defn read-body [response]
   (update response :body parse-json))

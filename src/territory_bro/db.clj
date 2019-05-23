@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns ^{:resource-deps ["sql/queries.sql"]} territory-bro.db
-  (:require [cheshire.core :as cheshire]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
@@ -14,6 +13,7 @@
             [hugsql.core :as hugsql]
             [mount.core :as mount]
             [territory-bro.config :as config]
+            [territory-bro.json :as json]
             [territory-bro.util :refer [getx]])
   (:import (clojure.lang IPersistentMap IPersistentVector)
            (com.zaxxer.hikari HikariDataSource HikariConfig)
@@ -103,8 +103,8 @@
     (let [type (.getType pgobj)
           value (.getValue pgobj)]
       (case type
-        "json" (cheshire/parse-string value true)
-        "jsonb" (cheshire/parse-string value true)
+        "json" (json/parse-string value)
+        "jsonb" (json/parse-string value)
         "citext" (str value)
         value))))
 
@@ -116,7 +116,7 @@
 (defn to-pg-json [value]
   (doto (PGobject.)
         (.setType "jsonb")
-        (.setValue (cheshire/generate-string value))))
+        (.setValue (json/generate-string value))))
 
 (extend-type IPersistentVector
   jdbc/ISQLParameter
