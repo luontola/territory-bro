@@ -15,14 +15,14 @@
 (def ^:dynamic *current-user* nil)
 (def ^:dynamic *current-system* nil)
 
-(defn new [type]
-  (let [event {:event/type type
-               :event/version 1
-               :event/time (Instant/now)}]
-    (cond
-      *current-user* (assoc event :event/user *current-user*)
-      *current-system* (assoc event :event/system *current-system*)
-      :else (throw (AssertionError. "user or system is required")))))
+(defn defaults
+  ([]
+   (defaults (Instant/now)))
+  ([^Instant now]
+   (cond-> {:event/version 1
+            :event/time now}
+     *current-user* (assoc :event/user *current-user*)
+     *current-system* (assoc :event/system *current-system*))))
 
 (s/defschema EventBase
   {(s/optional-key :event/stream-id) UUID

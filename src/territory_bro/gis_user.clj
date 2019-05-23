@@ -55,11 +55,13 @@
     (assert schema)
     (event-store/save! conn cong-id
                        (count (event-store/read-stream conn cong-id))
-                       [(assoc (events/new :congregation.event/permission-granted)
+                       [(assoc (events/defaults)
+                               :event/type :congregation.event/permission-granted
                                :congregation/id cong-id
                                :user/id user-id
                                :permission/id :gis-access)
-                        (assoc (events/new :congregation.event/gis-user-created)
+                        (assoc (events/defaults)
+                               :event/type :congregation.event/gis-user-created
                                :congregation/id cong-id
                                :user/id user-id
                                :gis-user/username username
@@ -93,11 +95,13 @@
     (assert schema)
     (event-store/save! conn cong-id
                        (count (event-store/read-stream conn cong-id))
-                       [(assoc (events/new :congregation.event/permission-revoked)
+                       [(assoc (events/defaults)
+                               :event/type :congregation.event/permission-revoked
                                :congregation/id cong-id
                                :user/id user-id
                                :permission/id :gis-access)
-                        (assoc (events/new :congregation.event/gis-user-deleted)
+                        (assoc (events/defaults)
+                               :event/type :congregation.event/gis-user-deleted
                                :congregation/id cong-id
                                :user/id user-id
                                :gis-user/username username)])

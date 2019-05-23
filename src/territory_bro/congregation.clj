@@ -52,7 +52,8 @@
     (assert (not (contains? (set (db/get-schemas conn))
                             tenant-schema))
             {:schema-name tenant-schema})
-    (event-store/save! conn id 0 [(assoc (events/new :congregation.event/congregation-created)
+    (event-store/save! conn id 0 [(assoc (events/defaults)
+                                         :event/type :congregation.event/congregation-created
                                          :congregation/id id
                                          :congregation/name name
                                          :congregation/schema-name tenant-schema)])
@@ -74,7 +75,8 @@
 (defn grant-access! [conn cong-id user-id]
   (event-store/save! conn cong-id
                      (count (event-store/read-stream conn cong-id))
-                     [(assoc (events/new :congregation.event/permission-granted)
+                     [(assoc (events/defaults)
+                             :event/type :congregation.event/permission-granted
                              :congregation/id cong-id
                              :user/id user-id
                              :permission/id :view-congregation)])
@@ -85,7 +87,8 @@
 (defn revoke-access! [conn cong-id user-id]
   (event-store/save! conn cong-id
                      (count (event-store/read-stream conn cong-id))
-                     [(assoc (events/new :congregation.event/permission-revoked)
+                     [(assoc (events/defaults)
+                             :event/type :congregation.event/permission-revoked
                              :congregation/id cong-id
                              :user/id user-id
                              :permission/id :view-congregation)])

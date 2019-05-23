@@ -14,6 +14,39 @@
            (java.time Instant)
            (java.util UUID)))
 
+(deftest event-defaults-test
+  (let [time (Instant/now)
+        user (UUID/randomUUID)
+        system "some-subsystem"]
+
+    (testing "no context (not really allowed)"
+      (is (= {:event/time time
+              :event/version 1}
+             (events/defaults time))))
+
+    (testing "user context"
+      (is (= {:event/time time
+              :event/version 1
+              :event/user user}
+             (binding [events/*current-user* user]
+               (events/defaults time)))))
+
+    (testing "system context"
+      (is (= {:event/time time
+              :event/version 1
+              :event/system system}
+             (binding [events/*current-system* system]
+               (events/defaults time)))))
+
+    (testing "user and system context (not really allowed)"
+      (is (= {:event/time time
+              :event/version 1
+              :event/user user
+              :event/system system}
+             (binding [events/*current-user* user
+                       events/*current-system* system]
+               (events/defaults time)))))))
+
 (def valid-event {:event/type :congregation.event/congregation-created
                   :event/version 1
                   :event/time (Instant/now)
@@ -55,6 +88,8 @@
   (is (= [] (events/validate-events [])))
   (is (= [valid-event] (events/validate-events [valid-event])))
   (is (thrown? ExceptionInfo (events/validate-events [invalid-event]))))
+
+;;; Generators for serialization tests
 
 (def uuid-gen (gen/fmap (fn [[a b]]
                           (UUID. a b))
