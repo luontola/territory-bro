@@ -9,6 +9,7 @@
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
             [territory-bro.fixtures :refer [db-fixture]]
+            [territory-bro.json :as json]
             [territory-bro.testutil :refer [re-equals re-contains grab-exception]])
   (:import (java.util UUID)
            (org.postgresql.util PSQLException)
@@ -17,7 +18,9 @@
 (use-fixtures :once db-fixture)
 
 (deftest event-store-test
-  (binding [event-store/*validator* identity]
+  ;; bypass validating serializers
+  (binding [event-store/*event->json* json/generate-string
+            event-store/*json->event* json/parse-string]
     (db/with-db [conn {}]
       (jdbc/db-set-rollback-only! conn)
 
@@ -130,13 +133,14 @@
         (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown event type :dummy-event")
                               (event-store/save! conn stream-id 0 [{:event/type :dummy-event}]))))
 
-      (binding [event-store/*validator* identity]
+      ;; bypass validating serializers
+      (binding [event-store/*event->json* json/generate-string]
         (event-store/save! conn stream-id 0 [{:event/type :dummy-event}]))
 
       (testing "validates events on reading a stream"
-        (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown event type :dummy-event")
+        (is (thrown-with-msg? ExceptionInfo (re-equals "Event schema validation failed")
                               (event-store/read-stream conn stream-id))))
 
       (testing "validates events on reading all events"
-        (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown event type :dummy-event")
+        (is (thrown-with-msg? ExceptionInfo (re-equals "Event schema validation failed")
                               (event-store/read-all-events conn stream-id)))))))
