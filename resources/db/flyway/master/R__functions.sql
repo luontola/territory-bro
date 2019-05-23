@@ -31,31 +31,31 @@ $$ language plpgsql security definer;
 create or replace function prepare_new_event() returns trigger as
 $$
 declare
-    latest_global_revision bigint;
-    latest_stream_revision integer;
+    next_global_revision bigint;
+    next_stream_revision integer;
 begin
     lock table event in share row exclusive mode;
 
-    select coalesce(max(global_revision), 0) into latest_global_revision
+    select coalesce(max(global_revision), 0) + 1 into next_global_revision
     from event;
 
-    select coalesce(max(stream_revision), 0) into latest_stream_revision
+    select coalesce(max(stream_revision), 0) + 1 into next_stream_revision
     from event
     where stream_id = new.stream_id;
 
     if new.stream_revision is null then
-        new.stream_revision = latest_stream_revision + 1;
+        new.stream_revision = next_stream_revision;
     end if;
 
-    if new.stream_revision != latest_stream_revision + 1 then
+    if new.stream_revision != next_stream_revision then
         raise exception 'tried to insert stream revision % but it should have been %',
             new.stream_revision,
-            latest_stream_revision + 1
+            next_stream_revision
             using errcode = 'serialization_failure',
                 hint = 'The transaction might succeed if retried.';
     end if;
 
-    new.global_revision = latest_global_revision + 1;
+    new.global_revision = next_global_revision;
     return new;
 end
 $$ language plpgsql;
