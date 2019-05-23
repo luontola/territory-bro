@@ -25,6 +25,7 @@
                  [metosin/jsonista "0.2.2"]
                  [metosin/ring-http-response "0.9.1"]
                  [metosin/ring-middleware-format "0.6.0"] ;; TODO: replace with newer library
+                 [metosin/schema-tools "0.11.0"]
                  [mount "0.1.16"]
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.10.0"]

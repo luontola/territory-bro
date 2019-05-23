@@ -78,6 +78,7 @@
     <orderEntry type="library" name="Leiningen: metosin/jsonista:0.2.2" level="project" />
     <orderEntry type="library" name="Leiningen: metosin/ring-http-response:0.9.1" level="project" />
     <orderEntry type="library" name="Leiningen: metosin/ring-middleware-format:0.6.0" level="project" />
+    <orderEntry type="library" name="Leiningen: metosin/schema-tools:0.11.0" level="project" />
     <orderEntry type="library" name="Leiningen: migratus:1.2.3" level="project" />
     <orderEntry type="library" name="Leiningen: mount:0.1.16" level="project" />
     <orderEntry type="library" name="Leiningen: nrepl:0.6.0" level="project" />
