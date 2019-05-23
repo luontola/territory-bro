@@ -11,6 +11,9 @@
                  [com.attendify/schema-refined "0.3.0-alpha4"]
                  [com.auth0/java-jwt "3.8.0"]
                  [com.auth0/jwks-rsa "0.8.0"]
+                 [com.fasterxml.jackson.core/jackson-core "2.9.9"]
+                 [com.fasterxml.jackson.core/jackson-databind "2.9.9"]
+                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.9.9"]
                  [com.layerware/hugsql "0.4.9"]
                  [compojure "1.6.1"]
                  [conman "0.8.3"]
@@ -19,6 +22,7 @@
                  [luminus-immutant "0.2.5"]
                  [luminus-migrations "0.6.5"]
                  [luminus-nrepl "0.1.6"]
+                 [metosin/jsonista "0.2.2"]
                  [metosin/ring-http-response "0.9.1"]
                  [metosin/ring-middleware-format "0.6.0"] ;; TODO: replace with newer library
                  [mount "0.1.16"]
