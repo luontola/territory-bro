@@ -4,7 +4,8 @@
 
 (ns territory-bro.event-store
   (:require [territory-bro.db :as db]
-            [territory-bro.events :as events]))
+            [territory-bro.events :as events])
+  (:import (java.util UUID)))
 
 (def ^:dynamic *event->json* events/event->json)
 (def ^:dynamic *json->event* events/json->event)
@@ -51,3 +52,8 @@
                                                    :data (-> event *event->json*)})]
             (:global_revision result))))
        (last)))
+
+(comment
+  (db/with-db [conn {}]
+    (->> (read-stream conn (UUID/fromString "61e51981-bbd3-4298-a7a6-46109e39dd52"))
+         (map events/sorted-keys))))

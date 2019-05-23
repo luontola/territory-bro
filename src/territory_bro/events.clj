@@ -24,6 +24,27 @@
      *current-user* (assoc :event/user *current-user*)
      *current-system* (assoc :event/system *current-system*))))
 
+(def ^:private key-order
+  (->> [:event/type
+        :event/version
+        :event/user
+        :event/system
+        :event/time
+        :event/stream-id
+        :event/stream-revision
+        :event/global-revision]
+       (map-indexed (fn [idx k]
+                      [k idx]))
+       (into {})))
+
+(defn- key-comparator [x y]
+  (compare [(get key-order x 100) x]
+           [(get key-order y 100) y]))
+
+(defn sorted-keys [event]
+  (into (sorted-map-by key-comparator)
+        event))
+
 (s/defschema EventBase
   {(s/optional-key :event/stream-id) UUID
    (s/optional-key :event/stream-revision) s/Int

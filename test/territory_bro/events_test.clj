@@ -57,6 +57,16 @@
 (def invalid-event (dissoc valid-event :congregation/name))
 (def unknown-event (assoc valid-event :event/type :foo))
 
+(deftest sorted-keys-test
+  (is (= [:event/type
+          :event/version
+          :event/user
+          :event/time
+          :congregation/id
+          :congregation/name
+          :congregation/schema-name]
+         (keys (events/sorted-keys valid-event)))))
+
 (deftest event-schema-test
   (testing "check specific event schema"
     (is (nil? (s/check events/CongregationCreated valid-event))))
