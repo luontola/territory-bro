@@ -3,8 +3,12 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.events
-  (:require [schema-refined.core :as r]
-            [schema.core :as s])
+  (:require [schema-refined.core :refer [dispatch-on]]
+            [schema-tools.core :refer [open-schema]]
+            [schema.coerce :as coerce]
+            [schema.core :as s]
+            [schema.utils]
+            [territory-bro.json :as json])
   (:import (java.time Instant)
            (java.util UUID)))
 
@@ -68,7 +72,9 @@
    :congregation.event/gis-user-deleted GisUserDeleted})
 
 (s/defschema Event
-  (apply r/dispatch-on :event/type (flatten (seq event-schemas))))
+  (apply dispatch-on :event/type (flatten (seq event-schemas))))
+
+;;; Validation
 
 (defn validate-event [event]
   (when-not (contains? event-schemas (:event/type event))
@@ -83,3 +89,43 @@
   (doseq [event events]
     (validate-event event))
   events)
+
+;;; Serialization
+
+(defn- string->instant [s]
+  (if (string? s)
+    (Instant/parse s)
+    s))
+
+(def ^:private datestring-coercion-matcher
+  {Instant string->instant})
+
+(defn- coercion-matcher [schema]
+  (or (datestring-coercion-matcher schema)
+      (coerce/string-coercion-matcher schema)))
+
+(def ^:private coerce-event-commons
+  (coerce/coercer (open-schema EventBase) coercion-matcher))
+
+(def ^:private coerce-event-specifics
+  (coerce/coercer Event coercion-matcher))
+
+(defn- coerce-event [event]
+  ;; must coerce the common fields first, so that Event can
+  ;; choose the right event schema based on the event type
+  (let [result (coerce-event-commons event)]
+    (if (schema.utils/error? result)
+      result
+      (coerce-event-specifics result))))
+
+(defn json->event [json]
+  (when json
+    (let [result (coerce-event (json/parse-string json))]
+      (when (schema.utils/error? result)
+        (throw (ex-info "Event schema validation failed"
+                        {:json json
+                         :error result})))
+      result)))
+
+(defn event->json [event]
+  (json/generate-string (validate-event event)))
