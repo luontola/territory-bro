@@ -21,9 +21,7 @@
     (try
       (handler req)
       (catch Throwable t
-        ;; The stack trace is already logged by ring.logger if it originated from application code
-        ;; and otherwise it's from some ring middleware whose stack trace is not interesting.
-        (log/error "Uncaught exception:" (.toString t))
+        (log/error t "Uncaught exception")
         (-> (internal-server-error "Internal Server Error")
             (response/content-type "text/html; charset=utf-8"))))))
 
