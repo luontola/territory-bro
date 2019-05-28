@@ -17,10 +17,17 @@
 
 (use-fixtures :once db-fixture)
 
+(defn event->json-no-validate [event]
+  (json/generate-string event))
+
+(defn json->event-no-validate [json]
+  (-> (json/parse-string json)
+      (update :event/type keyword)))
+
 (deftest event-store-test
   ;; bypass validating serializers
-  (binding [event-store/*event->json* json/generate-string
-            event-store/*json->event* json/parse-string]
+  (binding [event-store/*event->json* event->json-no-validate
+            event-store/*json->event* json->event-no-validate]
     (db/with-db [conn {}]
       (jdbc/db-set-rollback-only! conn)
 
@@ -143,7 +150,7 @@
                               (event-store/save! conn stream-id 0 [{:event/type :dummy-event}]))))
 
       ;; bypass validating serializers
-      (binding [event-store/*event->json* json/generate-string]
+      (binding [event-store/*event->json* event->json-no-validate]
         (event-store/save! conn stream-id 0 [{:event/type :dummy-event}]))
 
       (testing "validates events on reading a stream"

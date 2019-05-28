@@ -13,11 +13,6 @@
 
 (def ^:private query! (db/compile-queries "db/hugsql/event-store.sql"))
 
-(defn- coerce-keyword [s]
-  (if (string? s)
-    (keyword s)
-    s))
-
 (defn- sorted-keys [event]
   ;; sorted maps are slower to access than hash maps,
   ;; so we use them in only dev mode for readability
@@ -31,7 +26,6 @@
       (assoc :event/stream-id (:stream_id row)
              :event/stream-revision (:stream_revision row)
              :event/global-revision (:global_revision row))
-      (update :event/type coerce-keyword)
       (sorted-keys)))
 
 (defn read-stream
