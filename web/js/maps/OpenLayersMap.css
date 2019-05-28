@@ -41,4 +41,8 @@
     .root :global .map-attribution {
         display: block !important;
     }
+
+    .root :global .ol-control.ol-rotate {
+        display: block !important;
+    }
 }
