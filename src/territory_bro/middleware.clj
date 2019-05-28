@@ -21,7 +21,7 @@
     (try
       (handler req)
       (catch Throwable t
-        (log/error t "Uncaught exception")
+        (log/error t "Uncaught exception" (pr-str (select-keys req [:request-method :uri])))
         (-> (internal-server-error "Internal Server Error")
             (response/content-type "text/html; charset=utf-8"))))))
 
