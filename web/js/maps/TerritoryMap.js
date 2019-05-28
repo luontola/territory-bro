@@ -59,14 +59,15 @@ function initTerritoryMap(element: HTMLDivElement,
     view: new View({
       center: fromLonLat([0.0, 0.0]),
       zoom: 1,
-      minResolution: 1.25, // prevent zooming too close, show more surrounding for small territories
+      minResolution: 0.1,
       zoomFactor: 1.1 // zoom in small steps to enable fine tuning
     })
   });
   map.getView().fit(
     territoryLayer.getSource().getExtent(),
     {
-      padding: [20, 20, 20, 20]
+      padding: [20, 20, 20, 20],
+      minResolution: 1.25, // prevent zooming too close, show more surrounding for small territories
     }
   );
 
