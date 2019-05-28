@@ -1,0 +1,40 @@
+
+.root {
+    composes: root from "./TerritoryCard.css";
+    grid-template-areas:
+            "minimap header header number"
+            "map map map map"
+            "footer footer footer footer";
+}
+
+.header {
+    composes: header from "./TerritoryCard.css";
+}
+
+.title {
+    composes: title from "./TerritoryCard.css";
+}
+
+.subregion {
+    composes: subregion from "./TerritoryCard.css";
+}
+
+.number {
+    composes: number from "./TerritoryCard.css";
+}
+
+.minimap {
+    composes: minimap from "./TerritoryCard.css";
+}
+
+.map {
+    composes: map from "./TerritoryCard.css";
+}
+
+.addresses {
+    composes: addresses from "./TerritoryCard.css";
+}
+
+.footer {
+    composes: footer from "./TerritoryCard.css";
+}

@@ -12,12 +12,19 @@ import TerritoryCard from "./TerritoryCard";
 import NeighborhoodCard from "./NeighborhoodCard";
 import RuralTerritoryCard from "./RuralTerritoryCard";
 import RegionPrintout from "./RegionPrintout";
+import TerritoryCardMapOnly from "./TerritoryCardMapOnly";
 
 const templates = [
   {
     id: 'TerritoryCard',
     component: TerritoryCard,
     name: 'Territory Card',
+    type: 'territory',
+  },
+  {
+    id: 'TerritoryCardMapOnly',
+    component: TerritoryCardMapOnly,
+    name: 'Territory Card, map only',
     type: 'territory',
   },
   {
