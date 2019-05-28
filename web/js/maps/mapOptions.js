@@ -14,6 +14,7 @@ import Tile from "ol/layer/Tile";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
 import Text from "ol/style/Text";
+import TileWMS from "ol/source/TileWMS";
 
 export type MapRaster = {
   id: string,
@@ -38,12 +39,22 @@ export const mapRasters: Array<MapRaster> = [
   },
   {
     id: 'mmlTaustakartta',
-    name: "Finland - Maanmittauslaitos taustakarttasarja",
+    name: "Finland - Maanmittauslaitoksen taustakarttasarja",
     source: new XYZ({
       url: '//tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
       tileSize: [128, 128],
       tilePixelRatio: 2,
       attributions: '&copy; Maanmittauslaitos'
+    })
+  },
+  {
+    id: 'vantaaKaupunkikartta',
+    name: "Finland - Vantaan kaupunkikartta",
+    source: new TileWMS({
+      url: 'https://gis.vantaa.fi/geoserver/wms',
+      params: {'LAYERS': 'taustakartta:kaupunkikartta_single_layer', 'TILED': true},
+      serverType: 'geoserver',
+      attributions: '&copy; Vantaan kaupunki'
     })
   },
 ];
