@@ -8,18 +8,20 @@
 
 (def project-template (io/resource "template-territories.qgs"))
 
-(defn generate-project [{:keys [database-host database-name database-schema database-username database-password]}]
+(defn generate-project [{:keys [database-host database-name database-schema database-username database-password database-ssl-mode]}]
   (assert database-host "host is missing")
   (assert database-name "db name is missing")
   (assert database-schema "schema is missing")
   (assert database-username "username is missing")
   (assert database-password "password is missing")
+  (assert database-ssl-mode "ssl mode is missing")
   (-> (slurp project-template :encoding "UTF-8")
       (str/replace "HOST_GOES_HERE" database-host)
       (str/replace "DBNAME_GOES_HERE" database-name)
       (str/replace "SCHEMA_GOES_HERE" database-schema)
       (str/replace "USERNAME_GOES_HERE" database-username)
-      (str/replace "PASSWORD_GOES_HERE" database-password)))
+      (str/replace "PASSWORD_GOES_HERE" database-password)
+      (str/replace "SSLMODE_GOES_HERE" database-ssl-mode)))
 
 (defn project-file-name [name]
   (let [name (-> name

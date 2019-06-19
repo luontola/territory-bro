@@ -286,7 +286,7 @@
         <ymax>90</ymax>
       </extent>
       <id>card_minimap_viewport_c81045cd_d929_4b00_8b57_939c3318a10c</id>
-      <datasource>dbname='DBNAME_GOES_HERE' host=HOST_GOES_HERE port=5432 user='USERNAME_GOES_HERE' password='PASSWORD_GOES_HERE' key='id' srid=4326 type=Polygon table="SCHEMA_GOES_HERE"."card_minimap_viewport" (location) sql=</datasource>
+      <datasource>dbname='DBNAME_GOES_HERE' host=HOST_GOES_HERE port=5432 user='USERNAME_GOES_HERE' password='PASSWORD_GOES_HERE' sslmode=SSLMODE_GOES_HERE key='id' srid=4326 type=Polygon table="SCHEMA_GOES_HERE"."card_minimap_viewport" (location) sql=</datasource>
       <keywordList>
         <value></value>
       </keywordList>
@@ -495,7 +495,7 @@ def my_form_open(dialog, layer, feature):
         <ymax>90</ymax>
       </extent>
       <id>congregation_boundary_be1440d2_e55f_402c_b6da_78ab3d532bfa</id>
-      <datasource>dbname='DBNAME_GOES_HERE' host=HOST_GOES_HERE port=5432 user='USERNAME_GOES_HERE' password='PASSWORD_GOES_HERE' key='id' srid=4326 type=MultiPolygon table="SCHEMA_GOES_HERE"."congregation_boundary" (location) sql=</datasource>
+      <datasource>dbname='DBNAME_GOES_HERE' host=HOST_GOES_HERE port=5432 user='USERNAME_GOES_HERE' password='PASSWORD_GOES_HERE' sslmode=SSLMODE_GOES_HERE key='id' srid=4326 type=MultiPolygon table="SCHEMA_GOES_HERE"."congregation_boundary" (location) sql=</datasource>
       <keywordList>
         <value></value>
       </keywordList>
@@ -704,7 +704,7 @@ def my_form_open(dialog, layer, feature):
         <ymax>90</ymax>
       </extent>
       <id>subregion_02ee1555_6db2_4163_83e7_def41ce9f6fd</id>
-      <datasource>dbname='DBNAME_GOES_HERE' host=HOST_GOES_HERE port=5432 user='USERNAME_GOES_HERE' password='PASSWORD_GOES_HERE' key='id' srid=4326 type=MultiPolygon table="SCHEMA_GOES_HERE"."subregion" (location) sql=</datasource>
+      <datasource>dbname='DBNAME_GOES_HERE' host=HOST_GOES_HERE port=5432 user='USERNAME_GOES_HERE' password='PASSWORD_GOES_HERE' sslmode=SSLMODE_GOES_HERE key='id' srid=4326 type=MultiPolygon table="SCHEMA_GOES_HERE"."subregion" (location) sql=</datasource>
       <keywordList>
         <value></value>
       </keywordList>
@@ -930,7 +930,7 @@ def my_form_open(dialog, layer, feature):
         <ymax>90</ymax>
       </extent>
       <id>territory_a7d6820f_be91_4658_8e73_7531083f9b14</id>
-      <datasource>dbname='DBNAME_GOES_HERE' host=HOST_GOES_HERE port=5432 user='USERNAME_GOES_HERE' password='PASSWORD_GOES_HERE' key='id' srid=4326 type=MultiPolygon table="SCHEMA_GOES_HERE"."territory" (location) sql=</datasource>
+      <datasource>dbname='DBNAME_GOES_HERE' host=HOST_GOES_HERE port=5432 user='USERNAME_GOES_HERE' password='PASSWORD_GOES_HERE' sslmode=SSLMODE_GOES_HERE key='id' srid=4326 type=MultiPolygon table="SCHEMA_GOES_HERE"."territory" (location) sql=</datasource>
       <keywordList>
         <value></value>
       </keywordList>

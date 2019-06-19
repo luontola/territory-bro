@@ -147,7 +147,8 @@
                                               :database-name (:gis-database-name config/env)
                                               :database-schema (:congregation/schema-name congregation)
                                               :database-username (:gis-user/username gis-user)
-                                              :database-password ((:gis-user/password gis-user))})
+                                              :database-password ((:gis-user/password gis-user))
+                                              :database-ssl-mode (:gis-database-ssl-mode config/env)})
               file-name (qgis/project-file-name (:congregation/name congregation))]
           (-> (ok content)
               (response/content-type "application/octet-stream")
