@@ -16,6 +16,7 @@ import pt from "react-intl/locale-data/pt";
 import translations from "./translations.json";
 import sortBy from "lodash/sortBy";
 import toPairs from "lodash/toPairs";
+import flatMap from "lodash/flatMap";
 
 // TODO: create translations.json at build time, store the english version only in JSX tags to avoid getting out of sync
 // https://medium.freecodecamp.com/internationalization-in-react-7264738274a0
@@ -51,12 +52,12 @@ export function changeLanguage(language: string): void {
   window.location.reload();
 }
 
-const languagePreference: string[] = [
+const languagePreference: string[] = flatMap([
   Cookies.get('lang'),
   ...(navigator.languages || []),
   navigator.language,
   (navigator: any).userLanguage, // Internet Explorer
-].flatMap(lang => [lang, withoutRegionCode(lang)]);
+], lang => [lang, withoutRegionCode(lang)]);
 
 export const language: string = languagePreference.find(getMessages) || 'en';
 
