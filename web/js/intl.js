@@ -39,7 +39,7 @@ export const languages =
     ({name}) => name);
 
 export function getMessages(language: string): {} {
-  return translations[language] || translations[withoutRegionCode(language)];
+  return translations[language];
 }
 
 function withoutRegionCode(language: string): string {
@@ -56,7 +56,7 @@ const languagePreference: string[] = [
   ...(navigator.languages || []),
   navigator.language,
   (navigator: any).userLanguage, // Internet Explorer
-];
+].flatMap(lang => [lang, withoutRegionCode(lang)]);
 
 export const language: string = languagePreference.find(getMessages) || 'en';
 
