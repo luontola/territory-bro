@@ -3,7 +3,9 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.migration
-  (:require [clojure.tools.logging :as log]
+  (:require [clojure.string :as str]
+            [clojure.test :refer [deftest is testing]]
+            [clojure.tools.logging :as log]
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
@@ -11,7 +13,42 @@
             [territory-bro.gis-user :as gis-user]
             [territory-bro.region :as region]
             [territory-bro.territory :as territory]
-            [territory-bro.user :as user]))
+            [territory-bro.user :as user])
+  (:import (java.time Instant OffsetDateTime ZoneOffset ZoneId ZonedDateTime)
+           (java.time.format DateTimeFormatter DateTimeParseException)))
+
+(def patterns [(DateTimeFormatter/ofPattern "EE LLL d y H:m:s 'GMT'Z")
+               (-> (DateTimeFormatter/ofPattern "d LLL H:m:s y")
+                   (.withZone (ZoneId/of "Europe/Helsinki")))
+               (DateTimeFormatter/ofPattern "EE, d LLL y H:m:s Z")])
+
+(defn- parse-instant [s]
+  (let [parsed (->> patterns
+                    (map (fn [pattern]
+                           (try
+                             (-> s
+                                 (ZonedDateTime/parse pattern)
+                                 (.toInstant))
+                             (catch DateTimeParseException e
+                               (str e "\n\t for pattern: " pattern))))))]
+    (or (->> parsed
+             (filter (partial instance? Instant))
+             first)
+        (throw (RuntimeException. (str "Could not parse '" s "'\n" (str/join "\n" parsed)))))))
+
+(deftest parse-instant-test
+  (is (= (.toInstant (OffsetDateTime/of 2015 12 27
+                                        19 32 0 0
+                                        (ZoneOffset/ofHours 2)))
+         (parse-instant "Sun Dec 27 2015 19:32:00 GMT+0200")))
+  (is (= (.toInstant (OffsetDateTime/of 2015 11 7
+                                        22 44 53 0
+                                        (ZoneOffset/ofHours 2)))
+         (parse-instant "7 Nov 22:44:53 2015")))
+  (is (= (.toInstant (OffsetDateTime/of 2016 2 19
+                                        18 40 18 0
+                                        (ZoneOffset/ofHours 2)))
+         (parse-instant "Fri, 19 Feb 2016 18:40:18 +0200"))))
 
 (defn migrate-congregation [tenant]
   (db/as-tenant tenant
