@@ -20,7 +20,8 @@
 (def patterns [(DateTimeFormatter/ofPattern "EE LLL d y H:m:s 'GMT'Z")
                (-> (DateTimeFormatter/ofPattern "d LLL H:m:s y")
                    (.withZone (ZoneId/of "Europe/Helsinki")))
-               (DateTimeFormatter/ofPattern "EE, d LLL y H:m:s Z")])
+               (DateTimeFormatter/ofPattern "EE, d LLL y H:m:s Z")
+               (DateTimeFormatter/ofPattern "EE LLL d H:m:s y Z")])
 
 (defn- parse-instant [s]
   (let [parsed (->> patterns
@@ -48,7 +49,11 @@
   (is (= (.toInstant (OffsetDateTime/of 2016 2 19
                                         18 40 18 0
                                         (ZoneOffset/ofHours 2)))
-         (parse-instant "Fri, 19 Feb 2016 18:40:18 +0200"))))
+         (parse-instant "Fri, 19 Feb 2016 18:40:18 +0200")))
+  (is (= (.toInstant (OffsetDateTime/of 2018 11 27
+                                        15 48 57 0
+                                        (ZoneOffset/ofHours 2)))
+         (parse-instant "Tue Nov 27 15:48:57 2018 +0200"))))
 
 (defn migrate-congregation [tenant]
   (db/as-tenant tenant
