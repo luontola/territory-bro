@@ -12,12 +12,13 @@
   (:import (java.time Instant)
            (java.util UUID)))
 
+(def ^:dynamic *current-time* nil)
 (def ^:dynamic *current-user* nil)
 (def ^:dynamic *current-system* nil)
 
 (defn defaults
   ([]
-   (defaults (Instant/now)))
+   (defaults (or *current-time* (Instant/now))))
   ([^Instant now]
    (cond-> {:event/version 1
             :event/time now}

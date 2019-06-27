@@ -61,31 +61,34 @@
   (db/as-tenant tenant
     (let [regions (db/query :find-regions)
           territories (db/query :find-territories)
-          admins (get-in config/env [:tenant tenant :admins])]
-      (db/with-db [conn {}] ; to be able to see the new schema
-        (let [cong-id (congregation/create-congregation! conn (.toUpperCase (name tenant)))]
+          admins (get-in config/env [:tenant tenant :admins])
+          created (Instant/parse (get-in config/env [:tenant tenant :created]))]
 
-          (doseq [admin admins]
-            (let [user-id (user/save-user! conn admin {})]
-              (congregation/grant-access! conn cong-id user-id)
-              (gis-user/create-gis-user! conn cong-id user-id)))
+      (binding [events/*current-time* created]
+        (db/with-db [conn {}]
+          (let [cong-id (congregation/create-congregation! conn (.toUpperCase (name tenant)))]
 
-          (congregation/use-schema conn cong-id)
+            (doseq [admin admins]
+              (let [user-id (user/save-user! conn admin {})]
+                (congregation/grant-access! conn cong-id user-id)
+                (gis-user/create-gis-user! conn cong-id user-id)))
 
-          (doseq [region regions]
-            (cond
-              (:congregation region) (region/create-congregation-boundary! conn (:location region))
-              (:subregion region) (region/create-subregion! conn (:name region) (:location region))
-              (:minimap_viewport region) (region/create-card-minimap-viewport! conn (:location region))
-              :else (region/create-subregion! conn (:name region) (:location region))))
+            (congregation/use-schema conn cong-id)
 
-          (doseq [territory territories]
-            (let [meta (dissoc territory :id :number :address :region :location :location_2)]
-              (territory/create-territory! conn {:territory/number (:number territory)
-                                                 :territory/addresses (:address territory)
-                                                 :territory/subregion (:region territory)
-                                                 :territory/meta meta
-                                                 :territory/location (:location territory)})))))))
+            (doseq [region regions]
+              (cond
+                (:congregation region) (region/create-congregation-boundary! conn (:location region))
+                (:subregion region) (region/create-subregion! conn (:name region) (:location region))
+                (:minimap_viewport region) (region/create-card-minimap-viewport! conn (:location region))
+                :else (region/create-subregion! conn (:name region) (:location region))))
+
+            (doseq [territory territories]
+              (let [meta (dissoc territory :id :number :address :region :location :location_2)]
+                (territory/create-territory! conn {:territory/number (:number territory)
+                                                   :territory/addresses (:address territory)
+                                                   :territory/subregion (:region territory)
+                                                   :territory/meta meta
+                                                   :territory/location (:location territory)}))))))))
   (log/info "Migrated tenant" tenant))
 
 (comment
