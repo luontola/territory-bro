@@ -101,6 +101,9 @@
     (.setContents cp contents contents)
     [in out])
 
-  (doseq [tenant (keys (:tenant config/env))]
-    (binding [events/*current-system* "migration"]
-      (migrate-congregation tenant))))
+  (let [tenants (keys (:tenant config/env))]
+    (doseq [[i tenant] (map-indexed vector tenants)]
+      (log/info (str "Start migrating tenant " tenant " (" (inc i) "/" (count tenants) ")"))
+      (binding [events/*current-system* "migration"]
+        (migrate-congregation tenant)))
+    (log/info "All done")))
