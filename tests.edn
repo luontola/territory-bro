@@ -1,5 +1,5 @@
 #kaocha/v1
-    {:capture-output? false
+    {:capture-output? true
      :tests [{:id :unit
-              :test-paths ["test"]
-              :ns-patterns [".*-test"]}]}
+              :test-paths ["src" "test"]
+              :ns-patterns ["^territory-bro"]}]}
