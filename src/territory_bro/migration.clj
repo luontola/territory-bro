@@ -15,7 +15,9 @@
             [territory-bro.territory :as territory]
             [territory-bro.user :as user])
   (:import (java.time Instant OffsetDateTime ZoneOffset ZoneId ZonedDateTime)
-           (java.time.format DateTimeFormatter DateTimeParseException)))
+           (java.time.format DateTimeFormatter DateTimeParseException)
+           (java.awt Toolkit)
+           (java.awt.datatransfer DataFlavor StringSelection)))
 
 (def patterns [(DateTimeFormatter/ofPattern "EE LLL d y H:m:s 'GMT'Z")
                (-> (DateTimeFormatter/ofPattern "d LLL H:m:s y")
@@ -87,6 +89,15 @@
   (log/info "Migrated tenant" tenant))
 
 (comment
+  (let [cp (-> (Toolkit/getDefaultToolkit)
+               (.getSystemClipboard))
+        in (.getData cp DataFlavor/stringFlavor)
+        time (parse-instant in)
+        out (.toString time)
+        contents (StringSelection. out)]
+    (.setContents cp contents contents)
+    [in out])
+
   (doseq [tenant (keys (:tenant config/env))]
     (binding [events/*current-system* "migration"]
       (migrate-congregation tenant))))
