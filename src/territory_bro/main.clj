@@ -9,9 +9,9 @@
             [luminus.repl-server :as repl]
             [mount.core :as mount]
             [territory-bro.config :as config]
+            [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
-            [territory-bro.router :as router]
-            [territory-bro.congregation :as congregation])
+            [territory-bro.router :as router])
   (:gen-class))
 
 (mount/defstate ^{:on-reload :noop} http-server
@@ -32,6 +32,7 @@
     (repl/stop repl-server)))
 
 (defn migrate-database! []
+  (db/check-database-version 11)
   (let [master-schema (:database-schema config/env)]
     (log/info "Migrating master schema" master-schema)
     (-> (db/master-schema master-schema)

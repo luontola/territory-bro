@@ -184,6 +184,14 @@
        (use-master-schema ~conn)
        ~@body)))
 
+(defn check-database-version [minimum-version]
+  (with-db [conn {}]
+    (let [metadata (-> (jdbc/db-connection conn) .getMetaData)
+          version (.getDatabaseMajorVersion metadata)]
+      (assert (>= version minimum-version)
+              (str "Expected the database to be PostgreSQL " minimum-version " but it was "
+                   (.getDatabaseProductName metadata) " " (.getDatabaseProductVersion metadata))))))
+
 (defn- load-queries [queries-atom]
   ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
   (let [{queries :queries, resource :resource, old-last-modified :last-modified} @queries-atom
