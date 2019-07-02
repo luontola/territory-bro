@@ -16,6 +16,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import Layout from "./layout/Layout";
 import PrintoutPage from "./pages/PrintoutPage";
 import ErrorPage from "./pages/ErrorPage";
+import SupportPage from "./pages/SupportPage";
 
 const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
 
@@ -31,6 +32,7 @@ root.render(
           <Layout>
             <Router>
               <OverviewPage path="/"/>
+              <SupportPage path="/support"/>
               <RegistrationPage path="/register"/>
               <LoginCallbackPage path="/login-callback"/>
               <CongregationPage path="/congregation/:congregationId"/>
