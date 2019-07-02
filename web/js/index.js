@@ -15,44 +15,13 @@ import LoginCallbackPage from "./pages/LoginCallbackPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Layout from "./layout/Layout";
 import PrintoutPage from "./pages/PrintoutPage";
-import {getSettings} from "./api";
-import {buildAuthenticator} from "./authentication";
+import ErrorPage from "./pages/ErrorPage";
 
 const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
 
 globalHistory.listen(({location, action}) => {
   console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
 });
-
-function login() {
-  const settings = getSettings();
-  const {domain, clientId} = settings.auth0;
-  const auth = buildAuthenticator(domain, clientId);
-  auth.login();
-}
-
-const ErrorPage = ({componentStack, error}) => {
-  const httpStatus = error.isAxiosError && error.response && error.response.status;
-  if (httpStatus === 401) {
-    login();
-    return <p>Logging in...</p>;
-  }
-  if (httpStatus === 403) {
-    return (
-      <>
-        <h1>Not authorized 🛑</h1>
-        <p><a href="/">Return to the front page and try again</a></p>
-      </>
-    );
-  }
-  return (
-    <>
-      <h1>Sorry, something went wrong 🥺</h1>
-      <p><a href="/">Return to the front page and try again</a></p>
-      <pre>{`${error.stack}\n\nThe error is located at:${componentStack}`}</pre>
-    </>
-  );
-};
 
 root.render(
   <React.StrictMode>
