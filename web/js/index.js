@@ -36,6 +36,14 @@ const ErrorPage = ({componentStack, error}) => {
     login();
     return <p>Logging in...</p>;
   }
+  if (error.isAxiosError && error.response && error.response.status === 403) {
+    return (
+      <>
+        <h1>Not authorized 🛑</h1>
+        <p><a href="/">Return to the front page and try again</a></p>
+      </>
+    );
+  }
   return (
     <>
       <h1>Sorry, something went wrong 🥺</h1>
