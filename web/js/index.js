@@ -32,11 +32,12 @@ function login() {
 }
 
 const ErrorPage = ({componentStack, error}) => {
-  if (error.isAxiosError && error.response && error.response.status === 401) {
+  const httpStatus = error.isAxiosError && error.response && error.response.status;
+  if (httpStatus === 401) {
     login();
     return <p>Logging in...</p>;
   }
-  if (error.isAxiosError && error.response && error.response.status === 403) {
+  if (httpStatus === 403) {
     return (
       <>
         <h1>Not authorized 🛑</h1>
