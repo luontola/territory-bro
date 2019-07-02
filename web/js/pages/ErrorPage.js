@@ -13,25 +13,40 @@ function login() {
   auth.login();
 }
 
+function formatHttpError(error) {
+  if (!error.isAxiosError) {
+    return null;
+  }
+  let s = "Request failed:\n";
+  s += `    ${error.config.method.toUpperCase()} ${error.config.url}\n`;
+  if (error.request.status > 0) {
+    s += `    ${error.request.status} ${error.request.statusText}\n`;
+  }
+  if (error.request.responseText) {
+    s += `    ${error.request.responseText}\n`;
+  }
+  s += "\n";
+  return s;
+}
+
 const ErrorPage = ({componentStack, error}) => {
   const httpStatus = error.isAxiosError && error.response && error.response.status;
   if (httpStatus === 401) {
     login();
     return <p>Logging in...</p>;
   }
+  let message = "Sorry, something went wrong 🥺";
   if (httpStatus === 403) {
-    return (
-      <>
-        <h1>Not authorized 🛑</h1>
-        <p><a href="/">Return to the front page and try again</a></p>
-      </>
-    );
+    message = "Not authorized 🛑";
   }
   return (
     <>
-      <h1>Sorry, something went wrong 🥺</h1>
+      <h1>{message}</h1>
       <p><a href="/">Return to the front page and try again</a></p>
-      <pre>{`${error.stack}\n\nThe error is located at:${componentStack}`}</pre>
+      <pre>
+        {formatHttpError(error)}
+        {`${error.stack}\n\nThe error is located at:${componentStack}`}
+      </pre>
     </>
   );
 };
