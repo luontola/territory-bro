@@ -30,7 +30,9 @@ class Layout extends React.Component<Props> {
         <nav className="no-print">
           <AuthenticationPanel/>
           <ul>
-            <li><Link to="/">Overview</Link></li>
+            <li><Link to="/">Home</Link></li>
+            <li><a href="https://territorybro.com/guide/">User Guide</a></li>
+            <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">Updates</a></li>
           </ul>
         </nav>
 
