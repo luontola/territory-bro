@@ -58,7 +58,7 @@
     <orderEntry type="library" name="Leiningen: commons-io:2.6" level="project" />
     <orderEntry type="library" name="Leiningen: compojure:1.6.1" level="project" />
     <orderEntry type="library" name="Leiningen: conman:0.8.3" level="project" />
-    <orderEntry type="library" name="Leiningen: cprop:0.1.13" level="project" />
+    <orderEntry type="library" name="Leiningen: cprop:0.1.14-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Leiningen: crypto-equality:1.0.0" level="project" />
     <orderEntry type="library" name="Leiningen: crypto-random:1.2.0" level="project" />
     <orderEntry type="library" name="Leiningen: hiccup:1.0.5" level="project" />

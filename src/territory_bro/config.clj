@@ -30,16 +30,17 @@
        (into {})))
 
 (defn enrich-env [env]
-  (assoc env :now #(Instant/now)
-             :jwt-issuer (str "https://" (getx env :auth0-domain) "/")
-             :jwt-audience (getx env :auth0-client-id)
-             :tenant (enrich-tenants (:tenant env))))
+  (assoc env
+         :now #(Instant/now)
+         :jwt-issuer (str "https://" (getx env :auth0-domain) "/")
+         :jwt-audience (getx env :auth0-client-id)
+         :tenant (enrich-tenants (:tenant env))))
 
 (mount/defstate ^:dynamic env
   :start (-> (override-defaults
-               (cprop/load-config :resource "config-defaults.edn"
-                                  :merge [(source/from-resource "config.edn")])
-               (source/from-system-props)
-               (source/from-env))
+              (cprop/load-config :resource "config-defaults.edn"
+                                 :merge [(source/from-resource "config.edn")])
+              (source/from-system-props {:as-is? true})
+              (source/from-env {:as-is? true}))
              (enrich-env)
              (merge (mount/args))))
