@@ -68,3 +68,28 @@ You can do minor adjustments to the maps: drag with mouse to move, scroll mouse 
 Using the latest Chrome or Firefox, save the territory cards page as PDF. Open the PDF in [Adobe Reader](https://get.adobe.com/reader/), print one page with 100% scale on paper (one A4 sheet fits 2 cards) and measure the distance between the printed crop marks. Then measure that what the dimensions of the card should really be, so that it would fit inside your protective plastic cases. Calculate the correct scale for printing the cards by dividing those two measures and try printing again.
 
 Print the territory cards with the correct scale on thick paper. Cut the cards along the crop marks using a ruler and a sharp knife. Optionally cover the cards with adhesive book covering film (before cutting them out).
+
+*TODO: Update this section of the user guide (the video).*
+
+
+## Advanced: Importing City Suburb Boundaries
+
+> **Note: This video is a bit old. It shows an older version of QGIS.** With QGIS 3 some things may work differently, and some things you might be able to do without installing plugins.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/19vtQn6CwEU?list=PLSADDT9dzgRCEEopQhYLrdjVOfyfrC-Iz" frameborder="0" allowfullscreen></iframe>
+
+The above video shows starting at 4:45 that how to use QGIS to copy city suburb boundaries from a WFS service to your **subregion layer**. The video shows an old version of QGIS and Territory Bro, but the basic idea is the same.
+
+*TODO: Update this section of the user guide (importing WFS/OSM/KML).*
+
+
+## Tip: Finding Out Staircase Entrances From OpenStreetMap
+
+
+> **Note: This video is a bit old. It shows an older version of QGIS.** With QGIS 3 some things may work differently, and some things you might be able to do without installing plugins.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Oj9Lt4W5F4c?list=PLSADDT9dzgRCEEopQhYLrdjVOfyfrC-Iz" frameborder="0" allowfullscreen></iframe>
+
+The above video shows at time 1:05-3:40 that how to use [OpenStreetMap](https://www.openstreetmap.org/) to find out the staircase entrance letters/numbers easily. You could also use Google Street View.
+
+*TODO: Update this section of the user guide.*
