@@ -6,6 +6,18 @@ permalink: /guide2/
 
 # User Guide
 
+## Table of Contents
+
+1. [Getting Started](#getting-started)
+2. [Editing Maps with QGIS](#editing-maps-with-qgis)
+    1. [Map Layers](#map-layers)
+    2. [Drawing Features](#drawing-features)
+3. [Printing Territory Cards](#printing-territory-cards)
+4. [Advanced Topics](#advanced-topics)
+    1. [Importing City Suburb Boundaries](#importing-city-suburb-boundaries)
+    2. [Locating Staircase Entrances](#locating-staircase-entrances)
+
+
 ## Getting Started
 
 1. Visit <https://beta.territorybro.com/register> to add a new congregation to Territory Bro. You will need to login using your Google or Facebook account.
@@ -19,7 +31,9 @@ permalink: /guide2/
 After this the next steps are to draw your congregation's boundaries on the map and then start drawing individual territories.
 
 
-## Map Layers
+## Editing Maps with QGIS
+
+### Map Layers
 
 After opening your congregation's project file in QGIS, you should see a *layers* panel. If it is not visible, select **View \| Panels \| Layers** from the main menu.
 
@@ -42,7 +56,7 @@ The **card_minimap_viewport layer** determines the minimap's ⑤ zoom level. By 
 In the layers panel there are also various map rasters. The default is **OpenStreetMap**, which has street maps for the whole world, but for some countries there are also additional maps. These same maps can be used for printing the territory cards inside Territory Bro.
 
 
-## Drawing Features
+### Drawing Features
 
 In QGIS, to draw a feature on one of the layers, first select the layer in the Layers panel and choose **Layer \| Toggle Editing** from the main menu.
 
@@ -72,7 +86,9 @@ Print the territory cards with the correct scale on thick paper. Cut the cards a
 *TODO: Update this section of the user guide (the video).*
 
 
-## Advanced: Importing City Suburb Boundaries
+## Advanced Topics
+
+### Importing City Suburb Boundaries
 
 > **Note: This video is a bit old. It shows an older version of QGIS.** With QGIS 3 some things may work differently, and some things you might be able to do without installing plugins.
 
@@ -83,8 +99,7 @@ The above video shows starting at 4:45 that how to use QGIS to copy city suburb 
 *TODO: Update this section of the user guide (importing WFS/OSM/KML).*
 
 
-## Tip: Finding Out Staircase Entrances From OpenStreetMap
-
+### Locating Staircase Entrances
 
 > **Note: This video is a bit old. It shows an older version of QGIS.** With QGIS 3 some things may work differently, and some things you might be able to do without installing plugins.
 
