@@ -44,10 +44,27 @@ In the layers panel there are also various map rasters. The default is **OpenStr
 
 ## Drawing Features
 
-To draw a feature on one of the layers, first select the layer in the Layers panel and choose **Layer \| Toggle Editing** from the main menu.
+In QGIS, to draw a feature on one of the layers, first select the layer in the Layers panel and choose **Layer \| Toggle Editing** from the main menu.
 
 Now the layer is editable and you can choose the **Edit \| Add Polygon Feature** tool. Left-click on the map to draw the polygon's corners. Right-click when you're finished, after which you can type the feature's attributes.
 
 The feature is saved to the database only after you select **Layer \| Save Layer Edits**. To avoid losing work, it's best to save after each new territory you add, in case QGIS crashes and you need to restart QGIS (it is known to happen).
 
 After you are done editing a layer, you can choose **Layer \| Toggle Editing** again to make the layer read-only.
+
+
+## Printing Territory Cards
+
+> **Note: This video is a bit old, so you can skip the beginning and start watching from 4:00.** The export/import phase is no more needed, because you can now login to Territory Bro and it will show your territories directly. Also the experimental web browser features mentioned in the video are no more experimental.  
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/WSxMMV6CpPg?list=PLSADDT9dzgRCEEopQhYLrdjVOfyfrC-Iz&start=239" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+Log in to <https://beta.territorybro.com>, choose your congregation and to go printouts. You should see your territories ready to be printed using various card templates. You can print multiple territories by holding down `Ctrl` or `Shift` to select them from the territories list. 
+
+By default, the map rasters from OpenStreetMap are used, but Territory Bro can support also other freely available maps. [Create an issue](https://github.com/luontola/territory-bro/issues) if you know about a map you wish to use.
+
+You can do minor adjustments to the maps: drag with mouse to move, scroll mouse wheel to zoom, hold `Alt+Shift` while dragging to rotate. These adjustments are not saved after you leave the page, so do them right before printing the cards. 
+
+Using the latest Chrome or Firefox, save the territory cards page as PDF. Open the PDF in [Adobe Reader](https://get.adobe.com/reader/), print one page with 100% scale on paper (one A4 sheet fits 2 cards) and measure the distance between the printed crop marks. Then measure that what the dimensions of the card should really be, so that it would fit inside your protective plastic cases. Calculate the correct scale for printing the cards by dividing those two measures and try printing again.
+
+Print the territory cards with the correct scale on thick paper. Cut the cards along the crop marks using a ruler and a sharp knife. Optionally cover the cards with adhesive book covering film (before cutting them out).
