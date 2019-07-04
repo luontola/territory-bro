@@ -26,7 +26,7 @@ permalink: /guide2/
 
 3. Download and install [QGIS 3.4 (Long Term Release)](https://qgis.org/). This program will be used to edit the territory maps.
 
-4. Open the QGIS project file in QGIS. You should see a world map.
+4. Use QGIS to open your congregation's QGIS project file (which you saved in step 2). You should see a world map and you can zoom to your city.
 
 After this the next steps are to draw your congregation's boundaries on the map and then start drawing individual territories.
 
