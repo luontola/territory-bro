@@ -44,7 +44,7 @@
                             :meta {:foo "bar", :gazonk 42}
                             :location testdata/wkt-multi-polygon}}
                      (-> (last changes)
-                         (select-keys [:table :op :old :new]))))))
+                         (dissoc :id :schema :user :time))))))
 
           (testing "update"
             (jdbc/execute! conn ["UPDATE territory SET addresses = 'Another Street 2' WHERE id = ?" territory-id])
@@ -65,7 +65,7 @@
                             :meta {:foo "bar", :gazonk 42}
                             :location testdata/wkt-multi-polygon}}
                      (-> (last changes)
-                         (select-keys [:table :op :old :new]))))))
+                         (dissoc :id :schema :user :time))))))
 
           (testing "delete"
             (jdbc/execute! conn ["DELETE FROM territory WHERE id = ?" territory-id])
@@ -81,7 +81,7 @@
                             :location testdata/wkt-multi-polygon}
                       :new nil}
                      (-> (last changes)
-                         (select-keys [:table :op :old :new]))))))))
+                         (dissoc :id :schema :user :time))))))))
 
       (testing "congregation_boundary table change log"
         (let [region-id (region/create-congregation-boundary! conn testdata/wkt-multi-polygon)
@@ -93,7 +93,7 @@
                   :new {:id (str region-id)
                         :location testdata/wkt-multi-polygon}}
                  (-> (last changes)
-                     (select-keys [:table :op :old :new]))))))
+                     (dissoc :id :schema :user :time))))))
 
       (testing "subregion table change log"
         (let [region-id (region/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
@@ -106,7 +106,7 @@
                         :name "Somewhere"
                         :location testdata/wkt-multi-polygon}}
                  (-> (last changes)
-                     (select-keys [:table :op :old :new]))))))
+                     (dissoc :id :schema :user :time))))))
 
       (testing "card_minimap_viewport table change log"
         (let [region-id (region/create-card-minimap-viewport! conn testdata/wkt-polygon)
@@ -118,4 +118,4 @@
                   :new {:id (str region-id)
                         :location testdata/wkt-polygon}}
                  (-> (last changes)
-                     (select-keys [:table :op :old :new])))))))))
+                     (dissoc :id :schema :user :time)))))))))
