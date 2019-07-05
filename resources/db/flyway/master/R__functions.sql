@@ -5,7 +5,8 @@ declare
 begin
     lock table gis_change_log in share row exclusive mode;
 
-    select coalesce(max(id), 0) into latest_id
+    select coalesce(max(id), 0)
+    into latest_id
     from gis_change_log;
 
     insert into gis_change_log (id, schema, "table", op, "user", time, old, new)
@@ -13,7 +14,7 @@ begin
            tg_table_schema,
            tg_table_name,
            tg_op,
-           current_user,
+           session_user,
            now(),
            case tg_op
                when 'INSERT' then null
@@ -36,10 +37,12 @@ declare
 begin
     lock table event in share row exclusive mode;
 
-    select coalesce(max(global_revision), 0) + 1 into next_global_revision
+    select coalesce(max(global_revision), 0) + 1
+    into next_global_revision
     from event;
 
-    select coalesce(max(stream_revision), 0) + 1 into next_stream_revision
+    select coalesce(max(stream_revision), 0) + 1
+    into next_stream_revision
     from event
     where stream_id = new.stream_id;
 

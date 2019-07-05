@@ -10,6 +10,7 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
+            [territory-bro.gis :as gis]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.region :as region]
             [territory-bro.territory :as territory]
@@ -98,6 +99,27 @@
         (is (region/create-congregation-boundary! conn testdata/wkt-multi-polygon))
         (is (region/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
         (is (region/create-card-minimap-viewport! conn testdata/wkt-polygon))))
+
+    (testing "user ID is logged in GIS change log"
+      (db/with-db [conn {}]
+        (is (= [{:op "INSERT",
+                 :schema schema,
+                 :table "territory",
+                 :user username}
+                {:op "INSERT",
+                 :schema schema,
+                 :table "congregation_boundary",
+                 :user username}
+                {:op "INSERT",
+                 :schema schema,
+                 :table "subregion",
+                 :user username}
+                {:op "INSERT",
+                 :schema schema,
+                 :table "card_minimap_viewport",
+                 :user username}]
+               (->> (gis/get-gis-changes conn)
+                    (map #(dissoc % :id :time :old :new)))))))
 
     (testing "cannot view the master schema"
       (is (thrown-with-msg? PSQLException #"ERROR: permission denied for schema"
