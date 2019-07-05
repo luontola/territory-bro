@@ -40,7 +40,7 @@
   :start (-> (override-defaults
               (cprop/load-config :resource "config-defaults.edn"
                                  :merge [(source/from-resource "config.edn")])
-              (source/from-system-props {:as-is? true})
-              (source/from-env {:as-is? true}))
+              (source/from-system-props {:as-is? false})
+              (source/from-env {:as-is? false}))
              (enrich-env)
              (merge (mount/args))))
