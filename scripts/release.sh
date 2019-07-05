@@ -8,6 +8,8 @@ set -x
 
 docker-compose build --pull
 
+git tag "$TAG"
+
 docker tag "luontola/territory-bro-api" "luontola/territory-bro-api:$TAG"
 docker tag "luontola/territory-bro-web" "luontola/territory-bro-web:$TAG"
 
