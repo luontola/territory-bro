@@ -33,14 +33,14 @@
 (defn migrate-database! []
   (db/check-database-version 11)
   (let [master-schema (:database-schema config/env)]
-    (log/info "Migrating master schema" master-schema)
+    (log/info "Migrating master schema:" master-schema)
     (-> (db/master-schema master-schema)
         (.migrate))
 
     (doseq [congregation (db/with-db [conn {}]
                            (congregation/get-unrestricted-congregations conn))]
       (let [tenant-schema (:congregation/schema-name congregation)]
-        (log/info "Migrating tenant schema" tenant-schema)
+        (log/info "Migrating tenant schema:" tenant-schema)
         (-> (db/tenant-schema tenant-schema master-schema)
             (.migrate))))))
 
