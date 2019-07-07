@@ -17,7 +17,7 @@
                  [com.layerware/hugsql "0.4.9"]
                  [compojure "1.6.1"]
                  [conman "0.8.3"]
-                 [cprop "0.1.14-SNAPSHOT"]
+                 [cprop "0.1.14"]
                  [liberator "0.15.3"]
                  [luminus-immutant "0.2.5"]
                  [luminus-migrations "0.6.5"]
