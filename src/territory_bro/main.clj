@@ -4,7 +4,6 @@
 
 (ns territory-bro.main
   (:require [clojure.tools.logging :as log]
-            [luminus-migrations.core :as migrations]
             [luminus.http-server :as http]
             [luminus.repl-server :as repl]
             [mount.core :as mount]
@@ -68,25 +67,9 @@
       (log/error t "Failed to start")
       (stop-app))))
 
-(defn -main [& args]
+(defn -main [& _args]
   (log-mount-states (mount/start #'config/env))
-  (cond
-    (nil? (:database-url config/env))
-    (do
-      (log/error "Database configuration not found, :database-url must be set before running")
-      (System/exit 1))
-
-    (some #{"init"} args)
-    (do
-      (migrations/init (select-keys config/env [:database-url :init-script]))
-      (System/exit 0))
-
-    (migrations/migration? args)
-    (do
-      (log-mount-states (mount/start #'db/databases))
-      (migrate-database!)
-      (migrations/migrate args (select-keys config/env [:database-url]))
-      (System/exit 0))
-
-    :else
-    (start-app)))
+  (when (nil? (:database-url config/env))
+    (log/error "Database configuration not found, :database-url must be set before running")
+    (System/exit 1))
+  (start-app))

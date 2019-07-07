@@ -11,5 +11,4 @@
  :auth0-domain nil
  :auth0-client-id nil
  :super-admin nil
- :tenant {}
  :support-email nil}

@@ -35,5 +35,4 @@
                                     :subregion (:territory/subregion territory)
                                     :meta (:territory/meta territory)
                                     :location (:territory/location territory)})
-
     id))

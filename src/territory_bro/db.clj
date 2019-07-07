@@ -2,13 +2,12 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns ^{:resource-deps ["sql/queries.sql"]} territory-bro.db
+(ns territory-bro.db
   (:require [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [conman.core :as conman]
-            [hikari-cp.core :as hikari-cp]
             [hugsql.adapter.clojure-java-jdbc] ; for hugsql.core/get-adapter to not crash on first usage
             [hugsql.core :as hugsql]
             [mount.core :as mount]
@@ -16,74 +15,24 @@
             [territory-bro.json :as json]
             [territory-bro.util :refer [getx]])
   (:import (clojure.lang IPersistentMap IPersistentVector)
-           (com.zaxxer.hikari HikariDataSource HikariConfig)
+           (com.zaxxer.hikari HikariDataSource)
            (java.net URL)
            (java.sql Date Timestamp PreparedStatement Array)
-           (java.time Duration)
            (org.flywaydb.core Flyway)
            (org.postgresql.util PGobject)))
 
-; Since there are tens of tenants, we don't want to keep connections open to all of them all the time.
-; See hikari-cp.core/default-datasource-options for available options.
-(def datasource-options {:idle-timeout (-> (Duration/ofSeconds 60) (.toMillis))
-                         :minimum-idle 0
-                         :maximum-pool-size 10
-                         :initialization-fail-timeout -1})
-
-(defn my-connect! [pool-spec]
-  ;; XXX: the hikari-cp wrapper doesn't support setInitializationFailTimeout
-  (let [{:keys [initialization-fail-timeout]} pool-spec
-        config ^HikariConfig (hikari-cp/datasource-config (conman/make-config pool-spec))]
-    (when initialization-fail-timeout (.setInitializationFailTimeout config initialization-fail-timeout))
-    {:datasource (HikariDataSource. config)}))
-
 (defn connect! [database-url]
   (log/info "Connect" database-url)
-  (my-connect! (merge datasource-options
-                      {:jdbc-url database-url})))
+  (conman/connect! {:jdbc-url database-url}))
 
 (defn disconnect! [connection]
   (log/info "Disconnect" (if-let [ds (:datasource connection)]
                            (.getJdbcUrl ^HikariDataSource ds)))
   (conman/disconnect! connection))
 
-(defn connect-all! []
-  {:default (connect! (getx config/env :database-url))
-   :tenant (into {} (map (fn [[tenant config]]
-                           [tenant (connect! (:database-url config))])
-                         (get config/env :tenant)))})
-
-(defn disconnect-all! [databases]
-  (disconnect! (:default databases))
-  (doseq [config (vals (:tenant databases))]
-    (disconnect! config)))
-
-(mount/defstate databases
-  :start (connect-all!)
-  :stop (disconnect-all! databases))
-
-(def ^:dynamic *conn*)
-
-(def queries (conman/bind-connection-map nil "sql/queries.sql"))
-
-(defn as-tenant* [tenant f]
-  (binding [*conn* (if (nil? tenant)
-                     (or (get databases :default)
-                         (throw (IllegalArgumentException. "default database connection not found")))
-                     (or (get-in databases [:tenant tenant])
-                         (throw (IllegalArgumentException. (str "database connection for tenant " tenant " not found")))))]
-    (f)))
-
-(defmacro as-tenant [tenant & body]
-  `(as-tenant* ~tenant (fn [] ~@body)))
-
-(defn query
-  ([query-id]
-   (query query-id {}))
-  ([query-id params]
-   (if-let [query-fn (get-in queries [:fns query-id :fn])]
-     (query-fn *conn* params)
-     (throw (IllegalArgumentException. (str "query " query-id " not found"))))))
+(mount/defstate database
+  :start (connect! (getx config/env :database-url))
+  :stop (disconnect! database))
 
 (defn to-date [^java.util.Date sql-date]
   (-> sql-date (.getTime) (java.util.Date.)))
@@ -141,14 +90,14 @@
 
 (defn ^Flyway master-schema [schema]
   (-> (Flyway/configure)
-      (.dataSource (get-in databases [:default :datasource]))
+      (.dataSource (:datasource database))
       (.schemas (strings schema))
       (.locations (strings "classpath:db/flyway/master"))
       (.load)))
 
 (defn ^Flyway tenant-schema [schema master-schema]
   (-> (Flyway/configure)
-      (.dataSource (get-in databases [:default :datasource]))
+      (.dataSource (:datasource database))
       (.schemas (strings schema))
       (.locations (strings "classpath:db/flyway/tenant"))
       (.placeholders {"masterSchema" master-schema})
@@ -180,7 +129,7 @@
   (let [conn (first binding)
         options (merge {:isolation :serializable}
                        (second binding))]
-    `(jdbc/with-db-transaction [~conn (:default databases) ~options]
+    `(jdbc/with-db-transaction [~conn database ~options]
        (use-master-schema ~conn)
        ~@body)))
 

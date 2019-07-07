@@ -1,12 +1,10 @@
-;; Copyright © 2015-2018 Esko Luontola
+;; Copyright © 2015-2019 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns user
   (:require [clojure.test :as test]
             [clojure.tools.namespace.repl :refer [refresh]]
-            [conman.core :as conman]
-            [luminus-migrations.core :as migrations]
             [mount.core :as mount]
             [territory-bro.config :refer [env]]
             [territory-bro.db]
@@ -21,18 +19,6 @@
 (defn restart []
   (stop)
   (start))
-
-(defn reset-db []
-  (migrations/migrate ["reset"] (select-keys env [:database-url])))
-
-(defn migrate []
-  (migrations/migrate ["migrate"] (select-keys env [:database-url])))
-
-(defn rollback []
-  (migrations/migrate ["rollback"] (select-keys env [:database-url])))
-
-(defn create-migration [name]
-  (migrations/create name (select-keys env [:database-url])))
 
 (defn run-all-tests []
   (refresh)

@@ -20,7 +20,6 @@
                  [cprop "0.1.14"]
                  [liberator "0.15.3"]
                  [luminus-immutant "0.2.5"]
-                 [luminus-migrations "0.6.5"]
                  [luminus-nrepl "0.1.6"]
                  [metosin/jsonista "0.2.2"]
                  [metosin/ring-http-response "0.9.1"]
