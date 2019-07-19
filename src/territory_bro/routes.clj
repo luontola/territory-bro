@@ -164,3 +164,19 @@
   (GET "/api/congregations" request (list-congregations request))
   (GET "/api/congregation/:congregation" request (get-congregation request))
   (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request)))
+
+(comment
+  (db/with-db [conn {}]
+    (->> (user/get-users conn)
+         (filter #(= "" (:name (:user/attributes %))))))
+
+  (db/with-db [conn {}]
+    (->> (congregation/get-unrestricted-congregations conn)
+         (filter #(= "" (:congregation/name %)))))
+
+  (db/with-db [conn {}]
+    (let [user-id (UUID/fromString "")
+          cong-id (UUID/fromString "")]
+      (binding [events/*current-system* "admin"]
+        (congregation/grant-access! conn cong-id user-id)
+        (gis-user/create-gis-user! conn cong-id user-id)))))
