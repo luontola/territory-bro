@@ -25,11 +25,6 @@ services:
       SUPER_ADMIN:
       SUPPORT_EMAIL: support@example.com
       DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro
-      TENANT__TESTING__DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro
-      TENANT__TESTING__DATABASE_HOST: db
-      TENANT__TESTING__DATABASE_USERNAME: territorybro
-      TENANT__TESTING__DATABASE_PASSWORD: territorybro
-      TENANT__TESTING__ADMINS: google-oauth2|102883237794451111459
     mem_reservation: 150m
     mem_limit: 200m
     ports:
