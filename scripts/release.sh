@@ -17,3 +17,5 @@ docker push "luontola/territory-bro-api:$TAG"
 docker push "luontola/territory-bro-api:latest"
 docker push "luontola/territory-bro-web:$TAG"
 docker push "luontola/territory-bro-web:latest"
+
+git push origin "$TAG"
