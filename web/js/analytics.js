@@ -17,5 +17,12 @@ export function logPageView() {
   });
 }
 
+export function logFatalException(error) {
+  gtag('event', 'exception', {
+    'description': error.stack,
+    'fatal': true
+  });
+}
+
 gtag('js', new Date());
 logPageView();

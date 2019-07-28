@@ -5,6 +5,7 @@
 import React from "react";
 import {getSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
+import {logFatalException} from "../analytics";
 
 function login() {
   const settings = getSettings();
@@ -35,9 +36,12 @@ const ErrorPage = ({componentStack, error}) => {
     login();
     return <p>Logging in...</p>;
   }
-  let message = "Sorry, something went wrong 🥺";
+  let message;
   if (httpStatus === 403) {
     message = "Not authorized 🛑";
+  } else {
+    message = "Sorry, something went wrong 🥺";
+    logFatalException(error);
   }
   return (
     <>
