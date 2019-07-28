@@ -17,11 +17,13 @@ import Layout from "./layout/Layout";
 import PrintoutPage from "./pages/PrintoutPage";
 import ErrorPage from "./pages/ErrorPage";
 import SupportPage from "./pages/SupportPage";
+import {logPageView} from "./analytics";
 
 const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
 
 globalHistory.listen(({location, action}) => {
   console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
+  logPageView();
 });
 
 root.render(
