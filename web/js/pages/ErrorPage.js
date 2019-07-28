@@ -16,7 +16,7 @@ function login() {
 
 function formatHttpError(error) {
   if (!error.isAxiosError) {
-    return null;
+    return '';
   }
   let s = "Request failed:\n";
   s += `    ${error.config.method.toUpperCase()} ${error.config.url}\n`;
@@ -36,21 +36,19 @@ const ErrorPage = ({componentStack, error}) => {
     login();
     return <p>Logging in...</p>;
   }
-  let message;
+  let title;
+  let description = `${formatHttpError(error)}${error.stack}\n\nThe error is located at:${componentStack}`;
   if (httpStatus === 403) {
-    message = "Not authorized 🛑";
+    title = "Not authorized 🛑";
   } else {
-    message = "Sorry, something went wrong 🥺";
-    logFatalException(error);
+    title = "Sorry, something went wrong 🥺";
+    logFatalException(description);
   }
   return (
     <>
-      <h1>{message}</h1>
+      <h1>{title}</h1>
       <p><a href="/">Return to the front page and try again</a></p>
-      <pre>
-        {formatHttpError(error)}
-        {`${error.stack}\n\nThe error is located at:${componentStack}`}
-      </pre>
+      <pre>{description}</pre>
     </>
   );
 };

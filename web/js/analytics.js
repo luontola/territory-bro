@@ -17,9 +17,9 @@ export function logPageView() {
   });
 }
 
-export function logFatalException(error) {
+export function logFatalException(description) {
   gtag('event', 'exception', {
-    'description': error.stack,
+    'description': description,
     'fatal': true
   });
 }
