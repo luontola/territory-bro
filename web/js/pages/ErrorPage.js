@@ -5,29 +5,13 @@
 import React from "react";
 import {getSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
-import {logFatalException} from "../analytics";
+import {formatError, logFatalException} from "../analytics";
 
 function login() {
   const settings = getSettings();
   const {domain, clientId} = settings.auth0;
   const auth = buildAuthenticator(domain, clientId);
   auth.login();
-}
-
-function formatHttpError(error) {
-  if (!error.isAxiosError) {
-    return '';
-  }
-  let s = "Request failed:\n";
-  s += `    ${error.config.method.toUpperCase()} ${error.config.url}\n`;
-  if (error.request.status > 0) {
-    s += `    ${error.request.status} ${error.request.statusText}\n`;
-  }
-  if (error.request.responseText) {
-    s += `    ${error.request.responseText}\n`;
-  }
-  s += "\n";
-  return s;
 }
 
 const ErrorPage = ({componentStack, error}) => {
@@ -37,7 +21,7 @@ const ErrorPage = ({componentStack, error}) => {
     return <p>Logging in...</p>;
   }
   let title;
-  let description = `${formatHttpError(error)}${error.stack}\n\nThe error is located at:${componentStack}`;
+  let description = `${formatError(error)}\n\nThe error is located at:${componentStack}`;
   if (httpStatus === 403) {
     title = "Not authorized 🛑";
   } else {

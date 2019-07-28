@@ -24,5 +24,33 @@ export function logFatalException(description) {
   });
 }
 
+function formatHttpError(error) {
+  if (!error.isAxiosError) {
+    return '';
+  }
+  let s = "Request failed:\n";
+  s += `    ${error.config.method.toUpperCase()} ${error.config.url}\n`;
+  if (error.request.status > 0) {
+    s += `    ${error.request.status} ${error.request.statusText}\n`;
+  }
+  if (error.request.responseText) {
+    s += `    ${error.request.responseText}\n`;
+  }
+  s += "\n";
+  return s;
+}
+
+export function formatError(error) {
+  return formatHttpError(error) + (error.stack || error);
+}
+
 gtag('js', new Date());
 logPageView();
+
+window.addEventListener('error', event => {
+  logFatalException(`Unhandled exception\n${event.message}\n${formatError(event.error)}`)
+});
+
+window.addEventListener('unhandledrejection', event => {
+  logFatalException(`Unhandled exception (in promise)\n${formatError(event.reason)}`)
+});
