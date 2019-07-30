@@ -77,7 +77,8 @@
                  {:dev (getx config/env :dev)
                   :auth0 {:domain (getx config/env :auth0-domain)
                           :clientId (getx config/env :auth0-client-id)}
-                  :supportEmail (getx config/env :support-email)
+                  :supportEmail (when auth/*user*
+                                  (getx config/env :support-email))
                   :user (assoc (select-keys auth/*user* [:name :sub])
                                :authenticated (not (nil? auth/*user*)))})))
 
