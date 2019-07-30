@@ -6,8 +6,8 @@
   (:require [compojure.core :refer [routes wrap-routes]]
             [compojure.route :as route]
             [mount.core :as mount]
-            [territory-bro.middleware :as middleware]
-            [territory-bro.routes :refer [api-routes]]))
+            [territory-bro.api :refer [api-routes]]
+            [territory-bro.middleware :as middleware]))
 
 (mount/defstate app
   :start

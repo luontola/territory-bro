@@ -8,6 +8,8 @@
             [clojure.test :refer :all]
             [ring.mock.request :refer :all]
             [ring.util.http-predicates :refer :all]
+            [territory-bro.api :as api]
+            [territory-bro.authentication :as auth]
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
@@ -73,6 +75,13 @@
       (assert-response ok?)))
 
 
+(deftest format-for-api-test
+  (is (= {} (api/format-for-api {})))
+  (is (= {"foo" 1} (api/format-for-api {:foo 1})))
+  (is (= {"fooBar" 1} (api/format-for-api {:foo-bar 1})))
+  (is (= {"bar" 1} (api/format-for-api {:foo/bar 1})))
+  (is (= [{"foo" 1} {"bar" 2}] (api/format-for-api [{:foo 1} {:bar 2}]))))
+
 (deftest basic-routes-test
   (testing "index"
     (let [response (-> (request :get "/")
@@ -134,6 +143,29 @@
       (is (forbidden? response))
       (is (= "Dev mode disabled" (:body response)))
       (is (empty? (get-cookies response))))))
+
+(deftest dev-login-test
+  (testing "authenticates as anybody in dev mode"
+    (binding [config/env {:dev true}
+              api/save-user-from-jwt! (fn [_])]
+      (is (= {:status 200,
+              :headers {},
+              :body "Logged in",
+              :session {::auth/user {:sub "sub",
+                                     :name "name",
+                                     :email "email"}}}
+             (api/dev-login {:params {:sub "sub"
+                                      :name "name"
+                                      :email "email"}})))))
+
+  (testing "is disabled when not in dev mode"
+    (binding [config/env {:dev false}]
+      (is (= {:status 403
+              :headers {}
+              :body "Dev mode disabled"}
+             (api/dev-login {:params {:sub "sub"
+                                      :name "name"
+                                      :email "email"}}))))))
 
 (deftest authorization-test
   (testing "before login"
