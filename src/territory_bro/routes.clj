@@ -30,12 +30,6 @@
   (if-not auth/*user*
     (unauthorized! "Not logged in")))
 
-(defn find-tenant [request tenants]
-  (if-let [tenant (get-in request [:headers "x-tenant"])]
-    (let [tenant (keyword tenant)]
-      (when (some #(= tenant %) tenants)
-        tenant))))
-
 (defn ^:dynamic save-user-from-jwt! [jwt]
   (db/with-db [conn {}]
     (user/save-user! conn (:sub jwt) (select-keys jwt [:name :nickname :email :email_verified :picture]))))
