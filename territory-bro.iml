@@ -73,7 +73,7 @@
     <orderEntry type="library" name="Leiningen: liberator:0.15.3" level="project" />
     <orderEntry type="library" name="Leiningen: luminus-immutant:0.2.5" level="project" />
     <orderEntry type="library" name="Leiningen: luminus-nrepl:0.1.6" level="project" />
-    <orderEntry type="library" name="Leiningen: medley:1.0.0" level="project" />
+    <orderEntry type="library" name="Leiningen: medley:1.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: metosin/jsonista:0.2.3" level="project" />
     <orderEntry type="library" name="Leiningen: metosin/ring-http-response:0.9.1" level="project" />
     <orderEntry type="library" name="Leiningen: metosin/ring-middleware-format:0.6.0" level="project" />

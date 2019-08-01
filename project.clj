@@ -21,6 +21,7 @@
                  [liberator "0.15.3"]
                  [luminus-immutant "0.2.5"]
                  [luminus-nrepl "0.1.6"]
+                 [medley "1.1.0"]
                  [metosin/jsonista "0.2.3"]
                  [metosin/ring-http-response "0.9.1"]
                  [metosin/ring-middleware-format "0.6.0"] ;; TODO: replace with newer library
