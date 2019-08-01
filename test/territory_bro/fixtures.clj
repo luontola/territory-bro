@@ -33,7 +33,6 @@
   ;; cleanup
   (db/with-db [conn {}]
     (delete-schemas-starting-with! conn (:database-schema test-env)))
-  (reset! congregation/cache nil)
   ;; setup
   (-> (db/master-schema (:database-schema config/env))
       (.migrate))

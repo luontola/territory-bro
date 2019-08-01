@@ -5,6 +5,7 @@
 (ns territory-bro.congregation
   (:require [clojure.string :as str]
             [clojure.tools.logging :as log]
+            [mount.core :as mount]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
@@ -146,8 +147,9 @@
   nil)
 
 
-(def cache (atom {:last-event nil
-                  :state nil}))
+(mount/defstate cache
+  :start (atom {:last-event nil
+                :state nil}))
 
 (defn update-cache! [conn]
   (let [cached @cache
