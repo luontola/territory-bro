@@ -11,6 +11,12 @@
             [territory-bro.events :as events])
   (:import (java.util UUID)))
 
+(defn congregation-view [state event]
+  (-> state
+      (assoc-in [(:congregation/id event) :congregation/id] (:congregation/id event))
+      (assoc-in [(:congregation/id event) :congregation/name] (:congregation/name event))
+      (assoc-in [(:congregation/id event) :congregation/schema-name] (:congregation/schema-name event))))
+
 (def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
 
 (defn- format-congregation [row]

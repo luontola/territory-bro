@@ -8,11 +8,33 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
+            [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
             [territory-bro.user :as user])
-  (:import (java.util UUID)))
+  (:import (java.util UUID)
+           (java.time Instant)))
 
 (use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
+
+(defn apply-events [events]
+  (->> events
+       events/validate-events
+       (reduce congregation/congregation-view nil)))
+
+(deftest congregation-view-test
+  (testing "created"
+    (let [cong-id (UUID. 0 1)
+          events [{:event/type :congregation.event/congregation-created
+                   :event/version 1
+                   :event/system "test"
+                   :event/time (Instant/ofEpochSecond 1)
+                   :congregation/id cong-id
+                   :congregation/name "Cong1 Name"
+                   :congregation/schema-name "cong1_schema"}]
+          expected {cong-id {:congregation/id cong-id
+                             :congregation/name "Cong1 Name"
+                             :congregation/schema-name "cong1_schema"}}]
+      (is (= expected (apply-events events))))))
 
 (deftest congregations-test
   (db/with-db [conn {:isolation :read-committed}] ; creating the schema happens in another transaction
