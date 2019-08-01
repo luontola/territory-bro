@@ -31,17 +31,17 @@
 (defn read-stream
   ([conn stream-id]
    (read-stream conn stream-id {}))
-  ([conn stream-id opts]
+  ([conn stream-id {:keys [since]}]
    (->> (query! conn :read-stream {:stream stream-id
-                                   :since (get opts :since 0)})
+                                   :since (or since 0)})
         (map parse-db-row)
         (doall))))
 
 (defn read-all-events
   ([conn]
    (read-all-events conn {}))
-  ([conn opts]
-   (->> (query! conn :read-all-events {:since (get opts :since 0)})
+  ([conn {:keys [since]}]
+   (->> (query! conn :read-all-events {:since (or since 0)})
         (map parse-db-row)
         (doall))))
 

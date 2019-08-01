@@ -54,7 +54,9 @@
                    :event/global-revision 2
                    :event/type :event-2
                    :stuff "bar"}]
-                 (event-store/read-stream conn stream-1))))
+                 (event-store/read-stream conn stream-1)
+                 (event-store/read-stream conn stream-1 {:since 0})
+                 (event-store/read-stream conn stream-1 {:since nil}))))
 
         (testing "read stream since revision"
           (is (= [{:event/stream-id stream-1
@@ -85,7 +87,9 @@
                    :event/global-revision 4
                    :event/type :event-2
                    :stuff "bar"}]
-                 (event-store/read-all-events conn))))
+                 (event-store/read-all-events conn)
+                 (event-store/read-all-events conn {:since 0})
+                 (event-store/read-all-events conn {:since nil}))))
 
         (testing "read all events since revision"
           (is (= [{:event/stream-id stream-2
