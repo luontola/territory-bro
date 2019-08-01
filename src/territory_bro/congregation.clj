@@ -11,11 +11,31 @@
             [territory-bro.events :as events])
   (:import (java.util UUID)))
 
-(defn congregation-view [state event]
+(defmulti event-handler (fn [_state event] (:event/type event)))
+
+(defmethod event-handler :default [state _event]
+  state)
+
+(defmethod event-handler :congregation.event/congregation-created [state event]
   (-> state
       (assoc-in [(:congregation/id event) :congregation/id] (:congregation/id event))
       (assoc-in [(:congregation/id event) :congregation/name] (:congregation/name event))
       (assoc-in [(:congregation/id event) :congregation/schema-name] (:congregation/schema-name event))))
+
+(defmethod event-handler :congregation.event/permission-granted [state event]
+  (-> state
+      (update-in [(:congregation/id event) :congregation/user-permissions (:user/id event)]
+                 (fnil conj #{})
+                 (:permission/id event))))
+
+(defmethod event-handler :congregation.event/permission-revoked [state event]
+  (-> state
+      (update-in [(:congregation/id event) :congregation/user-permissions (:user/id event)]
+                 disj
+                 (:permission/id event))))
+
+(defn congregation-view [state event]
+  (event-handler state event))
 
 (def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
 

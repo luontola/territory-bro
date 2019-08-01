@@ -5,6 +5,7 @@
 (ns territory-bro.congregation-test
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
+            [medley.core :refer [deep-merge]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
@@ -16,8 +17,12 @@
 
 (use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
 
-(defn apply-events [events]
+(defn- apply-events [events]
   (->> events
+       (map-indexed (fn [index event]
+                      (merge {:event/system "test"
+                              :event/time (Instant/ofEpochSecond (inc index))}
+                             event)))
        events/validate-events
        (reduce congregation/congregation-view nil)))
 
@@ -26,15 +31,34 @@
     (let [cong-id (UUID. 0 1)
           events [{:event/type :congregation.event/congregation-created
                    :event/version 1
-                   :event/system "test"
-                   :event/time (Instant/ofEpochSecond 1)
                    :congregation/id cong-id
                    :congregation/name "Cong1 Name"
                    :congregation/schema-name "cong1_schema"}]
           expected {cong-id {:congregation/id cong-id
                              :congregation/name "Cong1 Name"
                              :congregation/schema-name "cong1_schema"}}]
-      (is (= expected (apply-events events))))))
+      (is (= expected (apply-events events)))
+
+      (testing "> permission granted"
+        (let [user-id (UUID. 0 2)
+              events (conj events {:event/type :congregation.event/permission-granted
+                                   :event/version 1
+                                   :congregation/id cong-id
+                                   :user/id user-id
+                                   :permission/id :view-congregation})
+              expected (deep-merge expected
+                                   {cong-id {:congregation/user-permissions {user-id #{:view-congregation}}}})]
+          (is (= expected (apply-events events)))
+
+          (testing "> permissing revoked"
+            (let [events (conj events {:event/type :congregation.event/permission-revoked
+                                       :event/version 1
+                                       :congregation/id cong-id
+                                       :user/id user-id
+                                       :permission/id :view-congregation})
+                  expected (deep-merge expected
+                                       {cong-id {:congregation/user-permissions {user-id #{}}}})]
+              (is (= expected (apply-events events))))))))))
 
 (deftest congregations-test
   (db/with-db [conn {:isolation :read-committed}] ; creating the schema happens in another transaction
