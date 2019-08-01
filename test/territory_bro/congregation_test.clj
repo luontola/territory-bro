@@ -123,3 +123,55 @@
         (is (empty? (congregation/get-my-congregations conn user-id))))
 
       (testing "superadmin can access all congregations")))) ; TODO
+
+(deftest congregation-access2-test
+  (let [cong-id (UUID. 0 1)
+        unrelated-cong-id (UUID. 0 2)
+        user-id (UUID. 0 3)
+        events [{:event/type :congregation.event/congregation-created
+                 :event/version 1
+                 :congregation/id cong-id
+                 :congregation/name "Cong1 Name"
+                 :congregation/schema-name "cong1_schema"}
+                {:event/type :congregation.event/congregation-created
+                 :event/version 1
+                 :congregation/id unrelated-cong-id
+                 :congregation/name "Cong2 Name"
+                 :congregation/schema-name "cong2_schema"}]
+        state (apply-events events)]
+
+    (testing "cannot see congregations by default"
+      (is (nil? (congregation/get-my-congregation2 state cong-id user-id)))
+      (is (empty? (congregation/get-my-congregations2 state user-id))))
+
+    (let [events (conj events {:event/type :congregation.event/permission-granted
+                               :event/version 1
+                               :congregation/id cong-id
+                               :user/id user-id
+                               :permission/id :view-congregation})
+          state (apply-events events)]
+      (testing "can see congregations after granting access"
+        (is (= cong-id (:congregation/id (congregation/get-my-congregation2 state cong-id user-id))))
+        (is (= [cong-id] (keys (congregation/get-my-congregations2 state user-id)))))
+
+      (testing "list users"
+        (is (= [user-id] (congregation/get-users2 state cong-id)))
+        (is (empty? (congregation/get-users2 state unrelated-cong-id))
+            "unrelated congregation"))
+
+      (let [events (conj events {:event/type :congregation.event/permission-revoked
+                                 :event/version 1
+                                 :congregation/id cong-id
+                                 :user/id user-id
+                                 :permission/id :view-congregation})
+            state (apply-events events)]
+        (testing "cannot see congregations after revoking access"
+          (is (nil? (congregation/get-my-congregation2 state cong-id user-id)))
+          (is (empty? (congregation/get-my-congregations2 state user-id))))
+
+        (testing "list users"
+          (is (empty? (congregation/get-users2 state cong-id)))
+          (is (empty? (congregation/get-users2 state unrelated-cong-id))
+              "unrelated congregation"))))
+
+    (testing "superadmin can access all congregations"))) ; TODO

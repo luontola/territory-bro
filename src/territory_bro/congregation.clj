@@ -33,6 +33,7 @@
 (defmethod update-congregation :congregation.event/permission-revoked
   [congregation event]
   (-> congregation
+      ;; TODO: remove user when no more permissions remain
       (update-in [:congregation/user-permissions (:user/id event)]
                  disj
                  (:permission/id event))))
@@ -65,6 +66,18 @@
   ([conn user-id search]
    (get-unrestricted-congregations conn (assoc search
                                                :user user-id))))
+
+(defn get-my-congregations2 [state user-id]
+  (->> state
+       (filter (fn [[_cong-id cong]]
+                 (let [permissions (get-in cong [:congregation/user-permissions user-id])]
+                   (contains? permissions :view-congregation))))))
+
+(defn get-my-congregation2 [state cong-id user-id]
+  (let [cong (get state cong-id)
+        permissions (get-in cong [:congregation/user-permissions user-id])]
+    (when (contains? permissions :view-congregation)
+      cong)))
 
 (defn get-my-congregation [conn cong-id user-id]
   (first (get-my-congregations conn user-id {:ids [cong-id]})))
@@ -101,6 +114,14 @@
   (->> (query! conn :get-users {:congregation cong-id})
        (map :user)
        (doall)))
+
+(defn get-users2 [state cong-id]
+  (let [cong (get state cong-id)]
+    (->> (:congregation/user-permissions cong)
+         ;; TODO: remove old users already in the projection
+         (filter (fn [[_user-id permissions]]
+                   (not (empty? permissions))))
+         (keys))))
 
 (defn grant-access! [conn cong-id user-id]
   (event-store/save! conn cong-id nil
