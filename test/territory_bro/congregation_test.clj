@@ -24,9 +24,9 @@
                               :event/time (Instant/ofEpochSecond (inc index))}
                              event)))
        events/validate-events
-       (reduce congregation/congregation-view nil)))
+       (reduce congregation/congregations-view nil)))
 
-(deftest congregation-view-test
+(deftest congregations-view-test
   (testing "created"
     (let [cong-id (UUID. 0 1)
           events [{:event/type :congregation.event/congregation-created

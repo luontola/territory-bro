@@ -11,31 +11,35 @@
             [territory-bro.events :as events])
   (:import (java.util UUID)))
 
-(defmulti event-handler (fn [_state event] (:event/type event)))
+(defmulti ^:private update-congregation (fn [_congregation event] (:event/type event)))
 
-(defmethod event-handler :default [state _event]
-  state)
+(defmethod update-congregation :default [congregation _event]
+  congregation)
 
-(defmethod event-handler :congregation.event/congregation-created [state event]
-  (-> state
-      (assoc-in [(:congregation/id event) :congregation/id] (:congregation/id event))
-      (assoc-in [(:congregation/id event) :congregation/name] (:congregation/name event))
-      (assoc-in [(:congregation/id event) :congregation/schema-name] (:congregation/schema-name event))))
+(defmethod update-congregation :congregation.event/congregation-created
+  [congregation event]
+  (-> congregation
+      (assoc :congregation/id (:congregation/id event))
+      (assoc :congregation/name (:congregation/name event))
+      (assoc :congregation/schema-name (:congregation/schema-name event))))
 
-(defmethod event-handler :congregation.event/permission-granted [state event]
-  (-> state
-      (update-in [(:congregation/id event) :congregation/user-permissions (:user/id event)]
+(defmethod update-congregation :congregation.event/permission-granted
+  [congregation event]
+  (-> congregation
+      (update-in [:congregation/user-permissions (:user/id event)]
                  (fnil conj #{})
                  (:permission/id event))))
 
-(defmethod event-handler :congregation.event/permission-revoked [state event]
-  (-> state
-      (update-in [(:congregation/id event) :congregation/user-permissions (:user/id event)]
+(defmethod update-congregation :congregation.event/permission-revoked
+  [congregation event]
+  (-> congregation
+      (update-in [:congregation/user-permissions (:user/id event)]
                  disj
                  (:permission/id event))))
 
-(defn congregation-view [state event]
-  (event-handler state event))
+(defn congregations-view [congregations event]
+  (update congregations (:congregation/id event) update-congregation event))
+
 
 (def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
 
