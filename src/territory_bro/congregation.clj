@@ -60,7 +60,7 @@
 (defn get-unrestricted-congregation [conn cong-id]
   (first (get-unrestricted-congregations conn {:ids [cong-id]})))
 
-(defn get-my-congregations
+(defn get-my-congregations ; TODO: remove me
   ([conn user-id]
    (get-my-congregations conn user-id {}))
   ([conn user-id search]
@@ -79,7 +79,7 @@
     (when (contains? permissions :view-congregation)
       cong)))
 
-(defn get-my-congregation [conn cong-id user-id]
+(defn get-my-congregation [conn cong-id user-id] ; TODO: remove me
   (first (get-my-congregations conn user-id {:ids [cong-id]})))
 
 (defn use-schema [conn cong-id] ; TODO: create a better helper?
@@ -110,7 +110,7 @@
 
 ;;;; User access
 
-(defn get-users [conn cong-id]
+(defn get-users [conn cong-id] ; TODO: remove me
   (->> (query! conn :get-users {:congregation cong-id})
        (map :user)
        (doall)))

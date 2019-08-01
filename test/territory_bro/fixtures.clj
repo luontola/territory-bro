@@ -8,6 +8,7 @@
             [clojure.test :refer :all]
             [mount.core :as mount]
             [territory-bro.config :as config]
+            [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
@@ -32,6 +33,7 @@
   ;; cleanup
   (db/with-db [conn {}]
     (delete-schemas-starting-with! conn (:database-schema test-env)))
+  (reset! congregation/cache nil)
   ;; setup
   (-> (db/master-schema (:database-schema config/env))
       (.migrate))

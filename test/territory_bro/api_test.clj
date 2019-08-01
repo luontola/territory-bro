@@ -256,7 +256,8 @@
 
     (testing "no access"
       (db/with-db [conn {}]
-        (doseq [user-id (congregation/get-users conn cong-id)]
+        (congregation/update-cache! conn)
+        (doseq [user-id (congregation/get-users2 (:state @congregation/cache) cong-id)]
           (binding [events/*current-system* "test"]
             (congregation/revoke-access! conn cong-id user-id))))
       (let [response (-> (request :get (str "/api/congregation/" cong-id))

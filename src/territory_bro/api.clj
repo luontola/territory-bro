@@ -99,7 +99,8 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
-      (ok (->> (congregation/get-my-congregations conn (current-user-id conn))
+      (congregation/update-cache! conn)
+      (ok (->> (vals (congregation/get-my-congregations2 (:state @congregation/cache) (current-user-id conn)))
                (map (fn [congregation]
                       {:id (:congregation/id congregation)
                        :name (:congregation/name congregation)})))))))
@@ -116,8 +117,9 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
+      (congregation/update-cache! conn)
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-            congregation (congregation/get-my-congregation conn cong-id (current-user-id conn))]
+            congregation (congregation/get-my-congregation2 (:state @congregation/cache) cong-id (current-user-id conn))]
         (when-not congregation
           (forbidden! "No congregation access"))
         (db/use-tenant-schema conn (:congregation/schema-name congregation))
@@ -132,9 +134,10 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
+      (congregation/update-cache! conn)
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             user-id (current-user-id conn)
-            congregation (congregation/get-my-congregation conn cong-id user-id)
+            congregation (congregation/get-my-congregation2 (:state @congregation/cache) cong-id user-id)
             gis-user (gis-user/get-gis-user conn cong-id user-id)]
         (when-not gis-user
           (forbidden! "No GIS access"))
