@@ -12,7 +12,6 @@
   :clojure.core/assoc 1000
   :clojure.core/comment 0
   :clojure.core/cond-&gt; 1
-  :clojure.core/doto 0
   :conman.core/with-transaction 1
   :cursive.formatting/align-conditionals false
   :cursive.formatting/align-maps false
