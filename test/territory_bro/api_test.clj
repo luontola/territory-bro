@@ -199,7 +199,8 @@
     (let [cong-id (UUID/fromString (:id (:body response)))]
       (db/with-db [conn {}]
         (testing "grants access to the current user"
-          (is (= 1 (count (congregation/get-users conn cong-id)))))
+          (congregation/update-cache! conn)
+          (is (= 1 (count (congregation/get-users (:state @congregation/cache) cong-id)))))
 
         (testing "creates a GIS user for the current user"
           (is (= 1 (count (gis-user/get-gis-users conn {:congregation cong-id}))))))))
@@ -257,7 +258,7 @@
     (testing "no access"
       (db/with-db [conn {}]
         (congregation/update-cache! conn)
-        (doseq [user-id (congregation/get-users2 (:state @congregation/cache) cong-id)]
+        (doseq [user-id (congregation/get-users (:state @congregation/cache) cong-id)]
           (binding [events/*current-system* "test"]
             (congregation/revoke-access! conn cong-id user-id))))
       (let [response (-> (request :get (str "/api/congregation/" cong-id))

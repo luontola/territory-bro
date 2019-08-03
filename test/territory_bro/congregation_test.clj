@@ -126,8 +126,8 @@
         (is (= [cong-id] (keys (congregation/get-my-congregations state user-id)))))
 
       (testing "list users"
-        (is (= [user-id] (congregation/get-users2 state cong-id)))
-        (is (empty? (congregation/get-users2 state unrelated-cong-id))
+        (is (= [user-id] (congregation/get-users state cong-id)))
+        (is (empty? (congregation/get-users state unrelated-cong-id))
             "unrelated congregation"))
 
       (let [events (conj events {:event/type :congregation.event/permission-revoked
@@ -141,8 +141,8 @@
           (is (empty? (congregation/get-my-congregations state user-id))))
 
         (testing "list users"
-          (is (empty? (congregation/get-users2 state cong-id)))
-          (is (empty? (congregation/get-users2 state unrelated-cong-id))
+          (is (empty? (congregation/get-users state cong-id)))
+          (is (empty? (congregation/get-users state unrelated-cong-id))
               "unrelated congregation"))))
 
     (testing "superadmin can access all congregations"))) ; TODO

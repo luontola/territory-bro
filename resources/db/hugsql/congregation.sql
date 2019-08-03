@@ -16,11 +16,6 @@ values (:id, :name, :schema_name);
 
 ---- User access
 
--- :name get-users :? :*
-select "user"
-from congregation_access
-where congregation = :congregation;
-
 -- :name grant-access :!
 insert into congregation_access ("user", congregation)
 values (:user, :congregation);

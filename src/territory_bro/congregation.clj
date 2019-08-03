@@ -101,12 +101,7 @@
 
 ;;;; User access
 
-(defn get-users [conn cong-id] ; TODO: remove me
-  (->> (query! conn :get-users {:congregation cong-id})
-       (map :user)
-       (doall)))
-
-(defn get-users2 [state cong-id]
+(defn get-users [state cong-id]
   (let [cong (get state cong-id)]
     (->> (:congregation/user-permissions cong)
          ;; TODO: remove old users already in the projection
