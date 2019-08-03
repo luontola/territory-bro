@@ -42,9 +42,9 @@
         available-tasks ^Queue (::available-tasks this)
         task (.poll available-tasks)]
     (when task
-      (.submit executor ^Runnable (fn []
-                                    (.add available-tasks task)
-                                    (run-safely! task))))))
+      (.execute executor (fn []
+                           (.add available-tasks task)
+                           (run-safely! task))))))
 
 (defn shutdown! [this]
   (doto ^ExecutorService (::executor this)
