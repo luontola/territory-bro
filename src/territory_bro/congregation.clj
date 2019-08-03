@@ -116,8 +116,6 @@
                              :congregation/id cong-id
                              :user/id user-id
                              :permission/id :view-congregation)])
-  (query! conn :grant-access {:congregation cong-id
-                              :user user-id})
   nil)
 
 (defn revoke-access! [conn cong-id user-id]
@@ -127,8 +125,6 @@
                              :congregation/id cong-id
                              :user/id user-id
                              :permission/id :view-congregation)])
-  (query! conn :revoke-access {:congregation cong-id
-                               :user user-id})
   nil)
 
 
