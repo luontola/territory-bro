@@ -18,7 +18,7 @@
     (jdbc/db-set-rollback-only! conn)
 
     (let [cong-id (congregation/create-congregation! conn "the name")
-          _ (congregation/use-schema conn cong-id)]
+          _ (congregation/use-schema conn (congregation/current-state conn) cong-id)]
 
       (testing "create & list congregation boundaries"
         (let [id (region/create-congregation-boundary! conn testdata/wkt-multi-polygon)]

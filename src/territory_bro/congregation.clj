@@ -45,22 +45,6 @@
 
 (def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
 
-(defn- format-congregation [row]
-  {:congregation/id (:id row)
-   :congregation/name (:name row)
-   :congregation/schema-name (:schema_name row)})
-
-(defn get-unrestricted-congregations ; TODO: remove me
-  ([conn]
-   (get-unrestricted-congregations conn {}))
-  ([conn search]
-   (->> (query! conn :get-congregations search)
-        (map format-congregation)
-        (doall))))
-
-(defn get-unrestricted-congregation [conn cong-id] ; TODO: remove me
-  (first (get-unrestricted-congregations conn {:ids [cong-id]})))
-
 (defn get-my-congregations [state user-id]
   (->> state
        (filter (fn [[_cong-id cong]]
@@ -73,9 +57,9 @@
     (when (contains? permissions :view-congregation)
       cong)))
 
-(defn use-schema [conn cong-id] ; TODO: create a better helper?
-  (let [cong (get-unrestricted-congregation conn cong-id)]
-    (db/use-tenant-schema conn (:congregation/schema-name cong))))
+(defn use-schema [conn state cong-id] ; TODO: create a better helper?
+  (let [schema (get-in state [cong-id :congregation/schema-name])]
+    (db/use-tenant-schema conn schema)))
 
 (defn create-congregation! [conn name]
   (let [id (UUID/randomUUID)

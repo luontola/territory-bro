@@ -61,7 +61,7 @@
 (defn- create-test-data! []
   (db/with-db [conn {}]
     (let [cong-id (congregation/create-congregation! conn "cong")
-          cong (congregation/get-unrestricted-congregation conn cong-id)
+          cong (get (congregation/current-state conn) cong-id)
           user-id (user/save-user! conn "user" {})
           _ (gis-user/create-gis-user! conn cong-id user-id)
           gis-user (gis-user/get-gis-user conn cong-id user-id)]

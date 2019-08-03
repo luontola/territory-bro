@@ -20,7 +20,7 @@
     (jdbc/db-set-rollback-only! conn)
 
     (let [cong-id (congregation/create-congregation! conn "the name")
-          _ (congregation/use-schema conn cong-id)]
+          _ (congregation/use-schema conn (congregation/current-state conn) cong-id)]
 
       (testing "before making changes"
         (is (= [] (gis/get-gis-changes conn))))

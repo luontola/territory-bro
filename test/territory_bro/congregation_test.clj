@@ -64,12 +64,9 @@
   (db/with-db [conn {:isolation :read-committed}] ; creating the schema happens in another transaction
     (jdbc/db-set-rollback-only! conn)
 
-    (testing "no congregations"
-      (is (= [] (congregation/get-unrestricted-congregations conn))))
-
     (testing "create congregation"
       (let [id (congregation/create-congregation! conn "the name")
-            congregation (congregation/get-unrestricted-congregation conn id)]
+            congregation (get (congregation/current-state conn) id)]
         (is id)
         (is (= [{:event/type :congregation.event/congregation-created
                  :event/version 1
@@ -83,17 +80,7 @@
         (is (= "the name" (:congregation/name congregation)))
         (is (contains? (set (db/get-schemas conn))
                        (:congregation/schema-name congregation))
-            "should create congregation schema")))
-
-    (let [congregations (congregation/get-unrestricted-congregations conn)]
-      (testing "list congregations"
-        (is (not (empty? congregations)))
-        (is (contains? (set (map :congregation/name congregations))
-                       "the name")))
-      (testing "get congregation by ID"
-        (let [id (:congregation/id (first congregations))]
-          (is (= (first congregations) (congregation/get-unrestricted-congregation conn id)))
-          (is (nil? (congregation/get-unrestricted-congregation conn (UUID/randomUUID)))))))))
+            "should create congregation schema")))))
 
 (deftest congregation-access-test
   (let [cong-id (UUID. 0 1)

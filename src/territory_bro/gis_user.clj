@@ -51,7 +51,7 @@
 (defn create-gis-user! [conn cong-id user-id]
   (let [username (str "gis_user_" (uuid-prefix cong-id) "_" (uuid-prefix user-id))
         password (generate-password 50)
-        schema (:congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
+        schema (get-in (congregation/current-state conn) [cong-id :congregation/schema-name])]
     (assert schema)
     (event-store/save! conn cong-id nil
                        [(assoc (events/defaults)
@@ -90,7 +90,7 @@
 
 (defn delete-gis-user! [conn cong-id user-id]
   (let [username (:gis-user/username (get-gis-user conn cong-id user-id))
-        schema (:congregation/schema-name (congregation/get-unrestricted-congregation conn cong-id))]
+        schema (get-in (congregation/current-state conn) [cong-id :congregation/schema-name])]
     (assert schema)
     (event-store/save! conn cong-id nil
                        [(assoc (events/defaults)

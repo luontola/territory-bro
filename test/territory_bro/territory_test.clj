@@ -18,7 +18,7 @@
     (jdbc/db-set-rollback-only! conn)
 
     (let [cong-id (congregation/create-congregation! conn "the name")
-          _ (congregation/use-schema conn cong-id)
+          _ (congregation/use-schema conn (congregation/current-state conn) cong-id)
           territory-id (territory/create-territory! conn {:territory/number "123"
                                                           :territory/addresses "Street 1 A"
                                                           :territory/subregion "Somewhere"

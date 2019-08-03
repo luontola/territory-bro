@@ -169,10 +169,6 @@
          (filter #(= "" (:name (:user/attributes %))))))
 
   (db/with-db [conn {}]
-    (->> (congregation/get-unrestricted-congregations conn)
-         (filter #(= "" (:congregation/name %)))))
-
-  (db/with-db [conn {}]
     (let [user-id (UUID/fromString "")
           cong-id (UUID/fromString "")]
       (binding [events/*current-system* "admin"]

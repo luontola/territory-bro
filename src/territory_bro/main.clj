@@ -37,8 +37,9 @@
     (-> (db/master-schema master-schema)
         (.migrate))
 
-    (doseq [congregation (db/with-db [conn {}]
-                           (congregation/get-unrestricted-congregations conn))]
+    (db/with-db [conn {}]
+      (congregation/update-cache! conn))
+    (doseq [congregation (vals (:state @congregation/cache))]
       (let [tenant-schema (:congregation/schema-name congregation)]
         (log/info "Migrating tenant schema:" tenant-schema)
         (-> (db/tenant-schema tenant-schema master-schema)
@@ -61,7 +62,7 @@
     ;; start the public API only after the database is ready
     (log-mount-states (mount/start #'http-server))
     (doto (Runtime/getRuntime)
-          (.addShutdownHook (Thread. ^Runnable stop-app)))
+      (.addShutdownHook (Thread. ^Runnable stop-app)))
     (log/info "Started")
     (catch Throwable t
       (log/error t "Failed to start")

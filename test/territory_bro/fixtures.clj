@@ -29,7 +29,8 @@
 (defn db-fixture [f]
   (mount/start-with-args test-env
                          #'config/env
-                         #'db/database)
+                         #'db/database
+                         #'congregation/cache)
   ;; cleanup
   (db/with-db [conn {}]
     (delete-schemas-starting-with! conn (:database-schema test-env)))
