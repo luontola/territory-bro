@@ -30,8 +30,8 @@
 (defn- run-safely! [task]
   (try
     (task)
-    (catch InterruptedException e
-      (throw e))
+    (catch InterruptedException _
+      (.interrupt (Thread/currentThread)))
     (catch Throwable e
       (let [t (Thread/currentThread)]
         (when-let [handler (.getUncaughtExceptionHandler t)]
