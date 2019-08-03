@@ -96,35 +96,6 @@
           (is (nil? (congregation/get-unrestricted-congregation conn (UUID/randomUUID)))))))))
 
 (deftest congregation-access-test
-  (db/with-db [conn {}]
-    (jdbc/db-set-rollback-only! conn)
-
-    (let [cong-id (congregation/create-congregation! conn "")
-          unrelated-cong-id (congregation/create-congregation! conn "")
-          user-id (user/save-user! conn "user" {})]
-
-      (testing "cannot see congregations by default"
-        (is (nil? (congregation/get-my-congregation conn cong-id user-id)))
-        (is (empty? (congregation/get-my-congregations conn user-id))))
-
-      (congregation/grant-access! conn cong-id user-id)
-      (testing "can see congregations after granting access"
-        (is (= cong-id (:congregation/id (congregation/get-my-congregation conn cong-id user-id))))
-        (is (= [cong-id] (->> (congregation/get-my-congregations conn user-id)
-                              (map :congregation/id)))))
-      (testing "list users"
-        (is (= [user-id] (congregation/get-users conn cong-id)))
-        (is (= [] (congregation/get-users conn unrelated-cong-id))
-            "unrelated congregation"))
-
-      (congregation/revoke-access! conn cong-id user-id)
-      (testing "cannot see congregations after revoking access"
-        (is (nil? (congregation/get-my-congregation conn cong-id user-id)))
-        (is (empty? (congregation/get-my-congregations conn user-id))))
-
-      (testing "superadmin can access all congregations")))) ; TODO
-
-(deftest congregation-access2-test
   (let [cong-id (UUID. 0 1)
         unrelated-cong-id (UUID. 0 2)
         user-id (UUID. 0 3)
@@ -141,8 +112,8 @@
         state (apply-events events)]
 
     (testing "cannot see congregations by default"
-      (is (nil? (congregation/get-my-congregation2 state cong-id user-id)))
-      (is (empty? (congregation/get-my-congregations2 state user-id))))
+      (is (nil? (congregation/get-my-congregation state cong-id user-id)))
+      (is (empty? (congregation/get-my-congregations state user-id))))
 
     (let [events (conj events {:event/type :congregation.event/permission-granted
                                :event/version 1
@@ -151,8 +122,8 @@
                                :permission/id :view-congregation})
           state (apply-events events)]
       (testing "can see congregations after granting access"
-        (is (= cong-id (:congregation/id (congregation/get-my-congregation2 state cong-id user-id))))
-        (is (= [cong-id] (keys (congregation/get-my-congregations2 state user-id)))))
+        (is (= cong-id (:congregation/id (congregation/get-my-congregation state cong-id user-id))))
+        (is (= [cong-id] (keys (congregation/get-my-congregations state user-id)))))
 
       (testing "list users"
         (is (= [user-id] (congregation/get-users2 state cong-id)))
@@ -166,8 +137,8 @@
                                  :permission/id :view-congregation})
             state (apply-events events)]
         (testing "cannot see congregations after revoking access"
-          (is (nil? (congregation/get-my-congregation2 state cong-id user-id)))
-          (is (empty? (congregation/get-my-congregations2 state user-id))))
+          (is (nil? (congregation/get-my-congregation state cong-id user-id)))
+          (is (empty? (congregation/get-my-congregations state user-id))))
 
         (testing "list users"
           (is (empty? (congregation/get-users2 state cong-id)))
@@ -175,26 +146,3 @@
               "unrelated congregation"))))
 
     (testing "superadmin can access all congregations"))) ; TODO
-
-(comment
-  (congregation/update-cache! db/database)
-  (:state @congregation/cache)
-
-  (is (= (set (congregation/get-unrestricted-congregations db/database))
-         (set (->> (vals (:state @congregation/cache))
-                   (map #(dissoc % :congregation/user-permissions))))))
-
-  (doseq [{:keys [congregation user]} (set (->> (jdbc/query db/database ["select * from congregation_access"])
-                                                (doall)))]
-    (is (= (congregation/get-my-congregation db/database congregation user)
-           (-> (congregation/get-my-congregation2 (:state @congregation/cache) congregation user)
-               (dissoc :congregation/user-permissions)))))
-
-  (is (= (set (->> (jdbc/query db/database ["select * from congregation_access"])
-                   (doall)))
-         (set (->> (vals (:state @congregation/cache))
-                   (mapcat (fn [cong]
-                             (map (fn [[user perms]]
-                                    {:congregation (:congregation/id cong)
-                                     :user user})
-                                  (:congregation/user-permissions cong)))))))))

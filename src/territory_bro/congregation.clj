@@ -50,7 +50,7 @@
    :congregation/name (:name row)
    :congregation/schema-name (:schema_name row)})
 
-(defn get-unrestricted-congregations
+(defn get-unrestricted-congregations ; TODO: remove me
   ([conn]
    (get-unrestricted-congregations conn {}))
   ([conn search]
@@ -58,30 +58,20 @@
         (map format-congregation)
         (doall))))
 
-(defn get-unrestricted-congregation [conn cong-id]
+(defn get-unrestricted-congregation [conn cong-id] ; TODO: remove me
   (first (get-unrestricted-congregations conn {:ids [cong-id]})))
 
-(defn get-my-congregations ; TODO: remove me
-  ([conn user-id]
-   (get-my-congregations conn user-id {}))
-  ([conn user-id search]
-   (get-unrestricted-congregations conn (assoc search
-                                               :user user-id))))
-
-(defn get-my-congregations2 [state user-id]
+(defn get-my-congregations [state user-id]
   (->> state
        (filter (fn [[_cong-id cong]]
                  (let [permissions (get-in cong [:congregation/user-permissions user-id])]
                    (contains? permissions :view-congregation))))))
 
-(defn get-my-congregation2 [state cong-id user-id]
+(defn get-my-congregation [state cong-id user-id]
   (let [cong (get state cong-id)
         permissions (get-in cong [:congregation/user-permissions user-id])]
     (when (contains? permissions :view-congregation)
       cong)))
-
-(defn get-my-congregation [conn cong-id user-id] ; TODO: remove me
-  (first (get-my-congregations conn user-id {:ids [cong-id]})))
 
 (defn use-schema [conn cong-id] ; TODO: create a better helper?
   (let [cong (get-unrestricted-congregation conn cong-id)]
