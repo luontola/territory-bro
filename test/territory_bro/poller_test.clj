@@ -121,4 +121,15 @@
       (is (= 1 (count (.-list appender))) "log event count")
       (let [event ^LoggingEvent (first (.-list appender))]
         (is (= "Uncaught exception in worker thread" (.getMessage event)))
-        (is (= "dummy" (.getMessage (.getThrowableProxy event))))))))
+        (is (= "dummy" (.getMessage (.getThrowableProxy event)))))))
+
+  (testing "await blocks until the current task is finished"
+    (let [task-count (atom 0)
+          p (poller/create (fn []
+                             (Thread/yield)
+                             (swap! task-count inc)))]
+      (poller/trigger! p)
+      (poller/await p)
+
+      (is (= 1 @task-count) "task count")
+      (poller/shutdown! p))))

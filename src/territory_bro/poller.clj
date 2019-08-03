@@ -51,3 +51,8 @@
     (.shutdown)
     (.awaitTermination 1 TimeUnit/MINUTES)
     (.shutdownNow)))
+
+(defn await [this]
+  (let [executor ^ExecutorService (::executor this)
+        future (.submit executor ^Runnable (fn []))]
+    (.get future)))
