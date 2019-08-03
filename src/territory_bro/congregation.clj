@@ -132,15 +132,26 @@
   :start (atom {:last-event nil
                 :state nil}))
 
+(defn- apply-new-events [conn cached]
+  (let [new-events (event-store/read-all-events conn {:since (:event/global-revision (:last-event cached))})
+        last-event (last new-events)]
+    (if last-event
+      {:last-event last-event
+       :state (reduce congregations-view (:state cached) new-events)}
+      cached)))
+
 (defn update-cache! [conn]
   (let [cached @cache
-        new-events (event-store/read-all-events conn {:since (:event/global-revision (:last-event cached))})]
-    (when-let [last-event (last new-events)]
-      (log/info "Updating with" (count new-events) "new events")
-      (let [updated {:last-event last-event
-                     :state (reduce congregations-view (:state cached) new-events)}]
-        ;; with concurrent requests, only one of them will update the cache
-        (compare-and-set! cache cached updated)))))
+        updated (apply-new-events conn cached)]
+    (when-not (identical? cached updated)
+      ;; with concurrent requests, only one of them will update the cache
+      (compare-and-set! cache cached updated))))
+
+(defn current-state
+  "Calculates the current state from all events, including uncommitted ones,
+   but does not update the cache (it could cause dirty reads to others)."
+  [conn]
+  (:state (apply-new-events conn @cache)))
 
 (comment
   (count (:state @cache))
