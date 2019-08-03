@@ -42,9 +42,6 @@
 (defn congregations-view [congregations event]
   (update congregations (:congregation/id event) update-congregation event))
 
-
-(def ^:private query! (db/compile-queries "db/hugsql/congregation.sql"))
-
 (defn get-my-congregations [state user-id]
   (->> state
        (filter (fn [[_cong-id cong]]
@@ -75,9 +72,6 @@
                                          :congregation/id id
                                          :congregation/name name
                                          :congregation/schema-name tenant-schema)])
-    (query! conn :create-congregation {:id id
-                                       :name name
-                                       :schema_name tenant-schema})
     (-> (db/tenant-schema tenant-schema master-schema)
         (.migrate))
     (log/info "Congregation created:" id)
