@@ -3,11 +3,17 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.poller
+  (:refer-clojure :exclude [await])
   (:require [clojure.tools.logging :as log])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.lang Thread$UncaughtExceptionHandler)
            (java.util Queue)
            (java.util.concurrent ExecutorService Executors TimeUnit ArrayBlockingQueue)))
+
+(defprotocol Poller
+  (trigger! [this])
+  (await [this])
+  (shutdown! [this]))
 
 (def ^:private uncaught-exception-handler
   (reify Thread$UncaughtExceptionHandler
@@ -21,12 +27,6 @@
       (.setUncaughtExceptionHandler uncaught-exception-handler)
       (.build)))
 
-(defn create [task]
-  (assert (fn? task) {:task task})
-  {::available-tasks (doto (ArrayBlockingQueue. 1)
-                       (.add task))
-   ::executor (Executors/newFixedThreadPool 1 thread-factory)})
-
 (defn- run-safely! [task]
   (try
     (task)
@@ -37,22 +37,27 @@
         (when-let [handler (.getUncaughtExceptionHandler t)]
           (.uncaughtException handler t e))))))
 
-(defn trigger! [this]
-  (let [executor ^ExecutorService (::executor this)
-        available-tasks ^Queue (::available-tasks this)
-        task (.poll available-tasks)]
-    (when task
+(defrecord AsyncPoller [^Queue available-tasks
+                        ^ExecutorService executor]
+  Poller
+  (trigger! [_]
+    (when-let [task (.poll available-tasks)]
       (.execute executor (fn []
                            (.add available-tasks task)
-                           (run-safely! task))))))
+                           (run-safely! task)))))
 
-(defn shutdown! [this]
-  (doto ^ExecutorService (::executor this)
-    (.shutdown)
-    (.awaitTermination 1 TimeUnit/MINUTES)
-    (.shutdownNow)))
+  (await [_]
+    (let [future (.submit executor ^Runnable (fn []))]
+      (.get future)))
 
-(defn await [this]
-  (let [executor ^ExecutorService (::executor this)
-        future (.submit executor ^Runnable (fn []))]
-    (.get future)))
+  (shutdown! [_]
+    (doto executor
+      (.shutdown)
+      (.awaitTermination 1 TimeUnit/MINUTES)
+      (.shutdownNow))))
+
+(defn create [task]
+  (assert (fn? task) {:task task})
+  (AsyncPoller. (doto (ArrayBlockingQueue. 1)
+                  (.add task))
+                (Executors/newFixedThreadPool 1 thread-factory)))
