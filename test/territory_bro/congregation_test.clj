@@ -175,3 +175,26 @@
               "unrelated congregation"))))
 
     (testing "superadmin can access all congregations"))) ; TODO
+
+(comment
+  (congregation/update-cache! db/database)
+  (:state @congregation/cache)
+
+  (is (= (set (congregation/get-unrestricted-congregations db/database))
+         (set (->> (vals (:state @congregation/cache))
+                   (map #(dissoc % :congregation/user-permissions))))))
+
+  (doseq [{:keys [congregation user]} (set (->> (jdbc/query db/database ["select * from congregation_access"])
+                                                (doall)))]
+    (is (= (congregation/get-my-congregation db/database congregation user)
+           (-> (congregation/get-my-congregation2 (:state @congregation/cache) congregation user)
+               (dissoc :congregation/user-permissions)))))
+
+  (is (= (set (->> (jdbc/query db/database ["select * from congregation_access"])
+                   (doall)))
+         (set (->> (vals (:state @congregation/cache))
+                   (mapcat (fn [cong]
+                             (map (fn [[user perms]]
+                                    {:congregation (:congregation/id cong)
+                                     :user user})
+                                  (:congregation/user-permissions cong)))))))))
