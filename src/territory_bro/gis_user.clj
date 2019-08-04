@@ -23,24 +23,41 @@
       (assoc :congregation/id (:congregation/id event))
       (assoc :congregation/schema-name (:congregation/schema-name event))))
 
-(defn- set-gis-access [congregation user-id has-gis-access?]
-  (update-in congregation [:congregation/users user-id]
+(defn- update-gis-access [congregation event has-gis-access?]
+  (update-in congregation [:congregation/users (:user/id event)]
              (fn [user]
                (-> user
-                   (assoc :user/id user-id)
+                   (assoc :user/id (:user/id event))
                    (assoc :user/has-gis-access? has-gis-access?)))))
 
 (defmethod update-congregation :congregation.event/permission-granted
   [congregation event]
   (if (= :gis-access (:permission/id event))
-    (set-gis-access congregation (:user/id event) true)
+    (update-gis-access congregation event true)
     congregation))
 
 (defmethod update-congregation :congregation.event/permission-revoked
   [congregation event]
   (if (= :gis-access (:permission/id event))
-    (set-gis-access congregation (:user/id event) false)
+    (update-gis-access congregation event false)
     congregation))
+
+(defn- update-gis-user [congregation event desired-state]
+  (update-in congregation [:congregation/users (:user/id event)]
+             (fn [user]
+               (-> user
+                   (assoc :user/id (:user/id event))
+                   (assoc :gis-user/desired-state desired-state)
+                   (assoc :gis-user/username (:gis-user/username event))
+                   (assoc :gis-user/password (:gis-user/password event))))))
+
+(defmethod update-congregation :congregation.event/gis-user-created
+  [congregation event]
+  (update-gis-user congregation event :present))
+
+(defmethod update-congregation :congregation.event/gis-user-deleted
+  [congregation event]
+  (update-gis-user congregation event :absent))
 
 (defn gis-users-view [congregations event]
   (update congregations (:congregation/id event) update-congregation event))

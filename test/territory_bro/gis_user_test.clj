@@ -81,7 +81,32 @@
                                    :congregation/id cong-id
                                    :user/id user-id
                                    :permission/id :view-congregation})]
-          (is (= expected (apply-events events)) "should ignore the event"))))))
+          (is (= expected (apply-events events)) "should ignore the event")))
+
+      (testing "> GIS user created"
+        (let [events (conj events {:event/type :congregation.event/gis-user-created
+                                   :event/version 1
+                                   :congregation/id cong-id
+                                   :user/id user-id
+                                   :gis-user/username "username123"
+                                   :gis-user/password "password123"})
+              expected (deep-merge expected
+                                   {cong-id {:congregation/users {user-id {:user/id user-id
+                                                                           :gis-user/desired-state :present
+                                                                           :gis-user/username "username123"
+                                                                           :gis-user/password "password123"}}}})]
+          (is (= expected (apply-events events)))
+
+          (testing "> GIS user deleted"
+            (let [events (conj events {:event/type :congregation.event/gis-user-deleted
+                                       :event/version 1
+                                       :congregation/id cong-id
+                                       :user/id user-id
+                                       :gis-user/username "username123"})
+                  expected (deep-merge expected
+                                       {cong-id {:congregation/users {user-id {:gis-user/desired-state :absent
+                                                                               :gis-user/password nil}}}})]
+              (is (= expected (apply-events events))))))))))
 
 (deftest gis-users-test
   (db/with-db [conn {}]
