@@ -4,7 +4,6 @@
 
 (ns territory-bro.gis-user
   (:require [clojure.java.jdbc :as jdbc]
-            [clojure.test :refer [deftest is]]
             [mount.core :as mount]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
@@ -61,9 +60,6 @@
 (defn gis-users-view [congregations event]
   (update congregations (:congregation/id event) update-congregation event))
 
-
-(def ^:private query! (db/compile-queries "db/hugsql/gis-user.sql"))
-
 (defn get-gis-users [state cong-id] ; TODO: remove me? only used in tests
   (->> (vals (get-in state [cong-id :congregation/users]))
        (filter (fn [user]
@@ -105,10 +101,6 @@
                                :user/id user-id
                                :gis-user/username username
                                :gis-user/password password)])
-    (query! conn :create-gis-user {:congregation cong-id
-                                   :user user-id
-                                   :username username
-                                   :password password})
     (jdbc/execute! conn [(str "CREATE ROLE " username " WITH LOGIN")])
     (jdbc/execute! conn [(str "ALTER ROLE " username " WITH PASSWORD '" password "'")])
     (jdbc/execute! conn [(str "ALTER ROLE " username " VALID UNTIL 'infinity'")])
@@ -146,8 +138,6 @@
                                :user/id user-id
                                :gis-user/username username)])
     (drop-role-cascade! conn username [schema])
-    (query! conn :delete-gis-user {:congregation cong-id
-                                   :user user-id})
     nil))
 
 ;; TODO: deduplicate with congregation namespace
