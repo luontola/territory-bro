@@ -9,22 +9,14 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
-            [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
-            [territory-bro.user :as user])
-  (:import (java.util UUID)
-           (java.time Instant)))
+            [territory-bro.testutil :as testutil])
+  (:import (java.util UUID)))
 
 (use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
 
 (defn- apply-events [events]
-  (->> events
-       (map-indexed (fn [index event]
-                      (merge {:event/system "test"
-                              :event/time (Instant/ofEpochSecond (inc index))}
-                             event)))
-       events/validate-events
-       (reduce congregation/congregations-view nil)))
+  (testutil/apply-events congregation/congregations-view events))
 
 (deftest congregations-view-test
   (testing "created"

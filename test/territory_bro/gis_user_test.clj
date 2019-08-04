@@ -10,28 +10,21 @@
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
-            [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
             [territory-bro.gis :as gis]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.region :as region]
             [territory-bro.territory :as territory]
             [territory-bro.testdata :as testdata]
+            [territory-bro.testutil :as testutil]
             [territory-bro.user :as user])
-  (:import (java.time Instant)
-           (java.util UUID)
+  (:import (java.util UUID)
            (org.postgresql.util PSQLException)))
 
 (use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
 
 (defn- apply-events [events]
-  (->> events
-       (map-indexed (fn [index event]
-                      (merge {:event/system "test"
-                              :event/time (Instant/ofEpochSecond (inc index))}
-                             event)))
-       events/validate-events
-       (reduce gis-user/gis-users-view nil)))
+  (testutil/apply-events gis-user/gis-users-view events))
 
 (deftest gis-users-view-test
   (testing "congregation created"

@@ -3,8 +3,10 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.testutil
-  (:require [clojure.test :refer :all])
-  (:import (java.util.regex Pattern)))
+  (:require [clojure.test :refer :all]
+            [territory-bro.events :as events])
+  (:import (java.time Instant)
+           (java.util.regex Pattern)))
 
 (defn re-equals [^String s]
   (re-pattern (str "^" (Pattern/quote s) "$")))
@@ -23,3 +25,12 @@
        result#)
      (catch Throwable t#
        t#)))
+
+(defn apply-events [projection events]
+  (->> events
+       (map-indexed (fn [index event]
+                      (merge {:event/system "test"
+                              :event/time (Instant/ofEpochSecond (inc index))}
+                             event)))
+       events/validate-events
+       (reduce projection nil)))
