@@ -231,3 +231,19 @@
 
     (testing "exposes the secret when invoked as a function"
       (is (= "foo" (secret))))))
+
+(comment
+  (gis-user/update-cache! db/database)
+  (:state @gis-user/cache)
+
+  (is (= (set (->> (gis-user/get-gis-users db/database)
+                   (map (fn [user]
+                          (update user :gis-user/password #(%))))))
+         (set (->> (vals (:state @gis-user/cache))
+                   (mapcat (fn [cong]
+                             (map (fn [[user-id user]]
+                                    {:congregation/id (:congregation/id cong)
+                                     :user/id (:user/id user)
+                                     :gis-user/username (:gis-user/username user)
+                                     :gis-user/password (:gis-user/password user)})
+                                  (:congregation/users cong)))))))))
