@@ -106,11 +106,12 @@
                       {:id (:congregation/id congregation)
                        :name (:congregation/name congregation)})))))))
 
+(def ^:private format-key-for-api (memoize (comp csk/->camelCaseString name)))
+
 (defn format-for-api [m]
-  (let [convert-keyword (comp csk/->camelCaseString name)
-        f (fn [x]
+  (let [f (fn [x]
             (if (map? x)
-              (map-keys convert-keyword x)
+              (map-keys format-key-for-api x)
               x))]
     (clojure.walk/postwalk f m)))
 
