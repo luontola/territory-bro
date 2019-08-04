@@ -30,7 +30,8 @@
   (mount/start-with-args test-env
                          #'config/env
                          #'db/database
-                         #'congregation/cache)
+                         #'congregation/cache
+                         #'gis-user/cache)
   ;; cleanup
   (db/with-db [conn {}]
     (delete-schemas-starting-with! conn (:database-schema test-env)))

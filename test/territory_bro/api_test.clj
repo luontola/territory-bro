@@ -202,7 +202,7 @@
           (is (= 1 (count (congregation/get-users (congregation/current-state conn) cong-id)))))
 
         (testing "creates a GIS user for the current user"
-          (is (= 1 (count (gis-user/get-gis-users conn {:congregation cong-id}))))))))
+          (is (= 1 (count (gis-user/get-gis-users (gis-user/current-state conn) cong-id))))))))
 
   (testing "requires login"
     (let [response (-> (request :post "/api/congregations")
@@ -288,7 +288,9 @@
 
     (testing "requires GIS access"
       (db/with-db [conn {}]
-        (doseq [gis-user (gis-user/get-gis-users conn {:congregation cong-id})]
+        ;; TODO: create API for getting the current user's ID
+        ;; TODO: create API for removing GIS access from a user
+        (doseq [gis-user (gis-user/get-gis-users (gis-user/current-state conn) cong-id)]
           (binding [events/*current-system* "test"]
             (gis-user/delete-gis-user! conn cong-id (:user/id gis-user)))))
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))

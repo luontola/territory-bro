@@ -64,26 +64,15 @@
 
 (def ^:private query! (db/compile-queries "db/hugsql/gis-user.sql"))
 
-(defn secret [str]
-  (fn [] str))
+(defn get-gis-users [state cong-id] ; TODO: remove me? only used in tests
+  (->> (vals (get-in state [cong-id :congregation/users]))
+       (filter (fn [user]
+                 (= :present (:gis-user/desired-state user))))))
 
-(defn- format-gis-user [gis-user]
-  {:congregation/id (:congregation gis-user)
-   :user/id (:user gis-user)
-   :gis-user/username (:username gis-user)
-   :gis-user/password (secret (:password gis-user))})
-
-(defn get-gis-users
-  ([conn]
-   (get-gis-users conn {}))
-  ([conn search]
-   (->> (query! conn :get-gis-users search)
-        (map format-gis-user)
-        (doall))))
-
-(defn get-gis-user [conn cong-id user-id]
-  (first (get-gis-users conn {:congregation cong-id
-                              :user user-id})))
+(defn get-gis-user [state cong-id user-id]
+  (let [user (get-in state [cong-id :congregation/users user-id])]
+    (when (= :present (:gis-user/desired-state user))
+      user)))
 
 (defn generate-password [length]
   (let [bytes (byte-array length)]
@@ -99,6 +88,7 @@
       (.substring 0 16)))
 
 (defn create-gis-user! [conn cong-id user-id]
+  ;; TODO: refactor to commands and process managers
   (let [username (str "gis_user_" (uuid-prefix cong-id) "_" (uuid-prefix user-id))
         password (generate-password 50)
         schema (get-in (congregation/current-state conn) [cong-id :congregation/schema-name])]
@@ -138,8 +128,10 @@
     (jdbc/execute! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " role)]))
   (jdbc/execute! conn [(str "DROP ROLE " role)]))
 
+(declare current-state)
 (defn delete-gis-user! [conn cong-id user-id]
-  (let [username (:gis-user/username (get-gis-user conn cong-id user-id))
+  ;; TODO: refactor to commands and process managers
+  (let [username (:gis-user/username (get-gis-user (current-state conn) cong-id user-id))
         schema (get-in (congregation/current-state conn) [cong-id :congregation/schema-name])]
     (assert schema)
     (event-store/save! conn cong-id nil

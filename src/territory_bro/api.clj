@@ -99,6 +99,7 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
+      ;; TODO: update the cache centrally
       (congregation/update-cache! conn)
       (ok (->> (vals (congregation/get-my-congregations (:state @congregation/cache) (current-user-id conn)))
                (map (fn [congregation]
@@ -117,6 +118,7 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
+      ;; TODO: update the cache centrally
       (congregation/update-cache! conn)
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             congregation (congregation/get-my-congregation (:state @congregation/cache) cong-id (current-user-id conn))]
@@ -134,18 +136,20 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
+      ;; TODO: update the cache centrally
       (congregation/update-cache! conn)
+      (gis-user/update-cache! conn)
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             user-id (current-user-id conn)
             congregation (congregation/get-my-congregation (:state @congregation/cache) cong-id user-id)
-            gis-user (gis-user/get-gis-user conn cong-id user-id)]
+            gis-user (gis-user/get-gis-user (:state @gis-user/cache) cong-id user-id)]
         (when-not gis-user
           (forbidden! "No GIS access"))
         (let [content (qgis/generate-project {:database-host (:gis-database-host config/env)
                                               :database-name (:gis-database-name config/env)
                                               :database-schema (:congregation/schema-name congregation)
                                               :database-username (:gis-user/username gis-user)
-                                              :database-password ((:gis-user/password gis-user))
+                                              :database-password (:gis-user/password gis-user)
                                               :database-ssl-mode (:gis-database-ssl-mode config/env)})
               file-name (qgis/project-file-name (:congregation/name congregation))]
           (-> (ok content)

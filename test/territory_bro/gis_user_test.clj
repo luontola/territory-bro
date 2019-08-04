@@ -115,28 +115,14 @@
       (gis-user/create-gis-user! conn cong-id2 user-id)
       (gis-user/create-gis-user! conn cong-id2 user-id2)
       (testing "create & get GIS user"
-        (let [user (gis-user/get-gis-user conn cong-id user-id)]
+        (let [user (gis-user/get-gis-user (gis-user/current-state conn) cong-id user-id)]
           (is (:gis-user/username user))
-          (is (= 50 (count ((:gis-user/password user)))))))
-
-      (testing "get GIS users by congregation"
-        (is (= #{[cong-id user-id]
-                 [cong-id user-id2]}
-               (->> (gis-user/get-gis-users conn {:congregation cong-id})
-                    (map (juxt :congregation/id :user/id))
-                    (into #{})))))
-
-      (testing "get GIS users by user"
-        (is (= #{[cong-id user-id]
-                 [cong-id2 user-id]}
-               (->> (gis-user/get-gis-users conn {:user user-id})
-                    (map (juxt :congregation/id :user/id))
-                    (into #{})))))
+          (is (= 50 (count (:gis-user/password user))))))
 
       (testing "delete GIS user"
         (gis-user/delete-gis-user! conn cong-id user-id)
-        (is (nil? (gis-user/get-gis-user conn cong-id user-id)))
-        (is (gis-user/get-gis-user conn cong-id2 user-id2)
+        (is (nil? (gis-user/get-gis-user (gis-user/current-state conn) cong-id user-id)))
+        (is (gis-user/get-gis-user (gis-user/current-state conn) cong-id2 user-id2)
             "should not delete unrelated users")))))
 
 (defn- create-test-data! []
@@ -145,12 +131,12 @@
           cong (get (congregation/current-state conn) cong-id)
           user-id (user/save-user! conn "user" {})
           _ (gis-user/create-gis-user! conn cong-id user-id)
-          gis-user (gis-user/get-gis-user conn cong-id user-id)]
+          gis-user (gis-user/get-gis-user (gis-user/current-state conn) cong-id user-id)]
       {:cong-id cong-id
        :user-id user-id
        :schema (:congregation/schema-name cong)
        :username (:gis-user/username gis-user)
-       :password ((:gis-user/password gis-user))})))
+       :password (:gis-user/password gis-user)})))
 
 (deftest gis-user-database-access-test
   (let [{:keys [cong-id user-id schema username password]} (create-test-data!)
@@ -221,29 +207,3 @@
         b (gis-user/generate-password 10)]
     (is (= 10 (count a) (count b)))
     (is (not (= a b)))))
-
-(deftest secret-test
-  (let [secret (gis-user/secret "foo")]
-
-    (testing "hides the secret when printed normally"
-      (is (not (str/includes? (str secret) "foo")))
-      (is (not (str/includes? (pr-str secret) "foo"))))
-
-    (testing "exposes the secret when invoked as a function"
-      (is (= "foo" (secret))))))
-
-(comment
-  (gis-user/update-cache! db/database)
-  (:state @gis-user/cache)
-
-  (is (= (set (->> (gis-user/get-gis-users db/database)
-                   (map (fn [user]
-                          (update user :gis-user/password #(%))))))
-         (set (->> (vals (:state @gis-user/cache))
-                   (mapcat (fn [cong]
-                             (map (fn [[user-id user]]
-                                    {:congregation/id (:congregation/id cong)
-                                     :user/id (:user/id user)
-                                     :gis-user/username (:gis-user/username user)
-                                     :gis-user/password (:gis-user/password user)})
-                                  (:congregation/users cong)))))))))
