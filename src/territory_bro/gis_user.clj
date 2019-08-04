@@ -12,6 +12,40 @@
   (:import (java.security SecureRandom)
            (java.util Base64)))
 
+(defmulti ^:private update-congregation (fn [_congregation event] (:event/type event)))
+
+(defmethod update-congregation :default [congregation _event]
+  congregation)
+
+(defmethod update-congregation :congregation.event/congregation-created
+  [congregation event]
+  (-> congregation
+      (assoc :congregation/id (:congregation/id event))
+      (assoc :congregation/schema-name (:congregation/schema-name event))))
+
+(defn- set-gis-access [congregation user-id has-gis-access?]
+  (update-in congregation [:congregation/users user-id]
+             (fn [user]
+               (-> user
+                   (assoc :user/id user-id)
+                   (assoc :user/has-gis-access? has-gis-access?)))))
+
+(defmethod update-congregation :congregation.event/permission-granted
+  [congregation event]
+  (if (= :gis-access (:permission/id event))
+    (set-gis-access congregation (:user/id event) true)
+    congregation))
+
+(defmethod update-congregation :congregation.event/permission-revoked
+  [congregation event]
+  (if (= :gis-access (:permission/id event))
+    (set-gis-access congregation (:user/id event) false)
+    congregation))
+
+(defn gis-users-view [congregations event]
+  (update congregations (:congregation/id event) update-congregation event))
+
+
 (def ^:private query! (db/compile-queries "db/hugsql/gis-user.sql"))
 
 (defn secret [str]

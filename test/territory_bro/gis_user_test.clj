@@ -6,9 +6,11 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.test :refer :all]
+            [medley.core :refer [deep-merge]]
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
+            [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
             [territory-bro.gis :as gis]
             [territory-bro.gis-user :as gis-user]
@@ -16,9 +18,70 @@
             [territory-bro.territory :as territory]
             [territory-bro.testdata :as testdata]
             [territory-bro.user :as user])
-  (:import (org.postgresql.util PSQLException)))
+  (:import (java.time Instant)
+           (java.util UUID)
+           (org.postgresql.util PSQLException)))
 
 (use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
+
+(defn- apply-events [events]
+  (->> events
+       (map-indexed (fn [index event]
+                      (merge {:event/system "test"
+                              :event/time (Instant/ofEpochSecond (inc index))}
+                             event)))
+       events/validate-events
+       (reduce gis-user/gis-users-view nil)))
+
+(deftest gis-users-view-test
+  (testing "congregation created"
+    (let [cong-id (UUID. 0 1)
+          user-id (UUID. 0 2)
+          events [{:event/type :congregation.event/congregation-created
+                   :event/version 1
+                   :congregation/id cong-id
+                   :congregation/name "Cong1 Name"
+                   :congregation/schema-name "cong1_schema"}]
+          expected {cong-id {:congregation/id cong-id
+                             :congregation/schema-name "cong1_schema"}}]
+      (is (= expected (apply-events events)))
+
+      (testing "> GIS access granted"
+        (let [events (conj events {:event/type :congregation.event/permission-granted
+                                   :event/version 1
+                                   :congregation/id cong-id
+                                   :user/id user-id
+                                   :permission/id :gis-access})
+              expected (deep-merge expected
+                                   {cong-id {:congregation/users {user-id {:user/id user-id
+                                                                           :user/has-gis-access? true}}}})]
+          (is (= expected (apply-events events)))
+
+          (testing "> GIS access revoked"
+            (let [events (conj events {:event/type :congregation.event/permission-revoked
+                                       :event/version 1
+                                       :congregation/id cong-id
+                                       :user/id user-id
+                                       :permission/id :gis-access})
+                  expected (deep-merge expected
+                                       {cong-id {:congregation/users {user-id {:user/has-gis-access? false}}}})]
+              (is (= expected (apply-events events)))))
+
+          (testing "> unrelated permission revoked"
+            (let [events (conj events {:event/type :congregation.event/permission-revoked
+                                       :event/version 1
+                                       :congregation/id cong-id
+                                       :user/id user-id
+                                       :permission/id :view-congregation})]
+              (is (= expected (apply-events events)) "should ignore the event")))))
+
+      (testing "> unrelated permission granted"
+        (let [events (conj events {:event/type :congregation.event/permission-granted
+                                   :event/version 1
+                                   :congregation/id cong-id
+                                   :user/id user-id
+                                   :permission/id :view-congregation})]
+          (is (= expected (apply-events events)) "should ignore the event"))))))
 
 (deftest gis-users-test
   (db/with-db [conn {}]
