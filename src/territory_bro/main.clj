@@ -59,7 +59,7 @@
 (defn start-app []
   (try
     ;; start the public API only after the database is ready
-    (log-mount-states (mount/start-without #'http-server #'projections/refresher))
+    (log-mount-states (mount/start-without #'http-server #'projections/scheduled-refresh))
     (migrate-database!)
     (log-mount-states (mount/start))
 

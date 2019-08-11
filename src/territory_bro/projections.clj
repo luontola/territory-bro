@@ -8,7 +8,8 @@
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
             [territory-bro.gis-user :as gis-user]
-            [territory-bro.poller :as poller]))
+            [territory-bro.poller :as poller])
+  (:import (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
 
 (mount/defstate cache
   :start (atom {:last-event nil
@@ -45,10 +46,9 @@
 
 
 (mount/defstate refresher
-  :start (doto (poller/create (fn []
-                                (db/with-db [conn {}]
-                                  (refresh-now! conn))))
-           (poller/trigger!))
+  :start (poller/create (fn []
+                          (db/with-db [conn {}]
+                            (refresh-now! conn))))
   :stop (poller/shutdown! refresher))
 
 (defn refresh-async! []
@@ -56,6 +56,12 @@
 
 (defn await-refreshed []
   (poller/await refresher))
+
+
+(mount/defstate scheduled-refresh
+  :start (doto (Executors/newScheduledThreadPool 1)
+           (.scheduleWithFixedDelay refresh-async! 0 60 TimeUnit/SECONDS))
+  :stop (.shutdown ^ScheduledExecutorService scheduled-refresh))
 
 
 (comment
