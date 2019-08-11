@@ -35,8 +35,9 @@
                    :congregation/id cong-id
                    :congregation/name "Cong1 Name"
                    :congregation/schema-name "cong1_schema"}]
-          expected {cong-id {:congregation/id cong-id
-                             :congregation/schema-name "cong1_schema"}}]
+          expected {::gis-user/congregations
+                    {cong-id {:congregation/id cong-id
+                              :congregation/schema-name "cong1_schema"}}}]
       (is (= expected (apply-events events)))
 
       (testing "> GIS access granted"
@@ -46,8 +47,9 @@
                                    :user/id user-id
                                    :permission/id :gis-access})
               expected (deep-merge expected
-                                   {cong-id {:congregation/users {user-id {:user/id user-id
-                                                                           :user/has-gis-access? true}}}})]
+                                   {::gis-user/congregations
+                                    {cong-id {:congregation/users {user-id {:user/id user-id
+                                                                            :user/has-gis-access? true}}}}})]
           (is (= expected (apply-events events)))
 
           (testing "> GIS access revoked"
@@ -57,7 +59,8 @@
                                        :user/id user-id
                                        :permission/id :gis-access})
                   expected (deep-merge expected
-                                       {cong-id {:congregation/users {user-id {:user/has-gis-access? false}}}})]
+                                       {::gis-user/congregations
+                                        {cong-id {:congregation/users {user-id {:user/has-gis-access? false}}}}})]
               (is (= expected (apply-events events)))))
 
           (testing "> unrelated permission revoked"
@@ -84,10 +87,11 @@
                                    :gis-user/username "username123"
                                    :gis-user/password "password123"})
               expected (deep-merge expected
-                                   {cong-id {:congregation/users {user-id {:user/id user-id
-                                                                           :gis-user/desired-state :present
-                                                                           :gis-user/username "username123"
-                                                                           :gis-user/password "password123"}}}})]
+                                   {::gis-user/congregations
+                                    {cong-id {:congregation/users {user-id {:user/id user-id
+                                                                            :gis-user/desired-state :present
+                                                                            :gis-user/username "username123"
+                                                                            :gis-user/password "password123"}}}}})]
           (is (= expected (apply-events events)))
 
           (testing "> GIS user deleted"
@@ -97,8 +101,9 @@
                                        :user/id user-id
                                        :gis-user/username "username123"})
                   expected (deep-merge expected
-                                       {cong-id {:congregation/users {user-id {:gis-user/desired-state :absent
-                                                                               :gis-user/password nil}}}})]
+                                       {::gis-user/congregations
+                                        {cong-id {:congregation/users {user-id {:gis-user/desired-state :absent
+                                                                                :gis-user/password nil}}}}})]
               (is (= expected (apply-events events))))))))))
 
 (deftest gis-users-test
@@ -128,7 +133,7 @@
 (defn- create-test-data! []
   (db/with-db [conn {}]
     (let [cong-id (congregation/create-congregation! conn "cong")
-          cong (get (congregation/current-state conn) cong-id)
+          cong (get-in (congregation/current-state conn) [::congregation/congregations cong-id])
           user-id (user/save-user! conn "user" {})
           _ (gis-user/create-gis-user! conn cong-id user-id)
           gis-user (gis-user/get-gis-user (gis-user/current-state conn) cong-id user-id)]

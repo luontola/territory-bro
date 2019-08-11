@@ -58,15 +58,15 @@
   (update-gis-user congregation event :absent))
 
 (defn gis-users-view [congregations event]
-  (update congregations (:congregation/id event) update-congregation event))
+  (update-in congregations [::congregations (:congregation/id event)] update-congregation event))
 
 (defn get-gis-users [state cong-id] ; TODO: remove me? only used in tests
-  (->> (vals (get-in state [cong-id :congregation/users]))
+  (->> (vals (get-in state [::congregations cong-id :congregation/users]))
        (filter (fn [user]
                  (= :present (:gis-user/desired-state user))))))
 
 (defn get-gis-user [state cong-id user-id]
-  (let [user (get-in state [cong-id :congregation/users user-id])]
+  (let [user (get-in state [::congregations cong-id :congregation/users user-id])]
     (when (= :present (:gis-user/desired-state user))
       user)))
 
@@ -87,7 +87,7 @@
   ;; TODO: refactor to commands and process managers
   (let [username (str "gis_user_" (uuid-prefix cong-id) "_" (uuid-prefix user-id))
         password (generate-password 50)
-        schema (get-in (congregation/current-state conn) [cong-id :congregation/schema-name])]
+        schema (get-in (congregation/current-state conn) [::congregation/congregations cong-id :congregation/schema-name])]
     (assert schema)
     (event-store/save! conn cong-id nil
                        [(assoc (events/defaults)
@@ -124,7 +124,7 @@
 (defn delete-gis-user! [conn cong-id user-id]
   ;; TODO: refactor to commands and process managers
   (let [username (:gis-user/username (get-gis-user (current-state conn) cong-id user-id))
-        schema (get-in (congregation/current-state conn) [cong-id :congregation/schema-name])]
+        schema (get-in (congregation/current-state conn) [::congregation/congregations cong-id :congregation/schema-name])]
     (assert schema)
     (event-store/save! conn cong-id nil
                        [(assoc (events/defaults)

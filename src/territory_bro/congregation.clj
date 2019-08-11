@@ -39,23 +39,23 @@
                  disj
                  (:permission/id event))))
 
-(defn congregations-view [congregations event]
-  (update congregations (:congregation/id event) update-congregation event))
+(defn congregations-view [state event]
+  (update-in state [::congregations (:congregation/id event)] update-congregation event))
 
 (defn get-my-congregations [state user-id]
-  (->> state
+  (->> (::congregations state)
        (filter (fn [[_cong-id cong]]
                  (let [permissions (get-in cong [:congregation/user-permissions user-id])]
                    (contains? permissions :view-congregation))))))
 
 (defn get-my-congregation [state cong-id user-id]
-  (let [cong (get state cong-id)
+  (let [cong (get-in state [::congregations cong-id])
         permissions (get-in cong [:congregation/user-permissions user-id])]
     (when (contains? permissions :view-congregation)
       cong)))
 
 (defn use-schema [conn state cong-id] ; TODO: create a better helper?
-  (let [schema (get-in state [cong-id :congregation/schema-name])]
+  (let [schema (get-in state [::congregations cong-id :congregation/schema-name])]
     (db/use-tenant-schema conn schema)))
 
 (defn create-congregation! [conn name]
@@ -80,7 +80,7 @@
 ;;;; User access
 
 (defn get-users [state cong-id]
-  (let [cong (get state cong-id)]
+  (let [cong (get-in state [::congregations cong-id])]
     (->> (:congregation/user-permissions cong)
          ;; TODO: remove old users already in the projection
          (filter (fn [[_user-id permissions]]

@@ -26,9 +26,10 @@
                    :congregation/id cong-id
                    :congregation/name "Cong1 Name"
                    :congregation/schema-name "cong1_schema"}]
-          expected {cong-id {:congregation/id cong-id
-                             :congregation/name "Cong1 Name"
-                             :congregation/schema-name "cong1_schema"}}]
+          expected {::congregation/congregations
+                    {cong-id {:congregation/id cong-id
+                              :congregation/name "Cong1 Name"
+                              :congregation/schema-name "cong1_schema"}}}]
       (is (= expected (apply-events events)))
 
       (testing "> permission granted"
@@ -39,7 +40,8 @@
                                    :user/id user-id
                                    :permission/id :view-congregation})
               expected (deep-merge expected
-                                   {cong-id {:congregation/user-permissions {user-id #{:view-congregation}}}})]
+                                   {::congregation/congregations
+                                    {cong-id {:congregation/user-permissions {user-id #{:view-congregation}}}}})]
           (is (= expected (apply-events events)))
 
           (testing "> permissing revoked"
@@ -49,7 +51,8 @@
                                        :user/id user-id
                                        :permission/id :view-congregation})
                   expected (deep-merge expected
-                                       {cong-id {:congregation/user-permissions {user-id #{}}}})]
+                                       {::congregation/congregations
+                                        {cong-id {:congregation/user-permissions {user-id #{}}}}})]
               (is (= expected (apply-events events))))))))))
 
 (deftest congregations-test
@@ -58,7 +61,7 @@
 
     (testing "create congregation"
       (let [id (congregation/create-congregation! conn "the name")
-            congregation (get (congregation/current-state conn) id)]
+            congregation (get-in (congregation/current-state conn) [::congregation/congregations id])]
         (is id)
         (is (= [{:event/type :congregation.event/congregation-created
                  :event/version 1
