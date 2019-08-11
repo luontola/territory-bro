@@ -102,7 +102,7 @@
     (db/with-db [conn {}]
       ;; TODO: update the cache centrally
       (projections/update-cache! conn)
-      (ok (->> (vals (congregation/get-my-congregations (:state @projections/cache) (current-user-id conn)))
+      (ok (->> (vals (congregation/get-my-congregations (projections/cached-state) (current-user-id conn)))
                (map (fn [congregation]
                       {:id (:congregation/id congregation)
                        :name (:congregation/name congregation)})))))))
@@ -123,7 +123,7 @@
       ;; TODO: update the cache centrally
       (projections/update-cache! conn)
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-            congregation (congregation/get-my-congregation (:state @projections/cache) cong-id (current-user-id conn))]
+            congregation (congregation/get-my-congregation (projections/cached-state) cong-id (current-user-id conn))]
         (when-not congregation
           (forbidden! "No congregation access"))
         (db/use-tenant-schema conn (:congregation/schema-name congregation))
@@ -142,8 +142,8 @@
       (projections/update-cache! conn)
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             user-id (current-user-id conn)
-            congregation (congregation/get-my-congregation (:state @projections/cache) cong-id user-id)
-            gis-user (gis-user/get-gis-user (:state @projections/cache) cong-id user-id)]
+            congregation (congregation/get-my-congregation (projections/cached-state) cong-id user-id)
+            gis-user (gis-user/get-gis-user (projections/cached-state) cong-id user-id)]
         (when-not gis-user
           (forbidden! "No GIS access"))
         (let [content (qgis/generate-project {:database-host (:gis-database-host config/env)

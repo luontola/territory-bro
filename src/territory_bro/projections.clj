@@ -32,6 +32,9 @@
       ;; with concurrent requests, only one of them will update the cache
       (compare-and-set! cache cached updated))))
 
+(defn cached-state []
+  (:state @cache))
+
 (defn current-state
   "Calculates the current state from all events, including uncommitted ones,
    but does not update the cache (it could cause dirty reads to others)."
