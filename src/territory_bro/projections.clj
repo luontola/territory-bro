@@ -5,8 +5,10 @@
 (ns territory-bro.projections
   (:require [mount.core :as mount]
             [territory-bro.congregation :as congregation]
+            [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
-            [territory-bro.gis-user :as gis-user]))
+            [territory-bro.gis-user :as gis-user]
+            [territory-bro.poller :as poller]))
 
 (mount/defstate cache
   :start (atom {:last-event nil
@@ -25,7 +27,7 @@
        :state (reduce update-projections (:state cached) new-events)}
       cached)))
 
-(defn update-cache! [conn]
+(defn refresh-now! [conn]
   (let [cached @cache
         updated (apply-new-events conn cached)]
     (when-not (identical? cached updated)
@@ -41,6 +43,21 @@
   [conn]
   (:state (apply-new-events conn @cache)))
 
+
+(mount/defstate refresher
+  :start (doto (poller/create (fn []
+                                (db/with-db [conn {}]
+                                  (refresh-now! conn))))
+           (poller/trigger!))
+  :stop (poller/shutdown! refresher))
+
+(defn refresh-async! []
+  (poller/trigger! refresher))
+
+(defn await-refreshed []
+  (poller/await refresher))
+
+
 (comment
   (count (:state @cache))
-  (update-cache! db/database))
+  (refresh-now! db/database))

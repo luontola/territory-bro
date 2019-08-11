@@ -256,10 +256,14 @@
         (is (forbidden? response)))) ; same as when ID exists but user has no access
 
     (testing "no access"
+      ;; TODO: create an API for changing permissions
       (db/with-db [conn {}]
         (doseq [user-id (congregation/get-users (projections/current-state conn) cong-id)]
           (binding [events/*current-system* "test"]
             (congregation/revoke-access! conn cong-id user-id))))
+      (projections/refresh-async!)
+      (projections/await-refreshed)
+
       (let [response (-> (request :get (str "/api/congregation/" cong-id))
                          (merge session)
                          app)]
@@ -288,12 +292,15 @@
         (is (unauthorized? response))))
 
     (testing "requires GIS access"
+      ;; TODO: create API for getting the current user's ID
+      ;; TODO: create API for removing GIS access from a user
       (db/with-db [conn {}]
-        ;; TODO: create API for getting the current user's ID
-        ;; TODO: create API for removing GIS access from a user
         (doseq [gis-user (gis-user/get-gis-users (projections/current-state conn) cong-id)]
           (binding [events/*current-system* "test"]
             (gis-user/delete-gis-user! conn (projections/current-state conn) cong-id (:user/id gis-user)))))
+      (projections/refresh-async!)
+      (projections/await-refreshed)
+
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
                          (merge session)
                          app)]

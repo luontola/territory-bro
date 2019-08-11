@@ -39,7 +39,7 @@
         (.migrate))
 
     (db/with-db [conn {}]
-      (projections/update-cache! conn))
+      (projections/refresh-now! conn))
     (doseq [congregation (congregation/get-unrestricted-congregations (projections/cached-state))]
       (let [tenant-schema (:congregation/schema-name congregation)]
         (log/info "Migrating tenant schema:" tenant-schema)
@@ -58,10 +58,11 @@
 
 (defn start-app []
   (try
-    (log-mount-states (mount/start-without #'http-server))
-    (migrate-database!)
     ;; start the public API only after the database is ready
-    (log-mount-states (mount/start #'http-server))
+    (log-mount-states (mount/start-without #'http-server #'projections/refresher))
+    (migrate-database!)
+    (log-mount-states (mount/start))
+
     (doto (Runtime/getRuntime)
       (.addShutdownHook (Thread. ^Runnable stop-app)))
     (log/info "Started")

@@ -14,6 +14,7 @@
             [ring.util.http-response :refer [internal-server-error]]
             [ring.util.response :as response]
             [territory-bro.config :refer [env]]
+            [territory-bro.projections :as projections]
             [territory-bro.util :as util]))
 
 (defn wrap-internal-error [handler]
@@ -49,8 +50,20 @@
 ;; Avoid forgetting sessions every time the code is reloaded in development mode
 (defonce session-store (memory-session/memory-store))
 
+(def ^:private mutative-operation #{:put :post :delete})
+
+(defn wrap-projections-refresh [handler]
+  (fn [req]
+    (let [resp (handler req)]
+      (when (contains? mutative-operation (:request-method req))
+        (projections/refresh-async!)
+        ;; TODO: store the observed revision in session and await before the next read if the cache is out of date
+        (projections/await-refreshed))
+      resp)))
+
 (defn wrap-base [handler]
   (-> handler
+      wrap-projections-refresh
       (cond->
         (:dev env) (wrap-reload {:dirs ["src" "resources"]}))
       wrap-sqlexception-chain

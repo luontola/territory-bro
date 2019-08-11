@@ -100,8 +100,6 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
-      ;; TODO: update the cache centrally
-      (projections/update-cache! conn)
       (ok (->> (congregation/get-my-congregations (projections/cached-state) (current-user-id conn))
                (map (fn [congregation]
                       {:id (:congregation/id congregation)
@@ -120,8 +118,6 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
-      ;; TODO: update the cache centrally
-      (projections/update-cache! conn)
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             congregation (congregation/get-my-congregation (projections/cached-state) cong-id (current-user-id conn))]
         (when-not congregation
@@ -138,8 +134,6 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (db/with-db [conn {}]
-      ;; TODO: update the cache centrally
-      (projections/update-cache! conn)
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             user-id (current-user-id conn)
             congregation (congregation/get-my-congregation (projections/cached-state) cong-id user-id)
