@@ -134,7 +134,7 @@
 (defn- create-test-data! []
   (db/with-db [conn {}]
     (let [cong-id (congregation/create-congregation! conn "cong")
-          cong (get-in (projections/current-state conn) [::congregation/congregations cong-id])
+          cong (congregation/get-unrestricted-congregation (projections/current-state conn) cong-id)
           user-id (user/save-user! conn "user" {})
           _ (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)
           gis-user (gis-user/get-gis-user (projections/current-state conn) cong-id user-id)]

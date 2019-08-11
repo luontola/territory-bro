@@ -61,18 +61,18 @@
     (jdbc/db-set-rollback-only! conn)
 
     (testing "create congregation"
-      (let [id (congregation/create-congregation! conn "the name")
-            congregation (get-in (projections/current-state conn) [::congregation/congregations id])]
-        (is id)
+      (let [cong-id (congregation/create-congregation! conn "the name")
+            congregation (congregation/get-unrestricted-congregation (projections/current-state conn) cong-id)]
+        (is cong-id)
         (is (= [{:event/type :congregation.event/congregation-created
                  :event/version 1
                  :event/system "test"
-                 :congregation/id id
+                 :congregation/id cong-id
                  :congregation/name "the name"
                  :congregation/schema-name (:congregation/schema-name congregation)}]
-               (->> (event-store/read-stream conn id)
+               (->> (event-store/read-stream conn cong-id)
                     (map #(dissoc % :event/stream-id :event/stream-revision :event/global-revision :event/time)))))
-        (is (= id (:congregation/id congregation)))
+        (is (= cong-id (:congregation/id congregation)))
         (is (= "the name" (:congregation/name congregation)))
         (is (contains? (set (db/get-schemas conn))
                        (:congregation/schema-name congregation))
@@ -106,7 +106,8 @@
           state (apply-events events)]
       (testing "can see congregations after granting access"
         (is (= cong-id (:congregation/id (congregation/get-my-congregation state cong-id user-id))))
-        (is (= [cong-id] (keys (congregation/get-my-congregations state user-id)))))
+        (is (= [cong-id] (->> (congregation/get-my-congregations state user-id)
+                              (map :congregation/id)))))
 
       (testing "list users"
         (is (= [user-id] (congregation/get-users state cong-id)))

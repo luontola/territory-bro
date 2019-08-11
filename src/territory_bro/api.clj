@@ -102,7 +102,7 @@
     (db/with-db [conn {}]
       ;; TODO: update the cache centrally
       (projections/update-cache! conn)
-      (ok (->> (vals (congregation/get-my-congregations (projections/cached-state) (current-user-id conn)))
+      (ok (->> (congregation/get-my-congregations (projections/cached-state) (current-user-id conn))
                (map (fn [congregation]
                       {:id (:congregation/id congregation)
                        :name (:congregation/name congregation)})))))))

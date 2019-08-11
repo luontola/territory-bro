@@ -41,20 +41,30 @@
 (defn congregations-view [state event]
   (update-in state [::congregations (:congregation/id event)] update-congregation event))
 
-(defn get-my-congregations [state user-id]
-  (->> (::congregations state)
-       (filter (fn [[_cong-id cong]]
-                 (let [permissions (get-in cong [:congregation/user-permissions user-id])]
-                   (contains? permissions :view-congregation))))))
+(defn get-unrestricted-congregations [state]
+  (vals (::congregations state)))
 
-(defn get-my-congregation [state cong-id user-id]
-  (let [cong (get-in state [::congregations cong-id])
-        permissions (get-in cong [:congregation/user-permissions user-id])]
+(defn get-unrestricted-congregation [state cong-id]
+  (get (::congregations state) cong-id))
+
+(defn- apply-user-permissions [cong user-id]
+  (let [permissions (get-in cong [:congregation/user-permissions user-id])]
     (when (contains? permissions :view-congregation)
       cong)))
 
+(defn get-my-congregations [state user-id]
+  ;; TODO: avoid the linear search
+  (->> (get-unrestricted-congregations state)
+       (map #(apply-user-permissions % user-id))
+       (remove nil?)))
+
+(defn get-my-congregation [state cong-id user-id]
+  (-> (get-unrestricted-congregation state cong-id)
+      (apply-user-permissions user-id)))
+
 (defn use-schema [conn state cong-id] ; TODO: create a better helper?
-  (let [schema (get-in state [::congregations cong-id :congregation/schema-name])]
+  (let [cong (get-unrestricted-congregation state cong-id)
+        schema (:congregation/schema-name cong)]
     (db/use-tenant-schema conn schema)))
 
 (defn create-congregation! [conn name]
@@ -79,7 +89,7 @@
 ;;;; User access
 
 (defn get-users [state cong-id]
-  (let [cong (get-in state [::congregations cong-id])]
+  (let [cong (get-unrestricted-congregation state cong-id)]
     (->> (:congregation/user-permissions cong)
          ;; TODO: remove old users already in the projection
          (filter (fn [[_user-id permissions]]

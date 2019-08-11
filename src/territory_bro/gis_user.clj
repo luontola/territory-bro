@@ -85,7 +85,8 @@
   ;; TODO: refactor to commands and process managers
   (let [username (str "gis_user_" (uuid-prefix cong-id) "_" (uuid-prefix user-id))
         password (generate-password 50)
-        schema (get-in state [::congregation/congregations cong-id :congregation/schema-name])]
+        cong (congregation/get-unrestricted-congregation state cong-id)
+        schema (:congregation/schema-name cong)]
     (assert schema)
     (event-store/save! conn cong-id nil
                        [(assoc (events/defaults)
@@ -122,7 +123,8 @@
 (defn delete-gis-user! [conn state cong-id user-id]
   ;; TODO: refactor to commands and process managers
   (let [username (:gis-user/username (get-gis-user state cong-id user-id))
-        schema (get-in state [::congregation/congregations cong-id :congregation/schema-name])]
+        cong (congregation/get-unrestricted-congregation state cong-id)
+        schema (:congregation/schema-name cong)]
     (assert schema)
     (event-store/save! conn cong-id nil
                        [(assoc (events/defaults)

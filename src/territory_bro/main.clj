@@ -40,7 +40,7 @@
 
     (db/with-db [conn {}]
       (projections/update-cache! conn))
-    (doseq [congregation (vals (::congregation/congregations (projections/cached-state)))]
+    (doseq [congregation (congregation/get-unrestricted-congregations (projections/cached-state))]
       (let [tenant-schema (:congregation/schema-name congregation)]
         (log/info "Migrating tenant schema:" tenant-schema)
         (-> (db/tenant-schema tenant-schema master-schema)
