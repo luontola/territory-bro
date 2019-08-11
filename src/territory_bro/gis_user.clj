@@ -4,9 +4,7 @@
 
 (ns territory-bro.gis-user
   (:require [clojure.java.jdbc :as jdbc]
-            [mount.core :as mount]
             [territory-bro.congregation :as congregation]
-            [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
             [territory-bro.events :as events])
   (:import (java.security SecureRandom)
@@ -83,11 +81,11 @@
       (.replace "-" "")
       (.substring 0 16)))
 
-(defn create-gis-user! [conn cong-id user-id]
+(defn create-gis-user! [conn state cong-id user-id]
   ;; TODO: refactor to commands and process managers
   (let [username (str "gis_user_" (uuid-prefix cong-id) "_" (uuid-prefix user-id))
         password (generate-password 50)
-        schema (get-in (congregation/current-state conn) [::congregation/congregations cong-id :congregation/schema-name])]
+        schema (get-in state [::congregation/congregations cong-id :congregation/schema-name])]
     (assert schema)
     (event-store/save! conn cong-id nil
                        [(assoc (events/defaults)
@@ -121,10 +119,10 @@
   (jdbc/execute! conn [(str "DROP ROLE " role)]))
 
 (declare current-state)
-(defn delete-gis-user! [conn cong-id user-id]
+(defn delete-gis-user! [conn state cong-id user-id]
   ;; TODO: refactor to commands and process managers
-  (let [username (:gis-user/username (get-gis-user (current-state conn) cong-id user-id))
-        schema (get-in (congregation/current-state conn) [::congregation/congregations cong-id :congregation/schema-name])]
+  (let [username (:gis-user/username (get-gis-user state cong-id user-id))
+        schema (get-in state [::congregation/congregations cong-id :congregation/schema-name])]
     (assert schema)
     (event-store/save! conn cong-id nil
                        [(assoc (events/defaults)
@@ -139,34 +137,3 @@
                                :gis-user/username username)])
     (drop-role-cascade! conn username [schema])
     nil))
-
-;; TODO: deduplicate with congregation namespace
-
-(mount/defstate cache
-  :start (atom {:last-event nil
-                :state nil}))
-
-(defn- apply-new-events [conn cached]
-  (let [new-events (event-store/read-all-events conn {:since (:event/global-revision (:last-event cached))})
-        last-event (last new-events)]
-    (if last-event
-      {:last-event last-event
-       :state (reduce gis-users-view (:state cached) new-events)}
-      cached)))
-
-(defn update-cache! [conn]
-  (let [cached @cache
-        updated (apply-new-events conn cached)]
-    (when-not (identical? cached updated)
-      ;; with concurrent requests, only one of them will update the cache
-      (compare-and-set! cache cached updated))))
-
-(defn current-state
-  "Calculates the current state from all events, including uncommitted ones,
-   but does not update the cache (it could cause dirty reads to others)."
-  [conn]
-  (:state (apply-new-events conn @cache)))
-
-(comment
-  (count (:state @cache))
-  (update-cache! db/database))

@@ -10,6 +10,7 @@
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
+            [territory-bro.projections :as projections]
             [territory-bro.testutil :as testutil])
   (:import (java.util UUID)))
 
@@ -61,7 +62,7 @@
 
     (testing "create congregation"
       (let [id (congregation/create-congregation! conn "the name")
-            congregation (get-in (congregation/current-state conn) [::congregation/congregations id])]
+            congregation (get-in (projections/current-state conn) [::congregation/congregations id])]
         (is id)
         (is (= [{:event/type :congregation.event/congregation-created
                  :event/version 1

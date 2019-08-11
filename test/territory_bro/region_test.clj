@@ -8,6 +8,7 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
+            [territory-bro.projections :as projections]
             [territory-bro.region :as region]
             [territory-bro.testdata :as testdata]))
 
@@ -18,7 +19,7 @@
     (jdbc/db-set-rollback-only! conn)
 
     (let [cong-id (congregation/create-congregation! conn "the name")
-          _ (congregation/use-schema conn (congregation/current-state conn) cong-id)]
+          _ (congregation/use-schema conn (projections/current-state conn) cong-id)]
 
       (testing "create & list congregation boundaries"
         (let [id (region/create-congregation-boundary! conn testdata/wkt-multi-polygon)]

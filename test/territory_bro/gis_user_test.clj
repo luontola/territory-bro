@@ -13,6 +13,7 @@
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
             [territory-bro.gis :as gis]
             [territory-bro.gis-user :as gis-user]
+            [territory-bro.projections :as projections]
             [territory-bro.region :as region]
             [territory-bro.territory :as territory]
             [territory-bro.testdata :as testdata]
@@ -115,28 +116,28 @@
           user-id (user/save-user! conn "user1" {})
           user-id2 (user/save-user! conn "user2" {})]
 
-      (gis-user/create-gis-user! conn cong-id user-id)
-      (gis-user/create-gis-user! conn cong-id user-id2)
-      (gis-user/create-gis-user! conn cong-id2 user-id)
-      (gis-user/create-gis-user! conn cong-id2 user-id2)
+      (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)
+      (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id2)
+      (gis-user/create-gis-user! conn (projections/current-state conn) cong-id2 user-id)
+      (gis-user/create-gis-user! conn (projections/current-state conn) cong-id2 user-id2)
       (testing "create & get GIS user"
-        (let [user (gis-user/get-gis-user (gis-user/current-state conn) cong-id user-id)]
+        (let [user (gis-user/get-gis-user (projections/current-state conn) cong-id user-id)]
           (is (:gis-user/username user))
           (is (= 50 (count (:gis-user/password user))))))
 
       (testing "delete GIS user"
-        (gis-user/delete-gis-user! conn cong-id user-id)
-        (is (nil? (gis-user/get-gis-user (gis-user/current-state conn) cong-id user-id)))
-        (is (gis-user/get-gis-user (gis-user/current-state conn) cong-id2 user-id2)
+        (gis-user/delete-gis-user! conn (projections/current-state conn) cong-id user-id)
+        (is (nil? (gis-user/get-gis-user (projections/current-state conn) cong-id user-id)))
+        (is (gis-user/get-gis-user (projections/current-state conn) cong-id2 user-id2)
             "should not delete unrelated users")))))
 
 (defn- create-test-data! []
   (db/with-db [conn {}]
     (let [cong-id (congregation/create-congregation! conn "cong")
-          cong (get-in (congregation/current-state conn) [::congregation/congregations cong-id])
+          cong (get-in (projections/current-state conn) [::congregation/congregations cong-id])
           user-id (user/save-user! conn "user" {})
-          _ (gis-user/create-gis-user! conn cong-id user-id)
-          gis-user (gis-user/get-gis-user (gis-user/current-state conn) cong-id user-id)]
+          _ (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)
+          gis-user (gis-user/get-gis-user (projections/current-state conn) cong-id user-id)]
       {:cong-id cong-id
        :user-id user-id
        :schema (:congregation/schema-name cong)
@@ -203,7 +204,7 @@
 
     (testing "cannot login to database after user is deleted"
       (db/with-db [conn {}]
-        (gis-user/delete-gis-user! conn cong-id user-id))
+        (gis-user/delete-gis-user! conn (projections/current-state conn) cong-id user-id))
       (is (thrown-with-msg? PSQLException #"FATAL: password authentication failed for user"
                             (jdbc/query db-spec ["select 1 as test"]))))))
 

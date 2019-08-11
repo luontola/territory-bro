@@ -9,6 +9,7 @@
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
             [territory-bro.gis :as gis]
+            [territory-bro.projections :as projections]
             [territory-bro.region :as region]
             [territory-bro.territory :as territory]
             [territory-bro.testdata :as testdata]))
@@ -20,7 +21,7 @@
     (jdbc/db-set-rollback-only! conn)
 
     (let [cong-id (congregation/create-congregation! conn "the name")
-          _ (congregation/use-schema conn (congregation/current-state conn) cong-id)]
+          _ (congregation/use-schema conn (projections/current-state conn) cong-id)]
 
       (testing "before making changes"
         (is (= [] (gis/get-gis-changes conn))))

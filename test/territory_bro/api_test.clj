@@ -19,6 +19,7 @@
             [territory-bro.json :as json]
             [territory-bro.jwt :as jwt]
             [territory-bro.jwt-test :as jwt-test]
+            [territory-bro.projections :as projections]
             [territory-bro.router :as router]
             [territory-bro.user :as user])
   (:import (java.time Instant)
@@ -199,10 +200,10 @@
     (let [cong-id (UUID/fromString (:id (:body response)))]
       (db/with-db [conn {}]
         (testing "grants access to the current user"
-          (is (= 1 (count (congregation/get-users (congregation/current-state conn) cong-id)))))
+          (is (= 1 (count (congregation/get-users (projections/current-state conn) cong-id)))))
 
         (testing "creates a GIS user for the current user"
-          (is (= 1 (count (gis-user/get-gis-users (gis-user/current-state conn) cong-id))))))))
+          (is (= 1 (count (gis-user/get-gis-users (projections/current-state conn) cong-id))))))))
 
   (testing "requires login"
     (let [response (-> (request :post "/api/congregations")
@@ -256,7 +257,7 @@
 
     (testing "no access"
       (db/with-db [conn {}]
-        (doseq [user-id (congregation/get-users (congregation/current-state conn) cong-id)]
+        (doseq [user-id (congregation/get-users (projections/current-state conn) cong-id)]
           (binding [events/*current-system* "test"]
             (congregation/revoke-access! conn cong-id user-id))))
       (let [response (-> (request :get (str "/api/congregation/" cong-id))
@@ -290,9 +291,9 @@
       (db/with-db [conn {}]
         ;; TODO: create API for getting the current user's ID
         ;; TODO: create API for removing GIS access from a user
-        (doseq [gis-user (gis-user/get-gis-users (gis-user/current-state conn) cong-id)]
+        (doseq [gis-user (gis-user/get-gis-users (projections/current-state conn) cong-id)]
           (binding [events/*current-system* "test"]
-            (gis-user/delete-gis-user! conn cong-id (:user/id gis-user)))))
+            (gis-user/delete-gis-user! conn (projections/current-state conn) cong-id (:user/id gis-user)))))
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
                          (merge session)
                          app)]

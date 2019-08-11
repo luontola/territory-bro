@@ -10,6 +10,7 @@
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
+            [territory-bro.projections :as projections]
             [territory-bro.router :as router])
   (:gen-class))
 
@@ -38,8 +39,8 @@
         (.migrate))
 
     (db/with-db [conn {}]
-      (congregation/update-cache! conn))
-    (doseq [congregation (vals (:state @congregation/cache))]
+      (projections/update-cache! conn))
+    (doseq [congregation (vals (::congregation/congregations (:state @projections/cache)))]
       (let [tenant-schema (:congregation/schema-name congregation)]
         (log/info "Migrating tenant schema:" tenant-schema)
         (-> (db/tenant-schema tenant-schema master-schema)

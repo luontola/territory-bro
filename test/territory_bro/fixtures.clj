@@ -14,6 +14,7 @@
             [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
             [territory-bro.jwt-test :as jwt-test]
+            [territory-bro.projections :as projections]
             [territory-bro.router :as router]))
 
 (defn- delete-schemas-starting-with! [conn prefix]
@@ -30,8 +31,7 @@
   (mount/start-with-args test-env
                          #'config/env
                          #'db/database
-                         #'congregation/cache
-                         #'gis-user/cache)
+                         #'projections/cache)
   ;; cleanup
   (db/with-db [conn {}]
     (delete-schemas-starting-with! conn (:database-schema test-env)))

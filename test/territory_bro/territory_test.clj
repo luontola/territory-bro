@@ -8,6 +8,7 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
+            [territory-bro.projections :as projections]
             [territory-bro.territory :as territory]
             [territory-bro.testdata :as testdata]))
 
@@ -18,7 +19,7 @@
     (jdbc/db-set-rollback-only! conn)
 
     (let [cong-id (congregation/create-congregation! conn "the name")
-          _ (congregation/use-schema conn (congregation/current-state conn) cong-id)
+          _ (congregation/use-schema conn (projections/current-state conn) cong-id)
           territory-id (territory/create-territory! conn {:territory/number "123"
                                                           :territory/addresses "Street 1 A"
                                                           :territory/subregion "Somewhere"
