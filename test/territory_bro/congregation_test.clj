@@ -172,6 +172,7 @@
                              {:command/type :congregation.command/rename-congregation
                               :command/time (Instant/ofEpochSecond 2)
                               :command/user user-id
+                              :congregation/id cong-id
                               :congregation/name "new name"}))))
 
     (testing "name not changed"
@@ -180,10 +181,12 @@
                                   {:command/type :congregation.command/rename-congregation
                                    :command/time (Instant/ofEpochSecond 3)
                                    :command/user user-id
+                                   :congregation/id cong-id
                                    :congregation/name "old name"}))))
       (testing "from previous rename"
         (is (= [] (handle-command [created-event renamed-event]
                                   {:command/type :congregation.command/rename-congregation
                                    :command/user user-id
                                    :command/time (Instant/ofEpochSecond 3)
+                                   :congregation/id cong-id
                                    :congregation/name "new name"})))))))

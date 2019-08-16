@@ -67,6 +67,8 @@
           :congregation/schema-name]
          (keys (events/sorted-keys valid-event)))))
 
+;; TODO: deduplicate event & command validation infra
+
 (deftest event-schema-test
   (testing "check specific event schema"
     (is (nil? (s/check events/CongregationCreated valid-event))))

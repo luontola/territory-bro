@@ -5,6 +5,7 @@
 (ns territory-bro.congregation
   (:require [clojure.string :as str]
             [clojure.tools.logging :as log]
+            [territory-bro.commands :as commands]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
@@ -128,9 +129,9 @@
       (assoc :event/user (:command/user command))))
 
 (defn handle-command [events command]
-  ;; TODO: command validation
   ;; TODO: permission checks
-  (let [congregation (reduce write-model nil events)]
+  (let [command (commands/validate-command command)
+        congregation (reduce write-model nil events)]
     (->> (command-handler congregation command)
          (map #(enrich-event % command)))))
 
