@@ -63,6 +63,12 @@
          :congregation/id UUID
          :congregation/name s/Str
          :congregation/schema-name s/Str))
+(s/defschema CongregationRenamed
+  (assoc EventBase
+         :event/type (s/eq :congregation.event/congregation-renamed)
+         :event/version (s/eq 1)
+         :congregation/id UUID
+         :congregation/name s/Str))
 
 (s/defschema PermissionId
   (s/enum :view-congregation
@@ -100,6 +106,7 @@
 
 (def event-schemas
   {:congregation.event/congregation-created CongregationCreated
+   :congregation.event/congregation-renamed CongregationRenamed
    :congregation.event/permission-granted PermissionGranted
    :congregation.event/permission-revoked PermissionRevoked
    :congregation.event/gis-user-created GisUserCreated

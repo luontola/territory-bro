@@ -11,6 +11,8 @@
             [territory-bro.events :as events])
   (:import (java.util UUID)))
 
+;;; Read Model
+
 (defmulti ^:private update-congregation (fn [_congregation event] (:event/type event)))
 
 (defmethod update-congregation :default [congregation _event]
@@ -85,6 +87,48 @@
         (.migrate))
     (log/info "Congregation created:" id)
     id))
+
+
+;;;; Write Model
+
+(defmulti ^:private write-model (fn [_congregation event] (:event/type event)))
+
+(defmethod write-model :default [congregation _event]
+  congregation)
+
+(defmethod write-model :congregation.event/congregation-created [congregation event]
+  (-> congregation
+      (assoc :congregation/id (:congregation/id event))
+      (assoc :congregation/name (:congregation/name event))))
+
+(defmethod write-model :congregation.event/congregation-renamed [congregation event]
+  (-> congregation
+      (assoc :congregation/name (:congregation/name event))))
+
+
+(defmulti ^:private command-handler (fn [_congregation command] (:command/type command)))
+
+(defmethod command-handler :congregation.command/rename-congregation [congregation command]
+  (when (not= (:congregation/name congregation)
+              (:congregation/name command))
+    [{:event/type :congregation.event/congregation-renamed
+      :event/version 1
+      :congregation/id (:congregation/id congregation)
+      :congregation/name (:congregation/name command)}]))
+
+
+(defn- enrich-event [event command]
+  (-> event
+      (assoc :event/time (:command/time command))
+      (assoc :event/user (:command/user command))))
+
+(defn handle-command [events command]
+  ;; TODO: command validation
+  ;; TODO: permission checks
+  (let [congregation (reduce write-model nil events)]
+    (->> (command-handler congregation command)
+         (map #(enrich-event % command)))))
+
 
 ;;;; User access
 
