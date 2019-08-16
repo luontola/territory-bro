@@ -159,6 +159,11 @@
                        :congregation/id cong-id
                        :congregation/name "old name"
                        :congregation/schema-name ""}
+        rename-command {:command/type :congregation.command/rename-congregation
+                        :command/time (Instant/ofEpochSecond 2)
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :congregation/name "new name"}
         renamed-event {:event/type :congregation.event/congregation-renamed
                        :event/version 1
                        :event/time (Instant/ofEpochSecond 2)
@@ -169,24 +174,13 @@
     (testing "name changed"
       (is (= [renamed-event]
              (handle-command [created-event]
-                             {:command/type :congregation.command/rename-congregation
-                              :command/time (Instant/ofEpochSecond 2)
-                              :command/user user-id
-                              :congregation/id cong-id
-                              :congregation/name "new name"}))))
+                             rename-command))))
 
     (testing "name not changed"
       (testing "from original"
         (is (= [] (handle-command [created-event]
-                                  {:command/type :congregation.command/rename-congregation
-                                   :command/time (Instant/ofEpochSecond 3)
-                                   :command/user user-id
-                                   :congregation/id cong-id
-                                   :congregation/name "old name"}))))
+                                  (assoc rename-command :congregation/name "old name")))))
+
       (testing "from previous rename"
         (is (= [] (handle-command [created-event renamed-event]
-                                  {:command/type :congregation.command/rename-congregation
-                                   :command/user user-id
-                                   :command/time (Instant/ofEpochSecond 3)
-                                   :congregation/id cong-id
-                                   :congregation/name "new name"})))))))
+                                  rename-command)))))))
