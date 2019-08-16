@@ -25,6 +25,11 @@
       (assoc :congregation/name (:congregation/name event))
       (assoc :congregation/schema-name (:congregation/schema-name event))))
 
+(defmethod update-congregation :congregation.event/congregation-renamed
+  [congregation event]
+  (-> congregation
+      (assoc :congregation/name (:congregation/name event))))
+
 (defmethod update-congregation :congregation.event/permission-granted
   [congregation event]
   (-> congregation

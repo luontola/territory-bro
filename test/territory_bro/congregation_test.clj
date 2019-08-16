@@ -56,7 +56,17 @@
                   expected (deep-merge expected
                                        {::congregation/congregations
                                         {cong-id {:congregation/user-permissions {user-id #{}}}}})]
-              (is (= expected (apply-events events))))))))))
+              (is (= expected (apply-events events)))))))
+
+      (testing "> congregation renamed"
+        (let [events (conj events {:event/type :congregation.event/congregation-renamed
+                                   :event/version 1
+                                   :congregation/id cong-id
+                                   :congregation/name "New Name"})
+              expected (deep-merge expected
+                                   {::congregation/congregations
+                                    {cong-id {:congregation/name "New Name"}}})]
+          (is (= expected (apply-events events))))))))
 
 (deftest congregations-test
   (db/with-db [conn {:isolation :read-committed}] ; creating the schema happens in another transaction
