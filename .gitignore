@@ -1,6 +1,7 @@
 *.bak
 *.log
 *.qgs~
+*.sql.gz
 *.tmp
 .DS_Store
 /.lein-*
