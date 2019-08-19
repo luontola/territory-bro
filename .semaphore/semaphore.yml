@@ -15,9 +15,21 @@ blocks:
         - name: APP_ENV
           value: prod
       jobs:
-      - name: Download our code
-        commands:
-          - echo "Hello from Semaphore!"
-          - echo $APP_ENV
-          - checkout
-          - ls -alh
+        - name: Download our code
+          commands:
+            - echo "Hello from Semaphore!"
+            - echo $APP_ENV
+            - checkout
+            - ls -alh
+        - name: Test API
+          commands:
+            - checkout
+            - lein test
+            - lein uberjar
+        - name: Test Web
+          commands:
+            - checkout
+            - yarn install
+            - yarn run flow check
+            - yarn run test
+            - yarn run build
