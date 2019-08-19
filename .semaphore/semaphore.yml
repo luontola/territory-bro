@@ -24,7 +24,7 @@ blocks:
         - name: Test API
           commands:
             - checkout
-            - cache restore
+            - cache restore lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
             #- lein test
             - lein uberjar
             - cache store lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.m2
