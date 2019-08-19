@@ -18,14 +18,6 @@ blocks:
           value: jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro
 
       jobs:
-        - name: Download our code
-          commands:
-            - echo "Hello from Semaphore!"
-            - echo $APP_ENV
-            - checkout
-            - ls -alh
-            - pwd
-
         - name: Test API
           commands:
             - checkout
@@ -45,3 +37,8 @@ blocks:
             - yarn run flow check
             - yarn run test
             - cache store
+
+        - name: Build Containers
+          commands:
+            - checkout
+            - docker-compose build --pull
