@@ -31,7 +31,9 @@ blocks:
         - name: Test Web
           commands:
             - checkout
+            - cache restore
             - yarn install
             - yarn run flow check
             - yarn run test
             - yarn run build
+            - cache store
