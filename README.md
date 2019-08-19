@@ -4,7 +4,9 @@ Territory Bro is a tool for managing territory cards in the congregations of Jeh
 
 For more information, see <https://territorybro.com>
 
-[![CI Build Status](https://travis-ci.org/luontola/territory-bro.svg?branch=master)](https://travis-ci.org/luontola/territory-bro)
+[![Travis CI](https://travis-ci.org/luontola/territory-bro.svg?branch=master)](https://travis-ci.org/luontola/territory-bro)
+
+[Semaphore CI](https://luontola.semaphoreci.com/projects/territory-bro)
 
 
 ## Running

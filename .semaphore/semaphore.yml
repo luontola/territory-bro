@@ -1,0 +1,80 @@
+version: v1.0
+name: Territory Bro CI
+
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+
+blocks:
+  - name: Build
+    task:
+      secrets:
+        - name: docker-hub
+
+      prologue:
+        commands:
+          - checkout
+
+      jobs:
+        - name: Test API
+          commands:
+            - cache restore m2-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
+            - cache restore lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
+
+            - docker-compose up -d db
+            - lein test
+
+            - cache store m2-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.m2
+            - cache store lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.lein/self-installs
+
+        - name: Test Web
+          commands:
+            - cache restore
+            - nvm install 11
+
+            - yarn install
+            - yarn run flow check
+            - yarn run test
+
+            - cache store
+
+        - name: Build API
+          commands:
+            - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+            - docker pull luontola/territory-bro-api:ci-builder || true
+            - docker pull luontola/territory-bro-api:ci || true
+
+            - docker build --pull
+              --tag        luontola/territory-bro-api:ci-builder
+              --cache-from luontola/territory-bro-api:ci-builder
+              --file Dockerfile-api --target builder .
+
+            - docker build --pull
+              --tag        luontola/territory-bro-api:ci
+              --cache-from luontola/territory-bro-api:ci
+              --cache-from luontola/territory-bro-api:ci-builder
+              --file Dockerfile-api .
+
+            - docker push luontola/territory-bro-api:ci-builder
+            - docker push luontola/territory-bro-api:ci
+
+        - name: Build Web
+          commands:
+            - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+            - docker pull luontola/territory-bro-web:ci-builder || true
+            - docker pull luontola/territory-bro-web:ci || true
+
+            - docker build --pull
+              --tag        luontola/territory-bro-web:ci-builder
+              --cache-from luontola/territory-bro-web:ci-builder
+              --file Dockerfile-web --target builder .
+
+            - docker build --pull
+              --tag        luontola/territory-bro-web:ci
+              --cache-from luontola/territory-bro-web:ci
+              --cache-from luontola/territory-bro-web:ci-builder
+              --file Dockerfile-web .
+
+            - docker push luontola/territory-bro-web:ci-builder
+            - docker push luontola/territory-bro-web:ci
