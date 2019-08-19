@@ -29,11 +29,12 @@ blocks:
         - name: Test API
           commands:
             - checkout
+            - cache restore m2-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
             - cache restore lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
             - docker-compose up -d db
             - lein test
-            - lein uberjar
-            - cache store lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.m2
+            - cache store m2-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.m2
+            - cache store lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.lein/self-installs
 
         - name: Test Web
           commands:
@@ -43,5 +44,4 @@ blocks:
             - yarn install
             - yarn run flow check
             - yarn run test
-            - yarn run build
             - cache store
