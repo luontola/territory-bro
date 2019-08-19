@@ -13,6 +13,9 @@ agent:
 blocks:
   - name: Build
     task:
+      secrets:
+        - name: docker-hub
+
       env_vars:
         - name: DATABASE_URL
           value: jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro
@@ -42,6 +45,7 @@ blocks:
           commands:
             - checkout
             #- docker-compose build --pull
+            - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
             - docker build --pull --tag api-builder --file Dockerfile-api --target builder .
             - docker build --pull --tag api --file Dockerfile-api .
             - docker build --pull --tag web-builder --file Dockerfile-web --target builder .
