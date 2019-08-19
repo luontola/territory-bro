@@ -46,11 +46,10 @@ blocks:
             - checkout
             #- docker-compose build --pull
             - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
-            - docker build \
-                  --tag "luontola/territory-bro-api:ci-builder" \
-                  --cache-from "luontola/territory-bro-api:ci-builder" \
-                  --pull --file Dockerfile-api --target builder \
-                  .
+            - docker build
+              --tag "luontola/territory-bro-api:ci-builder"
+              --cache-from "luontola/territory-bro-api:ci-builder"
+              --pull --file Dockerfile-api --target builder .
             - docker build --pull --tag "luontola/territory-bro-api:ci" --cache-from "luontola/territory-bro-api:ci-builder" --cache-from "luontola/territory-bro-api:ci" --file Dockerfile-api .
             - docker build --pull --tag "luontola/territory-bro-web:ci-builder" --cache-from "luontola/territory-bro-web:ci-builder" --file Dockerfile-web --target builder .
             - docker build --pull --tag "luontola/territory-bro-web:ci" --cache-from "luontola/territory-bro-web:ci-builder" --cache-from "luontola/territory-bro-web:ci" --file Dockerfile-web .
