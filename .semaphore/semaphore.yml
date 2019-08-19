@@ -32,6 +32,7 @@ blocks:
           commands:
             - checkout
             - cache restore
+            - nvm install 11
             - yarn install
             - yarn run flow check
             - yarn run test
