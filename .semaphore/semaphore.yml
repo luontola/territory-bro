@@ -3,17 +3,29 @@
 # https://docs.semaphoreci.com/category/58-programming-languages
 # https://docs.semaphoreci.com/category/56-guided-tour
 version: v1.0
-name: Hello Semaphore
+name: Territory Bro CI
+
 agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu1804
+
+  containers:
+    - name: db
+      image: mdillon/postgis:11
+      env_vars:
+        - name: POSTGRES_USER
+          value: territorybro
+        - name: POSTGRES_PASSWORD
+          value: territorybro
+
 blocks:
-  - name: Simple example
+  - name: Build
     task:
       env_vars:
-        - name: APP_ENV
-          value: prod
+        - name: DATABASE_URL
+          value: jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro
+
       jobs:
         - name: Download our code
           commands:
@@ -21,13 +33,16 @@ blocks:
             - echo $APP_ENV
             - checkout
             - ls -alh
+            - pwd
+
         - name: Test API
           commands:
             - checkout
             - cache restore lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
-            #- lein test
+            - lein test
             - lein uberjar
             - cache store lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.m2
+
         - name: Test Web
           commands:
             - checkout
