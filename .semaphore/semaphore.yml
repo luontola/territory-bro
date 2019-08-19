@@ -41,4 +41,8 @@ blocks:
         - name: Build Containers
           commands:
             - checkout
-            - docker-compose build --pull
+            #- docker-compose build --pull
+            - docker build --pull --tag api-builder --file Dockerfile-api --target builder .
+            - docker build --pull --tag api --file Dockerfile-api .
+            - docker build --pull --tag web-builder --file Dockerfile-web --target builder .
+            - docker build --pull --tag web --file Dockerfile-web .
