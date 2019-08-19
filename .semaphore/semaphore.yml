@@ -46,16 +46,16 @@ blocks:
             - docker pull luontola/territory-bro-api:ci-builder || true
             - docker pull luontola/territory-bro-api:ci || true
 
-            - docker build
-              --tag luontola/territory-bro-api:ci-builder
+            - docker build --pull
+              --tag        luontola/territory-bro-api:ci-builder
               --cache-from luontola/territory-bro-api:ci-builder
-              --pull --file Dockerfile-api --target builder .
+              --file Dockerfile-api --target builder .
 
-            - docker build
-              --tag luontola/territory-bro-api:ci
-              --cache-from luontola/territory-bro-api:ci-builder
+            - docker build --pull
+              --tag        luontola/territory-bro-api:ci
               --cache-from luontola/territory-bro-api:ci
-              --pull --file Dockerfile-api .
+              --cache-from luontola/territory-bro-api:ci-builder
+              --file Dockerfile-api .
 
             - docker push luontola/territory-bro-api:ci-builder
             - docker push luontola/territory-bro-api:ci
@@ -67,16 +67,16 @@ blocks:
             - docker pull luontola/territory-bro-web:ci-builder || true
             - docker pull luontola/territory-bro-web:ci || true
 
-            - docker build
-              --tag luontola/territory-bro-web:ci-builder
+            - docker build --pull
+              --tag        luontola/territory-bro-web:ci-builder
               --cache-from luontola/territory-bro-web:ci-builder
-              --pull --file Dockerfile-web --target builder .
+              --file Dockerfile-web --target builder .
 
-            - docker build
-              --tag luontola/territory-bro-web:ci
-              --cache-from luontola/territory-bro-web:ci-builder
+            - docker build --pull
+              --tag        luontola/territory-bro-web:ci
               --cache-from luontola/territory-bro-web:ci
-              --pull --file Dockerfile-web .
+              --cache-from luontola/territory-bro-web:ci-builder
+              --file Dockerfile-web .
 
             - docker push luontola/territory-bro-web:ci-builder
             - docker push luontola/territory-bro-web:ci
