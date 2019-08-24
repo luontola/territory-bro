@@ -6,9 +6,11 @@
   (:require [medley.core :refer [dissoc-in]]))
 
 (defn- path [user-id permission]
-  (concat [::permissions user-id]
-          (rest permission)
-          [(first permission)]))
+  (->> nil
+       (cons (first permission))
+       (concat (rest permission))
+       (cons user-id)
+       (cons ::permissions)))
 
 (defn grant [state user-id permission]
   (assoc-in state (path user-id permission) true))
