@@ -9,13 +9,14 @@
 (defn grant [state user-id permission]
   (update-in state [::permissions user-id (second permission)] conj-set (first permission)))
 
-(defn- revoke-impl [m ks v]
+(defn- disj-in [m ks to-be-removed]
   (if (empty? ks)
-    (disj m v)
-    (let [m (update m (first ks) revoke-impl (rest ks) v)]
-      (if (empty? (get m (first ks)))
-        (dissoc m (first ks))
-        m))))
+    (disj m to-be-removed)
+    (let [k (first ks)
+          v (disj-in (get m k) (rest ks) to-be-removed)]
+      (if (empty? v)
+        (dissoc m k)
+        (assoc m k v)))))
 
 (defn revoke [state user-id permission]
-  (revoke-impl state [::permissions user-id (second permission)] (first permission)))
+  (disj-in state [::permissions user-id (second permission)] (first permission)))
