@@ -41,7 +41,7 @@
                    (permissions/grant user-id [:foo cong-id])
                    (permissions/grant user-id2 [:foo cong-id])))))
 
-      (testing "nested permissions"
+      (testing "narrow permits"
         (is (= {::permissions/permissions {user-id {cong-id {:foo true
                                                              resource-id {:bar true}
                                                              :gazonk true}}}}
@@ -72,14 +72,14 @@
                    (permissions/grant user-id2 [:foo cong-id])
                    (permissions/revoke user-id [:foo cong-id])))))
 
-      (testing "nested permissions"
+      (testing "narrow permits"
         (is (= {::permissions/permissions {user-id {cong-id {:bar true}}}}
                (-> nil
                    (permissions/grant user-id [:foo cong-id resource-id])
                    (permissions/grant user-id [:bar cong-id])
                    (permissions/revoke user-id [:foo cong-id resource-id])))))
 
-      (testing "all permissions"
+      (testing "all permits"
         (is (= {}
                (-> nil
                    (permissions/grant user-id [:foo cong-id])
@@ -93,7 +93,7 @@
         resource-id (UUID. 0 100)]
 
     (let [state (permissions/grant nil user-id [:foo cong-id])]
-      (testing "exact permission"
+      (testing "exact permit"
         (is (true? (permissions/allowed? state user-id [:foo cong-id]))))
 
       (testing "different permission"
@@ -105,7 +105,7 @@
       (testing "different user"
         (is (false? (permissions/allowed? state user-id2 [:foo cong-id])))))
 
-    (testing "broader permission implies nested permissions"
+    (testing "broad permit implies narrower permits"
       (is (true? (-> nil
                      (permissions/grant user-id [:foo cong-id])
                      (permissions/allowed? user-id [:foo cong-id resource-id]))))
@@ -113,7 +113,7 @@
                      (permissions/grant user-id [:foo])
                      (permissions/allowed? user-id [:foo cong-id resource-id])))))
 
-    (testing "nested permission doesn't imply broader permission"
+    (testing "narrow permit doesn't imply broader permits"
       (is (false? (-> nil
                       (permissions/grant user-id [:foo cong-id resource-id])
                       (permissions/allowed? user-id [:foo cong-id]))))

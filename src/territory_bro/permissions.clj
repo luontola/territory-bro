@@ -5,23 +5,23 @@
 (ns territory-bro.permissions
   (:require [medley.core :refer [dissoc-in]]))
 
-(defn- path [user-id [permission-name & resource-ids]]
+(defn- path [user-id [permission & resource-ids]]
   (->> nil
-       (cons permission-name)
+       (cons permission)
        (concat resource-ids)
        (cons user-id)
        (cons ::permissions)))
 
-(defn grant [state user-id permission]
-  (assoc-in state (path user-id permission) true))
+(defn grant [state user-id permit]
+  (assoc-in state (path user-id permit) true))
 
-(defn revoke [state user-id permission]
-  (dissoc-in state (path user-id permission)))
+(defn revoke [state user-id permit]
+  (dissoc-in state (path user-id permit)))
 
-(defn allowed? [state user-id permission]
+(defn allowed? [state user-id permit]
   (cond
-    (empty? permission) false
-    ;; has exact permission?
-    (get-in state (path user-id permission)) true
-    ;; has broader permission?
-    :else (recur state user-id (drop-last permission))))
+    (empty? permit) false
+    ;; has exact permit?
+    (get-in state (path user-id permit)) true
+    ;; has broader permit?
+    :else (recur state user-id (drop-last permit))))
