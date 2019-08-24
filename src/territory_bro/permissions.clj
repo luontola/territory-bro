@@ -20,3 +20,6 @@
 
 (defn revoke [state user-id permission]
   (disj-in state [::permissions user-id (second permission)] (first permission)))
+
+(defn allowed? [state user-id permission]
+  (boolean (get-in state [::permissions user-id (second permission) (first permission)])))

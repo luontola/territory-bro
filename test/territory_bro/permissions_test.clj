@@ -7,7 +7,7 @@
             [territory-bro.permissions :as permissions])
   (:import (java.util UUID)))
 
-(deftest permissions-model-test
+(deftest changing-permissions-test
   (let [user-id (UUID. 0 1)
         user-id2 (UUID. 0 2)
         cong-id (UUID. 0 10)
@@ -66,3 +66,22 @@
                (-> nil
                    (permissions/grant user-id [:foo cong-id])
                    (permissions/revoke user-id [:foo cong-id]))))))))
+
+(deftest checking-permissions-test
+  (let [user-id (UUID. 0 1)
+        user-id2 (UUID. 0 2)
+        cong-id (UUID. 0 10)
+        cong-id2 (UUID. 0 20)]
+
+    (let [state (permissions/grant nil user-id [:foo cong-id])]
+      (testing "exact permission"
+        (is (true? (permissions/allowed? state user-id [:foo cong-id]))))
+
+      (testing "different permission"
+        (is (false? (permissions/allowed? state user-id [:bar cong-id]))))
+
+      (testing "different congregation"
+        (is (false? (permissions/allowed? state user-id [:foo cong-id2]))))
+
+      (testing "different user"
+        (is (false? (permissions/allowed? state user-id2 [:foo cong-id])))))))
