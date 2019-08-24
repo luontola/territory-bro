@@ -5,10 +5,10 @@
 (ns territory-bro.permissions
   (:require [medley.core :refer [dissoc-in]]))
 
-(defn- path [user-id permission]
+(defn- path [user-id [permission-name & resource-ids]]
   (->> nil
-       (cons (first permission))
-       (concat (rest permission))
+       (cons permission-name)
+       (concat resource-ids)
        (cons user-id)
        (cons ::permissions)))
 
