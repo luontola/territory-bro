@@ -39,7 +39,7 @@
                    (permissions/grant user-id [:foo cong-id])
                    (permissions/grant user-id2 [:foo cong-id]))))))
 
-    (testing "revoking"
+    (testing "revoking,"
       (testing "some permissions"
         (is (= {::permissions/permissions {user-id {cong-id #{:bar}}}}
                (-> nil
@@ -47,8 +47,22 @@
                    (permissions/grant user-id [:bar cong-id])
                    (permissions/revoke user-id [:foo cong-id])))))
 
+      (testing "some congregations"
+        (is (= {::permissions/permissions {user-id {cong-id2 #{:foo}}}}
+               (-> nil
+                   (permissions/grant user-id [:foo cong-id])
+                   (permissions/grant user-id [:foo cong-id2])
+                   (permissions/revoke user-id [:foo cong-id])))))
+
+      (testing "some users"
+        (is (= {::permissions/permissions {user-id2 {cong-id #{:foo}}}}
+               (-> nil
+                   (permissions/grant user-id [:foo cong-id])
+                   (permissions/grant user-id2 [:foo cong-id])
+                   (permissions/revoke user-id [:foo cong-id])))))
+
       (testing "all permissions"
-        (is (= {::permissions/permissions {}}
+        (is (= {}
                (-> nil
                    (permissions/grant user-id [:foo cong-id])
                    (permissions/revoke user-id [:foo cong-id]))))))))
