@@ -64,8 +64,8 @@
 
 (defn to-pg-json [value]
   (doto (PGobject.)
-        (.setType "jsonb")
-        (.setValue (json/generate-string value))))
+    (.setType "jsonb")
+    (.setValue (json/generate-string value))))
 
 (extend-type IPersistentVector
   jdbc/ISQLParameter
@@ -141,26 +141,26 @@
               (str "Expected the database to be PostgreSQL " minimum-version " but it was "
                    (.getDatabaseProductName metadata) " " (.getDatabaseProductVersion metadata))))))
 
-(defn- load-queries [queries-atom]
+(defn- load-queries [*queries]
   ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
-  (let [{queries :queries, resource :resource, old-last-modified :last-modified} @queries-atom
+  (let [{queries :queries, resource :resource, old-last-modified :last-modified} @*queries
         new-last-modified (-> ^URL resource
                               (.openConnection)
                               (.getLastModified))]
     (if (= old-last-modified new-last-modified)
       queries
-      (:queries (reset! queries-atom {:resource resource
-                                      :queries (hugsql/map-of-db-fns resource)
-                                      :last-modified new-last-modified})))))
+      (:queries (reset! *queries {:resource resource
+                                  :queries (hugsql/map-of-db-fns resource)
+                                  :last-modified new-last-modified})))))
 
-(defn- query! [conn queries name params]
-  (let [query-fn (get-in (load-queries queries) [name :fn])]
+(defn- query! [conn *queries name params]
+  (let [query-fn (get-in (load-queries *queries) [name :fn])]
     (assert query-fn (str "Query not found: " name))
     (apply query-fn conn params)))
 
 (defn compile-queries [path]
   (let [resource (io/resource path)
         _ (assert resource (str "Resource not found: " path))
-        queries (atom {:resource resource})]
+        *queries (atom {:resource resource})]
     (fn [conn name & params]
-      (query! conn queries name params))))
+      (query! conn *queries name params))))

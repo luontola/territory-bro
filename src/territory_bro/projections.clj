@@ -13,7 +13,7 @@
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
 
-(mount/defstate cache
+(mount/defstate *cache
   :start (atom {:last-event nil
                 :state nil}))
 
@@ -31,22 +31,22 @@
       cached)))
 
 (defn refresh-now! [conn]
-  (let [cached @cache
+  (let [cached @*cache
         updated (apply-new-events conn cached)]
     (when-not (identical? cached updated)
       ;; with concurrent requests, only one of them will update the cache
-      (when (compare-and-set! cache cached updated)
+      (when (compare-and-set! *cache cached updated)
         (log/info "Updated from revision" (:event/global-revision (:last-event cached))
                   "to" (:event/global-revision (:last-event updated)))))))
 
 (defn cached-state []
-  (:state @cache))
+  (:state @*cache))
 
 (defn current-state
   "Calculates the current state from all events, including uncommitted ones,
    but does not update the cache (it could cause dirty reads to others)."
   [conn]
-  (:state (apply-new-events conn @cache)))
+  (:state (apply-new-events conn @*cache)))
 
 
 (mount/defstate refresher
@@ -72,5 +72,5 @@
 
 
 (comment
-  (count (:state @cache))
+  (count (:state @*cache))
   (refresh-now! db/database))

@@ -20,26 +20,26 @@
 (deftest poller-test
   (testing "runs the task when triggered"
     (let [task-finished (CountDownLatch. 1)
-          task-count (atom 0)
-          task-thread (atom nil)
+          *task-count (atom 0)
+          *task-thread (atom nil)
           p (poller/create (fn []
-                             (swap! task-count inc)
-                             (reset! task-thread (Thread/currentThread))))]
+                             (swap! *task-count inc)
+                             (reset! *task-thread (Thread/currentThread))))]
       (poller/trigger! p)
       (await-latch task-finished)
       (poller/shutdown! p)
 
-      (is (= 1 @task-count) "task count")
-      (is (instance? Thread @task-thread))
-      (is (not= (Thread/currentThread) @task-thread)
+      (is (= 1 @*task-count) "task count")
+      (is (instance? Thread @*task-thread))
+      (is (not= (Thread/currentThread) @*task-thread)
           "runs the task in a background thread")))
 
   (testing "reruns when triggered after task started"
     (let [one-task-started (CountDownLatch. 1)
           two-tasks-started (CountDownLatch. 2)
-          task-count (atom 0)
+          *task-count (atom 0)
           p (poller/create (fn []
-                             (swap! task-count inc)
+                             (swap! *task-count inc)
                              (.countDown one-task-started)
                              (.countDown two-tasks-started)))]
       (poller/trigger! p)
@@ -48,15 +48,15 @@
       (await-latch two-tasks-started)
       (poller/shutdown! p)
 
-      (is (= 2 @task-count) "task count")))
+      (is (= 2 @*task-count) "task count")))
 
   (testing "reruns at most once when triggered after task started many times"
     (let [one-task-started (CountDownLatch. 1)
           many-tasks-triggered (CountDownLatch. 1)
           two-tasks-finished (CountDownLatch. 2)
-          task-count (atom 0)
+          *task-count (atom 0)
           p (poller/create (fn []
-                             (swap! task-count inc)
+                             (swap! *task-count inc)
                              (.countDown one-task-started)
                              (await-latch many-tasks-triggered)
                              (.countDown two-tasks-finished)))]
@@ -70,13 +70,13 @@
       (await-latch two-tasks-finished)
       (poller/shutdown! p)
 
-      (is (= 2 @task-count) "task count")))
+      (is (= 2 @*task-count) "task count")))
 
   (testing "reruns many times when triggered after task finished"
     (let [task-finished (CyclicBarrier. 2)
-          task-count (atom 0)
+          *task-count (atom 0)
           p (poller/create (fn []
-                             (swap! task-count inc)
+                             (swap! *task-count inc)
                              (await-barrier task-finished)))]
       (poller/trigger! p)
       (await-barrier task-finished)
@@ -86,26 +86,26 @@
       (await-barrier task-finished)
       (poller/shutdown! p)
 
-      (is (= 3 @task-count) "task count")))
+      (is (= 3 @*task-count) "task count")))
 
   (testing "runs only a single task at a time"
-    (let [concurrent-tasks (atom 0)
-          max-concurrent-tasks (atom 0)
-          task-count (atom 0)
+    (let [*concurrent-tasks (atom 0)
+          *max-concurrent-tasks (atom 0)
+          *task-count (atom 0)
           timeout (+ 1000 (System/currentTimeMillis))
           p (poller/create (fn []
-                             (swap! concurrent-tasks inc)
-                             (swap! max-concurrent-tasks #(max % @concurrent-tasks))
-                             (swap! task-count inc)
+                             (swap! *concurrent-tasks inc)
+                             (swap! *max-concurrent-tasks #(max % @*concurrent-tasks))
+                             (swap! *task-count inc)
                              (Thread/yield)
-                             (swap! concurrent-tasks dec)))]
-      (while (and (> 10 @task-count)
+                             (swap! *concurrent-tasks dec)))]
+      (while (and (> 10 @*task-count)
                   (> timeout (System/currentTimeMillis)))
         (poller/trigger! p))
       (poller/shutdown! p)
 
-      (is (< 1 @task-count) "task count")
-      (is (= 1 @max-concurrent-tasks) "max concurrent tasks")))
+      (is (< 1 @*task-count) "task count")
+      (is (= 1 @*max-concurrent-tasks) "max concurrent tasks")))
 
   (testing "logs uncaught exceptions"
     (let [appender (doto (ListAppender.)
@@ -124,12 +124,12 @@
         (is (= "dummy" (.getMessage (.getThrowableProxy event)))))))
 
   (testing "await blocks until the current task is finished"
-    (let [task-count (atom 0)
+    (let [*task-count (atom 0)
           p (poller/create (fn []
                              (Thread/yield)
-                             (swap! task-count inc)))]
+                             (swap! *task-count inc)))]
       (poller/trigger! p)
       (poller/await p)
 
-      (is (= 1 @task-count) "task count")
+      (is (= 1 @*task-count) "task count")
       (poller/shutdown! p))))

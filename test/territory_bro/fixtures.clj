@@ -31,7 +31,7 @@
   (mount/start-with-args test-env
                          #'config/env
                          #'db/database
-                         #'projections/cache)
+                         #'projections/*cache)
   ;; cleanup
   (db/with-db [conn {}]
     (delete-schemas-starting-with! conn (:database-schema test-env)))
