@@ -2,24 +2,24 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.permissions)
+(ns territory-bro.permissions
+  (:require [medley.core :refer [dissoc-in]]))
 
-(def ^:private conj-set (fnil conj #{}))
+(defn- path [user-id permission]
+  (concat [::permissions user-id]
+          (rest permission)
+          [(first permission)]))
 
 (defn grant [state user-id permission]
-  (update-in state [::permissions user-id (second permission)] conj-set (first permission)))
-
-(defn- disj-in [m ks to-be-removed]
-  (if (empty? ks)
-    (disj m to-be-removed)
-    (let [k (first ks)
-          v (disj-in (get m k) (rest ks) to-be-removed)]
-      (if (empty? v)
-        (dissoc m k)
-        (assoc m k v)))))
+  (assoc-in state (path user-id permission) true))
 
 (defn revoke [state user-id permission]
-  (disj-in state [::permissions user-id (second permission)] (first permission)))
+  (dissoc-in state (path user-id permission)))
 
 (defn allowed? [state user-id permission]
-  (boolean (get-in state [::permissions user-id (second permission) (first permission)])))
+  (cond
+    (empty? permission) false
+    ;; has exact permission?
+    (get-in state (path user-id permission)) true
+    ;; has broader permission?
+    :else (recur state user-id (drop-last permission))))
