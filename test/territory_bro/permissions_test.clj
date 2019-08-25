@@ -4,7 +4,8 @@
 
 (ns territory-bro.permissions-test
   (:require [clojure.test :refer :all]
-            [territory-bro.permissions :as permissions])
+            [territory-bro.permissions :as permissions]
+            [territory-bro.testutil :refer [re-contains]])
   (:import (java.util UUID)))
 
 (deftest changing-permissions-test
@@ -95,7 +96,11 @@
         (is (= {}
                (-> nil
                    (permissions/grant user-id [:foo cong-id])
-                   (permissions/revoke user-id [:foo cong-id]))))))))
+                   (permissions/revoke user-id [:foo cong-id]))))))
+
+    (testing "error: empty permit"
+      (is (thrown-with-msg? AssertionError (re-contains "{:permission nil}")
+                            (permissions/grant nil user-id []))))))
 
 (deftest checking-permissions-test
   (let [user-id (UUID. 0 1)

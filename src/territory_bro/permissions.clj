@@ -6,6 +6,7 @@
   (:require [medley.core :refer [dissoc-in]]))
 
 (defn- path [user-id [permission & resource-ids]]
+  (assert (keyword? permission) {:permission permission})
   (->> nil
        (cons permission)
        (concat resource-ids)
