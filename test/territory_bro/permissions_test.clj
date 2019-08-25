@@ -48,7 +48,12 @@
                (-> nil
                    (permissions/grant user-id [:foo cong-id])
                    (permissions/grant user-id [:bar cong-id resource-id])
-                   (permissions/grant user-id [:gazonk cong-id]))))))
+                   (permissions/grant user-id [:gazonk cong-id])))))
+
+      (testing "super user"
+        (is (= {::permissions/permissions {user-id {:foo true}}}
+               (-> nil
+                   (permissions/grant user-id [:foo]))))))
 
     (testing "revoking,"
       (testing "some permissions"
@@ -78,6 +83,13 @@
                    (permissions/grant user-id [:foo cong-id resource-id])
                    (permissions/grant user-id [:bar cong-id])
                    (permissions/revoke user-id [:foo cong-id resource-id])))))
+
+      (testing "super user"
+        (is (= {::permissions/permissions {user-id {:bar true}}}
+               (-> nil
+                   (permissions/grant user-id [:foo])
+                   (permissions/grant user-id [:bar])
+                   (permissions/revoke user-id [:foo])))))
 
       (testing "all permits"
         (is (= {}
