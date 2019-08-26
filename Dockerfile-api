@@ -20,6 +20,7 @@ COPY --chown=app env /project/env
 COPY --chown=app resources /project/resources
 COPY --chown=app test /project/test
 COPY --chown=app src /project/src
+COPY --chown=app src-java /project/src-java
 RUN lein uberjar
 
 # ------------------------------------------------------------

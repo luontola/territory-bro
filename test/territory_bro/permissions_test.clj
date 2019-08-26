@@ -6,8 +6,8 @@
   (:require [clojure.test :refer :all]
             [territory-bro.permissions :as permissions]
             [territory-bro.testutil :refer [re-contains]])
-  (:import (clojure.lang ExceptionInfo)
-           (java.util UUID)))
+  (:import (java.util UUID)
+           (territory_bro NoPermitException)))
 
 (deftest changing-permissions-test
   (let [user-id (UUID. 0 1)
@@ -146,5 +146,5 @@
           (is (nil? (permissions/check state user-id [:foo cong-id]))))
 
         (testing "throws when user doesn't have the permit"
-          (is (thrown? ExceptionInfo
+          (is (thrown? NoPermitException
                        (permissions/check state user-id [:bar cong-id]))))))))

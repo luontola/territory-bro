@@ -14,7 +14,8 @@
             [territory-bro.projections :as projections]
             [territory-bro.testutil :as testutil])
   (:import (java.time Instant)
-           (java.util UUID)))
+           (java.util UUID)
+           (territory_bro NoPermitException)))
 
 (use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
 
@@ -187,6 +188,6 @@
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
                                         (is (= [:rename-congregation cong-id] permit))
-                                        (throw (RuntimeException. "dummy")))}]
-        (is (thrown-with-msg? RuntimeException #"dummy"
-                              (handle-command rename-command [created-event] injections)))))))
+                                        (throw (NoPermitException. nil nil)))}]
+        (is (thrown? NoPermitException
+                     (handle-command rename-command [created-event] injections)))))))

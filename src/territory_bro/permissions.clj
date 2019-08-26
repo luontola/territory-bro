@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.permissions
-  (:require [medley.core :refer [dissoc-in]]))
+  (:require [medley.core :refer [dissoc-in]])
+  (:import (territory_bro NoPermitException)))
 
 (defn- path [user-id [permission & resource-ids]]
   (assert (keyword? permission) {:permission permission})
@@ -29,6 +30,4 @@
 
 (defn check [state user-id permit]
   (when-not (allowed? state user-id permit)
-    ;; TODO: custom exception
-    (throw (ex-info "Missing required permit" {:user-id user-id
-                                               :permit permit}))))
+    (throw (NoPermitException. user-id permit))))

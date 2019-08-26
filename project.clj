@@ -45,6 +45,8 @@
   :min-lein-version "2.0.0"
 
   :source-paths ["src"]
+  :java-source-paths ["src-java"]
+  :javac-options ["-source" "8" "-target" "8"]
   :test-paths ["test"]
   :resource-paths ["resources"]
   :target-path "target/%s/"
