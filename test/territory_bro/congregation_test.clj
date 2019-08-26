@@ -144,9 +144,9 @@
     (testing "superadmin can access all congregations"))) ; TODO
 
 
-(defn- handle-command [events injections command]
+(defn- handle-command [command events injections]
   (let [events (events/validate-events events)
-        new-events (congregation/handle-command events injections command)]
+        new-events (congregation/handle-command command events injections)]
     (events/validate-events new-events)))
 
 (deftest rename-congregation-test
@@ -174,26 +174,19 @@
 
     (testing "name changed"
       (is (= [renamed-event]
-             (handle-command [created-event]
-                             injections
-                             rename-command))))
+             (handle-command rename-command [created-event] injections))))
 
     (testing "name not changed"
       (testing "from original"
-        (is (= [] (handle-command [created-event]
-                                  injections
-                                  (assoc rename-command :congregation/name "old name")))))
+        (let [command (assoc rename-command :congregation/name "old name")]
+          (is (= [] (handle-command command [created-event] injections)))))
 
       (testing "from previous rename"
-        (is (= [] (handle-command [created-event renamed-event]
-                                  injections
-                                  rename-command)))))
+        (is (= [] (handle-command rename-command [created-event renamed-event] injections)))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
                                         (is (= [:rename-congregation cong-id] permit))
                                         (throw (RuntimeException. "dummy")))}]
         (is (thrown-with-msg? RuntimeException #"dummy"
-                              (handle-command [created-event]
-                                              injections
-                                              rename-command)))))))
+                              (handle-command rename-command [created-event] injections)))))))

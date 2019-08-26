@@ -112,9 +112,9 @@
       (assoc :congregation/name (:congregation/name event))))
 
 
-(defmulti ^:private command-handler (fn [_congregation _injections command] (:command/type command)))
+(defmulti ^:private command-handler (fn [command _congregation _injections] (:command/type command)))
 
-(defmethod command-handler :congregation.command/rename-congregation [congregation {:keys [check-permit]} command]
+(defmethod command-handler :congregation.command/rename-congregation [command congregation {:keys [check-permit]}]
   (check-permit [:rename-congregation (:congregation/id congregation)])
   (when (not= (:congregation/name congregation)
               (:congregation/name command))
@@ -129,11 +129,11 @@
       (assoc :event/time (:command/time command))
       (assoc :event/user (:command/user command))))
 
-(defn handle-command [events injections command]
+(defn handle-command [command events injections]
   ;; TODO: permission checks
   (let [command (commands/validate-command command)
         congregation (reduce write-model nil events)]
-    (->> (command-handler congregation injections command)
+    (->> (command-handler command congregation injections)
          (map #(enrich-event % command)))))
 
 
