@@ -6,7 +6,8 @@
   (:require [clojure.test :refer :all]
             [territory-bro.permissions :as permissions]
             [territory-bro.testutil :refer [re-contains]])
-  (:import (java.util UUID)))
+  (:import (clojure.lang ExceptionInfo)
+           (java.util UUID)))
 
 (deftest changing-permissions-test
   (let [user-id (UUID. 0 1)
@@ -136,4 +137,14 @@
                       (permissions/allowed? user-id [:foo cong-id]))))
       (is (false? (-> nil
                       (permissions/grant user-id [:foo cong-id resource-id])
-                      (permissions/allowed? user-id [:foo])))))))
+                      (permissions/allowed? user-id [:foo])))))
+
+    (testing "checker"
+      (let [state (-> nil
+                      (permissions/grant user-id [:foo cong-id]))]
+        (testing "is silent when user has the permit"
+          (is (nil? (permissions/check state user-id [:foo cong-id]))))
+
+        (testing "throws when user doesn't have the permit"
+          (is (thrown? ExceptionInfo
+                       (permissions/check state user-id [:bar cong-id]))))))))

@@ -26,3 +26,9 @@
     (get-in state (path user-id permit)) true
     ;; has broader permit?
     :else (recur state user-id (drop-last permit))))
+
+(defn check [state user-id permit]
+  (when-not (allowed? state user-id permit)
+    ;; TODO: custom exception
+    (throw (ex-info "Missing required permit" {:user-id user-id
+                                               :permit permit}))))
