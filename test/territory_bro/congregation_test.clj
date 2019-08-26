@@ -144,14 +144,15 @@
     (testing "superadmin can access all congregations"))) ; TODO
 
 
-(defn- handle-command [events command]
+(defn- handle-command [events injections command]
   (let [events (events/validate-events events)
-        new-events (congregation/handle-command events command)]
+        new-events (congregation/handle-command events injections command)]
     (events/validate-events new-events)))
 
 (deftest rename-congregation-test
   (let [cong-id (UUID. 0 1)
         user-id (UUID. 0 2)
+        injections {:check-permit (fn [_permit])}
         created-event {:event/type :congregation.event/congregation-created
                        :event/version 1
                        :event/time (Instant/ofEpochSecond 1)
@@ -174,13 +175,25 @@
     (testing "name changed"
       (is (= [renamed-event]
              (handle-command [created-event]
+                             injections
                              rename-command))))
 
     (testing "name not changed"
       (testing "from original"
         (is (= [] (handle-command [created-event]
+                                  injections
                                   (assoc rename-command :congregation/name "old name")))))
 
       (testing "from previous rename"
         (is (= [] (handle-command [created-event renamed-event]
-                                  rename-command)))))))
+                                  injections
+                                  rename-command)))))
+
+    (testing "checks permits"
+      (let [injections {:check-permit (fn [permit]
+                                        (is (= [:rename-congregation cong-id] permit))
+                                        (throw (RuntimeException. "dummy")))}]
+        (is (thrown-with-msg? RuntimeException #"dummy"
+                              (handle-command [created-event]
+                                              injections
+                                              rename-command)))))))
