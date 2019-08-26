@@ -224,6 +224,16 @@
                        app)]
       (is (unauthorized? response)))))
 
+(defn revoke-access-from-all! [cong-id]
+  ;; TODO: create an API for changing permissions
+  (db/with-db [conn {}]
+    (doseq [user-id (congregation/get-users (projections/current-state conn) cong-id)]
+      (binding [events/*current-system* "test"]
+        (congregation/revoke-access! conn cong-id user-id))))
+  (projections/refresh-async!)
+  (projections/await-refreshed))
+
+
 (deftest get-congregation-test
   (let [session (login! app)
         response (-> (request :post "/api/congregations")
@@ -256,14 +266,7 @@
         (is (forbidden? response)))) ; same as when ID exists but user has no access
 
     (testing "no access"
-      ;; TODO: create an API for changing permissions
-      (db/with-db [conn {}]
-        (doseq [user-id (congregation/get-users (projections/current-state conn) cong-id)]
-          (binding [events/*current-system* "test"]
-            (congregation/revoke-access! conn cong-id user-id))))
-      (projections/refresh-async!)
-      (projections/await-refreshed)
-
+      (revoke-access-from-all! cong-id)
       (let [response (-> (request :get (str "/api/congregation/" cong-id))
                          (merge session)
                          app)]
@@ -306,3 +309,32 @@
                          app)]
         (is (forbidden? response))
         (is (str/includes? (:body response) "No GIS access"))))))
+
+(deftest rename-congregation-test
+  (let [session (login! app)
+        response (-> (request :post "/api/congregations")
+                     (json-body {:name "Old Name"})
+                     (merge session)
+                     app
+                     (assert-response ok?))
+        cong-id (UUID/fromString (:id (:body response)))]
+
+    (testing "rename congregation"
+      (let [response (-> (request :post (str "/api/congregation/" cong-id "/rename"))
+                         (json-body {:name "New Name"})
+                         (merge session)
+                         app)]
+        (is (ok? response)))
+      (let [response (-> (request :get (str "/api/congregation/" cong-id))
+                         (merge session)
+                         app)]
+        (is (ok? response))
+        (is (= "New Name" (:name (:body response))))))
+
+    (testing "no access"
+      (revoke-access-from-all! cong-id)
+      (let [response (-> (request :post (str "/api/congregation/" cong-id "/rename"))
+                         (json-body {:name "should not be allowed"})
+                         (merge session)
+                         app)]
+        (is (forbidden? response))))))

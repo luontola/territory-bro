@@ -11,6 +11,7 @@
             [territory-bro.event-store :as event-store]
             [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
+            [territory-bro.permissions :as permissions]
             [territory-bro.projections :as projections]
             [territory-bro.testutil :as testutil])
   (:import (java.time Instant)
@@ -45,7 +46,9 @@
                                    :permission/id :view-congregation})
               expected (deep-merge expected
                                    {::congregation/congregations
-                                    {cong-id {:congregation/user-permissions {user-id #{:view-congregation}}}}})]
+                                    {cong-id {:congregation/user-permissions {user-id #{:view-congregation}}}}
+                                    ::permissions/permissions
+                                    {user-id {cong-id {:view-congregation true}}}})]
           (is (= expected (apply-events events)))
 
           (testing "> permissing revoked"
@@ -54,9 +57,10 @@
                                        :congregation/id cong-id
                                        :user/id user-id
                                        :permission/id :view-congregation})
-                  expected (deep-merge expected
-                                       {::congregation/congregations
-                                        {cong-id {:congregation/user-permissions {user-id #{}}}}})]
+                  expected (-> expected
+                               (deep-merge {::congregation/congregations
+                                            {cong-id {:congregation/user-permissions {user-id #{}}}}})
+                               (dissoc ::permissions/permissions))]
               (is (= expected (apply-events events)))))))
 
       (testing "> congregation renamed"
@@ -187,7 +191,8 @@
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        (is (= [:rename-congregation cong-id] permit))
+                                        ;; TODO: grant users :configure-congregation and use it here
+                                        (is (= [:view-congregation cong-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
                      (handle-command rename-command [created-event] injections)))))))

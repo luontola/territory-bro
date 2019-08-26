@@ -25,7 +25,8 @@
             [territory-bro.user :as user]
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
-           (java.util UUID)))
+           (java.util UUID)
+           (territory_bro NoPermitException)))
 
 (defn require-logged-in! []
   (if-not auth/*user*
@@ -130,6 +131,28 @@
                              :subregions (region/get-subregions conn)
                              :card-minimap-viewports (region/get-card-minimap-viewports conn)}))))))
 
+(defn- api-command! [conn command]
+  (let [command (assoc command
+                       :command/time ((:now config/env))
+                       :command/user (current-user-id conn))]
+    (try
+      (congregation/command! conn (projections/cached-state)
+                             command)
+      (ok {:message "OK"})
+      (catch NoPermitException e
+        (log/warn e "Command denied:" command)
+        (forbidden {:message "Forbidden"})))))
+
+(defn rename-congregation [request]
+  (auth/with-authenticated-user request
+    (require-logged-in!)
+    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+          name (get-in request [:params :name])]
+      (db/with-db [conn {}]
+        (api-command! conn {:command/type :congregation.command/rename-congregation
+                            :congregation/id cong-id
+                            :congregation/name name})))))
+
 (defn download-qgis-project [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -160,6 +183,7 @@
   (POST "/api/congregations" request (create-congregation request))
   (GET "/api/congregations" request (list-congregations request))
   (GET "/api/congregation/:congregation" request (get-congregation request))
+  (POST "/api/congregation/:congregation/rename" request (rename-congregation request))
   (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request)))
 
 (comment

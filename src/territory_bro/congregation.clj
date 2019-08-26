@@ -9,7 +9,8 @@
             [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
-            [territory-bro.events :as events])
+            [territory-bro.events :as events]
+            [territory-bro.permissions :as permissions])
   (:import (java.util UUID)))
 
 ;;; Read Model
@@ -46,8 +47,29 @@
                  disj
                  (:permission/id event))))
 
+
+(defmulti ^:private update-permissions (fn [_state event] (:event/type event)))
+
+(defmethod update-permissions :default [state _event]
+  state)
+
+(defmethod update-permissions :congregation.event/permission-granted
+  [state event]
+  (-> state
+      (permissions/grant (:user/id event) [(:permission/id event)
+                                           (:congregation/id event)])))
+
+(defmethod update-permissions :congregation.event/permission-revoked
+  [state event]
+  (-> state
+      (permissions/revoke (:user/id event) [(:permission/id event)
+                                            (:congregation/id event)])))
+
+
 (defn congregations-view [state event]
-  (update-in state [::congregations (:congregation/id event)] update-congregation event))
+  (-> state
+      (update-in [::congregations (:congregation/id event)] update-congregation event)
+      (update-permissions event)))
 
 (defn get-unrestricted-congregations [state]
   (vals (::congregations state)))
@@ -115,7 +137,8 @@
 (defmulti ^:private command-handler (fn [command _congregation _injections] (:command/type command)))
 
 (defmethod command-handler :congregation.command/rename-congregation [command congregation {:keys [check-permit]}]
-  (check-permit [:rename-congregation (:congregation/id congregation)])
+  ;; TODO: grant users :configure-congregation and use it here
+  (check-permit [:view-congregation (:congregation/id congregation)])
   (when (not= (:congregation/name congregation)
               (:congregation/name command))
     [{:event/type :congregation.event/congregation-renamed
@@ -130,11 +153,22 @@
       (assoc :event/user (:command/user command))))
 
 (defn handle-command [command events injections]
-  ;; TODO: permission checks
   (let [command (commands/validate-command command)
-        congregation (reduce write-model nil events)]
+        congregation (reduce write-model nil events)
+        injections (assoc injections
+                          :check-permit (or (:check-permit injections)
+                                            (fn [permit]
+                                              (permissions/check (:state injections)
+                                                                 (:command/user command)
+                                                                 permit))))]
     (->> (command-handler command congregation injections)
          (map #(enrich-event % command)))))
+
+(defn command! [conn state command]
+  (let [stream-id (:congregation/id command)
+        old-events (event-store/read-stream conn stream-id)
+        new-events (handle-command command old-events {:state state})]
+    (event-store/save! conn stream-id (count old-events) new-events)))
 
 
 ;;;; User access
