@@ -5,7 +5,7 @@
 import React from "react";
 import {getCongregationById, renameCongregation} from "../api";
 import {Link} from "@reach/router";
-import {Field, Form, Formik} from "formik";
+import {ErrorMessage, Field, Form, Formik} from "formik";
 
 const SettingsPage = ({congregationId, navigate}) => {
   const congregation = getCongregationById(congregationId);
@@ -14,11 +14,19 @@ const SettingsPage = ({congregationId, navigate}) => {
       initialValues={{
         name: congregation.name,
       }}
+      validate={values => {
+        let errors = {};
+        if (!values.name) {
+          errors.name = 'Name is required.';
+        }
+        return errors;
+      }}
       onSubmit={async (values, {setSubmitting}) => {
         try {
           // TODO: show success/failure message
-          // TODO: validate name
-          await renameCongregation(congregationId, values.name);
+          if (congregation.name !== values.name) {
+            await renameCongregation(congregation.id, values.name);
+          }
           navigate('..');
         } finally {
           setSubmitting(false);
@@ -32,6 +40,7 @@ const SettingsPage = ({congregationId, navigate}) => {
             <div className="pure-control-group">
               <label htmlFor="name">Congregation Name</label>
               <Field name="name" id="name" type="text"/>
+              <ErrorMessage name="name" component="span" className="pure-form-message-inline"/>
             </div>
 
             <div className="pure-controls">
