@@ -49,6 +49,8 @@ const SettingsPage = ({congregationId, navigate}) => {
                       className="pure-button pure-button-primary">
                 Save
               </button>
+              {' '}
+              <Link to=".." className="pure-button">Cancel</Link>
             </div>
           </fieldset>
         </Form>
