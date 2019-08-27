@@ -6,13 +6,17 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://territorybro.com" # the base hostname & protocol for your site
 
 navigation:
-  - title: Introduction
+  - title: 👋 Introduction
     url: /
-  - title: User Guide
+  - title: 🚀 Get Started
+    url: /guide/#getting-started
+  - title: 📒 User Guide
     url: /guide/
-  - title: Updates
+  - title: 👤 Login
+    url: https://beta.territorybro.com
+  - title: 📰 News
     url: https://groups.google.com/forum/#!forum/territory-bro-announcements
-  - title: GitHub Project
+  - title: 🧬 Source Code
     url: https://github.com/luontola/territory-bro
 
 # Build settings
