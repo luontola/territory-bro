@@ -12,7 +12,7 @@ function handleClick() {
 }
 
 const RegisterButton = () => (
-  <button type="button" onClick={handleClick}>Register</button>
+  <button type="button" className="pure-button" onClick={handleClick}>Register</button>
 );
 
 export default RegisterButton;

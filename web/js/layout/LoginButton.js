@@ -12,7 +12,7 @@ let LoginButton = () => {
   const settings = getSettings();
   const {domain, clientId} = settings.auth0;
   return (
-    <button type="button" onClick={() => {
+    <button type="button" className="pure-button" onClick={() => {
       const auth = buildAuthenticator(domain, clientId);
       auth.login();
     }}>Login</button>
