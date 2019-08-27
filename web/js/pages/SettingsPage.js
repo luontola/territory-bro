@@ -12,19 +12,19 @@ const SettingsPage = ({congregationId, navigate}) => {
   return (
     <Formik
       initialValues={{
-        name: congregation.name,
+        congregationName: congregation.name,
       }}
       validate={values => {
         let errors = {};
-        if (!values.name) {
-          errors.name = 'Name is required.';
+        if (!values.congregationName) {
+          errors.congregationName = 'Congregation name is required.';
         }
         return errors;
       }}
       onSubmit={async (values, {setSubmitting}) => {
         try {
-          if (congregation.name !== values.name) {
-            await renameCongregation(congregation.id, values.name);
+          if (congregation.name !== values.congregationName) {
+            await renameCongregation(congregation.id, values.congregationName);
           }
           navigate('..');
         } catch (e) {
@@ -40,9 +40,9 @@ const SettingsPage = ({congregationId, navigate}) => {
         <Form className="pure-form pure-form-aligned">
           <fieldset>
             <div className="pure-control-group">
-              <label htmlFor="name">Congregation Name</label>
-              <Field name="name" id="name" type="text"/>
-              <ErrorMessage name="name" component="span" className="pure-form-message-inline"/>
+              <label htmlFor="congregationName">Congregation Name</label>
+              <Field name="congregationName" id="congregationName" type="text"/>
+              <ErrorMessage name="congregationName" component="span" className="pure-form-message-inline"/>
             </div>
 
             <div className="pure-controls">
