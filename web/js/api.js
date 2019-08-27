@@ -173,6 +173,11 @@ export async function createCongregation(name: string) {
   return response.data.id;
 }
 
+export async function renameCongregation(congregationId: string, name: string) {
+  await api.post(`/api/congregation/${congregationId}/rename`, {name});
+  refreshCongregations();
+}
+
 
 // ====== Territories ======
 
