@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: com.auth0/jwks-rsa:0.8.3">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/auth0/jwks-rsa/0.8.3/jwks-rsa-0.8.3.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

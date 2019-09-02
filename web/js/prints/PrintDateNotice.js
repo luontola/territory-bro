@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Esko Luontola
+// Copyright © 2015-2019 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -13,7 +13,7 @@ type Props = {
 };
 
 const PrintDateNotice = ({children}: Props) => {
-  const today = formatDate(new Date(), 'YYYY-MM-DD');
+  const today = formatDate(new Date(), 'yyyy-MM-dd');
   return (
     <div className={styles.root}>
       <div className={styles.notice}>

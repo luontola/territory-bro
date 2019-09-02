@@ -29,8 +29,8 @@
     <orderEntry type="library" name="Leiningen: clojure-complete:0.2.5" level="project" />
     <orderEntry type="library" name="Leiningen: clout:2.2.1" level="project" />
     <orderEntry type="library" name="Leiningen: com.attendify/schema-refined:0.3.0-alpha4" level="project" />
-    <orderEntry type="library" name="Leiningen: com.auth0/java-jwt:3.8.1" level="project" />
-    <orderEntry type="library" name="Leiningen: com.auth0/jwks-rsa:0.8.2" level="project" />
+    <orderEntry type="library" name="Leiningen: com.auth0/java-jwt:3.8.2" level="project" />
+    <orderEntry type="library" name="Leiningen: com.auth0/jwks-rsa:0.8.3" level="project" />
     <orderEntry type="library" name="Leiningen: com.carouselapps/to-jdbc-uri:0.5.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.cognitect/transit-clj:0.8.269" level="project" />
     <orderEntry type="library" name="Leiningen: com.cognitect/transit-java:0.8.276" level="project" />
@@ -74,8 +74,8 @@
     <orderEntry type="library" name="Leiningen: liberator:0.15.3" level="project" />
     <orderEntry type="library" name="Leiningen: luminus-immutant:0.2.5" level="project" />
     <orderEntry type="library" name="Leiningen: luminus-nrepl:0.1.6" level="project" />
-    <orderEntry type="library" name="Leiningen: medley:1.1.0" level="project" />
-    <orderEntry type="library" name="Leiningen: metosin/jsonista:0.2.3" level="project" />
+    <orderEntry type="library" name="Leiningen: medley:1.2.0" level="project" />
+    <orderEntry type="library" name="Leiningen: metosin/jsonista:0.2.4" level="project" />
     <orderEntry type="library" name="Leiningen: metosin/ring-http-response:0.9.1" level="project" />
     <orderEntry type="library" name="Leiningen: metosin/ring-middleware-format:0.6.0" level="project" />
     <orderEntry type="library" name="Leiningen: metosin/schema-tools:0.12.0" level="project" />
@@ -94,9 +94,9 @@
     <orderEntry type="library" name="Leiningen: org.clojure/java.classpath:0.2.3" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/java.jdbc:0.7.7" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/spec.alpha:0.2.176" level="project" />
-    <orderEntry type="library" name="Leiningen: org.clojure/test.check:0.9.0" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/test.check:0.10.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/tools.cli:0.4.2" level="project" />
-    <orderEntry type="library" name="Leiningen: org.clojure/tools.logging:0.4.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/tools.logging:0.5.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/tools.macro:0.1.5" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/tools.namespace:0.2.11" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/tools.reader:1.3.2" level="project" />
@@ -107,7 +107,7 @@
     <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-io:7.6.13.v20130916" level="project" />
     <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-server:7.6.13.v20130916" level="project" />
     <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-util:7.6.13.v20130916" level="project" />
-    <orderEntry type="library" name="Leiningen: org.flywaydb/flyway-core:6.0.0-beta" level="project" />
+    <orderEntry type="library" name="Leiningen: org.flywaydb/flyway-core:6.0.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.immutant/core:2.1.10" level="project" />
     <orderEntry type="library" name="Leiningen: org.immutant/web:2.1.10" level="project" />
     <orderEntry type="library" name="Leiningen: org.javassist/javassist:3.18.1-GA" level="project" />
@@ -130,7 +130,7 @@
     <orderEntry type="library" name="Leiningen: pjstadig/humane-test-output:0.9.0" level="project" />
     <orderEntry type="library" name="Leiningen: potemkin:0.4.5" level="project" />
     <orderEntry type="library" name="Leiningen: prismatic/schema-generators:0.1.3" level="project" />
-    <orderEntry type="library" name="Leiningen: prismatic/schema:1.1.11" level="project" />
+    <orderEntry type="library" name="Leiningen: prismatic/schema:1.1.12" level="project" />
     <orderEntry type="library" name="Leiningen: riddley:0.1.12" level="project" />
     <orderEntry type="library" name="Leiningen: ring-logger:1.0.1" level="project" />
     <orderEntry type="library" name="Leiningen: ring/ring-anti-forgery:1.3.0" level="project" />
