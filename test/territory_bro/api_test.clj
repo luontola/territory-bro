@@ -229,7 +229,8 @@
   (db/with-db [conn {}]
     (doseq [user-id (congregation/get-users (projections/current-state conn) cong-id)]
       (binding [events/*current-system* "test"]
-        (congregation/revoke-access! conn cong-id user-id))))
+        (congregation/revoke! conn cong-id user-id :view-congregation)
+        (congregation/revoke! conn cong-id user-id :configure-congregation))))
   (projections/refresh-async!)
   (projections/await-refreshed))
 

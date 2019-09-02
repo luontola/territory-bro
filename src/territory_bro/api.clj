@@ -94,7 +94,8 @@
         (let [user-id (current-user-id conn)]
           (binding [events/*current-user* user-id]
             (let [cong-id (congregation/create-congregation! conn name)]
-              (congregation/grant-access! conn cong-id user-id)
+              (congregation/grant! conn cong-id user-id :view-congregation)
+              (congregation/grant! conn cong-id user-id :configure-congregation)
               (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)
               (ok {:id cong-id}))))))))
 
@@ -202,5 +203,6 @@
     (let [user-id (UUID/fromString "")
           cong-id (UUID/fromString "")]
       (binding [events/*current-system* "admin"]
-        (congregation/grant-access! conn cong-id user-id)
+        (congregation/grant! conn cong-id user-id :view-congregation)
+        (congregation/grant! conn cong-id user-id :configure-congregation)
         (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)))))
