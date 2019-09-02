@@ -18,6 +18,7 @@
             [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
+            [territory-bro.permissions :as permissions]
             [territory-bro.projections :as projections]
             [territory-bro.qgis :as qgis]
             [territory-bro.region :as region]
@@ -120,12 +121,18 @@
     (require-logged-in!)
     (db/with-db [conn {}]
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-            congregation (congregation/get-my-congregation (projections/cached-state) cong-id (current-user-id conn))]
+            user-id (current-user-id conn)
+            state (projections/cached-state)
+            congregation (congregation/get-my-congregation state cong-id user-id)]
         (when-not congregation
           (forbidden! "No congregation access"))
         (db/use-tenant-schema conn (:congregation/schema-name congregation))
         (ok (format-for-api {:id (:congregation/id congregation)
                              :name (:congregation/name congregation)
+                             :permissions (->> (permissions/list-permissions state user-id [cong-id])
+                                               (map (fn [permission]
+                                                      [permission true]))
+                                               (into {}))
                              :territories (territory/get-territories conn)
                              :congregation-boundaries (region/get-congregation-boundaries conn)
                              :subregions (region/get-subregions conn)

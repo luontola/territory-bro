@@ -79,6 +79,7 @@ export async function logout() {
 export type Congregation = {
   id: string,
   name: string,
+  permissions: { [permission: string]: boolean },
   location: string,
   congregationBoundaries: Array<Boundary>,
   territories: Array<Territory>,
