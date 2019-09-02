@@ -15,7 +15,9 @@ const CongregationPage = ({congregationId}) => {
       {congregation.permissions.gisAccess &&
       <p><a href={`/api/congregation/${congregationId}/qgis-project`}>Download QGIS project</a></p>
       }
+      {congregation.permissions.configureCongregation &&
       <p><Link to="settings">Settings</Link></p>
+      }
     </>
   );
 };

@@ -191,8 +191,7 @@
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        ;; TODO: grant users :configure-congregation and use it here
-                                        (is (= [:view-congregation cong-id] permit))
+                                        (is (= [:configure-congregation cong-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
                      (handle-command rename-command [created-event] injections)))))))

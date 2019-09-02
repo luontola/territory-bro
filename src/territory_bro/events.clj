@@ -72,6 +72,7 @@
 
 (s/defschema PermissionId
   (s/enum :view-congregation
+          :configure-congregation
           :gis-access))
 (s/defschema PermissionGranted
   (assoc EventBase
