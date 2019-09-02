@@ -23,9 +23,7 @@ const SettingsPage = ({congregationId, navigate}) => {
       }}
       onSubmit={async (values, {setSubmitting}) => {
         try {
-          if (congregation.name !== values.congregationName) {
-            await renameCongregation(congregation.id, values.congregationName);
-          }
+          await renameCongregation(congregation.id, values.congregationName);
           navigate('..');
         } catch (e) {
           console.error('Form submit failed:', e);
