@@ -205,4 +205,18 @@
       (binding [events/*current-system* "admin"]
         (congregation/grant! conn cong-id user-id :view-congregation)
         (congregation/grant! conn cong-id user-id :configure-congregation)
-        (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)))))
+        (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id))))
+
+  (db/with-db [conn {}]
+    (binding [events/*current-system* "admin"]
+      (doseq [{:keys [cong-id user-id perms]}
+              (->> (::congregation/congregations (projections/cached-state))
+                   (mapcat (fn [[cong-id cong]]
+                             (map (fn [[user-id perms]]
+                                    {:cong-id cong-id
+                                     :user-id user-id
+                                     :perms perms})
+                                  (:congregation/user-permissions cong)))))]
+        (when (and (:view-congregation perms)
+                   (not (:configure-congregation perms)))
+          (congregation/grant! conn cong-id user-id :configure-congregation))))))
