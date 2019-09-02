@@ -31,3 +31,11 @@
 (defn check [state user-id permit]
   (when-not (allowed? state user-id permit)
     (throw (NoPermitException. user-id permit))))
+
+(defn list-permissions [state user-id resource-ids]
+  (let [parent-path (drop-last (path user-id (cons :dummy resource-ids)))
+        permision-map (get-in state parent-path)
+        permissions (set (filter keyword? (keys permision-map)))]
+    (if (empty? resource-ids)
+      permissions
+      (into permissions (list-permissions state user-id (drop-last resource-ids))))))

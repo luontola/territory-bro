@@ -148,3 +148,31 @@
         (testing "throws when user doesn't have the permit"
           (is (thrown? NoPermitException
                        (permissions/check state user-id [:bar cong-id]))))))))
+
+(deftest listing-permissions-test
+  (let [user-id (UUID. 0 1)
+        user-id2 (UUID. 0 2)
+        cong-id (UUID. 0 10)
+        cong-id2 (UUID. 0 20)
+        resource-id (UUID. 0 100)]
+
+    (let [state (-> nil
+                    (permissions/grant user-id [:foo cong-id])
+                    (permissions/grant user-id [:bar cong-id])
+                    (permissions/grant user-id [:gazonk cong-id resource-id]))]
+      (testing "congregation-level permissions"
+        (is (= #{:foo :bar} (permissions/list-permissions state user-id [cong-id]))))
+
+      (testing "resource-level permissions"
+        (is (= #{:foo :bar :gazonk} (permissions/list-permissions state user-id [cong-id resource-id]))))
+
+      (testing "different congregation"
+        (is (= #{} (permissions/list-permissions state user-id [cong-id2]))))
+
+      (testing "different user"
+        (is (= #{} (permissions/list-permissions state user-id2 [cong-id]))))
+
+      (testing "super user"
+        (let [state (permissions/grant state user-id [:admin])]
+          (is (= #{:admin} (permissions/list-permissions state user-id [])))
+          (is (= #{:foo :bar :admin} (permissions/list-permissions state user-id [cong-id]))))))))
