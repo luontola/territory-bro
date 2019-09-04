@@ -55,8 +55,38 @@
   [congregation event]
   (update-gis-user congregation event :absent))
 
-(defn gis-users-view [congregations event]
-  (update-in congregations [::congregations (:congregation/id event)] update-congregation event))
+
+(defn- need-to-create? [state user-id cong-id]
+  (let [user (get-in state [::congregations cong-id :congregation/users user-id])]
+    (and (:user/has-gis-access? user)
+         (not (:gis-user/password user)))))
+
+(defn- need-to-delete? [state user-id cong-id]
+  (let [user (get-in state [::congregations cong-id :congregation/users user-id])]
+    (and (not (:user/has-gis-access? user))
+         (:gis-user/password user))))
+
+(defn- calculate-needed-changes [state event]
+  (let [user-id (:user/id event)
+        cong-id (:congregation/id event)
+        account {:user/id user-id :congregation/id cong-id}]
+    (-> state
+        (update ::need-to-create
+                (fn [needs]
+                  (set (if (need-to-create? state user-id cong-id)
+                         (conj needs account)
+                         (disj needs account)))))
+        (update ::need-to-delete
+                (fn [needs]
+                  (set (if (need-to-delete? state user-id cong-id)
+                         (conj needs account)
+                         (disj needs account))))))))
+
+
+(defn gis-users-view [state event]
+  (-> state
+      (update-in [::congregations (:congregation/id event)] update-congregation event)
+      (calculate-needed-changes event)))
 
 (defn get-gis-users [state cong-id] ; TODO: remove me? only used in tests
   (->> (vals (get-in state [::congregations cong-id :congregation/users]))
@@ -69,20 +99,10 @@
       user)))
 
 (defn gis-users-to-create [state]
-  (set (for [[cong-id cong] (::congregations state)
-             [user-id user] (:congregation/users cong)
-             :when (and (:user/has-gis-access? user)
-                        (not (:gis-user/password user)))]
-         {:congregation/id cong-id
-          :user/id user-id})))
+  (set (::need-to-create state)))
 
 (defn gis-users-to-delete [state]
-  (set (for [[cong-id cong] (::congregations state)
-             [user-id user] (:congregation/users cong)
-             :when (and (not (:user/has-gis-access? user))
-                        (:gis-user/password user))]
-         {:congregation/id cong-id
-          :user/id user-id})))
+  (set (::need-to-delete state)))
 
 (defn generate-password [length]
   (let [bytes (byte-array length)]

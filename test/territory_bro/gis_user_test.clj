@@ -38,7 +38,9 @@
                    :congregation/schema-name "cong1_schema"}]
           expected {::gis-user/congregations
                     {cong-id {:congregation/id cong-id
-                              :congregation/schema-name "cong1_schema"}}}]
+                              :congregation/schema-name "cong1_schema"}}
+                    ::gis-user/need-to-create #{}
+                    ::gis-user/need-to-delete #{}}]
       (is (= expected (apply-events events)))
 
       (testing "> GIS access granted"
@@ -50,27 +52,60 @@
               expected (deep-merge expected
                                    {::gis-user/congregations
                                     {cong-id {:congregation/users {user-id {:user/id user-id
-                                                                            :user/has-gis-access? true}}}}})]
+                                                                            :user/has-gis-access? true}}}}
+                                    ::gis-user/need-to-create #{{:congregation/id cong-id
+                                                                 :user/id user-id}}})]
           (is (= expected (apply-events events)))
 
-          (testing "> GIS access revoked"
-            (let [events (conj events {:event/type :congregation.event/permission-revoked
+          (testing "> GIS user created"
+            (let [events (conj events {:event/type :congregation.event/gis-user-created
                                        :event/version 1
                                        :congregation/id cong-id
                                        :user/id user-id
-                                       :permission/id :gis-access})
+                                       :gis-user/username "username123"
+                                       :gis-user/password "password123"})
                   expected (deep-merge expected
                                        {::gis-user/congregations
-                                        {cong-id {:congregation/users {user-id {:user/has-gis-access? false}}}}})]
-              (is (= expected (apply-events events)))))
+                                        {cong-id {:congregation/users {user-id {:user/id user-id
+                                                                                :gis-user/desired-state :present
+                                                                                :gis-user/username "username123"
+                                                                                :gis-user/password "password123"}}}}
+                                        ::gis-user/need-to-create #{}})]
+              (is (= expected (apply-events events)))
 
-          (testing "> unrelated permission revoked"
-            (let [events (conj events {:event/type :congregation.event/permission-revoked
-                                       :event/version 1
-                                       :congregation/id cong-id
-                                       :user/id user-id
-                                       :permission/id :view-congregation})]
-              (is (= expected (apply-events events)) "should ignore the event")))))
+              (testing "> GIS access revoked"
+                (let [events (conj events {:event/type :congregation.event/permission-revoked
+                                           :event/version 1
+                                           :congregation/id cong-id
+                                           :user/id user-id
+                                           :permission/id :gis-access})
+                      expected (deep-merge expected
+                                           {::gis-user/congregations
+                                            {cong-id {:congregation/users {user-id {:user/has-gis-access? false}}}}
+                                            ::gis-user/need-to-delete #{{:congregation/id cong-id
+                                                                         :user/id user-id}}})]
+                  (is (= expected (apply-events events)))
+
+                  (testing "> GIS user deleted"
+                    (let [events (conj events {:event/type :congregation.event/gis-user-deleted
+                                               :event/version 1
+                                               :congregation/id cong-id
+                                               :user/id user-id
+                                               :gis-user/username "username123"})
+                          expected (deep-merge expected
+                                               {::gis-user/congregations
+                                                {cong-id {:congregation/users {user-id {:gis-user/desired-state :absent
+                                                                                        :gis-user/password nil}}}}
+                                                ::gis-user/need-to-delete #{}})]
+                      (is (= expected (apply-events events)))))))
+
+              (testing "> unrelated permission revoked"
+                (let [events (conj events {:event/type :congregation.event/permission-revoked
+                                           :event/version 1
+                                           :congregation/id cong-id
+                                           :user/id user-id
+                                           :permission/id :view-congregation})]
+                  (is (= expected (apply-events events)) "should ignore the event")))))))
 
       (testing "> unrelated permission granted"
         (let [events (conj events {:event/type :congregation.event/permission-granted
@@ -78,34 +113,7 @@
                                    :congregation/id cong-id
                                    :user/id user-id
                                    :permission/id :view-congregation})]
-          (is (= expected (apply-events events)) "should ignore the event")))
-
-      (testing "> GIS user created"
-        (let [events (conj events {:event/type :congregation.event/gis-user-created
-                                   :event/version 1
-                                   :congregation/id cong-id
-                                   :user/id user-id
-                                   :gis-user/username "username123"
-                                   :gis-user/password "password123"})
-              expected (deep-merge expected
-                                   {::gis-user/congregations
-                                    {cong-id {:congregation/users {user-id {:user/id user-id
-                                                                            :gis-user/desired-state :present
-                                                                            :gis-user/username "username123"
-                                                                            :gis-user/password "password123"}}}}})]
-          (is (= expected (apply-events events)))
-
-          (testing "> GIS user deleted"
-            (let [events (conj events {:event/type :congregation.event/gis-user-deleted
-                                       :event/version 1
-                                       :congregation/id cong-id
-                                       :user/id user-id
-                                       :gis-user/username "username123"})
-                  expected (deep-merge expected
-                                       {::gis-user/congregations
-                                        {cong-id {:congregation/users {user-id {:gis-user/desired-state :absent
-                                                                                :gis-user/password nil}}}}})]
-              (is (= expected (apply-events events))))))))))
+          (is (= expected (apply-events events)) "should ignore the event"))))))
 
 (deftest gis-users-to-update-test
   (let [cong-id (UUID. 0 1)
