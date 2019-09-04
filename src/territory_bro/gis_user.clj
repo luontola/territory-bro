@@ -68,6 +68,22 @@
     (when (= :present (:gis-user/desired-state user))
       user)))
 
+(defn gis-users-to-create [state]
+  (set (for [[cong-id cong] (::congregations state)
+             [user-id user] (:congregation/users cong)
+             :when (and (:user/has-gis-access? user)
+                        (not (:gis-user/password user)))]
+         {:congregation/id cong-id
+          :user/id user-id})))
+
+(defn gis-users-to-delete [state]
+  (set (for [[cong-id cong] (::congregations state)
+             [user-id user] (:congregation/users cong)
+             :when (and (not (:user/has-gis-access? user))
+                        (:gis-user/password user))]
+         {:congregation/id cong-id
+          :user/id user-id})))
+
 (defn generate-password [length]
   (let [bytes (byte-array length)]
     (-> (SecureRandom/getInstanceStrong)
@@ -119,7 +135,6 @@
     (jdbc/execute! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " role)]))
   (jdbc/execute! conn [(str "DROP ROLE " role)]))
 
-(declare current-state)
 (defn delete-gis-user! [conn state cong-id user-id]
   ;; TODO: refactor to commands and process managers
   (let [username (:gis-user/username (get-gis-user state cong-id user-id))

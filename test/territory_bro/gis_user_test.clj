@@ -107,6 +107,59 @@
                                                                                 :gis-user/password nil}}}}})]
               (is (= expected (apply-events events))))))))))
 
+(deftest gis-users-to-update-test
+  (let [cong-id (UUID. 0 1)
+        user-id (UUID. 0 2)]
+
+    (testing "empty state"
+      (is (= #{} (gis-user/gis-users-to-create nil)) "to create")
+      (is (= #{} (gis-user/gis-users-to-delete nil))) "to delete")
+
+    (testing "GIS access granted"
+      (let [events [{:event/type :congregation.event/permission-granted
+                     :event/version 1
+                     :congregation/id cong-id
+                     :user/id user-id
+                     :permission/id :gis-access}]
+            state (apply-events events)]
+        (is (= #{{:congregation/id cong-id
+                  :user/id user-id}}
+               (gis-user/gis-users-to-create state)) "to create")
+        (is (= #{} (gis-user/gis-users-to-delete state)) "to delete")
+
+        (testing "> GIS user created"
+          (let [events (conj events {:event/type :congregation.event/gis-user-created
+                                     :event/version 1
+                                     :congregation/id cong-id
+                                     :user/id user-id
+                                     :gis-user/username "username123"
+                                     :gis-user/password "password123"})
+                state (apply-events events)]
+            (is (= #{} (gis-user/gis-users-to-create state)) "to create")
+            (is (= #{} (gis-user/gis-users-to-delete state)) "to delete")
+
+            (testing "> GIS access revoked"
+              (let [events (conj events {:event/type :congregation.event/permission-revoked
+                                         :event/version 1
+                                         :congregation/id cong-id
+                                         :user/id user-id
+                                         :permission/id :gis-access})
+                    state (apply-events events)]
+                (is (= #{} (gis-user/gis-users-to-create state)) "to create")
+                (is (= #{{:congregation/id cong-id
+                          :user/id user-id}}
+                       (gis-user/gis-users-to-delete state)) "to delete")
+
+                (testing "> GIS user deleted"
+                  (let [events (conj events {:event/type :congregation.event/gis-user-deleted
+                                             :event/version 1
+                                             :congregation/id cong-id
+                                             :user/id user-id
+                                             :gis-user/username "username123"})
+                        state (apply-events events)]
+                    (is (= #{} (gis-user/gis-users-to-create state)) "to create")
+                    (is (= #{} (gis-user/gis-users-to-delete state)) "to delete")))))))))))
+
 (deftest gis-users-test
   (db/with-db [conn {}]
     (jdbc/db-set-rollback-only! conn)
