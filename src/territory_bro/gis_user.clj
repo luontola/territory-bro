@@ -98,12 +98,6 @@
     (when (= :present (:gis-user/desired-state user))
       user)))
 
-(defn gis-users-to-create [state]
-  (set (::need-to-create state)))
-
-(defn gis-users-to-delete [state]
-  (set (::need-to-delete state)))
-
 (defn generate-password [length]
   (let [bytes (byte-array length)]
     (-> (SecureRandom/getInstanceStrong)
