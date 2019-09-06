@@ -5,10 +5,12 @@
 (ns territory-bro.gis-user
   (:require [clojure.java.jdbc :as jdbc]
             [territory-bro.congregation :as congregation]
+            [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
             [territory-bro.events :as events])
   (:import (java.security SecureRandom)
-           (java.util Base64)))
+           (java.util Base64)
+           (org.postgresql.util PSQLException)))
 
 (defmulti ^:private update-congregation (fn [_congregation event] (:event/type event)))
 
@@ -111,6 +113,28 @@
       (.replace "-" "")
       (.substring 0 16)))
 
+(defn ensure-present! [conn {:keys [username password schema]}]
+  (assert username)
+  (assert password)
+  (assert schema)
+  (try
+    (jdbc/execute! conn [(str "CREATE ROLE " username " WITH LOGIN")])
+    (catch PSQLException e
+      ;; ignore if role exists
+      (when (not= db/psql-duplicate-object (.getSQLState e))
+        (throw e))))
+  (jdbc/execute! conn [(str "ALTER ROLE " username " WITH PASSWORD '" password "'")])
+  (jdbc/execute! conn [(str "ALTER ROLE " username " VALID UNTIL 'infinity'")])
+  ;; TODO: move detailed permissions to schema specific role
+  (jdbc/execute! conn [(str "GRANT USAGE ON SCHEMA " schema " TO " username)])
+  (jdbc/execute! conn [(str "GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "
+                            schema ".territory, "
+                            schema ".congregation_boundary, "
+                            schema ".subregion, "
+                            schema ".card_minimap_viewport "
+                            "TO " username)])
+  nil)
+
 (defn create-gis-user! [conn state cong-id user-id]
   ;; TODO: refactor to commands and process managers
   (let [username (str "gis_user_" (uuid-prefix cong-id) "_" (uuid-prefix user-id))
@@ -130,24 +154,24 @@
                                :user/id user-id
                                :gis-user/username username
                                :gis-user/password password)])
-    (jdbc/execute! conn [(str "CREATE ROLE " username " WITH LOGIN")])
-    (jdbc/execute! conn [(str "ALTER ROLE " username " WITH PASSWORD '" password "'")])
-    (jdbc/execute! conn [(str "ALTER ROLE " username " VALID UNTIL 'infinity'")])
-    ;; TODO: move detailed permissions to schema specific role
-    (jdbc/execute! conn [(str "GRANT USAGE ON SCHEMA " schema " TO " username)])
-    (jdbc/execute! conn [(str "GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "
-                              schema ".territory, "
-                              schema ".congregation_boundary, "
-                              schema ".subregion, "
-                              schema ".card_minimap_viewport "
-                              "TO " username)])
-    nil))
+    (ensure-present! conn {:username username
+                           :password password
+                           :schema schema})))
 
 (defn drop-role-cascade! [conn role schemas]
-  (doseq [schema schemas]
-    (jdbc/execute! conn [(str "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA " schema " FROM " role)])
-    (jdbc/execute! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " role)]))
-  (jdbc/execute! conn [(str "DROP ROLE " role)]))
+  (try
+    (doseq [schema schemas]
+      (jdbc/execute! conn [(str "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA " schema " FROM " role)])
+      (jdbc/execute! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " role)]))
+    (catch PSQLException e
+      ;; ignore if role does not exist
+      (when (not= db/psql-undefined-object (.getSQLState e))
+        (throw e))))
+  (jdbc/execute! conn [(str "DROP ROLE IF EXISTS " role)])
+  nil)
+
+(defn ensure-absent! [conn {:keys [username schema]}]
+  (drop-role-cascade! conn username [schema]))
 
 (defn delete-gis-user! [conn state cong-id user-id]
   ;; TODO: refactor to commands and process managers
@@ -166,5 +190,5 @@
                                :congregation/id cong-id
                                :user/id user-id
                                :gis-user/username username)])
-    (drop-role-cascade! conn username [schema])
-    nil))
+    (ensure-absent! conn {:username username
+                          :schema schema})))

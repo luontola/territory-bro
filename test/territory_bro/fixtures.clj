@@ -8,7 +8,6 @@
             [clojure.test :refer :all]
             [mount.core :as mount]
             [territory-bro.config :as config]
-            [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
@@ -20,6 +19,7 @@
 (defn- delete-schemas-starting-with! [conn prefix]
   (doseq [schema (db/get-schemas conn)
           :when (str/starts-with? schema prefix)]
+    ;; TODO: there is no more gis_user table
     (when (:exists (first (jdbc/query conn ["SELECT to_regclass(?) AS exists" (str schema ".gis_user")])))
       (doseq [gis-user (jdbc/query conn [(str "SELECT username FROM " schema ".gis_user")])]
         (gis-user/drop-role-cascade! conn (:username gis-user) (db/get-schemas conn))))

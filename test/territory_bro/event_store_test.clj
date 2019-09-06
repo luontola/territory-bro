@@ -129,7 +129,7 @@
             (is (str/starts-with? (.getMessage exception)
                                   (str "ERROR: tried to insert stream revision 1 but it should have been 2\n"
                                        "  Hint: The transaction might succeed if retried.")))
-            (is (= "40001" (.getSQLState exception)))))))
+            (is (= db/psql-serialization-failure (.getSQLState exception)))))))
 
     (db/with-db [conn {}]
       (jdbc/db-set-rollback-only! conn)
@@ -142,7 +142,7 @@
             (is (str/starts-with? (.getMessage exception)
                                   (str "ERROR: tried to insert stream revision 3 but it should have been 2\n"
                                        "  Hint: The transaction might succeed if retried.")))
-            (is (= "40001" (.getSQLState exception)))))))))
+            (is (= db/psql-serialization-failure (.getSQLState exception)))))))))
 
 (deftest event-validation-test
   (db/with-db [conn {}]

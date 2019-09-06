@@ -21,6 +21,12 @@
            (org.flywaydb.core Flyway)
            (org.postgresql.util PGobject)))
 
+;; PostgreSQL error codes
+;; https://www.postgresql.org/docs/11/errcodes-appendix.html
+(def psql-serialization-failure "40001")
+(def psql-undefined-object "42704")
+(def psql-duplicate-object "42710")
+
 (defn connect! [database-url]
   (log/info "Connect" database-url)
   (conman/connect! {:jdbc-url database-url}))

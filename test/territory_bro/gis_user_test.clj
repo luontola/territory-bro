@@ -139,6 +139,48 @@
         (is (gis-user/get-gis-user (projections/current-state conn) cong-id2 user-id2)
             "should not delete unrelated users")))))
 
+(defn- gis-db-spec [username password]
+  {:connection-uri (-> (:database-url config/env)
+                       (str/replace #"\?.*" "")) ; strip username and password
+   :user username
+   :password password})
+
+(defn- create-tenant-schema! [conn]
+  (let [cong-id (congregation/create-congregation! conn "cong1")
+        cong (congregation/get-unrestricted-congregation
+              (projections/current-state conn) cong-id)]
+    (:congregation/schema-name cong)))
+
+(defn- login-as [username password]
+  (= [{:user username}] (jdbc/query (gis-db-spec username password)
+                                    ["select session_user as user"])))
+
+(deftest ensure-gis-user-present-or-absent-test
+  (let [schema (create-tenant-schema! db/database)
+        username "gis_user_1"]
+
+    (testing "create account"
+      (gis-user/ensure-present! db/database {:username username
+                                             :password "password1"
+                                             :schema schema})
+      (is (login-as username "password1")))
+
+    (testing "update account / create is idempotent"
+      (gis-user/ensure-present! db/database {:username username
+                                             :password "password2"
+                                             :schema schema})
+      (is (login-as username "password2")))
+
+    (testing "delete account"
+      (gis-user/ensure-absent! db/database {:username username
+                                            :schema schema})
+      (is (thrown? PSQLException (login-as username "password2"))))
+
+    (testing "delete is idempotent"
+      (gis-user/ensure-absent! db/database {:username username
+                                            :schema schema})
+      (is (thrown? PSQLException (login-as username "password2"))))))
+
 (defn- create-test-data! []
   (db/with-db [conn {}]
     (let [cong-id (congregation/create-congregation! conn "cong")
@@ -154,10 +196,7 @@
 
 (deftest gis-user-database-access-test
   (let [{:keys [cong-id user-id schema username password]} (create-test-data!)
-        db-spec {:connection-uri (-> (:database-url config/env)
-                                     (str/replace #"\?.*" "")) ; strip username and password
-                 :user username
-                 :password password}]
+        db-spec (gis-db-spec username password)]
 
     (testing "can login to the database"
       (is (= [{:test 1}] (jdbc/query db-spec ["select 1 as test"]))))
@@ -220,4 +259,4 @@
   (let [a (gis-user/generate-password 10)
         b (gis-user/generate-password 10)]
     (is (= 10 (count a) (count b)))
-    (is (not (= a b)))))
+    (is (not= a b))))
