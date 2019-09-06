@@ -10,6 +10,7 @@
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
+            [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
             [territory-bro.gis :as gis]
             [territory-bro.gis-user :as gis-user]
@@ -19,7 +20,8 @@
             [territory-bro.testdata :as testdata]
             [territory-bro.testutil :as testutil]
             [territory-bro.user :as user])
-  (:import (java.util UUID)
+  (:import (java.time Instant)
+           (java.util UUID)
            (org.postgresql.util PSQLException)))
 
 (use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
@@ -114,6 +116,53 @@
                                    :user/id user-id
                                    :permission/id :view-congregation})]
           (is (= expected (apply-events events)) "should ignore the event"))))))
+
+(defn- handle-command [command events injections]
+  (let [events (events/validate-events events)
+        new-events (gis-user/handle-command command events injections)]
+    (events/validate-events new-events)))
+
+(deftest commands-test
+  (let [cong-id (UUID. 1 0)
+        user-id (UUID. 2 0)
+        injections {:generate-password (constantly "secret123")}
+        create-command {:command/type :gis-user.command/create-gis-user
+                        :command/time (Instant/ofEpochSecond 1)
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :user/id user-id}
+        created-event {:event/type :congregation.event/gis-user-created
+                       :event/version 1
+                       :event/time (Instant/ofEpochSecond 1)
+                       :event/user user-id
+                       :congregation/id cong-id
+                       :user/id user-id
+                       :gis-user/username "gis_user_0000000000000001_0000000000000002"
+                       :gis-user/password "secret123"}
+        delete-command {:command/type :gis-user.command/delete-gis-user
+                        :command/time (Instant/ofEpochSecond 2)
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :user/id user-id}
+        deleted-event {:event/type :congregation.event/gis-user-deleted
+                       :event/version 1
+                       :event/time (Instant/ofEpochSecond 2)
+                       :event/user user-id
+                       :congregation/id cong-id
+                       :user/id user-id
+                       :gis-user/username "gis_user_0000000000000001_0000000000000002"}]
+
+    (testing "create GIS user"
+      (is (= [created-event]
+             (handle-command create-command [] injections))))
+
+    (testing "create is idempotent")
+
+    (testing "delete GIS user") ; TODO
+
+    (testing "delete is idempotent")
+
+    (testing "enforces unique usernames"))) ; TODO: query database for existing role?
 
 (deftest gis-users-test
   (db/with-db [conn {}]

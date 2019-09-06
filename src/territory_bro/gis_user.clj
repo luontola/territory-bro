@@ -12,6 +12,8 @@
            (java.util Base64)
            (org.postgresql.util PSQLException)))
 
+;;;  Read Model
+
 (defmulti ^:private update-congregation (fn [_congregation event] (:event/type event)))
 
 (defmethod update-congregation :default [congregation _event]
@@ -100,6 +102,17 @@
     (when (= :present (:gis-user/desired-state user))
       user)))
 
+
+;;; Write Model
+
+(defn- uuid-prefix [uuid]
+  (-> (str uuid)
+      (.replace "-" "")
+      (.substring 0 16)))
+
+(defn- generate-username [cong-id user-id]
+  (str "gis_user_" (uuid-prefix cong-id) "_" (uuid-prefix user-id)))
+
 (defn generate-password [length]
   (let [bytes (byte-array length)]
     (-> (SecureRandom/getInstanceStrong)
@@ -108,10 +121,31 @@
         (.encodeToString bytes)
         (.substring 0 length))))
 
-(defn- uuid-prefix [uuid]
-  (-> (str uuid)
-      (.replace "-" "")
-      (.substring 0 16)))
+(defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
+
+(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password]}]
+  [{:event/type :congregation.event/gis-user-created
+    :event/version 1
+    :event/time (:command/time command)
+    :event/user (:command/user command)
+    :congregation/id (:congregation/id command)
+    :user/id (:user/id command)
+    :gis-user/username (generate-username (:congregation/id command) (:user/id command))
+    :gis-user/password (generate-password)}])
+
+(defn handle-command [command events injections]
+  (let [state nil] ; TODO
+    (command-handler command state injections)))
+
+(defn command! [conn command]
+  ;; TODO: the GIS user events would belong better to a user-specific stream
+  (let [stream-id (:congregation/id command)
+        old-events (event-store/read-stream conn stream-id)
+        new-events (handle-command command old-events {})]
+    (event-store/save! conn stream-id (count old-events) new-events)))
+
+
+;;; Database Users
 
 (defn ensure-present! [conn {:keys [username password schema]}]
   (assert username)
@@ -137,7 +171,7 @@
 
 (defn create-gis-user! [conn state cong-id user-id]
   ;; TODO: refactor to commands and process managers
-  (let [username (str "gis_user_" (uuid-prefix cong-id) "_" (uuid-prefix user-id))
+  (let [username (generate-username cong-id user-id)
         password (generate-password 50)
         cong (congregation/get-unrestricted-congregation state cong-id)
         schema (:congregation/schema-name cong)]
