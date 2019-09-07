@@ -57,7 +57,8 @@
 
 (defn process-pending-changes! [state {:keys [dispatch!
                                               migrate-tenant-schema!
-                                              ensure-gis-user-present!]}]
+                                              ensure-gis-user-present!
+                                              ensure-gis-user-absent!]}]
   (doseq [tenant (::pending-schemas state)]
     (migrate-tenant-schema! (:congregation/schema-name tenant))
     (dispatch! {:event/type :db-admin.event/gis-schema-is-present
@@ -67,12 +68,23 @@
                 :congregation/schema-name (:congregation/schema-name tenant)}))
 
   (doseq [[[cong-id user-id] gis-user] (::pending-gis-users state)]
-    (ensure-gis-user-present! {:username (:gis-user/username gis-user)
-                               :password (:gis-user/password gis-user)
-                               :schema (:congregation/schema-name gis-user)})
-    (dispatch! {:event/type :db-admin.event/gis-user-is-present
-                :event/version 1
-                :event/transient? true
-                :congregation/id cong-id
-                :user/id user-id
-                :gis-user/username (:gis-user/username gis-user)})))
+    (case (::desired-state gis-user)
+      :present (do
+                 (ensure-gis-user-present! {:username (:gis-user/username gis-user)
+                                            :password (:gis-user/password gis-user)
+                                            :schema (:congregation/schema-name gis-user)})
+                 (dispatch! {:event/type :db-admin.event/gis-user-is-present
+                             :event/version 1
+                             :event/transient? true
+                             :congregation/id cong-id
+                             :user/id user-id
+                             :gis-user/username (:gis-user/username gis-user)}))
+      :absent (do
+                (ensure-gis-user-absent! {:username (:gis-user/username gis-user)
+                                          :schema (:congregation/schema-name gis-user)})
+                (dispatch! {:event/type :db-admin.event/gis-user-is-absent
+                            :event/version 1
+                            :event/transient? true
+                            :congregation/id cong-id
+                            :user/id user-id
+                            :gis-user/username (:gis-user/username gis-user)})))))
