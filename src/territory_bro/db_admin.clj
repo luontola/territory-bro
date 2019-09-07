@@ -26,7 +26,7 @@
                      (select-keys [:gis-user/username
                                    :gis-user/password
                                    :congregation/schema-name])
-                     (assoc ::state :present))]
+                     (assoc ::desired-state :present))]
     (assoc-in state [::pending-gis-users [cong-id user-id]] gis-user)))
 
 (defmethod projection :congregation.event/gis-user-deleted
@@ -37,5 +37,13 @@
         gis-user (-> (merge cong event)
                      (select-keys [:gis-user/username
                                    :congregation/schema-name])
-                     (assoc ::state :absent))]
+                     (assoc ::desired-state :absent))]
     (assoc-in state [::pending-gis-users [cong-id user-id]] gis-user)))
+
+(defmethod projection :db-admin.event/gis-user-is-present
+  [state event]
+  (let [cong-id (:congregation/id event)
+        user-id (:user/id event)]
+    (if (= :present (get-in state [::pending-gis-users [cong-id user-id] ::desired-state]))
+      (update state ::pending-gis-users dissoc [cong-id user-id])
+      state)))
