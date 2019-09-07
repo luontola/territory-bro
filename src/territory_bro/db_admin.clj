@@ -12,15 +12,30 @@
 
 (defmethod projection :congregation.event/congregation-created
   [state event]
-  (-> state
-      (assoc-in [::congregations (:congregation/id event)] (select-keys event [:congregation/schema-name]))
-      (update ::tenant-schemas-to-create (fnil conj #{}) (select-keys event [:congregation/schema-name]))))
+  (let [cong (select-keys event [:congregation/schema-name])]
+    (-> state
+        (assoc-in [::congregations (:congregation/id event)] cong)
+        (update ::pending-tenants (fnil conj #{}) cong))))
 
 (defmethod projection :congregation.event/gis-user-created
   [state event]
-  (let [cong (get-in state [::congregations (:congregation/id event)])
-        gis-user (select-keys (merge cong event)
-                              [:gis-user/username
-                               :gis-user/password
-                               :congregation/schema-name])]
-    (update state ::gis-users-to-create (fnil conj #{}) gis-user)))
+  (let [cong-id (:congregation/id event)
+        user-id (:user/id event)
+        cong (get-in state [::congregations cong-id])
+        gis-user (-> (merge cong event)
+                     (select-keys [:gis-user/username
+                                   :gis-user/password
+                                   :congregation/schema-name])
+                     (assoc ::state :present))]
+    (assoc-in state [::pending-gis-users [cong-id user-id]] gis-user)))
+
+(defmethod projection :congregation.event/gis-user-deleted
+  [state event]
+  (let [cong-id (:congregation/id event)
+        user-id (:user/id event)
+        cong (get-in state [::congregations cong-id])
+        gis-user (-> (merge cong event)
+                     (select-keys [:gis-user/username
+                                   :congregation/schema-name])
+                     (assoc ::state :absent))]
+    (assoc-in state [::pending-gis-users [cong-id user-id]] gis-user)))

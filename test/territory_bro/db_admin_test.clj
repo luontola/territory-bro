@@ -21,7 +21,7 @@
                    :congregation/name "Cong1 Name"
                    :congregation/schema-name "cong1_schema"}]
           expected {::db-admin/congregations {cong-id {:congregation/schema-name "cong1_schema"}}
-                    ::db-admin/tenant-schemas-to-create #{{:congregation/schema-name "cong1_schema"}}}]
+                    ::db-admin/pending-tenants #{{:congregation/schema-name "cong1_schema"}}}]
       (is (= expected (apply-events events)))
 
       (testing "> GIS user created"
@@ -32,8 +32,22 @@
                                    :gis-user/username "username123"
                                    :gis-user/password "password123"})
               expected (merge expected
-                              {::db-admin/gis-users-to-create
-                               #{{:gis-user/username "username123"
-                                  :gis-user/password "password123"
-                                  :congregation/schema-name "cong1_schema"}}})]
-          (is (= expected (apply-events events))))))))
+                              {::db-admin/pending-gis-users
+                               {[cong-id user-id] {::db-admin/state :present
+                                                   :gis-user/username "username123"
+                                                   :gis-user/password "password123"
+                                                   :congregation/schema-name "cong1_schema"}}})]
+          (is (= expected (apply-events events)))
+
+          (testing "> GIS user deleted"
+            (let [events (conj events {:event/type :congregation.event/gis-user-deleted
+                                       :event/version 1
+                                       :congregation/id cong-id
+                                       :user/id user-id
+                                       :gis-user/username "username123"})
+                  expected (merge expected
+                                  {::db-admin/pending-gis-users
+                                   {[cong-id user-id] {::db-admin/state :absent
+                                                       :gis-user/username "username123"
+                                                       :congregation/schema-name "cong1_schema"}}})]
+              (is (= expected (apply-events events))))))))))
