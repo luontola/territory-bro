@@ -107,6 +107,26 @@
 
 ;;; Write Model
 
+(defn- username-path [event-or-command]
+  [::usernames-by-cong-user (select-keys event-or-command [:congregation/id :user/id])])
+
+(defmulti ^:private write-model (fn [_state event] (:event/type event)))
+
+(defmethod write-model :default
+  [state _event]
+  state)
+
+(defmethod write-model :congregation.event/gis-user-created
+  [state event]
+  (assoc-in state (username-path event) (:gis-user/username event)))
+
+(defmethod write-model :congregation.event/gis-user-deleted
+  [state event]
+  (dissoc-in state (username-path event)))
+
+
+;; Command Handlers
+
 (defn- uuid-prefix [uuid]
   (-> (str uuid)
       (.replace "-" "")
@@ -122,9 +142,6 @@
     (-> (Base64/getUrlEncoder)
         (.encodeToString bytes)
         (.substring 0 length))))
-
-(defn- username-path [event-or-command]
-  [::usernames-by-cong-user (select-keys event-or-command [:congregation/id :user/id])])
 
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
@@ -148,20 +165,6 @@
       :congregation/id (:congregation/id command)
       :user/id (:user/id command)
       :gis-user/username username}]))
-
-(defmulti ^:private write-model (fn [_state event] (:event/type event)))
-
-(defmethod write-model :default
-  [state _event]
-  state)
-
-(defmethod write-model :congregation.event/gis-user-created
-  [state event]
-  (assoc-in state (username-path event) (:gis-user/username event)))
-
-(defmethod write-model :congregation.event/gis-user-deleted
-  [state event]
-  (dissoc-in state (username-path event)))
 
 (defn handle-command [command events injections]
   (let [state (reduce write-model nil events)]
