@@ -46,9 +46,10 @@
           (apply-events new-events)
           (assoc :last-event (last new-events))))))
 
-(defn refresh-now! [conn]
+(defn refresh-now! []
   (let [cached @*cache
-        updated (apply-new-events cached conn)]
+        updated (db/with-db [conn {:read-only? true}]
+                  (apply-new-events cached conn))]
     (when-not (identical? cached updated)
       ;; with concurrent requests, only one of them will update the cache
       (when (compare-and-set! *cache cached updated)
@@ -90,8 +91,7 @@
 
 (mount/defstate refresher
   :start (poller/create (fn []
-                          (db/with-db [conn {}]
-                            (refresh-now! conn))
+                          (refresh-now!)
                           (poller/trigger! process-managers)))
   :stop (poller/shutdown! refresher))
 
@@ -114,4 +114,4 @@
 (comment
   (count (:state @*cache))
   (refresh-async!)
-  (refresh-now! db/database))
+  (refresh-now!))
