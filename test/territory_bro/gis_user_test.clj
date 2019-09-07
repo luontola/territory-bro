@@ -161,7 +161,10 @@
 
     (testing "delete GIS user"
       (is (= [deleted-event]
-             (handle-command delete-command [created-event] injections))))
+             (handle-command delete-command [created-event] injections)))
+      (is (= [(assoc deleted-event :gis-user/username "foo")]
+             (handle-command delete-command [(assoc created-event :gis-user/username "foo")] injections))
+          "username comes from the created event and is not re-generated"))
 
     (testing "delete is idempotent"
       (is (empty? (handle-command delete-command [] injections))
