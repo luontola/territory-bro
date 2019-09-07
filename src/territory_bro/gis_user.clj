@@ -123,11 +123,13 @@
         (.encodeToString bytes)
         (.substring 0 length))))
 
+(defn- username-path [event-or-command]
+  [::usernames-by-cong-user (select-keys event-or-command [:congregation/id :user/id])])
+
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
 (defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password]}]
-  (if (contains? (::usernames-by-cong-user state) (select-keys command [:congregation/id :user/id]))
-    []
+  (when (nil? (get-in state (username-path command)))
     [{:event/type :congregation.event/gis-user-created
       :event/version 1
       :event/time (:command/time command)
@@ -138,15 +140,14 @@
       :gis-user/password (generate-password)}]))
 
 (defmethod command-handler :gis-user.command/delete-gis-user [command state _injections]
-  (if-some [username (get-in state [::usernames-by-cong-user (select-keys command [:congregation/id :user/id])])]
+  (when-some [username (get-in state (username-path command))]
     [{:event/type :congregation.event/gis-user-deleted
       :event/version 1
       :event/time (:command/time command)
       :event/user (:command/user command)
       :congregation/id (:congregation/id command)
       :user/id (:user/id command)
-      :gis-user/username username}]
-    []))
+      :gis-user/username username}]))
 
 (defmulti ^:private write-model (fn [_state event] (:event/type event)))
 
@@ -156,13 +157,11 @@
 
 (defmethod write-model :congregation.event/gis-user-created
   [state event]
-  (assoc-in state
-            [::usernames-by-cong-user (select-keys event [:congregation/id :user/id])]
-            (:gis-user/username event)))
+  (assoc-in state (username-path event) (:gis-user/username event)))
 
 (defmethod write-model :congregation.event/gis-user-deleted
   [state event]
-  (dissoc-in state [::usernames-by-cong-user (select-keys event [:congregation/id :user/id])]))
+  (dissoc-in state (username-path event)))
 
 (defn handle-command [command events injections]
   (let [state (reduce write-model nil events)]
