@@ -140,7 +140,7 @@
        ~@body)))
 
 (defn check-database-version [minimum-version]
-  (with-db [conn {}]
+  (with-db [conn {:read-only? true}]
     (let [metadata (-> (jdbc/db-connection conn) .getMetaData)
           version (.getDatabaseMajorVersion metadata)]
       (assert (>= version minimum-version)

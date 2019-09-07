@@ -58,5 +58,5 @@
        (last)))
 
 (comment
-  (db/with-db [conn {}]
+  (db/with-db [conn {:read-only? true}]
     (read-stream conn (UUID/fromString "61e51981-bbd3-4298-a7a6-46109e39dd52"))))

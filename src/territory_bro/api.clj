@@ -102,7 +102,7 @@
 (defn list-congregations [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
-    (db/with-db [conn {}]
+    (db/with-db [conn {:read-only? true}]
       (ok (->> (congregation/get-my-congregations (projections/cached-state) (current-user-id conn))
                (map (fn [congregation]
                       {:id (:congregation/id congregation)
@@ -120,7 +120,7 @@
 (defn get-congregation [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
-    (db/with-db [conn {}]
+    (db/with-db [conn {:read-only? true}]
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             user-id (current-user-id conn)
             state (projections/cached-state)
@@ -164,7 +164,7 @@
 (defn download-qgis-project [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
-    (db/with-db [conn {}]
+    (db/with-db [conn {:read-only? true}]
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             user-id (current-user-id conn)
             congregation (congregation/get-my-congregation (projections/cached-state) cong-id user-id)
@@ -195,7 +195,7 @@
   (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request)))
 
 (comment
-  (db/with-db [conn {}]
+  (db/with-db [conn {:read-only? true}]
     (->> (user/get-users conn)
          (filter #(= "" (:name (:user/attributes %))))))
 
