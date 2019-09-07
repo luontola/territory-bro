@@ -5,6 +5,7 @@
 (ns territory-bro.db-admin-test
   (:require [clojure.test :refer :all]
             [territory-bro.db-admin :as db-admin]
+            [territory-bro.spy :as spy]
             [territory-bro.testutil :as testutil])
   (:import (java.util UUID)))
 
@@ -101,30 +102,21 @@
                   (is (= expected (apply-events events))))))))))))
 
 (deftest process-test
-  (let [*spy (atom [])
-        spy-results (fn []
-                      (let [results @*spy]
-                        (reset! *spy [])
-                        results))
-        injections {:dispatch! (fn [event]
-                                 (testutil/validate-test-events [event])
-                                 (swap! *spy conj [:dispatch! event]))
-                    :migrate-tenant-schema! (fn [schema]
-                                              (swap! *spy conj [:migrate-tenant-schema! schema]))
-                    :ensure-gis-user-present! (fn [args]
-                                                (swap! *spy conj [:ensure-gis-user-present! args]))
-                    :ensure-gis-user-absent! (fn [args]
-                                               (swap! *spy conj [:ensure-gis-user-absent! args]))}]
+  (let [spy (spy/spy)
+        injections {:dispatch! (spy/fn spy :dispatch! #(testutil/validate-test-events [%]))
+                    :migrate-tenant-schema! (spy/fn spy :migrate-tenant-schema!)
+                    :ensure-gis-user-present! (spy/fn spy :ensure-gis-user-present!)
+                    :ensure-gis-user-absent! (spy/fn spy :ensure-gis-user-absent!)}]
     (testing "empty state"
       (db-admin/process-pending-changes! nil injections)
-      (is (empty? (spy-results))))
+      (is (empty? (spy/read! spy))))
 
     (testing "pending schema"
       (let [state (apply-events [cong-created-event])]
         (db-admin/process-pending-changes! state injections)
         (is (= [[:migrate-tenant-schema! "cong1_schema"]
                 [:dispatch! schema-is-present-event]]
-               (spy-results)))))
+               (spy/read! spy)))))
 
     (testing "pending GIS user creation"
       (let [state (apply-events [cong-created-event schema-is-present-event
@@ -134,7 +126,7 @@
                                             :password "password123"
                                             :schema "cong1_schema"}]
                 [:dispatch! user-is-present-event]]
-               (spy-results)))))
+               (spy/read! spy)))))
 
     (testing "pending GIS user deletion"
       (let [state (apply-events [cong-created-event schema-is-present-event
@@ -144,4 +136,4 @@
         (is (= [[:ensure-gis-user-absent! {:username "username123"
                                            :schema "cong1_schema"}]
                 [:dispatch! user-is-absent-event]]
-               (spy-results)))))))
+               (spy/read! spy)))))))
