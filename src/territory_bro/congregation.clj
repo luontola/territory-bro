@@ -13,7 +13,7 @@
             [territory-bro.permissions :as permissions])
   (:import (java.util UUID)))
 
-;;; Read Model
+;;; Read model
 
 (defmulti ^:private update-congregation (fn [_congregation event] (:event/type event)))
 
@@ -117,7 +117,7 @@
     id))
 
 
-;;;; Write Model
+;;;; Write model
 
 (defmulti ^:private write-model (fn [_congregation event] (:event/type event)))
 

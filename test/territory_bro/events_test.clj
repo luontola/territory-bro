@@ -101,6 +101,7 @@
   (is (= [valid-event] (events/validate-events [valid-event])))
   (is (thrown? ExceptionInfo (events/validate-events [invalid-event]))))
 
+
 ;;; Generators for serialization tests
 
 (def uuid-gen (gen/fmap (fn [[a b]]

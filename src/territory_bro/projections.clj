@@ -15,6 +15,8 @@
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
 
+;;; Transient events
+
 (mount/defstate *transient-events
   :start (atom []))
 
@@ -25,6 +27,9 @@
 (defn dispatch-transient-event! [event]
   (assert (:event/transient? event) {:event event})
   (swap! *transient-events conj event))
+
+
+;;; Cache
 
 (mount/defstate *cache
   :start (atom {:last-event nil
@@ -47,6 +52,18 @@
           (apply-events new-events)
           (assoc :last-event (last new-events))))))
 
+(defn cached-state []
+  (:state @*cache))
+
+(defn current-state
+  "Calculates the current state from all events, including uncommitted ones,
+   but does not update the cache (it could cause dirty reads to others)."
+  [conn]
+  (:state (apply-new-events @*cache conn)))
+
+
+;;; Refreshing
+
 (declare refresh-async!)
 (def db-admin-injections
   {:dispatch! (fn [event]
@@ -65,7 +82,6 @@
                               (db/with-db [conn {}]
                                 (gis-user/ensure-absent! conn args)))})
 
-(declare cached-state)
 (defn refresh-now! []
   (let [cached @*cache
         updated (db/with-db [conn {:read-only? true}]
@@ -83,15 +99,6 @@
 
     ;; run process managers
     (db-admin/process-pending-changes! (cached-state) db-admin-injections)))
-
-(defn cached-state []
-  (:state @*cache))
-
-(defn current-state
-  "Calculates the current state from all events, including uncommitted ones,
-   but does not update the cache (it could cause dirty reads to others)."
-  [conn]
-  (:state (apply-new-events @*cache conn)))
 
 (mount/defstate refresher
   :start (poller/create (fn []

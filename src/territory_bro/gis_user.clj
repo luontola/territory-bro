@@ -13,7 +13,7 @@
            (java.util Base64)
            (org.postgresql.util PSQLException)))
 
-;;;  Read Model
+;;; Read model
 
 (defmulti ^:private update-congregation (fn [_congregation event] (:event/type event)))
 
@@ -105,7 +105,7 @@
       user)))
 
 
-;;; Write Model
+;;; Write model
 
 (defn- username-path [event-or-command]
   [::usernames-by-cong-user (select-keys event-or-command [:congregation/id :user/id])])
@@ -186,7 +186,7 @@
     (event-store/save! conn stream-id (count old-events) new-events)))
 
 
-;;; Database Users
+;;; Database users
 
 (defn ensure-present! [conn {:keys [username password schema]}]
   (assert username)
