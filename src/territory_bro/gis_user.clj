@@ -193,10 +193,13 @@
   (assert password)
   (assert schema)
   (try
+    (jdbc/execute! conn ["SAVEPOINT create_role"])
     (jdbc/execute! conn [(str "CREATE ROLE " username " WITH LOGIN")])
+    (jdbc/execute! conn ["RELEASE SAVEPOINT create_role"])
     (catch PSQLException e
-      ;; ignore if role exists
-      (when (not= db/psql-duplicate-object (.getSQLState e))
+      ;; ignore error if role already exists
+      (if (= db/psql-duplicate-object (.getSQLState e))
+        (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT create_role"])
         (throw e))))
   (jdbc/execute! conn [(str "ALTER ROLE " username " WITH PASSWORD '" password "'")])
   (jdbc/execute! conn [(str "ALTER ROLE " username " VALID UNTIL 'infinity'")])
@@ -234,13 +237,18 @@
                            :schema schema})))
 
 (defn drop-role-cascade! [conn role schemas]
+  (assert role)
   (try
     (doseq [schema schemas]
+      (assert schema)
+      (jdbc/execute! conn ["SAVEPOINT revoke_privileges"])
       (jdbc/execute! conn [(str "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA " schema " FROM " role)])
-      (jdbc/execute! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " role)]))
+      (jdbc/execute! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " role)])
+      (jdbc/execute! conn ["RELEASE SAVEPOINT revoke_privileges"]))
     (catch PSQLException e
-      ;; ignore if role does not exist
-      (when (not= db/psql-undefined-object (.getSQLState e))
+      ;; ignore error if role already does not exist
+      (if (= db/psql-undefined-object (.getSQLState e))
+        (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT revoke_privileges"])
         (throw e))))
   (jdbc/execute! conn [(str "DROP ROLE IF EXISTS " role)])
   nil)

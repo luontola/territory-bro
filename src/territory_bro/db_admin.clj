@@ -24,6 +24,7 @@
   (let [cong-id (:congregation/id event)
         user-id (:user/id event)
         cong (get-in state [::congregations cong-id])
+        _ (assert cong {:cong-id cong-id})
         gis-user (-> (merge cong event)
                      (select-keys [:gis-user/username
                                    :gis-user/password

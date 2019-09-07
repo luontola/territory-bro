@@ -233,25 +233,29 @@
         username "gis_user_1"]
 
     (testing "create account"
-      (gis-user/ensure-present! db/database {:username username
-                                             :password "password1"
-                                             :schema schema})
+      (db/with-db [conn {}]
+        (gis-user/ensure-present! conn {:username username
+                                        :password "password1"
+                                        :schema schema}))
       (is (login-as username "password1")))
 
     (testing "update account / create is idempotent"
-      (gis-user/ensure-present! db/database {:username username
-                                             :password "password2"
-                                             :schema schema})
+      (db/with-db [conn {}]
+        (gis-user/ensure-present! conn {:username username
+                                        :password "password2"
+                                        :schema schema}))
       (is (login-as username "password2")))
 
     (testing "delete account"
-      (gis-user/ensure-absent! db/database {:username username
-                                            :schema schema})
+      (db/with-db [conn {}]
+        (gis-user/ensure-absent! conn {:username username
+                                       :schema schema}))
       (is (thrown? PSQLException (login-as username "password2"))))
 
     (testing "delete is idempotent"
-      (gis-user/ensure-absent! db/database {:username username
-                                            :schema schema})
+      (db/with-db [conn {}]
+        (gis-user/ensure-absent! conn {:username username
+                                       :schema schema}))
       (is (thrown? PSQLException (login-as username "password2"))))))
 
 (defn- create-test-data! []
