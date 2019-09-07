@@ -55,11 +55,24 @@
   [state event]
   (remove-pending-gis-user state event :absent))
 
-(defn process-pending-changes! [state {:keys [dispatch! migrate-tenant-schema!]}]
+(defn process-pending-changes! [state {:keys [dispatch!
+                                              migrate-tenant-schema!
+                                              ensure-gis-user-present!]}]
   (doseq [tenant (::pending-schemas state)]
     (migrate-tenant-schema! (:congregation/schema-name tenant))
     (dispatch! {:event/type :db-admin.event/gis-schema-is-present
                 :event/version 1
                 :event/transient? true
                 :congregation/id (:congregation/id tenant)
-                :congregation/schema-name (:congregation/schema-name tenant)})))
+                :congregation/schema-name (:congregation/schema-name tenant)}))
+
+  (doseq [[[cong-id user-id] gis-user] (::pending-gis-users state)]
+    (ensure-gis-user-present! {:username (:gis-user/username gis-user)
+                               :password (:gis-user/password gis-user)
+                               :schema (:congregation/schema-name gis-user)})
+    (dispatch! {:event/type :db-admin.event/gis-user-is-present
+                :event/version 1
+                :event/transient? true
+                :congregation/id cong-id
+                :user/id user-id
+                :gis-user/username (:gis-user/username gis-user)})))

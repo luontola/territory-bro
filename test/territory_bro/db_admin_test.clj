@@ -110,7 +110,9 @@
                                  (testutil/validate-test-events [event])
                                  (swap! *spy conj [:dispatch! event]))
                     :migrate-tenant-schema! (fn [schema]
-                                              (swap! *spy conj [:migrate-tenant-schema! schema]))}]
+                                              (swap! *spy conj [:migrate-tenant-schema! schema]))
+                    :ensure-gis-user-present! (fn [schema]
+                                                (swap! *spy conj [:ensure-gis-user-present! schema]))}]
     (testing "empty state"
       (db-admin/process-pending-changes! nil injections)
       (is (empty? (spy-results))))
@@ -120,4 +122,13 @@
         (db-admin/process-pending-changes! state injections)
         (is (= [[:migrate-tenant-schema! "cong1_schema"]
                 [:dispatch! schema-is-present-event]]
+               (spy-results)))))
+
+    (testing "pending GIS user creation"
+      (let [state (apply-events [cong-created-event schema-is-present-event user-created-event])]
+        (db-admin/process-pending-changes! state injections)
+        (is (= [[:ensure-gis-user-present! {:username "username123"
+                                            :password "password123"
+                                            :schema "cong1_schema"}]
+                [:dispatch! user-is-present-event]]
                (spy-results)))))))
