@@ -259,25 +259,25 @@
       (is (thrown? PSQLException (login-as username "password2"))))))
 
 (defn- create-test-data! []
-  (db/with-db [conn {}]
-    (let [cong-id (congregation/create-congregation! conn "cong")
-          cong (congregation/get-unrestricted-congregation (projections/current-state conn) cong-id)
-          user-id (user/save-user! conn "user" {})
-          _ (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)
-          gis-user (gis-user/get-gis-user (projections/current-state conn) cong-id user-id)]
-      {:cong-id cong-id
-       :user-id user-id
-       :schema (:congregation/schema-name cong)
-       :username (:gis-user/username gis-user)
-       :password (:gis-user/password gis-user)})))
+  (try
+    (db/with-db [conn {}]
+      (let [cong-id (congregation/create-congregation! conn "cong")
+            cong (congregation/get-unrestricted-congregation (projections/current-state conn) cong-id)
+            user-id (user/save-user! conn "user" {})
+            _ (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)
+            gis-user (gis-user/get-gis-user (projections/current-state conn) cong-id user-id)]
+        {:cong-id cong-id
+         :user-id user-id
+         :schema (:congregation/schema-name cong)
+         :username (:gis-user/username gis-user)
+         :password (:gis-user/password gis-user)}))
+    (finally
+      (projections/refresh-async!)
+      (projections/await-refreshed)))) ; wait for process managers to create the GIS user
 
 (deftest gis-user-database-access-test
   (let [{:keys [cong-id user-id schema username password]} (create-test-data!)
         db-spec (gis-db-spec username password)]
-    ;; XXX: waiting for process managers to create the GIS user
-    (projections/refresh-async!)
-    (projections/await-refreshed)
-    (Thread/sleep 100)
 
     (testing "can login to the database"
       (is (= [{:test 1}] (jdbc/query db-spec ["select 1 as test"]))))
@@ -332,10 +332,9 @@
     (testing "cannot login to database after user is deleted"
       (db/with-db [conn {}]
         (gis-user/delete-gis-user! conn (projections/current-state conn) cong-id user-id))
-      ;; XXX: waiting for process managers to delete the GIS user
       (projections/refresh-async!)
-      (projections/await-refreshed)
-      (Thread/sleep 100)
+      (projections/await-refreshed) ; wait for process managers to delete the GIS user
+
       (is (thrown-with-msg? PSQLException #"FATAL: password authentication failed for user"
                             (jdbc/query db-spec ["select 1 as test"]))))))
 

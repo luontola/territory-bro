@@ -47,8 +47,7 @@
 (defn process-managers-fixture [f]
   (mount/start #'projections/*transient-events
                #'projections/*cache
-               #'projections/refresher
-               #'projections/process-managers)
+               #'projections/refresher)
   (f)
   (mount/stop))
 

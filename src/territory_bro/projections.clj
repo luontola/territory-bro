@@ -47,6 +47,25 @@
           (apply-events new-events)
           (assoc :last-event (last new-events))))))
 
+(declare refresh-async!)
+(def db-admin-injections
+  {:dispatch! (fn [event]
+                (dispatch-transient-event! event)
+                (refresh-async!))
+   :migrate-tenant-schema! (fn [schema]
+                             (log/info "Migrating tenant schema:" schema)
+                             (-> (db/tenant-schema schema (:database-schema config/env))
+                                 (.migrate)))
+   :ensure-gis-user-present! (fn [args]
+                               (log/info "Creating GIS user:" (:username args))
+                               (db/with-db [conn {}]
+                                 (gis-user/ensure-present! conn args)))
+   :ensure-gis-user-absent! (fn [args]
+                              (log/info "Deleting GIS user:" (:username args))
+                              (db/with-db [conn {}]
+                                (gis-user/ensure-absent! conn args)))})
+
+(declare cached-state)
 (defn refresh-now! []
   (let [cached @*cache
         updated (db/with-db [conn {:read-only? true}]
@@ -60,7 +79,10 @@
     (let [transient-events (read-transient-events!)]
       (when-not (empty? transient-events)
         (swap! *cache apply-events transient-events)
-        (log/info "Updated with" (count transient-events) "transient events")))))
+        (log/info "Updated with" (count transient-events) "transient events")))
+
+    ;; run process managers
+    (db-admin/process-pending-changes! (cached-state) db-admin-injections)))
 
 (defn cached-state []
   (:state @*cache))
@@ -71,46 +93,12 @@
   [conn]
   (:state (apply-new-events @*cache conn)))
 
-;; TODO
-(declare refresh-async!)
-(def db-admin-injections
-  {:dispatch! (fn [event]
-                (log/debug :dispatch! event) ; TODO: remove me
-                (dispatch-transient-event! event)
-                (refresh-async!))
-   :migrate-tenant-schema! (fn [schema]
-                             (log/debug :migrate-tenant-schema! schema) ; TODO: remove me
-                             (log/info "Migrating tenant schema:" schema)
-                             (-> (db/tenant-schema schema (:database-schema config/env))
-                                 (.migrate)))
-   :ensure-gis-user-present! (fn [args]
-                               (log/debug :ensure-gis-user-present! args) ; TODO: remove me
-                               (log/info "Creating GIS user:" (:username args))
-                               (db/with-db [conn {}]
-                                 (gis-user/ensure-present! conn args)))
-   :ensure-gis-user-absent! (fn [args]
-                              (log/debug :ensure-gis-user-absent! args) ; TODO: remove me
-                              (log/info "Deleting GIS user:" (:username args))
-                              (db/with-db [conn {}]
-                                (gis-user/ensure-absent! conn args)))})
-
-(mount/defstate process-managers
-  :start (poller/create (fn []
-                          (log/debug "process-pending-changes! start") ; TODO: remove me
-                          (db-admin/process-pending-changes! (cached-state) db-admin-injections)
-                          (log/debug "process-pending-changes! end"))) ; TODO: remove me
-  :stop (poller/shutdown! process-managers))
-
 (mount/defstate refresher
   :start (poller/create (fn []
-                          (log/debug "refresh-now! start") ; TODO: remove me
-                          (refresh-now!)
-                          (log/debug "refresh-now! end") ; TODO: remove me
-                          (poller/trigger! process-managers)))
+                          (refresh-now!)))
   :stop (poller/shutdown! refresher))
 
 (defn refresh-async! []
-  (log/debug "refresh-async!") ; TODO: remove me
   (poller/trigger! refresher))
 
 (defn await-refreshed []
