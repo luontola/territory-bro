@@ -20,5 +20,20 @@
                    :congregation/id cong-id
                    :congregation/name "Cong1 Name"
                    :congregation/schema-name "cong1_schema"}]
-          expected {::db-admin/tenant-schemas-to-create #{{:congregation/schema-name "cong1_schema"}}}]
-      (is (= expected (apply-events events))))))
+          expected {::db-admin/congregations {cong-id {:congregation/schema-name "cong1_schema"}}
+                    ::db-admin/tenant-schemas-to-create #{{:congregation/schema-name "cong1_schema"}}}]
+      (is (= expected (apply-events events)))
+
+      (testing "> GIS user created"
+        (let [events (conj events {:event/type :congregation.event/gis-user-created
+                                   :event/version 1
+                                   :congregation/id cong-id
+                                   :user/id user-id
+                                   :gis-user/username "username123"
+                                   :gis-user/password "password123"})
+              expected (merge expected
+                              {::db-admin/gis-users-to-create
+                               #{{:gis-user/username "username123"
+                                  :gis-user/password "password123"
+                                  :congregation/schema-name "cong1_schema"}}})]
+          (is (= expected (apply-events events))))))))

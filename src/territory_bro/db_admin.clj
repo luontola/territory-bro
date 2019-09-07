@@ -12,4 +12,15 @@
 
 (defmethod projection :congregation.event/congregation-created
   [state event]
-  (update state ::tenant-schemas-to-create (fnil conj #{}) (select-keys event [:congregation/schema-name])))
+  (-> state
+      (assoc-in [::congregations (:congregation/id event)] (select-keys event [:congregation/schema-name]))
+      (update ::tenant-schemas-to-create (fnil conj #{}) (select-keys event [:congregation/schema-name]))))
+
+(defmethod projection :congregation.event/gis-user-created
+  [state event]
+  (let [cong (get-in state [::congregations (:congregation/id event)])
+        gis-user (select-keys (merge cong event)
+                              [:gis-user/username
+                               :gis-user/password
+                               :congregation/schema-name])]
+    (update state ::gis-users-to-create (fnil conj #{}) gis-user)))
