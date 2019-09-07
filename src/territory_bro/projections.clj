@@ -5,7 +5,6 @@
 (ns territory-bro.projections
   (:require [clojure.tools.logging :as log]
             [mount.core :as mount]
-            [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.db-admin :as db-admin]
@@ -69,10 +68,7 @@
   {:dispatch! (fn [event]
                 (dispatch-transient-event! event)
                 (refresh-async!))
-   :migrate-tenant-schema! (fn [schema]
-                             (log/info "Migrating tenant schema:" schema)
-                             (-> (db/tenant-schema schema (:database-schema config/env))
-                                 (.migrate)))
+   :migrate-tenant-schema! db/migrate-tenant-schema!
    :ensure-gis-user-present! (fn [args]
                                (log/info "Creating GIS user:" (:username args))
                                (db/with-db [conn {}]

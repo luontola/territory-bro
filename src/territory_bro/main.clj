@@ -8,7 +8,6 @@
             [luminus.repl-server :as repl]
             [mount.core :as mount]
             [territory-bro.config :as config]
-            [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.projections :as projections]
             [territory-bro.router :as router])
@@ -33,17 +32,11 @@
 
 (defn migrate-database! []
   (db/check-database-version 11)
-  (let [master-schema (:database-schema config/env)]
-    (log/info "Migrating master schema:" master-schema)
-    (-> (db/master-schema master-schema)
-        (.migrate))
-
-    (projections/refresh-now!)
-    (doseq [congregation (congregation/get-unrestricted-congregations (projections/cached-state))]
-      (let [tenant-schema (:congregation/schema-name congregation)]
-        (log/info "Migrating tenant schema:" tenant-schema)
-        (-> (db/tenant-schema tenant-schema master-schema)
-            (.migrate))))))
+  (db/migrate-master-schema!)
+  ;; process managers will migrate tenant schemas and create missing GIS users
+  ;; TODO: run in the main thread to not miss exceptions (will need to change `dispatch!` to not call `refresh-async!`)
+  (projections/refresh-async!)
+  (projections/await-refreshed))
 
 (defn- log-mount-states [result]
   (doseq [component (:started result)]

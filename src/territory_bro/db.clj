@@ -109,6 +109,17 @@
       (.placeholders {"masterSchema" master-schema})
       (.load)))
 
+(defn migrate-master-schema! []
+  (let [schema (:database-schema config/env)]
+    (log/info "Migrating master schema:" schema)
+    (-> (master-schema schema)
+        (.migrate))))
+
+(defn migrate-tenant-schema! [schema]
+  (log/info "Migrating tenant schema:" schema)
+  (-> (tenant-schema schema (:database-schema config/env))
+      (.migrate)))
+
 (defn get-schemas [conn]
   (->> (jdbc/query conn ["select schema_name from information_schema.schemata"])
        (map :schema_name)
