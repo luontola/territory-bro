@@ -26,11 +26,13 @@
      (catch Throwable t#
        t#)))
 
-(defn apply-events [projection events]
+(defn validate-test-events [events]
   (->> events
        (map-indexed (fn [index event]
                       (merge {:event/system "test"
                               :event/time (Instant/ofEpochSecond (inc index))}
                              event)))
-       events/validate-events
-       (reduce projection nil)))
+       (events/validate-events)))
+
+(defn apply-events [projection events]
+  (reduce projection nil (validate-test-events events)))

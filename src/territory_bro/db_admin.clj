@@ -54,3 +54,12 @@
 (defmethod projection :db-admin.event/gis-user-is-absent
   [state event]
   (remove-pending-gis-user state event :absent))
+
+(defn process-pending-changes! [state {:keys [dispatch! migrate-tenant-schema!]}]
+  (doseq [tenant (::pending-schemas state)]
+    (migrate-tenant-schema! (:congregation/schema-name tenant))
+    (dispatch! {:event/type :db-admin.event/gis-schema-is-present
+                :event/version 1
+                :event/transient? true
+                :congregation/id (:congregation/id tenant)
+                :congregation/schema-name (:congregation/schema-name tenant)})))

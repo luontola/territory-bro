@@ -99,3 +99,25 @@
                 (let [events (conj events user-is-absent-event)
                       expected (merge expected {::db-admin/pending-gis-users {}})]
                   (is (= expected (apply-events events))))))))))))
+
+(deftest process-test
+  (let [*spy (atom [])
+        spy-results (fn []
+                      (let [results @*spy]
+                        (reset! *spy [])
+                        results))
+        injections {:dispatch! (fn [event]
+                                 (testutil/validate-test-events [event])
+                                 (swap! *spy conj [:dispatch! event]))
+                    :migrate-tenant-schema! (fn [schema]
+                                              (swap! *spy conj [:migrate-tenant-schema! schema]))}]
+    (testing "empty state"
+      (db-admin/process-pending-changes! nil injections)
+      (is (empty? (spy-results))))
+
+    (testing "pending schema"
+      (let [state (apply-events [cong-created-event])]
+        (db-admin/process-pending-changes! state injections)
+        (is (= [[:migrate-tenant-schema! "cong1_schema"]
+                [:dispatch! schema-is-present-event]]
+               (spy-results)))))))
