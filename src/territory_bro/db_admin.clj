@@ -47,3 +47,11 @@
     (if (= :present (get-in state [::pending-gis-users [cong-id user-id] ::desired-state]))
       (update state ::pending-gis-users dissoc [cong-id user-id])
       state)))
+
+(defmethod projection :db-admin.event/gis-user-is-absent
+  [state event]
+  (let [cong-id (:congregation/id event)
+        user-id (:user/id event)]
+    (if (= :absent (get-in state [::pending-gis-users [cong-id user-id] ::desired-state]))
+      (update state ::pending-gis-users dissoc [cong-id user-id])
+      state)))

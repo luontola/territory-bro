@@ -26,17 +26,23 @@
                               :user/id user-id
                               :gis-user/username "username123"
                               :gis-user/password "password123"}
-          user-present-event {:event/type :db-admin.event/gis-user-is-present
-                              :event/version 1
-                              :event/transient? true
-                              :congregation/id cong-id
-                              :user/id user-id
-                              :gis-user/username "username123"}
           user-deleted-event {:event/type :congregation.event/gis-user-deleted
                               :event/version 1
                               :congregation/id cong-id
                               :user/id user-id
                               :gis-user/username "username123"}
+          user-is-present-event {:event/type :db-admin.event/gis-user-is-present
+                                 :event/version 1
+                                 :event/transient? true
+                                 :congregation/id cong-id
+                                 :user/id user-id
+                                 :gis-user/username "username123"}
+          user-is-absent-event {:event/type :db-admin.event/gis-user-is-absent
+                                :event/version 1
+                                :event/transient? true
+                                :congregation/id cong-id
+                                :user/id user-id
+                                :gis-user/username "username123"}
 
           events [cong-created-event]
           expected {::db-admin/congregations {cong-id {:congregation/schema-name "cong1_schema"}}
@@ -54,9 +60,14 @@
           (is (= expected (apply-events events)))
 
           (testing "> GIS user is present"
-            (let [events (conj events user-present-event)
+            (let [events (conj events user-is-present-event)
                   expected (merge expected {::db-admin/pending-gis-users {}})]
               (is (= expected (apply-events events)))))
+
+          (testing "> GIS user is absent (undesired)"
+            (let [events (conj events user-is-absent-event)]
+              (is (= expected (apply-events events))
+                  "no change")))
 
           (testing "> GIS user deleted"
             (let [events (conj events user-deleted-event)
@@ -67,7 +78,12 @@
                                                        :congregation/schema-name "cong1_schema"}}})]
               (is (= expected (apply-events events)))
 
-              (testing "> GIS user is present"
-                (let [events (conj events user-present-event)]
+              (testing "> GIS user is present (undesired)"
+                (let [events (conj events user-is-present-event)]
                   (is (= expected (apply-events events))
-                      "no change"))))))))))
+                      "no change")))
+
+              (testing "> GIS user is absent"
+                (let [events (conj events user-is-absent-event)
+                      expected (merge expected {::db-admin/pending-gis-users {}})]
+                  (is (= expected (apply-events events))))))))))))
