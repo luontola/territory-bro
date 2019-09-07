@@ -4,6 +4,7 @@
 
 (ns territory-bro.gis-user
   (:require [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
             [medley.core :refer [dissoc-in]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
@@ -199,7 +200,9 @@
     (catch PSQLException e
       ;; ignore error if role already exists
       (if (= db/psql-duplicate-object (.getSQLState e))
-        (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT create_role"])
+        (do
+          (log/info "GIS user already present:" username)
+          (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT create_role"]))
         (throw e))))
   (jdbc/execute! conn [(str "ALTER ROLE " username " WITH PASSWORD '" password "'")])
   (jdbc/execute! conn [(str "ALTER ROLE " username " VALID UNTIL 'infinity'")])
@@ -245,7 +248,9 @@
     (catch PSQLException e
       ;; ignore error if role already does not exist
       (if (= db/psql-undefined-object (.getSQLState e))
-        (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT revoke_privileges"])
+        (do
+          (log/info "GIS user already absent:" role)
+          (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT revoke_privileges"]))
         (throw e))))
   (jdbc/execute! conn [(str "DROP ROLE IF EXISTS " role)])
   nil)
