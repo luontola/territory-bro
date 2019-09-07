@@ -16,7 +16,8 @@
 
 (defmulti ^:private update-congregation (fn [_congregation event] (:event/type event)))
 
-(defmethod update-congregation :default [congregation _event]
+(defmethod update-congregation :default
+  [congregation _event]
   congregation)
 
 (defmethod update-congregation :congregation.event/congregation-created
@@ -124,17 +125,31 @@
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
 (defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password]}]
-  [{:event/type :congregation.event/gis-user-created
-    :event/version 1
-    :event/time (:command/time command)
-    :event/user (:command/user command)
-    :congregation/id (:congregation/id command)
-    :user/id (:user/id command)
-    :gis-user/username (generate-username (:congregation/id command) (:user/id command))
-    :gis-user/password (generate-password)}])
+  (if (contains? (::existing-gis-users state) (select-keys command [:congregation/id :user/id]))
+    []
+    [{:event/type :congregation.event/gis-user-created
+      :event/version 1
+      :event/time (:command/time command)
+      :event/user (:command/user command)
+      :congregation/id (:congregation/id command)
+      :user/id (:user/id command)
+      :gis-user/username (generate-username (:congregation/id command) (:user/id command))
+      :gis-user/password (generate-password)}]))
+
+(defmulti ^:private write-model (fn [_state event] (:event/type event)))
+
+(defmethod write-model :default
+  [state _event]
+  state)
+
+(defmethod write-model :congregation.event/gis-user-created
+  [state event]
+  (update state ::existing-gis-users
+          (fnil conj #{})
+          (select-keys event [:congregation/id :user/id])))
 
 (defn handle-command [command events injections]
-  (let [state nil] ; TODO
+  (let [state (reduce write-model nil events)]
     (command-handler command state injections)))
 
 (defn command! [conn command]

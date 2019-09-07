@@ -156,7 +156,9 @@
       (is (= [created-event]
              (handle-command create-command [] injections))))
 
-    (testing "create is idempotent")
+    (testing "create is idempotent"
+      (is (= []
+             (handle-command create-command [created-event] injections))))
 
     (testing "delete GIS user") ; TODO
 
