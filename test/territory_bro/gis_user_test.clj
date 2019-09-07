@@ -164,7 +164,13 @@
       (is (= [deleted-event]
              (handle-command delete-command [created-event] injections))))
 
-    (testing "delete is idempotent")
+    (testing "delete is idempotent"
+      (is (= []
+             (handle-command delete-command [] injections))
+          "not created")
+      (is (= []
+             (handle-command delete-command [created-event deleted-event] injections))
+          "already deleted"))
 
     (testing "enforces unique usernames"))) ; TODO: query database for existing role?
 

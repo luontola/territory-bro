@@ -4,6 +4,7 @@
 
 (ns territory-bro.gis-user
   (:require [clojure.java.jdbc :as jdbc]
+            [medley.core :refer [dissoc-in]]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
@@ -137,14 +138,15 @@
       :gis-user/password (generate-password)}]))
 
 (defmethod command-handler :gis-user.command/delete-gis-user [command state _injections]
-  (let [username (get-in state [::usernames-by-cong-user (select-keys command [:congregation/id :user/id])])]
+  (if-some [username (get-in state [::usernames-by-cong-user (select-keys command [:congregation/id :user/id])])]
     [{:event/type :congregation.event/gis-user-deleted
       :event/version 1
       :event/time (:command/time command)
       :event/user (:command/user command)
       :congregation/id (:congregation/id command)
       :user/id (:user/id command)
-      :gis-user/username username}]))
+      :gis-user/username username}]
+    []))
 
 (defmulti ^:private write-model (fn [_state event] (:event/type event)))
 
@@ -157,6 +159,10 @@
   (assoc-in state
             [::usernames-by-cong-user (select-keys event [:congregation/id :user/id])]
             (:gis-user/username event)))
+
+(defmethod write-model :congregation.event/gis-user-deleted
+  [state event]
+  (dissoc-in state [::usernames-by-cong-user (select-keys event [:congregation/id :user/id])]))
 
 (defn handle-command [command events injections]
   (let [state (reduce write-model nil events)]
