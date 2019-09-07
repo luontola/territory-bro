@@ -294,25 +294,24 @@
         (is (region/create-card-minimap-viewport! conn testdata/wkt-polygon))))
 
     (testing "user ID is logged in GIS change log"
-      (db/with-db [conn {}]
-        (is (= [{:op "INSERT",
-                 :schema schema,
-                 :table "territory",
-                 :user username}
-                {:op "INSERT",
-                 :schema schema,
-                 :table "congregation_boundary",
-                 :user username}
-                {:op "INSERT",
-                 :schema schema,
-                 :table "subregion",
-                 :user username}
-                {:op "INSERT",
-                 :schema schema,
-                 :table "card_minimap_viewport",
-                 :user username}]
-               (->> (gis/get-gis-changes conn)
-                    (map #(dissoc % :id :time :old :new)))))))
+      (is (= [{:op "INSERT",
+               :schema schema,
+               :table "territory",
+               :user username}
+              {:op "INSERT",
+               :schema schema,
+               :table "congregation_boundary",
+               :user username}
+              {:op "INSERT",
+               :schema schema,
+               :table "subregion",
+               :user username}
+              {:op "INSERT",
+               :schema schema,
+               :table "card_minimap_viewport",
+               :user username}]
+             (->> (gis/get-gis-changes db/database)
+                  (map #(dissoc % :id :time :old :new))))))
 
     (testing "cannot view the master schema"
       (is (thrown-with-msg? PSQLException #"ERROR: permission denied for schema"

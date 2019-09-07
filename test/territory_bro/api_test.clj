@@ -104,10 +104,9 @@
       (is (= ["ring-session"] (keys (get-cookies response))))))
 
   (testing "user is saved on login"
-    (db/with-db [conn {}]
-      (let [user (user/get-by-subject conn (:sub (jwt/validate jwt-test/token config/env)))]
-        (is user)
-        (is (= "Esko Luontola" (get-in user [:user/attributes :name]))))))
+    (let [user (user/get-by-subject db/database (:sub (jwt/validate jwt-test/token config/env)))]
+      (is user)
+      (is (= "Esko Luontola" (get-in user [:user/attributes :name])))))
 
   (testing "login with expired token"
     (binding [config/env (assoc config/env :now #(Instant/now))]
@@ -130,10 +129,9 @@
         (is (= ["ring-session"] (keys (get-cookies response)))))))
 
   (testing "user is saved on dev login"
-    (db/with-db [conn {}]
-      (let [user (user/get-by-subject conn "developer")]
-        (is user)
-        (is (= "Developer" (get-in user [:user/attributes :name]))))))
+    (let [user (user/get-by-subject db/database "developer")]
+      (is user)
+      (is (= "Developer" (get-in user [:user/attributes :name])))))
 
   (testing "dev login outside dev mode"
     (let [response (-> (request :post "/api/dev-login")
@@ -198,12 +196,11 @@
     (is (:id (:body response)))
 
     (let [cong-id (UUID/fromString (:id (:body response)))]
-      (db/with-db [conn {}]
-        (testing "grants access to the current user"
-          (is (= 1 (count (congregation/get-users (projections/current-state conn) cong-id)))))
+      (testing "grants access to the current user"
+        (is (= 1 (count (congregation/get-users (projections/current-state db/database) cong-id)))))
 
-        (testing "creates a GIS user for the current user"
-          (is (= 1 (count (gis-user/get-gis-users (projections/current-state conn) cong-id))))))))
+      (testing "creates a GIS user for the current user"
+        (is (= 1 (count (gis-user/get-gis-users (projections/current-state db/database) cong-id)))))))
 
   (testing "requires login"
     (let [response (-> (request :post "/api/congregations")
