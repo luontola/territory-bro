@@ -231,10 +231,7 @@
                                :congregation/id cong-id
                                :user/id user-id
                                :gis-user/username username
-                               :gis-user/password password)])
-    (ensure-present! conn {:username username
-                           :password password
-                           :schema schema})))
+                               :gis-user/password password)])))
 
 (defn drop-role-cascade! [conn role schemas]
   (assert role)
@@ -272,6 +269,4 @@
                                :event/type :congregation.event/gis-user-deleted
                                :congregation/id cong-id
                                :user/id user-id
-                               :gis-user/username username)])
-    (ensure-absent! conn {:username username
-                          :schema schema})))
+                               :gis-user/username username)])))

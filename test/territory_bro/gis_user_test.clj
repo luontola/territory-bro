@@ -11,7 +11,7 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.events :as events]
-            [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
+            [territory-bro.fixtures :refer [db-fixture process-managers-fixture event-actor-fixture]]
             [territory-bro.gis :as gis]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.projections :as projections]
@@ -24,7 +24,7 @@
            (java.util UUID)
            (org.postgresql.util PSQLException)))
 
-(use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
+(use-fixtures :once (join-fixtures [db-fixture process-managers-fixture event-actor-fixture]))
 
 (defn- apply-events [events]
   (testutil/apply-events gis-user/gis-users-view events))
@@ -274,6 +274,10 @@
 (deftest gis-user-database-access-test
   (let [{:keys [cong-id user-id schema username password]} (create-test-data!)
         db-spec (gis-db-spec username password)]
+    ;; XXX: waiting for process managers to create the GIS user
+    (projections/refresh-async!)
+    (projections/await-refreshed)
+    (Thread/sleep 100)
 
     (testing "can login to the database"
       (is (= [{:test 1}] (jdbc/query db-spec ["select 1 as test"]))))
@@ -328,6 +332,10 @@
     (testing "cannot login to database after user is deleted"
       (db/with-db [conn {}]
         (gis-user/delete-gis-user! conn (projections/current-state conn) cong-id user-id))
+      ;; XXX: waiting for process managers to delete the GIS user
+      (projections/refresh-async!)
+      (projections/await-refreshed)
+      (Thread/sleep 100)
       (is (thrown-with-msg? PSQLException #"FATAL: password authentication failed for user"
                             (jdbc/query db-spec ["select 1 as test"]))))))
 

@@ -44,6 +44,14 @@
   (f)
   (mount/stop))
 
+(defn process-managers-fixture [f]
+  (mount/start #'projections/*transient-events
+               #'projections/*cache
+               #'projections/refresher
+               #'projections/process-managers)
+  (f)
+  (mount/stop))
+
 (defn api-fixture [f]
   (mount/stop #'config/env)
   (mount/start-with-args (merge test-env jwt-test/env)

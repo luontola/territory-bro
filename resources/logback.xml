@@ -15,6 +15,8 @@
     <logger name="com.zaxxer.hikari" level="warn"/>
     <logger name="ring.logger" level="info"/>
 
+    <logger name="territory-bro" level="DEBUG"/>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
