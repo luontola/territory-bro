@@ -135,6 +135,11 @@
 (defn- generate-username [cong-id user-id]
   (str "gis_user_" (uuid-prefix cong-id) "_" (uuid-prefix user-id)))
 
+(defn- unique-username [username db-user-exists?]
+  (->> (cons username (map #(str username "_" %) (iterate inc 1)))
+       (remove db-user-exists?)
+       (first)))
+
 (defn generate-password [length]
   (let [bytes (byte-array length)]
     (-> (SecureRandom/getInstanceStrong)
@@ -145,7 +150,7 @@
 
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
-(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password]}]
+(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists?]}]
   (when (nil? (get-in state (username-path command)))
     [{:event/type :congregation.event/gis-user-created
       :event/version 1
@@ -153,7 +158,10 @@
       :event/user (:command/user command)
       :congregation/id (:congregation/id command)
       :user/id (:user/id command)
-      :gis-user/username (generate-username (:congregation/id command) (:user/id command))
+      ;; Due to PostgreSQL identifier length limits, the username is based on
+      ;; truncated UUIDs and is not guaranteed to be unique as-is.
+      :gis-user/username (-> (generate-username (:congregation/id command) (:user/id command))
+                             (unique-username db-user-exists?))
       :gis-user/password (generate-password)}]))
 
 (defmethod command-handler :gis-user.command/delete-gis-user [command state _injections]

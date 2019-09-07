@@ -125,7 +125,8 @@
 (deftest commands-test
   (let [cong-id (UUID. 1 0)
         user-id (UUID. 2 0)
-        injections {:generate-password (constantly "secret123")}
+        injections {:generate-password (constantly "secret123")
+                    :db-user-exists? (constantly false)}
         create-command {:command/type :gis-user.command/create-gis-user
                         :command/time (Instant/ofEpochSecond 1)
                         :command/user user-id
@@ -172,7 +173,20 @@
       (is (empty? (handle-command delete-command [created-event deleted-event] injections))
           "already deleted"))
 
-    (testing "enforces unique usernames"))) ; TODO: query database for existing role?
+    (testing "create enforces unique usernames"
+      (let [injections (assoc injections :db-user-exists? (fn [schema]
+                                                            (contains? #{"gis_user_0000000000000001_0000000000000002"}
+                                                                       schema)))]
+        (is (= [(assoc created-event :gis-user/username "gis_user_0000000000000001_0000000000000002_1")]
+               (handle-command create-command [] injections))))
+      (let [injections (assoc injections :db-user-exists? (fn [schema]
+                                                            (contains? #{"gis_user_0000000000000001_0000000000000002"
+                                                                         "gis_user_0000000000000001_0000000000000002_1"
+                                                                         "gis_user_0000000000000001_0000000000000002_2"
+                                                                         "gis_user_0000000000000001_0000000000000002_3"}
+                                                                       schema)))]
+        (is (= [(assoc created-event :gis-user/username "gis_user_0000000000000001_0000000000000002_4")]
+               (handle-command create-command [] injections)))))))
 
 (deftest gis-users-test
   (db/with-db [conn {}]
