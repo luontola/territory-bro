@@ -26,6 +26,11 @@
                          :congregation/id cong-id
                          :user/id user-id
                          :gis-user/username "username123"})
+(def schema-is-present-event {:event/type :db-admin.event/gis-schema-is-present
+                              :event/version 1
+                              :event/transient? true
+                              :congregation/id cong-id
+                              :congregation/schema-name "cong1_schema"})
 (def user-is-present-event {:event/type :db-admin.event/gis-user-is-present
                             :event/version 1
                             :event/transient? true
@@ -45,9 +50,16 @@
 (deftest projection-test
   (testing "congregation created"
     (let [events [cong-created-event]
-          expected {::db-admin/congregations {cong-id {:congregation/schema-name "cong1_schema"}}
-                    ::db-admin/pending-tenants #{{:congregation/schema-name "cong1_schema"}}}]
+          expected {::db-admin/congregations {cong-id {:congregation/id cong-id
+                                                       :congregation/schema-name "cong1_schema"}}
+                    ::db-admin/pending-schemas #{{:congregation/id cong-id
+                                                  :congregation/schema-name "cong1_schema"}}}]
       (is (= expected (apply-events events)))
+
+      (testing "> schema is present"
+        (let [events (conj events schema-is-present-event)
+              expected (merge expected {::db-admin/pending-schemas #{}})]
+          (is (= expected (apply-events events)))))
 
       (testing "> GIS user created"
         (let [events (conj events user-created-event)

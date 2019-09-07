@@ -104,6 +104,14 @@
          :congregation/id UUID
          :user/id UUID
          :gis-user/username s/Str))
+
+(s/defschema GisSchemaIsPresent
+  (assoc EventBase
+         :event/type (s/eq :db-admin.event/gis-schema-is-present)
+         :event/version (s/eq 1)
+         :event/transient? (s/eq true)
+         :congregation/id UUID
+         :congregation/schema-name s/Str))
 (s/defschema GisUserIsPresent
   (assoc EventBase
          :event/type (s/eq :db-admin.event/gis-user-is-present)
@@ -128,6 +136,7 @@
    :congregation.event/permission-revoked PermissionRevoked
    :congregation.event/gis-user-created GisUserCreated
    :congregation.event/gis-user-deleted GisUserDeleted
+   :db-admin.event/gis-schema-is-present GisSchemaIsPresent
    :db-admin.event/gis-user-is-present GisUserIsPresent
    :db-admin.event/gis-user-is-absent GisUserIsAbsent})
 

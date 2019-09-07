@@ -9,11 +9,16 @@
 
 (defmethod projection :congregation.event/congregation-created
   [state event]
-  (let [cong (select-keys event [:congregation/schema-name])]
+  (let [cong (select-keys event [:congregation/id
+                                 :congregation/schema-name])]
     (-> state
         (assoc-in [::congregations (:congregation/id event)] cong)
-        (update ::pending-tenants (fnil conj #{}) cong))))
+        (update ::pending-schemas (fnil conj #{}) cong))))
 
+(defmethod projection :db-admin.event/gis-schema-is-present
+  [state event]
+  (update state ::pending-schemas disj (select-keys event [:congregation/id
+                                                           :congregation/schema-name])))
 
 (defn- add-pending-gis-user [state event desired-state]
   (let [cong-id (:congregation/id event)
