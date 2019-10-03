@@ -55,6 +55,7 @@
                                                    :stream_revision next-revision
                                                    :data (-> event *event->json*)})]
             (:global_revision result))))
+       (doall)
        (last)))
 
 (comment
