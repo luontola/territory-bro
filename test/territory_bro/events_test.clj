@@ -89,7 +89,7 @@
     (is (= valid-event (events/validate-event valid-event))))
 
   (testing "invalid event"
-    (is (thrown-with-msg? ExceptionInfo (re-contains "#:congregation{:name missing-required-key}")
+    (is (thrown-with-msg? ExceptionInfo (re-contains "{:congregation/name missing-required-key}")
                           (events/validate-event invalid-event))))
 
   (testing "unknown event type"

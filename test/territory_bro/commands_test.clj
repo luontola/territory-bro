@@ -41,7 +41,7 @@
     (is (= valid-command (commands/validate-command valid-command))))
 
   (testing "invalid command"
-    (is (thrown-with-msg? ExceptionInfo (re-contains "#:congregation{:name missing-required-key}")
+    (is (thrown-with-msg? ExceptionInfo (re-contains "{:congregation/name missing-required-key}")
                           (commands/validate-command invalid-command))))
 
   (testing "unknown command type"

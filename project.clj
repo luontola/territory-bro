@@ -51,7 +51,8 @@
   :resource-paths ["resources"]
   :target-path "target/%s/"
   :main ^:skip-aot territory-bro.main
-  :global-vars {*warn-on-reflection* true}
+  :global-vars {*warn-on-reflection* true
+                *print-namespace-maps* false}
 
   :plugins [[com.jakemccrary/lein-test-refresh "0.14.0"]
             [lein-ancient "0.6.15"]]
