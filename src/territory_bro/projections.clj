@@ -14,20 +14,6 @@
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
 
-;;; Transient events
-
-(mount/defstate *transient-events
-  :start (atom []))
-
-(defn read-transient-events! []
-  (let [[new-events _] (reset-vals! *transient-events [])]
-    new-events))
-
-(defn dispatch-transient-event! [event]
-  (assert (:event/transient? event) {:event event})
-  (swap! *transient-events conj event))
-
-
 ;;; Cache
 
 (mount/defstate *cache
@@ -65,10 +51,7 @@
 
 (declare refresh-async!)
 (def db-admin-injections
-  {:dispatch! (fn [event]
-                (dispatch-transient-event! event)
-                (refresh-async!))
-   :migrate-tenant-schema! db/migrate-tenant-schema!
+  {:migrate-tenant-schema! db/migrate-tenant-schema!
    :ensure-gis-user-present! (fn [args]
                                (log/info "Creating GIS user:" (:username args))
                                (db/with-db [conn {}]
@@ -78,23 +61,36 @@
                               (db/with-db [conn {}]
                                 (gis-user/ensure-absent! conn args)))})
 
+(defn- get-and-reset! [*atom new-value]
+  (let [[old-value _] (reset-vals! *atom new-value)]
+    old-value))
+
 (defn refresh-now! []
   (let [cached @*cache
         updated (db/with-db [conn {:read-only? true}]
-                  (apply-new-events cached conn))]
-    (when-not (identical? cached updated)
-      ;; with concurrent requests, only one of them will update the cache
-      (when (compare-and-set! *cache cached updated)
-        (log/info "Updated from revision" (:event/global-revision (:last-event cached))
-                  "to" (:event/global-revision (:last-event updated)))))
+                  (apply-new-events cached conn))
+        *transient-events (atom [])
+        dispatch-transient-event! (fn dispatch-transient-event! [event]
+                                    (assert (:event/transient? event) {:event event})
+                                    (swap! *transient-events conj event))
+        db-admin-injections (assoc db-admin-injections :dispatch! dispatch-transient-event!)]
+    (loop []
+      (when-not (identical? cached updated)
+        ;; with concurrent requests, only one of them will update the cache
+        (when (compare-and-set! *cache cached updated)
+          (log/info "Updated from revision" (:event/global-revision (:last-event cached))
+                    "to" (:event/global-revision (:last-event updated)))))
 
-    (let [transient-events (read-transient-events!)]
-      (when-not (empty? transient-events)
-        (swap! *cache apply-events transient-events)
-        (log/info "Updated with" (count transient-events) "transient events")))
+      (let [transient-events (get-and-reset! *transient-events [])]
+        (when-not (empty? transient-events)
+          (swap! *cache apply-events transient-events)
+          (log/info "Updated with" (count transient-events) "transient events")))
 
-    ;; run process managers
-    (db-admin/process-pending-changes! (cached-state) db-admin-injections)))
+      ;; run process managers
+      (db-admin/process-pending-changes! (cached-state) db-admin-injections)
+
+      (when-not (empty? @*transient-events)
+        (recur)))))
 
 (mount/defstate refresher
   :start (poller/create (fn []
