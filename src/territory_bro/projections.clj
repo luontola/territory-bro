@@ -49,7 +49,6 @@
 
 ;;; Refreshing
 
-(declare refresh-async!)
 (def db-admin-injections
   {:migrate-tenant-schema! db/migrate-tenant-schema!
    :ensure-gis-user-present! (fn [args]
@@ -73,19 +72,20 @@
     (seq @*transient-events)))
 
 (defn refresh-now! []
-  (let [cached @*cache
-        updated (db/with-db [conn {:read-only? true}]
-                  (apply-new-events cached conn))]
-    (when-not (identical? cached updated)
-      ;; with concurrent requests, only one of them will update the cache
-      (when (compare-and-set! *cache cached updated)
-        (log/info "Updated from revision" (:event/global-revision (:last-event cached))
-                  "to" (:event/global-revision (:last-event updated)))))
+  (let [[old new] (swap-vals! *cache (fn [cached]
+                                       ;; Though this reads the database and is thus a slow
+                                       ;; operation, retries on updating the atom should not
+                                       ;; happen because it's called from a single thread.
+                                       (db/with-db [conn {:read-only? true}]
+                                         (apply-new-events cached conn))))]
+    (when-not (identical? old new)
+      (log/info "Updated from revision" (:event/global-revision (:last-event old))
+                "to" (:event/global-revision (:last-event new)))))
 
-    (when-some [transient-events (run-process-managers! (cached-state))]
-      (swap! *cache apply-events transient-events)
-      (log/info "Updated with" (count transient-events) "transient events")
-      (recur))))
+  (when-some [transient-events (run-process-managers! (cached-state))]
+    (swap! *cache apply-events transient-events)
+    (log/info "Updated with" (count transient-events) "transient events")
+    (recur)))
 
 (mount/defstate refresher
   :start (poller/create (fn []
