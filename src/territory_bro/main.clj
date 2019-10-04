@@ -34,9 +34,7 @@
   (db/check-database-version 11)
   (db/migrate-master-schema!)
   ;; process managers will migrate tenant schemas and create missing GIS users
-  ;; TODO: run in the main thread to not miss exceptions (will need to change `dispatch!` to not call `refresh-async!`)
-  (projections/refresh-async!)
-  (projections/await-refreshed))
+  (projections/refresh!))
 
 (defn- log-mount-states [result]
   (doseq [component (:started result)]

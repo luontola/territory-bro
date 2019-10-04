@@ -69,7 +69,7 @@
 
     (seq @*transient-events)))
 
-(defn refresh-now! []
+(defn refresh! []
   (let [[old new] (swap-vals! *cache (fn [cached]
                                        ;; Though this reads the database and is thus a slow
                                        ;; operation, retries on updating the atom should not
@@ -86,8 +86,7 @@
     (recur)))
 
 (mount/defstate refresher
-  :start (poller/create (fn []
-                          (refresh-now!)))
+  :start (poller/create refresh!)
   :stop (poller/shutdown! refresher))
 
 (defn refresh-async! []
@@ -109,4 +108,4 @@
 (comment
   (count (:state @*cache))
   (refresh-async!)
-  (refresh-now!))
+  (refresh!))
