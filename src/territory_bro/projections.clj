@@ -61,36 +61,31 @@
                               (db/with-db [conn {}]
                                 (gis-user/ensure-absent! conn args)))})
 
-(defn- get-and-reset! [*atom new-value]
-  (let [[old-value _] (reset-vals! *atom new-value)]
-    old-value))
-
-(defn refresh-now! []
-  (let [cached @*cache
-        updated (db/with-db [conn {:read-only? true}]
-                  (apply-new-events cached conn))
-        *transient-events (atom [])
+(defn- run-process-managers! [state]
+  (let [*transient-events (atom [])
         dispatch-transient-event! (fn dispatch-transient-event! [event]
                                     (assert (:event/transient? event) {:event event})
                                     (swap! *transient-events conj event))
         db-admin-injections (assoc db-admin-injections :dispatch! dispatch-transient-event!)]
-    (loop []
-      (when-not (identical? cached updated)
-        ;; with concurrent requests, only one of them will update the cache
-        (when (compare-and-set! *cache cached updated)
-          (log/info "Updated from revision" (:event/global-revision (:last-event cached))
-                    "to" (:event/global-revision (:last-event updated)))))
 
-      (let [transient-events (get-and-reset! *transient-events [])]
-        (when-not (empty? transient-events)
-          (swap! *cache apply-events transient-events)
-          (log/info "Updated with" (count transient-events) "transient events")))
+    (db-admin/process-pending-changes! state db-admin-injections)
 
-      ;; run process managers
-      (db-admin/process-pending-changes! (cached-state) db-admin-injections)
+    (seq @*transient-events)))
 
-      (when-not (empty? @*transient-events)
-        (recur)))))
+(defn refresh-now! []
+  (let [cached @*cache
+        updated (db/with-db [conn {:read-only? true}]
+                  (apply-new-events cached conn))]
+    (when-not (identical? cached updated)
+      ;; with concurrent requests, only one of them will update the cache
+      (when (compare-and-set! *cache cached updated)
+        (log/info "Updated from revision" (:event/global-revision (:last-event cached))
+                  "to" (:event/global-revision (:last-event updated)))))
+
+    (when-some [transient-events (run-process-managers! (cached-state))]
+      (swap! *cache apply-events transient-events)
+      (log/info "Updated with" (count transient-events) "transient events")
+      (recur))))
 
 (mount/defstate refresher
   :start (poller/create (fn []
