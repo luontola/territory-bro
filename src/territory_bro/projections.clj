@@ -52,11 +52,9 @@
 (def db-admin-injections
   {:migrate-tenant-schema! db/migrate-tenant-schema!
    :ensure-gis-user-present! (fn [args]
-                               (log/info "Creating GIS user:" (:username args))
                                (db/with-db [conn {}]
                                  (gis-user/ensure-present! conn args)))
    :ensure-gis-user-absent! (fn [args]
-                              (log/info "Deleting GIS user:" (:username args))
                               (db/with-db [conn {}]
                                 (gis-user/ensure-absent! conn args)))})
 

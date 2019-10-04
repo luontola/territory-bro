@@ -190,6 +190,7 @@
 ;;; Database users
 
 (defn ensure-present! [conn {:keys [username password schema]}]
+  (log/info "Creating GIS user:" username)
   (assert username)
   (assert password)
   (assert schema)
@@ -256,6 +257,7 @@
   nil)
 
 (defn ensure-absent! [conn {:keys [username schema]}]
+  (log/info "Deleting GIS user:" username)
   (drop-role-cascade! conn username [schema]))
 
 (defn delete-gis-user! [conn state cong-id user-id]
