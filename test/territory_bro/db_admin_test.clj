@@ -48,37 +48,23 @@
 (defn- apply-events [events]
   (testutil/apply-events db-admin/projection events))
 
+(defn- generate-commands [events]
+  (->> events apply-events db-admin/generate-commands))
+
 (deftest projection-test
   (testing "congregation created"
-    (let [events [cong-created-event]
-          state (apply-events events)
-          expected {::db-admin/congregations {cong-id {:congregation/id cong-id
-                                                       :congregation/schema-name "cong1_schema"}}
-                    ::db-admin/pending-schemas #{{:congregation/id cong-id
-                                                  :congregation/schema-name "cong1_schema"}}}]
-      (is (= expected state))
+    (let [events [cong-created-event]]
       (is (= [{:command/type :db-admin.command/migrate-tenant-schema
                :congregation/id cong-id
                :congregation/schema-name "cong1_schema"}]
-             (db-admin/generate-commands state)))
+             (generate-commands events)))
 
       (testing "> schema is present"
-        (let [events (conj events schema-is-present-event)
-              state (apply-events events)
-              expected (merge expected {::db-admin/pending-schemas #{}})]
-          (is (= expected state))
-          (is (empty? (db-admin/generate-commands state)))))
+        (let [events (conj events schema-is-present-event)]
+          (is (empty? (generate-commands events)))))
 
       (testing "> GIS user created"
-        (let [events (conj events user-created-event)
-              state (apply-events events)
-              expected (merge expected
-                              {::db-admin/pending-gis-users
-                               {[cong-id user-id] {::db-admin/desired-state :present
-                                                   :gis-user/username "username123"
-                                                   :gis-user/password "password123"
-                                                   :congregation/schema-name "cong1_schema"}}})]
-          (is (= expected state))
+        (let [events (conj events user-created-event)]
           ;; TODO: these tests should not care about tenant schema migration
           (is (= [{:command/type :db-admin.command/migrate-tenant-schema
                    :congregation/id cong-id
@@ -89,23 +75,17 @@
                    :user/id user-id
                    :gis-user/password "password123"
                    :gis-user/username "username123"}]
-                 (db-admin/generate-commands state)))
+                 (generate-commands events)))
 
           (testing "> GIS user is present"
-            (let [events (conj events user-is-present-event)
-                  state (apply-events events)
-                  expected (merge expected {::db-admin/pending-gis-users {}})]
-              (is (= expected state))
+            (let [events (conj events user-is-present-event)]
               (is (= [{:command/type :db-admin.command/migrate-tenant-schema
                        :congregation/id cong-id
                        :congregation/schema-name "cong1_schema"}]
-                     (db-admin/generate-commands state)))))
+                     (generate-commands events)))))
 
           (testing "> GIS user is absent (undesired)"
-            (let [events (conj events user-is-absent-event)
-                  state (apply-events events)]
-              (is (= expected state)
-                  "no change")
+            (let [events (conj events user-is-absent-event)]
               (is (= [{:command/type :db-admin.command/migrate-tenant-schema
                        :congregation/id cong-id
                        :congregation/schema-name "cong1_schema"}
@@ -115,17 +95,10 @@
                        :user/id user-id
                        :gis-user/password "password123"
                        :gis-user/username "username123"}]
-                     (db-admin/generate-commands state)))))
+                     (generate-commands events)))))
 
           (testing "> GIS user deleted"
-            (let [events (conj events user-deleted-event)
-                  state (apply-events events)
-                  expected (merge expected
-                                  {::db-admin/pending-gis-users
-                                   {[cong-id user-id] {::db-admin/desired-state :absent
-                                                       :gis-user/username "username123"
-                                                       :congregation/schema-name "cong1_schema"}}})]
-              (is (= expected state))
+            (let [events (conj events user-deleted-event)]
               (is (= [{:command/type :db-admin.command/migrate-tenant-schema
                        :congregation/id cong-id
                        :congregation/schema-name "cong1_schema"}
@@ -134,13 +107,10 @@
                        :congregation/schema-name "cong1_schema"
                        :user/id user-id
                        :gis-user/username "username123"}]
-                     (db-admin/generate-commands state)))
+                     (generate-commands events)))
 
               (testing "> GIS user is present (undesired)"
-                (let [events (conj events user-is-present-event)
-                      state (apply-events events)]
-                  (is (= expected state)
-                      "no change")
+                (let [events (conj events user-is-present-event)]
                   (is (= [{:command/type :db-admin.command/migrate-tenant-schema
                            :congregation/id cong-id
                            :congregation/schema-name "cong1_schema"}
@@ -149,17 +119,14 @@
                            :congregation/schema-name "cong1_schema"
                            :user/id user-id
                            :gis-user/username "username123"}]
-                         (db-admin/generate-commands state)))))
+                         (generate-commands events)))))
 
               (testing "> GIS user is absent"
-                (let [events (conj events user-is-absent-event)
-                      state (apply-events events)
-                      expected (merge expected {::db-admin/pending-gis-users {}})]
-                  (is (= expected state))
+                (let [events (conj events user-is-absent-event)]
                   (is (= [{:command/type :db-admin.command/migrate-tenant-schema
                            :congregation/id cong-id
                            :congregation/schema-name "cong1_schema"}]
-                         (db-admin/generate-commands state))))))))))))
+                         (generate-commands events))))))))))))
 
 (deftest process-test
   (let [spy (spy/spy)
