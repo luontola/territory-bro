@@ -49,9 +49,11 @@
   (testutil/apply-events db-admin/projection events))
 
 (defn- generate-commands [events]
-  (->> events apply-events db-admin/generate-commands))
+  (-> events
+      apply-events
+      db-admin/generate-commands))
 
-(deftest projection-test
+(deftest process-manager-test
   (testing "congregation created"
     (let [events [cong-created-event]]
       (is (= [{:command/type :db-admin.command/migrate-tenant-schema
@@ -59,74 +61,48 @@
                :congregation/schema-name "cong1_schema"}]
              (generate-commands events)))
 
-      (testing "> schema is present"
+      (testing "> GIS schema is present"
         (let [events (conj events schema-is-present-event)]
-          (is (empty? (generate-commands events)))))
+          (is (empty? (generate-commands events)))
 
-      (testing "> GIS user created"
-        (let [events (conj events user-created-event)]
-          ;; TODO: these tests should not care about tenant schema migration
-          (is (= [{:command/type :db-admin.command/migrate-tenant-schema
-                   :congregation/id cong-id
-                   :congregation/schema-name "cong1_schema"}
-                  {:command/type :db-admin.command/ensure-gis-user-present
-                   :congregation/id cong-id
-                   :congregation/schema-name "cong1_schema"
-                   :user/id user-id
-                   :gis-user/password "password123"
-                   :gis-user/username "username123"}]
-                 (generate-commands events)))
-
-          (testing "> GIS user is present"
-            (let [events (conj events user-is-present-event)]
-              (is (= [{:command/type :db-admin.command/migrate-tenant-schema
-                       :congregation/id cong-id
-                       :congregation/schema-name "cong1_schema"}]
-                     (generate-commands events)))))
-
-          (testing "> GIS user is absent (undesired)"
-            (let [events (conj events user-is-absent-event)]
-              (is (= [{:command/type :db-admin.command/migrate-tenant-schema
-                       :congregation/id cong-id
-                       :congregation/schema-name "cong1_schema"}
-                      {:command/type :db-admin.command/ensure-gis-user-present
+          (testing "> GIS user created"
+            (let [events (conj events user-created-event)]
+              (is (= [{:command/type :db-admin.command/ensure-gis-user-present
                        :congregation/id cong-id
                        :congregation/schema-name "cong1_schema"
                        :user/id user-id
                        :gis-user/password "password123"
                        :gis-user/username "username123"}]
-                     (generate-commands events)))))
-
-          (testing "> GIS user deleted"
-            (let [events (conj events user-deleted-event)]
-              (is (= [{:command/type :db-admin.command/migrate-tenant-schema
-                       :congregation/id cong-id
-                       :congregation/schema-name "cong1_schema"}
-                      {:command/type :db-admin.command/ensure-gis-user-absent
-                       :congregation/id cong-id
-                       :congregation/schema-name "cong1_schema"
-                       :user/id user-id
-                       :gis-user/username "username123"}]
                      (generate-commands events)))
 
-              (testing "> GIS user is present (undesired)"
+              (testing "> GIS user is present"
                 (let [events (conj events user-is-present-event)]
-                  (is (= [{:command/type :db-admin.command/migrate-tenant-schema
-                           :congregation/id cong-id
-                           :congregation/schema-name "cong1_schema"}
-                          {:command/type :db-admin.command/ensure-gis-user-absent
+                  (is (empty? (generate-commands events)))))
+
+              (testing "> GIS user is absent (undesired)"
+                (let [before (generate-commands events)
+                      events (conj events user-is-absent-event)]
+                  (is (= before (generate-commands events))
+                      "no change")))
+
+              (testing "> GIS user deleted"
+                (let [events (conj events user-deleted-event)]
+                  (is (= [{:command/type :db-admin.command/ensure-gis-user-absent
                            :congregation/id cong-id
                            :congregation/schema-name "cong1_schema"
                            :user/id user-id
                            :gis-user/username "username123"}]
-                         (generate-commands events)))))
+                         (generate-commands events)))
 
-              (testing "> GIS user is absent"
-                (let [events (conj events user-is-absent-event)]
-                  (is (= [{:command/type :db-admin.command/migrate-tenant-schema
-                           :congregation/id cong-id
-                           :congregation/schema-name "cong1_schema"}]
-                         (generate-commands events))))))))))))
+                  (testing "> GIS user is present (undesired)"
+                    (let [before (generate-commands events)
+                          events (conj events user-is-present-event)]
+                      (is (= before (generate-commands events))
+                          "no change")))
+
+                  (testing "> GIS user is absent"
+                    (let [events (conj events user-is-absent-event)]
+                      (is (empty? (generate-commands events))))))))))))))
 
 (deftest process-test
   (let [spy (spy/spy)
