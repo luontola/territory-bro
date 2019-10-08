@@ -87,8 +87,7 @@
                 :congregation/id cong-id
                 :congregation/schema-name (:congregation/schema-name gis-user)}))))
 
-(defn handle-command! [command {:keys [dispatch!
-                                       migrate-tenant-schema!
+(defn handle-command! [command {:keys [migrate-tenant-schema!
                                        ensure-gis-user-present!
                                        ensure-gis-user-absent!]}]
   (commands/validate-command command)
@@ -97,31 +96,31 @@
     :db-admin.command/migrate-tenant-schema
     (do
       (migrate-tenant-schema! (:congregation/schema-name command))
-      (dispatch! {:event/type :db-admin.event/gis-schema-is-present
-                  :event/version 1
-                  :event/transient? true
-                  :congregation/id (:congregation/id command)
-                  :congregation/schema-name (:congregation/schema-name command)}))
+      [{:event/type :db-admin.event/gis-schema-is-present
+        :event/version 1
+        :event/transient? true
+        :congregation/id (:congregation/id command)
+        :congregation/schema-name (:congregation/schema-name command)}])
 
     :db-admin.command/ensure-gis-user-present
     (do
       (ensure-gis-user-present! {:username (:gis-user/username command)
                                  :password (:gis-user/password command)
                                  :schema (:congregation/schema-name command)})
-      (dispatch! {:event/type :db-admin.event/gis-user-is-present
-                  :event/version 1
-                  :event/transient? true
-                  :congregation/id (:congregation/id command)
-                  :user/id (:user/id command)
-                  :gis-user/username (:gis-user/username command)}))
+      [{:event/type :db-admin.event/gis-user-is-present
+        :event/version 1
+        :event/transient? true
+        :congregation/id (:congregation/id command)
+        :user/id (:user/id command)
+        :gis-user/username (:gis-user/username command)}])
 
     :db-admin.command/ensure-gis-user-absent
     (do
       (ensure-gis-user-absent! {:username (:gis-user/username command)
                                 :schema (:congregation/schema-name command)})
-      (dispatch! {:event/type :db-admin.event/gis-user-is-absent
-                  :event/version 1
-                  :event/transient? true
-                  :congregation/id (:congregation/id command)
-                  :user/id (:user/id command)
-                  :gis-user/username (:gis-user/username command)}))))
+      [{:event/type :db-admin.event/gis-user-is-absent
+        :event/version 1
+        :event/transient? true
+        :congregation/id (:congregation/id command)
+        :user/id (:user/id command)
+        :gis-user/username (:gis-user/username command)}])))

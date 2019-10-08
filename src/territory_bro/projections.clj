@@ -60,19 +60,14 @@
                                 (gis-user/ensure-absent! conn args)))})
 
 (defn- run-process-managers! [state]
-  (let [*transient-events (atom [])
-        dispatch-transient-event! (fn dispatch-transient-event! [event]
-                                    ;; TODO: use territory-bro.congregation/enrich-event or similar?
-                                    ;; TODO: validate events
-                                    ;; TODO: get events as return value instead of this imperative dispatch
-                                    (assert (:event/transient? event) {:event event})
-                                    (swap! *transient-events conj event))
-        db-admin-injections (assoc db-admin-injections :dispatch! dispatch-transient-event!)]
-
-    (doseq [command (db-admin/generate-commands state (select-keys config/env [:now]))]
-      (db-admin/handle-command! command db-admin-injections))
-
-    (seq @*transient-events)))
+  (let [commands (-> state
+                     (db-admin/generate-commands {:now (:now config/env)}))
+        events (->> commands
+                    (mapcat #(db-admin/handle-command! % db-admin-injections))
+                    (doall))]
+    ;; TODO: use territory-bro.congregation/enrich-event or similar?
+    ;; TODO: validate events
+    (seq events)))
 
 (defn refresh! []
   (let [[old new] (swap-vals! *cache (fn [cached]
