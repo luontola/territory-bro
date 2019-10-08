@@ -18,7 +18,8 @@
 (def ^:private uncaught-exception-handler
   (reify Thread$UncaughtExceptionHandler
     (uncaughtException [_this _thread exception]
-      (log/error exception "Uncaught exception in worker thread"))))
+     ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
+      (log/error exception (str "Uncaught exception in worker thread\n" (pr-str exception))))))
 
 (def ^:private thread-factory
   (-> (ThreadFactoryBuilder.)

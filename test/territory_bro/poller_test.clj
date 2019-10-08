@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.poller-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [territory-bro.poller :as poller])
   (:import (ch.qos.logback.classic Logger)
            (ch.qos.logback.classic.spi LoggingEvent)
@@ -120,7 +121,7 @@
 
       (is (= 1 (count (.-list appender))) "log event count")
       (let [event ^LoggingEvent (first (.-list appender))]
-        (is (= "Uncaught exception in worker thread" (.getMessage event)))
+        (is (str/starts-with? (.getMessage event) "Uncaught exception in worker thread"))
         (is (= "dummy" (.getMessage (.getThrowableProxy event)))))))
 
   (testing "await blocks until the current task is finished"

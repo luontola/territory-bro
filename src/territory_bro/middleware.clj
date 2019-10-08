@@ -22,7 +22,11 @@
     (try
       (handler req)
       (catch Throwable t
-        (log/error t "Uncaught exception" (pr-str (select-keys req [:request-method :uri])))
+        ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
+        (log/error t (str "Uncaught exception "
+                          (pr-str (select-keys req [:request-method :uri]))
+                          "\n"
+                          (pr-str t)))
         (-> (internal-server-error "Internal Server Error")
             (response/content-type "text/html; charset=utf-8"))))))
 

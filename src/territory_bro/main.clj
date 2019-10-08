@@ -57,7 +57,8 @@
       (.addShutdownHook (Thread. ^Runnable stop-app)))
     (log/info "Started")
     (catch Throwable t
-      (log/error t "Failed to start")
+      ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
+      (log/error t (str "Failed to start\n" (pr-str t)))
       (stop-app))))
 
 (defn -main [& _args]
