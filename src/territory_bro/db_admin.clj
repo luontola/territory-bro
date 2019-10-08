@@ -3,7 +3,9 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.db-admin
-  (:require [territory-bro.commands :as commands]))
+  (:require [territory-bro.commands :as commands]
+            [territory-bro.db :as db]
+            [territory-bro.gis-user :as gis-user]))
 
 (defmulti projection (fn [_state event] (:event/type event)))
 (defmethod projection :default [state _event] state)
@@ -120,8 +122,20 @@
     :user/id (:user/id command)
     :gis-user/username (:gis-user/username command)}])
 
-(defn handle-command! [command injections]
-  (commands/validate-command command)
-  ;; TODO: use territory-bro.congregation/enrich-event or similar?
-  ;; TODO: validate events
-  (command-handler command injections))
+(def ^:private default-injections
+  {:migrate-tenant-schema! db/migrate-tenant-schema!
+   :ensure-gis-user-present! (fn [args]
+                               (db/with-db [conn {}]
+                                 (gis-user/ensure-present! conn args)))
+   :ensure-gis-user-absent! (fn [args]
+                              (db/with-db [conn {}]
+                                (gis-user/ensure-absent! conn args)))})
+
+(defn handle-command!
+  ([command]
+   (handle-command! command default-injections))
+  ([command injections]
+   (commands/validate-command command)
+   ;; TODO: use territory-bro.congregation/enrich-event or similar?
+   ;; TODO: validate events
+   (command-handler command injections)))

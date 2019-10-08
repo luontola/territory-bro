@@ -50,20 +50,11 @@
 
 ;;; Refreshing
 
-(def db-admin-injections
-  {:migrate-tenant-schema! db/migrate-tenant-schema!
-   :ensure-gis-user-present! (fn [args]
-                               (db/with-db [conn {}]
-                                 (gis-user/ensure-present! conn args)))
-   :ensure-gis-user-absent! (fn [args]
-                              (db/with-db [conn {}]
-                                (gis-user/ensure-absent! conn args)))})
-
 (defn- run-process-managers! [state]
   (let [commands (-> state
                      (db-admin/generate-commands {:now (:now config/env)}))
         events (->> commands
-                    (mapcat #(db-admin/handle-command! % db-admin-injections))
+                    (mapcat #(db-admin/handle-command! %))
                     (doall))]
     (seq events)))
 
