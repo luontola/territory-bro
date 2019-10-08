@@ -2,7 +2,8 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.db-admin)
+(ns territory-bro.db-admin
+  (:require [territory-bro.commands :as commands]))
 
 (defmulti projection (fn [_state event] (:event/type event)))
 (defmethod projection :default [state _event] state)
@@ -57,61 +58,70 @@
   [state event]
   (remove-pending-gis-user state event :absent))
 
-(defn generate-commands [state]
+(def ^:private system (str (ns-name *ns*)))
+
+(defn generate-commands [state {:keys [now]}]
   (concat
    (for [tenant (::pending-schemas state)]
      {:command/type :db-admin.command/migrate-tenant-schema
+      :command/time (now)
+      :command/system system
       :congregation/id (:congregation/id tenant)
       :congregation/schema-name (:congregation/schema-name tenant)})
 
    (for [[[cong-id user-id] gis-user] (::pending-gis-users state)]
      (case (::desired-state gis-user)
        :present {:command/type :db-admin.command/ensure-gis-user-present
+                 :command/time (now)
+                 :command/system system
                  :user/id user-id
                  :gis-user/username (:gis-user/username gis-user)
                  :gis-user/password (:gis-user/password gis-user)
                  :congregation/id cong-id
                  :congregation/schema-name (:congregation/schema-name gis-user)}
        :absent {:command/type :db-admin.command/ensure-gis-user-absent
+                :command/time (now)
+                :command/system system
                 :user/id user-id
                 :gis-user/username (:gis-user/username gis-user)
                 :congregation/id cong-id
                 :congregation/schema-name (:congregation/schema-name gis-user)}))))
 
-(defn process-pending-changes! [state {:keys [dispatch!
-                                              migrate-tenant-schema!
-                                              ensure-gis-user-present!
-                                              ensure-gis-user-absent!]}]
-  (doseq [command (generate-commands state)]
-    (case (:command/type command)
-      :db-admin.command/migrate-tenant-schema
-      (do
-        (migrate-tenant-schema! (:congregation/schema-name command))
-        (dispatch! {:event/type :db-admin.event/gis-schema-is-present
-                    :event/version 1
-                    :event/transient? true
-                    :congregation/id (:congregation/id command)
-                    :congregation/schema-name (:congregation/schema-name command)}))
+(defn handle-command! [command {:keys [dispatch!
+                                       migrate-tenant-schema!
+                                       ensure-gis-user-present!
+                                       ensure-gis-user-absent!]}]
+  (commands/validate-command command)
 
-      :db-admin.command/ensure-gis-user-present
-      (do
-        (ensure-gis-user-present! {:username (:gis-user/username command)
-                                   :password (:gis-user/password command)
-                                   :schema (:congregation/schema-name command)})
-        (dispatch! {:event/type :db-admin.event/gis-user-is-present
-                    :event/version 1
-                    :event/transient? true
-                    :congregation/id (:congregation/id command)
-                    :user/id (:user/id command)
-                    :gis-user/username (:gis-user/username command)}))
+  (case (:command/type command)
+    :db-admin.command/migrate-tenant-schema
+    (do
+      (migrate-tenant-schema! (:congregation/schema-name command))
+      (dispatch! {:event/type :db-admin.event/gis-schema-is-present
+                  :event/version 1
+                  :event/transient? true
+                  :congregation/id (:congregation/id command)
+                  :congregation/schema-name (:congregation/schema-name command)}))
 
-      :db-admin.command/ensure-gis-user-absent
-      (do
-        (ensure-gis-user-absent! {:username (:gis-user/username command)
-                                  :schema (:congregation/schema-name command)})
-        (dispatch! {:event/type :db-admin.event/gis-user-is-absent
-                    :event/version 1
-                    :event/transient? true
-                    :congregation/id (:congregation/id command)
-                    :user/id (:user/id command)
-                    :gis-user/username (:gis-user/username command)})))))
+    :db-admin.command/ensure-gis-user-present
+    (do
+      (ensure-gis-user-present! {:username (:gis-user/username command)
+                                 :password (:gis-user/password command)
+                                 :schema (:congregation/schema-name command)})
+      (dispatch! {:event/type :db-admin.event/gis-user-is-present
+                  :event/version 1
+                  :event/transient? true
+                  :congregation/id (:congregation/id command)
+                  :user/id (:user/id command)
+                  :gis-user/username (:gis-user/username command)}))
+
+    :db-admin.command/ensure-gis-user-absent
+    (do
+      (ensure-gis-user-absent! {:username (:gis-user/username command)
+                                :schema (:congregation/schema-name command)})
+      (dispatch! {:event/type :db-admin.event/gis-user-is-absent
+                  :event/version 1
+                  :event/transient? true
+                  :congregation/id (:congregation/id command)
+                  :user/id (:user/id command)
+                  :gis-user/username (:gis-user/username command)}))))

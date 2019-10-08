@@ -5,6 +5,7 @@
 (ns territory-bro.projections
   (:require [clojure.tools.logging :as log]
             [mount.core :as mount]
+            [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.db-admin :as db-admin]
@@ -61,11 +62,15 @@
 (defn- run-process-managers! [state]
   (let [*transient-events (atom [])
         dispatch-transient-event! (fn dispatch-transient-event! [event]
+                                    ;; TODO: use territory-bro.congregation/enrich-event or similar?
+                                    ;; TODO: validate events
+                                    ;; TODO: get events as return value instead of this imperative dispatch
                                     (assert (:event/transient? event) {:event event})
                                     (swap! *transient-events conj event))
         db-admin-injections (assoc db-admin-injections :dispatch! dispatch-transient-event!)]
 
-    (db-admin/process-pending-changes! state db-admin-injections)
+    (doseq [command (db-admin/generate-commands state (select-keys config/env [:now]))]
+      (db-admin/handle-command! command db-admin-injections))
 
     (seq @*transient-events)))
 

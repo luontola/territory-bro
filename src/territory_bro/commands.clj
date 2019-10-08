@@ -9,20 +9,50 @@
   (:import (java.time Instant)
            (java.util UUID)))
 
-(s/defschema CommandBase
+(s/defschema UserCommand
   {:command/type s/Keyword
    :command/time Instant
    :command/user UUID})
 
+(s/defschema SystemCommand
+  {:command/type s/Keyword
+   :command/time Instant
+   :command/system s/Str})
+
 (s/defschema RenameCongregation
-  (assoc CommandBase
+  (assoc UserCommand
          :command/type (s/eq :congregation.command/rename-congregation)
          :congregation/id UUID
          :congregation/name s/Str))
 
+(s/defschema EnsureGisUserAbsent
+  (assoc SystemCommand
+         :command/type (s/eq :db-admin.command/ensure-gis-user-absent)
+         :user/id UUID
+         :gis-user/username s/Str
+         :congregation/id UUID
+         :congregation/schema-name s/Str))
+
+(s/defschema EnsureGisUserPresent
+  (assoc SystemCommand
+         :command/type (s/eq :db-admin.command/ensure-gis-user-present)
+         :user/id UUID
+         :gis-user/username s/Str
+         :gis-user/password s/Str
+         :congregation/id UUID
+         :congregation/schema-name s/Str))
+
+(s/defschema MigrateTenantSchema
+  (assoc SystemCommand
+         :command/type (s/eq :db-admin.command/migrate-tenant-schema)
+         :congregation/id UUID
+         :congregation/schema-name s/Str))
 
 (def command-schemas
-  {:congregation.command/rename-congregation RenameCongregation})
+  {:congregation.command/rename-congregation RenameCongregation
+   :db-admin.command/ensure-gis-user-absent EnsureGisUserAbsent
+   :db-admin.command/ensure-gis-user-present EnsureGisUserPresent
+   :db-admin.command/migrate-tenant-schema MigrateTenantSchema})
 
 (s/defschema Command
   (apply refined/dispatch-on :command/type (flatten (seq command-schemas))))
