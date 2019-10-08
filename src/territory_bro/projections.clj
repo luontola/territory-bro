@@ -65,8 +65,6 @@
         events (->> commands
                     (mapcat #(db-admin/handle-command! % db-admin-injections))
                     (doall))]
-    ;; TODO: use territory-bro.congregation/enrich-event or similar?
-    ;; TODO: validate events
     (seq events)))
 
 (defn refresh! []
