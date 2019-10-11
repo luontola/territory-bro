@@ -7,6 +7,7 @@ import {addUser, getCongregationById} from "../api";
 import {Link} from "@reach/router";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 import sortBy from "lodash/sortBy";
+import styles from "./UsersPage.css";
 
 const IdentityProvider = ({user}) => {
   const sub = user.sub || '';
@@ -20,7 +21,7 @@ const IdentityProvider = ({user}) => {
   return sub;
 };
 
-const UsersPage = ({congregationId, navigate}) => {
+const UsersPage = ({congregationId}) => {
   const [newUser, setNewUser] = useState(null);
   const congregation = getCongregationById(congregationId);
   const joinPageUrl = `${location.protocol}//${location.host}/join`;
@@ -90,17 +91,9 @@ const UsersPage = ({congregationId, navigate}) => {
           <tbody>
           {users.map(user => (
             <tr key={user.id}
-                style={{backgroundColor: user.id === newUser ? '#ffc' : ''}}>
-              <td style={{textAlign: 'center', padding: 0}}>
-                {user.picture &&
-                <img src={user.picture}
-                     alt=""
-                     style={{
-                       height: '3em',
-                       width: '3em',
-                       display: 'block', // needed to avoid a mysterious 4px margin below the image
-                     }}/>
-                }
+                className={user.id === newUser ? styles.newUser : null}>
+              <td className={styles.profilePicture}>
+                {user.picture && <img src={user.picture} alt=""/>}
               </td>
               <td>{user.name || user.id}</td>
               <td>{user.email} {(user.email && !user.emailVerified) && <i>(Unverified)</i>}</td>

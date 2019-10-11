@@ -1,0 +1,15 @@
+
+tr.newUser {
+    background-color: #ffc;
+}
+
+td.profilePicture {
+    text-align: center;
+    padding: 0;
+}
+
+td.profilePicture img {
+    height: 3em;
+    width: 3em;
+    display: block; /* needed to avoid a mysterious 4px margin below the image */
+}
