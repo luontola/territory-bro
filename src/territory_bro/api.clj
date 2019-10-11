@@ -86,8 +86,8 @@
                             (fix-user-for-liberator)
                             (assoc :authenticated (not (nil? auth/*user*))))})))
 
-(defn- current-user-id [conn]
-  (let [id (:user/id (user/get-by-subject conn (:sub auth/*user*)))]
+(defn- current-user-id []
+  (let [id (:user/id auth/*user*)]
     (assert id)
     id))
 
@@ -98,7 +98,7 @@
       (assert (not (str/blank? name)) ; TODO: test this
               {:name name})
       (db/with-db [conn {}]
-        (let [user-id (current-user-id conn)]
+        (let [user-id (current-user-id)]
           (binding [events/*current-user* user-id]
             (let [cong-id (congregation/create-congregation! conn name)]
               (congregation/grant! conn cong-id user-id :view-congregation)
@@ -109,11 +109,10 @@
 (defn list-congregations [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
-    (db/with-db [conn {:read-only? true}]
-      (ok (->> (congregation/get-my-congregations (projections/cached-state) (current-user-id conn))
-               (map (fn [congregation]
-                      {:id (:congregation/id congregation)
-                       :name (:congregation/name congregation)})))))))
+    (ok (->> (congregation/get-my-congregations (projections/cached-state) (current-user-id))
+             (map (fn [congregation]
+                    {:id (:congregation/id congregation)
+                     :name (:congregation/name congregation)}))))))
 
 (def ^:private format-key-for-api (memoize (comp csk/->camelCaseString name)))
 
@@ -129,7 +128,7 @@
     (require-logged-in!)
     (db/with-db [conn {:read-only? true}]
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-            user-id (current-user-id conn)
+            user-id (current-user-id)
             state (projections/cached-state)
             congregation (congregation/get-my-congregation state cong-id user-id)]
         (when-not congregation
@@ -149,7 +148,7 @@
 (defn- api-command! [conn command]
   (let [command (assoc command
                        :command/time ((:now config/env))
-                       :command/user (current-user-id conn))]
+                       :command/user (current-user-id))]
     (try
       (congregation/command! conn (projections/cached-state)
                              command)
@@ -181,23 +180,22 @@
 (defn download-qgis-project [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
-    (db/with-db [conn {:read-only? true}]
-      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-            user-id (current-user-id conn)
-            congregation (congregation/get-my-congregation (projections/cached-state) cong-id user-id)
-            gis-user (gis-user/get-gis-user (projections/cached-state) cong-id user-id)]
-        (when-not gis-user
-          (forbidden! "No GIS access"))
-        (let [content (qgis/generate-project {:database-host (:gis-database-host config/env)
-                                              :database-name (:gis-database-name config/env)
-                                              :database-schema (:congregation/schema-name congregation)
-                                              :database-username (:gis-user/username gis-user)
-                                              :database-password (:gis-user/password gis-user)
-                                              :database-ssl-mode (:gis-database-ssl-mode config/env)})
-              file-name (qgis/project-file-name (:congregation/name congregation))]
-          (-> (ok content)
-              (response/content-type "application/octet-stream")
-              (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\""))))))))
+    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+          user-id (current-user-id)
+          congregation (congregation/get-my-congregation (projections/cached-state) cong-id user-id)
+          gis-user (gis-user/get-gis-user (projections/cached-state) cong-id user-id)]
+      (when-not gis-user
+        (forbidden! "No GIS access"))
+      (let [content (qgis/generate-project {:database-host (:gis-database-host config/env)
+                                            :database-name (:gis-database-name config/env)
+                                            :database-schema (:congregation/schema-name congregation)
+                                            :database-username (:gis-user/username gis-user)
+                                            :database-password (:gis-user/password gis-user)
+                                            :database-ssl-mode (:gis-database-ssl-mode config/env)})
+            file-name (qgis/project-file-name (:congregation/name congregation))]
+        (-> (ok content)
+            (response/content-type "application/octet-stream")
+            (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\"")))))))
 
 (defroutes api-routes
   (GET "/" [] (ok "Territory Bro"))
