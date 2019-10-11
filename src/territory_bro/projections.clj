@@ -53,7 +53,9 @@
 (defn- run-process-managers! [state]
   (let [commands (-> state
                      (db-admin/generate-commands {:now (:now config/env)}))
+        ;; TODO: lift the following to run-commands! or similar
         events (->> commands
+                    ;; TODO: use a global dispatcher for all command handlers
                     (mapcat #(db-admin/handle-command! %))
                     (doall))]
     (seq events)))

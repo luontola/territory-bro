@@ -100,6 +100,7 @@
 (defn create-congregation! [conn name]
   (let [id (UUID/randomUUID)
         master-schema (:database-schema config/env)
+        ;; TODO: ensure uniqueness similar to territory-bro.gis-user/unique-username
         tenant-schema (str master-schema
                            "_"
                            (str/replace (str id) "-" ""))]
@@ -111,6 +112,7 @@
                                          :congregation/id id
                                          :congregation/name name
                                          :congregation/schema-name tenant-schema)])
+    ;; TODO NEXT: remove schema migration from here, rely on process managers instead
     (-> (db/tenant-schema tenant-schema master-schema)
         (.migrate))
     (log/info "Congregation created:" id)

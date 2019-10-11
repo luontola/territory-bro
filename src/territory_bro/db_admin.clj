@@ -137,5 +137,5 @@
   ([command injections]
    (commands/validate-command command)
    ;; TODO: use territory-bro.congregation/enrich-event or similar?
-   ;; TODO: validate events
+   ;; TODO next: validate events
    (command-handler command injections)))
