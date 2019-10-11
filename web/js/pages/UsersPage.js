@@ -95,7 +95,7 @@ const UsersPage = ({congregationId}) => {
                 {user.picture && <img src={user.picture} alt=""/>}
               </td>
               <td>{user.name || user.id}</td>
-              <td>{user.email} {(user.email && !user.emailVerified) && <i>(Unverified)</i>}</td>
+              <td>{user.email} {(user.email && !user.emailVerified) && <em>(Unverified)</em>}</td>
               <td><IdentityProvider user={user}/></td>
             </tr>
           ))}
