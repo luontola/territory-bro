@@ -145,13 +145,12 @@
                              :subregions (region/get-subregions conn)
                              :card-minimap-viewports (region/get-card-minimap-viewports conn)}))))))
 
-(defn- api-command! [conn command]
+(defn- api-command! [conn state command]
   (let [command (assoc command
                        :command/time ((:now config/env))
                        :command/user (current-user-id))]
     (try
-      (congregation/command! conn (projections/cached-state)
-                             command)
+      (congregation/command! conn state command)
       (ok {:message "OK"})
       (catch NoPermitException e
         (log/warn e "Command denied:" command)
@@ -161,21 +160,29 @@
   (auth/with-authenticated-user request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          user-id (UUID/fromString (get-in request [:params :userId]))]
+          user-id (UUID/fromString (get-in request [:params :userId]))
+          state (projections/cached-state)]
       (db/with-db [conn {}]
-        (api-command! conn {:command/type :congregation.command/add-user
-                            :congregation/id cong-id
-                            :user/id user-id})))))
+        (let [response (api-command! conn state {:command/type :congregation.command/add-user
+                                                 :congregation/id cong-id
+                                                 :user/id user-id})]
+          (when (= 200 (:status response))
+            ;; TODO: remove these after the admin can himself edit user permissions
+            (binding [events/*current-user* (current-user-id)]
+              (congregation/grant! conn cong-id user-id :configure-congregation)
+              (gis-user/create-gis-user! conn state cong-id user-id)))
+          response)))))
 
 (defn rename-congregation [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          name (get-in request [:params :name])]
+          name (get-in request [:params :name])
+          state (projections/cached-state)]
       (db/with-db [conn {}]
-        (api-command! conn {:command/type :congregation.command/rename-congregation
-                            :congregation/id cong-id
-                            :congregation/name name})))))
+        (api-command! conn state {:command/type :congregation.command/rename-congregation
+                                  :congregation/id cong-id
+                                  :congregation/name name})))))
 
 (defn download-qgis-project [request]
   (auth/with-authenticated-user request
