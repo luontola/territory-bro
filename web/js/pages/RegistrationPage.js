@@ -48,7 +48,7 @@ const RegistrationPage = () => {
             <fieldset>
               <div className="pure-control-group">
                 <label htmlFor="congregationName">Congregation Name</label>
-                <Field type="text" name="congregationName" id="congregationName"/>
+                <Field type="text" name="congregationName" id="congregationName" autoComplete="off"/>
                 <ErrorMessage name="congregationName" component="div" className="pure-form-message-inline"/>
               </div>
               <div className="pure-controls">
