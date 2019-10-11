@@ -86,8 +86,8 @@ const UsersPage = ({congregationId, navigate}) => {
                      }}/>
                 }
               </td>
-              <td>{user.name}</td>
-              <td>{user.email} {!user.emailVerified && <i>(Unverified)</i>}</td>
+              <td>{user.name || user.id}</td>
+              <td>{user.email} {(user.email && !user.emailVerified) && <i>(Unverified)</i>}</td>
             </tr>
           ))}
           </tbody>
