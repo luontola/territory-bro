@@ -216,17 +216,21 @@
                           :command/time (Instant/ofEpochSecond 2)
                           :command/user admin-id
                           :congregation/id cong-id
-                          :user/id new-user-id}]
+                          :user/id new-user-id}
+        access-granted-event {:event/type :congregation.event/permission-granted
+                              :event/version 1
+                              :event/time (Instant/ofEpochSecond 2)
+                              :event/user admin-id
+                              :congregation/id cong-id
+                              :user/id new-user-id
+                              :permission/id :view-congregation}]
 
     (testing "user added"
-      (is (= [{:event/type :congregation.event/permission-granted
-               :event/version 1
-               :event/time (Instant/ofEpochSecond 2)
-               :event/user admin-id
-               :congregation/id cong-id
-               :user/id new-user-id
-               :permission/id :view-congregation}]
+      (is (= [access-granted-event]
              (handle-command add-user-command [created-event] injections))))
+
+    (testing "user already in congregation"
+      (is (= [] (handle-command add-user-command [created-event access-granted-event] injections))))
 
     (testing "user doesn't exist"
       (let [invalid-command (assoc add-user-command

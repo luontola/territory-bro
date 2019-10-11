@@ -16,7 +16,8 @@
 
 ;;; Read model
 
-(defmulti ^:private update-congregation (fn [_congregation event] (:event/type event)))
+(defmulti ^:private update-congregation (fn [_congregation event]
+                                          (:event/type event)))
 
 (defmethod update-congregation :default [congregation _event]
   congregation)
@@ -49,7 +50,8 @@
                  (:permission/id event))))
 
 
-(defmulti ^:private update-permissions (fn [_state event] (:event/type event)))
+(defmulti ^:private update-permissions (fn [_state event]
+                                         (:event/type event)))
 
 (defmethod update-permissions :default [state _event]
   state)
@@ -120,39 +122,57 @@
 
 ;;;; Write model
 
-(defmulti ^:private write-model (fn [_congregation event] (:event/type event)))
+(defmulti ^:private write-model (fn [_congregation event]
+                                  (:event/type event)))
 
-(defmethod write-model :default [congregation _event]
+(defmethod write-model :default
+  [congregation _event]
   congregation)
 
-(defmethod write-model :congregation.event/congregation-created [congregation event]
+(defmethod write-model :congregation.event/congregation-created
+  [congregation event]
   (-> congregation
       (assoc :congregation/id (:congregation/id event))
       (assoc :congregation/name (:congregation/name event))))
 
-(defmethod write-model :congregation.event/congregation-renamed [congregation event]
+(defmethod write-model :congregation.event/congregation-renamed
+  [congregation event]
   (-> congregation
       (assoc :congregation/name (:congregation/name event))))
 
+(defmethod write-model :congregation.event/permission-granted
+  [congregation event]
+  (if (= :view-congregation (:permission/id event))
+    (update congregation ::users (fnil conj #{}) (:user/id event))
+    congregation))
 
-(defmulti ^:private command-handler (fn [command _congregation _injections] (:command/type command)))
+(defmethod write-model :congregation.event/permission-revoked
+  [congregation event]
+  (if (= :view-congregation (:permission/id event))
+    (update congregation ::users disj (:user/id event))
+    congregation))
+
+
+(defmulti ^:private command-handler (fn [command _congregation _injections]
+                                      (:command/type command)))
 
 (defmethod command-handler :congregation.command/add-user
   [command congregation {:keys [user-exists? check-permit]}]
   (check-permit [:configure-congregation (:congregation/id congregation)])
   (when-not (user-exists? (:user/id command))
     (throw (ex-info "User doesn't exist" {:command command})))
-  [{:event/type :congregation.event/permission-granted
-    :event/version 1
-    :congregation/id (:congregation/id congregation)
-    :user/id (:user/id command)
-    :permission/id :view-congregation}])
+  (when-not (contains? (::users congregation) (:user/id command))
+    [{:event/type :congregation.event/permission-granted
+      :event/version 1
+      :congregation/id (:congregation/id congregation)
+      :user/id (:user/id command)
+      :permission/id :view-congregation}]))
 
 (defmethod command-handler :congregation.command/rename-congregation
   [command congregation {:keys [check-permit]}]
   (check-permit [:configure-congregation (:congregation/id congregation)])
-  (when (not= (:congregation/name congregation)
-              (:congregation/name command))
+  (when-not (= (:congregation/name congregation)
+               (:congregation/name command))
     [{:event/type :congregation.event/congregation-renamed
       :event/version 1
       :congregation/id (:congregation/id congregation)
