@@ -108,13 +108,17 @@ function refreshCongregations() {
   CongregationsCache = unstable_createResource(async () => {
     console.info("Fetch congregations");
     const response = await api.get('/api/congregations');
-    return response.data;
+    return sortCongregations(response.data);
   });
   CongregationsByIdCache = unstable_createResource(async (congregationId) => {
     console.info(`Fetch congregation ${congregationId}`);
     const response = await api.get(`/api/congregation/${congregationId}`);
     return enrichCongregation(response.data);
   });
+}
+
+function sortCongregations(congregations: Array<Congregation>): Array<Congregation> {
+  return sortBy(congregations, (c: Congregation) => c.name.toLowerCase());
 }
 
 export function enrichCongregation(congregation: Congregation): Congregation {
