@@ -6,6 +6,7 @@ import React, {useState} from "react";
 import {addUser, getCongregationById} from "../api";
 import {Link} from "@reach/router";
 import {ErrorMessage, Field, Form, Formik} from "formik";
+import sortBy from "lodash/sortBy";
 
 const IdentityProvider = ({user}) => {
   const sub = user.sub || '';
@@ -23,6 +24,8 @@ const UsersPage = ({congregationId, navigate}) => {
   const [newUser, setNewUser] = useState(null);
   const congregation = getCongregationById(congregationId);
   const joinPageUrl = `${location.protocol}//${location.host}/join`;
+  // show the new user first for better visibility
+  const users = sortBy(congregation.users, user => user.id !== newUser);
   return (
     <Formik
       initialValues={{
@@ -85,7 +88,7 @@ const UsersPage = ({congregationId, navigate}) => {
           </tr>
           </thead>
           <tbody>
-          {congregation.users.map(user => (
+          {users.map(user => (
             <tr key={user.id}
                 style={{backgroundColor: user.id === newUser ? '#ffc' : ''}}>
               <td style={{textAlign: 'center', padding: 0}}>
