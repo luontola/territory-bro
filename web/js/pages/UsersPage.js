@@ -47,7 +47,7 @@ const UsersPage = ({congregationId, navigate}) => {
           <fieldset>
             <div className="pure-control-group">
               <label htmlFor="userId">User ID</label>
-              <Field name="userId" id="userId" type="text"/>
+              <Field name="userId" id="userId" type="text" autoComplete="off"/>
               <ErrorMessage name="userId" component="span" className="pure-form-message-inline"/>
             </div>
 
