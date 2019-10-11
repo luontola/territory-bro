@@ -147,7 +147,8 @@
                              :users (->> (user/get-users conn {:ids (congregation/get-users state cong-id)})
                                          (map (fn [user]
                                                 (-> (:user/attributes user)
-                                                    (assoc :id (:user/id user))))))}))))))
+                                                    (assoc :id (:user/id user))
+                                                    (assoc :sub (:user/subject user))))))}))))))
 
 (defn- api-command! [conn state command]
   (let [command (assoc command
