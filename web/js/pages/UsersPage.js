@@ -7,6 +7,18 @@ import {addUser, getCongregationById} from "../api";
 import {Link} from "@reach/router";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 
+const IdentityProvider = ({user}) => {
+  const sub = user.sub || '';
+  const nickname = user.nickname || sub;
+  if (sub.startsWith('google-oauth2|')) {
+    return `Google (${nickname})`;
+  }
+  if (sub.startsWith('facebook|')) {
+    return `Facebook (${nickname})`;
+  }
+  return sub;
+};
+
 const UsersPage = ({congregationId, navigate}) => {
   const [newUser, setNewUser] = useState(null);
   const congregation = getCongregationById(congregationId);
@@ -69,6 +81,7 @@ const UsersPage = ({congregationId, navigate}) => {
             <th/>
             <th>Name</th>
             <th>Email</th>
+            <th>Login Method</th>
           </tr>
           </thead>
           <tbody>
@@ -88,6 +101,7 @@ const UsersPage = ({congregationId, navigate}) => {
               </td>
               <td>{user.name || user.id}</td>
               <td>{user.email} {(user.email && !user.emailVerified) && <i>(Unverified)</i>}</td>
+              <td><IdentityProvider user={user}/></td>
             </tr>
           ))}
           </tbody>
