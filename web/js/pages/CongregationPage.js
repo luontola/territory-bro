@@ -16,7 +16,10 @@ const CongregationPage = ({congregationId}) => {
       <p><a href={`/api/congregation/${congregationId}/qgis-project`}>Download QGIS project</a></p>
       }
       {congregation.permissions.configureCongregation &&
-      <p><Link to="settings">Settings</Link></p>
+      <>
+        <p><Link to="users">Users</Link></p>
+        <p><Link to="settings">Settings</Link></p>
+      </>
       }
     </>
   );

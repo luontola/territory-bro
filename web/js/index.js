@@ -19,6 +19,7 @@ import ErrorPage from "./pages/ErrorPage";
 import SupportPage from "./pages/SupportPage";
 import {logPageView} from "./analytics";
 import SettingsPage from "./pages/SettingsPage";
+import UsersPage from "./pages/UsersPage";
 
 const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
 
@@ -41,6 +42,7 @@ root.render(
               <CongregationPage path="/congregation/:congregationId"/>
               <PrintoutPage path="/congregation/:congregationId/printouts"/>
               <SettingsPage path="/congregation/:congregationId/settings"/>
+              <UsersPage path="/congregation/:congregationId/users"/>
               <NotFoundPage default/>
             </Router>
           </Layout>

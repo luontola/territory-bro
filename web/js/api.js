@@ -174,6 +174,11 @@ export async function createCongregation(name: string) {
   return response.data.id;
 }
 
+export async function addUser(congregationId: string, userId: string) {
+  await api.post(`/api/congregation/${congregationId}/add-user`, {userId});
+  refreshCongregations();
+}
+
 export async function renameCongregation(congregationId: string, name: string) {
   await api.post(`/api/congregation/${congregationId}/rename`, {name});
   refreshCongregations();
