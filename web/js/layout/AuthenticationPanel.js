@@ -7,7 +7,6 @@
 import React from "react";
 import LoginButton from "./LoginButton";
 import LogoutButton from "./LogoutButton";
-import RegisterButton from "./RegisterButton";
 import DevLoginButton from "./DevLoginButton";
 import {getSettings} from "../api";
 
@@ -20,13 +19,13 @@ let AuthenticationPanel = () => {
   if (loggedIn) {
     return (
       <p>
-        Logged in as {fullName} <LogoutButton/> <RegisterButton/>
+        Logged in as {fullName} <LogoutButton/>
       </p>
     );
   } else {
     return (
       <p>
-        <LoginButton/> {dev && <DevLoginButton/>} <RegisterButton/>
+        <LoginButton/> {dev && <DevLoginButton/>}
       </p>
     );
   }

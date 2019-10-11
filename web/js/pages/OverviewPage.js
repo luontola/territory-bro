@@ -7,6 +7,7 @@
 import React from "react";
 import {getCongregations, getSettings} from "../api";
 import {Link} from "@reach/router";
+import LoginButton from "../layout/LoginButton";
 
 // TODO: move QGIS project download to congregation page
 function QgisProjectSection({territoryCount, regionCount, congregationIds, supportEmail}) {
@@ -37,36 +38,43 @@ function QgisProjectSection({territoryCount, regionCount, congregationIds, suppo
   );
 }
 
-const CongregationsList = () => {
-  const congregations = getCongregations();
-  return (
-    <>
-      <h2>Congregations</h2>
-      {congregations.length === 0 ?
-        <p>You have no congregations. Please <Link to={"/register"}>register</Link> one first.</p> :
-        <ul>
-          {congregations.map(cong => (
-            <li key={cong.id}><Link to={`/congregation/${cong.id}`}>{cong.name}</Link></li>
-          ))}
-        </ul>
-      }
-    </>
-  );
-};
+const RegisterButton = () => <Link to="/register" className="pure-button">Register a New Congregation</Link>;
+const JoinButton = () => <Link to="/join" className="pure-button">Join an Existing Congregation</Link>;
 
 const OverviewPage = () => {
   const settings = getSettings();
   const loggedIn = settings.user.authenticated;
+  const congregations = loggedIn ? getCongregations() : [];
   return (
     <>
       <h1>Territory Bro</h1>
 
-      <p>Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.</p>
+      <p>Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.
+        See <a href="https://territorybro.com">territorybro.com</a> for more information.</p>
 
-      <p>For more information, see <a href="http://territorybro.com">http://territorybro.com</a></p>
+      {congregations.length > 0 &&
+      <>
+        <h2>Your Congregations</h2>
+        <ul>
+          {congregations.map(cong => (
+            <li key={cong.id} style={{fontSize: '150%'}}><Link to={`/congregation/${cong.id}`}>{cong.name}</Link></li>
+          ))}
+        </ul>
+        <p style={{paddingTop: '1.5em'}}>
+          <RegisterButton/> <JoinButton/>
+        </p>
+      </>
+      }
 
-      {loggedIn &&
-      <CongregationsList/>}
+      {congregations.length === 0 &&
+      <div style={{fontSize: '150%', maxWidth: '20em', textAlign: 'center'}}>
+        {!loggedIn &&
+        <p><LoginButton/></p>
+        }
+        <p><RegisterButton/></p>
+        <p><JoinButton/></p>
+      </div>
+      }
     </>
   );
 };
