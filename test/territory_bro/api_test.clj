@@ -146,11 +146,13 @@
 (deftest dev-login-test
   (testing "authenticates as anybody in dev mode"
     (binding [config/env {:dev true}
-              api/save-user-from-jwt! (fn [_])]
+              api/save-user-from-jwt! (fn [_]
+                                        (UUID. 0 1))]
       (is (= {:status 200,
               :headers {},
               :body "Logged in",
-              :session {::auth/user {:sub "sub",
+              :session {::auth/user {:user/id (UUID. 0 1)
+                                     :sub "sub",
                                      :name "name",
                                      :email "email"}}}
              (api/dev-login {:params {:sub "sub"

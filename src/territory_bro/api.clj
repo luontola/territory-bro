@@ -44,20 +44,20 @@
               (catch JWTVerificationException e
                 (log/info e "Login failed, invalid token")
                 (forbidden! "Invalid token")))
+        user-id (save-user-from-jwt! jwt)
         session (merge (:session request)
-                       (auth/user-session jwt))]
+                       (auth/user-session jwt user-id))]
     (log/info "Logged in using JWT" jwt)
-    (save-user-from-jwt! jwt)
     (-> (ok "Logged in")
         (assoc :session session))))
 
 (defn dev-login [request]
   (if (getx config/env :dev)
     (let [fake-jwt (:params request)
+          user-id (save-user-from-jwt! fake-jwt)
           session (merge (:session request)
-                         (auth/user-session fake-jwt))]
+                         (auth/user-session fake-jwt user-id))]
       (log/info "Developer login as" fake-jwt)
-      (save-user-from-jwt! fake-jwt)
       (-> (ok "Logged in")
           (assoc :session session)))
     (forbidden "Dev mode disabled")))
@@ -66,6 +66,12 @@
   (log/info "Logged out")
   (-> (ok "Logged out")
       (assoc :session nil)))
+
+(defn- fix-user-for-liberator [user]
+  ;; TODO: custom serializer for UUID
+  (if (some? (:user/id user))
+    (update user :user/id str)
+    user))
 
 (defresource settings
   :available-media-types ["application/json"]
@@ -76,8 +82,9 @@
                           :clientId (getx config/env :auth0-client-id)}
                   :supportEmail (when auth/*user*
                                   (getx config/env :support-email))
-                  :user (assoc (select-keys auth/*user* [:name :sub])
-                               :authenticated (not (nil? auth/*user*)))})))
+                  :user (-> (select-keys auth/*user* [:user/id :name :sub])
+                            (fix-user-for-liberator)
+                            (assoc :authenticated (not (nil? auth/*user*))))})))
 
 (defn- current-user-id [conn]
   (let [id (:user/id (user/get-by-subject conn (:sub auth/*user*)))]

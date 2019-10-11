@@ -7,8 +7,9 @@
 
 (def ^:dynamic *user*)
 
-(defn user-session [jwt]
-  {::user (select-keys jwt [:sub :name :email :email_verified :picture])})
+(defn user-session [jwt user-id]
+  {::user (-> (select-keys jwt [:sub :name :email :email_verified :picture])
+              (assoc :user/id user-id))})
 
 (defn with-authenticated-user* [request f]
   (binding [*user* (get-in request [:session ::user])]
