@@ -143,7 +143,11 @@
                              :territories (territory/get-territories conn)
                              :congregation-boundaries (region/get-congregation-boundaries conn)
                              :subregions (region/get-subregions conn)
-                             :card-minimap-viewports (region/get-card-minimap-viewports conn)}))))))
+                             :card-minimap-viewports (region/get-card-minimap-viewports conn)
+                             :users (->> (user/get-users conn {:ids (congregation/get-users state cong-id)})
+                                         (map (fn [user]
+                                                (-> (:user/attributes user)
+                                                    (assoc :id (:user/id user))))))}))))))
 
 (defn- api-command! [conn state command]
   (let [command (assoc command

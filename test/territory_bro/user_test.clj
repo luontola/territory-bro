@@ -43,6 +43,16 @@
                     (map :user/subject)
                     (sort)))))
 
+      (testing "find users by IDs"
+        (is (= ["user1"]
+               (->> (user/get-users conn {:ids [user-id]})
+                    (map :user/subject)
+                    (sort))))
+        (is (= ["user1" "user2"]
+               (->> (user/get-users conn {:ids [user-id unrelated-user-id]})
+                    (map :user/subject)
+                    (sort)))))
+
       (testing "find user by ID"
         (is (= user-id (:user/id (user/get-by-id conn user-id))))
         (is (nil? (user/get-by-id conn (UUID/randomUUID)))
