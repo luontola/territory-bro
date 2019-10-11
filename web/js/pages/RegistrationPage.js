@@ -13,6 +13,7 @@ import {navigate} from "@reach/router";
 const RegistrationPage = () => {
   const settings = getSettings();
   const loggedIn = settings.user.authenticated;
+  const userId = settings.user.id;
 
   if (!loggedIn) {
     const {domain, clientId} = settings.auth0;
@@ -27,8 +28,11 @@ const RegistrationPage = () => {
 
       <h2>Join an Existing Congregation</h2>
 
-      <p>Coming soon. <a href="https://groups.google.com/forum/#!forum/territory-bro-announcements/join">Subscribe to
-        the mailing list</a> to be notified when this becomes available.</p>
+      <p>Ask the brother who is taking care of the territories in your congregation to give you Territory Bro
+        access.</p>
+
+      <p>You will need to tell him your User ID, which is: <div
+        style={{fontSize: '150%', margin: '15px'}}>{userId}</div></p>
 
       <h2>Register a New Congregation</h2>
 

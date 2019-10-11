@@ -35,6 +35,7 @@ export type Settings = {
   supportEmail: string,
   user: {
     authenticated: boolean,
+    id: ?string,
     name: ?string,
     sub: ?string,
   },
