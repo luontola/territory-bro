@@ -11,12 +11,11 @@ import styles from "./UsersPage.css";
 
 const IdentityProvider = ({user}) => {
   const sub = user.sub || '';
-  const nickname = user.nickname || sub;
   if (sub.startsWith('google-oauth2|')) {
-    return `Google (${nickname})`;
+    return 'Google';
   }
   if (sub.startsWith('facebook|')) {
-    return `Facebook (${nickname})`;
+    return 'Facebook';
   }
   return sub;
 };
