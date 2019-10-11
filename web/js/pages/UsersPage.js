@@ -2,12 +2,13 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import React from "react";
+import React, {useState} from "react";
 import {addUser, getCongregationById} from "../api";
 import {Link} from "@reach/router";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 
 const UsersPage = ({congregationId, navigate}) => {
+  const [newUser, setNewUser] = useState(null);
   const congregation = getCongregationById(congregationId);
   const joinPageUrl = `${location.protocol}//${location.host}/join`;
   return (
@@ -22,10 +23,12 @@ const UsersPage = ({congregationId, navigate}) => {
         }
         return errors;
       }}
-      onSubmit={async (values, {setSubmitting}) => {
+      onSubmit={async (values, {setSubmitting, resetForm}) => {
         try {
           await addUser(congregation.id, values.userId);
-          navigate('..');
+          // changing state is needed to trigger re-rendering with the updated user list
+          setNewUser(values.userId);
+          resetForm();
         } catch (e) {
           console.error('Form submit failed:', e);
           alert(e);
@@ -59,6 +62,36 @@ const UsersPage = ({congregationId, navigate}) => {
             </div>
           </fieldset>
         </Form>
+
+        <table className="pure-table pure-table-horizontal">
+          <thead>
+          <tr>
+            <th/>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+          </thead>
+          <tbody>
+          {congregation.users.map(user => (
+            <tr key={user.id}
+                style={{backgroundColor: user.id === newUser ? '#ffc' : ''}}>
+              <td style={{textAlign: 'center', padding: 0}}>
+                {user.picture &&
+                <img src={user.picture}
+                     alt=""
+                     style={{
+                       height: '3em',
+                       width: '3em',
+                       display: 'block', // needed to avoid a mysterious 4px margin below the image
+                     }}/>
+                }
+              </td>
+              <td>{user.name}</td>
+              <td>{user.email} {!user.emailVerified && <i>(Unverified)</i>}</td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
       </>
     )}
     </Formik>

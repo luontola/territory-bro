@@ -79,6 +79,10 @@ export async function logout() {
   refreshSettings();
 }
 
+function sortUsers(users: Array<User>): Array<User> {
+  return sortBy(users, [(u: User) => (u.name || '').toLowerCase(), 'id'])
+}
+
 
 // ====== Congregations ======
 
@@ -114,6 +118,7 @@ function refreshCongregations() {
 }
 
 export function enrichCongregation(congregation: Congregation): Congregation {
+  congregation.users = sortUsers(congregation.users);
   congregation.territories = sortTerritories(congregation.territories);
   congregation.subregions = sortSubregions(congregation.subregions);
   congregation.territories.forEach(territory => {
