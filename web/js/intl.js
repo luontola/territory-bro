@@ -5,14 +5,6 @@
 /* @flow */
 
 import Cookies from "js-cookie";
-import {addLocaleData} from "react-intl";
-import en from "react-intl/locale-data/en";
-import es from "react-intl/locale-data/es";
-import fi from "react-intl/locale-data/fi";
-import id from "react-intl/locale-data/id";
-import it from "react-intl/locale-data/it";
-import nl from "react-intl/locale-data/nl";
-import pt from "react-intl/locale-data/pt";
 import translations from "./translations.json";
 import sortBy from "lodash/sortBy";
 import toPairs from "lodash/toPairs";
@@ -21,8 +13,6 @@ import flatMap from "lodash/flatMap";
 // TODO: create translations.json at build time, store the english version only in JSX tags to avoid getting out of sync
 // https://medium.freecodecamp.com/internationalization-in-react-7264738274a0
 // https://github.com/iam-peekay/inbox-react-intl/issues/1
-
-addLocaleData([...en, ...es, ...fi, ...id, ...it, ...nl, ...pt]);
 
 const languagesByCode = {
   en: "English",

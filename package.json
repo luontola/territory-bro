@@ -28,7 +28,7 @@
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
     "react-error-boundary": "^1.2.5",
-    "react-intl": "^2.9.0",
+    "react-intl": "^3.3.2",
     "regenerator-runtime": "^0.13.3"
   },
   "devDependencies": {
