@@ -31,10 +31,20 @@ const stories = storiesOf('TerritoryMap', module)
     </Box>);
 
 mapRasters.forEach(mapRaster => {
-  stories.add(`with ${mapRaster.id} raster`, () =>
-    <Box>
-      <TerritoryMap
-        territory={territory101}
-        mapRaster={mapRaster}/>
-    </Box>)
+  stories.add(`with ${mapRaster.id} raster`, () => {
+    let territory = territory101;
+    if (mapRaster.id === 'vantaaKaupunkikartta') {
+      territory = {
+        ...territory,
+        location: "MULTIPOLYGON(((25.0319657181808 60.2951399010073,25.0329619630632 60.2951063504953,25.0328265511374 60.2943945922339,25.0323139202756 60.2944185574107,25.0323767900983 60.2948571170425,25.0319270290592 60.2948786853971,25.0319657181808 60.2951399010073)))"
+      };
+    }
+    return (
+      <Box>
+        <TerritoryMap
+          territory={territory}
+          mapRaster={mapRaster}/>
+      </Box>
+    );
+  })
 });
