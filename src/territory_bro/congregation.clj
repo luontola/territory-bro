@@ -136,7 +136,19 @@
 
 (defmulti ^:private command-handler (fn [command _congregation _injections] (:command/type command)))
 
-(defmethod command-handler :congregation.command/rename-congregation [command congregation {:keys [check-permit]}]
+(defmethod command-handler :congregation.command/add-user
+  [command congregation {:keys [user-exists? check-permit]}]
+  (check-permit [:configure-congregation (:congregation/id congregation)])
+  (when-not (user-exists? (:user/id command))
+    (throw (ex-info "User doesn't exist" {:command command})))
+  [{:event/type :congregation.event/permission-granted
+    :event/version 1
+    :congregation/id (:congregation/id congregation)
+    :user/id (:user/id command)
+    :permission/id :view-congregation}])
+
+(defmethod command-handler :congregation.command/rename-congregation
+  [command congregation {:keys [check-permit]}]
   (check-permit [:configure-congregation (:congregation/id congregation)])
   (when (not= (:congregation/name congregation)
               (:congregation/name command))

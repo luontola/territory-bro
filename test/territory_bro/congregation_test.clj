@@ -14,7 +14,8 @@
             [territory-bro.permissions :as permissions]
             [territory-bro.projections :as projections]
             [territory-bro.testutil :as testutil])
-  (:import (java.time Instant)
+  (:import (clojure.lang ExceptionInfo)
+           (java.time Instant)
            (java.util UUID)
            (territory_bro NoPermitException)))
 
@@ -195,3 +196,48 @@
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
                      (handle-command rename-command [created-event] injections)))))))
+
+(deftest add-user-to-congregation-test
+  (let [cong-id (UUID. 0 1)
+        admin-id (UUID. 0 2)
+        new-user-id (UUID. 0 3)
+        invalid-user-id (UUID. 0 4)
+        injections {:check-permit (fn [_permit])
+                    :user-exists? (fn [user-id]
+                                    (= new-user-id user-id))}
+        created-event {:event/type :congregation.event/congregation-created
+                       :event/version 1
+                       :event/time (Instant/ofEpochSecond 1)
+                       :event/user admin-id
+                       :congregation/id cong-id
+                       :congregation/name "old name"
+                       :congregation/schema-name ""}
+        add-user-command {:command/type :congregation.command/add-user
+                          :command/time (Instant/ofEpochSecond 2)
+                          :command/user admin-id
+                          :congregation/id cong-id
+                          :user/id new-user-id}]
+
+    (testing "user added"
+      (is (= [{:event/type :congregation.event/permission-granted
+               :event/version 1
+               :event/time (Instant/ofEpochSecond 2)
+               :event/user admin-id
+               :congregation/id cong-id
+               :user/id new-user-id
+               :permission/id :view-congregation}]
+             (handle-command add-user-command [created-event] injections))))
+
+    (testing "user doesn't exist"
+      (let [invalid-command (assoc add-user-command
+                                   :user/id invalid-user-id)]
+        (is (thrown-with-msg? ExceptionInfo #"User doesn't exist"
+                              (handle-command invalid-command [created-event] injections)))))
+
+    (testing "checks permits"
+      (let [injections (assoc injections
+                              :check-permit (fn [permit]
+                                              (is (= [:configure-congregation cong-id] permit))
+                                              (throw (NoPermitException. nil nil))))]
+        (is (thrown? NoPermitException
+                     (handle-command add-user-command [created-event] injections)))))))

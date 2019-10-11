@@ -24,6 +24,12 @@
 
 ;;; Congregation
 
+(s/defschema AddUser
+  (assoc UserCommand
+         :command/type (s/eq :congregation.command/add-user)
+         :congregation/id UUID
+         :user/id UUID))
+
 (s/defschema RenameCongregation
   (assoc UserCommand
          :command/type (s/eq :congregation.command/rename-congregation)
@@ -58,7 +64,8 @@
 
 
 (def command-schemas
-  {:congregation.command/rename-congregation RenameCongregation
+  {:congregation.command/add-user AddUser
+   :congregation.command/rename-congregation RenameCongregation
    :db-admin.command/ensure-gis-user-absent EnsureGisUserAbsent
    :db-admin.command/ensure-gis-user-present EnsureGisUserPresent
    :db-admin.command/migrate-tenant-schema MigrateTenantSchema})
