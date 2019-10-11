@@ -9,6 +9,7 @@ import {ErrorMessage, Field, Form, Formik} from "formik";
 
 const UsersPage = ({congregationId, navigate}) => {
   const congregation = getCongregationById(congregationId);
+  const joinPageUrl = `${location.protocol}//${location.host}/join`;
   return (
     <Formik
       initialValues={{
@@ -35,6 +36,10 @@ const UsersPage = ({congregationId, navigate}) => {
     >{({isSubmitting}) => (
       <>
         <h1><Link to="..">{congregation.name}</Link>: Users</h1>
+
+        <p>To add users to this congregation, ask them to visit <Link to="/join">{joinPageUrl}</Link> and tell you
+          their <em>user ID</em> from that page. You can then input their user ID to the following form.</p>
+
         <Form className="pure-form pure-form-aligned">
           <fieldset>
             <div className="pure-control-group">
