@@ -10,7 +10,8 @@
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
             [territory-bro.events :as events]
-            [territory-bro.permissions :as permissions])
+            [territory-bro.permissions :as permissions]
+            [territory-bro.user :as user])
   (:import (java.util UUID)))
 
 ;;; Read model
@@ -166,12 +167,14 @@
 (defn handle-command [command events injections]
   (let [command (commands/validate-command command)
         congregation (reduce write-model nil events)
-        injections (assoc injections
-                          :check-permit (or (:check-permit injections)
-                                            (fn [permit]
-                                              (permissions/check (:state injections)
-                                                                 (:command/user command)
-                                                                 permit))))]
+        injections (merge {:check-permit (fn [permit]
+                                           (permissions/check (:state injections)
+                                                              (:command/user command)
+                                                              permit))
+                           :user-exists? (fn [user-id]
+                                           (db/with-db [conn {:read-only? true}]
+                                             (some? (user/get-by-id conn user-id))))}
+                          injections)]
     (->> (command-handler command congregation injections)
          (map #(enrich-event % command)))))
 

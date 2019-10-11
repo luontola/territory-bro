@@ -310,6 +310,35 @@
         (is (forbidden? response))
         (is (str/includes? (:body response) "No GIS access"))))))
 
+(deftest add-user-test
+  (let [session (login! app)
+        response (-> (request :post "/api/congregations")
+                     (json-body {:name "Congregation"})
+                     (merge session)
+                     app
+                     (assert-response ok?))
+        cong-id (UUID/fromString (:id (:body response)))
+        new-user-id (user/save-user! db/database "user1" {:name "User 1"})]
+
+    (testing "add user"
+      (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
+                         (json-body {:userId (str new-user-id)})
+                         (merge session)
+                         app)]
+        (is (ok? response)))
+      ;; TODO: check the result through the API
+      (let [users (-> (projections/current-state db/database)
+                      (congregation/get-users cong-id))]
+        (is (contains? (set users) new-user-id))))
+
+    (testing "no access"
+      (revoke-access-from-all! cong-id)
+      (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
+                         (json-body {:userId (str new-user-id)})
+                         (merge session)
+                         app)]
+        (is (forbidden? response))))))
+
 (deftest rename-congregation-test
   (let [session (login! app)
         response (-> (request :post "/api/congregations")
