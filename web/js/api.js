@@ -26,6 +26,16 @@ function requestConfig(congregationId: ?string) {
 
 // ====== Settings & Authentication ======
 
+export type User = {
+  id: string,
+  sub: ?string,
+  name: ?string,
+  nickname: ?string,
+  email: ?string,
+  emailVerified: ?boolean,
+  picture: ?string
+}
+
 export type Settings = {
   dev: boolean,
   auth0: {
@@ -33,12 +43,7 @@ export type Settings = {
     clientId: string,
   },
   supportEmail: string,
-  user: {
-    authenticated: boolean,
-    id: ?string,
-    name: ?string,
-    sub: ?string,
-  },
+  user: ?User
 }
 
 let SettingsCache;
@@ -87,7 +92,8 @@ export type Congregation = {
   getTerritoryById: (string) => Territory,
   subregions: Array<Subregion>,
   getSubregionById: (string) => Subregion,
-  cardMinimapViewports: Array<Viewport>
+  cardMinimapViewports: Array<Viewport>,
+  users: Array<User>
 }
 
 let CongregationsCache;

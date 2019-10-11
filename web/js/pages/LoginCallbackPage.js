@@ -18,7 +18,7 @@ const LoginCallbackPage = () => {
     (async () => {
       const params = new URLSearchParams(document.location.search.substring(1));
       const returnPath = params.get('return') || '/';
-      if (settings.user.authenticated) {
+      if (settings.user) {
         navigate(returnPath);
       } else {
         await auth.handleAuthentication();

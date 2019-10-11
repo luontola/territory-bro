@@ -13,10 +13,8 @@ import {getSettings} from "../api";
 let AuthenticationPanel = () => {
   const settings = getSettings();
   const dev = settings.dev;
-  const loggedIn = settings.user.authenticated;
-  const fullName = settings.user.name;
-
-  if (loggedIn) {
+  if (settings.user) {
+    const fullName = settings.user.name;
     return (
       <p>
         Logged in as {fullName} <LogoutButton/>

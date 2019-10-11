@@ -10,16 +10,14 @@ import {buildAuthenticator} from "../authentication";
 
 const JoinPage = () => {
   const settings = getSettings();
-  const loggedIn = settings.user.authenticated;
-  const userId = settings.user.id;
-
   // TODO: deduplicate with registration page
-  if (!loggedIn) {
+  if (!settings.user) {
     const {domain, clientId} = settings.auth0;
     const auth = buildAuthenticator(domain, clientId);
     auth.login();
     return <p>Please wait, you will be redirected...</p>;
   }
+  const userId = settings.user.id;
 
   return (
     <>

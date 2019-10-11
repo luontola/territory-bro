@@ -29,13 +29,22 @@
            (java.util UUID)
            (territory_bro NoPermitException)))
 
+(def ^:private format-key-for-api (memoize (comp csk/->camelCaseString name)))
+
+(defn format-for-api [m]
+  (let [f (fn [x]
+            (if (map? x)
+              (map-keys format-key-for-api x)
+              x))]
+    (clojure.walk/postwalk f m)))
+
 (defn require-logged-in! []
   (if-not auth/*user*
     (unauthorized! "Not logged in")))
 
 (defn ^:dynamic save-user-from-jwt! [jwt]
   (db/with-db [conn {}]
-    (user/save-user! conn (:sub jwt) (select-keys jwt [:name :nickname :email :email_verified :picture]))))
+    (user/save-user! conn (:sub jwt) (select-keys jwt auth/user-profile-keys))))
 
 (defn login [request]
   (let [id-token (get-in request [:params :idToken])
@@ -77,14 +86,14 @@
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
                (auth/with-authenticated-user request
-                 {:dev (getx config/env :dev)
-                  :auth0 {:domain (getx config/env :auth0-domain)
-                          :clientId (getx config/env :auth0-client-id)}
-                  :supportEmail (when auth/*user*
-                                  (getx config/env :support-email))
-                  :user (-> (select-keys auth/*user* [:user/id :name :sub])
-                            (fix-user-for-liberator)
-                            (assoc :authenticated (not (nil? auth/*user*))))})))
+                 (format-for-api
+                  {:dev (getx config/env :dev)
+                   :auth0 {:domain (getx config/env :auth0-domain)
+                           :clientId (getx config/env :auth0-client-id)}
+                   :supportEmail (when auth/*user*
+                                   (getx config/env :support-email))
+                   :user (when auth/*user*
+                           (fix-user-for-liberator auth/*user*))}))))
 
 (defn- current-user-id []
   (let [id (:user/id auth/*user*)]
@@ -113,15 +122,6 @@
              (map (fn [congregation]
                     {:id (:congregation/id congregation)
                      :name (:congregation/name congregation)}))))))
-
-(def ^:private format-key-for-api (memoize (comp csk/->camelCaseString name)))
-
-(defn format-for-api [m]
-  (let [f (fn [x]
-            (if (map? x)
-              (map-keys format-key-for-api x)
-              x))]
-    (clojure.walk/postwalk f m)))
 
 (defn get-congregation [request]
   (auth/with-authenticated-user request

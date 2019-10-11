@@ -43,8 +43,7 @@ const JoinButton = () => <Link to="/join" className="pure-button">Join an Existi
 
 const OverviewPage = () => {
   const settings = getSettings();
-  const loggedIn = settings.user.authenticated;
-  const congregations = loggedIn ? getCongregations() : [];
+  const congregations = settings.user ? getCongregations() : [];
   return (
     <>
       <h1>Territory Bro</h1>
@@ -68,7 +67,7 @@ const OverviewPage = () => {
 
       {congregations.length === 0 &&
       <div style={{fontSize: '150%', maxWidth: '20em', textAlign: 'center'}}>
-        {!loggedIn &&
+        {!settings.user &&
         <p><LoginButton/></p>
         }
         <p><RegisterButton/></p>

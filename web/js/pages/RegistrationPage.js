@@ -12,9 +12,7 @@ import {navigate} from "@reach/router";
 
 const RegistrationPage = () => {
   const settings = getSettings();
-  const loggedIn = settings.user.authenticated;
-
-  if (!loggedIn) {
+  if (!settings.user) {
     const {domain, clientId} = settings.auth0;
     const auth = buildAuthenticator(domain, clientId);
     auth.login();
