@@ -46,6 +46,9 @@
   (into (sorted-map-by key-comparator)
         event))
 
+
+;;;; Schemas
+
 (s/defschema EventBase
   {(s/optional-key :event/stream-id) UUID
    (s/optional-key :event/stream-revision) s/Int
@@ -55,6 +58,9 @@
    :event/time Instant
    (s/optional-key :event/user) UUID
    (s/optional-key :event/system) s/Str})
+
+
+;;; Congregation
 
 (s/defschema CongregationCreated
   (assoc EventBase
@@ -105,6 +111,9 @@
          :user/id UUID
          :gis-user/username s/Str))
 
+
+;;; DB Admin
+
 (s/defschema GisSchemaIsPresent
   (assoc EventBase
          :event/type (s/eq :db-admin.event/gis-schema-is-present)
@@ -148,7 +157,8 @@
            (contains? event :event/system)))
    '(xor-required-key :event/user :event/system)))
 
-;;; Validation
+
+;;;; Validation
 
 (defn validate-event [event]
   (when-not (contains? event-schemas (:event/type event))
@@ -164,7 +174,8 @@
     (validate-event event))
   events)
 
-;;; Serialization
+
+;;;; Serialization
 
 (defn- string->instant [s]
   (if (string? s)

@@ -9,6 +9,8 @@
   (:import (java.time Instant)
            (java.util UUID)))
 
+;;;; Schemas
+
 (s/defschema UserCommand
   {:command/type s/Keyword
    :command/time Instant
@@ -19,11 +21,17 @@
    :command/time Instant
    :command/system s/Str})
 
+
+;;; Congregation
+
 (s/defschema RenameCongregation
   (assoc UserCommand
          :command/type (s/eq :congregation.command/rename-congregation)
          :congregation/id UUID
          :congregation/name s/Str))
+
+
+;;; DB Admin
 
 (s/defschema EnsureGisUserAbsent
   (assoc SystemCommand
@@ -47,6 +55,7 @@
          :command/type (s/eq :db-admin.command/migrate-tenant-schema)
          :congregation/id UUID
          :congregation/schema-name s/Str))
+
 
 (def command-schemas
   {:congregation.command/rename-congregation RenameCongregation
