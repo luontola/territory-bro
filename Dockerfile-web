@@ -1,4 +1,4 @@
-FROM node:11 AS builder
+FROM node:12 AS builder
 
 # flow depends on libelf.so.1
 RUN apt-get update && \
@@ -33,7 +33,7 @@ RUN find /project/web/html /project/target/webpack \
 
 # ------------------------------------------------------------
 
-FROM nginx:1.15-alpine
+FROM nginx:1.16-alpine
 
 COPY web/docker/nginx-default.conf.template /etc/nginx/conf.d/default.conf.template
 
