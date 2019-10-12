@@ -14,10 +14,9 @@
             [territory-bro.permissions :as permissions]
             [territory-bro.projections :as projections]
             [territory-bro.testutil :as testutil])
-  (:import (clojure.lang ExceptionInfo)
-           (java.time Instant)
+  (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException)))
+           (territory_bro NoPermitException ValidationException)))
 
 (use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
 
@@ -235,7 +234,7 @@
     (testing "user doesn't exist"
       (let [invalid-command (assoc add-user-command
                                    :user/id invalid-user-id)]
-        (is (thrown-with-msg? ExceptionInfo #"User doesn't exist"
+        (is (thrown-with-msg? ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000004\"]]")
                               (handle-command invalid-command [created-event] injections)))))
 
     (testing "checks permits"

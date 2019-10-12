@@ -8,6 +8,7 @@ import {Link} from "@reach/router";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 import sortBy from "lodash/sortBy";
 import styles from "./UsersPage.css";
+import {formatApiError} from "../errorMessages";
 
 const IdentityProvider = ({user}) => {
   const sub = user.sub || '';
@@ -50,9 +51,8 @@ const UsersPage = ({congregationId}) => {
           // changing state is needed to trigger re-rendering with the updated user list
           setNewUser(userId);
           resetForm();
-        } catch (e) {
-          console.error('Form submit failed:', e);
-          alert(e);
+        } catch (error) {
+          alert(formatApiError(error));
         } finally {
           setSubmitting(false);
         }

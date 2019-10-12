@@ -12,7 +12,8 @@
             [territory-bro.events :as events]
             [territory-bro.permissions :as permissions]
             [territory-bro.user :as user])
-  (:import (java.util UUID)))
+  (:import (java.util UUID)
+           (territory_bro ValidationException)))
 
 ;;; Read model
 
@@ -158,15 +159,17 @@
 
 (defmethod command-handler :congregation.command/add-user
   [command congregation {:keys [user-exists? check-permit]}]
-  (check-permit [:configure-congregation (:congregation/id congregation)])
-  (when-not (user-exists? (:user/id command))
-    (throw (ex-info "User doesn't exist" {:command command})))
-  (when-not (contains? (::users congregation) (:user/id command))
-    [{:event/type :congregation.event/permission-granted
-      :event/version 1
-      :congregation/id (:congregation/id congregation)
-      :user/id (:user/id command)
-      :permission/id :view-congregation}]))
+  (let [cong-id (:congregation/id congregation)
+        user-id (:user/id command)]
+    (check-permit [:configure-congregation cong-id])
+    (when-not (user-exists? user-id)
+      (throw (ValidationException. [[:no-such-user user-id]])))
+    (when-not (contains? (::users congregation) user-id)
+      [{:event/type :congregation.event/permission-granted
+        :event/version 1
+        :congregation/id cong-id
+        :user/id user-id
+        :permission/id :view-congregation}])))
 
 (defmethod command-handler :congregation.command/rename-congregation
   [command congregation {:keys [check-permit]}]

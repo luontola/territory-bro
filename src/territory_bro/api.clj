@@ -27,7 +27,7 @@
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
            (java.util UUID)
-           (territory_bro NoPermitException)))
+           (territory_bro NoPermitException ValidationException)))
 
 (def ^:private format-key-for-api (memoize (comp csk/->camelCaseString name)))
 
@@ -151,14 +151,18 @@
                                                     (assoc :sub (:user/subject user))))))}))))))
 
 (defn- api-command! [conn state command]
+  ;; TODO: unit tests for this and other generic request mapping stuff
   (let [command (assoc command
                        :command/time ((:now config/env))
                        :command/user (current-user-id))]
     (try
       (congregation/command! conn state command)
       (ok {:message "OK"})
+      (catch ValidationException e
+        (log/warn e "Invalid command:" command)
+        (bad-request {:errors (.getErrors e)}))
       (catch NoPermitException e
-        (log/warn e "Command denied:" command)
+        (log/warn e "Forbidden command:" command)
         (forbidden {:message "Forbidden"})))))
 
 (defn add-user [request]

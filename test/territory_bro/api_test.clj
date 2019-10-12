@@ -334,6 +334,15 @@
                       (congregation/get-users cong-id))]
         (is (contains? (set users) new-user-id))))
 
+    (testing "invalid user"
+      (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
+                         (json-body {:userId (str (UUID. 0 1))})
+                         (merge session)
+                         app)]
+        (is (bad-request? response))
+        (is (= {:errors [["no-such-user" "00000000-0000-0000-0000-000000000001"]]}
+               (:body response)))))
+
     (testing "no access"
       (revoke-access-from-all! cong-id)
       (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
