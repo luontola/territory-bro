@@ -26,8 +26,9 @@ const JoinPage = () => {
       <p>Ask the brother who is taking care of the territories in your congregation to give you Territory Bro
         access.</p>
 
-      <p>You will need to tell him your User ID, which is: <div
-        style={{fontSize: '150%', margin: '15px'}}>{userId}</div></p>
+      <p>You will need to tell him your User ID, which is:</p>
+
+      <div style={{fontSize: '150%', margin: '15px'}}>{userId}</div>
     </>
   );
 };
