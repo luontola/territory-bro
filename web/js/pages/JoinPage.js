@@ -7,6 +7,9 @@
 import React from "react";
 import {getSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
+import ClipboardJS from "clipboard";
+
+new ClipboardJS('#copy-your-user-id');
 
 const JoinPage = () => {
   const settings = getSettings();
@@ -28,7 +31,14 @@ const JoinPage = () => {
 
       <p>You will need to tell him your User ID, which is:</p>
 
-      <div style={{fontSize: '150%', margin: '15px'}}>{userId}</div>
+      <p id="your-user-id" style={{fontSize: '150%', margin: '15px'}}>{userId}</p>
+
+      <p>
+        <button id="copy-your-user-id" type="button" className="pure-button"
+                data-clipboard-target="#your-user-id">
+          Copy to clipboard
+        </button>
+      </p>
     </>
   );
 };
