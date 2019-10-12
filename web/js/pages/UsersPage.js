@@ -40,9 +40,10 @@ const UsersPage = ({congregationId}) => {
       }}
       onSubmit={async (values, {setSubmitting, resetForm}) => {
         try {
-          await addUser(congregation.id, values.userId);
+          const userId = values.userId.trim();
+          await addUser(congregation.id, userId);
           // changing state is needed to trigger re-rendering with the updated user list
-          setNewUser(values.userId);
+          setNewUser(userId);
           resetForm();
         } catch (e) {
           console.error('Form submit failed:', e);
