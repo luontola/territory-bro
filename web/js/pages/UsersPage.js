@@ -20,6 +20,8 @@ const IdentityProvider = ({user}) => {
   return sub;
 };
 
+const UUID_PATTERN = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+
 const UsersPage = ({congregationId}) => {
   const [newUser, setNewUser] = useState(null);
   const congregation = getCongregationById(congregationId);
@@ -33,8 +35,11 @@ const UsersPage = ({congregationId}) => {
       }}
       validate={values => {
         let errors = {};
-        if (!values.userId) {
+        const userId = values.userId.trim();
+        if (!userId) {
           errors.userId = 'User ID is required.';
+        } else if (!userId.match(`^${UUID_PATTERN}$`)) {
+          errors.userId = 'User ID must to be in UUID format: 01234567-89ab-cdef-0123-456789abcdef';
         }
         return errors;
       }}
@@ -63,7 +68,8 @@ const UsersPage = ({congregationId}) => {
           <fieldset>
             <div className="pure-control-group">
               <label htmlFor="userId">User ID</label>
-              <Field name="userId" id="userId" type="text" autoComplete="off"/>
+              <Field name="userId" id="userId" type="text" autoComplete="off"
+                     required={true} pattern={`\\s*${UUID_PATTERN}\\s*`}/>
               <ErrorMessage name="userId" component="span" className="pure-form-message-inline"/>
             </div>
 
