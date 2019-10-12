@@ -42,7 +42,11 @@
         display: block !important;
     }
 
+    .root :global .ol-control {
+        display: none;
+    }
+
     .root :global .ol-control.ol-rotate {
-        display: block !important;
+        display: block;
     }
 }
