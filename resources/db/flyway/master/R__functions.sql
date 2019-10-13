@@ -1,16 +1,16 @@
 create or replace function append_gis_change_log() returns trigger as
 $$
 declare
-    latest_id bigint;
+    next_id bigint;
 begin
     lock table ${masterSchema}.gis_change_log in share row exclusive mode;
 
-    select coalesce(max(id), 0)
-    into latest_id
+    select coalesce(max(id), 0) + 1
+    into next_id
     from ${masterSchema}.gis_change_log;
 
     insert into ${masterSchema}.gis_change_log (id, schema, "table", op, "user", time, old, new)
-    select latest_id + 1,
+    select next_id,
            tg_table_schema,
            tg_table_name,
            tg_op,
