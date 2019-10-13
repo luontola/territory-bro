@@ -99,6 +99,7 @@
       (.dataSource (:datasource database))
       (.schemas (strings schema))
       (.locations (strings "classpath:db/flyway/master"))
+      (.placeholders {"masterSchema" schema})
       (.load)))
 
 (defn ^Flyway tenant-schema [schema master-schema]

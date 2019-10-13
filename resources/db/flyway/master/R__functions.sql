@@ -3,13 +3,13 @@ $$
 declare
     latest_id bigint;
 begin
-    lock table gis_change_log in share row exclusive mode;
+    lock table ${masterSchema}.gis_change_log in share row exclusive mode;
 
     select coalesce(max(id), 0)
     into latest_id
-    from gis_change_log;
+    from ${masterSchema}.gis_change_log;
 
-    insert into gis_change_log (id, schema, "table", op, "user", time, old, new)
+    insert into ${masterSchema}.gis_change_log (id, schema, "table", op, "user", time, old, new)
     select latest_id + 1,
            tg_table_schema,
            tg_table_name,
@@ -18,11 +18,11 @@ begin
            now(),
            case tg_op
                when 'INSERT' then null
-               else jsonb_set(row_to_json(old)::jsonb, '{location}', to_jsonb(ST_AsText(old.location)))
+               else jsonb_set(row_to_json(old)::jsonb, '{location}', to_jsonb(public.ST_AsText(old.location)))
                end,
            case tg_op
                when 'DELETE' then null
-               else jsonb_set(row_to_json(new)::jsonb, '{location}', to_jsonb(ST_AsText(new.location)))
+               else jsonb_set(row_to_json(new)::jsonb, '{location}', to_jsonb(public.ST_AsText(new.location)))
                end;
 
     return null;
@@ -35,15 +35,15 @@ declare
     next_global_revision bigint;
     next_stream_revision integer;
 begin
-    lock table event in share row exclusive mode;
+    lock table ${masterSchema}.event in share row exclusive mode;
 
     select coalesce(max(global_revision), 0) + 1
     into next_global_revision
-    from event;
+    from ${masterSchema}.event;
 
     select coalesce(max(stream_revision), 0) + 1
     into next_stream_revision
-    from event
+    from ${masterSchema}.event
     where stream_id = new.stream_id;
 
     if new.stream_revision is null then
