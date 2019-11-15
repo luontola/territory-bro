@@ -35,7 +35,7 @@ const RegistrationPage = () => {
                 try {
                   const id = await createCongregation(values.congregationName);
                   // TODO: use short IDs
-                  navigate(`/congregation/${id}`);
+                  await navigate(`/congregation/${id}`);
                 } catch (e) {
                   console.error('Form submit failed:', e);
                   alert(e);

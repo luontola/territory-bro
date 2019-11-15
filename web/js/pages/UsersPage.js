@@ -40,7 +40,7 @@ const RemoveUserButton = ({congregation, user, onRemove}) => {
                 }
                 if (user.id === myUserId) {
                   // cannot view this congregation anymore, so redirect to front page
-                  navigate('/');
+                  await navigate('/');
                 }
               } catch (error) {
                 alert(formatApiError(error));

@@ -19,7 +19,7 @@ const LoginCallbackPage = () => {
       const params = new URLSearchParams(document.location.search.substring(1));
       const returnPath = params.get('return') || '/';
       if (settings.user) {
-        navigate(returnPath);
+        await navigate(returnPath);
       } else {
         await auth.handleAuthentication();
         // XXX: full page reload because clearing the cache doesn't re-render navbar
