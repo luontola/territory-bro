@@ -3,8 +3,8 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React, {useState} from "react";
-import {addUser, getCongregationById, setUserPermissions} from "../api";
-import {Link} from "@reach/router";
+import {addUser, getCongregationById, getSettings, setUserPermissions} from "../api";
+import {Link, navigate} from "@reach/router";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 import sortBy from "lodash/sortBy";
 import styles from "./UsersPage.css";
@@ -21,15 +21,26 @@ const IdentityProvider = ({user}) => {
   return sub;
 };
 
-const RemoveUserButton = ({congregationId, user, onRemove}) => {
+const RemoveUserButton = ({congregation, user, onRemove}) => {
+  const settings = getSettings();
+  const myUserId = settings.user.id;
   return (
     <button type="button"
             className={`pure-button ${styles.removeUser}`}
             onClick={async () => {
               try {
-                await setUserPermissions(congregationId, user.id, []);
+                if (user.id === myUserId) {
+                  if (!confirm(`Are you sure you want to REMOVE YOURSELF from ${congregation.name}? You will not be able to access this congregation anymore.`)) {
+                    return;
+                  }
+                }
+                await setUserPermissions(congregation.id, user.id, []);
                 if (onRemove) {
                   onRemove();
+                }
+                if (user.id === myUserId) {
+                  // cannot view this congregation anymore, so redirect to front page
+                  navigate('/');
                 }
               } catch (error) {
                 alert(formatApiError(error));
@@ -53,6 +64,8 @@ const UsersPage = ({congregationId}) => {
   const [newUser, setNewUser] = useState(null);
   const forceUpdate = useForceUpdate(); // to trigger re-rendering with the updated user list
   const congregation = getCongregationById(congregationId);
+  const settings = getSettings();
+  const myUserId = settings.user.id;
   const joinPageUrl = `${location.protocol}//${location.host}/join`;
   // show the new user first for better visibility
   const users = sortBy(congregation.users, user => user.id !== newUser);
@@ -129,10 +142,10 @@ const UsersPage = ({congregationId}) => {
               <td className={styles.profilePicture}>
                 {user.picture && <img src={user.picture} alt=""/>}
               </td>
-              <td>{user.name || user.id}</td>
+              <td>{user.name || user.id} {user.id === myUserId && <em>(You)</em>}</td>
               <td>{user.email} {(user.email && !user.emailVerified) && <em>(Unverified)</em>}</td>
               <td><IdentityProvider user={user}/></td>
-              <td><RemoveUserButton congregationId={congregationId}
+              <td><RemoveUserButton congregation={congregation}
                                     user={user}
                                     onRemove={forceUpdate}/></td>
             </tr>
