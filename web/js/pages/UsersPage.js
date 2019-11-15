@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React, {useState} from "react";
-import {addUser, getCongregationById} from "../api";
+import {addUser, getCongregationById, setUserPermissions} from "../api";
 import {Link} from "@reach/router";
 import {ErrorMessage, Field, Form, Formik} from "formik";
 import sortBy from "lodash/sortBy";
@@ -21,27 +21,37 @@ const IdentityProvider = ({user}) => {
   return sub;
 };
 
-function removeUser(user) {
-  console.log('removeUser', user);
-  alert("Removing users has not yet been implemented. Please try again later."); // TODO
-}
-
-const RemoveUserButton = ({user}) => {
+const RemoveUserButton = ({congregationId, user, onRemove}) => {
   return (
     <button type="button"
             className={`pure-button ${styles.removeUser}`}
-            onClick={() => {
-              removeUser(user);
+            onClick={async () => {
+              try {
+                await setUserPermissions(congregationId, user.id, []);
+                if (onRemove) {
+                  onRemove();
+                }
+              } catch (error) {
+                alert(formatApiError(error));
+              }
             }}>
       Remove User
     </button>
   );
 };
 
+function useForceUpdate() {
+  const [version, setVersion] = useState(1);
+  return () => {
+    setVersion(version + 1);
+  };
+}
+
 const UUID_PATTERN = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
 const UsersPage = ({congregationId}) => {
   const [newUser, setNewUser] = useState(null);
+  const forceUpdate = useForceUpdate(); // to trigger re-rendering with the updated user list
   const congregation = getCongregationById(congregationId);
   const joinPageUrl = `${location.protocol}//${location.host}/join`;
   // show the new user first for better visibility
@@ -122,7 +132,9 @@ const UsersPage = ({congregationId}) => {
               <td>{user.name || user.id}</td>
               <td>{user.email} {(user.email && !user.emailVerified) && <em>(Unverified)</em>}</td>
               <td><IdentityProvider user={user}/></td>
-              <td><RemoveUserButton user={user}/></td>
+              <td><RemoveUserButton congregationId={congregationId}
+                                    user={user}
+                                    onRemove={forceUpdate}/></td>
             </tr>
           ))}
           </tbody>

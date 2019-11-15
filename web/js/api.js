@@ -195,6 +195,11 @@ export async function addUser(congregationId: string, userId: string) {
   refreshCongregations();
 }
 
+export async function setUserPermissions(congregationId: string, userId: string, permissions: Array<string>) {
+  await api.post(`/api/congregation/${congregationId}/set-user-permissions`, {userId, permissions});
+  refreshCongregations();
+}
+
 export async function renameCongregation(congregationId: string, name: string) {
   await api.post(`/api/congregation/${congregationId}/rename`, {name});
   refreshCongregations();
