@@ -5,7 +5,8 @@
 (ns territory-bro.commands
   (:require [schema-refined.core :as refined]
             [schema.core :as s]
-            [schema.utils])
+            [schema.utils]
+            [territory-bro.events :as events])
   (:import (java.time Instant)
            (java.util UUID)))
 
@@ -29,6 +30,12 @@
          :command/type (s/eq :congregation.command/add-user)
          :congregation/id UUID
          :user/id UUID))
+(s/defschema SetUserPermissions
+  (assoc UserCommand
+         :command/type (s/eq :congregation.command/set-user-permissions)
+         :congregation/id UUID
+         :user/id UUID
+         :permission/ids [events/PermissionId]))
 
 (s/defschema RenameCongregation
   (assoc UserCommand
@@ -65,6 +72,7 @@
 
 (def command-schemas
   {:congregation.command/add-user AddUser
+   :congregation.command/set-user-permissions SetUserPermissions
    :congregation.command/rename-congregation RenameCongregation
    :db-admin.command/ensure-gis-user-absent EnsureGisUserAbsent
    :db-admin.command/ensure-gis-user-present EnsureGisUserPresent

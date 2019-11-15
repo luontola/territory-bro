@@ -209,7 +209,7 @@
                        :event/time (Instant/ofEpochSecond 1)
                        :event/user admin-id
                        :congregation/id cong-id
-                       :congregation/name "old name"
+                       :congregation/name ""
                        :congregation/schema-name ""}
         add-user-command {:command/type :congregation.command/add-user
                           :command/time (Instant/ofEpochSecond 2)
@@ -244,3 +244,88 @@
                                               (throw (NoPermitException. nil nil))))]
         (is (thrown? NoPermitException
                      (handle-command add-user-command [created-event] injections)))))))
+
+(deftest set-user-permissions-test
+  (let [cong-id (UUID. 0 1)
+        admin-id (UUID. 0 2)
+        target-user-id (UUID. 0 3)
+        invalid-user-id (UUID. 0 4)
+        injections {:check-permit (fn [_permit])
+                    :user-exists? (fn [user-id]
+                                    (= target-user-id user-id))}
+        created-event {:event/type :congregation.event/congregation-created
+                       :event/version 1
+                       :event/time (Instant/ofEpochSecond 1)
+                       :event/user admin-id
+                       :congregation/id cong-id
+                       :congregation/name ""
+                       :congregation/schema-name ""}
+        permission-granted-event {:event/type :congregation.event/permission-granted
+                                  :event/version 1
+                                  :event/time (Instant/ofEpochSecond 2)
+                                  :event/user admin-id
+                                  :congregation/id cong-id
+                                  :user/id target-user-id
+                                  :permission/id :PLACEHOLDER}
+        permission-revoked-event {:event/type :congregation.event/permission-revoked
+                                  :event/version 1
+                                  :event/time (Instant/ofEpochSecond 2)
+                                  :event/user admin-id
+                                  :congregation/id cong-id
+                                  :user/id target-user-id
+                                  :permission/id :PLACEHOLDER}
+        set-user-permissions-command {:command/type :congregation.command/set-user-permissions
+                                      :command/time (Instant/ofEpochSecond 2)
+                                      :command/user admin-id
+                                      :congregation/id cong-id
+                                      :user/id target-user-id
+                                      :permission/ids []}]
+
+    (testing "grant permissions"
+      (let [given [created-event
+                   (assoc permission-granted-event :permission/id :view-congregation)]
+            when (assoc set-user-permissions-command :permission/ids [:view-congregation :configure-congregation])
+            then [(assoc permission-granted-event :permission/id :configure-congregation)]]
+        (is (= then (handle-command when given injections)))))
+
+    (testing "revoke permissions"
+      (let [given [created-event
+                   (assoc permission-granted-event :permission/id :view-congregation)
+                   (assoc permission-granted-event :permission/id :configure-congregation)]
+            when (assoc set-user-permissions-command :permission/ids [:view-congregation])
+            then [(assoc permission-revoked-event :permission/id :configure-congregation)]]
+        (is (= then (handle-command when given injections)))))
+
+    (testing "setting permissions is idempotent"
+      (let [given [created-event
+                   (assoc permission-granted-event :permission/id :view-congregation)]
+            when (assoc set-user-permissions-command :permission/ids [:view-congregation])
+            then []]
+        (is (= then (handle-command when given injections)))))
+
+    (testing "remove user from congregation"
+      (let [given [created-event
+                   (assoc permission-granted-event :permission/id :view-congregation)]
+            when (assoc set-user-permissions-command :permission/ids [])
+            then [(assoc permission-revoked-event :permission/id :view-congregation)]]
+        (is (= then (handle-command when given injections)))))
+
+    (testing "user not in congregation") ;; TODO: should this command disallow adding new users?
+
+    (testing "user doesn't exist"
+      (let [given [created-event]
+            when (assoc set-user-permissions-command
+                        :user/id invalid-user-id
+                        :permission/ids [:view-congregation])]
+        (is (thrown-with-msg? ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000004\"]]")
+                              (handle-command when given injections)))))
+
+    (testing "checks permits"
+      (let [injections (assoc injections
+                              :check-permit (fn [permit]
+                                              (is (= [:configure-congregation cong-id] permit))
+                                              (throw (NoPermitException. nil nil))))
+            given [created-event]
+            when (assoc set-user-permissions-command :permission/ids [:view-congregation])]
+        (is (thrown? NoPermitException
+                     (handle-command when given injections)))))))

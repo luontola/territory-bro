@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.congregation
-  (:require [clojure.string :as str]
+  (:require [clojure.set :as set]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [territory-bro.commands :as commands]
             [territory-bro.config :as config]
@@ -153,6 +154,11 @@
     (update congregation ::users disj (:user/id event))
     congregation))
 
+(defn- write-model2 [congregation event]
+  (-> congregation
+      ;; TODO: rely more on reused code, remove write-model if possible
+      (write-model event)
+      (update-congregation event)))
 
 (defmulti ^:private command-handler (fn [command _congregation _injections]
                                       (:command/type command)))
@@ -170,6 +176,31 @@
         :congregation/id cong-id
         :user/id user-id
         :permission/id :view-congregation}])))
+
+(defmethod command-handler :congregation.command/set-user-permissions
+  [command congregation {:keys [user-exists? check-permit]}]
+  (let [cong-id (:congregation/id congregation)
+        user-id (:user/id command)
+        old-permissions (set (get-in congregation [:congregation/user-permissions user-id]))
+        new-permissions (set (:permission/ids command))
+        added-permissions (set/difference new-permissions old-permissions)
+        removed-permissions (set/difference old-permissions new-permissions)]
+    (check-permit [:configure-congregation cong-id])
+    (when-not (user-exists? user-id)
+      (throw (ValidationException. [[:no-such-user user-id]])))
+    (concat
+     (for [added-permission (sort added-permissions)]
+       {:event/type :congregation.event/permission-granted
+        :event/version 1
+        :congregation/id cong-id
+        :user/id user-id
+        :permission/id added-permission})
+     (for [removed-permission (sort removed-permissions)]
+       {:event/type :congregation.event/permission-revoked
+        :event/version 1
+        :congregation/id cong-id
+        :user/id user-id
+        :permission/id removed-permission}))))
 
 (defmethod command-handler :congregation.command/rename-congregation
   [command congregation {:keys [check-permit]}]
@@ -189,7 +220,7 @@
 
 (defn handle-command [command events injections]
   (let [command (commands/validate-command command)
-        congregation (reduce write-model nil events)
+        congregation (reduce write-model2 nil events)
         injections (merge {:check-permit (fn [permit]
                                            (permissions/check (:state injections)
                                                               (:command/user command)
