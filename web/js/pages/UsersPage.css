@@ -13,3 +13,8 @@ td.profilePicture img {
     width: 3em;
     display: block; /* needed to avoid a mysterious 4px margin below the image */
 }
+
+button.removeUser {
+    color: white;
+    background-color: rgb(202, 60, 60);
+}

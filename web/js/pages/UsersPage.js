@@ -21,6 +21,23 @@ const IdentityProvider = ({user}) => {
   return sub;
 };
 
+function removeUser(user) {
+  console.log('removeUser', user);
+  alert("Removing users has not yet been implemented. Please try again later."); // TODO
+}
+
+const RemoveUserButton = ({user}) => {
+  return (
+    <button type="button"
+            className={`pure-button ${styles.removeUser}`}
+            onClick={() => {
+              removeUser(user);
+            }}>
+      Remove User
+    </button>
+  );
+};
+
 const UUID_PATTERN = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
 const UsersPage = ({congregationId}) => {
@@ -92,6 +109,7 @@ const UsersPage = ({congregationId}) => {
             <th>Name</th>
             <th>Email</th>
             <th>Login Method</th>
+            <th>Actions</th>
           </tr>
           </thead>
           <tbody>
@@ -104,6 +122,7 @@ const UsersPage = ({congregationId}) => {
               <td>{user.name || user.id}</td>
               <td>{user.email} {(user.email && !user.emailVerified) && <em>(Unverified)</em>}</td>
               <td><IdentityProvider user={user}/></td>
+              <td><RemoveUserButton user={user}/></td>
             </tr>
           ))}
           </tbody>
