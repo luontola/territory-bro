@@ -182,6 +182,19 @@
               (gis-user/create-gis-user! conn state cong-id user-id)))
           response)))))
 
+(defn set-user-permissions [request]
+  (auth/with-authenticated-user request
+    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+          user-id (UUID/fromString (get-in request [:params :userId]))
+          permissions (->> (get-in request [:params :permissions])
+                           (map keyword))
+          state (projections/cached-state)]
+      (db/with-db [conn {}]
+        (api-command! conn state {:command/type :congregation.command/set-user-permissions
+                                  :congregation/id cong-id
+                                  :user/id user-id
+                                  :permission/ids permissions})))))
+
 (defn rename-congregation [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -223,6 +236,7 @@
   (GET "/api/congregations" request (list-congregations request))
   (GET "/api/congregation/:congregation" request (get-congregation request))
   (POST "/api/congregation/:congregation/add-user" request (add-user request))
+  (POST "/api/congregation/:congregation/set-user-permissions" request (set-user-permissions request))
   (POST "/api/congregation/:congregation/rename" request (rename-congregation request))
   (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request)))
 

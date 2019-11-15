@@ -351,6 +351,54 @@
                          app)]
         (is (forbidden? response))))))
 
+(deftest set-user-permissions-test
+  (let [session (login! app)
+        response (-> (request :post "/api/congregations")
+                     (json-body {:name "Congregation"})
+                     (merge session)
+                     app
+                     (assert-response ok?))
+        cong-id (UUID/fromString (:id (:body response)))
+        user-id (user/save-user! db/database "user1" {:name "User 1"})]
+    (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
+                       (json-body {:userId (str user-id)})
+                       (merge session)
+                       app)]
+      (is (ok? response)))
+
+    ;; TODO: test changing permissions (after new users no more get full admin access)?
+
+    (testing "remove user"
+      (let [response (-> (request :post (str "/api/congregation/" cong-id "/set-user-permissions"))
+                         (json-body {:userId (str user-id)
+                                     :permissions []})
+                         (merge session)
+                         app)]
+        (is (ok? response))
+        ;; TODO: check the result through the API
+        (let [users (-> (projections/current-state db/database)
+                        (congregation/get-users cong-id))]
+          (is (not (contains? (set users) user-id))))))
+
+    (testing "invalid user"
+      (let [response (-> (request :post (str "/api/congregation/" cong-id "/set-user-permissions"))
+                         (json-body {:userId (str (UUID. 0 1))
+                                     :permissions []})
+                         (merge session)
+                         app)]
+        (is (bad-request? response))
+        (is (= {:errors [["no-such-user" "00000000-0000-0000-0000-000000000001"]]}
+               (:body response)))))
+
+    (testing "no access"
+      (revoke-access-from-all! cong-id)
+      (let [response (-> (request :post (str "/api/congregation/" cong-id "/set-user-permissions"))
+                         (json-body {:userId (str user-id)
+                                     :permissions []})
+                         (merge session)
+                         app)]
+        (is (forbidden? response))))))
+
 (deftest rename-congregation-test
   (let [session (login! app)
         response (-> (request :post "/api/congregations")
