@@ -35,12 +35,12 @@ const RemoveUserButton = ({congregation, user, onRemove}) => {
                   }
                 }
                 await setUserPermissions(congregation.id, user.id, []);
-                if (onRemove) {
-                  onRemove();
-                }
                 if (user.id === myUserId) {
                   // cannot view this congregation anymore, so redirect to front page
                   await navigate('/');
+                }
+                if (onRemove) {
+                  onRemove();
                 }
               } catch (error) {
                 alert(formatApiError(error));
