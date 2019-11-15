@@ -26,10 +26,10 @@ const JoinPage = () => {
     <>
       <h1>Join an Existing Congregation</h1>
 
-      <p>Ask the brother who is taking care of the territories in your congregation to give you Territory Bro
-        access.</p>
+      <p>To access a congregation in Territory Bro, you will need to tell your <em>User ID</em> to the brother who is
+        taking care of the territories in your congregation, so that he can give you access.</p>
 
-      <p>You will need to tell him your User ID, which is:</p>
+      <p>Your User ID is:</p>
 
       <p id="your-user-id" style={{fontSize: '150%', margin: '15px'}}>{userId}</p>
 

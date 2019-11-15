@@ -40,7 +40,7 @@ const UsersPage = ({congregationId}) => {
         if (!userId) {
           errors.userId = 'User ID is required.';
         } else if (!userId.match(`^${UUID_PATTERN}$`)) {
-          errors.userId = 'User ID must to be in UUID format: 01234567-89ab-cdef-0123-456789abcdef';
+          errors.userId = "That doesn't look like a User ID. It should look something like: 01234567-89ab-cdef-0123-456789abcdef";
         }
         return errors;
       }}
@@ -61,17 +61,17 @@ const UsersPage = ({congregationId}) => {
       <>
         <h1><Link to="..">{congregation.name}</Link>: Users</h1>
 
-        <p>To add users to this congregation, ask them to visit <Link to="/join">{joinPageUrl}</Link> and tell you
-          their <em>user ID</em> from that page. You can then input their user ID to the following form.</p>
-
         <Form className="pure-form pure-form-aligned">
           <fieldset>
             <div className="pure-control-group">
-              <label htmlFor="userId">User ID</label>
+              <label htmlFor="userId">User ID *</label>
               <Field name="userId" id="userId" type="text" autoComplete="off"
                      required={true} pattern={`\\s*${UUID_PATTERN}\\s*`}/>
               <ErrorMessage name="userId" component="span" className="pure-form-message-inline"/>
             </div>
+
+            <p>* To find out somebody's <em>User ID</em>, ask them to visit <Link to="/join">{joinPageUrl}</Link> and
+              copy their User ID from that page and send it to you.</p>
 
             <div className="pure-controls">
               <button type="submit"
