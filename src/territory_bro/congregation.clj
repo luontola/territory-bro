@@ -16,7 +16,7 @@
   (:import (java.util UUID)
            (territory_bro ValidationException)))
 
-;;; Read model
+;;;; Read model
 
 (defmulti ^:private update-congregation (fn [_congregation event]
                                           (:event/type event)))
@@ -76,6 +76,9 @@
       (update-in [::congregations (:congregation/id event)] update-congregation event)
       (update-permissions event)))
 
+
+;;;; Queries
+
 (defn get-unrestricted-congregations [state]
   (vals (::congregations state)))
 
@@ -97,36 +100,15 @@
   (-> (get-unrestricted-congregation state cong-id)
       (apply-user-permissions user-id)))
 
-(defn use-schema [conn state cong-id] ; TODO: create a better helper?
-  (let [cong (get-unrestricted-congregation state cong-id)
-        schema (:congregation/schema-name cong)]
-    (db/use-tenant-schema conn schema)))
-
-(defn create-congregation! [conn name]
-  (let [id (UUID/randomUUID)
-        master-schema (:database-schema config/env)
-        tenant-schema (str master-schema
-                           "_"
-                           (str/replace (str id) "-" ""))]
-    (assert (not (contains? (set (db/get-schemas conn))
-                            tenant-schema))
-            {:schema-name tenant-schema})
-    (event-store/save! conn id 0 [(assoc (events/defaults)
-                                         :event/type :congregation.event/congregation-created
-                                         :congregation/id id
-                                         :congregation/name name
-                                         :congregation/schema-name tenant-schema)])
-    (-> (db/tenant-schema tenant-schema master-schema)
-        (.migrate))
-    (log/info "Congregation created:" id)
-    id))
-
 
 ;;;; Write model
 
 (defn- write-model [congregation event]
   (-> congregation
       (update-congregation event)))
+
+
+;;;; Command handlers
 
 (defmulti ^:private command-handler (fn [command _congregation _injections]
                                       (:command/type command)))
@@ -206,6 +188,33 @@
         old-events (event-store/read-stream conn stream-id)
         new-events (handle-command command old-events {:state state})]
     (event-store/save! conn stream-id (count old-events) new-events)))
+
+
+;;;; Other commands
+
+(defn use-schema [conn state cong-id] ; TODO: create a better helper?
+  (let [cong (get-unrestricted-congregation state cong-id)
+        schema (:congregation/schema-name cong)]
+    (db/use-tenant-schema conn schema)))
+
+(defn create-congregation! [conn name]
+  (let [id (UUID/randomUUID)
+        master-schema (:database-schema config/env)
+        tenant-schema (str master-schema
+                           "_"
+                           (str/replace (str id) "-" ""))]
+    (assert (not (contains? (set (db/get-schemas conn))
+                            tenant-schema))
+            {:schema-name tenant-schema})
+    (event-store/save! conn id 0 [(assoc (events/defaults)
+                                         :event/type :congregation.event/congregation-created
+                                         :congregation/id id
+                                         :congregation/name name
+                                         :congregation/schema-name tenant-schema)])
+    (-> (db/tenant-schema tenant-schema master-schema)
+        (.migrate))
+    (log/info "Congregation created:" id)
+    id))
 
 
 ;;;; User access
