@@ -124,40 +124,8 @@
 
 ;;;; Write model
 
-(defmulti ^:private write-model (fn [_congregation event]
-                                  (:event/type event)))
-
-(defmethod write-model :default
-  [congregation _event]
-  congregation)
-
-(defmethod write-model :congregation.event/congregation-created
-  [congregation event]
+(defn- write-model [congregation event]
   (-> congregation
-      (assoc :congregation/id (:congregation/id event))
-      (assoc :congregation/name (:congregation/name event))))
-
-(defmethod write-model :congregation.event/congregation-renamed
-  [congregation event]
-  (-> congregation
-      (assoc :congregation/name (:congregation/name event))))
-
-(defmethod write-model :congregation.event/permission-granted
-  [congregation event]
-  (if (= :view-congregation (:permission/id event))
-    (update congregation ::users (fnil conj #{}) (:user/id event))
-    congregation))
-
-(defmethod write-model :congregation.event/permission-revoked
-  [congregation event]
-  (if (= :view-congregation (:permission/id event))
-    (update congregation ::users disj (:user/id event))
-    congregation))
-
-(defn- write-model2 [congregation event]
-  (-> congregation
-      ;; TODO: rely more on reused code, remove write-model if possible
-      (write-model event)
       (update-congregation event)))
 
 (defmulti ^:private command-handler (fn [command _congregation _injections]
@@ -166,11 +134,12 @@
 (defmethod command-handler :congregation.command/add-user
   [command congregation {:keys [user-exists? check-permit]}]
   (let [cong-id (:congregation/id congregation)
-        user-id (:user/id command)]
+        user-id (:user/id command)
+        user-permissions (set (get-in congregation [:congregation/user-permissions user-id]))]
     (check-permit [:configure-congregation cong-id])
     (when-not (user-exists? user-id)
       (throw (ValidationException. [[:no-such-user user-id]])))
-    (when-not (contains? (::users congregation) user-id)
+    (when-not (contains? user-permissions :view-congregation)
       [{:event/type :congregation.event/permission-granted
         :event/version 1
         :congregation/id cong-id
@@ -220,7 +189,7 @@
 
 (defn handle-command [command events injections]
   (let [command (commands/validate-command command)
-        congregation (reduce write-model2 nil events)
+        congregation (reduce write-model nil events)
         injections (merge {:check-permit (fn [permit]
                                            (permissions/check (:state injections)
                                                               (:command/user command)
