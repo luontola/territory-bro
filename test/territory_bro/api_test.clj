@@ -224,7 +224,14 @@
         (is (contains? (->> (:body response)
                             (map :id)
                             (set))
-                       (str cong-id)))))))
+                       (str cong-id)))))
+
+    (testing "super user can configure all congregations"
+      (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
+                         (json-body {:userId (str user-id)})
+                         (merge session)
+                         app)]
+        (is (ok? response))))))
 
 (deftest create-congregation-test
   (let [session (login! app)

@@ -119,7 +119,8 @@
   (let [state (projections/cached-state)]
     (if (::sudo? (:session request))
       (-> state
-          (permissions/grant (current-user-id) [:view-congregation]))
+          (permissions/grant (current-user-id) [:view-congregation])
+          (permissions/grant (current-user-id) [:configure-congregation]))
       state)))
 
 (defn create-congregation [request]
