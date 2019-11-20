@@ -11,7 +11,7 @@ services:
     mem_reservation: 10m
     mem_limit: 20m
     ports:
-      - "8080:80"
+      - "127.0.0.1:8080:80"
 
   api:
     build:
@@ -28,8 +28,8 @@ services:
     mem_reservation: 150m
     mem_limit: 200m
     ports:
-      - "8081:8080"
-      - "7000:7000"
+      - "127.0.0.1:8081:8080"
+      - "127.0.0.1:7000:7000"
 
   db:
     image: mdillon/postgis:11
@@ -39,4 +39,4 @@ services:
     mem_reservation: 30m
     mem_limit: 150m
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
