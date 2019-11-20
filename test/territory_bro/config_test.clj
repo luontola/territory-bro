@@ -7,7 +7,8 @@
             [territory-bro.config :refer :all]
             [territory-bro.testutil :refer [re-equals]]
             [territory-bro.util :refer [getx]])
-  (:import (java.time Instant)))
+  (:import (java.time Instant)
+           (java.util UUID)))
 
 (deftest override-defaults-test
   (testing "default values"
@@ -27,7 +28,8 @@
 
 (deftest enrich-env-test
   (let [env (enrich-env {:auth0-domain "example.eu.auth0.com"
-                         :auth0-client-id "m14ziOMuEVgHB4LIzoLKeDXazSReXCZo"})]
+                         :auth0-client-id "m14ziOMuEVgHB4LIzoLKeDXazSReXCZo"
+                         :super-users "user1 user2 ac66bb30-0b9b-11ea-8d71-362b9e155667"})]
     (testing ":now is a function which returns current time"
       (let [result ((getx env :now))]
         (is (instance? Instant result))
@@ -41,4 +43,8 @@
 
     (testing ":jwt-audience is the Auth0 Client ID"
       (is (= "m14ziOMuEVgHB4LIzoLKeDXazSReXCZo"
-             (getx env :jwt-audience))))))
+             (getx env :jwt-audience))))
+
+    (testing ":super-users is parsed as a set"
+      (is (= #{"user1" "user2" (UUID/fromString "ac66bb30-0b9b-11ea-8d71-362b9e155667")}
+             (getx env :super-users))))))
