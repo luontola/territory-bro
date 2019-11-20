@@ -76,6 +76,21 @@
   (-> (ok "Logged out")
       (assoc :session nil)))
 
+(defn- super-user? []
+  (or (contains? (:super-users config/env) (:user/id auth/*user*))
+      (contains? (:super-users config/env) (:sub auth/*user*))))
+
+(defn sudo [request]
+  (auth/with-authenticated-user request
+    (require-logged-in!)
+    (if (super-user?)
+      (let [session (-> (:session request)
+                        (assoc ::sudo? true))]
+        (log/info "Super user promotion")
+        (-> (see-other "/")
+            (assoc :session session)))
+      (forbidden "Not super user"))))
+
 (defn- fix-user-for-liberator [user]
   ;; TODO: custom serializer for UUID
   (if (some? (:user/id user))
@@ -231,6 +246,7 @@
   (POST "/api/login" request (login request))
   (POST "/api/dev-login" request (dev-login request))
   (POST "/api/logout" [] (logout))
+  (GET "/api/sudo" request (sudo request))
   (ANY "/api/settings" [] settings)
   (POST "/api/congregations" request (create-congregation request))
   (GET "/api/congregations" request (list-congregations request))

@@ -14,7 +14,7 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.events :as events]
-            [territory-bro.fixtures :refer [db-fixture api-fixture]]
+            [territory-bro.fixtures :refer [db-fixture api-fixture event-actor-fixture]]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.json :as json]
             [territory-bro.jwt :as jwt]
@@ -187,6 +187,32 @@
                          (merge session)
                          app)]
         (is (unauthorized? response))))))
+
+(defn- get-user-id [session]
+  (let [response (-> (request :get "/api/settings")
+                     (merge session)
+                     app)]
+    (assert (ok? response) {:response response})
+    (UUID/fromString (get-in (json/parse-string (:body response)) [:user :id]))))
+
+(deftest super-user-test
+  (let [session (login! app)
+        user-id (get-user-id session)]
+
+    (testing "normal users cannot use sudo"
+      (let [response (-> (request :get "/api/sudo")
+                         (merge session)
+                         app)]
+        (is (forbidden? response))
+        (is (= "Not super user" (:body response)))))
+
+    (testing "super users can use sudo"
+      (binding [config/env (update config/env :super-users conj user-id)]
+        (let [response (-> (request :get "/api/sudo")
+                           (merge session)
+                           app)]
+          (is (see-other? response))
+          (is (= "http://localhost/" (get-in response [:headers "Location"]))))))))
 
 (deftest create-congregation-test
   (let [session (login! app)
