@@ -12,6 +12,11 @@
 
 (use-fixtures :once db-fixture)
 
+(defn subjects [users]
+  (->> users
+       (map :user/subject)
+       (sort)))
+
 (deftest users-test
   (db/with-db [conn {}]
     (jdbc/db-set-rollback-only! conn)
@@ -39,24 +44,32 @@
 
       (testing "list users"
         (is (= ["user1" "user2"]
-               (->> (user/get-users conn)
-                    (map :user/subject)
-                    (sort)))))
+               (subjects (user/get-users conn)))))
 
       (testing "find users by IDs"
         (is (= ["user1"]
-               (->> (user/get-users conn {:ids [user-id]})
-                    (map :user/subject)
-                    (sort))))
+               (subjects (user/get-users conn {:ids [user-id]}))))
         (is (= ["user1" "user2"]
-               (->> (user/get-users conn {:ids [user-id unrelated-user-id]})
-                    (map :user/subject)
-                    (sort)))))
+               (subjects (user/get-users conn {:ids [user-id unrelated-user-id]}))))
+        (is (= []
+               (subjects (user/get-users conn {:ids []}))))
+        (is (= []
+               (subjects (user/get-users conn {:ids nil})))))
 
       (testing "find user by ID"
         (is (= user-id (:user/id (user/get-by-id conn user-id))))
         (is (nil? (user/get-by-id conn (UUID/randomUUID)))
             "not found"))
+
+      (testing "find users by subjects"
+        (is (= ["user1"]
+               (subjects (user/get-users conn {:subjects ["user1"]}))))
+        (is (= ["user1" "user2"]
+               (subjects (user/get-users conn {:subjects ["user1" "user2"]}))))
+        (is (= []
+               (subjects (user/get-users conn {:subjects []}))))
+        (is (= []
+               (subjects (user/get-users conn {:subjects nil})))))
 
       (testing "find user by subject"
         (is (= user-id (:user/id (user/get-by-subject conn "user1"))))

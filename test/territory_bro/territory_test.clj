@@ -38,6 +38,17 @@
                 :territory/location testdata/wkt-multi-polygon}
                (territory/get-by-id conn territory-id))))
 
+      (testing "get territories by IDs"
+        (is (= [territory-id]
+               (->> (territory/get-territories conn {:ids [territory-id]})
+                    (map :territory/id))))
+        (is (= []
+               (->> (territory/get-territories conn {:ids []})
+                    (map :territory/id))))
+        (is (= []
+               (->> (territory/get-territories conn {:ids nil})
+                    (map :territory/id)))))
+
       (testing "list territories"
         (is (= ["123"]
                (->> (territory/get-territories conn)

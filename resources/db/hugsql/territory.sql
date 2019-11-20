@@ -2,8 +2,8 @@
 select id, number, addresses, subregion, meta, ST_AsText(location) AS location
 from territory
 where 1 = 1
-/*~ (when (:ids params) */
-  and id in (:v*:ids)
+/*~ (when (contains? params :ids) */
+  and id = any(array[:v*:ids]::uuid[])
 /*~ ) ~*/
 ;
 

@@ -2,11 +2,11 @@
 select id, subject, attributes
 from "user"
 where 1 = 1
-/*~ (when (:ids params) */
-  and id in (:v*:ids)
+/*~ (when (contains? params :ids) */
+  and id = any(array[:v*:ids]::uuid[])
 /*~ ) ~*/
-/*~ (when (:subjects params) */
-  and subject in (:v*:subjects)
+/*~ (when (contains? params :subjects) */
+  and subject = any(array[:v*:subjects]::text[])
 /*~ ) ~*/
 ;
 
