@@ -115,6 +115,13 @@
     (assert id)
     id))
 
+(defn- state-for-request [request]
+  (let [state (projections/cached-state)]
+    (if (::sudo? (:session request))
+      (-> state
+          (permissions/grant (current-user-id) [:view-congregation]))
+      state)))
+
 (defn create-congregation [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -133,10 +140,11 @@
 (defn list-congregations [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
-    (ok (->> (congregation/get-my-congregations (projections/cached-state) (current-user-id))
-             (map (fn [congregation]
-                    {:id (:congregation/id congregation)
-                     :name (:congregation/name congregation)}))))))
+    (let [state (state-for-request request)]
+      (ok (->> (congregation/get-my-congregations state (current-user-id))
+               (map (fn [congregation]
+                      {:id (:congregation/id congregation)
+                       :name (:congregation/name congregation)})))))))
 
 (defn get-congregation [request]
   (auth/with-authenticated-user request
@@ -144,7 +152,7 @@
     (db/with-db [conn {:read-only? true}]
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             user-id (current-user-id)
-            state (projections/cached-state)
+            state (state-for-request request)
             congregation (congregation/get-my-congregation state cong-id user-id)]
         (when-not congregation
           (forbidden! "No congregation access"))
@@ -185,7 +193,7 @@
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           user-id (UUID/fromString (get-in request [:params :userId]))
-          state (projections/cached-state)]
+          state (state-for-request request)]
       (db/with-db [conn {}]
         (let [response (api-command! conn state {:command/type :congregation.command/add-user
                                                  :congregation/id cong-id
@@ -203,7 +211,7 @@
           user-id (UUID/fromString (get-in request [:params :userId]))
           permissions (->> (get-in request [:params :permissions])
                            (map keyword))
-          state (projections/cached-state)]
+          state (state-for-request request)]
       (db/with-db [conn {}]
         (api-command! conn state {:command/type :congregation.command/set-user-permissions
                                   :congregation/id cong-id
@@ -215,7 +223,7 @@
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           name (get-in request [:params :name])
-          state (projections/cached-state)]
+          state (state-for-request request)]
       (db/with-db [conn {}]
         (api-command! conn state {:command/type :congregation.command/rename-congregation
                                   :congregation/id cong-id
@@ -226,8 +234,9 @@
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           user-id (current-user-id)
-          congregation (congregation/get-my-congregation (projections/cached-state) cong-id user-id)
-          gis-user (gis-user/get-gis-user (projections/cached-state) cong-id user-id)]
+          state (state-for-request request)
+          congregation (congregation/get-my-congregation state cong-id user-id)
+          gis-user (gis-user/get-gis-user state cong-id user-id)]
       (when-not gis-user
         (forbidden! "No GIS access"))
       (let [content (qgis/generate-project {:database-host (:gis-database-host config/env)

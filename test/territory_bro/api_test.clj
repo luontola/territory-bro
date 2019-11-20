@@ -196,7 +196,9 @@
     (UUID/fromString (get-in (json/parse-string (:body response)) [:user :id]))))
 
 (deftest super-user-test
-  (let [session (login! app)
+  (let [cong-id (event-actor-fixture
+                 #(congregation/create-congregation! db/database "sudo test"))
+        session (login! app)
         user-id (get-user-id session)]
 
     (testing "normal users cannot use sudo"
@@ -212,7 +214,17 @@
                            (merge session)
                            app)]
           (is (see-other? response))
-          (is (= "http://localhost/" (get-in response [:headers "Location"]))))))))
+          (is (= "http://localhost/" (get-in response [:headers "Location"]))))))
+
+    (testing "super user can view all congregations"
+      (let [response (-> (request :get "/api/congregations")
+                         (merge session)
+                         app)]
+        (is (ok? response))
+        (is (contains? (->> (:body response)
+                            (map :id)
+                            (set))
+                       (str cong-id)))))))
 
 (deftest create-congregation-test
   (let [session (login! app)

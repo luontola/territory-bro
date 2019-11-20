@@ -85,20 +85,19 @@
 (defn get-unrestricted-congregation [state cong-id]
   (get (::congregations state) cong-id))
 
-(defn- apply-user-permissions [cong user-id]
-  (let [permissions (get-in cong [:congregation/user-permissions user-id])]
-    (when (contains? permissions :view-congregation)
-      cong)))
+(defn- apply-user-permissions [cong state user-id]
+  (when (permissions/allowed? state user-id [:view-congregation (:congregation/id cong)])
+    cong))
 
 (defn get-my-congregations [state user-id]
   ;; TODO: avoid the linear search
   (->> (get-unrestricted-congregations state)
-       (map #(apply-user-permissions % user-id))
+       (map #(apply-user-permissions % state user-id))
        (remove nil?)))
 
 (defn get-my-congregation [state cong-id user-id]
   (-> (get-unrestricted-congregation state cong-id)
-      (apply-user-permissions user-id)))
+      (apply-user-permissions state user-id)))
 
 
 ;;;; Write model
