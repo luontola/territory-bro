@@ -54,10 +54,10 @@
   :global-vars {*warn-on-reflection* true
                 *print-namespace-maps* false}
 
-  :plugins [[com.jakemccrary/lein-test-refresh "0.14.0"]
-            [lein-ancient "0.6.15"]]
+  :plugins [[lein-ancient "0.6.15"]]
 
-  :aliases {"kaocha" ["with-profile" "+kaocha,+test" "run" "-m" "kaocha.runner"]}
+  :aliases {"autotest" ["kaocha" "--watch"]
+            "kaocha" ["with-profile" "+kaocha,+test" "run" "-m" "kaocha.runner"]}
 
   :profiles {:uberjar {:omit-source true
                        :aot :all

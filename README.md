@@ -69,17 +69,17 @@ Run tests
     yarn run flow check
     yarn run test
 
-Running tests automatically on change
+Run tests automatically on change
 
-    lein test-refresh
-    yarn run autotest    
+    lein autotest
+    yarn run autotest
 
 Download dependency sources
 
     lein pom
     mvn dependency:sources
 
-Producing canonical XML for better diffs 
+Produce canonical XML for better diffs
 
     xmllint --c14n11 example.qgs > resources/template-territories.qgs
 
