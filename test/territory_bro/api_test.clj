@@ -348,7 +348,7 @@
       (db/with-db [conn {}]
         (doseq [gis-user (gis-user/get-gis-users (projections/current-state conn) cong-id)]
           (binding [events/*current-system* "test"]
-            (gis-user/delete-gis-user! conn (projections/current-state conn) cong-id (:user/id gis-user)))))
+            (congregation/revoke! conn cong-id (:user/id gis-user) :gis-access))))
       (projections/refresh-async!)
       (projections/await-refreshed)
 

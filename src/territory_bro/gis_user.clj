@@ -232,27 +232,6 @@
                             "TO " username)])
   nil)
 
-(defn create-gis-user! [conn state cong-id user-id]
-  ;; TODO: refactor to commands and process managers
-  (let [username (generate-username cong-id user-id)
-        password (generate-password 50)
-        cong (congregation/get-unrestricted-congregation state cong-id)
-        schema (:congregation/schema-name cong)]
-    (assert schema)
-    (event-store/save! conn cong-id nil
-                       [(assoc (events/defaults)
-                               :event/type :congregation.event/permission-granted
-                               :congregation/id cong-id
-                               :user/id user-id
-                               :permission/id :gis-access)
-                        (assoc (events/defaults)
-                               :event/type :congregation.event/gis-user-created
-                               :congregation/id cong-id
-                               :user/id user-id
-                               :gis-user/username username
-                               :gis-user/password password)])
-    nil))
-
 (defn drop-role-cascade! [conn role schemas]
   (assert role)
   (try
@@ -275,22 +254,3 @@
 (defn ensure-absent! [conn {:keys [username schema]}]
   (log/info "Deleting GIS user:" username)
   (drop-role-cascade! conn username [schema]))
-
-(defn delete-gis-user! [conn state cong-id user-id]
-  ;; TODO: refactor to commands and process managers
-  (let [username (:gis-user/username (get-gis-user state cong-id user-id))
-        cong (congregation/get-unrestricted-congregation state cong-id)
-        schema (:congregation/schema-name cong)]
-    (assert schema)
-    (event-store/save! conn cong-id nil
-                       [(assoc (events/defaults)
-                               :event/type :congregation.event/permission-revoked
-                               :congregation/id cong-id
-                               :user/id user-id
-                               :permission/id :gis-access)
-                        (assoc (events/defaults)
-                               :event/type :congregation.event/gis-user-deleted
-                               :congregation/id cong-id
-                               :user/id user-id
-                               :gis-user/username username)])
-    nil))

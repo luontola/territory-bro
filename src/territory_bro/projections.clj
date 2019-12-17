@@ -56,7 +56,9 @@
   (case (namespace (:command/type command))
     "gis-user.command" (db/with-db [conn {}]
                          (gis-user/command! conn command)
-                         nil)
+                         ;; XXX: refresh! should recur also when persisted events are produced, so maybe return them from the command handler?
+                         [{:event/type :fake-event-to-trigger-refresh
+                           :event/transient? true}])
     "db-admin.command" (db-admin/handle-command! command)
     (throw (IllegalArgumentException. (str "Unsupported command: " (pr-str command))))))
 

@@ -188,30 +188,6 @@
         (is (= [(assoc created-event :gis-user/username "gis_user_0000000000000001_0000000000000002_4")]
                (handle-command create-command [] injections)))))))
 
-(deftest gis-users-test
-  (db/with-db [conn {}]
-    (jdbc/db-set-rollback-only! conn)
-
-    (let [cong-id (congregation/create-congregation! conn "cong1")
-          cong-id2 (congregation/create-congregation! conn "cong2")
-          user-id (user/save-user! conn "user1" {})
-          user-id2 (user/save-user! conn "user2" {})]
-
-      (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)
-      (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id2)
-      (gis-user/create-gis-user! conn (projections/current-state conn) cong-id2 user-id)
-      (gis-user/create-gis-user! conn (projections/current-state conn) cong-id2 user-id2)
-      (testing "create & get GIS user"
-        (let [user (gis-user/get-gis-user (projections/current-state conn) cong-id user-id)]
-          (is (:gis-user/username user))
-          (is (= 50 (count (:gis-user/password user))))))
-
-      (testing "delete GIS user"
-        (gis-user/delete-gis-user! conn (projections/current-state conn) cong-id user-id)
-        (is (nil? (gis-user/get-gis-user (projections/current-state conn) cong-id user-id)))
-        (is (gis-user/get-gis-user (projections/current-state conn) cong-id2 user-id2)
-            "should not delete unrelated users")))))
-
 (defn- gis-db-spec [username password]
   {:connection-uri (-> (:database-url config/env)
                        (str/replace #"\?.*" "")) ; strip username and password
@@ -260,22 +236,29 @@
                                        :schema schema}))
       (is (thrown? PSQLException (login-as username "password2"))))))
 
-(defn- create-test-data! []
+(defn- create-test-data-impl! []
   (try
     (db/with-db [conn {}]
       (let [cong-id (congregation/create-congregation! conn "cong")
-            cong (congregation/get-unrestricted-congregation (projections/current-state conn) cong-id)
-            user-id (user/save-user! conn "user" {})
-            _ (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)
-            gis-user (gis-user/get-gis-user (projections/current-state conn) cong-id user-id)]
+            user-id (user/save-user! conn "user" {})]
+        (congregation/grant! conn cong-id user-id :gis-access)
         {:cong-id cong-id
-         :user-id user-id
-         :schema (:congregation/schema-name cong)
-         :username (:gis-user/username gis-user)
-         :password (:gis-user/password gis-user)}))
+         :user-id user-id}))
     (finally
+      ;; wait for process managers to create the GIS user
       (projections/refresh-async!)
-      (projections/await-refreshed)))) ; wait for process managers to create the GIS user
+      (projections/await-refreshed))))
+
+(defn- create-test-data! []
+  (let [{:keys [cong-id user-id]} (create-test-data-impl!)
+        state (projections/cached-state)
+        cong (congregation/get-unrestricted-congregation state cong-id)
+        gis-user (gis-user/get-gis-user state cong-id user-id)]
+    {:cong-id cong-id
+     :user-id user-id
+     :schema (:congregation/schema-name cong)
+     :username (:gis-user/username gis-user)
+     :password (:gis-user/password gis-user)}))
 
 (deftest gis-user-database-access-test
   (let [{:keys [cong-id user-id schema username password]} (create-test-data!)
@@ -333,7 +316,7 @@
 
     (testing "cannot login to database after user is deleted"
       (db/with-db [conn {}]
-        (gis-user/delete-gis-user! conn (projections/current-state conn) cong-id user-id))
+        (congregation/revoke! conn cong-id user-id :gis-access))
       (projections/refresh-async!)
       (projections/await-refreshed) ; wait for process managers to delete the GIS user
 
