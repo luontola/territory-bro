@@ -187,7 +187,10 @@
         (bad-request {:errors (.getErrors e)}))
       (catch NoPermitException e
         (log/warn e "Forbidden command:" command)
-        (forbidden {:message "Forbidden"})))))
+        (forbidden {:message "Forbidden"}))
+      (catch Throwable t
+        (log/error t "Command failed:" command)
+        (internal-server-error {:message "Internal Server Error"})))))
 
 (defn add-user [request]
   (auth/with-authenticated-user request
