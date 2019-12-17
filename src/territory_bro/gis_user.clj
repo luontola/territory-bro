@@ -184,7 +184,8 @@
   (let [stream-id (:congregation/id command)
         old-events (event-store/read-stream conn stream-id)
         new-events (handle-command command old-events {})]
-    (event-store/save! conn stream-id (count old-events) new-events)))
+    (event-store/save! conn stream-id (count old-events) new-events)
+    nil))
 
 
 ;;; Database users
@@ -235,7 +236,8 @@
                                :congregation/id cong-id
                                :user/id user-id
                                :gis-user/username username
-                               :gis-user/password password)])))
+                               :gis-user/password password)])
+    nil))
 
 (defn drop-role-cascade! [conn role schemas]
   (assert role)
@@ -276,4 +278,5 @@
                                :event/type :congregation.event/gis-user-deleted
                                :congregation/id cong-id
                                :user/id user-id
-                               :gis-user/username username)])))
+                               :gis-user/username username)])
+    nil))
