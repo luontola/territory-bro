@@ -189,7 +189,11 @@
         (log/warn e "Forbidden command:" command)
         (forbidden {:message "Forbidden"}))
       (catch Throwable t
-        (log/error t "Command failed:" command)
+        ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
+        (log/error t (str "Command failed: "
+                          (pr-str command)
+                          "\n"
+                          (pr-str t)))
         (internal-server-error {:message "Internal Server Error"})))))
 
 (defn add-user [request]
