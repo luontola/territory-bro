@@ -170,7 +170,7 @@
       (assoc :event/user (:command/user command))))
 
 (defn handle-command [command events injections]
-  (let [command (commands/validate-command command)
+  (let [command (commands/validate-command command) ; TODO: validate all commands centrally
         congregation (reduce write-model nil events)
         injections (merge {:check-permit (fn [permit]
                                            (permissions/check (:state injections)

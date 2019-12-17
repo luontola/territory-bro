@@ -6,10 +6,9 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [medley.core :refer [dissoc-in]]
-            [territory-bro.congregation :as congregation]
+            [territory-bro.commands :as commands]
             [territory-bro.db :as db]
-            [territory-bro.event-store :as event-store]
-            [territory-bro.events :as events])
+            [territory-bro.event-store :as event-store])
   (:import (java.security SecureRandom)
            (java.util Base64)
            (org.postgresql.util PSQLException)))
@@ -188,8 +187,9 @@
         (enrich-events command))))
 
 (declare db-user-exists?)
-(defn command! [conn command]
+(defn handle-command! [conn command]
   ;; TODO: the GIS user events would belong better to a user-specific stream
+  (commands/validate-command command) ; TODO: validate all commands centrally
   (let [stream-id (:congregation/id command)
         injections {:generate-password #(generate-password 50)
                     :db-user-exists? #(db-user-exists? conn %)}

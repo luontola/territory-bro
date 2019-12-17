@@ -135,7 +135,7 @@
   ([command]
    (handle-command! command default-injections))
   ([command injections]
-   (commands/validate-command command)
+   (commands/validate-command command) ; TODO: validate all commands centrally
    ;; TODO: use territory-bro.congregation/enrich-event or similar?
    ;; TODO: validate events
    (command-handler command injections)))

@@ -55,7 +55,7 @@
 (defn- dispatch-command! [command] ; TODO: reuse also in the API routes?
   (case (namespace (:command/type command))
     "gis-user.command" (db/with-db [conn {}]
-                         (gis-user/command! conn command)
+                         (gis-user/handle-command! conn command)
                          ;; XXX: refresh! should recur also when persisted events are produced, so maybe return them from the command handler?
                          [{:event/type :fake-event-to-trigger-refresh
                            :event/transient? true}])

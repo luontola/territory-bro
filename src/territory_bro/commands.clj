@@ -30,6 +30,7 @@
          :command/type (s/eq :congregation.command/add-user)
          :congregation/id UUID
          :user/id UUID))
+
 (s/defschema SetUserPermissions
   (assoc UserCommand
          :command/type (s/eq :congregation.command/set-user-permissions)
@@ -70,13 +71,30 @@
          :congregation/schema-name s/Str))
 
 
+;;; GIS User
+
+(s/defschema CreateGisUser
+  (assoc SystemCommand
+         :command/type (s/eq :gis-user.command/create-gis-user)
+         :congregation/id UUID
+         :user/id UUID))
+
+(s/defschema DeleteGisUser
+  (assoc SystemCommand
+         :command/type (s/eq :gis-user.command/delete-gis-user)
+         :congregation/id UUID
+         :user/id UUID))
+
+
 (def command-schemas
   {:congregation.command/add-user AddUser
    :congregation.command/set-user-permissions SetUserPermissions
    :congregation.command/rename-congregation RenameCongregation
    :db-admin.command/ensure-gis-user-absent EnsureGisUserAbsent
    :db-admin.command/ensure-gis-user-present EnsureGisUserPresent
-   :db-admin.command/migrate-tenant-schema MigrateTenantSchema})
+   :db-admin.command/migrate-tenant-schema MigrateTenantSchema
+   :gis-user.command/create-gis-user CreateGisUser
+   :gis-user.command/delete-gis-user DeleteGisUser})
 
 (s/defschema Command
   (apply refined/dispatch-on :command/type (flatten (seq command-schemas))))
