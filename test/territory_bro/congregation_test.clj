@@ -157,22 +157,24 @@
 (deftest rename-congregation-test
   (let [cong-id (UUID. 0 1)
         user-id (UUID. 0 2)
-        injections {:check-permit (fn [_permit])}
+        test-time (Instant/ofEpochSecond 1)
+        injections {:now (constantly test-time)
+                    :check-permit (fn [_permit])}
         created-event {:event/type :congregation.event/congregation-created
                        :event/version 1
-                       :event/time (Instant/ofEpochSecond 1)
+                       :event/time test-time
                        :event/user user-id
                        :congregation/id cong-id
                        :congregation/name "old name"
                        :congregation/schema-name ""}
         rename-command {:command/type :congregation.command/rename-congregation
-                        :command/time (Instant/ofEpochSecond 2)
+                        :command/time test-time
                         :command/user user-id
                         :congregation/id cong-id
                         :congregation/name "new name"}
         renamed-event {:event/type :congregation.event/congregation-renamed
                        :event/version 1
-                       :event/time (Instant/ofEpochSecond 2)
+                       :event/time test-time
                        :event/user user-id
                        :congregation/id cong-id
                        :congregation/name "new name"}]
@@ -201,24 +203,26 @@
         admin-id (UUID. 0 2)
         new-user-id (UUID. 0 3)
         invalid-user-id (UUID. 0 4)
-        injections {:check-permit (fn [_permit])
+        test-time (Instant/ofEpochSecond 1)
+        injections {:now (constantly test-time)
+                    :check-permit (fn [_permit])
                     :user-exists? (fn [user-id]
                                     (= new-user-id user-id))}
         created-event {:event/type :congregation.event/congregation-created
                        :event/version 1
-                       :event/time (Instant/ofEpochSecond 1)
+                       :event/time test-time
                        :event/user admin-id
                        :congregation/id cong-id
                        :congregation/name ""
                        :congregation/schema-name ""}
         add-user-command {:command/type :congregation.command/add-user
-                          :command/time (Instant/ofEpochSecond 2)
+                          :command/time test-time
                           :command/user admin-id
                           :congregation/id cong-id
                           :user/id new-user-id}
         access-granted-event {:event/type :congregation.event/permission-granted
                               :event/version 1
-                              :event/time (Instant/ofEpochSecond 2)
+                              :event/time test-time
                               :event/user admin-id
                               :congregation/id cong-id
                               :user/id new-user-id
@@ -250,32 +254,34 @@
         admin-id (UUID. 0 2)
         target-user-id (UUID. 0 3)
         invalid-user-id (UUID. 0 4)
-        injections {:check-permit (fn [_permit])
+        test-time (Instant/ofEpochSecond 1)
+        injections {:now (constantly test-time)
+                    :check-permit (fn [_permit])
                     :user-exists? (fn [user-id]
                                     (= target-user-id user-id))}
         created-event {:event/type :congregation.event/congregation-created
                        :event/version 1
-                       :event/time (Instant/ofEpochSecond 1)
+                       :event/time test-time
                        :event/user admin-id
                        :congregation/id cong-id
                        :congregation/name ""
                        :congregation/schema-name ""}
         permission-granted-event {:event/type :congregation.event/permission-granted
                                   :event/version 1
-                                  :event/time (Instant/ofEpochSecond 2)
+                                  :event/time test-time
                                   :event/user admin-id
                                   :congregation/id cong-id
                                   :user/id target-user-id
                                   :permission/id :PLACEHOLDER}
         permission-revoked-event {:event/type :congregation.event/permission-revoked
                                   :event/version 1
-                                  :event/time (Instant/ofEpochSecond 2)
+                                  :event/time test-time
                                   :event/user admin-id
                                   :congregation/id cong-id
                                   :user/id target-user-id
                                   :permission/id :PLACEHOLDER}
         set-user-permissions-command {:command/type :congregation.command/set-user-permissions
-                                      :command/time (Instant/ofEpochSecond 2)
+                                      :command/time test-time
                                       :command/user admin-id
                                       :congregation/id cong-id
                                       :user/id target-user-id

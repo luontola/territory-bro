@@ -125,29 +125,31 @@
 (deftest commands-test
   (let [cong-id (UUID. 1 0)
         user-id (UUID. 2 0)
-        injections {:generate-password (constantly "secret123")
+        test-time (Instant/ofEpochSecond 1)
+        injections {:now (constantly test-time)
+                    :generate-password (constantly "secret123")
                     :db-user-exists? (constantly false)}
         create-command {:command/type :gis-user.command/create-gis-user
-                        :command/time (Instant/ofEpochSecond 1)
+                        :command/time test-time
                         :command/user user-id
                         :congregation/id cong-id
                         :user/id user-id}
         created-event {:event/type :congregation.event/gis-user-created
                        :event/version 1
-                       :event/time (Instant/ofEpochSecond 1)
+                       :event/time test-time
                        :event/user user-id
                        :congregation/id cong-id
                        :user/id user-id
                        :gis-user/username "gis_user_0000000000000001_0000000000000002"
                        :gis-user/password "secret123"}
         delete-command {:command/type :gis-user.command/delete-gis-user
-                        :command/time (Instant/ofEpochSecond 2)
+                        :command/time test-time
                         :command/user user-id
                         :congregation/id cong-id
                         :user/id user-id}
         deleted-event {:event/type :congregation.event/gis-user-deleted
                        :event/version 1
-                       :event/time (Instant/ofEpochSecond 2)
+                       :event/time test-time
                        :event/user user-id
                        :congregation/id cong-id
                        :user/id user-id

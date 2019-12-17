@@ -163,16 +163,11 @@
       :congregation/id (:congregation/id congregation)
       :congregation/name (:congregation/name command)}]))
 
-
-(defn- enrich-event [event command]
-  (-> event
-      (assoc :event/time (:command/time command))
-      (assoc :event/user (:command/user command))))
-
 (defn handle-command [command events injections]
   (let [command (commands/validate-command command) ; TODO: validate all commands centrally
         congregation (reduce write-model nil events)
-        injections (merge {:check-permit (fn [permit]
+        injections (merge {:now (:now config/env)
+                           :check-permit (fn [permit]
                                            (permissions/check (:state injections)
                                                               (:command/user command)
                                                               permit))
@@ -181,7 +176,7 @@
                                              (some? (user/get-by-id conn user-id))))}
                           injections)]
     (->> (command-handler command congregation injections)
-         (map #(enrich-event % command)))))
+         (events/enrich-events command injections))))
 
 (defn command! [conn state command]
   (let [stream-id (:congregation/id command)

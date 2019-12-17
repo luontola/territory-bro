@@ -16,7 +16,7 @@
 (def ^:dynamic *current-user* nil)
 (def ^:dynamic *current-system* nil)
 
-(defn defaults
+(defn defaults ; TODO: get rid of this method, use enrich-events instead
   ([]
    (defaults (or *current-time* (Instant/now))))
   ([^Instant now]
@@ -24,6 +24,21 @@
             :event/time now}
      *current-user* (assoc :event/user *current-user*)
      *current-system* (assoc :event/system *current-system*))))
+
+
+(defn- enrich-event [event command current-time]
+  (let [{:command/keys [user system]} command]
+    (-> event
+        (assoc :event/time current-time)
+        (cond->
+          user (assoc :event/user user)
+          system (assoc :event/system system)))))
+
+(defn enrich-events [command {:keys [now]} events]
+  (assert (some? now))
+  (let [current-time (now)]
+    (map #(enrich-event % command current-time) events)))
+
 
 (def ^:private key-order
   (->> [:event/type

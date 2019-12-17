@@ -3,13 +3,13 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.events-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [clojure.test.check.generators :as gen]
             [schema-generators.generators :as sg]
             [schema.core :as s]
             [territory-bro.events :as events]
-            [territory-bro.testutil :refer [re-equals re-contains]]
-            [clojure.string :as str])
+            [territory-bro.testutil :refer [re-equals re-contains]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)))
@@ -46,6 +46,37 @@
              (binding [events/*current-user* user
                        events/*current-system* system]
                (events/defaults time)))))))
+
+(deftest enrich-events-test
+  (let [time (Instant/now)
+        injections {:now (constantly time)}
+        user (UUID/randomUUID)
+        system "some-subsystem"
+        events [{:extra-keys :foo}]]
+
+    (testing "no context (not really allowed)"
+      (is (= [{:event/time time
+               :extra-keys :foo}]
+             (events/enrich-events {} injections events))))
+
+    (testing "user context"
+      (is (= [{:event/time time
+               :event/user user
+               :extra-keys :foo}]
+             (events/enrich-events {:command/user user} injections events))))
+
+    (testing "system context"
+      (is (= [{:event/time time
+               :event/system system
+               :extra-keys :foo}]
+             (events/enrich-events {:command/system system} injections events))))
+
+    (testing "user and system context (not really allowed)"
+      (is (= [{:event/time time
+               :event/user user
+               :event/system system
+               :extra-keys :foo}]
+             (events/enrich-events {:command/system system, :command/user user} injections events))))))
 
 (def valid-event {:event/type :congregation.event/congregation-created
                   :event/version 1

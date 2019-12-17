@@ -4,7 +4,9 @@
 
 (ns territory-bro.db-admin
   (:require [territory-bro.commands :as commands]
+            [territory-bro.config :as config]
             [territory-bro.db :as db]
+            [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]))
 
 (defmulti projection (fn [_state event] (:event/type event)))
@@ -123,7 +125,8 @@
     :gis-user/username (:gis-user/username command)}])
 
 (def ^:private default-injections
-  {:migrate-tenant-schema! db/migrate-tenant-schema!
+  {:now #((:now config/env))
+   :migrate-tenant-schema! db/migrate-tenant-schema!
    :ensure-gis-user-present! (fn [args]
                                (db/with-db [conn {}]
                                  (gis-user/ensure-present! conn args)))
@@ -136,6 +139,6 @@
    (handle-command! command default-injections))
   ([command injections]
    (commands/validate-command command) ; TODO: validate all commands centrally
-   ;; TODO: use territory-bro.congregation/enrich-event or similar?
-   ;; TODO: validate events
-   (command-handler command injections)))
+   (->> (command-handler command injections)
+        (events/enrich-events command injections)
+        (events/validate-events)))) ; XXX: validated here because transient events are not saved and validated on save

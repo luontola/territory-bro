@@ -7,8 +7,10 @@
             [clojure.tools.logging :as log]
             [medley.core :refer [dissoc-in]]
             [territory-bro.commands :as commands]
+            [territory-bro.config :as config]
             [territory-bro.db :as db]
-            [territory-bro.event-store :as event-store])
+            [territory-bro.event-store :as event-store]
+            [territory-bro.events :as events])
   (:import (java.security SecureRandom)
            (java.util Base64)
            (org.postgresql.util PSQLException)))
@@ -171,27 +173,18 @@
       :user/id (:user/id command)
       :gis-user/username username}]))
 
-(defn- enrich-event [event command] ; TODO: extract as a reusable function
-  (let [{:command/keys [time user system]} command]
-    (cond-> event
-      time (assoc :event/time time)
-      user (assoc :event/user user)
-      system (assoc :event/system system))))
-
-(defn- enrich-events [events command]
-  (map #(enrich-event % command) events))
-
 (defn handle-command [command events injections]
   (let [state (reduce write-model nil events)]
-    (-> (command-handler command state injections)
-        (enrich-events command))))
+    (->> (command-handler command state injections)
+         (events/enrich-events command injections))))
 
 (declare db-user-exists?)
 (defn handle-command! [conn command]
   ;; TODO: the GIS user events would belong better to a user-specific stream
   (commands/validate-command command) ; TODO: validate all commands centrally
   (let [stream-id (:congregation/id command)
-        injections {:generate-password #(generate-password 50)
+        injections {:now (:now config/env)
+                    :generate-password #(generate-password 50)
                     :db-user-exists? #(db-user-exists? conn %)}
         old-events (event-store/read-stream conn stream-id)
         new-events (handle-command command old-events injections)]

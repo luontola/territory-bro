@@ -33,17 +33,23 @@
 (def schema-is-present-event {:event/type :db-admin.event/gis-schema-is-present
                               :event/version 1
                               :event/transient? true
+                              :event/system "test"
+                              :event/time test-time
                               :congregation/id cong-id
                               :congregation/schema-name "cong1_schema"})
 (def user-is-present-event {:event/type :db-admin.event/gis-user-is-present
                             :event/version 1
                             :event/transient? true
+                            :event/system "test"
+                            :event/time test-time
                             :congregation/id cong-id
                             :user/id user-id
                             :gis-user/username "username123"})
 (def user-is-absent-event {:event/type :db-admin.event/gis-user-is-absent
                            :event/version 1
                            :event/transient? true
+                           :event/system "test"
+                           :event/time test-time
                            :congregation/id cong-id
                            :user/id user-id
                            :gis-user/username "username123"})
@@ -116,7 +122,8 @@
 
 (deftest handle-command-test
   (let [spy (spy/spy)
-        injections {:migrate-tenant-schema! (spy/fn spy :migrate-tenant-schema!)
+        injections {:now (constantly test-time)
+                    :migrate-tenant-schema! (spy/fn spy :migrate-tenant-schema!)
                     :ensure-gis-user-present! (spy/fn spy :ensure-gis-user-present!)
                     :ensure-gis-user-absent! (spy/fn spy :ensure-gis-user-absent!)}]
 
