@@ -86,8 +86,9 @@
   (get (::congregations state) cong-id))
 
 (defn- apply-user-permissions [cong state user-id]
-  (when (permissions/allowed? state user-id [:view-congregation (:congregation/id cong)])
-    cong))
+  (when cong
+    (when (permissions/allowed? state user-id [:view-congregation (:congregation/id cong)])
+      cong)))
 
 (defn get-my-congregations [state user-id]
   ;; TODO: avoid the linear search

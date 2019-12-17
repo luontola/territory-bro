@@ -8,6 +8,7 @@
 
 (defn- path [user-id [permission & resource-ids]]
   (assert (keyword? permission) {:permission permission})
+  (assert (every? some? resource-ids) {:resource-ids resource-ids})
   (->> nil
        (cons permission)
        (concat resource-ids)

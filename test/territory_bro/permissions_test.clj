@@ -101,7 +101,9 @@
 
     (testing "error: empty permit"
       (is (thrown-with-msg? AssertionError (re-contains "{:permission nil}")
-                            (permissions/grant nil user-id []))))))
+                            (permissions/grant nil user-id [])))
+      (is (thrown-with-msg? AssertionError (re-contains "{:permission nil}")
+                            (permissions/grant nil user-id nil))))))
 
 (deftest checking-permissions-test
   (let [user-id (UUID. 0 1)
@@ -147,7 +149,21 @@
 
         (testing "throws when user doesn't have the permit"
           (is (thrown? NoPermitException
-                       (permissions/check state user-id [:bar cong-id]))))))))
+                       (permissions/check state user-id [:bar cong-id]))))))
+
+    (testing "error: nil parameters"
+      (is (thrown-with-msg? AssertionError (re-contains "{:permission nil}")
+                            (permissions/allowed? nil user-id [nil])))
+      (is (thrown-with-msg? AssertionError (re-contains "{:resource-ids (nil)}")
+                            (permissions/allowed? nil user-id [:foo nil])))
+      (is (thrown-with-msg? AssertionError (re-contains "{:resource-ids (nil #uuid \"00000000-0000-0000-0000-000000000064\")}")
+                            (permissions/allowed? nil user-id [:foo nil resource-id])))
+      (is (thrown-with-msg? AssertionError (re-contains "{:resource-ids (#uuid \"00000000-0000-0000-0000-00000000000a\" nil)}")
+                            (permissions/allowed? nil user-id [:foo cong-id nil]))))
+
+    (testing "error: empty permit" ; due to recursion it's not an error, but it should at least be always false
+      (is (false? (permissions/allowed? nil user-id nil)))
+      (is (false? (permissions/allowed? nil user-id []))))))
 
 (deftest listing-permissions-test
   (let [user-id (UUID. 0 1)
