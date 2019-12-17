@@ -135,7 +135,7 @@
             (let [cong-id (congregation/create-congregation! conn name)]
               (congregation/grant! conn cong-id user-id :view-congregation)
               (congregation/grant! conn cong-id user-id :configure-congregation)
-              (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id)
+              (congregation/grant! conn cong-id user-id :gis-access)
               (ok {:id cong-id}))))))))
 
 (defn list-congregations [request]
@@ -206,7 +206,7 @@
             ;; TODO: remove these after the admin can himself edit user permissions
             (binding [events/*current-user* (current-user-id)]
               (congregation/grant! conn cong-id user-id :configure-congregation)
-              (gis-user/create-gis-user! conn state cong-id user-id)))
+              (congregation/grant! conn cong-id user-id :gis-access)))
           response)))))
 
 (defn set-user-permissions [request]
@@ -280,7 +280,7 @@
       (binding [events/*current-system* "admin"]
         (congregation/grant! conn cong-id user-id :view-congregation)
         (congregation/grant! conn cong-id user-id :configure-congregation)
-        (gis-user/create-gis-user! conn (projections/current-state conn) cong-id user-id))))
+        (congregation/grant! conn cong-id user-id :gis-access))))
 
   (db/with-db [conn {}]
     (binding [events/*current-system* "admin"]

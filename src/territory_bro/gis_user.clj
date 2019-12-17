@@ -155,8 +155,6 @@
   (when (nil? (get-in state (username-path command)))
     [{:event/type :congregation.event/gis-user-created
       :event/version 1
-      :event/time (:command/time command)
-      :event/user (:command/user command)
       :congregation/id (:congregation/id command)
       :user/id (:user/id command)
       ;; Due to PostgreSQL identifier length limits, the username is based on
@@ -166,29 +164,45 @@
       :gis-user/password (generate-password)}]))
 
 (defmethod command-handler :gis-user.command/delete-gis-user [command state _injections]
+  ;; TODO: should this be idempotent? send event even if gis user is missing?
   (when-some [username (get-in state (username-path command))]
     [{:event/type :congregation.event/gis-user-deleted
       :event/version 1
-      :event/time (:command/time command)
-      :event/user (:command/user command)
       :congregation/id (:congregation/id command)
       :user/id (:user/id command)
       :gis-user/username username}]))
 
+(defn- enrich-event [event command] ; TODO: extract as a reusable function
+  (let [{:command/keys [time user system]} command]
+    (cond-> event
+      time (assoc :event/time time)
+      user (assoc :event/user user)
+      system (assoc :event/system system))))
+
+(defn- enrich-events [events command]
+  (map #(enrich-event % command) events))
+
 (defn handle-command [command events injections]
   (let [state (reduce write-model nil events)]
-    (command-handler command state injections)))
+    (-> (command-handler command state injections)
+        (enrich-events command))))
 
+(declare db-user-exists?)
 (defn command! [conn command]
   ;; TODO: the GIS user events would belong better to a user-specific stream
   (let [stream-id (:congregation/id command)
+        injections {:generate-password #(generate-password 50)
+                    :db-user-exists? #(db-user-exists? conn %)}
         old-events (event-store/read-stream conn stream-id)
-        new-events (handle-command command old-events {})]
+        new-events (handle-command command old-events injections)]
     (event-store/save! conn stream-id (count old-events) new-events)
     nil))
 
 
 ;;; Database users
+
+(defn db-user-exists? [conn username]
+  (not (empty? (jdbc/query conn ["SELECT 1 FROM pg_roles WHERE rolname = ?" username]))))
 
 (defn ensure-present! [conn {:keys [username password schema]}]
   (log/info "Creating GIS user:" username)

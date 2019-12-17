@@ -59,15 +59,18 @@
 
 (def ^:private system (str (ns-name *ns*)))
 
+(defn sort-users [gis-users]
+  (sort-by (juxt :congregation/id :user/id) gis-users))
+
 (defn generate-commands [state {:keys [now]}]
   (concat
-   (for [gis-user (sort (::gis-users-to-be-created state))]
+   (for [gis-user (sort-users (::gis-users-to-be-created state))]
      {:command/type :gis-user.command/create-gis-user
       :command/time (now)
       :command/system system
       :congregation/id (:congregation/id gis-user)
       :user/id (:user/id gis-user)})
-   (for [gis-user (sort (::gis-users-to-be-deleted state))]
+   (for [gis-user (sort-users (::gis-users-to-be-deleted state))]
      {:command/type :gis-user.command/delete-gis-user
       :command/time (now)
       :command/system system

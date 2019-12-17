@@ -234,9 +234,11 @@
 
     (testing "create account"
       (db/with-db [conn {}]
+        (is (false? (gis-user/db-user-exists? conn username)))
         (gis-user/ensure-present! conn {:username username
                                         :password "password1"
-                                        :schema schema}))
+                                        :schema schema})
+        (is (true? (gis-user/db-user-exists? conn username))))
       (is (login-as username "password1")))
 
     (testing "update account / create is idempotent"

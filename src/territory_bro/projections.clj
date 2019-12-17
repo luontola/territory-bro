@@ -11,6 +11,7 @@
             [territory-bro.db-admin :as db-admin]
             [territory-bro.event-store :as event-store]
             [territory-bro.gis-user :as gis-user]
+            [territory-bro.gis-user-process :as gis-user-process]
             [territory-bro.poller :as poller])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
@@ -25,6 +26,7 @@
   (-> state
       (congregation/congregations-view event)
       (gis-user/gis-users-view event)
+      (gis-user-process/projection event)
       (db-admin/projection event)))
 
 (defn- apply-events [cache events]
@@ -50,13 +52,22 @@
 
 ;;; Refreshing
 
+(defn- dispatch-command! [command] ; TODO: reuse also in the API routes?
+  (case (namespace (:command/type command))
+    "gis-user.command" (db/with-db [conn {}]
+                         (gis-user/command! conn command)
+                         nil)
+    "db-admin.command" (db-admin/handle-command! command)
+    (throw (IllegalArgumentException. (str "Unsupported command: " (pr-str command))))))
+
 (defn- run-process-managers! [state]
-  (let [commands (-> state
-                     (db-admin/generate-commands {:now (:now config/env)}))
-        events (->> commands
-                    (mapcat #(db-admin/handle-command! %))
-                    (doall))]
-    (seq events)))
+  (let [commands (concat
+                  (gis-user-process/generate-commands state {:now (:now config/env)})
+                  (db-admin/generate-commands state {:now (:now config/env)}))
+        transient-events (->> commands
+                              (mapcat dispatch-command!)
+                              (doall))]
+    (seq transient-events)))
 
 (defn refresh! []
   (let [[old new] (swap-vals! *cache (fn [cached]
