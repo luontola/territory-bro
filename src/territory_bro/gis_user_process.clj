@@ -3,59 +3,40 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis-user-process
-  (:require [territory-bro.util :refer [conj-set]]))
+  (:require [territory-bro.todo-tracker :as todo-tracker]
+            [territory-bro.util :refer [conj-set]]))
 
 (defmulti projection (fn [_state event] (:event/type event)))
 (defmethod projection :default [state _event] state)
 
-;; TODO: extract shared code for tracking desired vs actual
-(defn- update-todo [state event]
-  (let [key (select-keys event [:congregation/id :user/id])
-        {:keys [desired actual]
-         :or {desired :absent
-              actual :absent}} (get-in state [::gis-users key])
-        action (cond
-                 (and (= :present desired) (= :absent actual)) :create
-                 (and (= :absent desired) (= :present actual)) :delete
-                 :else :ignore)]
-    (case action
-      :create (-> state
-                  (update ::gis-users-to-be-created conj-set key)
-                  (update ::gis-users-to-be-deleted disj key))
-      :delete (-> state
-                  (update ::gis-users-to-be-created disj key)
-                  (update ::gis-users-to-be-deleted conj-set key))
-      :ignore (-> state
-                  (update ::gis-users-to-be-created disj key)
-                  (update ::gis-users-to-be-deleted disj key)))))
+(defn- gis-user-key [event]
+  (select-keys event [:congregation/id :user/id]))
 
 (defmethod projection :congregation.event/permission-granted
   [state event]
   (if (= :gis-access (:permission/id event))
-    (-> state
-        (assoc-in [::gis-users (select-keys event [:congregation/id :user/id]) :desired] :present)
-        (update-todo event))
+    (let [k (gis-user-key event)]
+      (-> state
+          (todo-tracker/merge-state k k)
+          (todo-tracker/set-desired k :present)))
     state))
 
 (defmethod projection :congregation.event/permission-revoked
   [state event]
   (if (= :gis-access (:permission/id event))
     (-> state
-        (assoc-in [::gis-users (select-keys event [:congregation/id :user/id]) :desired] :absent)
-        (update-todo event))
+        (todo-tracker/set-desired (gis-user-key event) :absent))
     state))
 
 (defmethod projection :congregation.event/gis-user-created
   [state event]
   (-> state
-      (assoc-in [::gis-users (select-keys event [:congregation/id :user/id]) :actual] :present)
-      (update-todo event)))
+      (todo-tracker/set-actual (gis-user-key event) :present)))
 
 (defmethod projection :congregation.event/gis-user-deleted
   [state event]
   (-> state
-      (assoc-in [::gis-users (select-keys event [:congregation/id :user/id]) :actual] :absent)
-      (update-todo event)))
+      (todo-tracker/set-actual (gis-user-key event) :absent)))
 
 
 (def ^:private system (str (ns-name *ns*)))
@@ -65,13 +46,13 @@
 
 (defn generate-commands [state {:keys [now]}]
   (concat
-   (for [gis-user (sort-users (::gis-users-to-be-created state))]
+   (for [gis-user (sort-users (todo-tracker/creatable state))]
      {:command/type :gis-user.command/create-gis-user
       :command/time (now)
       :command/system system
       :congregation/id (:congregation/id gis-user)
       :user/id (:user/id gis-user)})
-   (for [gis-user (sort-users (::gis-users-to-be-deleted state))]
+   (for [gis-user (sort-users (todo-tracker/deletable state))]
      {:command/type :gis-user.command/delete-gis-user
       :command/time (now)
       :command/system system
