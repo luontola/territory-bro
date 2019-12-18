@@ -9,7 +9,7 @@
 (deftest state-test
   (let [simplify (fn [m]
                    (-> m
-                       (todo-tracker/get :the-key)
+                       (todo-tracker/inspect :the-key)
                        (select-keys [:state])))]
     (testing "default"
       (is (= {:state nil}
@@ -38,7 +38,7 @@
 (deftest desired-test
   (let [simplify (fn [m]
                    (-> m
-                       (todo-tracker/get :the-key)
+                       (todo-tracker/inspect :the-key)
                        (select-keys [:desired])))]
     (testing "default"
       (is (= {:desired :absent}
@@ -58,7 +58,7 @@
 (deftest actual-test
   (let [simplify (fn [m]
                    (-> m
-                       (todo-tracker/get :the-key)
+                       (todo-tracker/inspect :the-key)
                        (select-keys [:actual])))]
     (testing "default"
       (is (= {:actual :absent}
@@ -78,7 +78,7 @@
 (deftest action-test
   (let [simplify (fn [m]
                    (-> m
-                       (todo-tracker/get :the-key)
+                       (todo-tracker/inspect :the-key)
                        (select-keys [:action])))]
     (testing "absent absent -> ignore"
       (is (= {:action :ignore}

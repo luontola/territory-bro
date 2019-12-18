@@ -3,10 +3,9 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.todo-tracker
-  (:refer-clojure :exclude [get])
   (:require [territory-bro.util :refer [conj-set]]))
 
-(defn get [m k]
+(defn inspect [m k]
   (let [{::keys [state desired actual]
          :or {desired :absent, actual :absent}} (get-in m [::todo k])]
     {:state state
@@ -30,7 +29,7 @@
   (update-in m [::todo k ::state] merge new-state))
 
 (defn- update-indexes [m k]
-  (let [action (:action (get m k))]
+  (let [action (:action (inspect m k))]
     (-> m
         (update ::creatable (if (= :create action) conj-set disj) k)
         (update ::deletable (if (= :delete action) conj-set disj) k))))
