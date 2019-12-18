@@ -8,6 +8,15 @@
 (defn merge-state [m k new-state]
   (update-in m [::todo k ::state] merge new-state))
 
+(def ^:private conj-set (fnil conj #{}))
+
+(declare get)
+(defn- update-indexes [m k]
+  (let [action (:action (get m k))]
+    (-> m
+        (update ::creatable (if (= :create action) conj-set disj) k)
+        (update ::deletable (if (= :delete action) conj-set disj) k))))
+
 (defn- assert-presence [presence]
   (assert (or (= :present presence)
               (= :absent presence))
@@ -15,11 +24,15 @@
 
 (defn set-desired [m k presence]
   (assert-presence presence)
-  (assoc-in m [::todo k ::desired] presence))
+  (-> m
+      (assoc-in [::todo k ::desired] presence)
+      (update-indexes k)))
 
 (defn set-actual [m k presence]
   (assert-presence presence)
-  (assoc-in m [::todo k ::actual] presence))
+  (-> m
+      (assoc-in [::todo k ::actual] presence)
+      (update-indexes k)))
 
 (defn get [m k]
   (let [{::keys [state desired actual]
@@ -33,13 +46,9 @@
                :ignore)}))
 
 (defn creatable [m]
-  (->> (keys (::todo m))
-       (map #(get m %))
-       (filter #(= :create (:action %)))
-       (map :state)))
+  (->> (::creatable m)
+       (map #(get-in m [::todo % ::state]))))
 
 (defn deletable [m]
-  (->> (keys (::todo m))
-       (map #(get m %))
-       (filter #(= :delete (:action %)))
-       (map :state)))
+  (->> (::deletable m)
+       (map #(get-in m [::todo % ::state]))))
