@@ -5,12 +5,31 @@
 (ns territory-bro.todo-tracker
   (:refer-clojure :exclude [get]))
 
+(defn get [m k]
+  (let [{::keys [state desired actual]
+         :or {desired :absent, actual :absent}} (get-in m [::todo k])]
+    {:state state
+     :desired desired
+     :actual actual
+     :action (case [desired actual]
+               [:present :absent] :create
+               [:absent :present] :delete
+               :ignore)}))
+
+(defn creatable [m]
+  (->> (::creatable m)
+       (map #(get-in m [::todo % ::state]))))
+
+(defn deletable [m]
+  (->> (::deletable m)
+       (map #(get-in m [::todo % ::state]))))
+
+
 (defn merge-state [m k new-state]
   (update-in m [::todo k ::state] merge new-state))
 
 (def ^:private conj-set (fnil conj #{}))
 
-(declare get)
 (defn- update-indexes [m k]
   (let [action (:action (get m k))]
     (-> m
@@ -33,22 +52,3 @@
   (-> m
       (assoc-in [::todo k ::actual] presence)
       (update-indexes k)))
-
-(defn get [m k]
-  (let [{::keys [state desired actual]
-         :or {desired :absent, actual :absent}} (get-in m [::todo k])]
-    {:state state
-     :desired desired
-     :actual actual
-     :action (case [desired actual]
-               [:present :absent] :create
-               [:absent :present] :delete
-               :ignore)}))
-
-(defn creatable [m]
-  (->> (::creatable m)
-       (map #(get-in m [::todo % ::state]))))
-
-(defn deletable [m]
-  (->> (::deletable m)
-       (map #(get-in m [::todo % ::state]))))
