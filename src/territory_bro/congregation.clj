@@ -12,7 +12,8 @@
             [territory-bro.event-store :as event-store]
             [territory-bro.events :as events]
             [territory-bro.permissions :as permissions]
-            [territory-bro.user :as user])
+            [territory-bro.user :as user]
+            [territory-bro.util :refer [conj-set]])
   (:import (java.util UUID)
            (territory_bro ValidationException)))
 
@@ -40,7 +41,7 @@
   [congregation event]
   (-> congregation
       (update-in [:congregation/user-permissions (:user/id event)]
-                 (fnil conj #{})
+                 conj-set
                  (:permission/id event))))
 
 (defmethod update-congregation :congregation.event/permission-revoked

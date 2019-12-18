@@ -2,7 +2,8 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.gis-user-process)
+(ns territory-bro.gis-user-process
+  (:require [territory-bro.util :refer [conj-set]]))
 
 (defmulti projection (fn [_state event] (:event/type event)))
 (defmethod projection :default [state _event] state)
@@ -19,11 +20,11 @@
                  :else :ignore)]
     (case action
       :create (-> state
-                  (update ::gis-users-to-be-created (fnil conj #{}) key)
+                  (update ::gis-users-to-be-created conj-set key)
                   (update ::gis-users-to-be-deleted disj key))
       :delete (-> state
                   (update ::gis-users-to-be-created disj key)
-                  (update ::gis-users-to-be-deleted (fnil conj #{}) key))
+                  (update ::gis-users-to-be-deleted conj-set key))
       :ignore (-> state
                   (update ::gis-users-to-be-created disj key)
                   (update ::gis-users-to-be-deleted disj key)))))

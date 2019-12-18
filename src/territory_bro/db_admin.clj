@@ -7,7 +7,8 @@
             [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.events :as events]
-            [territory-bro.gis-user :as gis-user]))
+            [territory-bro.gis-user :as gis-user]
+            [territory-bro.util :refer [conj-set]]))
 
 (defmulti projection (fn [_state event] (:event/type event)))
 (defmethod projection :default [state _event] state)
@@ -18,7 +19,7 @@
                                  :congregation/schema-name])]
     (-> state
         (assoc-in [::congregations (:congregation/id event)] cong)
-        (update ::pending-schemas (fnil conj #{}) cong))))
+        (update ::pending-schemas conj-set cong))))
 
 (defmethod projection :db-admin.event/gis-schema-is-present
   [state event]

@@ -22,3 +22,5 @@
     (if (nil? value)
       (throw (IllegalArgumentException. (str "key " key " is missing")))
       value)))
+
+(def conj-set (fnil conj #{}))

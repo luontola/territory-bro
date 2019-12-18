@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.todo-tracker
-  (:refer-clojure :exclude [get]))
+  (:refer-clojure :exclude [get])
+  (:require [territory-bro.util :refer [conj-set]]))
 
 (defn get [m k]
   (let [{::keys [state desired actual]
@@ -27,8 +28,6 @@
 
 (defn merge-state [m k new-state]
   (update-in m [::todo k ::state] merge new-state))
-
-(def ^:private conj-set (fnil conj #{}))
 
 (defn- update-indexes [m k]
   (let [action (:action (get m k))]
