@@ -14,45 +14,45 @@
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
 (def test-time (Instant/ofEpochSecond 42))
-(def cong-created-event {:event/type :congregation.event/congregation-created
-                         :event/version 1
-                         :congregation/id cong-id
-                         :congregation/name "Cong1 Name"
-                         :congregation/schema-name "cong1_schema"})
-(def user-created-event {:event/type :congregation.event/gis-user-created
-                         :event/version 1
-                         :congregation/id cong-id
-                         :user/id user-id
-                         :gis-user/username "username123"
-                         :gis-user/password "password123"})
-(def user-deleted-event {:event/type :congregation.event/gis-user-deleted
-                         :event/version 1
-                         :congregation/id cong-id
-                         :user/id user-id
-                         :gis-user/username "username123"})
-(def schema-is-present-event {:event/type :db-admin.event/gis-schema-is-present
-                              :event/version 1
-                              :event/transient? true
-                              :event/system "test"
-                              :event/time test-time
-                              :congregation/id cong-id
-                              :congregation/schema-name "cong1_schema"})
-(def user-is-present-event {:event/type :db-admin.event/gis-user-is-present
+(def congregation-created {:event/type :congregation.event/congregation-created
+                           :event/version 1
+                           :congregation/id cong-id
+                           :congregation/name "Cong1 Name"
+                           :congregation/schema-name "cong1_schema"})
+(def gis-user-created {:event/type :congregation.event/gis-user-created
+                       :event/version 1
+                       :congregation/id cong-id
+                       :user/id user-id
+                       :gis-user/username "username123"
+                       :gis-user/password "password123"})
+(def gis-user-deleted {:event/type :congregation.event/gis-user-deleted
+                       :event/version 1
+                       :congregation/id cong-id
+                       :user/id user-id
+                       :gis-user/username "username123"})
+(def gis-schema-is-present {:event/type :db-admin.event/gis-schema-is-present
                             :event/version 1
                             :event/transient? true
                             :event/system "test"
                             :event/time test-time
                             :congregation/id cong-id
-                            :user/id user-id
-                            :gis-user/username "username123"})
-(def user-is-absent-event {:event/type :db-admin.event/gis-user-is-absent
-                           :event/version 1
-                           :event/transient? true
-                           :event/system "test"
-                           :event/time test-time
-                           :congregation/id cong-id
-                           :user/id user-id
-                           :gis-user/username "username123"})
+                            :congregation/schema-name "cong1_schema"})
+(def gis-user-is-present {:event/type :db-admin.event/gis-user-is-present
+                          :event/version 1
+                          :event/transient? true
+                          :event/system "test"
+                          :event/time test-time
+                          :congregation/id cong-id
+                          :user/id user-id
+                          :gis-user/username "username123"})
+(def gis-user-is-absent {:event/type :db-admin.event/gis-user-is-absent
+                         :event/version 1
+                         :event/transient? true
+                         :event/system "test"
+                         :event/time test-time
+                         :congregation/id cong-id
+                         :user/id user-id
+                         :gis-user/username "username123"})
 
 (defn- apply-events [events]
   (testutil/apply-events db-admin/projection events))
@@ -64,7 +64,7 @@
 
 (deftest generate-commands-test
   (testing "congregation created"
-    (let [events [cong-created-event]]
+    (let [events [congregation-created]]
       (is (= [{:command/type :db-admin.command/migrate-tenant-schema
                :command/time test-time
                :command/system "territory-bro.db-admin"
@@ -73,12 +73,12 @@
              (generate-commands events)))
 
       (testing "> GIS schema is present"
-        (let [events (conj events schema-is-present-event)]
+        (let [events (conj events gis-schema-is-present)]
           (is (empty? (generate-commands events)))
 
           ;; TODO: there could be a different process manager for dealing with GIS users
           (testing "> GIS user created"
-            (let [events (conj events user-created-event)]
+            (let [events (conj events gis-user-created)]
               (is (= [{:command/type :db-admin.command/ensure-gis-user-present
                        :command/time test-time
                        :command/system "territory-bro.db-admin"
@@ -90,11 +90,11 @@
                      (generate-commands events)))
 
               (testing "> GIS user is present"
-                (let [events (conj events user-is-present-event)]
+                (let [events (conj events gis-user-is-present)]
                   (is (empty? (generate-commands events)))
 
                   (testing "> GIS user password changed"
-                    (let [events (conj events (assoc user-created-event :gis-user/password "new password"))]
+                    (let [events (conj events (assoc gis-user-created :gis-user/password "new password"))]
                       (is (= [{:command/type :db-admin.command/ensure-gis-user-present
                                :command/time test-time
                                :command/system "territory-bro.db-admin"
@@ -106,7 +106,7 @@
                              (generate-commands events)))))
 
                   (testing "> GIS user deleted"
-                    (let [events (conj events user-deleted-event)]
+                    (let [events (conj events gis-user-deleted)]
                       (is (= [{:command/type :db-admin.command/ensure-gis-user-absent
                                :command/time test-time
                                :command/system "territory-bro.db-admin"
@@ -117,14 +117,14 @@
                              (generate-commands events)))
 
                       (testing "> GIS user is absent"
-                        (let [events (conj events user-is-absent-event)]
+                        (let [events (conj events gis-user-is-absent)]
                           (is (empty? (generate-commands events))))))))))))))))
 
 (deftest migrate-tenant-schema-test
   (let [spy (spy/spy)
         injections {:now (constantly test-time)
                     :migrate-tenant-schema! (spy/fn spy :migrate-tenant-schema!)}]
-    (is (= [schema-is-present-event]
+    (is (= [gis-schema-is-present]
            (db-admin/handle-command! {:command/type :db-admin.command/migrate-tenant-schema
                                       :command/time test-time
                                       :command/system "test"
@@ -138,7 +138,7 @@
   (let [spy (spy/spy)
         injections {:now (constantly test-time)
                     :ensure-gis-user-present! (spy/fn spy :ensure-gis-user-present!)}]
-    (is (= [user-is-present-event]
+    (is (= [gis-user-is-present]
            (db-admin/handle-command! {:command/type :db-admin.command/ensure-gis-user-present
                                       :command/time test-time
                                       :command/system "test"
@@ -157,7 +157,7 @@
   (let [spy (spy/spy)
         injections {:now (constantly test-time)
                     :ensure-gis-user-absent! (spy/fn spy :ensure-gis-user-absent!)}]
-    (is (= [user-is-absent-event]
+    (is (= [gis-user-is-absent]
            (db-admin/handle-command! {:command/type :db-admin.command/ensure-gis-user-absent
                                       :command/time test-time
                                       :command/system "test"
