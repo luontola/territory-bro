@@ -26,18 +26,38 @@
 
 (use-fixtures :once (join-fixtures [db-fixture process-managers-fixture event-actor-fixture]))
 
+(def cong-id (UUID. 1 0))
+(def user-id (UUID. 2 0))
+(def test-time (Instant/ofEpochSecond 1))
+
+(def congregation-created {:event/type :congregation.event/congregation-created
+                           :event/version 1
+                           :congregation/id cong-id
+                           :congregation/name "Cong1 Name"
+                           :congregation/schema-name "cong1_schema"})
+(def gis-user-created {:event/type :congregation.event/gis-user-created
+                       :event/version 1
+                       :event/time test-time
+                       :event/user user-id
+                       :congregation/id cong-id
+                       :user/id user-id
+                       :gis-user/username "gis_user_0000000000000001_0000000000000002"
+                       :gis-user/password "secret123"})
+(def gis-user-deleted {:event/type :congregation.event/gis-user-deleted
+                       :event/version 1
+                       :event/time test-time
+                       :event/user user-id
+                       :congregation/id cong-id
+                       :user/id user-id
+                       :gis-user/username "gis_user_0000000000000001_0000000000000002"})
+
 (defn- apply-events [events]
   (testutil/apply-events gis-user/gis-users-view events))
 
 (deftest gis-users-view-test
+  ;; TODO: reuse the event examples also in this test
   (testing "congregation created"
-    (let [cong-id (UUID. 0 1)
-          user-id (UUID. 0 2)
-          events [{:event/type :congregation.event/congregation-created
-                   :event/version 1
-                   :congregation/id cong-id
-                   :congregation/name "Cong1 Name"
-                   :congregation/schema-name "cong1_schema"}]
+    (let [events [congregation-created]
           expected {::gis-user/congregations
                     {cong-id {:congregation/id cong-id
                               :congregation/schema-name "cong1_schema"}}
@@ -122,73 +142,64 @@
         new-events (gis-user/handle-command command events injections)]
     (events/validate-events new-events)))
 
-(deftest commands-test
-  (let [cong-id (UUID. 1 0)
-        user-id (UUID. 2 0)
-        test-time (Instant/ofEpochSecond 1)
-        injections {:now (constantly test-time)
+(deftest create-gis-user-test
+  (let [injections {:now (constantly test-time)
                     :generate-password (constantly "secret123")
                     :db-user-exists? (constantly false)}
-        create-command {:command/type :gis-user.command/create-gis-user
-                        :command/time test-time
-                        :command/user user-id
-                        :congregation/id cong-id
-                        :user/id user-id}
-        created-event {:event/type :congregation.event/gis-user-created
-                       :event/version 1
-                       :event/time test-time
-                       :event/user user-id
-                       :congregation/id cong-id
-                       :user/id user-id
-                       :gis-user/username "gis_user_0000000000000001_0000000000000002"
-                       :gis-user/password "secret123"}
-        delete-command {:command/type :gis-user.command/delete-gis-user
-                        :command/time test-time
-                        :command/user user-id
-                        :congregation/id cong-id
-                        :user/id user-id}
-        deleted-event {:event/type :congregation.event/gis-user-deleted
-                       :event/version 1
-                       :event/time test-time
-                       :event/user user-id
-                       :congregation/id cong-id
-                       :user/id user-id
-                       :gis-user/username "gis_user_0000000000000001_0000000000000002"}]
+        command {:command/type :gis-user.command/create-gis-user
+                 :command/time test-time
+                 :command/user user-id ;; TODO: should be system
+                 :congregation/id cong-id
+                 :user/id user-id}]
 
-    (testing "create GIS user"
-      (is (= [created-event]
-             (handle-command create-command [] injections))))
+    (testing "valid command"
+      (is (= [gis-user-created]
+             (handle-command command [] injections))))
 
-    (testing "create is idempotent"
-      (is (empty? (handle-command create-command [created-event] injections))))
-
-    (testing "delete GIS user"
-      (is (= [deleted-event]
-             (handle-command delete-command [created-event] injections)))
-      (is (= [(assoc deleted-event :gis-user/username "foo")]
-             (handle-command delete-command [(assoc created-event :gis-user/username "foo")] injections))
-          "username comes from the created event and is not re-generated"))
-
-    (testing "delete is idempotent"
-      (is (empty? (handle-command delete-command [] injections))
-          "not created")
-      (is (empty? (handle-command delete-command [created-event deleted-event] injections))
-          "already deleted"))
-
-    (testing "create enforces unique usernames"
+    (testing "enforces unique usernames"
       (let [injections (assoc injections :db-user-exists? (fn [schema]
                                                             (contains? #{"gis_user_0000000000000001_0000000000000002"}
                                                                        schema)))]
-        (is (= [(assoc created-event :gis-user/username "gis_user_0000000000000001_0000000000000002_1")]
-               (handle-command create-command [] injections))))
+        (is (= [(assoc gis-user-created :gis-user/username "gis_user_0000000000000001_0000000000000002_1")]
+               (handle-command command [] injections))))
       (let [injections (assoc injections :db-user-exists? (fn [schema]
                                                             (contains? #{"gis_user_0000000000000001_0000000000000002"
                                                                          "gis_user_0000000000000001_0000000000000002_1"
                                                                          "gis_user_0000000000000001_0000000000000002_2"
                                                                          "gis_user_0000000000000001_0000000000000002_3"}
                                                                        schema)))]
-        (is (= [(assoc created-event :gis-user/username "gis_user_0000000000000001_0000000000000002_4")]
-               (handle-command create-command [] injections)))))))
+        (is (= [(assoc gis-user-created :gis-user/username "gis_user_0000000000000001_0000000000000002_4")]
+               (handle-command command [] injections)))))
+
+    (testing "is idempotent"
+      (is (empty? (handle-command command [gis-user-created] injections))
+          "already created"))
+
+    (testing "recreating"
+      (is (= [gis-user-created]
+             (handle-command command [gis-user-created gis-user-deleted] injections))))))
+
+(deftest delete-gis-user-test
+  (let [injections {:now (constantly test-time)}
+        command {:command/type :gis-user.command/delete-gis-user
+                 :command/time test-time
+                 :command/user user-id ;; TODO: should be system 
+                 :congregation/id cong-id
+                 :user/id user-id}]
+
+    (testing "valid command"
+      (is (= [gis-user-deleted]
+             (handle-command command [gis-user-created] injections))))
+
+    (testing "username comes from the gis-user-created event and is not re-generated"
+      (is (= [(assoc gis-user-deleted :gis-user/username "foo")]
+             (handle-command command [(assoc gis-user-created :gis-user/username "foo")] injections))))
+
+    (testing "is idempotent"
+      (is (empty? (handle-command command [] injections))
+          "not created")
+      (is (empty? (handle-command command [gis-user-created gis-user-deleted] injections))
+          "already deleted"))))
 
 (defn- gis-db-spec [username password]
   {:connection-uri (-> (:database-url config/env)
