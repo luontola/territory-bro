@@ -120,55 +120,58 @@
                         (let [events (conj events user-is-absent-event)]
                           (is (empty? (generate-commands events))))))))))))))))
 
-(deftest handle-command-test
+(deftest migrate-tenant-schema-test
   (let [spy (spy/spy)
         injections {:now (constantly test-time)
-                    :migrate-tenant-schema! (spy/fn spy :migrate-tenant-schema!)
-                    :ensure-gis-user-present! (spy/fn spy :ensure-gis-user-present!)
+                    :migrate-tenant-schema! (spy/fn spy :migrate-tenant-schema!)}]
+    (is (= [schema-is-present-event]
+           (db-admin/handle-command! {:command/type :db-admin.command/migrate-tenant-schema
+                                      :command/time test-time
+                                      :command/system "test"
+                                      :congregation/id cong-id
+                                      :congregation/schema-name "cong1_schema"}
+                                     injections)))
+    (is (= [[:migrate-tenant-schema! "cong1_schema"]]
+           (spy/read! spy)))))
+
+(deftest ensure-gis-user-present-test
+  (let [spy (spy/spy)
+        injections {:now (constantly test-time)
+                    :ensure-gis-user-present! (spy/fn spy :ensure-gis-user-present!)}]
+    (is (= [user-is-present-event]
+           (db-admin/handle-command! {:command/type :db-admin.command/ensure-gis-user-present
+                                      :command/time test-time
+                                      :command/system "test"
+                                      :user/id user-id
+                                      :gis-user/username "username123"
+                                      :gis-user/password "password123"
+                                      :congregation/id cong-id
+                                      :congregation/schema-name "cong1_schema"}
+                                     injections)))
+    (is (= [[:ensure-gis-user-present! {:username "username123"
+                                        :password "password123"
+                                        :schema "cong1_schema"}]]
+           (spy/read! spy)))))
+
+(deftest ensure-gis-user-absent-test
+  (let [spy (spy/spy)
+        injections {:now (constantly test-time)
                     :ensure-gis-user-absent! (spy/fn spy :ensure-gis-user-absent!)}]
+    (is (= [user-is-absent-event]
+           (db-admin/handle-command! {:command/type :db-admin.command/ensure-gis-user-absent
+                                      :command/time test-time
+                                      :command/system "test"
+                                      :user/id user-id
+                                      :gis-user/username "username123"
+                                      :congregation/id cong-id
+                                      :congregation/schema-name "cong1_schema"}
+                                     injections)))
+    (is (= [[:ensure-gis-user-absent! {:username "username123"
+                                       :schema "cong1_schema"}]]
+           (spy/read! spy)))))
 
-    (testing "migrate-tenant-schema"
-      (is (= [schema-is-present-event]
-             (db-admin/handle-command! {:command/type :db-admin.command/migrate-tenant-schema
-                                        :command/time test-time
-                                        :command/system "test"
-                                        :congregation/id cong-id
-                                        :congregation/schema-name "cong1_schema"}
-                                       injections)))
-      (is (= [[:migrate-tenant-schema! "cong1_schema"]]
-             (spy/read! spy))))
-
-    (testing "ensure-gis-user-present"
-      (is (= [user-is-present-event]
-             (db-admin/handle-command! {:command/type :db-admin.command/ensure-gis-user-present
-                                        :command/time test-time
-                                        :command/system "test"
-                                        :user/id user-id
-                                        :gis-user/username "username123"
-                                        :gis-user/password "password123"
-                                        :congregation/id cong-id
-                                        :congregation/schema-name "cong1_schema"}
-                                       injections)))
-      (is (= [[:ensure-gis-user-present! {:username "username123"
-                                          :password "password123"
-                                          :schema "cong1_schema"}]]
-             (spy/read! spy))))
-
-    (testing "ensure-gis-user-absent"
-      (is (= [user-is-absent-event]
-             (db-admin/handle-command! {:command/type :db-admin.command/ensure-gis-user-absent
-                                        :command/time test-time
-                                        :command/system "test"
-                                        :user/id user-id
-                                        :gis-user/username "username123"
-                                        :congregation/id cong-id
-                                        :congregation/schema-name "cong1_schema"}
-                                       injections)))
-      (is (= [[:ensure-gis-user-absent! {:username "username123"
-                                         :schema "cong1_schema"}]]
-             (spy/read! spy))))
-
-    (testing "invalid command"
-      (is (thrown-with-msg? ExceptionInfo #"Value does not match schema"
-                            (db-admin/handle-command! {:command/type :db-admin.command/ensure-gis-user-absent}
-                                                      injections))))))
+(deftest handle-command-test
+  (testing "invalid command"
+    (is (thrown-with-msg? ExceptionInfo #"Value does not match schema"
+                          (db-admin/handle-command! {:command/type :db-admin.command/ensure-gis-user-absent}
+                                                    {})))))
