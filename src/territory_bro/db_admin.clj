@@ -20,86 +20,85 @@
         cong (select-keys event [:congregation/id
                                  :congregation/schema-name])]
     (-> state
-        (todo-tracker/merge-state ::gis-schema cong-id cong)
+        (todo-tracker/merge-state ::tracked-congregations cong-id cong)
         (assoc-in [::congregations cong-id] cong) ;; TODO: use this instead of merge-state?
-        (todo-tracker/set-desired ::gis-schema cong-id :present))))
+        (todo-tracker/set-desired ::tracked-congregations cong-id :present))))
 
 (defmethod projection :db-admin.event/gis-schema-is-present
   [state event]
   (-> state
-      (todo-tracker/set-actual ::gis-schema (:congregation/id event) :present)))
+      (todo-tracker/set-actual ::tracked-congregations (:congregation/id event) :present)))
 
-(defn- add-pending-gis-user [state event desired-state]
+(defn- gis-user-specs [state event]
   (let [cong-id (:congregation/id event)
-        user-id (:user/id event)
         cong (get-in state [::congregations cong-id])
         _ (assert cong {:error "congregation not found"
-                        :cong-id cong-id})
-        gis-user (-> (merge cong event)
-                     (select-keys [:gis-user/username
-                                   :gis-user/password
-                                   :congregation/schema-name])
-                     (assoc ::desired-state desired-state))]
-    (assoc-in state [::pending-gis-users [cong-id user-id]] gis-user)))
+                        :cong-id cong-id})]
+    (-> (merge cong event)
+        (select-keys [:congregation/id
+                      :user/id
+                      :gis-user/username
+                      :gis-user/password
+                      :congregation/schema-name]))))
 
 (defmethod projection :congregation.event/gis-user-created
   [state event]
-  (add-pending-gis-user state event :present))
+  (-> state
+      (todo-tracker/merge-state ::tracked-gis-users (select-keys event [:congregation/id :user/id]) (gis-user-specs state event))
+      ;; TODO: set actual to absent, in order to support password change?
+      (todo-tracker/set-desired ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :present)))
 
 (defmethod projection :congregation.event/gis-user-deleted
   [state event]
-  (add-pending-gis-user state event :absent))
-
-
-(defn- remove-pending-gis-user [state event desired-state]
-  (let [cong-id (:congregation/id event)
-        user-id (:user/id event)]
-    (if (= desired-state (get-in state [::pending-gis-users [cong-id user-id] ::desired-state]))
-      (update state ::pending-gis-users dissoc [cong-id user-id])
-      state)))
+  (-> state
+      (todo-tracker/set-desired ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :absent)))
 
 (defmethod projection :db-admin.event/gis-user-is-present
   [state event]
-  (remove-pending-gis-user state event :present))
+  (-> state
+      (todo-tracker/set-actual ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :present)))
 
 (defmethod projection :db-admin.event/gis-user-is-absent
   [state event]
-  (remove-pending-gis-user state event :absent))
+  (-> state
+      (todo-tracker/set-actual ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :absent)))
 
 
 (def ^:private system (str (ns-name *ns*)))
 
 (defn generate-commands [state {:keys [now]}]
   (concat
-   (for [tenant (todo-tracker/creatable state ::gis-schema)]
+   (for [tenant (todo-tracker/creatable state ::tracked-congregations)]
      {:command/type :db-admin.command/migrate-tenant-schema
       :command/time (now)
       :command/system system
       :congregation/id (:congregation/id tenant)
       :congregation/schema-name (:congregation/schema-name tenant)})
 
-   (for [[[cong-id user-id] gis-user] (::pending-gis-users state)]
-     (case (::desired-state gis-user)
-       :present {:command/type :db-admin.command/ensure-gis-user-present
-                 :command/time (now)
-                 :command/system system
-                 :user/id user-id
-                 :gis-user/username (:gis-user/username gis-user)
-                 :gis-user/password (:gis-user/password gis-user)
-                 :congregation/id cong-id
-                 :congregation/schema-name (:congregation/schema-name gis-user)}
-       :absent {:command/type :db-admin.command/ensure-gis-user-absent
-                :command/time (now)
-                :command/system system
-                :user/id user-id
-                :gis-user/username (:gis-user/username gis-user)
-                :congregation/id cong-id
-                :congregation/schema-name (:congregation/schema-name gis-user)}))))
+   (for [gis-user (todo-tracker/creatable state ::tracked-gis-users)]
+     {:command/type :db-admin.command/ensure-gis-user-present
+      :command/time (now)
+      :command/system system
+      :user/id (:user/id gis-user)
+      :gis-user/username (:gis-user/username gis-user)
+      :gis-user/password (:gis-user/password gis-user)
+      :congregation/id (:congregation/id gis-user)
+      :congregation/schema-name (:congregation/schema-name gis-user)})
+
+   (for [gis-user (todo-tracker/deletable state ::tracked-gis-users)]
+     {:command/type :db-admin.command/ensure-gis-user-absent
+      :command/time (now)
+      :command/system system
+      :user/id (:user/id gis-user)
+      :gis-user/username (:gis-user/username gis-user)
+      :congregation/id (:congregation/id gis-user) ;; TODO: get :user/id instead and test that the invalid command is detected
+      :congregation/schema-name (:congregation/schema-name gis-user)})))
 
 
 (defmulti ^:private command-handler (fn [command _injections] (:command/type command)))
 
 (defmethod command-handler :db-admin.command/migrate-tenant-schema [command {:keys [migrate-tenant-schema!]}]
+  ;; TODO: validate congregation id
   (migrate-tenant-schema! (:congregation/schema-name command))
   [{:event/type :db-admin.event/gis-schema-is-present
     :event/version 1
@@ -108,6 +107,7 @@
     :congregation/schema-name (:congregation/schema-name command)}])
 
 (defmethod command-handler :db-admin.command/ensure-gis-user-present [command {:keys [ensure-gis-user-present!]}]
+  ;; TODO: validate congregation and user id
   (ensure-gis-user-present! {:username (:gis-user/username command)
                              :password (:gis-user/password command)
                              :schema (:congregation/schema-name command)})
@@ -119,6 +119,7 @@
     :gis-user/username (:gis-user/username command)}])
 
 (defmethod command-handler :db-admin.command/ensure-gis-user-absent [command {:keys [ensure-gis-user-absent!]}]
+  ;; TODO: validate congregation and user id
   (ensure-gis-user-absent! {:username (:gis-user/username command)
                             :schema (:congregation/schema-name command)})
   [{:event/type :db-admin.event/gis-user-is-absent

@@ -91,34 +91,22 @@
 
               (testing "> GIS user is present"
                 (let [events (conj events user-is-present-event)]
-                  (is (empty? (generate-commands events)))))
+                  (is (empty? (generate-commands events)))
 
-              (testing "> GIS user is absent (undesired)"
-                (let [before (generate-commands events)
-                      events (conj events user-is-absent-event)]
-                  (is (= before (generate-commands events))
-                      "no change")))
+                  (testing "> GIS user deleted"
+                    (let [events (conj events user-deleted-event)]
+                      (is (= [{:command/type :db-admin.command/ensure-gis-user-absent
+                               :command/time test-time
+                               :command/system "territory-bro.db-admin"
+                               :congregation/id cong-id
+                               :congregation/schema-name "cong1_schema"
+                               :user/id user-id
+                               :gis-user/username "username123"}]
+                             (generate-commands events)))
 
-              (testing "> GIS user deleted"
-                (let [events (conj events user-deleted-event)]
-                  (is (= [{:command/type :db-admin.command/ensure-gis-user-absent
-                           :command/time test-time
-                           :command/system "territory-bro.db-admin"
-                           :congregation/id cong-id
-                           :congregation/schema-name "cong1_schema"
-                           :user/id user-id
-                           :gis-user/username "username123"}]
-                         (generate-commands events)))
-
-                  (testing "> GIS user is present (undesired)"
-                    (let [before (generate-commands events)
-                          events (conj events user-is-present-event)]
-                      (is (= before (generate-commands events))
-                          "no change")))
-
-                  (testing "> GIS user is absent"
-                    (let [events (conj events user-is-absent-event)]
-                      (is (empty? (generate-commands events))))))))))))))
+                      (testing "> GIS user is absent"
+                        (let [events (conj events user-is-absent-event)]
+                          (is (empty? (generate-commands events))))))))))))))))
 
 (deftest handle-command-test
   (let [spy (spy/spy)
