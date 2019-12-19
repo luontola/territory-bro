@@ -165,7 +165,6 @@
       :gis-user/password (generate-password)}]))
 
 (defmethod command-handler :gis-user.command/delete-gis-user [command state _injections]
-  ;; TODO: should this be idempotent? send event even if gis user is missing?
   (when-some [username (get-in state (username-path command))]
     [{:event/type :congregation.event/gis-user-deleted
       :event/version 1
