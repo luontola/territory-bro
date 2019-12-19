@@ -20,8 +20,7 @@
         cong (select-keys event [:congregation/id
                                  :congregation/schema-name])]
     (-> state
-        (presence-tracker/merge-state ::tracked-congregations cong-id cong)
-        (assoc-in [::congregations cong-id] cong) ;; TODO: use this instead of merge-state?
+        (assoc-in [::congregations cong-id] cong)
         (presence-tracker/set-desired ::tracked-congregations cong-id :present))))
 
 (defmethod projection :db-admin.event/gis-schema-is-present
@@ -29,56 +28,58 @@
   (-> state
       (presence-tracker/set-actual ::tracked-congregations (:congregation/id event) :present)))
 
-(defn- gis-user-specs [state event]
-  (let [cong-id (:congregation/id event)
-        cong (get-in state [::congregations cong-id])
-        _ (assert cong {:error "congregation not found"
-                        :cong-id cong-id})]
-    (-> (merge cong event)
-        (select-keys [:congregation/id
-                      :user/id
-                      :gis-user/username
-                      :gis-user/password
-                      :congregation/schema-name]))))
+(defn- gis-user-key [event]
+  ;; TODO: use :gis-user/username as the key, in case the username is changed?
+  (select-keys event [:congregation/id :user/id]))
 
 (defmethod projection :congregation.event/gis-user-created
   [state event]
-  ;; TODO: use :gis-user/username as the key, in case the username is changed?
-  (let [gis-user-key (select-keys event [:congregation/id :user/id])]
+  (let [cong-id (:congregation/id event)
+        cong (get-in state [::congregations cong-id])
+        _ (assert cong {:error "congregation not found", :cong-id cong-id})
+        k (gis-user-key event)
+        gis-user (-> (merge cong event)
+                     (select-keys [:congregation/id
+                                   :user/id
+                                   :gis-user/username
+                                   :gis-user/password
+                                   :congregation/schema-name]))]
     (-> state
-        (presence-tracker/merge-state ::tracked-gis-users gis-user-key (gis-user-specs state event))
-        (presence-tracker/set-desired ::tracked-gis-users gis-user-key :present)
+        (assoc-in [::gis-users k] gis-user)
+        (presence-tracker/set-desired ::tracked-gis-users k :present)
         ;; force recreating the user to apply a password change
-        (presence-tracker/set-actual ::tracked-gis-users gis-user-key :absent))))
+        (presence-tracker/set-actual ::tracked-gis-users k :absent))))
 
 (defmethod projection :congregation.event/gis-user-deleted
   [state event]
   (-> state
-      (presence-tracker/set-desired ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :absent)))
+      (presence-tracker/set-desired ::tracked-gis-users (gis-user-key event) :absent)))
 
 (defmethod projection :db-admin.event/gis-user-is-present
   [state event]
   (-> state
-      (presence-tracker/set-actual ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :present)))
+      (presence-tracker/set-actual ::tracked-gis-users (gis-user-key event) :present)))
 
 (defmethod projection :db-admin.event/gis-user-is-absent
   [state event]
   (-> state
-      (presence-tracker/set-actual ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :absent)))
+      (presence-tracker/set-actual ::tracked-gis-users (gis-user-key event) :absent)))
 
 
 (def ^:private system (str (ns-name *ns*)))
 
 (defn generate-commands [state {:keys [now]}]
   (concat
-   (for [tenant (presence-tracker/creatable state ::tracked-congregations)]
+   (for [tenant (->> (presence-tracker/creatable state ::tracked-congregations)
+                     (map #(get-in state [::congregations %])))]
      {:command/type :db-admin.command/migrate-tenant-schema
       :command/time (now)
       :command/system system
       :congregation/id (:congregation/id tenant)
       :congregation/schema-name (:congregation/schema-name tenant)})
 
-   (for [gis-user (presence-tracker/creatable state ::tracked-gis-users)]
+   (for [gis-user (->> (presence-tracker/creatable state ::tracked-gis-users)
+                       (map #(get-in state [::gis-users %])))]
      {:command/type :db-admin.command/ensure-gis-user-present
       :command/time (now)
       :command/system system
@@ -88,7 +89,8 @@
       :congregation/id (:congregation/id gis-user)
       :congregation/schema-name (:congregation/schema-name gis-user)})
 
-   (for [gis-user (presence-tracker/deletable state ::tracked-gis-users)]
+   (for [gis-user (->> (presence-tracker/deletable state ::tracked-gis-users)
+                       (map #(get-in state [::gis-users %])))]
      {:command/type :db-admin.command/ensure-gis-user-absent
       :command/time (now)
       :command/system system

@@ -6,10 +6,9 @@
   (:require [territory-bro.util :refer [conj-set]]))
 
 (defn inspect [m keyspace k]
-  (let [{:keys [state desired actual]
+  (let [{:keys [desired actual]
          :or {desired :absent, actual :absent}} (get-in m [keyspace ::presence k])]
-    {:state state
-     :desired desired
+    {:desired desired
      :actual actual
      :action (case [desired actual]
                [:present :absent] :create
@@ -17,16 +16,10 @@
                :ignore)}))
 
 (defn creatable [m keyspace]
-  (->> (get-in m [keyspace ::creatable])
-       (map #(get-in m [keyspace ::presence % :state]))))
+  (set (get-in m [keyspace ::creatable])))
 
 (defn deletable [m keyspace]
-  (->> (get-in m [keyspace ::deletable])
-       (map #(get-in m [keyspace ::presence % :state]))))
-
-
-(defn merge-state [m keyspace k new-state]
-  (update-in m [keyspace ::presence k :state] merge new-state))
+  (set (get-in m [keyspace ::deletable])))
 
 (defn- update-indexes [m keyspace k]
   (let [action (:action (inspect m keyspace k))]

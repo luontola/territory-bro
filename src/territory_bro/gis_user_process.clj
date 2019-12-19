@@ -15,10 +15,8 @@
 (defmethod projection :congregation.event/permission-granted
   [state event]
   (if (= :gis-access (:permission/id event))
-    (let [k (gis-user-key event)]
-      (-> state
-          (presence-tracker/merge-state ::tracked-gis-users k k)
-          (presence-tracker/set-desired ::tracked-gis-users k :present)))
+    (-> state
+        (presence-tracker/set-desired ::tracked-gis-users (gis-user-key event) :present))
     state))
 
 (defmethod projection :congregation.event/permission-revoked
