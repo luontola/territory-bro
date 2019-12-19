@@ -39,7 +39,7 @@
 
 (def ^:private system (str (ns-name *ns*)))
 
-(defn sort-users [gis-users]
+(defn- sort-users [gis-users]
   (sort-by (juxt :congregation/id :user/id) gis-users))
 
 (defn generate-commands [state {:keys [now]}]
