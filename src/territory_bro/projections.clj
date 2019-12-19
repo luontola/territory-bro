@@ -14,6 +14,7 @@
             [territory-bro.gis-user-process :as gis-user-process]
             [territory-bro.poller :as poller])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
+           (java.time Duration)
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
 
 ;;; Cache
@@ -95,8 +96,8 @@
 (defn refresh-async! []
   (poller/trigger! refresher))
 
-(defn await-refreshed []
-  (poller/await refresher))
+(defn await-refreshed [^Duration duration]
+  (poller/await refresher duration))
 
 
 (mount/defstate scheduled-refresh

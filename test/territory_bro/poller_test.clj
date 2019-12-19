@@ -9,6 +9,7 @@
   (:import (ch.qos.logback.classic Logger)
            (ch.qos.logback.classic.spi LoggingEvent)
            (ch.qos.logback.core.read ListAppender)
+           (java.time Duration)
            (java.util.concurrent CountDownLatch TimeUnit CyclicBarrier)
            (org.slf4j LoggerFactory)))
 
@@ -130,7 +131,7 @@
                              (Thread/yield)
                              (swap! *task-count inc)))]
       (poller/trigger! p)
-      (poller/await p)
+      (poller/await p (Duration/ofSeconds 1))
 
       (is (= 1 @*task-count) "task count")
       (poller/shutdown! p))))

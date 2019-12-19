@@ -22,7 +22,7 @@
             [territory-bro.projections :as projections]
             [territory-bro.router :as router]
             [territory-bro.user :as user])
-  (:import (java.time Instant)
+  (:import (java.time Instant Duration)
            (java.util UUID)))
 
 (use-fixtures :once (join-fixtures [db-fixture api-fixture]))
@@ -276,7 +276,7 @@
         (congregation/revoke! conn cong-id user-id :view-congregation)
         (congregation/revoke! conn cong-id user-id :configure-congregation))))
   (projections/refresh-async!)
-  (projections/await-refreshed))
+  (projections/await-refreshed (Duration/ofSeconds 1)))
 
 
 (deftest get-congregation-test
@@ -350,7 +350,7 @@
           (binding [events/*current-system* "test"]
             (congregation/revoke! conn cong-id (:user/id gis-user) :gis-access))))
       (projections/refresh-async!)
-      (projections/await-refreshed)
+      (projections/await-refreshed (Duration/ofSeconds 1))
 
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
                          (merge session)

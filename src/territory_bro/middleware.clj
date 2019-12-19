@@ -15,7 +15,8 @@
             [ring.util.response :as response]
             [territory-bro.config :refer [env]]
             [territory-bro.projections :as projections]
-            [territory-bro.util :as util]))
+            [territory-bro.util :as util])
+  (:import (java.time Duration)))
 
 (defn wrap-internal-error [handler]
   (fn [req]
@@ -62,7 +63,7 @@
       (when (contains? mutative-operation (:request-method req))
         (projections/refresh-async!)
         ;; TODO: store the observed revision in session and await before the next read if the cache is out of date
-        (projections/await-refreshed))
+        (projections/await-refreshed (Duration/ofSeconds 10)))
       resp)))
 
 (defn wrap-base [handler]

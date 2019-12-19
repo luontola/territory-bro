@@ -20,7 +20,7 @@
             [territory-bro.testdata :as testdata]
             [territory-bro.testutil :as testutil]
             [territory-bro.user :as user])
-  (:import (java.time Instant)
+  (:import (java.time Instant Duration)
            (java.util UUID)
            (org.postgresql.util PSQLException)))
 
@@ -249,7 +249,7 @@
     (finally
       ;; wait for process managers to create the GIS user
       (projections/refresh-async!)
-      (projections/await-refreshed))))
+      (projections/await-refreshed (Duration/ofSeconds 1)))))
 
 (defn- create-test-data! []
   (let [{:keys [cong-id user-id]} (create-test-data-impl!)
@@ -320,7 +320,7 @@
       (db/with-db [conn {}]
         (congregation/revoke! conn cong-id user-id :gis-access))
       (projections/refresh-async!)
-      (projections/await-refreshed) ; wait for process managers to delete the GIS user
+      (projections/await-refreshed (Duration/ofSeconds 1)) ; wait for process managers to delete the GIS user
 
       (is (thrown-with-msg? PSQLException #"FATAL: password authentication failed for user"
                             (jdbc/query db-spec ["select 1 as test"]))))))

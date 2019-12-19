@@ -7,12 +7,13 @@
   (:require [clojure.tools.logging :as log])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.lang Thread$UncaughtExceptionHandler)
+           (java.time Duration)
            (java.util Queue)
            (java.util.concurrent ExecutorService Executors TimeUnit ArrayBlockingQueue Future)))
 
 (defprotocol Poller
   (trigger! [this])
-  (await [this])
+  (await [this ^Duration timeout])
   (shutdown! [this]))
 
 (def ^:private uncaught-exception-handler
@@ -47,9 +48,9 @@
                            (.add available-tasks task)
                            (run-safely! task)))))
 
-  (await [_]
+  (await [_ timeout]
     (let [future ^Future (.submit executor ^Runnable (fn []))]
-      (.get future 1 TimeUnit/MINUTES)))
+      (.get future (.toNanos timeout) TimeUnit/NANOSECONDS)))
 
   (shutdown! [_]
     (doto executor
