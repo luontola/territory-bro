@@ -72,6 +72,7 @@
     (seq transient-events)))
 
 (defn refresh! []
+  (log/info "Refreshing projections")
   (let [[old new] (swap-vals! *cache (fn [cached]
                                        ;; Though this reads the database and is thus a slow
                                        ;; operation, retries on updating the atom should not
