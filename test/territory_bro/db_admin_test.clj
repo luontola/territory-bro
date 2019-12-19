@@ -93,6 +93,18 @@
                 (let [events (conj events user-is-present-event)]
                   (is (empty? (generate-commands events)))
 
+                  (testing "> GIS user password changed"
+                    (let [events (conj events (assoc user-created-event :gis-user/password "new password"))]
+                      (is (= [{:command/type :db-admin.command/ensure-gis-user-present
+                               :command/time test-time
+                               :command/system "territory-bro.db-admin"
+                               :congregation/id cong-id
+                               :congregation/schema-name "cong1_schema"
+                               :user/id user-id
+                               :gis-user/password "new password"
+                               :gis-user/username "username123"}]
+                             (generate-commands events)))))
+
                   (testing "> GIS user deleted"
                     (let [events (conj events user-deleted-event)]
                       (is (= [{:command/type :db-admin.command/ensure-gis-user-absent

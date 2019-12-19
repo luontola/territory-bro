@@ -43,10 +43,13 @@
 
 (defmethod projection :congregation.event/gis-user-created
   [state event]
-  (-> state
-      (todo-tracker/merge-state ::tracked-gis-users (select-keys event [:congregation/id :user/id]) (gis-user-specs state event))
-      ;; TODO: set actual to absent, in order to support password change?
-      (todo-tracker/set-desired ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :present)))
+  ;; TODO: use :gis-user/username as the key, in case the username is changed?
+  (let [gis-user-key (select-keys event [:congregation/id :user/id])]
+    (-> state
+        (todo-tracker/merge-state ::tracked-gis-users gis-user-key (gis-user-specs state event))
+        (todo-tracker/set-desired ::tracked-gis-users gis-user-key :present)
+        ;; force recreating the user to apply a password change
+        (todo-tracker/set-actual ::tracked-gis-users gis-user-key :absent))))
 
 (defmethod projection :congregation.event/gis-user-deleted
   [state event]
