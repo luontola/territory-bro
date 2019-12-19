@@ -9,7 +9,8 @@
             [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.presence-tracker :as presence-tracker]
-            [territory-bro.util :refer [conj-set]]))
+            [territory-bro.util :refer [conj-set]])
+  (:import (territory_bro ValidationException)))
 
 (defmulti projection (fn [_state event] (:event/type event)))
 (defmethod projection :default [state _event] state)
@@ -35,6 +36,7 @@
 (defmethod projection :congregation.event/gis-user-created
   [state event]
   (let [cong-id (:congregation/id event)
+        user-id (:user/id event)
         cong (get-in state [::congregations cong-id])
         _ (assert cong {:error "congregation not found", :cong-id cong-id})
         k (gis-user-key event)
@@ -45,6 +47,7 @@
                                    :gis-user/password
                                    :congregation/schema-name]))]
     (-> state
+        (update ::users conj-set user-id)
         (assoc-in [::gis-users k] gis-user)
         (presence-tracker/set-desired ::tracked-gis-users k :present)
         ;; force recreating the user to apply a password change
@@ -96,43 +99,61 @@
       :command/system system
       :user/id (:user/id gis-user)
       :gis-user/username (:gis-user/username gis-user)
-      :congregation/id (:congregation/id gis-user) ;; TODO: get :user/id instead and test that the invalid command is detected
+      :congregation/id (:congregation/id gis-user)
       :congregation/schema-name (:congregation/schema-name gis-user)})))
 
 
-(defmulti ^:private command-handler (fn [command _injections] (:command/type command)))
+(defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
-(defmethod command-handler :db-admin.command/migrate-tenant-schema [command {:keys [migrate-tenant-schema!]}]
-  ;; TODO: validate congregation id
-  (migrate-tenant-schema! (:congregation/schema-name command))
-  [{:event/type :db-admin.event/gis-schema-is-present
-    :event/version 1
-    :event/transient? true
-    :congregation/id (:congregation/id command)
-    :congregation/schema-name (:congregation/schema-name command)}])
+(defn- check-congregation-exists [state cong-id]
+  (when-not (contains? (::congregations state) cong-id)
+    (throw (ValidationException. [[:no-such-congregation cong-id]]))))
 
-(defmethod command-handler :db-admin.command/ensure-gis-user-present [command {:keys [ensure-gis-user-present!]}]
-  ;; TODO: validate congregation and user id
-  (ensure-gis-user-present! {:username (:gis-user/username command)
-                             :password (:gis-user/password command)
-                             :schema (:congregation/schema-name command)})
-  [{:event/type :db-admin.event/gis-user-is-present
-    :event/version 1
-    :event/transient? true
-    :congregation/id (:congregation/id command)
-    :user/id (:user/id command)
-    :gis-user/username (:gis-user/username command)}])
+(defn- check-user-exists [state user-id]
+  (when-not (contains? (::users state) user-id)
+    (throw (ValidationException. [[:no-such-user user-id]]))))
 
-(defmethod command-handler :db-admin.command/ensure-gis-user-absent [command {:keys [ensure-gis-user-absent!]}]
-  ;; TODO: validate congregation and user id
-  (ensure-gis-user-absent! {:username (:gis-user/username command)
-                            :schema (:congregation/schema-name command)})
-  [{:event/type :db-admin.event/gis-user-is-absent
-    :event/version 1
-    :event/transient? true
-    :congregation/id (:congregation/id command)
-    :user/id (:user/id command)
-    :gis-user/username (:gis-user/username command)}])
+(defmethod command-handler :db-admin.command/migrate-tenant-schema [command state {:keys [migrate-tenant-schema!]}]
+  ;; TODO: check permissions (system)
+  (let [cong-id (:congregation/id command)]
+    (check-congregation-exists state cong-id)
+    (migrate-tenant-schema! (:congregation/schema-name command))
+    [{:event/type :db-admin.event/gis-schema-is-present
+      :event/version 1
+      :event/transient? true
+      :congregation/id cong-id
+      :congregation/schema-name (:congregation/schema-name command)}]))
+
+(defmethod command-handler :db-admin.command/ensure-gis-user-present [command state {:keys [ensure-gis-user-present!]}]
+  ;; TODO: check permissions (system)
+  (let [cong-id (:congregation/id command)
+        user-id (:user/id command)]
+    (check-congregation-exists state cong-id)
+    (check-user-exists state user-id)
+    (ensure-gis-user-present! {:username (:gis-user/username command)
+                               :password (:gis-user/password command)
+                               :schema (:congregation/schema-name command)})
+    [{:event/type :db-admin.event/gis-user-is-present
+      :event/version 1
+      :event/transient? true
+      :congregation/id cong-id
+      :user/id user-id
+      :gis-user/username (:gis-user/username command)}]))
+
+(defmethod command-handler :db-admin.command/ensure-gis-user-absent [command state {:keys [ensure-gis-user-absent!]}]
+  ;; TODO: check permissions (system)
+  (let [cong-id (:congregation/id command)
+        user-id (:user/id command)]
+    (check-congregation-exists state cong-id)
+    (check-user-exists state user-id)
+    (ensure-gis-user-absent! {:username (:gis-user/username command)
+                              :schema (:congregation/schema-name command)})
+    [{:event/type :db-admin.event/gis-user-is-absent
+      :event/version 1
+      :event/transient? true
+      :congregation/id (:congregation/id command)
+      :user/id (:user/id command)
+      :gis-user/username (:gis-user/username command)}]))
 
 (def ^:private default-injections
   {:now #((:now config/env))
@@ -145,10 +166,10 @@
                                 (gis-user/ensure-absent! conn args)))})
 
 (defn handle-command!
-  ([command]
-   (handle-command! command default-injections))
-  ([command injections]
+  ([command state]
+   (handle-command! command state default-injections))
+  ([command state injections]
    (commands/validate-command command) ; TODO: validate all commands centrally
-   (->> (command-handler command injections)
+   (->> (command-handler command state injections)
         (events/enrich-events command injections)
         (events/validate-events)))) ; XXX: validated here because transient events are not saved and validated on save

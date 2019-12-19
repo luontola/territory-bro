@@ -53,14 +53,14 @@
 
 ;;; Refreshing
 
-(defn- dispatch-command! [command] ; TODO: reuse also in the API routes?
+(defn- dispatch-command! [command state] ; TODO: reuse also in the API routes?
   (case (namespace (:command/type command))
     "gis-user.command" (db/with-db [conn {}]
                          (gis-user/handle-command! conn command)
                          ;; XXX: refresh! should recur also when persisted events are produced, so maybe return them from the command handler?
                          [{:event/type :fake-event-to-trigger-refresh
                            :event/transient? true}])
-    "db-admin.command" (db-admin/handle-command! command)
+    "db-admin.command" (db-admin/handle-command! command state)
     (throw (IllegalArgumentException. (str "Unsupported command: " (pr-str command))))))
 
 (defn- run-process-managers! [state]
@@ -68,7 +68,7 @@
                   (gis-user-process/generate-commands state {:now (:now config/env)})
                   (db-admin/generate-commands state {:now (:now config/env)}))
         transient-events (->> commands
-                              (mapcat dispatch-command!)
+                              (mapcat #(dispatch-command! % state))
                               (doall))]
     (seq transient-events)))
 
