@@ -8,7 +8,7 @@
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.lang Thread$UncaughtExceptionHandler)
            (java.util Queue)
-           (java.util.concurrent ExecutorService Executors TimeUnit ArrayBlockingQueue)))
+           (java.util.concurrent ExecutorService Executors TimeUnit ArrayBlockingQueue Future)))
 
 (defprotocol Poller
   (trigger! [this])
@@ -48,8 +48,8 @@
                            (run-safely! task)))))
 
   (await [_]
-    (let [future (.submit executor ^Runnable (fn []))]
-      (.get future)))
+    (let [future ^Future (.submit executor ^Runnable (fn []))]
+      (.get future 1 TimeUnit/MINUTES)))
 
   (shutdown! [_]
     (doto executor
