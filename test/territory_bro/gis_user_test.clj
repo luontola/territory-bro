@@ -22,7 +22,8 @@
             [territory-bro.user :as user])
   (:import (java.time Instant Duration)
            (java.util UUID)
-           (org.postgresql.util PSQLException)))
+           (org.postgresql.util PSQLException)
+           (territory_bro ValidationException)))
 
 (use-fixtures :once (join-fixtures [db-fixture process-managers-fixture event-actor-fixture]))
 
@@ -32,9 +33,18 @@
 
 (def congregation-created {:event/type :congregation.event/congregation-created
                            :event/version 1
+                           :event/time test-time
+                           :event/system "test" ; XXX: not :event/user, because would conflict with territory-bro.testutil/validate-test-events - use relaxed validation instead
                            :congregation/id cong-id
                            :congregation/name "Cong1 Name"
                            :congregation/schema-name "cong1_schema"})
+(def permission-granted {:event/type :congregation.event/permission-granted
+                         :event/version 1
+                         :event/time test-time
+                         :event/system "test" ; XXX: not :event/user, because would conflict with territory-bro.testutil/validate-test-events - use relaxed validation instead
+                         :congregation/id cong-id
+                         :user/id user-id
+                         :permission/id :gis-access})
 (def gis-user-created {:event/type :congregation.event/gis-user-created
                        :event/version 1
                        :event/time test-time
@@ -150,18 +160,19 @@
                  :command/time test-time
                  :command/user user-id ;; TODO: should be system
                  :congregation/id cong-id
-                 :user/id user-id}]
+                 :user/id user-id}
+        events [congregation-created permission-granted]]
 
     (testing "valid command"
       (is (= [gis-user-created]
-             (handle-command command [] injections))))
+             (handle-command command events injections))))
 
     (testing "enforces unique usernames"
       (let [injections (assoc injections :db-user-exists? (fn [schema]
                                                             (contains? #{"gis_user_0000000000000001_0000000000000002"}
                                                                        schema)))]
         (is (= [(assoc gis-user-created :gis-user/username "gis_user_0000000000000001_0000000000000002_1")]
-               (handle-command command [] injections))))
+               (handle-command command events injections))))
       (let [injections (assoc injections :db-user-exists? (fn [schema]
                                                             (contains? #{"gis_user_0000000000000001_0000000000000002"
                                                                          "gis_user_0000000000000001_0000000000000002_1"
@@ -169,15 +180,33 @@
                                                                          "gis_user_0000000000000001_0000000000000002_3"}
                                                                        schema)))]
         (is (= [(assoc gis-user-created :gis-user/username "gis_user_0000000000000001_0000000000000002_4")]
-               (handle-command command [] injections)))))
+               (handle-command command events injections)))))
 
     (testing "is idempotent"
-      (is (empty? (handle-command command [gis-user-created] injections))
+      (is (empty? (handle-command command
+                                  (conj events gis-user-created)
+                                  injections))
           "already created"))
 
     (testing "recreating"
       (is (= [gis-user-created]
-             (handle-command command [gis-user-created gis-user-deleted] injections))))))
+             (handle-command command
+                             (conj events gis-user-created gis-user-deleted)
+                             injections))))
+
+    (testing "invalid congregation ID"
+      (is (thrown-with-msg?
+           ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (handle-command (assoc command :congregation/id (UUID. 0 0x666))
+                           events
+                           injections))))
+
+    (testing "invalid user ID"
+      (is (thrown-with-msg?
+           ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (handle-command (assoc command :user/id (UUID. 0 0x666))
+                           events
+                           injections))))))
 
 (deftest delete-gis-user-test
   (let [injections {:now (constantly test-time)}
@@ -185,21 +214,42 @@
                  :command/time test-time
                  :command/user user-id ;; TODO: should be system 
                  :congregation/id cong-id
-                 :user/id user-id}]
+                 :user/id user-id}
+        events [congregation-created permission-granted]]
 
     (testing "valid command"
       (is (= [gis-user-deleted]
-             (handle-command command [gis-user-created] injections))))
+             (handle-command command
+                             (conj events gis-user-created)
+                             injections))))
 
     (testing "username comes from the gis-user-created event and is not re-generated"
       (is (= [(assoc gis-user-deleted :gis-user/username "foo")]
-             (handle-command command [(assoc gis-user-created :gis-user/username "foo")] injections))))
+             (handle-command command
+                             (conj events (assoc gis-user-created :gis-user/username "foo"))
+                             injections))))
 
     (testing "is idempotent"
-      (is (empty? (handle-command command [] injections))
+      (is (empty? (handle-command command events injections))
           "not created")
-      (is (empty? (handle-command command [gis-user-created gis-user-deleted] injections))
-          "already deleted"))))
+      (is (empty? (handle-command command
+                                  (conj events gis-user-created gis-user-deleted)
+                                  injections))
+          "already deleted"))
+
+    (testing "invalid congregation ID"
+      (is (thrown-with-msg?
+           ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (handle-command (assoc command :congregation/id (UUID. 0 0x666))
+                           events
+                           injections))))
+
+    (testing "invalid user ID"
+      (is (thrown-with-msg?
+           ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (handle-command (assoc command :user/id (UUID. 0 0x666))
+                           events
+                           injections))))))
 
 (defn- gis-db-spec [username password]
   {:connection-uri (-> (:database-url config/env)

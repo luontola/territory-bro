@@ -10,10 +10,12 @@
             [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
-            [territory-bro.events :as events])
+            [territory-bro.events :as events]
+            [territory-bro.util :refer [conj-set]])
   (:import (java.security SecureRandom)
            (java.util Base64)
-           (org.postgresql.util PSQLException)))
+           (org.postgresql.util PSQLException)
+           (territory_bro ValidationException)))
 
 ;;; Read model
 
@@ -118,13 +120,25 @@
   [state _event]
   state)
 
+(defmethod write-model :congregation.event/congregation-created
+  [state event]
+  (-> state
+      (update ::congregations conj-set (:congregation/id event))))
+
+(defmethod write-model :congregation.event/permission-granted
+  [state event]
+  (-> state
+      (update ::users conj-set (:user/id event))))
+
 (defmethod write-model :congregation.event/gis-user-created
   [state event]
-  (assoc-in state (username-path event) (:gis-user/username event)))
+  (-> state
+      (assoc-in (username-path event) (:gis-user/username event))))
 
 (defmethod write-model :congregation.event/gis-user-deleted
   [state event]
-  (dissoc-in state (username-path event)))
+  (-> state
+      (dissoc-in (username-path event))))
 
 
 ;; Command Handlers
@@ -150,27 +164,45 @@
         (.encodeToString bytes)
         (.substring 0 length))))
 
+(defn- check-congregation-exists [state cong-id]
+  (when-not (contains? (::congregations state) cong-id)
+    (throw (ValidationException. [[:no-such-congregation cong-id]]))))
+
+(defn- check-user-exists [state user-id]
+  (when-not (contains? (::users state) user-id)
+    (throw (ValidationException. [[:no-such-user user-id]]))))
+
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
 (defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists?]}]
-  (when (nil? (get-in state (username-path command)))
-    [{:event/type :congregation.event/gis-user-created
-      :event/version 1
-      :congregation/id (:congregation/id command)
-      :user/id (:user/id command)
-      ;; Due to PostgreSQL identifier length limits, the username is based on
-      ;; truncated UUIDs and is not guaranteed to be unique as-is.
-      :gis-user/username (-> (generate-username (:congregation/id command) (:user/id command))
-                             (unique-username db-user-exists?))
-      :gis-user/password (generate-password)}]))
+  ;; TODO: check permissions (system)
+  (let [cong-id (:congregation/id command)
+        user-id (:user/id command)]
+    (check-congregation-exists state cong-id)
+    (check-user-exists state user-id)
+    (when (nil? (get-in state (username-path command)))
+      [{:event/type :congregation.event/gis-user-created
+        :event/version 1
+        :congregation/id cong-id
+        :user/id user-id
+        ;; Due to PostgreSQL identifier length limits, the username is based on
+        ;; truncated UUIDs and is not guaranteed to be unique as-is.
+        :gis-user/username (-> (generate-username cong-id user-id)
+                               (unique-username db-user-exists?))
+        :gis-user/password (generate-password)}])))
 
 (defmethod command-handler :gis-user.command/delete-gis-user [command state _injections]
-  (when-some [username (get-in state (username-path command))]
-    [{:event/type :congregation.event/gis-user-deleted
-      :event/version 1
-      :congregation/id (:congregation/id command)
-      :user/id (:user/id command)
-      :gis-user/username username}]))
+  ;; TODO: check permissions (system)
+  (let [cong-id (:congregation/id command)
+        user-id (:user/id command)]
+    (check-congregation-exists state cong-id)
+    (check-user-exists state user-id)
+    (when-some [username (get-in state (username-path command))]
+      [{:event/type :congregation.event/gis-user-deleted
+        :event/version 1
+        :congregation/id cong-id
+        :user/id user-id
+        :gis-user/username username}])))
 
 (defn handle-command [command events injections]
   (let [state (reduce write-model nil events)]
