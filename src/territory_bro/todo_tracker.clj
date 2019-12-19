@@ -5,9 +5,9 @@
 (ns territory-bro.todo-tracker
   (:require [territory-bro.util :refer [conj-set]]))
 
-(defn inspect [m k]
-  (let [{::keys [state desired actual]
-         :or {desired :absent, actual :absent}} (get-in m [::todo k])]
+(defn inspect [m keyspace k]
+  (let [{:keys [state desired actual]
+         :or {desired :absent, actual :absent}} (get-in m [keyspace ::presence k])]
     {:state state
      :desired desired
      :actual actual
@@ -16,37 +16,37 @@
                [:absent :present] :delete
                :ignore)}))
 
-(defn creatable [m]
-  (->> (::creatable m)
-       (map #(get-in m [::todo % ::state]))))
+(defn creatable [m keyspace]
+  (->> (get-in m [keyspace ::creatable])
+       (map #(get-in m [keyspace ::presence % :state]))))
 
-(defn deletable [m]
-  (->> (::deletable m)
-       (map #(get-in m [::todo % ::state]))))
+(defn deletable [m keyspace]
+  (->> (get-in m [keyspace ::deletable])
+       (map #(get-in m [keyspace ::presence % :state]))))
 
 
-(defn merge-state [m k new-state]
-  (update-in m [::todo k ::state] merge new-state))
+(defn merge-state [m keyspace k new-state]
+  (update-in m [keyspace ::presence k :state] merge new-state))
 
-(defn- update-indexes [m k]
-  (let [action (:action (inspect m k))]
+(defn- update-indexes [m keyspace k]
+  (let [action (:action (inspect m keyspace k))]
     (-> m
-        (update ::creatable (if (= :create action) conj-set disj) k)
-        (update ::deletable (if (= :delete action) conj-set disj) k))))
+        (update-in [keyspace ::creatable] (if (= :create action) conj-set disj) k)
+        (update-in [keyspace ::deletable] (if (= :delete action) conj-set disj) k))))
 
 (defn- assert-presence [presence]
   (assert (or (= :present presence)
               (= :absent presence))
           {:presence presence}))
 
-(defn set-desired [m k presence]
+(defn set-desired [m keyspace k presence]
   (assert-presence presence)
   (-> m
-      (assoc-in [::todo k ::desired] presence)
-      (update-indexes k)))
+      (assoc-in [keyspace ::presence k :desired] presence)
+      (update-indexes keyspace k)))
 
-(defn set-actual [m k presence]
+(defn set-actual [m keyspace k presence]
   (assert-presence presence)
   (-> m
-      (assoc-in [::todo k ::actual] presence)
-      (update-indexes k)))
+      (assoc-in [keyspace ::presence k :actual] presence)
+      (update-indexes keyspace k)))

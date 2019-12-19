@@ -17,26 +17,26 @@
   (if (= :gis-access (:permission/id event))
     (let [k (gis-user-key event)]
       (-> state
-          (todo-tracker/merge-state k k)
-          (todo-tracker/set-desired k :present)))
+          (todo-tracker/merge-state ::gis-user k k)
+          (todo-tracker/set-desired ::gis-user k :present)))
     state))
 
 (defmethod projection :congregation.event/permission-revoked
   [state event]
   (if (= :gis-access (:permission/id event))
     (-> state
-        (todo-tracker/set-desired (gis-user-key event) :absent))
+        (todo-tracker/set-desired ::gis-user (gis-user-key event) :absent))
     state))
 
 (defmethod projection :congregation.event/gis-user-created
   [state event]
   (-> state
-      (todo-tracker/set-actual (gis-user-key event) :present)))
+      (todo-tracker/set-actual ::gis-user (gis-user-key event) :present)))
 
 (defmethod projection :congregation.event/gis-user-deleted
   [state event]
   (-> state
-      (todo-tracker/set-actual (gis-user-key event) :absent)))
+      (todo-tracker/set-actual ::gis-user (gis-user-key event) :absent)))
 
 
 (def ^:private system (str (ns-name *ns*)))
@@ -46,13 +46,13 @@
 
 (defn generate-commands [state {:keys [now]}]
   (concat
-   (for [gis-user (sort-users (todo-tracker/creatable state))]
+   (for [gis-user (sort-users (todo-tracker/creatable state ::gis-user))]
      {:command/type :gis-user.command/create-gis-user
       :command/time (now)
       :command/system system
       :congregation/id (:congregation/id gis-user)
       :user/id (:user/id gis-user)})
-   (for [gis-user (sort-users (todo-tracker/deletable state))]
+   (for [gis-user (sort-users (todo-tracker/deletable state ::gis-user))]
      {:command/type :gis-user.command/delete-gis-user
       :command/time (now)
       :command/system system
