@@ -36,8 +36,9 @@
       (.interrupt (Thread/currentThread)))
     (catch Throwable e
       (let [t (Thread/currentThread)]
-        (when-let [handler (.getUncaughtExceptionHandler t)]
-          (.uncaughtException handler t e))))))
+        (if-let [handler (.getUncaughtExceptionHandler t)]
+          (.uncaughtException handler t e)
+          (.printStackTrace e))))))
 
 (defrecord AsyncPoller [^Queue available-tasks
                         ^ExecutorService executor]
