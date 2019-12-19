@@ -2,7 +2,7 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.todo-tracker
+(ns territory-bro.presence-tracker
   (:require [territory-bro.util :refer [conj-set]]))
 
 (defn inspect [m keyspace k]

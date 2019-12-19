@@ -8,7 +8,7 @@
             [territory-bro.db :as db]
             [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
-            [territory-bro.todo-tracker :as todo-tracker]
+            [territory-bro.presence-tracker :as presence-tracker]
             [territory-bro.util :refer [conj-set]]))
 
 (defmulti projection (fn [_state event] (:event/type event)))
@@ -20,14 +20,14 @@
         cong (select-keys event [:congregation/id
                                  :congregation/schema-name])]
     (-> state
-        (todo-tracker/merge-state ::tracked-congregations cong-id cong)
+        (presence-tracker/merge-state ::tracked-congregations cong-id cong)
         (assoc-in [::congregations cong-id] cong) ;; TODO: use this instead of merge-state?
-        (todo-tracker/set-desired ::tracked-congregations cong-id :present))))
+        (presence-tracker/set-desired ::tracked-congregations cong-id :present))))
 
 (defmethod projection :db-admin.event/gis-schema-is-present
   [state event]
   (-> state
-      (todo-tracker/set-actual ::tracked-congregations (:congregation/id event) :present)))
+      (presence-tracker/set-actual ::tracked-congregations (:congregation/id event) :present)))
 
 (defn- gis-user-specs [state event]
   (let [cong-id (:congregation/id event)
@@ -46,39 +46,39 @@
   ;; TODO: use :gis-user/username as the key, in case the username is changed?
   (let [gis-user-key (select-keys event [:congregation/id :user/id])]
     (-> state
-        (todo-tracker/merge-state ::tracked-gis-users gis-user-key (gis-user-specs state event))
-        (todo-tracker/set-desired ::tracked-gis-users gis-user-key :present)
+        (presence-tracker/merge-state ::tracked-gis-users gis-user-key (gis-user-specs state event))
+        (presence-tracker/set-desired ::tracked-gis-users gis-user-key :present)
         ;; force recreating the user to apply a password change
-        (todo-tracker/set-actual ::tracked-gis-users gis-user-key :absent))))
+        (presence-tracker/set-actual ::tracked-gis-users gis-user-key :absent))))
 
 (defmethod projection :congregation.event/gis-user-deleted
   [state event]
   (-> state
-      (todo-tracker/set-desired ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :absent)))
+      (presence-tracker/set-desired ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :absent)))
 
 (defmethod projection :db-admin.event/gis-user-is-present
   [state event]
   (-> state
-      (todo-tracker/set-actual ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :present)))
+      (presence-tracker/set-actual ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :present)))
 
 (defmethod projection :db-admin.event/gis-user-is-absent
   [state event]
   (-> state
-      (todo-tracker/set-actual ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :absent)))
+      (presence-tracker/set-actual ::tracked-gis-users (select-keys event [:congregation/id :user/id]) :absent)))
 
 
 (def ^:private system (str (ns-name *ns*)))
 
 (defn generate-commands [state {:keys [now]}]
   (concat
-   (for [tenant (todo-tracker/creatable state ::tracked-congregations)]
+   (for [tenant (presence-tracker/creatable state ::tracked-congregations)]
      {:command/type :db-admin.command/migrate-tenant-schema
       :command/time (now)
       :command/system system
       :congregation/id (:congregation/id tenant)
       :congregation/schema-name (:congregation/schema-name tenant)})
 
-   (for [gis-user (todo-tracker/creatable state ::tracked-gis-users)]
+   (for [gis-user (presence-tracker/creatable state ::tracked-gis-users)]
      {:command/type :db-admin.command/ensure-gis-user-present
       :command/time (now)
       :command/system system
@@ -88,7 +88,7 @@
       :congregation/id (:congregation/id gis-user)
       :congregation/schema-name (:congregation/schema-name gis-user)})
 
-   (for [gis-user (todo-tracker/deletable state ::tracked-gis-users)]
+   (for [gis-user (presence-tracker/deletable state ::tracked-gis-users)]
      {:command/type :db-admin.command/ensure-gis-user-absent
       :command/time (now)
       :command/system system
