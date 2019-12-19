@@ -8,6 +8,7 @@
             [territory-bro.db :as db]
             [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
+            [territory-bro.todo-tracker :as todo-tracker]
             [territory-bro.util :refer [conj-set]]))
 
 (defmulti projection (fn [_state event] (:event/type event)))
@@ -15,16 +16,18 @@
 
 (defmethod projection :congregation.event/congregation-created
   [state event]
-  (let [cong (select-keys event [:congregation/id
+  (let [cong-id (:congregation/id event)
+        cong (select-keys event [:congregation/id
                                  :congregation/schema-name])]
     (-> state
-        (assoc-in [::congregations (:congregation/id event)] cong)
-        (update ::pending-schemas conj-set cong))))
+        (todo-tracker/merge-state ::gis-schema cong-id cong)
+        (assoc-in [::congregations cong-id] cong) ;; TODO: use this instead of merge-state?
+        (todo-tracker/set-desired ::gis-schema cong-id :present))))
 
 (defmethod projection :db-admin.event/gis-schema-is-present
   [state event]
-  (update state ::pending-schemas disj (select-keys event [:congregation/id
-                                                           :congregation/schema-name])))
+  (-> state
+      (todo-tracker/set-actual ::gis-schema (:congregation/id event) :present)))
 
 (defn- add-pending-gis-user [state event desired-state]
   (let [cong-id (:congregation/id event)
@@ -68,7 +71,7 @@
 
 (defn generate-commands [state {:keys [now]}]
   (concat
-   (for [tenant (::pending-schemas state)]
+   (for [tenant (todo-tracker/creatable state ::gis-schema)]
      {:command/type :db-admin.command/migrate-tenant-schema
       :command/time (now)
       :command/system system
