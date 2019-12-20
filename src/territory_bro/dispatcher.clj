@@ -15,8 +15,7 @@
   (let [stream-id (:congregation/id command)
         old-events (event-store/read-stream conn stream-id)
         new-events (congregation/handle-command command old-events {:state state})]
-    (event-store/save! conn stream-id (count old-events) new-events)
-    nil)) ; TODO: return produced events?
+    (event-store/save! conn stream-id (count old-events) new-events)))
 
 (defn- gis-user-command! [conn command state]
   ;; TODO: the GIS user events would belong better to a user-specific stream
@@ -28,10 +27,7 @@
                     :db-user-exists? #(gis-user/db-user-exists? conn %)}
         old-events (event-store/read-stream conn stream-id)
         new-events (gis-user/handle-command command old-events injections)]
-    (event-store/save! conn stream-id (count old-events) new-events)
-    ;; XXX: refresh! should recur also when persisted events are produced, so maybe return them from the command handler?
-    [{:event/type :fake-event-to-trigger-refresh
-      :event/transient? true}]))
+    (event-store/save! conn stream-id (count old-events) new-events)))
 
 (defn- db-admin-command! [conn command state]
   (let [injections {:now (:now config/env)

@@ -58,12 +58,12 @@
   (let [commands (concat
                   (gis-user-process/generate-commands state {:now (:now config/env)})
                   (db-admin/generate-commands state {:now (:now config/env)}))
-        transient-events (->> commands
-                              (mapcat (fn [command]
-                                        (db/with-db [conn {}]
-                                          (dispatcher/command! conn state command))))
-                              (doall))]
-    (seq transient-events)))
+        new-events (->> commands
+                        (mapcat (fn [command]
+                                  (db/with-db [conn {}]
+                                    (dispatcher/command! conn state command))))
+                        (doall))]
+    (seq new-events)))
 
 (defn refresh! []
   (log/info "Refreshing projections")
@@ -77,10 +77,10 @@
       (log/info "Updated from revision" (:event/global-revision (:last-event old))
                 "to" (:event/global-revision (:last-event new)))))
 
-  (when-some [transient-events (run-process-managers! (cached-state))]
-    ;; TODO: filter events to make sure that they all are transient
-    (swap! *cache apply-events transient-events)
-    (log/info "Updated with" (count transient-events) "transient events")
+  (when-some [new-events (run-process-managers! (cached-state))]
+    (when-some [transient-events (seq (filter :event/transient? new-events))]
+      (swap! *cache apply-events transient-events)
+      (log/info "Updated with" (count transient-events) "transient events"))
     (recur)))
 
 (mount/defstate refresher
