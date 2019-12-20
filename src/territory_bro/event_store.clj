@@ -23,9 +23,9 @@
 (defn- parse-db-row [row]
   (-> (:data row)
       *json->event*
-      (assoc :event/stream-id (:stream_id row)
-             :event/stream-revision (:stream_revision row)
-             :event/global-revision (:global_revision row))
+      (assoc :event/stream-id (:stream_id row))
+      (assoc :event/stream-revision (:stream_revision row))
+      (assoc :event/global-revision (:global_revision row))
       (sorted-keys)))
 
 (defn read-stream
@@ -55,9 +55,9 @@
                                                    :stream_revision next-revision
                                                    :data (-> event *event->json*)})]
             (-> event
-                (assoc :event/stream-id stream-id
-                       :event/stream-revision (:stream_revision result)
-                       :event/global-revision (:global_revision result))
+                (assoc :event/stream-id stream-id)
+                (assoc :event/stream-revision (:stream_revision result))
+                (assoc :event/global-revision (:global_revision result))
                 (sorted-keys)))))
        (doall)))
 
