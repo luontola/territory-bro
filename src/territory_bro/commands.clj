@@ -6,7 +6,8 @@
   (:require [schema-refined.core :as refined]
             [schema.core :as s]
             [schema.utils]
-            [territory-bro.events :as events])
+            [territory-bro.events :as events]
+            [territory-bro.permissions :as permissions])
   (:import (java.time Instant)
            (java.util UUID)))
 
@@ -110,3 +111,12 @@
           {:error [:unknown-command-type (:command/type command)]
            :command command})
   (s/validate Command command))
+
+(defn check-permit [state {user :command/user, system :command/system, :as command} permit]
+  (cond
+    (= (nil? user)
+       (nil? system))
+    (throw (IllegalArgumentException.
+            (str "Either :command/user or :command/system required, but was: " (pr-str command))))
+    (some? user) (permissions/check state user permit)
+    (some? system) nil)) ; allow everything for system

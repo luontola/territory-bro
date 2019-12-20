@@ -169,9 +169,7 @@
         congregation (reduce write-model nil events)
         injections (merge {:now (:now config/env)
                            :check-permit (fn [permit]
-                                           (permissions/check (:state injections)
-                                                              (:command/user command)
-                                                              permit))
+                                           (commands/check-permit (:state injections) command permit))
                            :user-exists? (fn [user-id]
                                            (db/with-db [conn {:read-only? true}]
                                              (some? (user/get-by-id conn user-id))))}

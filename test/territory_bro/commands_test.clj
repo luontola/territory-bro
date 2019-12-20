@@ -6,10 +6,12 @@
   (:require [clojure.test :refer :all]
             [schema.core :as s]
             [territory-bro.commands :as commands]
+            [territory-bro.permissions :as permissions]
             [territory-bro.testutil :refer [re-equals re-contains]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
-           (java.util UUID)))
+           (java.util UUID)
+           (territory_bro NoPermitException)))
 
 (def valid-command {:command/type :congregation.command/rename-congregation
                     :command/time (Instant/now)
@@ -47,3 +49,27 @@
   (testing "unknown command type"
     (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown command type :foo")
                           (commands/validate-command unknown-command)))))
+
+(deftest check-permit-test
+  (let [user-id (UUID. 0 1)
+        state (permissions/grant {} user-id [:foo])]
+
+    (testing "user has permission"
+      (is (nil? (commands/check-permit state {:command/user user-id} [:foo]))))
+
+    (testing "user doesn't have permission"
+      (is (thrown? NoPermitException
+                   (commands/check-permit state {:command/user user-id} [:bar]))))
+
+    (testing "system always has permission"
+      (is (nil? (commands/check-permit state {:command/system "sys"} [:foo]))))
+
+    (testing "error: user and system missing"
+      (is (thrown-with-msg?
+           IllegalArgumentException (re-equals "Either :command/user or :command/system required, but was: {:foo 123}")
+           (commands/check-permit state {:foo 123} [:bar]))))
+
+    (testing "error: both user and system present"
+      (is (thrown-with-msg?
+           IllegalArgumentException (re-equals "Either :command/user or :command/system required, but was: {:command/user #uuid \"00000000-0000-0000-0000-000000000001\", :command/system \"sys\"}")
+           (commands/check-permit state {:command/user user-id, :command/system "sys"} [:bar]))))))
