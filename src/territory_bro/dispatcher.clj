@@ -9,22 +9,29 @@
             [territory-bro.db :as db]
             [territory-bro.db-admin :as db-admin]
             [territory-bro.event-store :as event-store]
-            [territory-bro.gis-user :as gis-user]))
+            [territory-bro.gis-user :as gis-user]
+            [territory-bro.user :as user]))
 
 (defn- congregation-command! [conn command state]
-  (let [stream-id (:congregation/id command)
+  (let [injections {:now (:now config/env)
+                    :check-permit (fn [permit]
+                                    (commands/check-permit state command permit))
+                    :user-exists? (fn [user-id]
+                                    (db/with-db [conn {:read-only? true}]
+                                      (some? (user/get-by-id conn user-id))))}
+        stream-id (:congregation/id command)
         old-events (event-store/read-stream conn stream-id)
-        new-events (congregation/handle-command command old-events {:state state})]
+        new-events (congregation/handle-command command old-events injections)]
     (event-store/save! conn stream-id (count old-events) new-events)))
 
 (defn- gis-user-command! [conn command state]
-  ;; TODO: the GIS user events would belong better to a user-specific stream
-  (let [stream-id (:congregation/id command)
-        injections {:now (:now config/env)
+  (let [injections {:now (:now config/env)
                     :check-permit (fn [permit]
                                     (commands/check-permit state command permit))
                     :generate-password #(gis-user/generate-password 50)
                     :db-user-exists? #(gis-user/db-user-exists? conn %)}
+        ;; TODO: the GIS user events would belong better to a user-specific stream
+        stream-id (:congregation/id command)
         old-events (event-store/read-stream conn stream-id)
         new-events (gis-user/handle-command command old-events injections)]
     (event-store/save! conn stream-id (count old-events) new-events)))

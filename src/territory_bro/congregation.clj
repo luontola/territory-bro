@@ -6,13 +6,11 @@
   (:require [clojure.set :as set]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [territory-bro.commands :as commands]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
             [territory-bro.events :as events]
             [territory-bro.permissions :as permissions]
-            [territory-bro.user :as user]
             [territory-bro.util :refer [conj-set]])
   (:import (java.util UUID)
            (territory_bro ValidationException)))
@@ -165,14 +163,7 @@
       :congregation/name (:congregation/name command)}]))
 
 (defn handle-command [command events injections]
-  (let [congregation (reduce write-model nil events)
-        injections (merge {:now (:now config/env)
-                           :check-permit (fn [permit]
-                                           (commands/check-permit (:state injections) command permit))
-                           :user-exists? (fn [user-id]
-                                           (db/with-db [conn {:read-only? true}]
-                                             (some? (user/get-by-id conn user-id))))}
-                          injections)]
+  (let [congregation (reduce write-model nil events)]
     (->> (command-handler command congregation injections)
          (events/enrich-events command injections))))
 
