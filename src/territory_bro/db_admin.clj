@@ -113,9 +113,9 @@
   (when-not (contains? (::users state) user-id)
     (throw (ValidationException. [[:no-such-user user-id]]))))
 
-(defmethod command-handler :db-admin.command/migrate-tenant-schema [command state {:keys [migrate-tenant-schema!]}]
-  ;; TODO: check permissions (system)
+(defmethod command-handler :db-admin.command/migrate-tenant-schema [command state {:keys [migrate-tenant-schema! check-permit]}]
   (let [cong-id (:congregation/id command)]
+    (check-permit [:migrate-tenant-schema cong-id])
     (check-congregation-exists state cong-id)
     (migrate-tenant-schema! (:congregation/schema-name command))
     [{:event/type :db-admin.event/gis-schema-is-present
@@ -124,10 +124,10 @@
       :congregation/id cong-id
       :congregation/schema-name (:congregation/schema-name command)}]))
 
-(defmethod command-handler :db-admin.command/ensure-gis-user-present [command state {:keys [ensure-gis-user-present!]}]
-  ;; TODO: check permissions (system)
+(defmethod command-handler :db-admin.command/ensure-gis-user-present [command state {:keys [ensure-gis-user-present! check-permit]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
+    (check-permit [:ensure-gis-user-present cong-id user-id])
     (check-congregation-exists state cong-id)
     (check-user-exists state user-id)
     (ensure-gis-user-present! {:username (:gis-user/username command)
@@ -140,10 +140,10 @@
       :user/id user-id
       :gis-user/username (:gis-user/username command)}]))
 
-(defmethod command-handler :db-admin.command/ensure-gis-user-absent [command state {:keys [ensure-gis-user-absent!]}]
-  ;; TODO: check permissions (system)
+(defmethod command-handler :db-admin.command/ensure-gis-user-absent [command state {:keys [ensure-gis-user-absent! check-permit]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
+    (check-permit [:ensure-gis-user-absent cong-id user-id])
     (check-congregation-exists state cong-id)
     (check-user-exists state user-id)
     (ensure-gis-user-absent! {:username (:gis-user/username command)
@@ -155,19 +155,19 @@
       :user/id (:user/id command)
       :gis-user/username (:gis-user/username command)}]))
 
-(def ^:private default-injections
-  {:now #((:now config/env))
-   :migrate-tenant-schema! db/migrate-tenant-schema!
-   :ensure-gis-user-present! (fn [args]
-                               (db/with-db [conn {}]
-                                 (gis-user/ensure-present! conn args)))
-   :ensure-gis-user-absent! (fn [args]
-                              (db/with-db [conn {}]
-                                (gis-user/ensure-absent! conn args)))})
-
 (defn handle-command!
   ([command state]
-   (handle-command! command state default-injections))
+   (let [injections {:now (:now config/env)
+                     :check-permit (fn [permit]
+                                     (commands/check-permit state command permit))
+                     :migrate-tenant-schema! db/migrate-tenant-schema!
+                     :ensure-gis-user-present! (fn [args]
+                                                 (db/with-db [conn {}]
+                                                   (gis-user/ensure-present! conn args)))
+                     :ensure-gis-user-absent! (fn [args]
+                                                (db/with-db [conn {}]
+                                                  (gis-user/ensure-absent! conn args)))}]
+     (handle-command! command state injections)))
   ([command state injections]
    (commands/validate-command command) ; TODO: validate all commands centrally
    (->> (command-handler command state injections)

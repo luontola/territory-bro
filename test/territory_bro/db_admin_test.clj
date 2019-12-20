@@ -10,7 +10,7 @@
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)
-           (territory_bro ValidationException)))
+           (territory_bro ValidationException NoPermitException)))
 
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
@@ -125,6 +125,7 @@
   (let [spy (spy/spy)
         state (apply-events [congregation-created])
         injections {:now (constantly test-time)
+                    :check-permit (fn [_permit])
                     :migrate-tenant-schema! (spy/fn spy :migrate-tenant-schema!)}
         command {:command/type :db-admin.command/migrate-tenant-schema
                  :command/time test-time
@@ -140,17 +141,26 @@
       (is (= [[:migrate-tenant-schema! "cong1_schema"]]
              (spy/read! spy))))
 
-    (testing "invalid congregation ID"
+    (testing "congregation doesn't exist"
       (is (thrown-with-msg?
            ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
            (db-admin/handle-command! (assoc command :congregation/id (UUID. 0 0x666))
                                      state
-                                     injections))))))
+                                     injections))))
+
+    (testing "checks permits"
+      (let [injections (assoc injections
+                              :check-permit (fn [permit]
+                                              (is (= [:migrate-tenant-schema cong-id] permit))
+                                              (throw (NoPermitException. nil nil))))]
+        (is (thrown? NoPermitException
+                     (db-admin/handle-command! command state injections)))))))
 
 (deftest ensure-gis-user-present-test
   (let [spy (spy/spy)
         state (apply-events [congregation-created gis-user-created])
         injections {:now (constantly test-time)
+                    :check-permit (fn [_permit])
                     :ensure-gis-user-present! (spy/fn spy :ensure-gis-user-present!)}
         command {:command/type :db-admin.command/ensure-gis-user-present
                  :command/time test-time
@@ -171,24 +181,33 @@
                                           :schema "cong1_schema"}]]
              (spy/read! spy))))
 
-    (testing "invalid congregation ID"
+    (testing "congregation doesn't exist"
       (is (thrown-with-msg?
            ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
            (db-admin/handle-command! (assoc command :congregation/id (UUID. 0 0x666))
                                      state
                                      injections))))
 
-    (testing "invalid user ID"
+    (testing "user doesn't exist"
       (is (thrown-with-msg?
            ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
            (db-admin/handle-command! (assoc command :user/id (UUID. 0 0x666))
                                      state
-                                     injections))))))
+                                     injections))))
+
+    (testing "checks permits"
+      (let [injections (assoc injections
+                              :check-permit (fn [permit]
+                                              (is (= [:ensure-gis-user-present cong-id user-id] permit))
+                                              (throw (NoPermitException. nil nil))))]
+        (is (thrown? NoPermitException
+                     (db-admin/handle-command! command state injections)))))))
 
 (deftest ensure-gis-user-absent-test
   (let [spy (spy/spy)
         state (apply-events [congregation-created gis-user-created])
         injections {:now (constantly test-time)
+                    :check-permit (fn [_permit])
                     :ensure-gis-user-absent! (spy/fn spy :ensure-gis-user-absent!)}
         command {:command/type :db-admin.command/ensure-gis-user-absent
                  :command/time test-time
@@ -207,19 +226,27 @@
                                          :schema "cong1_schema"}]]
              (spy/read! spy))))
 
-    (testing "invalid congregation ID"
+    (testing "congregation doesn't exist"
       (is (thrown-with-msg?
            ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
            (db-admin/handle-command! (assoc command :congregation/id (UUID. 0 0x666))
                                      state
                                      injections))))
 
-    (testing "invalid user ID"
+    (testing "user doesn't exist"
       (is (thrown-with-msg?
            ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
            (db-admin/handle-command! (assoc command :user/id (UUID. 0 0x666))
                                      state
-                                     injections))))))
+                                     injections))))
+
+    (testing "checks permits"
+      (let [injections (assoc injections
+                              :check-permit (fn [permit]
+                                              (is (= [:ensure-gis-user-absent cong-id user-id] permit))
+                                              (throw (NoPermitException. nil nil))))]
+        (is (thrown? NoPermitException
+                     (db-admin/handle-command! command state injections)))))))
 
 (deftest handle-command-test
   (testing "invalid command"
