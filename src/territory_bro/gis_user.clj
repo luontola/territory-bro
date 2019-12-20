@@ -174,10 +174,10 @@
 
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
-(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists?]}]
-  ;; TODO: check permissions (system)
+(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists? check-permit]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
+    (check-permit [:create-gis-user cong-id user-id])
     (check-congregation-exists state cong-id)
     (check-user-exists state user-id)
     (when (nil? (get-in state (username-path command)))
@@ -191,10 +191,10 @@
                                (unique-username db-user-exists?))
         :gis-user/password (generate-password)}])))
 
-(defmethod command-handler :gis-user.command/delete-gis-user [command state _injections]
-  ;; TODO: check permissions (system)
+(defmethod command-handler :gis-user.command/delete-gis-user [command state {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
+    (check-permit [:delete-gis-user cong-id user-id])
     (check-congregation-exists state cong-id)
     (check-user-exists state user-id)
     (when-some [username (get-in state (username-path command))]
@@ -210,11 +210,13 @@
          (events/enrich-events command injections))))
 
 (declare db-user-exists?)
-(defn handle-command! [conn command]
+(defn handle-command! [conn command state]
   ;; TODO: the GIS user events would belong better to a user-specific stream
   (commands/validate-command command) ; TODO: validate all commands centrally
   (let [stream-id (:congregation/id command)
         injections {:now (:now config/env)
+                    :check-permit (fn [permit]
+                                    (commands/check-permit state command permit))
                     :generate-password #(generate-password 50)
                     :db-user-exists? #(db-user-exists? conn %)}
         old-events (event-store/read-stream conn stream-id)
