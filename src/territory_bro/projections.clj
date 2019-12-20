@@ -9,6 +9,7 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.db-admin :as db-admin]
+            [territory-bro.dispatcher :as dispatcher]
             [territory-bro.event-store :as event-store]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.gis-user-process :as gis-user-process]
@@ -53,22 +54,14 @@
 
 ;;; Refreshing
 
-(defn- dispatch-command! [command state] ; TODO: reuse also in the API routes?
-  (case (namespace (:command/type command))
-    "gis-user.command" (db/with-db [conn {}]
-                         (gis-user/handle-command! conn command state)
-                         ;; XXX: refresh! should recur also when persisted events are produced, so maybe return them from the command handler?
-                         [{:event/type :fake-event-to-trigger-refresh
-                           :event/transient? true}])
-    "db-admin.command" (db-admin/handle-command! command state)
-    (throw (IllegalArgumentException. (str "Unsupported command: " (pr-str command))))))
-
 (defn- run-process-managers! [state]
   (let [commands (concat
                   (gis-user-process/generate-commands state {:now (:now config/env)})
                   (db-admin/generate-commands state {:now (:now config/env)}))
         transient-events (->> commands
-                              (mapcat #(dispatch-command! % state))
+                              (mapcat (fn [command]
+                                        (db/with-db [conn {}]
+                                          (dispatcher/command! conn state command))))
                               (doall))]
     (seq transient-events)))
 
@@ -85,6 +78,7 @@
                 "to" (:event/global-revision (:last-event new)))))
 
   (when-some [transient-events (run-process-managers! (cached-state))]
+    ;; TODO: filter events to make sure that they all are transient
     (swap! *cache apply-events transient-events)
     (log/info "Updated with" (count transient-events) "transient events")
     (recur)))

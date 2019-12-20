@@ -15,6 +15,7 @@
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
+            [territory-bro.dispatcher :as dispatcher]
             [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
@@ -180,7 +181,7 @@
                        :command/time ((:now config/env))
                        :command/user (current-user-id))]
     (try
-      (congregation/command! conn state command)
+      (dispatcher/command! conn state command)
       (ok {:message "OK"})
       (catch ValidationException e
         (log/warn e "Invalid command:" command)

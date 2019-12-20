@@ -177,7 +177,7 @@
     (->> (command-handler command congregation injections)
          (events/enrich-events command injections))))
 
-(defn command! [conn state command]
+(defn command! [conn command state]
   (let [stream-id (:congregation/id command)
         old-events (event-store/read-stream conn stream-id)
         new-events (handle-command command old-events {:state state})]
