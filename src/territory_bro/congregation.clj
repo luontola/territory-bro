@@ -165,8 +165,7 @@
       :congregation/name (:congregation/name command)}]))
 
 (defn handle-command [command events injections]
-  (let [command (commands/validate-command command) ; TODO: validate all commands centrally
-        congregation (reduce write-model nil events)
+  (let [congregation (reduce write-model nil events)
         injections (merge {:now (:now config/env)
                            :check-permit (fn [permit]
                                            (commands/check-permit (:state injections) command permit))

@@ -212,7 +212,6 @@
 (declare db-user-exists?)
 (defn handle-command! [conn command state]
   ;; TODO: the GIS user events would belong better to a user-specific stream
-  (commands/validate-command command) ; TODO: validate all commands centrally
   (let [stream-id (:congregation/id command)
         injections {:now (:now config/env)
                     :check-permit (fn [permit]

@@ -247,10 +247,3 @@
                                               (throw (NoPermitException. nil nil))))]
         (is (thrown? NoPermitException
                      (db-admin/handle-command! command state injections)))))))
-
-(deftest handle-command-test
-  (testing "invalid command"
-    (is (thrown-with-msg? ExceptionInfo #"Value does not match schema"
-                          (db-admin/handle-command! {:command/type :db-admin.command/ensure-gis-user-absent}
-                                                    nil
-                                                    nil)))))
