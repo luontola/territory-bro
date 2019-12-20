@@ -168,7 +168,7 @@
                           (events/event->json invalid-event))))
 
   (testing "json->event validates events"
-    (is (thrown-with-msg? ExceptionInfo #"Event schema validation failed"
+    (is (thrown-with-msg? ExceptionInfo (re-contains "Value cannot be coerced to match schema")
                           (events/json->event "{}"))))
 
   (testing "json data format"

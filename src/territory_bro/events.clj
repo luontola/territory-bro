@@ -205,27 +205,19 @@
       (coerce/string-coercion-matcher schema)))
 
 (def ^:private coerce-event-commons
-  (coerce/coercer (tools/open-schema EventBase) coercion-matcher))
+  (coerce/coercer! (tools/open-schema EventBase) coercion-matcher))
 
 (def ^:private coerce-event-specifics
-  (coerce/coercer Event coercion-matcher))
+  (coerce/coercer! Event coercion-matcher))
 
 (defn- coerce-event [event]
   ;; must coerce the common fields first, so that Event can
   ;; choose the right event schema based on the event type
-  (let [result (coerce-event-commons event)]
-    (if (schema.utils/error? result)
-      result
-      (coerce-event-specifics result))))
+  (coerce-event-specifics (coerce-event-commons event)))
 
 (defn json->event [json]
   (when json
-    (let [result (coerce-event (json/parse-string json))]
-      (when (schema.utils/error? result)
-        (throw (ex-info "Event schema validation failed"
-                        {:json json
-                         :error result})))
-      result)))
+    (coerce-event (json/parse-string json))))
 
 (defn event->json [event]
   (json/generate-string (validate-event event)))

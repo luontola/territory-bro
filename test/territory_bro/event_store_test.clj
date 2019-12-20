@@ -187,9 +187,9 @@
         (event-store/save! conn stream-id 0 [{:event/type :dummy-event}]))
 
       (testing "validates events on reading a stream"
-        (is (thrown-with-msg? ExceptionInfo (re-equals "Event schema validation failed")
+        (is (thrown-with-msg? ExceptionInfo (re-contains "Value cannot be coerced to match schema")
                               (event-store/read-stream conn stream-id))))
 
       (testing "validates events on reading all events"
-        (is (thrown-with-msg? ExceptionInfo (re-equals "Event schema validation failed")
+        (is (thrown-with-msg? ExceptionInfo (re-contains "Value cannot be coerced to match schema")
                               (event-store/read-all-events conn stream-id)))))))
