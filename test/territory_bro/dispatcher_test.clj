@@ -4,12 +4,11 @@
 
 (ns territory-bro.dispatcher-test
   (:require [clojure.test :refer :all]
-            [territory-bro.congregation :as congregation]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.testutil :refer [re-contains]])
-  (:import (java.util UUID)
+  (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
-           (clojure.lang ExceptionInfo)))
+           (java.util UUID)))
 
 (deftest dispatch-command-test
   (testing "dispatches commands"
@@ -21,9 +20,11 @@
                    :congregation/id (UUID. 0 2)
                    :congregation/name ""}
           *spy (atom nil)]
-      (with-redefs [congregation/command! (fn [& args]
-                                            (reset! *spy args))]
-        (is (nil? (dispatcher/command! conn state command))))
+      (with-redefs [dispatcher/congregation-command! (fn [& args]
+                                                       (reset! *spy args)
+                                                       :dummy-return-value)]
+        (is (= :dummy-return-value
+               (dispatcher/command! conn state command))))
       (is (= [conn command state] @*spy))))
 
   (testing "validates commands"

@@ -209,20 +209,6 @@
     (->> (command-handler command state injections)
          (events/enrich-events command injections))))
 
-(declare db-user-exists?)
-(defn handle-command! [conn command state]
-  ;; TODO: the GIS user events would belong better to a user-specific stream
-  (let [stream-id (:congregation/id command)
-        injections {:now (:now config/env)
-                    :check-permit (fn [permit]
-                                    (commands/check-permit state command permit))
-                    :generate-password #(generate-password 50)
-                    :db-user-exists? #(db-user-exists? conn %)}
-        old-events (event-store/read-stream conn stream-id)
-        new-events (handle-command command old-events injections)]
-    (event-store/save! conn stream-id (count old-events) new-events)
-    nil))
-
 
 ;;; Database users
 

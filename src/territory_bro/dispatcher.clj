@@ -4,20 +4,50 @@
 
 (ns territory-bro.dispatcher
   (:require [territory-bro.commands :as commands]
+            [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
+            [territory-bro.db :as db]
             [territory-bro.db-admin :as db-admin]
+            [territory-bro.event-store :as event-store]
             [territory-bro.gis-user :as gis-user]))
+
+(defn- congregation-command! [conn command state]
+  (let [stream-id (:congregation/id command)
+        old-events (event-store/read-stream conn stream-id)
+        new-events (congregation/handle-command command old-events {:state state})]
+    (event-store/save! conn stream-id (count old-events) new-events)
+    nil)) ; TODO: return produced events?
+
+(defn- gis-user-command! [conn command state]
+  ;; TODO: the GIS user events would belong better to a user-specific stream
+  (let [stream-id (:congregation/id command)
+        injections {:now (:now config/env)
+                    :check-permit (fn [permit]
+                                    (commands/check-permit state command permit))
+                    :generate-password #(gis-user/generate-password 50)
+                    :db-user-exists? #(gis-user/db-user-exists? conn %)}
+        old-events (event-store/read-stream conn stream-id)
+        new-events (gis-user/handle-command command old-events injections)]
+    (event-store/save! conn stream-id (count old-events) new-events)
+    ;; XXX: refresh! should recur also when persisted events are produced, so maybe return them from the command handler?
+    [{:event/type :fake-event-to-trigger-refresh
+      :event/transient? true}]))
+
+(defn- db-admin-command! [conn command state]
+  (let [injections {:now (:now config/env)
+                    :check-permit (fn [permit]
+                                    (commands/check-permit state command permit))
+                    :migrate-tenant-schema! db/migrate-tenant-schema!
+                    :ensure-gis-user-present! (fn [args]
+                                                (gis-user/ensure-present! conn args))
+                    :ensure-gis-user-absent! (fn [args]
+                                               (gis-user/ensure-absent! conn args))}]
+    (db-admin/handle-command command state injections)))
 
 (defn command! [conn state command]
   (let [command (commands/validate-command command)]
     (case (namespace (:command/type command))
-      "congregation.command" (do
-                               (congregation/command! conn command state)
-                               nil) ; TODO: return produced events?
-      "gis-user.command" (do
-                           (gis-user/handle-command! conn command state)
-                           ;; XXX: refresh! should recur also when persisted events are produced, so maybe return them from the command handler?
-                           [{:event/type :fake-event-to-trigger-refresh
-                             :event/transient? true}])
-      "db-admin.command" (db-admin/handle-command! command state)
+      "congregation.command" (congregation-command! conn command state)
+      "gis-user.command" (gis-user-command! conn command state)
+      "db-admin.command" (db-admin-command! conn command state)
       (throw (IllegalArgumentException. (str "Unrecognized command: " (pr-str command)))))))

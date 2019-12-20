@@ -155,20 +155,7 @@
       :user/id (:user/id command)
       :gis-user/username (:gis-user/username command)}]))
 
-(defn handle-command!
-  ([command state]
-   (let [injections {:now (:now config/env)
-                     :check-permit (fn [permit]
-                                     (commands/check-permit state command permit))
-                     :migrate-tenant-schema! db/migrate-tenant-schema!
-                     :ensure-gis-user-present! (fn [args]
-                                                 (db/with-db [conn {}]
-                                                   (gis-user/ensure-present! conn args)))
-                     :ensure-gis-user-absent! (fn [args]
-                                                (db/with-db [conn {}]
-                                                  (gis-user/ensure-absent! conn args)))}]
-     (handle-command! command state injections)))
-  ([command state injections]
-   (->> (command-handler command state injections)
-        (events/enrich-events command injections)
-        (events/validate-events)))) ; XXX: validated here because transient events are not saved and validated on save
+(defn handle-command [command state injections]
+  (->> (command-handler command state injections)
+       (events/enrich-events command injections)
+       (events/validate-events))) ; XXX: validated here because transient events are not saved and validated on save
