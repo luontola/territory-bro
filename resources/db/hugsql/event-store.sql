@@ -13,4 +13,5 @@ order by global_revision;
 
 -- :name save-event :<!
 insert into event (stream_id, stream_revision, data)
-values (:stream, :stream_revision, :data::jsonb) returning global_revision;
+values (:stream, :stream_revision, :data::jsonb)
+returning global_revision, stream_revision;

@@ -185,6 +185,7 @@
     (db/use-tenant-schema conn schema)))
 
 (defn create-congregation! [conn name]
+  ;; TODO: refactor to event sourcing commands
   (let [id (UUID/randomUUID)
         master-schema (:database-schema config/env)
         tenant-schema (str master-schema

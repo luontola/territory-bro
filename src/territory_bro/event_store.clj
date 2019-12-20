@@ -54,9 +54,12 @@
                 [result] (query! conn :save-event {:stream stream-id
                                                    :stream_revision next-revision
                                                    :data (-> event *event->json*)})]
-            (:global_revision result))))
-       (doall)
-       (last)))
+            (-> event
+                (assoc :event/stream-id stream-id
+                       :event/stream-revision (:stream_revision result)
+                       :event/global-revision (:global_revision result))
+                (sorted-keys)))))
+       (doall)))
 
 (comment
   (db/with-db [conn {:read-only? true}]

@@ -39,9 +39,28 @@
                      :stuff "bar"}]]
 
         (testing "create new stream"
-          (is (= 2 (event-store/save! conn stream-1 0 events)))
-          (is (= 4 (event-store/save! conn stream-2 0 events))
-              "should return the global revision of the last written event"))
+          (is (= [{:event/stream-id stream-1
+                   :event/stream-revision 1
+                   :event/global-revision 1
+                   :event/type :event-1
+                   :stuff "foo"}
+                  {:event/stream-id stream-1
+                   :event/stream-revision 2
+                   :event/global-revision 2
+                   :event/type :event-2
+                   :stuff "bar"}]
+                 (event-store/save! conn stream-1 0 events)))
+          (is (= [{:event/stream-id stream-2
+                   :event/stream-revision 1 ; is a stream specific counter
+                   :event/global-revision 3 ; is a global counter
+                   :event/type :event-1
+                   :stuff "foo"}
+                  {:event/stream-id stream-2
+                   :event/stream-revision 2
+                   :event/global-revision 4
+                   :event/type :event-2
+                   :stuff "bar"}]
+                 (event-store/save! conn stream-2 0 events))))
 
         (testing "read stream"
           (is (= [{:event/stream-id stream-1
@@ -101,11 +120,21 @@
 
         (testing "append to stream"
           (testing "with concurrency check"
-            (is (= 5 (event-store/save! conn stream-1 2 [{:event/type :event-3
-                                                          :stuff "gazonk"}]))))
+            (is (= [{:event/stream-id stream-1
+                     :event/stream-revision 3
+                     :event/global-revision 5
+                     :event/type :event-3
+                     :stuff "gazonk"}]
+                   (event-store/save! conn stream-1 2 [{:event/type :event-3
+                                                        :stuff "gazonk"}]))))
           (testing "without concurrency check"
-            (is (= 6 (event-store/save! conn stream-1 nil [{:event/type :event-4
-                                                            :stuff "gazonk"}]))))
+            (is (= [{:event/stream-id stream-1
+                     :event/stream-revision 4
+                     :event/global-revision 6
+                     :event/type :event-4
+                     :stuff "gazonk"}]
+                   (event-store/save! conn stream-1 nil [{:event/type :event-4
+                                                          :stuff "gazonk"}]))))
           (is (= [{:event/stream-id stream-1
                    :event/stream-revision 3
                    :event/global-revision 5
