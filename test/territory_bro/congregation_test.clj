@@ -6,6 +6,7 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
             [medley.core :refer [deep-merge]]
+            [territory-bro.commands :as commands]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
@@ -22,6 +23,12 @@
 
 (defn- apply-events [events]
   (testutil/apply-events congregation/congregations-view events))
+
+(defn- handle-command [command events injections]
+  (->> (congregation/handle-command (commands/validate-command command)
+                                    (events/validate-events events)
+                                    injections)
+       (events/validate-events)))
 
 (deftest congregations-view-test
   (testing "created"
@@ -148,12 +155,6 @@
 
     (testing "superadmin can access all congregations"))) ; TODO
 
-
-(defn- handle-command [command events injections]
-  (let [events (events/validate-events events)
-        new-events (congregation/handle-command command events injections)]
-    (events/validate-events new-events)))
-
 (deftest rename-congregation-test
   (let [cong-id (UUID. 0 1)
         user-id (UUID. 0 2)
@@ -162,8 +163,6 @@
                     :check-permit (fn [_permit])}
         created-event {:event/type :congregation.event/congregation-created
                        :event/version 1
-                       :event/time test-time
-                       :event/user user-id
                        :congregation/id cong-id
                        :congregation/name "old name"
                        :congregation/schema-name ""}
@@ -174,8 +173,6 @@
                         :congregation/name "new name"}
         renamed-event {:event/type :congregation.event/congregation-renamed
                        :event/version 1
-                       :event/time test-time
-                       :event/user user-id
                        :congregation/id cong-id
                        :congregation/name "new name"}]
 
@@ -186,10 +183,10 @@
     (testing "name not changed"
       (testing "from original"
         (let [command (assoc rename-command :congregation/name "old name")]
-          (is (= [] (handle-command command [created-event] injections)))))
+          (is (empty? (handle-command command [created-event] injections)))))
 
       (testing "from previous rename"
-        (is (= [] (handle-command rename-command [created-event renamed-event] injections)))))
+        (is (empty? (handle-command rename-command [created-event renamed-event] injections)))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
@@ -210,8 +207,6 @@
                                     (= new-user-id user-id))}
         created-event {:event/type :congregation.event/congregation-created
                        :event/version 1
-                       :event/time test-time
-                       :event/user admin-id
                        :congregation/id cong-id
                        :congregation/name ""
                        :congregation/schema-name ""}
@@ -222,8 +217,6 @@
                           :user/id new-user-id}
         access-granted-event {:event/type :congregation.event/permission-granted
                               :event/version 1
-                              :event/time test-time
-                              :event/user admin-id
                               :congregation/id cong-id
                               :user/id new-user-id
                               :permission/id :view-congregation}]
@@ -233,7 +226,7 @@
              (handle-command add-user-command [created-event] injections))))
 
     (testing "user already in congregation"
-      (is (= [] (handle-command add-user-command [created-event access-granted-event] injections))))
+      (is (empty? (handle-command add-user-command [created-event access-granted-event] injections))))
 
     (testing "user doesn't exist"
       (let [invalid-command (assoc add-user-command
@@ -261,22 +254,16 @@
                                     (= target-user-id user-id))}
         created-event {:event/type :congregation.event/congregation-created
                        :event/version 1
-                       :event/time test-time
-                       :event/user admin-id
                        :congregation/id cong-id
                        :congregation/name ""
                        :congregation/schema-name ""}
         permission-granted-event {:event/type :congregation.event/permission-granted
                                   :event/version 1
-                                  :event/time test-time
-                                  :event/user admin-id
                                   :congregation/id cong-id
                                   :user/id target-user-id
                                   :permission/id :PLACEHOLDER}
         permission-revoked-event {:event/type :congregation.event/permission-revoked
                                   :event/version 1
-                                  :event/time test-time
-                                  :event/user admin-id
                                   :congregation/id cong-id
                                   :user/id target-user-id
                                   :permission/id :PLACEHOLDER}

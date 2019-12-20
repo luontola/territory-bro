@@ -50,6 +50,11 @@
     (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown command type :foo")
                           (commands/validate-command unknown-command)))))
 
+(deftest validate-commands-test
+  (is (= [] (commands/validate-commands [])))
+  (is (= [valid-command] (commands/validate-commands [valid-command])))
+  (is (thrown? ExceptionInfo (commands/validate-commands [invalid-command]))))
+
 (deftest check-permit-test
   (let [user-id (UUID. 0 1)
         state (permissions/grant {} user-id [:foo])]

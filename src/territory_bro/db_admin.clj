@@ -3,12 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.db-admin
-  (:require [territory-bro.commands :as commands]
-            [territory-bro.config :as config]
-            [territory-bro.db :as db]
-            [territory-bro.events :as events]
-            [territory-bro.gis-user :as gis-user]
-            [territory-bro.presence-tracker :as presence-tracker]
+  (:require [territory-bro.presence-tracker :as presence-tracker]
             [territory-bro.util :refer [conj-set]])
   (:import (territory_bro ValidationException)))
 
@@ -156,5 +151,4 @@
       :gis-user/username (:gis-user/username command)}]))
 
 (defn handle-command [command state injections]
-  (->> (command-handler command state injections)
-       (events/enrich-events command injections)))
+  (command-handler command state injections))

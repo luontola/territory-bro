@@ -164,8 +164,7 @@
 
 (defn handle-command [command events injections]
   (let [congregation (reduce write-model nil events)]
-    (->> (command-handler command congregation injections)
-         (events/enrich-events command injections))))
+    (command-handler command congregation injections)))
 
 
 ;;;; Other commands

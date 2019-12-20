@@ -6,11 +6,7 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [medley.core :refer [dissoc-in]]
-            [territory-bro.commands :as commands]
-            [territory-bro.config :as config]
             [territory-bro.db :as db]
-            [territory-bro.event-store :as event-store]
-            [territory-bro.events :as events]
             [territory-bro.util :refer [conj-set]])
   (:import (java.security SecureRandom)
            (java.util Base64)
@@ -206,8 +202,7 @@
 
 (defn handle-command [command events injections]
   (let [state (reduce write-model nil events)]
-    (->> (command-handler command state injections)
-         (events/enrich-events command injections))))
+    (command-handler command state injections)))
 
 
 ;;; Database users

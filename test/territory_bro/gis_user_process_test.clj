@@ -4,9 +4,9 @@
 
 (ns territory-bro.gis-user-process-test
   (:require [clojure.test :refer :all]
+            [territory-bro.commands :as commands]
             [territory-bro.gis-user-process :as gis-user-process]
-            [territory-bro.testutil :as testutil]
-            [territory-bro.events :as events])
+            [territory-bro.testutil :as testutil])
   (:import (java.time Instant)
            (java.util UUID)))
 
@@ -18,11 +18,9 @@
   (testutil/apply-events gis-user-process/projection events))
 
 (defn- generate-commands [events]
-  (-> events
-      ; TODO: validate events (need strict and lenient validation to avoid need for generic event fields in all tests)
-      ;(events/validate-events)
-      (apply-events)
-      (gis-user-process/generate-commands {:now (fn [] test-time)})))
+  (->> (gis-user-process/generate-commands (apply-events events)
+                                           {:now (fn [] test-time)})
+       (commands/validate-commands)))
 
 (deftest generate-commands-test
   (let [events []]

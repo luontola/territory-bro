@@ -7,6 +7,7 @@
             [clojure.string :as str]
             [clojure.test :refer :all]
             [medley.core :refer [deep-merge]]
+            [territory-bro.commands :as commands]
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
@@ -29,40 +30,37 @@
 
 (def cong-id (UUID. 1 0))
 (def user-id (UUID. 2 0))
-(def test-time (Instant/ofEpochSecond 1))
 
 (def congregation-created {:event/type :congregation.event/congregation-created
                            :event/version 1
-                           :event/time test-time
-                           :event/system "test" ; XXX: not :event/user, because would conflict with territory-bro.testutil/validate-test-events - use relaxed validation instead
                            :congregation/id cong-id
                            :congregation/name "Cong1 Name"
                            :congregation/schema-name "cong1_schema"})
 (def permission-granted {:event/type :congregation.event/permission-granted
                          :event/version 1
-                         :event/time test-time
-                         :event/system "test" ; XXX: not :event/user, because would conflict with territory-bro.testutil/validate-test-events - use relaxed validation instead
                          :congregation/id cong-id
                          :user/id user-id
                          :permission/id :gis-access})
 (def gis-user-created {:event/type :congregation.event/gis-user-created
                        :event/version 1
-                       :event/time test-time
-                       :event/user user-id
                        :congregation/id cong-id
                        :user/id user-id
                        :gis-user/username "gis_user_0000000000000001_0000000000000002"
                        :gis-user/password "secret123"})
 (def gis-user-deleted {:event/type :congregation.event/gis-user-deleted
                        :event/version 1
-                       :event/time test-time
-                       :event/user user-id
                        :congregation/id cong-id
                        :user/id user-id
                        :gis-user/username "gis_user_0000000000000001_0000000000000002"})
 
 (defn- apply-events [events]
   (testutil/apply-events gis-user/gis-users-view events))
+
+(defn- handle-command [command events injections]
+  (->> (gis-user/handle-command (commands/validate-command command)
+                                (events/validate-events events)
+                                injections)
+       (events/validate-events)))
 
 (deftest gis-users-view-test
   ;; TODO: reuse the event examples also in this test
@@ -147,19 +145,13 @@
                                    :permission/id :view-congregation})]
           (is (= expected (apply-events events)) "should ignore the event"))))))
 
-(defn- handle-command [command events injections]
-  (let [events (events/validate-events events)
-        new-events (gis-user/handle-command command events injections)]
-    (events/validate-events new-events)))
-
 (deftest create-gis-user-test
-  (let [injections {:now (constantly test-time)
-                    :check-permit (fn [_permit])
+  (let [injections {:check-permit (fn [_permit])
                     :generate-password (constantly "secret123")
                     :db-user-exists? (constantly false)}
         command {:command/type :gis-user.command/create-gis-user
-                 :command/time test-time
-                 :command/user user-id ;; TODO: should be system
+                 :command/time (Instant/now)
+                 :command/system "test"
                  :congregation/id cong-id
                  :user/id user-id}
         events [congregation-created permission-granted]]
@@ -218,11 +210,10 @@
                      (handle-command command events injections)))))))
 
 (deftest delete-gis-user-test
-  (let [injections {:now (constantly test-time)
-                    :check-permit (fn [_permit])}
+  (let [injections {:check-permit (fn [_permit])}
         command {:command/type :gis-user.command/delete-gis-user
-                 :command/time test-time
-                 :command/user user-id ;; TODO: should be system 
+                 :command/time (Instant/now)
+                 :command/system "test"
                  :congregation/id cong-id
                  :user/id user-id}
         events [congregation-created permission-granted gis-user-created]]

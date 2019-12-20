@@ -112,6 +112,11 @@
            :command command})
   (s/validate Command command))
 
+(defn validate-commands [commands]
+  (doseq [command commands]
+    (validate-command command))
+  commands)
+
 (defn check-permit [state {user :command/user, system :command/system, :as command} permit]
   (cond
     (= (nil? user)
