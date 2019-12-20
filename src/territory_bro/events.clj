@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.events
-  (:require [schema-refined.core :as refined]
+  (:require [medley.core :refer [map-keys]]
+            [schema-refined.core :as refined]
             [schema-tools.core :as tools]
             [schema.coerce :as coerce]
             [schema.core :as s]
@@ -70,7 +71,7 @@
    (s/optional-key :event/global-revision) s/Int
    :event/type s/Keyword
    :event/version s/Int
-   :event/time Instant
+   (s/optional-key :event/time) Instant
    (s/optional-key :event/user) UUID
    (s/optional-key :event/system) s/Str})
 
@@ -165,8 +166,19 @@
    :db-admin.event/gis-user-is-absent GisUserIsAbsent})
 
 (s/defschema Event
+  (apply refined/dispatch-on :event/type (flatten (seq event-schemas))))
+
+(defn- required-key [m k]
+  (map-keys #(if (= % (s/optional-key k))
+               k
+               %)
+            m))
+
+(s/defschema EnrichedEvent
   (s/constrained
-   (apply refined/dispatch-on :event/type (flatten (seq event-schemas)))
+   (-> EventBase
+       (required-key :event/time)
+       (assoc s/Any s/Any))
    (fn [event]
      (not= (contains? event :event/user)
            (contains? event :event/system)))
@@ -185,6 +197,15 @@
   (s/validate Event event))
 
 (defn validate-events [events]
+  (doseq [event events]
+    (validate-event event))
+  events)
+
+(defn strict-validate-event [event]
+  (validate-event event)
+  (s/validate EnrichedEvent event))
+
+(defn strict-validate-events [events]
   (doseq [event events]
     (validate-event event))
   events)
@@ -220,4 +241,4 @@
     (coerce-event (json/parse-string json))))
 
 (defn event->json [event]
-  (json/generate-string (validate-event event)))
+  (json/generate-string (strict-validate-event event)))

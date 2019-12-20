@@ -24,7 +24,7 @@
         old-events (event-store/read-stream conn stream-id)
         new-events (->> (congregation/handle-command command old-events injections)
                         (events/enrich-events command injections)
-                        (events/validate-events))]
+                        (events/strict-validate-events))]
     (event-store/save! conn stream-id (count old-events) new-events)))
 
 (defn- gis-user-command! [conn command state]
@@ -38,7 +38,7 @@
         old-events (event-store/read-stream conn stream-id)
         new-events (->> (gis-user/handle-command command old-events injections)
                         (events/enrich-events command injections)
-                        (events/validate-events))]
+                        (events/strict-validate-events))]
     (event-store/save! conn stream-id (count old-events) new-events)))
 
 (defn- db-admin-command! [conn command state]
@@ -52,7 +52,7 @@
                                                (gis-user/ensure-absent! conn args))}
         new-events (->> (db-admin/handle-command command state injections)
                         (events/enrich-events command injections)
-                        (events/validate-events))]
+                        (events/strict-validate-events))]
     new-events))
 
 (defn command! [conn state command]

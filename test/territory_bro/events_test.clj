@@ -123,14 +123,34 @@
     (is (thrown-with-msg? ExceptionInfo (re-contains "{:congregation/name missing-required-key}")
                           (events/validate-event invalid-event))))
 
+  (let [lax-event (dissoc valid-event :event/time)]
+    (testing "lax validation"
+      (is (= lax-event (events/validate-event lax-event))))
+
+    (testing "strict validation"
+      (is (thrown-with-msg? ExceptionInfo (re-contains "{:event/time missing-required-key}")
+                            (events/strict-validate-event lax-event)))))
+
+  (testing "strict validation: user xor system"
+    (let [event (assoc valid-event
+                       :event/user (UUID. 0 1)
+                       :event/system "sys")]
+      (is (thrown-with-msg? ExceptionInfo (re-contains "(xor-required-key :event/user :event/system)")
+                            (events/strict-validate-event event)))))
+
   (testing "unknown event type"
     (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown event type :foo")
                           (events/validate-event unknown-event)))))
 
 (deftest validate-events-test
-  (is (= [] (events/validate-events [])))
-  (is (= [valid-event] (events/validate-events [valid-event])))
-  (is (thrown? ExceptionInfo (events/validate-events [invalid-event]))))
+  (is (= []
+         (events/validate-events [])
+         (events/strict-validate-events [])))
+  (is (= [valid-event]
+         (events/validate-events [valid-event])
+         (events/strict-validate-events [valid-event])))
+  (is (thrown? ExceptionInfo (events/validate-events [invalid-event])))
+  (is (thrown? ExceptionInfo (events/strict-validate-events [invalid-event]))))
 
 
 ;;; Generators for serialization tests
@@ -147,18 +167,22 @@
                                uuid-gen))
 (def event-system-gen (gen/tuple (gen/elements [:event/system])
                                  gen/string-alphanumeric))
-(def dumb-event-gen (gen/one-of (->> (vals events/event-schemas)
-                                     (map #(sg/generator % leaf-generators)))))
-(def event-gen (gen/fmap (fn [[event [k v]]]
-                           (-> event
-                               (dissoc :event/user :event/system)
-                               (assoc k v)))
-                         (gen/tuple dumb-event-gen
-                                    (gen/one-of [event-user-gen event-system-gen]))))
+(def lax-event-gen (gen/one-of (->> (vals events/event-schemas)
+                                    (map #(sg/generator % leaf-generators)))))
+(def strict-event-gen
+  (gen/fmap (fn [[event time [k v]]]
+              ;; add required keys for strict validation
+              (-> event
+                  (assoc :event/time time)
+                  (dissoc :event/user :event/system)
+                  (assoc k v)))
+            (gen/tuple lax-event-gen
+                       instant-gen
+                       (gen/one-of [event-user-gen event-system-gen]))))
 
 (deftest event-serialization-test
   (testing "round trip serialization"
-    (doseq [event (gen/sample event-gen 100)]
+    (doseq [event (gen/sample strict-event-gen 100)]
       (is (= event (-> event events/event->json events/json->event)))))
 
   (testing "event->json validates events"
