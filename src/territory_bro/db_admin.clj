@@ -157,5 +157,4 @@
 
 (defn handle-command [command state injections]
   (->> (command-handler command state injections)
-       (events/enrich-events command injections)
-       (events/validate-events))) ; XXX: validated here because transient events are not saved and validated on save
+       (events/enrich-events command injections)))

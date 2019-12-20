@@ -9,6 +9,7 @@
             [territory-bro.db :as db]
             [territory-bro.db-admin :as db-admin]
             [territory-bro.event-store :as event-store]
+            [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.user :as user]))
 
@@ -21,7 +22,9 @@
                                       (some? (user/get-by-id conn user-id))))}
         stream-id (:congregation/id command)
         old-events (event-store/read-stream conn stream-id)
-        new-events (congregation/handle-command command old-events injections)]
+        new-events (->> (congregation/handle-command command old-events injections)
+                        (events/enrich-events command injections)
+                        (events/validate-events))]
     (event-store/save! conn stream-id (count old-events) new-events)))
 
 (defn- gis-user-command! [conn command state]
@@ -33,7 +36,9 @@
         ;; TODO: the GIS user events would belong better to a user-specific stream
         stream-id (:congregation/id command)
         old-events (event-store/read-stream conn stream-id)
-        new-events (gis-user/handle-command command old-events injections)]
+        new-events (->> (gis-user/handle-command command old-events injections)
+                        (events/enrich-events command injections)
+                        (events/validate-events))]
     (event-store/save! conn stream-id (count old-events) new-events)))
 
 (defn- db-admin-command! [conn command state]
@@ -44,8 +49,11 @@
                     :ensure-gis-user-present! (fn [args]
                                                 (gis-user/ensure-present! conn args))
                     :ensure-gis-user-absent! (fn [args]
-                                               (gis-user/ensure-absent! conn args))}]
-    (db-admin/handle-command command state injections)))
+                                               (gis-user/ensure-absent! conn args))}
+        new-events (->> (db-admin/handle-command command state injections)
+                        (events/enrich-events command injections)
+                        (events/validate-events))]
+    new-events))
 
 (defn command! [conn state command]
   (let [command (commands/validate-command command)]
