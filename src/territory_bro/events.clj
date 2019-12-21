@@ -207,7 +207,7 @@
 
 (defn strict-validate-events [events]
   (doseq [event events]
-    (validate-event event))
+    (strict-validate-event event))
   events)
 
 

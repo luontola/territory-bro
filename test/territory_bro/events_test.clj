@@ -85,6 +85,7 @@
                   :congregation/id (UUID/randomUUID)
                   :congregation/name ""
                   :congregation/schema-name ""})
+(def lax-event (dissoc valid-event :event/time))
 (def invalid-event (dissoc valid-event :congregation/name))
 (def unknown-event (assoc valid-event :event/type :foo))
 
@@ -123,13 +124,12 @@
     (is (thrown-with-msg? ExceptionInfo (re-contains "{:congregation/name missing-required-key}")
                           (events/validate-event invalid-event))))
 
-  (let [lax-event (dissoc valid-event :event/time)]
-    (testing "lax validation"
-      (is (= lax-event (events/validate-event lax-event))))
+  (testing "basic validation accepts lax events"
+    (is (= lax-event (events/validate-event lax-event))))
 
-    (testing "strict validation"
-      (is (thrown-with-msg? ExceptionInfo (re-contains "{:event/time missing-required-key}")
-                            (events/strict-validate-event lax-event)))))
+  (testing "strict validation rejects lax events"
+    (is (thrown-with-msg? ExceptionInfo (re-contains "{:event/time missing-required-key}")
+                          (events/strict-validate-event lax-event))))
 
   (testing "strict validation: user xor system"
     (let [event (assoc valid-event
@@ -143,14 +143,23 @@
                           (events/validate-event unknown-event)))))
 
 (deftest validate-events-test
-  (is (= []
-         (events/validate-events [])
-         (events/strict-validate-events [])))
-  (is (= [valid-event]
-         (events/validate-events [valid-event])
-         (events/strict-validate-events [valid-event])))
-  (is (thrown? ExceptionInfo (events/validate-events [invalid-event])))
-  (is (thrown? ExceptionInfo (events/strict-validate-events [invalid-event]))))
+  (testing "no events"
+    (is (= []
+           (events/validate-events [])
+           (events/strict-validate-events []))))
+
+  (testing "valid event"
+    (is (= [valid-event]
+           (events/validate-events [valid-event])
+           (events/strict-validate-events [valid-event]))))
+
+  (testing "lax event"
+    (is (= [lax-event] (events/validate-events [lax-event])))
+    (is (thrown? ExceptionInfo (events/strict-validate-events [lax-event]))))
+
+  (testing "invalid event"
+    (is (thrown? ExceptionInfo (events/validate-events [invalid-event])))
+    (is (thrown? ExceptionInfo (events/strict-validate-events [invalid-event])))))
 
 
 ;;; Generators for serialization tests
