@@ -19,7 +19,6 @@
                    (commands/check-permit state command permit))})
 
 (defn- write-stream! [conn stream-id f]
-  (assert stream-id)
   (let [old-events (event-store/read-stream conn stream-id)
         new-events (f old-events)]
     (event-store/save! conn stream-id (count old-events) new-events)))

@@ -32,6 +32,7 @@
   ([conn stream-id]
    (read-stream conn stream-id {}))
   ([conn stream-id {:keys [since]}]
+   (assert (some? stream-id))
    (->> (query! conn :read-stream {:stream stream-id
                                    :since (or since 0)})
         (map parse-db-row)
@@ -49,6 +50,8 @@
   (->> events
        (map-indexed
         (fn [idx event]
+          (assert (not (:event/transient? event))
+                  {:event event})
           (let [next-revision (when stream-revision
                                 (+ 1 idx stream-revision))
                 [result] (query! conn :save-event {:stream stream-id
