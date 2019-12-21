@@ -24,7 +24,7 @@
         new-events (f old-events)]
     (event-store/save! conn stream-id (count old-events) new-events)))
 
-(defn call! [command-handler command state-or-old-events injections]
+(defn- call! [command-handler command state-or-old-events injections]
   (->> (command-handler command state-or-old-events injections)
        (events/enrich-events command injections)
        (events/strict-validate-events)))

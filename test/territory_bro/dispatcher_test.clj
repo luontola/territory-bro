@@ -15,17 +15,18 @@
 (def test-time (Instant/ofEpochSecond 1))
 
 (deftest call-command-handler-test
-  (let [command {:command/type :dummy-command
+  (let [call! #'dispatcher/call!
+        command {:command/type :dummy-command
                  :command/user user-id}
         state :dummy-state
         injections {:now (constantly test-time)}]
 
     (testing "calls the command handler"
       (let [*command-handler-args (atom nil)]
-        (is (empty? (dispatcher/call! (fn [& args]
-                                        (reset! *command-handler-args args)
-                                        nil)
-                                      command state injections)))
+        (is (empty? (call! (fn [& args]
+                             (reset! *command-handler-args args)
+                             nil)
+                           command state injections)))
         (is (= [command state injections]
                @*command-handler-args))))
 
@@ -36,21 +37,21 @@
                :event/version 1
                :congregation/id cong-id
                :congregation/name ""}]
-             (dispatcher/call! (fn [& _]
-                                 [{:event/type :congregation.event/congregation-renamed
-                                   :event/version 1
-                                   :congregation/id cong-id
-                                   :congregation/name ""}])
-                               command state injections))))
+             (call! (fn [& _]
+                      [{:event/type :congregation.event/congregation-renamed
+                        :event/version 1
+                        :congregation/id cong-id
+                        :congregation/name ""}])
+                    command state injections))))
 
     (testing "validates the produced events"
       (is (thrown-with-msg?
            ExceptionInfo (re-contains "Value does not match schema")
-           (dispatcher/call! (fn [& _]
-                               [{:event/type :congregation.event/congregation-renamed
-                                 :event/version 1
-                                 :congregation/id cong-id}])
-                             command state injections))))))
+           (call! (fn [& _]
+                    [{:event/type :congregation.event/congregation-renamed
+                      :event/version 1
+                      :congregation/id cong-id}])
+                  command state injections))))))
 
 (deftest dispatch-command-test
   (testing "dispatches commands"
