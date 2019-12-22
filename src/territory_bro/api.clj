@@ -17,12 +17,12 @@
             [territory-bro.db :as db]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.events :as events]
+            [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
             [territory-bro.permissions :as permissions]
             [territory-bro.projections :as projections]
             [territory-bro.qgis :as qgis]
-            [territory-bro.region :as region]
             [territory-bro.territory :as territory]
             [territory-bro.user :as user]
             [territory-bro.util :refer [getx]])
@@ -166,9 +166,9 @@
                                                       [permission true]))
                                                (into {}))
                              :territories (territory/get-territories conn)
-                             :congregation-boundaries (region/get-congregation-boundaries conn)
-                             :subregions (region/get-subregions conn)
-                             :card-minimap-viewports (region/get-card-minimap-viewports conn)
+                             :congregation-boundaries (gis-db/get-congregation-boundaries conn)
+                             :subregions (gis-db/get-subregions conn)
+                             :card-minimap-viewports (gis-db/get-card-minimap-viewports conn)
                              :users (->> (user/get-users conn {:ids (congregation/get-users state cong-id)})
                                          (map (fn [user]
                                                 (-> (:user/attributes user)

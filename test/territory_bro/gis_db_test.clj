@@ -10,11 +10,36 @@
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
             [territory-bro.gis-db :as gis-db]
             [territory-bro.projections :as projections]
-            [territory-bro.region :as region]
             [territory-bro.territory :as territory]
             [territory-bro.testdata :as testdata]))
 
-(use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
+(use-fixtures :each (join-fixtures [db-fixture event-actor-fixture]))
+
+(deftest regions-test
+  (db/with-db [conn {}]
+    (jdbc/db-set-rollback-only! conn)
+
+    (let [cong-id (congregation/create-congregation! conn "the name")
+          _ (congregation/use-schema conn (projections/current-state conn) cong-id)]
+
+      (testing "create & list congregation boundaries"
+        (let [id (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon)]
+          (is (= [{:region/id id
+                   :region/location testdata/wkt-multi-polygon}]
+                 (gis-db/get-congregation-boundaries conn)))))
+
+      (testing "create & list subregions"
+        (let [id (gis-db/create-subregion! conn "the name" testdata/wkt-multi-polygon)]
+          (is (= [{:region/id id
+                   :region/name "the name"
+                   :region/location testdata/wkt-multi-polygon}]
+                 (gis-db/get-subregions conn)))))
+
+      (testing "create & list card minimap viewports"
+        (let [id (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon)]
+          (is (= [{:region/id id
+                   :region/location testdata/wkt-polygon}]
+                 (gis-db/get-card-minimap-viewports conn))))))))
 
 (deftest gis-change-log-test
   (db/with-db [conn {}]
@@ -85,7 +110,7 @@
                          (dissoc :id :schema :user :time))))))))
 
       (testing "congregation_boundary table change log"
-        (let [region-id (region/create-congregation-boundary! conn testdata/wkt-multi-polygon)
+        (let [region-id (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon)
               changes (gis-db/get-changes conn)]
           (is (= 4 (count changes)))
           (is (= {:table "congregation_boundary"
@@ -97,7 +122,7 @@
                      (dissoc :id :schema :user :time))))))
 
       (testing "subregion table change log"
-        (let [region-id (region/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+        (let [region-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
               changes (gis-db/get-changes conn)]
           (is (= 5 (count changes)))
           (is (= {:table "subregion"
@@ -110,7 +135,7 @@
                      (dissoc :id :schema :user :time))))))
 
       (testing "card_minimap_viewport table change log"
-        (let [region-id (region/create-card-minimap-viewport! conn testdata/wkt-polygon)
+        (let [region-id (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon)
               changes (gis-db/get-changes conn)]
           (is (= 6 (count changes)))
           (is (= {:table "card_minimap_viewport"

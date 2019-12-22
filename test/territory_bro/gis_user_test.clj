@@ -16,7 +16,6 @@
             [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.projections :as projections]
-            [territory-bro.region :as region]
             [territory-bro.territory :as territory]
             [territory-bro.testdata :as testdata]
             [territory-bro.testutil :as testutil]
@@ -354,9 +353,9 @@
                                                :territory/subregion "Somewhere"
                                                :territory/meta {:foo "bar", :gazonk 42}
                                                :territory/location testdata/wkt-multi-polygon}))
-        (is (region/create-congregation-boundary! conn testdata/wkt-multi-polygon))
-        (is (region/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
-        (is (region/create-card-minimap-viewport! conn testdata/wkt-polygon))))
+        (is (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon))
+        (is (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
+        (is (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon))))
 
     (testing "user ID is logged in GIS change log"
       (is (= [{:op "INSERT",
