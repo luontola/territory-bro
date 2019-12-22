@@ -10,6 +10,7 @@
             [territory-bro.db-admin :as db-admin]
             [territory-bro.event-store :as event-store]
             [territory-bro.events :as events]
+            [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.user :as user]))
 
@@ -42,7 +43,7 @@
 (defn- gis-user-command! [conn command state]
   (let [injections (assoc (default-injections command state)
                           :generate-password #(gis-user/generate-password 50)
-                          :db-user-exists? #(gis-user/db-user-exists? conn %))]
+                          :db-user-exists? #(gis-db/user-exists? conn %))]
     (write-stream! conn
                    (:congregation/id command) ; TODO: the GIS user events would belong better to a user-specific stream
                    (fn [old-events]
@@ -52,9 +53,9 @@
   (let [injections (assoc (default-injections command state)
                           :migrate-tenant-schema! db/migrate-tenant-schema!
                           :ensure-gis-user-present! (fn [args]
-                                                      (gis-user/ensure-present! conn args))
+                                                      (gis-db/ensure-user-present! conn args))
                           :ensure-gis-user-absent! (fn [args]
-                                                     (gis-user/ensure-absent! conn args)))]
+                                                     (gis-db/ensure-user-absent! conn args)))]
     (call! db-admin/handle-command command state injections)))
 
 (defn command! [conn state command]

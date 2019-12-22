@@ -3,28 +3,15 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis-user-test
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]
-            [clojure.test :refer :all]
+  (:require [clojure.test :refer :all]
             [medley.core :refer [deep-merge]]
             [territory-bro.commands :as commands]
-            [territory-bro.config :as config]
-            [territory-bro.congregation :as congregation]
-            [territory-bro.db :as db]
             [territory-bro.events :as events]
-            [territory-bro.fixtures :refer [db-fixture process-managers-fixture event-actor-fixture]]
-            [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
-            [territory-bro.projections :as projections]
-            [territory-bro.testdata :as testdata]
-            [territory-bro.testutil :as testutil]
-            [territory-bro.user :as user])
-  (:import (java.time Instant Duration)
+            [territory-bro.testutil :as testutil])
+  (:import (java.time Instant)
            (java.util UUID)
-           (org.postgresql.util PSQLException)
            (territory_bro ValidationException NoPermitException)))
-
-(use-fixtures :once (join-fixtures [db-fixture process-managers-fixture event-actor-fixture]))
 
 (def cong-id (UUID. 1 0))
 (def user-id (UUID. 2 0))
@@ -257,141 +244,6 @@
                                               (throw (NoPermitException. nil nil))))]
         (is (thrown? NoPermitException
                      (handle-command command events injections)))))))
-
-(defn- gis-db-spec [username password]
-  {:connection-uri (-> (:database-url config/env)
-                       (str/replace #"\?.*" "")) ; strip username and password
-   :user username
-   :password password})
-
-(defn- create-tenant-schema! [conn]
-  (let [cong-id (congregation/create-congregation! conn "cong1")
-        cong (congregation/get-unrestricted-congregation
-              (projections/current-state conn) cong-id)]
-    (:congregation/schema-name cong)))
-
-(defn- login-as [username password]
-  (= [{:user username}] (jdbc/query (gis-db-spec username password)
-                                    ["select session_user as user"])))
-
-(deftest ensure-gis-user-present-or-absent-test
-  (let [schema (create-tenant-schema! db/database)
-        username "gis_user_1"]
-
-    (testing "create account"
-      (db/with-db [conn {}]
-        (is (false? (gis-user/db-user-exists? conn username)))
-        (gis-user/ensure-present! conn {:username username
-                                        :password "password1"
-                                        :schema schema})
-        (is (true? (gis-user/db-user-exists? conn username))))
-      (is (login-as username "password1")))
-
-    (testing "update account / create is idempotent"
-      (db/with-db [conn {}]
-        (gis-user/ensure-present! conn {:username username
-                                        :password "password2"
-                                        :schema schema}))
-      (is (login-as username "password2")))
-
-    (testing "delete account"
-      (db/with-db [conn {}]
-        (gis-user/ensure-absent! conn {:username username
-                                       :schema schema}))
-      (is (thrown? PSQLException (login-as username "password2"))))
-
-    (testing "delete is idempotent"
-      (db/with-db [conn {}]
-        (gis-user/ensure-absent! conn {:username username
-                                       :schema schema}))
-      (is (thrown? PSQLException (login-as username "password2"))))))
-
-(defn- create-test-data-impl! []
-  (try
-    (db/with-db [conn {}]
-      (let [cong-id (congregation/create-congregation! conn "cong")
-            user-id (user/save-user! conn "user" {})]
-        (congregation/grant! conn cong-id user-id :gis-access)
-        {:cong-id cong-id
-         :user-id user-id}))
-    (finally
-      ;; wait for process managers to create the GIS user
-      (projections/refresh-async!)
-      (projections/await-refreshed (Duration/ofSeconds 1)))))
-
-(defn- create-test-data! []
-  (let [{:keys [cong-id user-id]} (create-test-data-impl!)
-        state (projections/cached-state)
-        cong (congregation/get-unrestricted-congregation state cong-id)
-        gis-user (gis-user/get-gis-user state cong-id user-id)]
-    {:cong-id cong-id
-     :user-id user-id
-     :schema (:congregation/schema-name cong)
-     :username (:gis-user/username gis-user)
-     :password (:gis-user/password gis-user)}))
-
-(deftest gis-user-database-access-test
-  (let [{:keys [cong-id user-id schema username password]} (create-test-data!)
-        db-spec (gis-db-spec username password)]
-
-    (testing "can login to the database"
-      (is (= [{:test 1}] (jdbc/query db-spec ["select 1 as test"]))))
-
-    (testing "can view the tenant schema and the tables in it"
-      (jdbc/with-db-transaction [conn db-spec]
-        (is (jdbc/query conn [(str "select * from " schema ".territory")]))
-        (is (jdbc/query conn [(str "select * from " schema ".congregation_boundary")]))
-        (is (jdbc/query conn [(str "select * from " schema ".subregion")]))
-        (is (jdbc/query conn [(str "select * from " schema ".card_minimap_viewport")]))))
-
-    (testing "can modify data in the tenant schema"
-      (jdbc/with-db-transaction [conn db-spec]
-        (db/use-tenant-schema conn schema)
-        (is (gis-db/create-territory! conn {:territory/number "123"
-                                            :territory/addresses "Street 1 A"
-                                            :territory/subregion "Somewhere"
-                                            :territory/meta {:foo "bar", :gazonk 42}
-                                            :territory/location testdata/wkt-multi-polygon}))
-        (is (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon))
-        (is (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
-        (is (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon))))
-
-    (testing "user ID is logged in GIS change log"
-      (is (= [{:op "INSERT",
-               :schema schema,
-               :table "territory",
-               :user username}
-              {:op "INSERT",
-               :schema schema,
-               :table "congregation_boundary",
-               :user username}
-              {:op "INSERT",
-               :schema schema,
-               :table "subregion",
-               :user username}
-              {:op "INSERT",
-               :schema schema,
-               :table "card_minimap_viewport",
-               :user username}]
-             (->> (gis-db/get-changes db/database)
-                  (map #(dissoc % :id :time :old :new))))))
-
-    (testing "cannot view the master schema"
-      (is (thrown-with-msg? PSQLException #"ERROR: permission denied for schema"
-                            (jdbc/query db-spec [(str "select * from " (:database-schema config/env) ".congregation")]))))
-
-    (testing "cannot create objects in the public schema"
-      (is (thrown-with-msg? PSQLException #"ERROR: permission denied for schema public"
-                            (jdbc/query db-spec ["create table public.foo (id serial primary key)"]))))
-
-    (testing "cannot login to database after user is deleted"
-      (db/with-db [conn {}]
-        (congregation/revoke! conn cong-id user-id :gis-access))
-      (projections/refresh-async!)
-      (projections/await-refreshed (Duration/ofSeconds 1)) ; wait for process managers to delete the GIS user
-
-      (is (thrown-with-msg? PSQLException #"FATAL: password authentication failed for user"
-                            (jdbc/query db-spec ["select 1 as test"]))))))
 
 (deftest generate-password-test
   (let [a (gis-user/generate-password 10)

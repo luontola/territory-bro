@@ -169,11 +169,6 @@
 
 ;;;; Other commands
 
-(defn use-schema [conn state cong-id] ; TODO: create a better helper?
-  (let [cong (get-unrestricted-congregation state cong-id)
-        schema (:congregation/schema-name cong)]
-    (db/use-tenant-schema conn schema)))
-
 (defn create-congregation! [conn name]
   ;; TODO: refactor to event sourcing commands
   (let [id (UUID/randomUUID)

@@ -3,9 +3,12 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis-db
-  (:require [medley.core :refer [remove-vals]]
+  (:require [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
+            [medley.core :refer [remove-vals]]
             [territory-bro.db :as db])
-  (:import (java.util UUID)))
+  (:import (java.util UUID)
+           (org.postgresql.util PSQLException)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/gis.sql"))
 
@@ -98,3 +101,60 @@
    (->> (query! conn :get-gis-changes search)
         (map format-gis-change)
         (doall))))
+
+
+;;; Database users
+
+(defn user-exists? [conn username]
+  (not (empty? (jdbc/query conn ["SELECT 1 FROM pg_roles WHERE rolname = ?" username]))))
+
+(defn ensure-user-present! [conn {:keys [username password schema]}]
+  (log/info "Creating GIS user:" username)
+  (assert username)
+  (assert password)
+  (assert schema)
+  (try
+    (jdbc/execute! conn ["SAVEPOINT create_role"])
+    (jdbc/execute! conn [(str "CREATE ROLE " username " WITH LOGIN")])
+    (jdbc/execute! conn ["RELEASE SAVEPOINT create_role"])
+    (catch PSQLException e
+      ;; ignore error if role already exists
+      (if (= db/psql-duplicate-object (.getSQLState e))
+        (do
+          (log/info "GIS user already present:" username)
+          (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT create_role"]))
+        (throw e))))
+  (jdbc/execute! conn [(str "ALTER ROLE " username " WITH PASSWORD '" password "'")])
+  (jdbc/execute! conn [(str "ALTER ROLE " username " VALID UNTIL 'infinity'")])
+  ;; TODO: move detailed permissions to schema specific role
+  (jdbc/execute! conn [(str "GRANT USAGE ON SCHEMA " schema " TO " username)])
+  (jdbc/execute! conn [(str "GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "
+                            schema ".territory, "
+                            schema ".congregation_boundary, "
+                            schema ".subregion, "
+                            schema ".card_minimap_viewport "
+                            "TO " username)])
+  nil)
+
+(defn drop-role-cascade! [conn role schemas]
+  (assert role)
+  (try
+    (doseq [schema schemas]
+      (assert schema)
+      (jdbc/execute! conn ["SAVEPOINT revoke_privileges"])
+      (jdbc/execute! conn [(str "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA " schema " FROM " role)])
+      (jdbc/execute! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " role)])
+      (jdbc/execute! conn ["RELEASE SAVEPOINT revoke_privileges"]))
+    (catch PSQLException e
+      ;; ignore error if role already does not exist
+      (if (= db/psql-undefined-object (.getSQLState e))
+        (do
+          (log/info "GIS user already absent:" role)
+          (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT revoke_privileges"]))
+        (throw e))))
+  (jdbc/execute! conn [(str "DROP ROLE IF EXISTS " role)])
+  nil)
+
+(defn ensure-user-absent! [conn {:keys [username schema]}]
+  (log/info "Deleting GIS user:" username)
+  (drop-role-cascade! conn username [schema]))
