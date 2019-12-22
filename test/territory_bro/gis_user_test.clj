@@ -13,7 +13,7 @@
             [territory-bro.db :as db]
             [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture process-managers-fixture event-actor-fixture]]
-            [territory-bro.gis :as gis]
+            [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.projections :as projections]
             [territory-bro.region :as region]
@@ -375,7 +375,7 @@
                :schema schema,
                :table "card_minimap_viewport",
                :user username}]
-             (->> (gis/get-gis-changes db/database)
+             (->> (gis-db/get-changes db/database)
                   (map #(dissoc % :id :time :old :new))))))
 
     (testing "cannot view the master schema"

@@ -2,13 +2,13 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.gis-test
+(ns territory-bro.gis-db-test
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
-            [territory-bro.gis :as gis]
+            [territory-bro.gis-db :as gis-db]
             [territory-bro.projections :as projections]
             [territory-bro.region :as region]
             [territory-bro.territory :as territory]
@@ -24,7 +24,7 @@
           _ (congregation/use-schema conn (projections/current-state conn) cong-id)]
 
       (testing "before making changes"
-        (is (= [] (gis/get-gis-changes conn))))
+        (is (= [] (gis-db/get-changes conn))))
 
       (testing "territory table change log,"
         (let [territory-id (territory/create-territory! conn {:territory/number "123"
@@ -33,7 +33,7 @@
                                                               :territory/meta {:foo "bar", :gazonk 42}
                                                               :territory/location testdata/wkt-multi-polygon})]
           (testing "insert"
-            (let [changes (gis/get-gis-changes conn)]
+            (let [changes (gis-db/get-changes conn)]
               (is (= 1 (count changes)))
               (is (= {:table "territory"
                       :op "INSERT"
@@ -49,7 +49,7 @@
 
           (testing "update"
             (jdbc/execute! conn ["UPDATE territory SET addresses = 'Another Street 2' WHERE id = ?" territory-id])
-            (let [changes (gis/get-gis-changes conn)]
+            (let [changes (gis-db/get-changes conn)]
               (is (= 2 (count changes)))
               (is (= {:table "territory"
                       :op "UPDATE"
@@ -70,7 +70,7 @@
 
           (testing "delete"
             (jdbc/execute! conn ["DELETE FROM territory WHERE id = ?" territory-id])
-            (let [changes (gis/get-gis-changes conn)]
+            (let [changes (gis-db/get-changes conn)]
               (is (= 3 (count changes)))
               (is (= {:table "territory"
                       :op "DELETE"
@@ -86,7 +86,7 @@
 
       (testing "congregation_boundary table change log"
         (let [region-id (region/create-congregation-boundary! conn testdata/wkt-multi-polygon)
-              changes (gis/get-gis-changes conn)]
+              changes (gis-db/get-changes conn)]
           (is (= 4 (count changes)))
           (is (= {:table "congregation_boundary"
                   :op "INSERT"
@@ -98,7 +98,7 @@
 
       (testing "subregion table change log"
         (let [region-id (region/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
-              changes (gis/get-gis-changes conn)]
+              changes (gis-db/get-changes conn)]
           (is (= 5 (count changes)))
           (is (= {:table "subregion"
                   :op "INSERT"
@@ -111,7 +111,7 @@
 
       (testing "card_minimap_viewport table change log"
         (let [region-id (region/create-card-minimap-viewport! conn testdata/wkt-polygon)
-              changes (gis/get-gis-changes conn)]
+              changes (gis-db/get-changes conn)]
           (is (= 6 (count changes)))
           (is (= {:table "card_minimap_viewport"
                   :op "INSERT"
@@ -122,20 +122,20 @@
                      (dissoc :id :schema :user :time)))))))
 
     (testing "get changes since X"
-      (let [all-changes (gis/get-gis-changes conn)]
+      (let [all-changes (gis-db/get-changes conn)]
         (is (= all-changes
-               (gis/get-gis-changes conn {:since 0}))
+               (gis-db/get-changes conn {:since 0}))
             "since beginning")
         (is (= (drop 1 all-changes)
-               (gis/get-gis-changes conn {:since 1}))
+               (gis-db/get-changes conn {:since 1}))
             "since first change")
         (is (= (take-last 1 all-changes)
-               (gis/get-gis-changes conn {:since (:id (first (take-last 2 all-changes)))}))
+               (gis-db/get-changes conn {:since (:id (first (take-last 2 all-changes)))}))
             "since second last change")
         (is (= []
-               (gis/get-gis-changes conn {:since (:id (last all-changes))}))
+               (gis-db/get-changes conn {:since (:id (last all-changes))}))
             "since last change")
         ;; should probably be an error, but an empty result is safer than returning all events
         (is (= []
-               (gis/get-gis-changes conn {:since nil}))
+               (gis-db/get-changes conn {:since nil}))
             "since nil")))))
