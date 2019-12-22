@@ -10,6 +10,8 @@
 (def ^:private query! (db/compile-queries "db/hugsql/gis.sql"))
 
 
+;;; Regions
+
 (defn- format-region [territory]
   (remove-vals nil? {:region/id (:id territory)
                      :region/name (:name territory)
@@ -52,6 +54,39 @@
     id))
 
 
+;;; Territories
+
+(defn- format-territory [territory]
+  {:territory/id (:id territory)
+   :territory/number (:number territory)
+   :territory/addresses (:addresses territory)
+   :territory/subregion (:subregion territory)
+   :territory/meta (:meta territory)
+   :territory/location (:location territory)})
+
+(defn get-territories
+  ([conn]
+   (get-territories conn {}))
+  ([conn search]
+   (->> (query! conn :get-territories search)
+        (map format-territory)
+        (doall))))
+
+(defn get-territory-by-id [conn id]
+  (first (get-territories conn {:ids [id]})))
+
+(defn create-territory! [conn territory]
+  (let [id (UUID/randomUUID)]
+    (query! conn :create-territory {:id id
+                                    :number (:territory/number territory)
+                                    :addresses (:territory/addresses territory)
+                                    :subregion (:territory/subregion territory)
+                                    :meta (:territory/meta territory)
+                                    :location (:territory/location territory)})
+    id))
+
+
+;;; Changes
 
 (defn- format-gis-change [change]
   change)

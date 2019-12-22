@@ -23,7 +23,6 @@
             [territory-bro.permissions :as permissions]
             [territory-bro.projections :as projections]
             [territory-bro.qgis :as qgis]
-            [territory-bro.territory :as territory]
             [territory-bro.user :as user]
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
@@ -165,7 +164,7 @@
                                                (map (fn [permission]
                                                       [permission true]))
                                                (into {}))
-                             :territories (territory/get-territories conn)
+                             :territories (gis-db/get-territories conn)
                              :congregation-boundaries (gis-db/get-congregation-boundaries conn)
                              :subregions (gis-db/get-subregions conn)
                              :card-minimap-viewports (gis-db/get-card-minimap-viewports conn)

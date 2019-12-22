@@ -16,7 +16,6 @@
             [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.projections :as projections]
-            [territory-bro.territory :as territory]
             [territory-bro.testdata :as testdata]
             [territory-bro.testutil :as testutil]
             [territory-bro.user :as user])
@@ -348,11 +347,11 @@
     (testing "can modify data in the tenant schema"
       (jdbc/with-db-transaction [conn db-spec]
         (db/use-tenant-schema conn schema)
-        (is (territory/create-territory! conn {:territory/number "123"
-                                               :territory/addresses "Street 1 A"
-                                               :territory/subregion "Somewhere"
-                                               :territory/meta {:foo "bar", :gazonk 42}
-                                               :territory/location testdata/wkt-multi-polygon}))
+        (is (gis-db/create-territory! conn {:territory/number "123"
+                                            :territory/addresses "Street 1 A"
+                                            :territory/subregion "Somewhere"
+                                            :territory/meta {:foo "bar", :gazonk 42}
+                                            :territory/location testdata/wkt-multi-polygon}))
         (is (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon))
         (is (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
         (is (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon))))
