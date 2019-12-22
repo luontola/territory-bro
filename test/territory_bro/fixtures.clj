@@ -44,12 +44,6 @@
   (f)
   (mount/stop))
 
-(defn process-managers-fixture [f]
-  (mount/start #'projections/*cache
-               #'projections/refresher)
-  (f)
-  (mount/stop))
-
 (defn api-fixture [f]
   (mount/stop #'config/env)
   (mount/start-with-args (merge test-env jwt-test/env)
@@ -58,7 +52,3 @@
   (mount/start #'router/app)
   (f)
   (mount/stop))
-
-(defn event-actor-fixture [f]
-  (binding [events/*current-system* "test"]
-    (f)))

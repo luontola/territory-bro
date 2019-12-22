@@ -11,7 +11,7 @@
             [territory-bro.db :as db]
             [territory-bro.event-store :as event-store]
             [territory-bro.events :as events]
-            [territory-bro.fixtures :refer [db-fixture event-actor-fixture]]
+            [territory-bro.fixtures :refer [db-fixture]]
             [territory-bro.permissions :as permissions]
             [territory-bro.projections :as projections]
             [territory-bro.testutil :as testutil])
@@ -19,7 +19,7 @@
            (java.util UUID)
            (territory_bro NoPermitException ValidationException)))
 
-(use-fixtures :once (join-fixtures [db-fixture event-actor-fixture]))
+(use-fixtures :once (join-fixtures [db-fixture]))
 
 (defn- apply-events [events]
   (testutil/apply-events congregation/congregations-view events))
@@ -85,7 +85,8 @@
     (jdbc/db-set-rollback-only! conn)
 
     (testing "create congregation"
-      (let [cong-id (congregation/create-congregation! conn "the name")
+      (let [cong-id (binding [events/*current-system* "test"]
+                      (congregation/create-congregation! conn "the name"))
             congregation (congregation/get-unrestricted-congregation (projections/current-state conn) cong-id)]
         (is cong-id)
         (is (= [{:event/type :congregation.event/congregation-created

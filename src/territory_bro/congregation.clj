@@ -184,8 +184,7 @@
                                          :congregation/id id
                                          :congregation/name name
                                          :congregation/schema-name tenant-schema)])
-    (-> (db/tenant-schema tenant-schema master-schema)
-        (.migrate))
+    (db/migrate-tenant-schema! tenant-schema)
     (log/info "Congregation created:" id)
     id))
 

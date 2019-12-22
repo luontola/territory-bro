@@ -14,7 +14,7 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.events :as events]
-            [territory-bro.fixtures :refer [db-fixture api-fixture event-actor-fixture]]
+            [territory-bro.fixtures :refer [db-fixture api-fixture]]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.json :as json]
             [territory-bro.jwt :as jwt]
@@ -196,8 +196,8 @@
     (UUID/fromString (get-in (json/parse-string (:body response)) [:user :id]))))
 
 (deftest super-user-test
-  (let [cong-id (event-actor-fixture
-                 #(congregation/create-congregation! db/database "sudo test"))
+  (let [cong-id (binding [events/*current-system* "test"]
+                  (congregation/create-congregation! db/database "sudo test"))
         session (login! app)
         user-id (get-user-id session)]
 
