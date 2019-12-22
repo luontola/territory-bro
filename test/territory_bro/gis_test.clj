@@ -119,4 +119,23 @@
                   :new {:id (str region-id)
                         :location testdata/wkt-polygon}}
                  (-> (last changes)
-                     (dissoc :id :schema :user :time)))))))))
+                     (dissoc :id :schema :user :time)))))))
+
+    (testing "get changes since X"
+      (let [all-changes (gis/get-gis-changes conn)]
+        (is (= all-changes
+               (gis/get-gis-changes conn {:since 0}))
+            "since beginning")
+        (is (= (drop 1 all-changes)
+               (gis/get-gis-changes conn {:since 1}))
+            "since first change")
+        (is (= (take-last 1 all-changes)
+               (gis/get-gis-changes conn {:since (:id (first (take-last 2 all-changes)))}))
+            "since second last change")
+        (is (= []
+               (gis/get-gis-changes conn {:since (:id (last all-changes))}))
+            "since last change")
+        ;; should probably be an error, but an empty result is safer than returning all events
+        (is (= []
+               (gis/get-gis-changes conn {:since nil}))
+            "since nil")))))
