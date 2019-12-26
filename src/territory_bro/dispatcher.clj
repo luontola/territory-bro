@@ -3,7 +3,9 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.dispatcher
-  (:require [clojure.tools.logging :as log]
+  (:require [clojure.pprint :as pprint]
+            [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [territory-bro.commands :as commands]
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
@@ -60,15 +62,20 @@
                                                      (gis-db/ensure-user-absent! conn args)))]
     (call! db-admin/handle-command command state injections)))
 
+(defn- pretty-str [object]
+  (str/trimr (with-out-str
+               (print "\n")
+               (pprint/pprint object))))
+
 (defn command! [conn state command]
   (let [command (-> command
                     (commands/sorted-keys)
                     (commands/validate-command))
-        _ (log/info "Dispatch command:" (pr-str command))
+        _ (log/info "Dispatch command:" (pretty-str command))
         events (case (namespace (:command/type command))
                  "congregation.command" (congregation-command! conn command state)
                  "gis-user.command" (gis-user-command! conn command state)
                  "db-admin.command" (db-admin-command! conn command state)
                  (throw (AssertionError. (str "Command handler not found: " (pr-str command)))))]
-    (log/info "Produced events:" (pr-str events))
+    (log/info "Produced events:" (pretty-str events))
     events))
