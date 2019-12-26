@@ -5,18 +5,10 @@
 (ns territory-bro.config
   (:require [clojure.string :as str]
             [cprop.core :as cprop]
-            [cprop.source :as source]
-            [cprop.tools :refer [merge-maps]]
             [mount.core :as mount]
             [territory-bro.util :refer [getx]])
   (:import (java.time Instant)
            (java.util UUID)))
-
-(defn override-defaults
-  ([defaults overrides & more]
-   (reduce override-defaults defaults (conj (seq more) overrides)))
-  ([defaults overrides]
-   (merge-maps defaults (select-keys overrides (keys defaults)))))
 
 (defn try-parse-uuid [s]
   (try
@@ -36,8 +28,5 @@
                            (set))))
 
 (mount/defstate ^:dynamic env
-  :start (-> (override-defaults
-              (cprop/load-config :resource "config-defaults.edn")
-              (source/from-system-props {:as-is? false})
-              (source/from-env {:as-is? false}))
+  :start (-> (cprop/load-config :resource "config-defaults.edn") ; TODO: use ":as-is? true" and schema coercion?
              (enrich-env)))
