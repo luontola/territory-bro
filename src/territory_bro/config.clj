@@ -37,8 +37,7 @@
 
 (mount/defstate ^:dynamic env
   :start (-> (override-defaults
-              (cprop/load-config :resource "config-defaults.edn"
-                                 :merge [(source/from-resource "config.edn")])
+              (cprop/load-config :resource "config-defaults.edn")
               (source/from-system-props {:as-is? false})
               (source/from-env {:as-is? false}))
              (enrich-env)

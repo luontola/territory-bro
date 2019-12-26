@@ -1,5 +1,6 @@
 {:port 8082
  :database-url "jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
+ :database-schema "test_territorybro"
  :gis-database-host "localhost"
  :auth0-domain "luontola.eu.auth0.com"
  :auth0-client-id "8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"

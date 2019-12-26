@@ -61,8 +61,7 @@
 
   :profiles {:uberjar {:omit-source true
                        :aot :all
-                       :uberjar-name "territory-bro.jar"
-                       :resource-paths ["env/prod/resources"]}
+                       :uberjar-name "territory-bro.jar"}
 
              :kaocha {:dependencies [[lambdaisland/kaocha "0.0-529"]]}
 
@@ -74,11 +73,10 @@
                                           [ring/ring-devel "1.7.1" :exclusions [ns-tracker]]
                                           [ring/ring-mock "0.4.0"]]
 
-                           :source-paths ["env/dev/clj"]
-                           :resource-paths ["env/dev/resources"]
+                           :jvm-opts ["-Dconf=dev-config.edn"]
                            :repl-options {:init-ns user}
                            :injections [(require 'pjstadig.humane-test-output)
                                         (pjstadig.humane-test-output/activate!)]}
-             :project/test {:resource-paths ["env/test/resources"]}
+             :project/test {:jvm-opts ["-Dconf=test-config.edn"]}
              :profiles/dev {}
              :profiles/test {}})

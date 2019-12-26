@@ -22,7 +22,7 @@ services:
       NREPL_PORT: 7000
       AUTH0_DOMAIN: luontola.eu.auth0.com
       AUTH0_CLIENT_ID: 8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi
-      SUPER_ADMIN:
+      SUPER_USERS:
       SUPPORT_EMAIL: support@example.com
       DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro
     mem_reservation: 150m
