@@ -11,6 +11,25 @@
   (:import (java.time Instant)
            (java.util UUID)))
 
+(def ^:private key-order
+  (->> [:command/type
+        :command/user
+        :command/system
+        :command/time]
+       (map-indexed (fn [idx k]
+                      [k idx]))
+       (into {})))
+
+(defn- key-comparator [x y]
+  (compare [(get key-order x 100) x]
+           [(get key-order y 100) y]))
+
+(defn sorted-keys [event]
+  (when event
+    (into (sorted-map-by key-comparator)
+          event)))
+
+
 ;;;; Schemas
 
 (s/defschema UserCommand

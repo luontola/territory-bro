@@ -28,6 +28,7 @@
 (defn- call! [command-handler command state-or-old-events injections]
   (->> (command-handler command state-or-old-events injections)
        (events/enrich-events command injections)
+       (map events/sorted-keys)
        (events/strict-validate-events)))
 
 
@@ -60,8 +61,10 @@
     (call! db-admin/handle-command command state injections)))
 
 (defn command! [conn state command]
-  (log/info "Dispatch command:" (pr-str command))
-  (let [command (commands/validate-command command)
+  (let [command (-> command
+                    (commands/sorted-keys)
+                    (commands/validate-command))
+        _ (log/info "Dispatch command:" (pr-str command))
         events (case (namespace (:command/type command))
                  "congregation.command" (congregation-command! conn command state)
                  "gis-user.command" (gis-user-command! conn command state)

@@ -90,6 +90,7 @@
 (def unknown-event (assoc valid-event :event/type :foo))
 
 (deftest sorted-keys-test
+  (is (nil? (events/sorted-keys nil)))
   (is (= [:event/type
           :event/version
           :event/user

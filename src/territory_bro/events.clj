@@ -44,6 +44,7 @@
 (def ^:private key-order
   (->> [:event/type
         :event/version
+        :event/transient?
         :event/user
         :event/system
         :event/time
@@ -59,8 +60,9 @@
            [(get key-order y 100) y]))
 
 (defn sorted-keys [event]
-  (into (sorted-map-by key-comparator)
-        event))
+  (when event
+    (into (sorted-map-by key-comparator)
+          event)))
 
 
 ;;;; Schemas

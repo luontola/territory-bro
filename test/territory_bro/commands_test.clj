@@ -21,6 +21,15 @@
 (def invalid-command (dissoc valid-command :congregation/name))
 (def unknown-command (assoc valid-command :command/type :foo))
 
+(deftest sorted-keys-test
+  (is (nil? (commands/sorted-keys nil)))
+  (is (= [:command/type
+          :command/user
+          :command/time
+          :congregation/id
+          :congregation/name]
+         (keys (commands/sorted-keys valid-command)))))
+
 ;; TODO: deduplicate event & command validation infra
 
 (deftest command-schema-test
