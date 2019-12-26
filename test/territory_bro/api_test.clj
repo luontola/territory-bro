@@ -104,7 +104,8 @@
       (is (= ["ring-session"] (keys (get-cookies response))))))
 
   (testing "user is saved on login"
-    (let [user (user/get-by-subject db/database (:sub (jwt/validate jwt-test/token config/env)))]
+    (let [user (db/with-db [conn {}]
+                 (user/get-by-subject conn (:sub (jwt/validate jwt-test/token config/env))))]
       (is user)
       (is (= "Esko Luontola" (get-in user [:user/attributes :name])))))
 
@@ -129,7 +130,8 @@
         (is (= ["ring-session"] (keys (get-cookies response)))))))
 
   (testing "user is saved on dev login"
-    (let [user (user/get-by-subject db/database "developer")]
+    (let [user (db/with-db [conn {}]
+                 (user/get-by-subject conn "developer"))]
       (is user)
       (is (= "Developer" (get-in user [:user/attributes :name])))))
 
@@ -197,7 +199,8 @@
 
 (deftest super-user-test
   (let [cong-id (binding [events/*current-system* "test"]
-                  (congregation/create-congregation! db/database "sudo test"))
+                  (db/with-db [conn {}]
+                    (congregation/create-congregation! conn "sudo test")))
         session (login! app)
         user-id (get-user-id session)]
 
@@ -244,10 +247,10 @@
 
     (let [cong-id (UUID/fromString (:id (:body response)))]
       (testing "grants access to the current user"
-        (is (= 1 (count (congregation/get-users (projections/current-state db/database) cong-id)))))
+        (is (= 1 (count (congregation/get-users (projections/cached-state) cong-id)))))
 
       (testing "creates a GIS user for the current user"
-        (is (= 1 (count (gis-user/get-gis-users (projections/current-state db/database) cong-id)))))))
+        (is (= 1 (count (gis-user/get-gis-users (projections/cached-state) cong-id)))))))
 
   (testing "requires login"
     (let [response (-> (request :post "/api/congregations")
@@ -366,7 +369,8 @@
                      app
                      (assert-response ok?))
         cong-id (UUID/fromString (:id (:body response)))
-        new-user-id (user/save-user! db/database "user1" {:name "User 1"})]
+        new-user-id (db/with-db [conn {}]
+                      (user/save-user! conn "user1" {:name "User 1"}))]
 
     (testing "add user"
       (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
@@ -375,8 +379,7 @@
                          app)]
         (is (ok? response)))
       ;; TODO: check the result through the API
-      (let [users (-> (projections/current-state db/database)
-                      (congregation/get-users cong-id))]
+      (let [users (congregation/get-users (projections/cached-state) cong-id)]
         (is (contains? (set users) new-user-id))))
 
     (testing "invalid user"
@@ -404,7 +407,8 @@
                      app
                      (assert-response ok?))
         cong-id (UUID/fromString (:id (:body response)))
-        user-id (user/save-user! db/database "user1" {:name "User 1"})]
+        user-id (db/with-db [conn {}]
+                  (user/save-user! conn "user1" {:name "User 1"}))]
     (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
                        (json-body {:userId (str user-id)})
                        (merge session)
@@ -421,8 +425,7 @@
                          app)]
         (is (ok? response))
         ;; TODO: check the result through the API
-        (let [users (-> (projections/current-state db/database)
-                        (congregation/get-users cong-id))]
+        (let [users (congregation/get-users (projections/cached-state) cong-id)]
           (is (not (contains? (set users) user-id))))))
 
     (testing "invalid user"

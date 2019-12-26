@@ -296,7 +296,8 @@
                :schema test-schema,
                :table "card_minimap_viewport",
                :user test-username}]
-             (->> (gis-db/get-changes db/database)
+             (->> (db/with-db [conn {}]
+                    (gis-db/get-changes conn))
                   (map #(dissoc % :id :time :old :new))))))
 
     (testing "cannot view the master schema"
