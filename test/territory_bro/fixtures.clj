@@ -42,10 +42,8 @@
   (mount/stop))
 
 (defn api-fixture [f]
-  (mount/stop #'config/env)
-  (mount/start-with-args jwt-test/env
-                         #'config/env)
-  (mount/start-with {#'jwt/jwk-provider jwt-test/fake-jwk-provider})
-  (mount/start #'router/app)
-  (f)
+  (binding [config/env (merge config/env jwt-test/env)]
+    (mount/start-with {#'jwt/jwk-provider jwt-test/fake-jwk-provider})
+    (mount/start #'router/app)
+    (f))
   (mount/stop))

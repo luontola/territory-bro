@@ -40,5 +40,4 @@
               (cprop/load-config :resource "config-defaults.edn")
               (source/from-system-props {:as-is? false})
               (source/from-env {:as-is? false}))
-             (enrich-env)
-             (merge (mount/args))))
+             (enrich-env)))
