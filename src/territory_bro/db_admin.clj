@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -100,18 +100,14 @@
 
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
-(defn- check-congregation-exists [state cong-id]
-  (when-not (contains? (::congregations state) cong-id)
-    (throw (ValidationException. [[:no-such-congregation cong-id]]))))
-
 (defn- check-user-exists [state user-id]
   (when-not (contains? (::users state) user-id)
     (throw (ValidationException. [[:no-such-user user-id]]))))
 
-(defmethod command-handler :db-admin.command/migrate-tenant-schema [command state {:keys [migrate-tenant-schema! check-permit]}]
+(defmethod command-handler :db-admin.command/migrate-tenant-schema [command _state {:keys [migrate-tenant-schema! check-permit check-congregation-exists]}]
   (let [cong-id (:congregation/id command)]
     (check-permit [:migrate-tenant-schema cong-id])
-    (check-congregation-exists state cong-id)
+    (check-congregation-exists cong-id)
     (migrate-tenant-schema! (:congregation/schema-name command))
     [{:event/type :db-admin.event/gis-schema-is-present
       :event/version 1
@@ -119,11 +115,11 @@
       :congregation/id cong-id
       :congregation/schema-name (:congregation/schema-name command)}]))
 
-(defmethod command-handler :db-admin.command/ensure-gis-user-present [command state {:keys [ensure-gis-user-present! check-permit]}]
+(defmethod command-handler :db-admin.command/ensure-gis-user-present [command state {:keys [ensure-gis-user-present! check-permit check-congregation-exists]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:ensure-gis-user-present cong-id user-id])
-    (check-congregation-exists state cong-id)
+    (check-congregation-exists cong-id)
     (check-user-exists state user-id)
     (ensure-gis-user-present! {:username (:gis-user/username command)
                                :password (:gis-user/password command)
@@ -135,11 +131,11 @@
       :user/id user-id
       :gis-user/username (:gis-user/username command)}]))
 
-(defmethod command-handler :db-admin.command/ensure-gis-user-absent [command state {:keys [ensure-gis-user-absent! check-permit]}]
+(defmethod command-handler :db-admin.command/ensure-gis-user-absent [command state {:keys [ensure-gis-user-absent! check-permit check-congregation-exists]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:ensure-gis-user-absent cong-id user-id])
-    (check-congregation-exists state cong-id)
+    (check-congregation-exists cong-id)
     (check-user-exists state user-id)
     (ensure-gis-user-absent! {:username (:gis-user/username command)
                               :schema (:congregation/schema-name command)})

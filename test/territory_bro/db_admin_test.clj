@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -125,8 +125,9 @@
 (deftest migrate-tenant-schema-test
   (let [spy (spy/spy)
         state (apply-events [congregation-created])
-        injections {:check-permit (fn [_permit])
-                    :migrate-tenant-schema! (spy/fn spy :migrate-tenant-schema!)}
+        injections {:migrate-tenant-schema! (spy/fn spy :migrate-tenant-schema!)
+                    :check-permit (fn [_permit])
+                    :check-congregation-exists (fn [_cong-id])}
         command {:command/type :db-admin.command/migrate-tenant-schema
                  :command/time (Instant/now)
                  :command/system "test"
@@ -139,12 +140,13 @@
       (is (= [[:migrate-tenant-schema! "cong1_schema"]]
              (spy/read! spy))))
 
-    (testing "congregation doesn't exist"
-      (is (thrown-with-msg?
-           ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (handle-command (assoc command :congregation/id (UUID. 0 0x666))
-                           state
-                           injections))))
+    (testing "checks congregation exists"
+      (let [injections (assoc injections
+                              :check-congregation-exists (fn [id]
+                                                           (is (= cong-id id))
+                                                           (throw (ValidationException. [[:dummy]]))))]
+        (is (thrown? ValidationException
+                     (handle-command command state injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections
@@ -157,8 +159,9 @@
 (deftest ensure-gis-user-present-test
   (let [spy (spy/spy)
         state (apply-events [congregation-created gis-user-created])
-        injections {:check-permit (fn [_permit])
-                    :ensure-gis-user-present! (spy/fn spy :ensure-gis-user-present!)}
+        injections {:ensure-gis-user-present! (spy/fn spy :ensure-gis-user-present!)
+                    :check-permit (fn [_permit])
+                    :check-congregation-exists (fn [_cong-id])}
         command {:command/type :db-admin.command/ensure-gis-user-present
                  :command/time (Instant/now)
                  :command/system "test"
@@ -176,12 +179,12 @@
                                           :schema "cong1_schema"}]]
              (spy/read! spy))))
 
-    (testing "congregation doesn't exist"
-      (is (thrown-with-msg?
-           ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (handle-command (assoc command :congregation/id (UUID. 0 0x666))
-                           state
-                           injections))))
+    (testing "checks congregation exists"
+      (let [injections (assoc injections
+                              :check-congregation-exists (fn [id]
+                                                           (is (= cong-id id))
+                                                           (throw (ValidationException. [[:dummy]]))))]
+        (is (thrown? ValidationException (handle-command command state injections)))))
 
     (testing "user doesn't exist"
       (is (thrown-with-msg?
@@ -201,8 +204,9 @@
 (deftest ensure-gis-user-absent-test
   (let [spy (spy/spy)
         state (apply-events [congregation-created gis-user-created])
-        injections {:check-permit (fn [_permit])
-                    :ensure-gis-user-absent! (spy/fn spy :ensure-gis-user-absent!)}
+        injections {:ensure-gis-user-absent! (spy/fn spy :ensure-gis-user-absent!)
+                    :check-permit (fn [_permit])
+                    :check-congregation-exists (fn [_cong-id])}
         command {:command/type :db-admin.command/ensure-gis-user-absent
                  :command/time (Instant/now)
                  :command/system "test"
@@ -218,12 +222,12 @@
                                          :schema "cong1_schema"}]]
              (spy/read! spy))))
 
-    (testing "congregation doesn't exist"
-      (is (thrown-with-msg?
-           ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (handle-command (assoc command :congregation/id (UUID. 0 0x666))
-                           state
-                           injections))))
+    (testing "checks congregation exists"
+      (let [injections (assoc injections
+                              :check-congregation-exists (fn [id]
+                                                           (is (= cong-id id))
+                                                           (throw (ValidationException. [[:dummy]]))))]
+        (is (thrown? ValidationException (handle-command command state injections)))))
 
     (testing "user doesn't exist"
       (is (thrown-with-msg?

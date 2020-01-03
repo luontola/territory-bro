@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -160,21 +160,17 @@
         (.encodeToString bytes)
         (.substring 0 length))))
 
-(defn- check-congregation-exists [state cong-id]
-  (when-not (contains? (::congregations state) cong-id)
-    (throw (ValidationException. [[:no-such-congregation cong-id]]))))
-
 (defn- check-user-exists [state user-id]
   (when-not (contains? (::users state) user-id)
     (throw (ValidationException. [[:no-such-user user-id]]))))
 
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
-(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists? check-permit]}]
+(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists? check-permit check-congregation-exists]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:create-gis-user cong-id user-id])
-    (check-congregation-exists state cong-id)
+    (check-congregation-exists cong-id)
     (check-user-exists state user-id)
     (when (nil? (get-in state (username-path command)))
       [{:event/type :congregation.event/gis-user-created
@@ -187,11 +183,11 @@
                                (unique-username db-user-exists?))
         :gis-user/password (generate-password)}])))
 
-(defmethod command-handler :gis-user.command/delete-gis-user [command state {:keys [check-permit]}]
+(defmethod command-handler :gis-user.command/delete-gis-user [command state {:keys [check-permit check-congregation-exists]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:delete-gis-user cong-id user-id])
-    (check-congregation-exists state cong-id)
+    (check-congregation-exists cong-id)
     (check-user-exists state user-id)
     (when-some [username (get-in state (username-path command))]
       [{:event/type :congregation.event/gis-user-deleted

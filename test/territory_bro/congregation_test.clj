@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -155,6 +155,25 @@
               "unrelated congregation"))))
 
     (testing "superadmin can access all congregations"))) ; TODO
+
+(deftest check-congregation-exists-test
+  (let [cong-id (UUID. 0 1)
+        events [{:event/type :congregation.event/congregation-created
+                 :event/version 1
+                 :congregation/id cong-id
+                 :congregation/name "Cong1 Name"
+                 :congregation/schema-name "cong1_schema"}]
+        state (apply-events events)]
+
+    (testing "exists"
+      (is (nil? (congregation/check-congregation-exists state cong-id))))
+
+    (testing "doesn't exist"
+      (is (thrown-with-msg?
+           ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (congregation/check-congregation-exists state (UUID. 0 0x666)))))))
+
+;;; Commands
 
 (deftest rename-congregation-test
   (let [cong-id (UUID. 0 1)

@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -19,8 +19,8 @@
 
 (defn- default-injections [command state]
   {:now (:now config/env)
-   :check-permit (fn [permit]
-                   (commands/check-permit state command permit))})
+   :check-permit #(commands/check-permit state command %)
+   :check-congregation-exists #(congregation/check-congregation-exists state %)})
 
 (defn- write-stream! [conn stream-id f]
   (let [old-events (event-store/read-stream conn stream-id)

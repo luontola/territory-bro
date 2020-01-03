@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -131,9 +131,10 @@
           (is (= expected (apply-events events)) "should ignore the event"))))))
 
 (deftest create-gis-user-test
-  (let [injections {:check-permit (fn [_permit])
-                    :generate-password (constantly "secret123")
-                    :db-user-exists? (constantly false)}
+  (let [injections {:generate-password (constantly "secret123")
+                    :db-user-exists? (constantly false)
+                    :check-permit (fn [_permit])
+                    :check-congregation-exists (fn [_cong-id])}
         command {:command/type :gis-user.command/create-gis-user
                  :command/time (Instant/now)
                  :command/system "test"
@@ -172,12 +173,12 @@
                              (conj events gis-user-created gis-user-deleted)
                              injections))))
 
-    (testing "congregation doesn't exist"
-      (is (thrown-with-msg?
-           ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (handle-command (assoc command :congregation/id (UUID. 0 0x666))
-                           events
-                           injections))))
+    (testing "checks congregation exists"
+      (let [injections (assoc injections
+                              :check-congregation-exists (fn [id]
+                                                           (is (= cong-id id))
+                                                           (throw (ValidationException. [[:dummy]]))))]
+        (is (thrown? ValidationException (handle-command command events injections)))))
 
     (testing "user doesn't exist"
       (is (thrown-with-msg?
@@ -195,7 +196,8 @@
                      (handle-command command events injections)))))))
 
 (deftest delete-gis-user-test
-  (let [injections {:check-permit (fn [_permit])}
+  (let [injections {:check-permit (fn [_permit])
+                    :check-congregation-exists (fn [_cong-id])}
         command {:command/type :gis-user.command/delete-gis-user
                  :command/time (Instant/now)
                  :command/system "test"
@@ -223,12 +225,12 @@
                                   injections))
           "already deleted"))
 
-    (testing "congregation doesn't exist"
-      (is (thrown-with-msg?
-           ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (handle-command (assoc command :congregation/id (UUID. 0 0x666))
-                           events
-                           injections))))
+    (testing "checks congregation exists"
+      (let [injections (assoc injections
+                              :check-congregation-exists (fn [id]
+                                                           (is (= cong-id id))
+                                                           (throw (ValidationException. [[:dummy]]))))]
+        (is (thrown? ValidationException (handle-command command events injections)))))
 
     (testing "user doesn't exist"
       (is (thrown-with-msg?

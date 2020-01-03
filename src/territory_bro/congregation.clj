@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -99,6 +99,9 @@
   (-> (get-unrestricted-congregation state cong-id)
       (apply-user-permissions state user-id)))
 
+(defn check-congregation-exists [state cong-id]
+  (when-not (contains? (::congregations state) cong-id)
+    (throw (ValidationException. [[:no-such-congregation cong-id]]))))
 
 ;;;; Write model
 
