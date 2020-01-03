@@ -15,17 +15,6 @@
 
 (def cong-id (UUID. 1 0))
 (def user-id (UUID. 2 0))
-
-(def congregation-created {:event/type :congregation.event/congregation-created
-                           :event/version 1
-                           :congregation/id cong-id
-                           :congregation/name "Cong1 Name"
-                           :congregation/schema-name "cong1_schema"})
-(def permission-granted {:event/type :congregation.event/permission-granted
-                         :event/version 1
-                         :congregation/id cong-id
-                         :user/id user-id
-                         :permission/id :gis-access})
 (def gis-user-created {:event/type :congregation.event/gis-user-created
                        :event/version 1
                        :congregation/id cong-id
@@ -48,44 +37,31 @@
        (events/validate-events)))
 
 (deftest gis-users-view-test
-  ;; TODO: reuse the event examples also in this test
-  (let [events []
-        expected nil]
+  (testing "GIS user created"
+    (let [events [gis-user-created]
+          expected {::gis-user/gis-users
+                    {cong-id {user-id {:user/id user-id
+                                       :gis-user/username "gis_user_0000000000000001_0000000000000002"
+                                       :gis-user/password "secret123"}}}}]
+      (is (= expected (apply-events events)))
 
-    (testing "GIS user created"
-      (let [events (conj events {:event/type :congregation.event/gis-user-created
-                                 :event/version 1
-                                 :congregation/id cong-id
-                                 :user/id user-id
-                                 :gis-user/username "username123"
-                                 :gis-user/password "password123"})
-            expected (deep-merge expected
-                                 {::gis-user/gis-users
-                                  {cong-id {user-id {:user/id user-id
-                                                     :gis-user/username "username123"
-                                                     :gis-user/password "password123"}}}})]
-        (is (= expected (apply-events events)))
-
-        (testing "> GIS user deleted"
-          (let [events (conj events {:event/type :congregation.event/gis-user-deleted
-                                     :event/version 1
-                                     :congregation/id cong-id
-                                     :user/id user-id
-                                     :gis-user/username "username123"})
-                expected (dissoc-in expected [::gis-user/gis-users cong-id user-id])]
-            (is (= expected (apply-events events)))))))))
+      (testing "> GIS user deleted"
+        (let [events (conj events gis-user-deleted)
+              expected {}]
+          (is (= expected (apply-events events))))))))
 
 (deftest create-gis-user-test
   (let [injections {:generate-password (constantly "secret123")
                     :db-user-exists? (constantly false)
                     :check-permit (fn [_permit])
-                    :check-congregation-exists (fn [_cong-id])}
+                    :check-congregation-exists (fn [_cong-id])
+                    :check-user-exists (fn [_user-id])}
         command {:command/type :gis-user.command/create-gis-user
                  :command/time (Instant/now)
                  :command/system "test"
                  :congregation/id cong-id
                  :user/id user-id}
-        events [congregation-created permission-granted]]
+        events []]
 
     (testing "valid command"
       (is (= [gis-user-created]
@@ -125,12 +101,12 @@
                                                            (throw (ValidationException. [[:dummy]]))))]
         (is (thrown? ValidationException (handle-command command events injections)))))
 
-    (testing "user doesn't exist"
-      (is (thrown-with-msg?
-           ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (handle-command (assoc command :user/id (UUID. 0 0x666))
-                           events
-                           injections))))
+    (testing "checks user exists"
+      (let [injections (assoc injections
+                              :check-user-exists (fn [id]
+                                                   (is (= user-id id))
+                                                   (throw (ValidationException. [[:dummy]]))))]
+        (is (thrown? ValidationException (handle-command command events injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections
@@ -142,13 +118,14 @@
 
 (deftest delete-gis-user-test
   (let [injections {:check-permit (fn [_permit])
-                    :check-congregation-exists (fn [_cong-id])}
+                    :check-congregation-exists (fn [_cong-id])
+                    :check-user-exists (fn [_user-id])}
         command {:command/type :gis-user.command/delete-gis-user
                  :command/time (Instant/now)
                  :command/system "test"
                  :congregation/id cong-id
                  :user/id user-id}
-        events [congregation-created permission-granted gis-user-created]]
+        events [gis-user-created]]
 
     (testing "valid command"
       (is (= [gis-user-deleted]
@@ -177,12 +154,12 @@
                                                            (throw (ValidationException. [[:dummy]]))))]
         (is (thrown? ValidationException (handle-command command events injections)))))
 
-    (testing "user doesn't exist"
-      (is (thrown-with-msg?
-           ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (handle-command (assoc command :user/id (UUID. 0 0x666))
-                           events
-                           injections))))
+    (testing "checks user exists"
+      (let [injections (assoc injections
+                              :check-user-exists (fn [id]
+                                                   (is (= user-id id))
+                                                   (throw (ValidationException. [[:dummy]]))))]
+        (is (thrown? ValidationException (handle-command command events injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections

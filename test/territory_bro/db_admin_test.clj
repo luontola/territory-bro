@@ -161,7 +161,8 @@
         state (apply-events [congregation-created gis-user-created])
         injections {:ensure-gis-user-present! (spy/fn spy :ensure-gis-user-present!)
                     :check-permit (fn [_permit])
-                    :check-congregation-exists (fn [_cong-id])}
+                    :check-congregation-exists (fn [_cong-id])
+                    :check-user-exists (fn [_user-id])}
         command {:command/type :db-admin.command/ensure-gis-user-present
                  :command/time (Instant/now)
                  :command/system "test"
@@ -186,12 +187,12 @@
                                                            (throw (ValidationException. [[:dummy]]))))]
         (is (thrown? ValidationException (handle-command command state injections)))))
 
-    (testing "user doesn't exist"
-      (is (thrown-with-msg?
-           ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (handle-command (assoc command :user/id (UUID. 0 0x666))
-                           state
-                           injections))))
+    (testing "checks user exists"
+      (let [injections (assoc injections
+                              :check-user-exists (fn [id]
+                                                   (is (= user-id id))
+                                                   (throw (ValidationException. [[:dummy]]))))]
+        (is (thrown? ValidationException (handle-command command state injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections
@@ -206,7 +207,8 @@
         state (apply-events [congregation-created gis-user-created])
         injections {:ensure-gis-user-absent! (spy/fn spy :ensure-gis-user-absent!)
                     :check-permit (fn [_permit])
-                    :check-congregation-exists (fn [_cong-id])}
+                    :check-congregation-exists (fn [_cong-id])
+                    :check-user-exists (fn [_user-id])}
         command {:command/type :db-admin.command/ensure-gis-user-absent
                  :command/time (Instant/now)
                  :command/system "test"
@@ -229,12 +231,12 @@
                                                            (throw (ValidationException. [[:dummy]]))))]
         (is (thrown? ValidationException (handle-command command state injections)))))
 
-    (testing "user doesn't exist"
-      (is (thrown-with-msg?
-           ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (handle-command (assoc command :user/id (UUID. 0 0x666))
-                           state
-                           injections))))
+    (testing "checks user exists"
+      (let [injections (assoc injections
+                              :check-user-exists (fn [id]
+                                                   (is (= user-id id))
+                                                   (throw (ValidationException. [[:dummy]]))))]
+        (is (thrown? ValidationException (handle-command command state injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections

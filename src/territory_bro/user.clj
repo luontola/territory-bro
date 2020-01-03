@@ -1,10 +1,11 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.user
   (:require [territory-bro.db :as db])
-  (:import (java.util UUID)))
+  (:import (java.util UUID)
+           (territory_bro ValidationException)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/user.sql"))
 
@@ -21,8 +22,8 @@
         (map format-user)
         (doall))))
 
-(defn get-by-id [conn id]
-  (first (get-users conn {:ids [id]})))
+(defn get-by-id [conn user-id]
+  (first (get-users conn {:ids [user-id]})))
 
 (defn get-by-subject [conn subject]
   (first (get-users conn {:subjects [subject]})))
@@ -31,3 +32,7 @@
   (:id (first (query! conn :save-user {:id (UUID/randomUUID)
                                        :subject subject
                                        :attributes attributes}))))
+
+(defn check-user-exists [conn user-id]
+  (when (nil? (get-by-id conn user-id))
+    (throw (ValidationException. [[:no-such-user user-id]]))))

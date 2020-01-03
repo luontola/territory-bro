@@ -3,9 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.db-admin
-  (:require [territory-bro.presence-tracker :as presence-tracker]
-            [territory-bro.util :refer [conj-set]])
-  (:import (territory_bro ValidationException)))
+  (:require [territory-bro.presence-tracker :as presence-tracker]))
 
 (defmulti projection (fn [_state event] (:event/type event)))
 (defmethod projection :default [state _event] state)
@@ -31,7 +29,6 @@
 (defmethod projection :congregation.event/gis-user-created
   [state event]
   (let [cong-id (:congregation/id event)
-        user-id (:user/id event)
         cong (get-in state [::congregations cong-id])
         _ (assert cong {:error "congregation not found", :cong-id cong-id})
         k (gis-user-key event)
@@ -42,7 +39,6 @@
                                    :gis-user/password
                                    :congregation/schema-name]))]
     (-> state
-        (update ::users conj-set user-id)
         (assoc-in [::gis-users k] gis-user)
         (presence-tracker/set-desired ::tracked-gis-users k :present)
         ;; force recreating the user to apply a password change
@@ -98,13 +94,9 @@
       :congregation/schema-name (:congregation/schema-name gis-user)})))
 
 
-(defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
+(defmulti ^:private command-handler (fn [command _injections] (:command/type command)))
 
-(defn- check-user-exists [state user-id]
-  (when-not (contains? (::users state) user-id)
-    (throw (ValidationException. [[:no-such-user user-id]]))))
-
-(defmethod command-handler :db-admin.command/migrate-tenant-schema [command _state {:keys [migrate-tenant-schema! check-permit check-congregation-exists]}]
+(defmethod command-handler :db-admin.command/migrate-tenant-schema [command {:keys [migrate-tenant-schema! check-permit check-congregation-exists]}]
   (let [cong-id (:congregation/id command)]
     (check-permit [:migrate-tenant-schema cong-id])
     (check-congregation-exists cong-id)
@@ -115,12 +107,12 @@
       :congregation/id cong-id
       :congregation/schema-name (:congregation/schema-name command)}]))
 
-(defmethod command-handler :db-admin.command/ensure-gis-user-present [command state {:keys [ensure-gis-user-present! check-permit check-congregation-exists]}]
+(defmethod command-handler :db-admin.command/ensure-gis-user-present [command {:keys [ensure-gis-user-present! check-permit check-congregation-exists check-user-exists]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:ensure-gis-user-present cong-id user-id])
     (check-congregation-exists cong-id)
-    (check-user-exists state user-id)
+    (check-user-exists user-id)
     (ensure-gis-user-present! {:username (:gis-user/username command)
                                :password (:gis-user/password command)
                                :schema (:congregation/schema-name command)})
@@ -131,12 +123,12 @@
       :user/id user-id
       :gis-user/username (:gis-user/username command)}]))
 
-(defmethod command-handler :db-admin.command/ensure-gis-user-absent [command state {:keys [ensure-gis-user-absent! check-permit check-congregation-exists]}]
+(defmethod command-handler :db-admin.command/ensure-gis-user-absent [command {:keys [ensure-gis-user-absent! check-permit check-congregation-exists check-user-exists]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:ensure-gis-user-absent cong-id user-id])
     (check-congregation-exists cong-id)
-    (check-user-exists state user-id)
+    (check-user-exists user-id)
     (ensure-gis-user-absent! {:username (:gis-user/username command)
                               :schema (:congregation/schema-name command)})
     [{:event/type :db-admin.event/gis-user-is-absent
@@ -146,5 +138,5 @@
       :user/id (:user/id command)
       :gis-user/username (:gis-user/username command)}]))
 
-(defn handle-command [command state injections]
-  (command-handler command state injections))
+(defn handle-command [command _state injections]
+  (command-handler command injections))

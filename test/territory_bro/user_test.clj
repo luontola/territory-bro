@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,8 +7,10 @@
             [clojure.test :refer :all]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture]]
+            [territory-bro.testutil :as testutil]
             [territory-bro.user :as user])
-  (:import (java.util UUID)))
+  (:import (java.util UUID)
+           (territory_bro ValidationException)))
 
 (use-fixtures :once db-fixture)
 
@@ -78,3 +80,17 @@
 
       (testing "did not accidentally change unrelated users"
         (is (= unrelated-user (user/get-by-id conn unrelated-user-id)))))))
+
+(deftest check-user-exists-test
+  (db/with-db [conn {}]
+    (jdbc/db-set-rollback-only! conn)
+
+    (let [user-id (user/save-user! conn "user1" {:name "User 1"})]
+
+      (testing "exists"
+        (is (nil? (user/check-user-exists conn user-id))))
+
+      (testing "doesn't exist"
+        (is (thrown-with-msg?
+             ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+             (user/check-user-exists conn (UUID. 0 0x666))))))))

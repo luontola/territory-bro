@@ -47,12 +47,6 @@
   [state _event]
   state)
 
-(defmethod write-model :congregation.event/permission-granted
-  [state event]
-  (-> state
-      ;; TODO: remove
-      (update ::users conj-set (:user/id event))))
-
 (defmethod write-model :congregation.event/gis-user-created
   [state event]
   (-> state
@@ -89,19 +83,14 @@
         (.encodeToString bytes)
         (.substring 0 length))))
 
-(defn- check-user-exists [state user-id]
-  ;; TODO: remove
-  (when-not (contains? (::users state) user-id)
-    (throw (ValidationException. [[:no-such-user user-id]]))))
-
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
-(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists? check-permit check-congregation-exists]}]
+(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists? check-permit check-congregation-exists check-user-exists]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:create-gis-user cong-id user-id])
     (check-congregation-exists cong-id)
-    (check-user-exists state user-id)
+    (check-user-exists user-id)
     (when (nil? (get-in state (username-path command)))
       [{:event/type :congregation.event/gis-user-created
         :event/version 1
@@ -113,12 +102,12 @@
                                (unique-username db-user-exists?))
         :gis-user/password (generate-password)}])))
 
-(defmethod command-handler :gis-user.command/delete-gis-user [command state {:keys [check-permit check-congregation-exists]}]
+(defmethod command-handler :gis-user.command/delete-gis-user [command state {:keys [check-permit check-congregation-exists check-user-exists]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:delete-gis-user cong-id user-id])
     (check-congregation-exists cong-id)
-    (check-user-exists state user-id)
+    (check-user-exists user-id)
     (when-some [username (get-in state (username-path command))]
       [{:event/type :congregation.event/gis-user-deleted
         :event/version 1

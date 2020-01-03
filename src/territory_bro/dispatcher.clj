@@ -17,10 +17,11 @@
             [territory-bro.gis-user :as gis-user]
             [territory-bro.user :as user]))
 
-(defn- default-injections [command state]
+(defn- default-injections [conn command state]
   {:now (:now config/env)
    :check-permit #(commands/check-permit state command %)
-   :check-congregation-exists #(congregation/check-congregation-exists state %)})
+   :check-congregation-exists #(congregation/check-congregation-exists state %)
+   :check-user-exists #(user/check-user-exists conn %)})
 
 (defn- write-stream! [conn stream-id f]
   (let [old-events (event-store/read-stream conn stream-id)
@@ -35,7 +36,7 @@
 
 
 (defn- congregation-command! [conn command state]
-  (let [injections (assoc (default-injections command state)
+  (let [injections (assoc (default-injections conn command state)
                           :user-exists? (fn [user-id]
                                           (db/with-db [conn {:read-only? true}]
                                             (some? (user/get-by-id conn user-id)))))]
@@ -45,7 +46,7 @@
                      (call! congregation/handle-command command old-events injections)))))
 
 (defn- gis-user-command! [conn command state]
-  (let [injections (assoc (default-injections command state)
+  (let [injections (assoc (default-injections conn command state)
                           :generate-password #(gis-user/generate-password 50)
                           :db-user-exists? #(gis-db/user-exists? conn %))]
     (write-stream! conn
@@ -54,7 +55,7 @@
                      (call! gis-user/handle-command command old-events injections)))))
 
 (defn- db-admin-command! [conn command state]
-  (let [injections (assoc (default-injections command state)
+  (let [injections (assoc (default-injections conn command state)
                           :migrate-tenant-schema! db/migrate-tenant-schema!
                           :ensure-gis-user-present! (fn [args]
                                                       (gis-db/ensure-user-present! conn args))
