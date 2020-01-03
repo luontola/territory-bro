@@ -3,106 +3,37 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis-user
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :as log]
-            [medley.core :refer [dissoc-in]]
-            [territory-bro.db :as db]
+  (:require [medley.core :refer [dissoc-in]]
             [territory-bro.util :refer [conj-set]])
   (:import (java.security SecureRandom)
            (java.util Base64)
-           (org.postgresql.util PSQLException)
            (territory_bro ValidationException)))
 
 ;;; Read model
 
-(defmulti ^:private update-congregation (fn [_congregation event] (:event/type event)))
+(defmulti gis-users-view (fn [_state event] (:event/type event)))
 
-(defmethod update-congregation :default
-  [congregation _event]
-  congregation)
+(defmethod gis-users-view :default
+  [state _event]
+  state)
 
-(defmethod update-congregation :congregation.event/congregation-created
-  [congregation event]
-  (-> congregation
-      (assoc :congregation/id (:congregation/id event))
-      (assoc :congregation/schema-name (:congregation/schema-name event))))
+(defmethod gis-users-view :congregation.event/gis-user-created
+  [state event]
+  (assoc-in state [::gis-users (:congregation/id event) (:user/id event)]
+            (select-keys event [:user/id :gis-user/username :gis-user/password])))
 
-(defn- update-permission [congregation event granted?]
-  (if (= :gis-access (:permission/id event))
-    (update-in congregation [:congregation/users (:user/id event)]
-               (fn [user]
-                 (-> user
-                     (assoc :user/id (:user/id event))
-                     (assoc :user/has-gis-access? granted?))))
-    congregation))
-
-(defmethod update-congregation :congregation.event/permission-granted
-  [congregation event]
-  (update-permission congregation event true))
-
-(defmethod update-congregation :congregation.event/permission-revoked
-  [congregation event]
-  (update-permission congregation event false))
-
-(defn- update-gis-user [congregation event desired-state]
-  (update-in congregation [:congregation/users (:user/id event)]
-             (fn [user]
-               (-> user
-                   (assoc :user/id (:user/id event))
-                   (assoc :gis-user/desired-state desired-state)
-                   (assoc :gis-user/username (:gis-user/username event))
-                   (assoc :gis-user/password (:gis-user/password event))))))
-
-(defmethod update-congregation :congregation.event/gis-user-created
-  [congregation event]
-  (update-gis-user congregation event :present))
-
-(defmethod update-congregation :congregation.event/gis-user-deleted
-  [congregation event]
-  (update-gis-user congregation event :absent))
+(defmethod gis-users-view :congregation.event/gis-user-deleted
+  [state event]
+  (dissoc-in state [::gis-users (:congregation/id event) (:user/id event)]))
 
 
-(defn- need-to-create? [state user-id cong-id]
-  (let [user (get-in state [::congregations cong-id :congregation/users user-id])]
-    (and (:user/has-gis-access? user)
-         (not (:gis-user/password user)))))
-
-(defn- need-to-delete? [state user-id cong-id]
-  (let [user (get-in state [::congregations cong-id :congregation/users user-id])]
-    (and (not (:user/has-gis-access? user))
-         (:gis-user/password user))))
-
-(defn- calculate-needed-changes [state event]
-  (let [user-id (:user/id event)
-        cong-id (:congregation/id event)
-        account {:user/id user-id :congregation/id cong-id}]
-    (-> state
-        (update ::need-to-create
-                (fn [needs]
-                  (set (if (need-to-create? state user-id cong-id)
-                         (conj needs account)
-                         (disj needs account)))))
-        (update ::need-to-delete
-                (fn [needs]
-                  (set (if (need-to-delete? state user-id cong-id)
-                         (conj needs account)
-                         (disj needs account))))))))
-
-
-(defn gis-users-view [state event]
-  (-> state
-      (update-in [::congregations (:congregation/id event)] update-congregation event)
-      (calculate-needed-changes event)))
+;;; Queries
 
 (defn get-gis-users [state cong-id] ; TODO: remove me? only used in tests
-  (->> (vals (get-in state [::congregations cong-id :congregation/users]))
-       (filter (fn [user]
-                 (= :present (:gis-user/desired-state user))))))
+  (vals (get-in state [::gis-users cong-id])))
 
 (defn get-gis-user [state cong-id user-id]
-  (let [user (get-in state [::congregations cong-id :congregation/users user-id])]
-    (when (= :present (:gis-user/desired-state user))
-      user)))
+  (get-in state [::gis-users cong-id user-id]))
 
 
 ;;; Write model
@@ -116,24 +47,22 @@
   [state _event]
   state)
 
-(defmethod write-model :congregation.event/congregation-created
-  [state event]
-  (-> state
-      (update ::congregations conj-set (:congregation/id event))))
-
 (defmethod write-model :congregation.event/permission-granted
   [state event]
   (-> state
+      ;; TODO: remove
       (update ::users conj-set (:user/id event))))
 
 (defmethod write-model :congregation.event/gis-user-created
   [state event]
   (-> state
+      ;; TODO: reuse the read model?
       (assoc-in (username-path event) (:gis-user/username event))))
 
 (defmethod write-model :congregation.event/gis-user-deleted
   [state event]
   (-> state
+      ;; TODO: reuse the read model?
       (dissoc-in (username-path event))))
 
 
@@ -161,6 +90,7 @@
         (.substring 0 length))))
 
 (defn- check-user-exists [state user-id]
+  ;; TODO: remove
   (when-not (contains? (::users state) user-id)
     (throw (ValidationException. [[:no-such-user user-id]]))))
 
