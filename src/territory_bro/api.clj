@@ -279,26 +279,4 @@
 (comment
   (db/with-db [conn {:read-only? true}]
     (->> (user/get-users conn)
-         (filter #(= "" (:name (:user/attributes %))))))
-
-  (db/with-db [conn {}]
-    (let [user-id (UUID/fromString "")
-          cong-id (UUID/fromString "")]
-      (binding [events/*current-system* "admin"]
-        (congregation/grant! conn cong-id user-id :view-congregation)
-        (congregation/grant! conn cong-id user-id :configure-congregation)
-        (congregation/grant! conn cong-id user-id :gis-access))))
-
-  (db/with-db [conn {}]
-    (binding [events/*current-system* "admin"]
-      (doseq [{:keys [cong-id user-id perms]}
-              (->> (::congregation/congregations (projections/cached-state))
-                   (mapcat (fn [[cong-id cong]]
-                             (map (fn [[user-id perms]]
-                                    {:cong-id cong-id
-                                     :user-id user-id
-                                     :perms perms})
-                                  (:congregation/user-permissions cong)))))]
-        (when (and (:view-congregation perms)
-                   (not (:configure-congregation perms)))
-          (congregation/grant! conn cong-id user-id :configure-congregation))))))
+         (filter #(= "" (:name (:user/attributes %)))))))
