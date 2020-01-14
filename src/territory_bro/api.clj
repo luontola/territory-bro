@@ -206,15 +206,9 @@
           user-id (UUID/fromString (get-in request [:params :userId]))
           state (state-for-request request)]
       (db/with-db [conn {}]
-        (let [response (api-command! conn state {:command/type :congregation.command/add-user
-                                                 :congregation/id cong-id
-                                                 :user/id user-id})]
-          (when (= 200 (:status response))
-            ;; TODO: remove these after the admin can himself edit user permissions
-            (binding [events/*current-user* (current-user-id)]
-              (congregation/grant! conn cong-id user-id :configure-congregation)
-              (congregation/grant! conn cong-id user-id :gis-access)))
-          response)))))
+        (api-command! conn state {:command/type :congregation.command/add-user
+                                  :congregation/id cong-id
+                                  :user/id user-id})))))
 
 (defn set-user-permissions [request]
   (auth/with-authenticated-user request

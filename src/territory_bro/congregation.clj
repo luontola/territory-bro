@@ -155,6 +155,7 @@
         :congregation/id cong-id
         :user/id user-id
         :permission/id :view-congregation}
+       ;; TODO: remove these after the admin can himself edit user permissions
        {:event/type :congregation.event/permission-granted
         :event/version 1
         :congregation/id cong-id
@@ -243,16 +244,6 @@
          (filter (fn [[_user-id permissions]]
                    (not (empty? permissions))))
          (keys))))
-
-(defn grant! [conn cong-id user-id permission]
-  ;; TODO: refactor to event sourcing commands
-  (event-store/save! conn cong-id nil
-                     [(assoc (events/defaults)
-                             :event/type :congregation.event/permission-granted
-                             :congregation/id cong-id
-                             :user/id user-id
-                             :permission/id permission)])
-  nil)
 
 (defn revoke! [conn cong-id user-id permission]
   ;; TODO: refactor to event sourcing commands
