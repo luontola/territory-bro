@@ -198,10 +198,20 @@
     (assert (ok? response) {:response response})
     (UUID/fromString (get-in (json/parse-string (:body response)) [:user :id]))))
 
+(defn- create-congregation! [name]
+  (db/with-db [conn {}]
+    (let [cong-id (UUID/randomUUID)
+          user-id (user/save-user! conn "cong-admin" {})]
+      (dispatcher/command! conn (projections/cached-state)
+                           {:command/type :congregation.command/create-congregation
+                            :command/time (Instant/now)
+                            :command/user user-id
+                            :congregation/id cong-id
+                            :congregation/name name})
+      cong-id)))
+
 (deftest super-user-test
-  (let [cong-id (binding [events/*current-system* "test"]
-                  (db/with-db [conn {}]
-                    (congregation/create-congregation! conn "sudo test")))
+  (let [cong-id (create-congregation! "sudo test")
         session (login! app)
         user-id (get-user-id session)]
 

@@ -80,29 +80,6 @@
                                     {cong-id {:congregation/name "New Name"}}})]
           (is (= expected (apply-events events))))))))
 
-(deftest congregations-test
-  (db/with-db [conn {:isolation :read-committed}] ; creating the schema happens in another transaction
-    (jdbc/db-set-rollback-only! conn)
-
-    (testing "create congregation"
-      (let [cong-id (binding [events/*current-system* "test"]
-                      (congregation/create-congregation! conn "the name"))
-            congregation (congregation/get-unrestricted-congregation (projections/current-state conn) cong-id)]
-        (is cong-id)
-        (is (= [{:event/type :congregation.event/congregation-created
-                 :event/version 1
-                 :event/system "test"
-                 :congregation/id cong-id
-                 :congregation/name "the name"
-                 :congregation/schema-name (:congregation/schema-name congregation)}]
-               (->> (event-store/read-stream conn cong-id)
-                    (map #(dissoc % :event/stream-id :event/stream-revision :event/global-revision :event/time)))))
-        (is (= cong-id (:congregation/id congregation)))
-        (is (= "the name" (:congregation/name congregation)))
-        (is (contains? (set (db/get-schemas conn))
-                       (:congregation/schema-name congregation))
-            "should create congregation schema")))))
-
 (deftest congregation-access-test
   (let [cong-id (UUID. 0 1)
         unrelated-cong-id (UUID. 0 2)

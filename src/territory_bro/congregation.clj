@@ -221,19 +221,6 @@
             {:schema-name tenant-schema})
     tenant-schema))
 
-(defn create-congregation! [conn name]
-  ;; TODO: refactor to event sourcing commands
-  (let [id (UUID/randomUUID)
-        tenant-schema (generate-tenant-schema-name conn id)]
-    (event-store/save! conn id 0 [(assoc (events/defaults)
-                                         :event/type :congregation.event/congregation-created
-                                         :congregation/id id
-                                         :congregation/name name
-                                         :congregation/schema-name tenant-schema)])
-    (db/migrate-tenant-schema! tenant-schema)
-    (log/info "Congregation created:" id)
-    id))
-
 
 ;;;; User access
 
