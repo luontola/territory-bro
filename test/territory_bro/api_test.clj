@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -13,6 +13,7 @@
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
+            [territory-bro.dispatcher :as dispatcher]
             [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture api-fixture]]
             [territory-bro.gis-user :as gis-user]
@@ -274,10 +275,16 @@
 (defn revoke-access-from-all! [cong-id]
   ;; TODO: create an API for changing permissions
   (db/with-db [conn {}]
-    (doseq [user-id (congregation/get-users (projections/current-state conn) cong-id)]
-      (binding [events/*current-system* "test"]
-        (congregation/revoke! conn cong-id user-id :view-congregation)
-        (congregation/revoke! conn cong-id user-id :configure-congregation))))
+    (let [state (projections/current-state conn)]
+      (doseq [user-id (congregation/get-users state cong-id)]
+        (dispatcher/command! conn state {:command/type :congregation.command/set-user-permissions
+                                         :command/time (Instant/now)
+                                         :command/user user-id
+                                         ;; TODO: allow all commands as either user or system
+                                         ;:command/system "test"
+                                         :congregation/id cong-id
+                                         :user/id user-id
+                                         :permission/ids []}))))
   (projections/refresh-async!)
   (projections/await-refreshed (Duration/ofSeconds 1)))
 
@@ -349,9 +356,17 @@
       ;; TODO: create API for getting the current user's ID
       ;; TODO: create API for removing GIS access from a user
       (db/with-db [conn {}]
-        (doseq [gis-user (gis-user/get-gis-users (projections/current-state conn) cong-id)]
-          (binding [events/*current-system* "test"]
-            (congregation/revoke! conn cong-id (:user/id gis-user) :gis-access))))
+        (let [state (projections/current-state conn)]
+          (doseq [gis-user (gis-user/get-gis-users state cong-id)]
+            (dispatcher/command! conn state {:command/type :congregation.command/set-user-permissions
+                                             :command/time (Instant/now)
+                                             :command/user (:user/id gis-user)
+                                             ;; TODO: allow all commands as either user or system
+                                             ;:command/system "test"
+                                             :congregation/id cong-id
+                                             :user/id (:user/id gis-user)
+                                             ;; removed :gis-access
+                                             :permission/ids [:view-congregation :configure-congregation]}))))
       (projections/refresh-async!)
       (projections/await-refreshed (Duration/ofSeconds 1))
 

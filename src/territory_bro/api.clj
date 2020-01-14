@@ -26,9 +26,9 @@
             [territory-bro.user :as user]
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
+           (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException ValidationException)
-           (java.time Instant)))
+           (territory_bro NoPermitException ValidationException)))
 
 (def ^:private format-key-for-api (memoize (comp csk/->camelCaseString name)))
 
