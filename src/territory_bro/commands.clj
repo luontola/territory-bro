@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -44,6 +44,12 @@
 
 
 ;;; Congregation
+
+(s/defschema CreateCongregation
+  (assoc UserCommand
+         :command/type (s/eq :congregation.command/create-congregation)
+         :congregation/id UUID
+         :congregation/name s/Str))
 
 (s/defschema AddUser
   (assoc UserCommand
@@ -108,8 +114,9 @@
 
 (def command-schemas
   {:congregation.command/add-user AddUser
-   :congregation.command/set-user-permissions SetUserPermissions
+   :congregation.command/create-congregation CreateCongregation
    :congregation.command/rename-congregation RenameCongregation
+   :congregation.command/set-user-permissions SetUserPermissions
    :db-admin.command/ensure-gis-user-absent EnsureGisUserAbsent
    :db-admin.command/ensure-gis-user-present EnsureGisUserPresent
    :db-admin.command/migrate-tenant-schema MigrateTenantSchema

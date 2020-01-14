@@ -115,6 +115,15 @@
 (defmulti ^:private command-handler (fn [command _congregation _injections]
                                       (:command/type command)))
 
+(defmethod command-handler :congregation.command/create-congregation
+  [command _congregation {:keys [generate-tenant-schema-name]}]
+  (let [cong-id (:congregation/id command)]
+    [{:event/type :congregation.event/congregation-created
+      :event/version 1
+      :congregation/id cong-id
+      :congregation/name (:congregation/name command)
+      :congregation/schema-name (generate-tenant-schema-name cong-id)}]))
+
 (defmethod command-handler :congregation.command/add-user
   [command congregation {:keys [user-exists? check-permit]}]
   (let [cong-id (:congregation/id congregation)
@@ -175,16 +184,20 @@
 
 ;;;; Other commands
 
-(defn create-congregation! [conn name]
-  ;; TODO: refactor to event sourcing commands
-  (let [id (UUID/randomUUID)
-        master-schema (:database-schema config/env)
+(defn generate-tenant-schema-name [conn tenant-id]
+  (let [master-schema (:database-schema config/env)
         tenant-schema (str master-schema
                            "_"
-                           (str/replace (str id) "-" ""))]
+                           (str/replace (str tenant-id) "-" ""))]
     (assert (not (contains? (set (db/get-schemas conn))
                             tenant-schema))
             {:schema-name tenant-schema})
+    tenant-schema))
+
+(defn create-congregation! [conn name]
+  ;; TODO: refactor to event sourcing commands
+  (let [id (UUID/randomUUID)
+        tenant-schema (generate-tenant-schema-name conn id)]
     (event-store/save! conn id 0 [(assoc (events/defaults)
                                          :event/type :congregation.event/congregation-created
                                          :congregation/id id

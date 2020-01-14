@@ -175,6 +175,33 @@
 
 ;;; Commands
 
+(deftest create-congregation-test
+  (let [cong-id (UUID. 0 1)
+        user-id (UUID. 0 2)
+        injections {:generate-tenant-schema-name (fn [id]
+                                                   (is (= cong-id id))
+                                                   "cong_schema")}
+        create-command {:command/type :congregation.command/create-congregation
+                        :command/time (Instant/now)
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :congregation/name "the name"}
+        created-event {:event/type :congregation.event/congregation-created
+                       :event/version 1
+                       :congregation/id cong-id
+                       :congregation/name "the name"
+                       :congregation/schema-name "cong_schema"}]
+
+    (testing "created"
+      ;; TODO: grant admin permissions
+      (is (= [created-event]
+             (handle-command create-command [] injections))))
+
+    ;; TODO: name should not be blank
+    (testing "create is idempotent") ; TODO
+    (testing "conflicting event stream ID"))) ; TODO
+
+
 (deftest rename-congregation-test
   (let [cong-id (UUID. 0 1)
         user-id (UUID. 0 2)
