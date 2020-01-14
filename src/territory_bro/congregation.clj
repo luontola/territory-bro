@@ -119,11 +119,12 @@
   [command congregation {:keys [user-exists? check-permit]}]
   (let [cong-id (:congregation/id congregation)
         user-id (:user/id command)
-        user-permissions (set (get-in congregation [:congregation/user-permissions user-id]))]
+        user-permissions (set (get-in congregation [:congregation/user-permissions user-id]))
+        already-user? (contains? user-permissions :view-congregation)]
     (check-permit [:configure-congregation cong-id])
     (when-not (user-exists? user-id)
       (throw (ValidationException. [[:no-such-user user-id]])))
-    (when-not (contains? user-permissions :view-congregation)
+    (when-not already-user?
       [{:event/type :congregation.event/permission-granted
         :event/version 1
         :congregation/id cong-id
@@ -157,13 +158,15 @@
 
 (defmethod command-handler :congregation.command/rename-congregation
   [command congregation {:keys [check-permit]}]
-  (check-permit [:configure-congregation (:congregation/id congregation)])
-  (when-not (= (:congregation/name congregation)
-               (:congregation/name command))
-    [{:event/type :congregation.event/congregation-renamed
-      :event/version 1
-      :congregation/id (:congregation/id congregation)
-      :congregation/name (:congregation/name command)}]))
+  (let [cong-id (:congregation/id congregation)
+        old-name (:congregation/name congregation)
+        new-name (:congregation/name command)]
+    (check-permit [:configure-congregation cong-id])
+    (when-not (= old-name new-name)
+      [{:event/type :congregation.event/congregation-renamed
+        :event/version 1
+        :congregation/id cong-id
+        :congregation/name new-name}])))
 
 (defn handle-command [command events injections]
   (let [congregation (reduce write-model nil events)]
