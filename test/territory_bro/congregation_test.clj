@@ -274,18 +274,28 @@
                           :command/user admin-id
                           :congregation/id cong-id
                           :user/id new-user-id}
-        access-granted-event {:event/type :congregation.event/permission-granted
-                              :event/version 1
-                              :congregation/id cong-id
-                              :user/id new-user-id
-                              :permission/id :view-congregation}]
-
+        view-granted {:event/type :congregation.event/permission-granted
+                      :event/version 1
+                      :congregation/id cong-id
+                      :user/id new-user-id
+                      :permission/id :view-congregation}
+        configure-granted {:event/type :congregation.event/permission-granted
+                           :event/version 1
+                           :congregation/id cong-id
+                           :user/id new-user-id
+                           :permission/id :configure-congregation}
+        gis-access-granted {:event/type :congregation.event/permission-granted
+                            :event/version 1
+                            :congregation/id cong-id
+                            :user/id new-user-id
+                            :permission/id :gis-access}]
+    
     (testing "user added"
-      (is (= [access-granted-event]
+      (is (= [view-granted configure-granted gis-access-granted]
              (handle-command add-user-command [created-event] injections))))
 
     (testing "user already in congregation"
-      (is (empty? (handle-command add-user-command [created-event access-granted-event] injections))))
+      (is (empty? (handle-command add-user-command [created-event view-granted] injections))))
 
     (testing "user doesn't exist"
       (let [invalid-command (assoc add-user-command

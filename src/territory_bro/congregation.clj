@@ -154,7 +154,17 @@
         :event/version 1
         :congregation/id cong-id
         :user/id user-id
-        :permission/id :view-congregation}])))
+        :permission/id :view-congregation}
+       {:event/type :congregation.event/permission-granted
+        :event/version 1
+        :congregation/id cong-id
+        :user/id user-id
+        :permission/id :configure-congregation}
+       {:event/type :congregation.event/permission-granted
+        :event/version 1
+        :congregation/id cong-id
+        :user/id user-id
+        :permission/id :gis-access}])))
 
 (defmethod command-handler :congregation.command/set-user-permissions
   [command congregation {:keys [user-exists? check-permit]}]
