@@ -184,11 +184,11 @@
 
 ;;;; Other commands
 
-(defn generate-tenant-schema-name [conn tenant-id]
+(defn generate-tenant-schema-name [conn cong-id]
   (let [master-schema (:database-schema config/env)
         tenant-schema (str master-schema
                            "_"
-                           (str/replace (str tenant-id) "-" ""))]
+                           (str/replace (str cong-id) "-" ""))]
     (assert (not (contains? (set (db/get-schemas conn))
                             tenant-schema))
             {:schema-name tenant-schema})

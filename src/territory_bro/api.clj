@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -27,7 +27,8 @@
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
            (java.util UUID)
-           (territory_bro NoPermitException ValidationException)))
+           (territory_bro NoPermitException ValidationException)
+           (java.time Instant)))
 
 (def ^:private format-key-for-api (memoize (comp csk/->camelCaseString name)))
 
@@ -126,13 +127,20 @@
 (defn create-congregation [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
-    (let [name (get-in request [:params :name])]
+    (let [name (get-in request [:params :name])
+          state (state-for-request request)]
       (assert (not (str/blank? name)) ; TODO: test this
               {:name name})
       (db/with-db [conn {}]
         (let [user-id (current-user-id)]
           (binding [events/*current-user* user-id]
-            (let [cong-id (congregation/create-congregation! conn name)]
+            ;; TODO: use api-command!
+            (let [events (dispatcher/command! conn state {:command/type :congregation.command/create-congregation
+                                                          :command/time (Instant/now)
+                                                          :command/user user-id
+                                                          :congregation/id (UUID/randomUUID)
+                                                          :congregation/name name})
+                  cong-id (:congregation/id (first events))]
               (congregation/grant! conn cong-id user-id :view-congregation)
               (congregation/grant! conn cong-id user-id :configure-congregation)
               (congregation/grant! conn cong-id user-id :gis-access)
