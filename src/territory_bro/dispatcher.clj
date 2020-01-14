@@ -38,7 +38,7 @@
 (defn- congregation-command! [conn command state]
   (let [injections (assoc (default-injections conn command state)
                           :generate-tenant-schema-name (fn [cong-id]
-                                                         (congregation/generate-tenant-schema-name conn cong-id))
+                                                         (db/generate-tenant-schema-name conn cong-id))
                           :user-exists? (fn [user-id]
                                           (db/with-db [conn {:read-only? true}]
                                             (some? (user/get-by-id conn user-id)))))]

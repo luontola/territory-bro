@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -125,6 +125,16 @@
   (->> (jdbc/query conn ["select schema_name from information_schema.schemata"])
        (map :schema_name)
        (doall)))
+
+(defn generate-tenant-schema-name [conn cong-id]
+  (let [master-schema (:database-schema config/env)
+        tenant-schema (str master-schema
+                           "_"
+                           (str/replace (str cong-id) "-" ""))]
+    (assert (not (contains? (set (get-schemas conn))
+                            tenant-schema))
+            {:schema-name tenant-schema})
+    tenant-schema))
 
 (defn set-search-path [conn schemas]
   (doseq [schema schemas]

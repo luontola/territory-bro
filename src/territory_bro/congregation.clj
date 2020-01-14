@@ -4,16 +4,9 @@
 
 (ns territory-bro.congregation
   (:require [clojure.set :as set]
-            [clojure.string :as str]
-            [clojure.tools.logging :as log]
-            [territory-bro.config :as config]
-            [territory-bro.db :as db]
-            [territory-bro.event-store :as event-store]
-            [territory-bro.events :as events]
             [territory-bro.permissions :as permissions]
             [territory-bro.util :refer [conj-set]])
-  (:import (java.util UUID)
-           (territory_bro ValidationException)))
+  (:import (territory_bro ValidationException)))
 
 ;;;; Read model
 
@@ -102,6 +95,7 @@
 (defn check-congregation-exists [state cong-id]
   (when-not (contains? (::congregations state) cong-id)
     (throw (ValidationException. [[:no-such-congregation cong-id]]))))
+
 
 ;;;; Write model
 
@@ -207,19 +201,6 @@
 (defn handle-command [command events injections]
   (let [congregation (reduce write-model nil events)]
     (command-handler command congregation injections)))
-
-
-;;;; Other commands
-
-(defn generate-tenant-schema-name [conn cong-id]
-  (let [master-schema (:database-schema config/env)
-        tenant-schema (str master-schema
-                           "_"
-                           (str/replace (str cong-id) "-" ""))]
-    (assert (not (contains? (set (db/get-schemas conn))
-                            tenant-schema))
-            {:schema-name tenant-schema})
-    tenant-schema))
 
 
 ;;;; User access
