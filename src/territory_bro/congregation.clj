@@ -117,12 +117,28 @@
 
 (defmethod command-handler :congregation.command/create-congregation
   [command _congregation {:keys [generate-tenant-schema-name]}]
-  (let [cong-id (:congregation/id command)]
+  (let [cong-id (:congregation/id command)
+        user-id (:command/user command)]
     [{:event/type :congregation.event/congregation-created
       :event/version 1
       :congregation/id cong-id
       :congregation/name (:congregation/name command)
-      :congregation/schema-name (generate-tenant-schema-name cong-id)}]))
+      :congregation/schema-name (generate-tenant-schema-name cong-id)}
+     {:congregation/id cong-id
+      :event/type :congregation.event/permission-granted
+      :event/version 1
+      :permission/id :view-congregation
+      :user/id user-id}
+     {:congregation/id cong-id
+      :event/type :congregation.event/permission-granted
+      :event/version 1
+      :permission/id :configure-congregation
+      :user/id user-id}
+     {:congregation/id cong-id
+      :event/type :congregation.event/permission-granted
+      :event/version 1
+      :permission/id :gis-access
+      :user/id user-id}]))
 
 (defmethod command-handler :congregation.command/add-user
   [command congregation {:keys [user-exists? check-permit]}]

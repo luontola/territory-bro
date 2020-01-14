@@ -190,11 +190,27 @@
                        :event/version 1
                        :congregation/id cong-id
                        :congregation/name "the name"
-                       :congregation/schema-name "cong_schema"}]
-
+                       :congregation/schema-name "cong_schema"}
+        view-permission-granted {:event/type :congregation.event/permission-granted
+                                 :event/version 1
+                                 :congregation/id cong-id
+                                 :user/id user-id
+                                 :permission/id :view-congregation}
+        configure-permission-granted {:event/type :congregation.event/permission-granted
+                                      :event/version 1
+                                      :congregation/id cong-id
+                                      :user/id user-id
+                                      :permission/id :configure-congregation}
+        gis-permission-granted {:event/type :congregation.event/permission-granted
+                                :event/version 1
+                                :congregation/id cong-id
+                                :user/id user-id
+                                :permission/id :gis-access}]
     (testing "created"
-      ;; TODO: grant admin permissions
-      (is (= [created-event]
+      (is (= [created-event
+              view-permission-granted
+              configure-permission-granted
+              gis-permission-granted]
              (handle-command create-command [] injections))))
 
     ;; TODO: name should not be blank

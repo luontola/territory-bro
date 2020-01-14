@@ -141,9 +141,6 @@
                                                           :congregation/id (UUID/randomUUID)
                                                           :congregation/name name})
                   cong-id (:congregation/id (first events))]
-              (congregation/grant! conn cong-id user-id :view-congregation)
-              (congregation/grant! conn cong-id user-id :configure-congregation)
-              (congregation/grant! conn cong-id user-id :gis-access)
               (ok {:id cong-id}))))))))
 
 (defn list-congregations [request]
