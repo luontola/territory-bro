@@ -29,9 +29,6 @@
 
 ;;; Queries
 
-(defn get-gis-users [state cong-id] ; TODO: remove me? only used in tests
-  (vals (get-in state [::gis-users cong-id])))
-
 (defn get-gis-user [state cong-id user-id]
   (get-in state [::gis-users cong-id user-id]))
 

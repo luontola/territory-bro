@@ -14,8 +14,8 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.dispatcher :as dispatcher]
-            [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture api-fixture]]
+            [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.json :as json]
             [territory-bro.jwt :as jwt]
@@ -249,6 +249,7 @@
 
 (deftest create-congregation-test
   (let [session (login! app)
+        user-id (get-user-id session)
         response (-> (request :post "/api/congregations")
                      (json-body {:name "foo"})
                      (merge session)
@@ -261,7 +262,10 @@
         (is (= 1 (count (congregation/get-users (projections/cached-state) cong-id)))))
 
       (testing "creates a GIS user for the current user"
-        (is (= 1 (count (gis-user/get-gis-users (projections/cached-state) cong-id)))))))
+        (let [gis-user (gis-user/get-gis-user (projections/cached-state) cong-id user-id)]
+          (is gis-user)
+          (is (true? (db/with-db [conn {:read-only? true}]
+                       (gis-db/user-exists? conn (:gis-user/username gis-user)))))))))
 
   (testing "requires login"
     (let [response (-> (request :post "/api/congregations")
@@ -342,6 +346,7 @@
 
 (deftest download-qgis-project-test
   (let [session (login! app)
+        user-id (get-user-id session)
         response (-> (request :post "/api/congregations")
                      (json-body {:name "Example Congregation"})
                      (merge session)
@@ -363,20 +368,19 @@
         (is (unauthorized? response))))
 
     (testing "requires GIS access"
-      ;; TODO: create API for getting the current user's ID
-      ;; TODO: create API for removing GIS access from a user
       (db/with-db [conn {}]
-        (let [state (projections/current-state conn)]
-          (doseq [gis-user (gis-user/get-gis-users state cong-id)]
-            (dispatcher/command! conn state {:command/type :congregation.command/set-user-permissions
-                                             :command/time (Instant/now)
-                                             :command/user (:user/id gis-user)
-                                             ;; TODO: allow all commands as either user or system
-                                             ;:command/system "test"
-                                             :congregation/id cong-id
-                                             :user/id (:user/id gis-user)
-                                             ;; removed :gis-access
-                                             :permission/ids [:view-congregation :configure-congregation]}))))
+        ;; TODO: change permissions via API?
+        (dispatcher/command! conn (projections/cached-state)
+                             {:command/type :congregation.command/set-user-permissions
+                              :command/time (Instant/now)
+                              :command/user user-id
+                              ;; TODO: allow all commands as either user or system
+                              ;:command/system "test"
+                              :congregation/id cong-id
+                              :user/id user-id
+                              ;; TODO: create a command for removing a single permission? or produce the event directly from tests?
+                              ;; removed :gis-access
+                              :permission/ids [:view-congregation :configure-congregation]}))
       (projections/refresh-async!)
       (projections/await-refreshed (Duration/ofSeconds 1))
 
