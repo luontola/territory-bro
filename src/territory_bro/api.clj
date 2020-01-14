@@ -132,16 +132,14 @@
       (assert (not (str/blank? name)) ; TODO: test this
               {:name name})
       (db/with-db [conn {}]
-        (let [user-id (current-user-id)]
-          (binding [events/*current-user* user-id]
-            ;; TODO: use api-command!
-            (let [events (dispatcher/command! conn state {:command/type :congregation.command/create-congregation
-                                                          :command/time (Instant/now)
-                                                          :command/user user-id
-                                                          :congregation/id (UUID/randomUUID)
-                                                          :congregation/name name})
-                  cong-id (:congregation/id (first events))]
-              (ok {:id cong-id}))))))))
+        (let [user-id (current-user-id)
+              events (dispatcher/command! conn state {:command/type :congregation.command/create-congregation
+                                                      :command/time (Instant/now)
+                                                      :command/user user-id
+                                                      :congregation/id (UUID/randomUUID)
+                                                      :congregation/name name})
+              cong-id (:congregation/id (first events))]
+          (ok {:id cong-id}))))))
 
 (defn list-congregations [request]
   (auth/with-authenticated-user request
