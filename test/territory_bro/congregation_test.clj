@@ -3,17 +3,13 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.congregation-test
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.test :refer :all]
+  (:require [clojure.test :refer :all]
             [medley.core :refer [deep-merge]]
             [territory-bro.commands :as commands]
             [territory-bro.congregation :as congregation]
-            [territory-bro.db :as db]
-            [territory-bro.event-store :as event-store]
             [territory-bro.events :as events]
             [territory-bro.fixtures :refer [db-fixture]]
             [territory-bro.permissions :as permissions]
-            [territory-bro.projections :as projections]
             [territory-bro.testutil :as testutil])
   (:import (java.time Instant)
            (java.util UUID)
@@ -190,10 +186,14 @@
               gis-permission-granted]
              (handle-command create-command [] injections))))
 
-    ;; TODO: name should not be blank
+    (testing "error: name is blank"
+      (let [command (assoc create-command :congregation/name "   ")]
+        (is (thrown-with-msg?
+             ValidationException (testutil/re-equals "[[:missing-name]]")
+             (handle-command command [] injections)))))
+
     (testing "create is idempotent") ; TODO
     (testing "conflicting event stream ID"))) ; TODO
-
 
 (deftest rename-congregation-test
   (let [cong-id (UUID. 0 1)
@@ -225,6 +225,12 @@
 
       (testing "from previous rename"
         (is (empty? (handle-command rename-command [created-event renamed-event] injections)))))
+
+    (testing "error: name is blank"
+      (let [command (assoc rename-command :congregation/name "   ")]
+        (is (thrown-with-msg?
+             ValidationException (testutil/re-equals "[[:missing-name]]")
+             (handle-command command [created-event] injections)))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
@@ -266,7 +272,7 @@
                             :congregation/id cong-id
                             :user/id new-user-id
                             :permission/id :gis-access}]
-    
+
     (testing "user added"
       (is (= [view-granted configure-granted gis-access-granted]
              (handle-command add-user-command [created-event] injections))))

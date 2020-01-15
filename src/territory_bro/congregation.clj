@@ -4,6 +4,7 @@
 
 (ns territory-bro.congregation
   (:require [clojure.set :as set]
+            [clojure.string :as str]
             [territory-bro.permissions :as permissions]
             [territory-bro.util :refer [conj-set]])
   (:import (territory_bro ValidationException)))
@@ -112,11 +113,14 @@
 (defmethod command-handler :congregation.command/create-congregation
   [command _congregation {:keys [generate-tenant-schema-name]}]
   (let [cong-id (:congregation/id command)
-        user-id (:command/user command)]
+        user-id (:command/user command)
+        name (:congregation/name command)]
+    (when (str/blank? name)
+      (throw (ValidationException. [[:missing-name]])))
     [{:event/type :congregation.event/congregation-created
       :event/version 1
       :congregation/id cong-id
-      :congregation/name (:congregation/name command)
+      :congregation/name name
       :congregation/schema-name (generate-tenant-schema-name cong-id)}
      {:congregation/id cong-id
       :event/type :congregation.event/permission-granted
@@ -192,6 +196,8 @@
         old-name (:congregation/name congregation)
         new-name (:congregation/name command)]
     (check-permit [:configure-congregation cong-id])
+    (when (str/blank? new-name)
+      (throw (ValidationException. [[:missing-name]])))
     (when-not (= old-name new-name)
       [{:event/type :congregation.event/congregation-renamed
         :event/version 1

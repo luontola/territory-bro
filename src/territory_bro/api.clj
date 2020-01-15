@@ -4,7 +4,6 @@
 
 (ns territory-bro.api
   (:require [camel-snake-kebab.core :as csk]
-            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [compojure.core :refer [defroutes GET POST ANY]]
             [liberator.core :refer [defresource]]
@@ -16,7 +15,6 @@
             [territory-bro.congregation :as congregation]
             [territory-bro.db :as db]
             [territory-bro.dispatcher :as dispatcher]
-            [territory-bro.events :as events]
             [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
@@ -129,8 +127,6 @@
     (require-logged-in!)
     (let [name (get-in request [:params :name])
           state (state-for-request request)]
-      (assert (not (str/blank? name)) ; TODO: test this
-              {:name name})
       (db/with-db [conn {}]
         (let [user-id (current-user-id)
               events (dispatcher/command! conn state {:command/type :congregation.command/create-congregation
