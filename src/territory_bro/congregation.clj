@@ -110,6 +110,14 @@
 (defmulti ^:private command-handler (fn [command _congregation _injections]
                                       (:command/type command)))
 
+(defn- admin-permissions-granted [cong-id user-id]
+  (for [permission [:view-congregation :configure-congregation :gis-access]]
+    {:event/type :congregation.event/permission-granted
+     :event/version 1
+     :congregation/id cong-id
+     :user/id user-id
+     :permission/id permission}))
+
 (defmethod command-handler :congregation.command/create-congregation
   [command _congregation {:keys [generate-tenant-schema-name]}]
   (let [cong-id (:congregation/id command)
@@ -117,26 +125,13 @@
         name (:congregation/name command)]
     (when (str/blank? name)
       (throw (ValidationException. [[:missing-name]])))
-    [{:event/type :congregation.event/congregation-created
-      :event/version 1
-      :congregation/id cong-id
-      :congregation/name name
-      :congregation/schema-name (generate-tenant-schema-name cong-id)}
-     {:congregation/id cong-id
-      :event/type :congregation.event/permission-granted
-      :event/version 1
-      :permission/id :view-congregation
-      :user/id user-id}
-     {:congregation/id cong-id
-      :event/type :congregation.event/permission-granted
-      :event/version 1
-      :permission/id :configure-congregation
-      :user/id user-id}
-     {:congregation/id cong-id
-      :event/type :congregation.event/permission-granted
-      :event/version 1
-      :permission/id :gis-access
-      :user/id user-id}]))
+    (cons {:event/type :congregation.event/congregation-created
+           :event/version 1
+           :congregation/id cong-id
+           :congregation/name name
+           :congregation/schema-name (generate-tenant-schema-name cong-id)}
+          ;; TODO: grant initial permissions using a process manager (after moving the events to a user stream)
+          (admin-permissions-granted cong-id user-id))))
 
 (defmethod command-handler :congregation.command/add-user
   [command congregation {:keys [user-exists? check-permit]}]
@@ -148,22 +143,8 @@
     (when-not (user-exists? user-id)
       (throw (ValidationException. [[:no-such-user user-id]])))
     (when-not already-user?
-      [{:event/type :congregation.event/permission-granted
-        :event/version 1
-        :congregation/id cong-id
-        :user/id user-id
-        :permission/id :view-congregation}
-       ;; TODO: remove these after the admin can himself edit user permissions
-       {:event/type :congregation.event/permission-granted
-        :event/version 1
-        :congregation/id cong-id
-        :user/id user-id
-        :permission/id :configure-congregation}
-       {:event/type :congregation.event/permission-granted
-        :event/version 1
-        :congregation/id cong-id
-        :user/id user-id
-        :permission/id :gis-access}])))
+      ;; TODO: only grant :view-congregation to new users (after admin has a UI for editing permissions)
+      (admin-permissions-granted cong-id user-id))))
 
 (defmethod command-handler :congregation.command/set-user-permissions
   [command congregation {:keys [user-exists? check-permit]}]
