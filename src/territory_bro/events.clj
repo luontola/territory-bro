@@ -13,20 +13,6 @@
   (:import (java.time Instant)
            (java.util UUID)))
 
-(def ^:dynamic *current-time* nil)
-(def ^:dynamic *current-user* nil)
-(def ^:dynamic *current-system* nil)
-
-(defn defaults ; TODO: get rid of this method, use enrich-events instead
-  ([]
-   (defaults (or *current-time* (Instant/now))))
-  ([^Instant now]
-   (cond-> {:event/version 1
-            :event/time now}
-     *current-user* (assoc :event/user *current-user*)
-     *current-system* (assoc :event/system *current-system*))))
-
-
 (defn- enrich-event [event command current-time]
   (let [{:command/keys [user system]} command]
     (-> event

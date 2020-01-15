@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -13,39 +13,6 @@
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)))
-
-(deftest event-defaults-test
-  (let [time (Instant/now)
-        user (UUID/randomUUID)
-        system "some-subsystem"]
-
-    (testing "no context (not really allowed)"
-      (is (= {:event/time time
-              :event/version 1}
-             (events/defaults time))))
-
-    (testing "user context"
-      (is (= {:event/time time
-              :event/version 1
-              :event/user user}
-             (binding [events/*current-user* user]
-               (events/defaults time)))))
-
-    (testing "system context"
-      (is (= {:event/time time
-              :event/version 1
-              :event/system system}
-             (binding [events/*current-system* system]
-               (events/defaults time)))))
-
-    (testing "user and system context (not really allowed)"
-      (is (= {:event/time time
-              :event/version 1
-              :event/user user
-              :event/system system}
-             (binding [events/*current-user* user
-                       events/*current-system* system]
-               (events/defaults time)))))))
 
 (deftest enrich-events-test
   (let [time (Instant/now)
