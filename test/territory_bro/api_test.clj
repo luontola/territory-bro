@@ -24,7 +24,8 @@
             [territory-bro.router :as router]
             [territory-bro.user :as user])
   (:import (java.time Instant Duration)
-           (java.util UUID)))
+           (java.util UUID)
+           (territory_bro ValidationException NoPermitException)))
 
 (use-fixtures :once (join-fixtures [db-fixture api-fixture]))
 
@@ -83,6 +84,50 @@
   (is (= {"fooBar" 1} (api/format-for-api {:foo-bar 1})))
   (is (= {"bar" 1} (api/format-for-api {:foo/bar 1})))
   (is (= [{"foo" 1} {"bar" 2}] (api/format-for-api [{:foo 1} {:bar 2}]))))
+
+(deftest api-command-test
+  (let [conn :dummy-conn
+        state :dummy-state
+        command {:command/type :dummy-command}
+        test-user (UUID. 0 0x123)
+        test-time (Instant/ofEpochSecond 42)]
+    (binding [auth/*user* {:user/id test-user}
+              config/env (assoc config/env :now (constantly test-time))]
+
+      (testing "successful command"
+        (with-redefs [dispatcher/command! (fn [& args]
+                                            (is (= [conn state (assoc command
+                                                                      :command/time test-time
+                                                                      :command/user test-user)]
+                                                   args)))]
+          (is (= {:body {:message "OK"}
+                  :status 200
+                  :headers {}}
+                 (api/api-command! conn state command)))))
+
+      (testing "failed command: validation"
+        (with-redefs [dispatcher/command! (fn [& _]
+                                            (throw (ValidationException. [[:dummy-error 123]])))]
+          (is (= {:body {:errors [[:dummy-error 123]]}
+                  :status 400
+                  :headers {}}
+                 (api/api-command! conn state command)))))
+
+      (testing "failed command: permission check"
+        (with-redefs [dispatcher/command! (fn [& _]
+                                            (throw (NoPermitException. test-user [:dummy-permission 123])))]
+          (is (= {:body {:message "Forbidden"}
+                  :status 403
+                  :headers {}}
+                 (api/api-command! conn state command)))))
+
+      (testing "failed command: internal error"
+        (with-redefs [dispatcher/command! (fn [& _]
+                                            (throw (RuntimeException. "dummy error")))]
+          (is (= {:body {:message "Internal Server Error"}
+                  :status 500
+                  :headers {}}
+                 (api/api-command! conn state command))))))))
 
 (deftest basic-routes-test
   (testing "index"

@@ -158,11 +158,10 @@
                                                     (assoc :id (:user/id user))
                                                     (assoc :sub (:user/subject user))))))}))))))
 
-(defn- api-command!
+(defn api-command!
   ([conn state command]
    (api-command! conn state command {:message "OK"}))
   ([conn state command ok-response]
-   ;; TODO: unit tests for this and other generic request mapping stuff
    (let [command (assoc command
                         :command/time ((:now config/env))
                         :command/user (current-user-id))]
