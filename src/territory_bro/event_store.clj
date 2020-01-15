@@ -7,6 +7,7 @@
             [territory-bro.db :as db]
             [territory-bro.events :as events])
   (:import (java.util UUID)
+           (org.postgresql.util PSQLException)
            (territory_bro WriteConflictException)))
 
 (def ^:dynamic *event->json* events/event->json)
@@ -47,6 +48,20 @@
         (map parse-db-row)
         (doall))))
 
+(defn- save-event! [conn stream-id stream-revision event]
+  (try
+    (first (query! conn :save-event {:stream stream-id
+                                     :stream_revision stream-revision
+                                     :data (-> event *event->json*)}))
+    (catch PSQLException e
+      (if (= db/psql-serialization-failure (.getSQLState e))
+        (throw (WriteConflictException.
+                (str "Failed to save stream " stream-id
+                     " revision " stream-revision
+                     ": " (pr-str event))
+                e))
+        (throw e)))))
+
 (defn save! [conn stream-id stream-revision events]
   (->> events
        (map-indexed
@@ -55,9 +70,7 @@
                   {:event event})
           (let [next-revision (when stream-revision
                                 (+ 1 idx stream-revision))
-                [result] (query! conn :save-event {:stream stream-id
-                                                   :stream_revision next-revision
-                                                   :data (-> event *event->json*)})]
+                result (save-event! conn stream-id next-revision event)]
             (-> event
                 (assoc :event/stream-id stream-id)
                 (assoc :event/stream-revision (:stream_revision result))

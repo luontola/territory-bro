@@ -150,31 +150,47 @@
 
     (db/with-db [conn {}]
       (jdbc/db-set-rollback-only! conn)
+
       (testing "error: expected revision too low"
-        (let [stream-id (UUID/randomUUID)]
+        (let [stream-id (UUID. 0 0x123)]
           (event-store/save! conn stream-id 0 [{:event/type :event-1}])
-          (let [^PSQLException exception (grab-exception
-                                           (event-store/save! conn stream-id 0 [{:event/type :event-2}]))]
-            ;; TODO: wrap the exception to WriteConflictException
-            (is (instance? PSQLException exception))
-            (is (str/starts-with? (.getMessage exception)
-                                  (str "ERROR: tried to insert stream revision 1 but it should have been 2\n"
-                                       "  Hint: The transaction might succeed if retried.")))
-            (is (= db/psql-serialization-failure (.getSQLState exception)))))))
+          (let [^Exception exception (grab-exception
+                                       (event-store/save! conn stream-id 0 [{:event/type :event-2}]))]
+
+            (testing "(exception)"
+              (is (instance? WriteConflictException exception))
+              (is (= "Failed to save stream 00000000-0000-0000-0000-000000000123 revision 1: {:event/type :event-2}"
+                     (.getMessage exception))))
+
+            (testing "(cause)"
+              (let [^PSQLException cause (.getCause exception)]
+                (is (str/starts-with?
+                     (.getMessage cause)
+                     (str "ERROR: tried to insert stream revision 1 but it should have been 2\n"
+                          "  Hint: The transaction might succeed if retried.")))
+                (is (= db/psql-serialization-failure (.getSQLState cause)))))))))
 
     (db/with-db [conn {}]
       (jdbc/db-set-rollback-only! conn)
+
       (testing "error: expected revision too high"
-        (let [stream-id (UUID/randomUUID)]
+        (let [stream-id (UUID. 0 0x123)]
           (event-store/save! conn stream-id 0 [{:event/type :event-1}])
-          (let [^PSQLException exception (grab-exception
-                                           (event-store/save! conn stream-id 2 [{:event/type :event-2}]))]
-            ;; TODO: wrap the exception to WriteConflictException
-            (is (instance? PSQLException exception))
-            (is (str/starts-with? (.getMessage exception)
-                                  (str "ERROR: tried to insert stream revision 3 but it should have been 2\n"
-                                       "  Hint: The transaction might succeed if retried.")))
-            (is (= db/psql-serialization-failure (.getSQLState exception)))))))))
+          (let [^Exception exception (grab-exception
+                                       (event-store/save! conn stream-id 2 [{:event/type :event-2}]))]
+
+            (testing "(exception)"
+              (is (instance? WriteConflictException exception))
+              (is (= "Failed to save stream 00000000-0000-0000-0000-000000000123 revision 3: {:event/type :event-2}"
+                     (.getMessage exception))))
+
+            (testing "(cause)"
+              (let [^PSQLException cause (.getCause exception)]
+                (is (str/starts-with?
+                     (.getMessage cause)
+                     (str "ERROR: tried to insert stream revision 3 but it should have been 2\n"
+                          "  Hint: The transaction might succeed if retried.")))
+                (is (= db/psql-serialization-failure (.getSQLState cause)))))))))))
 
 (deftest event-validation-test
   (db/with-db [conn {}]
