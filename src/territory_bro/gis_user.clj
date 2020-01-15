@@ -6,8 +6,7 @@
   (:require [medley.core :refer [dissoc-in]]
             [territory-bro.util :refer [conj-set]])
   (:import (java.security SecureRandom)
-           (java.util Base64)
-           (territory_bro ValidationException)))
+           (java.util Base64)))
 
 ;;; Read model
 

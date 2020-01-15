@@ -159,6 +159,8 @@
     (check-permit [:configure-congregation cong-id])
     (when-not (user-exists? user-id)
       (throw (ValidationException. [[:no-such-user user-id]])))
+    ;; TODO: remove :view-congregation only if removing all permissions
+    ;; TODO: don't allow adding new users with this command?
     (concat
      (for [added-permission (sort added-permissions)]
        {:event/type :congregation.event/permission-granted
