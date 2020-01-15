@@ -122,22 +122,6 @@
           (permissions/grant (current-user-id) [:configure-congregation]))
       state)))
 
-(defn create-congregation [request]
-  (auth/with-authenticated-user request
-    (require-logged-in!)
-    (let [name (get-in request [:params :name])
-          state (state-for-request request)]
-      (db/with-db [conn {}]
-        (let [user-id (current-user-id)
-              cong-id (UUID/randomUUID)]
-          ;; TODO: use api-command!
-          (dispatcher/command! conn state {:command/type :congregation.command/create-congregation
-                                           :command/time (Instant/now)
-                                           :command/user user-id
-                                           :congregation/id cong-id
-                                           :congregation/name name})
-          (ok {:id cong-id}))))))
-
 (defn list-congregations [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -174,27 +158,42 @@
                                                     (assoc :id (:user/id user))
                                                     (assoc :sub (:user/subject user))))))}))))))
 
-(defn- api-command! [conn state command]
-  ;; TODO: unit tests for this and other generic request mapping stuff
-  (let [command (assoc command
-                       :command/time ((:now config/env))
-                       :command/user (current-user-id))]
-    (try
-      (dispatcher/command! conn state command)
-      (ok {:message "OK"})
-      (catch ValidationException e
-        (log/warn e "Invalid command:" command)
-        (bad-request {:errors (.getErrors e)}))
-      (catch NoPermitException e
-        (log/warn e "Forbidden command:" command)
-        (forbidden {:message "Forbidden"}))
-      (catch Throwable t
-        ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
-        (log/error t (str "Command failed: "
-                          (pr-str command)
-                          "\n"
-                          (pr-str t)))
-        (internal-server-error {:message "Internal Server Error"})))))
+(defn- api-command!
+  ([conn state command]
+   (api-command! conn state command {:message "OK"}))
+  ([conn state command ok-response]
+   ;; TODO: unit tests for this and other generic request mapping stuff
+   (let [command (assoc command
+                        :command/time ((:now config/env))
+                        :command/user (current-user-id))]
+     (try
+       (dispatcher/command! conn state command)
+       (ok ok-response)
+       (catch ValidationException e
+         (log/warn e "Invalid command:" command)
+         (bad-request {:errors (.getErrors e)}))
+       (catch NoPermitException e
+         (log/warn e "Forbidden command:" command)
+         (forbidden {:message "Forbidden"}))
+       (catch Throwable t
+         ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
+         (log/error t (str "Command failed: "
+                           (pr-str command)
+                           "\n"
+                           (pr-str t)))
+         (internal-server-error {:message "Internal Server Error"}))))))
+
+(defn create-congregation [request]
+  (auth/with-authenticated-user request
+    (require-logged-in!)
+    (let [cong-id (UUID/randomUUID)
+          name (get-in request [:params :name])
+          state (state-for-request request)]
+      (db/with-db [conn {}]
+        (api-command! conn state {:command/type :congregation.command/create-congregation
+                                  :congregation/id cong-id
+                                  :congregation/name name}
+                      {:id cong-id})))))
 
 (defn add-user [request]
   (auth/with-authenticated-user request
