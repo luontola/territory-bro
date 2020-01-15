@@ -24,9 +24,8 @@
             [territory-bro.user :as user]
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
-           (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException ValidationException)))
+           (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 (def ^:private format-key-for-api (memoize (comp csk/->camelCaseString name)))
 
@@ -174,7 +173,9 @@
        (catch NoPermitException e
          (log/warn e "Forbidden command:" command)
          (forbidden {:message "Forbidden"}))
-       ;; TODO: catch WriteConflictException, return HTTP 409 CONFLICT
+       (catch WriteConflictException e
+         (log/warn e "Write conflict:" command)
+         (conflict {:message "Conflict"}))
        (catch Throwable t
          ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
          (log/error t (str "Command failed: "

@@ -25,7 +25,7 @@
             [territory-bro.user :as user])
   (:import (java.time Instant Duration)
            (java.util UUID)
-           (territory_bro ValidationException NoPermitException)))
+           (territory_bro ValidationException NoPermitException WriteConflictException)))
 
 (use-fixtures :once (join-fixtures [db-fixture api-fixture]))
 
@@ -118,6 +118,14 @@
                                             (throw (NoPermitException. test-user [:dummy-permission 123])))]
           (is (= {:body {:message "Forbidden"}
                   :status 403
+                  :headers {}}
+                 (api/api-command! conn state command)))))
+
+      (testing "failed command: write conflict"
+        (with-redefs [dispatcher/command! (fn [& _]
+                                            (throw (WriteConflictException. "dummy error")))]
+          (is (= {:body {:message "Conflict"}
+                  :status 409
                   :headers {}}
                  (api/api-command! conn state command)))))
 
