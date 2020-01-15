@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -11,9 +11,10 @@
             [territory-bro.fixtures :refer [db-fixture]]
             [territory-bro.json :as json]
             [territory-bro.testutil :refer [re-equals re-contains grab-exception]])
-  (:import (java.util UUID)
+  (:import (clojure.lang ExceptionInfo)
+           (java.util UUID)
            (org.postgresql.util PSQLException)
-           (clojure.lang ExceptionInfo)))
+           (territory_bro WriteConflictException)))
 
 (use-fixtures :once db-fixture)
 
@@ -154,6 +155,7 @@
           (event-store/save! conn stream-id 0 [{:event/type :event-1}])
           (let [^PSQLException exception (grab-exception
                                            (event-store/save! conn stream-id 0 [{:event/type :event-2}]))]
+            ;; TODO: wrap the exception to WriteConflictException
             (is (instance? PSQLException exception))
             (is (str/starts-with? (.getMessage exception)
                                   (str "ERROR: tried to insert stream revision 1 but it should have been 2\n"
@@ -167,6 +169,7 @@
           (event-store/save! conn stream-id 0 [{:event/type :event-1}])
           (let [^PSQLException exception (grab-exception
                                            (event-store/save! conn stream-id 2 [{:event/type :event-2}]))]
+            ;; TODO: wrap the exception to WriteConflictException
             (is (instance? PSQLException exception))
             (is (str/starts-with? (.getMessage exception)
                                   (str "ERROR: tried to insert stream revision 3 but it should have been 2\n"
@@ -193,3 +196,21 @@
       (testing "validates events on reading all events"
         (is (thrown-with-msg? ExceptionInfo (re-contains "Value cannot be coerced to match schema")
                               (event-store/read-all-events conn stream-id)))))))
+
+(deftest check-event-stream-does-not-exist-test
+  ;; bypass validating serializers
+  (binding [event-store/*event->json* event->json-no-validate
+            event-store/*json->event* json->event-no-validate]
+    (db/with-db [conn {}]
+      (jdbc/db-set-rollback-only! conn)
+      (let [existing-stream-id (UUID. 0 1)
+            non-existing-stream-id (UUID. 0 2)]
+        (event-store/save! conn existing-stream-id 0 [{:event/type :dummy-event}])
+
+        (testing "stream does not exist"
+          (is (nil? (event-store/check-event-stream-does-not-exist conn non-existing-stream-id))))
+
+        (testing "stream exists"
+          (is (thrown-with-msg?
+               WriteConflictException (re-equals "Event stream 00000000-0000-0000-0000-000000000001 already exists")
+               (event-store/check-event-stream-does-not-exist conn existing-stream-id))))))))

@@ -21,7 +21,8 @@
   {:now (:now config/env)
    :check-permit #(commands/check-permit state command %)
    :check-congregation-exists #(congregation/check-congregation-exists state %)
-   :check-user-exists #(user/check-user-exists conn %)})
+   :check-user-exists #(user/check-user-exists conn %)
+   :check-event-stream-does-not-exist #(event-store/check-event-stream-does-not-exist conn %)})
 
 (defn- write-stream! [conn stream-id f]
   (let [old-events (event-store/read-stream conn stream-id)

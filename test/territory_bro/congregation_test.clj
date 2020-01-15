@@ -13,7 +13,7 @@
             [territory-bro.testutil :as testutil])
   (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException ValidationException)))
+           (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 (use-fixtures :once (join-fixtures [db-fixture]))
 
@@ -153,7 +153,8 @@
         user-id (UUID. 0 2)
         injections {:generate-tenant-schema-name (fn [id]
                                                    (is (= cong-id id))
-                                                   "cong_schema")}
+                                                   "cong_schema")
+                    :check-event-stream-does-not-exist (fn [_id])}
         create-command {:command/type :congregation.command/create-congregation
                         :command/time (Instant/now)
                         :command/user user-id
@@ -192,10 +193,15 @@
              ValidationException (testutil/re-equals "[[:missing-name]]")
              (handle-command command [] injections)))))
 
-    (testing "create is idempotent"
-      (is (empty? (handle-command create-command [created-event] injections))))
+    (let [injections (assoc injections :check-event-stream-does-not-exist (fn [id]
+                                                                            (is (= cong-id id))
+                                                                            (throw (WriteConflictException.))))]
+      (testing "create is idempotent"
+        (is (empty? (handle-command create-command [created-event] injections))))
 
-    (testing "conflicting event stream ID"))) ; TODO
+      (testing "stream ID conflicts with another entity"
+        (is (thrown? WriteConflictException
+                     (handle-command create-command [] injections)))))))
 
 (deftest rename-congregation-test
   (let [cong-id (UUID. 0 1)

@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,7 +6,8 @@
   (:require [territory-bro.config :as config]
             [territory-bro.db :as db]
             [territory-bro.events :as events])
-  (:import (java.util UUID)))
+  (:import (java.util UUID)
+           (territory_bro WriteConflictException)))
 
 (def ^:dynamic *event->json* events/event->json)
 (def ^:dynamic *json->event* events/json->event)
@@ -63,6 +64,11 @@
                 (assoc :event/global-revision (:global_revision result))
                 (sorted-keys)))))
        (doall)))
+
+(defn check-event-stream-does-not-exist [conn stream-id]
+  (let [events (read-stream conn stream-id)]
+    (when (not (empty? events))
+      (throw (WriteConflictException. (str "Event stream " stream-id " already exists"))))))
 
 (comment
   (db/with-db [conn {:read-only? true}]

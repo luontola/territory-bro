@@ -175,6 +175,7 @@
        (catch NoPermitException e
          (log/warn e "Forbidden command:" command)
          (forbidden {:message "Forbidden"}))
+       ;; TODO: catch WriteConflictException, return HTTP 409 CONFLICT
        (catch Throwable t
          ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
          (log/error t (str "Command failed: "

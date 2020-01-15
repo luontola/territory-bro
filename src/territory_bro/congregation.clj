@@ -119,13 +119,14 @@
      :permission/id permission}))
 
 (defmethod command-handler :congregation.command/create-congregation
-  [command congregation {:keys [generate-tenant-schema-name]}]
+  [command congregation {:keys [generate-tenant-schema-name check-event-stream-does-not-exist]}]
   (let [cong-id (:congregation/id command)
         user-id (:command/user command)
         name (:congregation/name command)]
     (when (str/blank? name)
       (throw (ValidationException. [[:missing-name]])))
-    (when (nil? (:congregation/id congregation))
+    (when (nil? (:congregation/id congregation)) ; idempotence
+      (check-event-stream-does-not-exist cong-id) ; avoid conflict with unrelated entities
       (cons {:event/type :congregation.event/congregation-created
              :event/version 1
              :congregation/id cong-id
