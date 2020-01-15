@@ -192,7 +192,9 @@
              ValidationException (testutil/re-equals "[[:missing-name]]")
              (handle-command command [] injections)))))
 
-    (testing "create is idempotent") ; TODO
+    (testing "create is idempotent"
+      (is (empty? (handle-command create-command [created-event] injections))))
+
     (testing "conflicting event stream ID"))) ; TODO
 
 (deftest rename-congregation-test

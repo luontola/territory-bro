@@ -129,12 +129,13 @@
           state (state-for-request request)]
       (db/with-db [conn {}]
         (let [user-id (current-user-id)
-              events (dispatcher/command! conn state {:command/type :congregation.command/create-congregation
-                                                      :command/time (Instant/now)
-                                                      :command/user user-id
-                                                      :congregation/id (UUID/randomUUID)
-                                                      :congregation/name name})
-              cong-id (:congregation/id (first events))]
+              cong-id (UUID/randomUUID)]
+          ;; TODO: use api-command!
+          (dispatcher/command! conn state {:command/type :congregation.command/create-congregation
+                                           :command/time (Instant/now)
+                                           :command/user user-id
+                                           :congregation/id cong-id
+                                           :congregation/name name})
           (ok {:id cong-id}))))))
 
 (defn list-congregations [request]
