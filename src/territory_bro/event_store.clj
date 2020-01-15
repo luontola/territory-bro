@@ -50,9 +50,9 @@
 
 (defn- save-event! [conn stream-id stream-revision event]
   (try
-    (first (query! conn :save-event {:stream stream-id
-                                     :stream_revision stream-revision
-                                     :data (-> event *event->json*)}))
+    (query! conn :save-event {:stream stream-id
+                              :stream_revision stream-revision
+                              :data (-> event *event->json*)})
     (catch PSQLException e
       (if (= db/psql-serialization-failure (.getSQLState e))
         (throw (WriteConflictException.
