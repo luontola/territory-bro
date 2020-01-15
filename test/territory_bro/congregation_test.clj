@@ -8,14 +8,11 @@
             [territory-bro.commands :as commands]
             [territory-bro.congregation :as congregation]
             [territory-bro.events :as events]
-            [territory-bro.fixtures :refer [db-fixture]]
             [territory-bro.permissions :as permissions]
             [territory-bro.testutil :as testutil])
   (:import (java.time Instant)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
-
-(use-fixtures :once (join-fixtures [db-fixture]))
 
 (defn- apply-events [events]
   (testutil/apply-events congregation/congregations-view events))
