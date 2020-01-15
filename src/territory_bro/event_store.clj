@@ -79,9 +79,8 @@
        (doall)))
 
 (defn check-event-stream-does-not-exist [conn stream-id]
-  (let [events (read-stream conn stream-id)]
-    (when (not (empty? events))
-      (throw (WriteConflictException. (str "Event stream " stream-id " already exists"))))))
+  (when-not (empty? (query! conn :find-stream {:stream stream-id}))
+    (throw (WriteConflictException. (str "Event stream " stream-id " already exists")))))
 
 (comment
   (db/with-db [conn {:read-only? true}]

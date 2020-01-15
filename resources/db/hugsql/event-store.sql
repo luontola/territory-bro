@@ -15,6 +15,12 @@ from event
 where global_revision > :since
 order by global_revision;
 
+-- :name find-stream :? :*
+select stream_id
+from event
+where stream_id = :stream
+limit 1;
+
 -- :name save-event :<! :1
 insert into event (stream_id, stream_revision, data)
 values (:stream, :stream_revision, :data::jsonb)
