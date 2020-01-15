@@ -125,7 +125,7 @@
         name (:congregation/name command)]
     (when (str/blank? name)
       (throw (ValidationException. [[:missing-name]])))
-    (when-not (some? congregation)
+    (when (nil? (:congregation/id congregation))
       (cons {:event/type :congregation.event/congregation-created
              :event/version 1
              :congregation/id cong-id
