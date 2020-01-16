@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,8 +6,9 @@
   (:require [clojure.test :refer :all]
             [schema.core :as s]
             [territory-bro.commands :as commands]
+            [territory-bro.foreign-key :as foreign-key]
             [territory-bro.permissions :as permissions]
-            [territory-bro.testutil :refer [re-equals re-contains]])
+            [territory-bro.testutil :as testutil :refer [re-equals re-contains]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)
@@ -33,36 +34,41 @@
 ;; TODO: deduplicate event & command validation infra
 
 (deftest command-schema-test
-  (testing "check specific command schema"
-    (is (nil? (s/check commands/RenameCongregation valid-command))))
+  (binding [foreign-key/*reference-checkers* testutil/dummy-reference-checkers]
 
-  (testing "check generic command schema"
-    (is (nil? (s/check commands/Command valid-command))))
+    (testing "check specific command schema"
+      (is (nil? (s/check commands/RenameCongregation valid-command))))
 
-  (testing "invalid command"
-    (is (= {:congregation/name 'missing-required-key}
-           (s/check commands/Command invalid-command))))
+    (testing "check generic command schema"
+      (is (nil? (s/check commands/Command valid-command))))
 
-  (testing "unknown command type"
-    ;; TODO: produce a helpful error message
-    (is (s/check commands/Command unknown-command))))
+    (testing "invalid command"
+      (is (= {:congregation/name 'missing-required-key}
+             (s/check commands/Command invalid-command))))
+
+    (testing "unknown command type"
+      ;; TODO: produce a helpful error message
+      (is (s/check commands/Command unknown-command)))))
 
 (deftest validate-command-test
-  (testing "valid command"
-    (is (= valid-command (commands/validate-command valid-command))))
+  (binding [foreign-key/*reference-checkers* testutil/dummy-reference-checkers]
 
-  (testing "invalid command"
-    (is (thrown-with-msg? ExceptionInfo (re-contains "{:congregation/name missing-required-key}")
-                          (commands/validate-command invalid-command))))
+    (testing "valid command"
+      (is (= valid-command (testutil/validate-command valid-command))))
 
-  (testing "unknown command type"
-    (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown command type :foo")
-                          (commands/validate-command unknown-command)))))
+    (testing "invalid command"
+      (is (thrown-with-msg? ExceptionInfo (re-contains "{:congregation/name missing-required-key}")
+                            (testutil/validate-command invalid-command))))
+
+    (testing "unknown command type"
+      (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown command type :foo")
+                            (testutil/validate-command unknown-command))))))
 
 (deftest validate-commands-test
-  (is (= [] (commands/validate-commands [])))
-  (is (= [valid-command] (commands/validate-commands [valid-command])))
-  (is (thrown? ExceptionInfo (commands/validate-commands [invalid-command]))))
+  ;; this tests is here instead of the testutil namespace, because the command examples are here
+  (is (= [] (testutil/validate-commands [])))
+  (is (= [valid-command] (testutil/validate-commands [valid-command])))
+  (is (thrown? ExceptionInfo (testutil/validate-commands [invalid-command]))))
 
 (deftest check-permit-test
   (let [user-id (UUID. 0 1)

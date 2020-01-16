@@ -13,6 +13,7 @@
             [territory-bro.db-admin :as db-admin]
             [territory-bro.event-store :as event-store]
             [territory-bro.events :as events]
+            [territory-bro.foreign-key :as foreign-key]
             [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.user :as user]))
@@ -71,10 +72,17 @@
                (print "\n")
                (pprint/pprint object))))
 
+(defn- validate-command [command]
+  ;; TODO: real checkers
+  (binding [foreign-key/*reference-checkers* {:congregation (constantly true)
+                                              :new (constantly true)
+                                              :user (constantly true)}]
+    (commands/validate-command command)))
+
 (defn command! [conn state command]
   (let [command (-> command
                     (commands/sorted-keys)
-                    (commands/validate-command))
+                    (validate-command))
         _ (log/info "Dispatch command:" (pretty-str command))
         events (case (namespace (:command/type command))
                  "congregation.command" (congregation-command! conn command state)

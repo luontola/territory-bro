@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -20,7 +20,7 @@
 (defn- generate-commands [events]
   (->> (gis-user-process/generate-commands (apply-events events)
                                            {:now (fn [] test-time)})
-       (commands/validate-commands)))
+       (testutil/validate-commands)))
 
 (deftest generate-commands-test
   (let [events []]

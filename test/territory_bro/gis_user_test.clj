@@ -31,7 +31,7 @@
   (testutil/apply-events gis-user/gis-users-view events))
 
 (defn- handle-command [command events injections]
-  (->> (gis-user/handle-command (commands/validate-command command)
+  (->> (gis-user/handle-command (testutil/validate-command command)
                                 (events/validate-events events)
                                 injections)
        (events/validate-events)))

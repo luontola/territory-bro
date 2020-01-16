@@ -56,10 +56,10 @@
 (defn- generate-commands [events]
   (->> (db-admin/generate-commands (apply-events events)
                                    {:now (fn [] test-time)})
-       (commands/validate-commands)))
+       (testutil/validate-commands)))
 
 (defn- handle-command [command state injections]
-  (->> (db-admin/handle-command (commands/validate-command command)
+  (->> (db-admin/handle-command (testutil/validate-command command)
                                 state
                                 injections)
        (events/validate-events)))

@@ -7,6 +7,7 @@
             [schema.core :as s]
             [schema.utils]
             [territory-bro.events :as events]
+            [territory-bro.foreign-key :as foreign-key]
             [territory-bro.permissions :as permissions])
   (:import (java.time Instant)
            (java.util UUID)))
@@ -35,7 +36,7 @@
 (s/defschema UserCommand
   {:command/type s/Keyword
    :command/time Instant
-   :command/user UUID})
+   :command/user (foreign-key/references :user UUID)})
 
 (s/defschema SystemCommand
   {:command/type s/Keyword
@@ -48,26 +49,26 @@
 (s/defschema CreateCongregation
   (assoc UserCommand
          :command/type (s/eq :congregation.command/create-congregation)
-         :congregation/id UUID
+         :congregation/id (foreign-key/references :new UUID)
          :congregation/name s/Str))
 
 (s/defschema AddUser
   (assoc UserCommand
          :command/type (s/eq :congregation.command/add-user)
-         :congregation/id UUID
-         :user/id UUID))
+         :congregation/id (foreign-key/references :congregation UUID)
+         :user/id (foreign-key/references :user UUID)))
 
 (s/defschema SetUserPermissions
   (assoc UserCommand
          :command/type (s/eq :congregation.command/set-user-permissions)
-         :congregation/id UUID
-         :user/id UUID
+         :congregation/id (foreign-key/references :congregation UUID)
+         :user/id (foreign-key/references :user UUID)
          :permission/ids [events/PermissionId]))
 
 (s/defschema RenameCongregation
   (assoc UserCommand
          :command/type (s/eq :congregation.command/rename-congregation)
-         :congregation/id UUID
+         :congregation/id (foreign-key/references :congregation UUID)
          :congregation/name s/Str))
 
 
@@ -76,24 +77,24 @@
 (s/defschema EnsureGisUserAbsent
   (assoc SystemCommand
          :command/type (s/eq :db-admin.command/ensure-gis-user-absent)
-         :user/id UUID
+         :user/id (foreign-key/references :user UUID)
          :gis-user/username s/Str
-         :congregation/id UUID
+         :congregation/id (foreign-key/references :congregation UUID)
          :congregation/schema-name s/Str))
 
 (s/defschema EnsureGisUserPresent
   (assoc SystemCommand
          :command/type (s/eq :db-admin.command/ensure-gis-user-present)
-         :user/id UUID
+         :user/id (foreign-key/references :user UUID)
          :gis-user/username s/Str
          :gis-user/password s/Str
-         :congregation/id UUID
+         :congregation/id (foreign-key/references :congregation UUID)
          :congregation/schema-name s/Str))
 
 (s/defschema MigrateTenantSchema
   (assoc SystemCommand
          :command/type (s/eq :db-admin.command/migrate-tenant-schema)
-         :congregation/id UUID
+         :congregation/id (foreign-key/references :congregation UUID)
          :congregation/schema-name s/Str))
 
 
@@ -102,14 +103,14 @@
 (s/defschema CreateGisUser
   (assoc SystemCommand
          :command/type (s/eq :gis-user.command/create-gis-user)
-         :congregation/id UUID
-         :user/id UUID))
+         :congregation/id (foreign-key/references :congregation UUID)
+         :user/id (foreign-key/references :user UUID)))
 
 (s/defschema DeleteGisUser
   (assoc SystemCommand
          :command/type (s/eq :gis-user.command/delete-gis-user)
-         :congregation/id UUID
-         :user/id UUID))
+         :congregation/id (foreign-key/references :congregation UUID)
+         :user/id (foreign-key/references :user UUID)))
 
 
 (def command-schemas
@@ -137,11 +138,6 @@
           {:error [:unknown-command-type (:command/type command)]
            :command command})
   (s/validate Command command))
-
-(defn validate-commands [commands]
-  (doseq [command commands]
-    (validate-command command))
-  commands)
 
 (defn check-permit [state {user :command/user, system :command/system, :as command} permit]
   (cond

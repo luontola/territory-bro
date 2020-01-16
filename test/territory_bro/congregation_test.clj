@@ -18,7 +18,7 @@
   (testutil/apply-events congregation/congregations-view events))
 
 (defn- handle-command [command events injections]
-  (->> (congregation/handle-command (commands/validate-command command)
+  (->> (congregation/handle-command (testutil/validate-command command)
                                     (events/validate-events events)
                                     injections)
        (events/validate-events)))
