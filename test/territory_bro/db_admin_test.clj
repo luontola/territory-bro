@@ -4,14 +4,13 @@
 
 (ns territory-bro.db-admin-test
   (:require [clojure.test :refer :all]
-            [territory-bro.commands :as commands]
             [territory-bro.db-admin :as db-admin]
             [territory-bro.events :as events]
             [territory-bro.spy :as spy]
             [territory-bro.testutil :as testutil])
   (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro ValidationException NoPermitException)))
+           (territory_bro NoPermitException)))
 
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
@@ -126,8 +125,7 @@
   (let [spy (spy/spy)
         state (apply-events [congregation-created])
         injections {:migrate-tenant-schema! (spy/fn spy :migrate-tenant-schema!)
-                    :check-permit (fn [_permit])
-                    :check-congregation-exists (fn [_cong-id])}
+                    :check-permit (fn [_permit])}
         command {:command/type :db-admin.command/migrate-tenant-schema
                  :command/time (Instant/now)
                  :command/system "test"
@@ -139,14 +137,6 @@
              (handle-command command state injections)))
       (is (= [[:migrate-tenant-schema! "cong1_schema"]]
              (spy/read! spy))))
-
-    (testing "checks congregation exists"
-      (let [injections (assoc injections
-                              :check-congregation-exists (fn [id]
-                                                           (is (= cong-id id))
-                                                           (throw (ValidationException. [[:dummy]]))))]
-        (is (thrown? ValidationException
-                     (handle-command command state injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections
@@ -160,9 +150,7 @@
   (let [spy (spy/spy)
         state (apply-events [congregation-created gis-user-created])
         injections {:ensure-gis-user-present! (spy/fn spy :ensure-gis-user-present!)
-                    :check-permit (fn [_permit])
-                    :check-congregation-exists (fn [_cong-id])
-                    :check-user-exists (fn [_user-id])}
+                    :check-permit (fn [_permit])}
         command {:command/type :db-admin.command/ensure-gis-user-present
                  :command/time (Instant/now)
                  :command/system "test"
@@ -180,20 +168,6 @@
                                           :schema "cong1_schema"}]]
              (spy/read! spy))))
 
-    (testing "checks congregation exists"
-      (let [injections (assoc injections
-                              :check-congregation-exists (fn [id]
-                                                           (is (= cong-id id))
-                                                           (throw (ValidationException. [[:dummy]]))))]
-        (is (thrown? ValidationException (handle-command command state injections)))))
-
-    (testing "checks user exists"
-      (let [injections (assoc injections
-                              :check-user-exists (fn [id]
-                                                   (is (= user-id id))
-                                                   (throw (ValidationException. [[:dummy]]))))]
-        (is (thrown? ValidationException (handle-command command state injections)))))
-
     (testing "checks permits"
       (let [injections (assoc injections
                               :check-permit (fn [permit]
@@ -206,9 +180,7 @@
   (let [spy (spy/spy)
         state (apply-events [congregation-created gis-user-created])
         injections {:ensure-gis-user-absent! (spy/fn spy :ensure-gis-user-absent!)
-                    :check-permit (fn [_permit])
-                    :check-congregation-exists (fn [_cong-id])
-                    :check-user-exists (fn [_user-id])}
+                    :check-permit (fn [_permit])}
         command {:command/type :db-admin.command/ensure-gis-user-absent
                  :command/time (Instant/now)
                  :command/system "test"
@@ -223,20 +195,6 @@
       (is (= [[:ensure-gis-user-absent! {:username "username123"
                                          :schema "cong1_schema"}]]
              (spy/read! spy))))
-
-    (testing "checks congregation exists"
-      (let [injections (assoc injections
-                              :check-congregation-exists (fn [id]
-                                                           (is (= cong-id id))
-                                                           (throw (ValidationException. [[:dummy]]))))]
-        (is (thrown? ValidationException (handle-command command state injections)))))
-
-    (testing "checks user exists"
-      (let [injections (assoc injections
-                              :check-user-exists (fn [id]
-                                                   (is (= user-id id))
-                                                   (throw (ValidationException. [[:dummy]]))))]
-        (is (thrown? ValidationException (handle-command command state injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections

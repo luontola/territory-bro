@@ -96,10 +96,9 @@
 
 (defmulti ^:private command-handler (fn [command _injections] (:command/type command)))
 
-(defmethod command-handler :db-admin.command/migrate-tenant-schema [command {:keys [migrate-tenant-schema! check-permit check-congregation-exists]}]
+(defmethod command-handler :db-admin.command/migrate-tenant-schema [command {:keys [migrate-tenant-schema! check-permit]}]
   (let [cong-id (:congregation/id command)]
     (check-permit [:migrate-tenant-schema cong-id])
-    (check-congregation-exists cong-id)
     (migrate-tenant-schema! (:congregation/schema-name command))
     [{:event/type :db-admin.event/gis-schema-is-present
       :event/version 1
@@ -107,12 +106,10 @@
       :congregation/id cong-id
       :congregation/schema-name (:congregation/schema-name command)}]))
 
-(defmethod command-handler :db-admin.command/ensure-gis-user-present [command {:keys [ensure-gis-user-present! check-permit check-congregation-exists check-user-exists]}]
+(defmethod command-handler :db-admin.command/ensure-gis-user-present [command {:keys [ensure-gis-user-present! check-permit]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:ensure-gis-user-present cong-id user-id])
-    (check-congregation-exists cong-id)
-    (check-user-exists user-id)
     (ensure-gis-user-present! {:username (:gis-user/username command)
                                :password (:gis-user/password command)
                                :schema (:congregation/schema-name command)})
@@ -123,12 +120,10 @@
       :user/id user-id
       :gis-user/username (:gis-user/username command)}]))
 
-(defmethod command-handler :db-admin.command/ensure-gis-user-absent [command {:keys [ensure-gis-user-absent! check-permit check-congregation-exists check-user-exists]}]
+(defmethod command-handler :db-admin.command/ensure-gis-user-absent [command {:keys [ensure-gis-user-absent! check-permit]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:ensure-gis-user-absent cong-id user-id])
-    (check-congregation-exists cong-id)
-    (check-user-exists user-id)
     (ensure-gis-user-absent! {:username (:gis-user/username command)
                               :schema (:congregation/schema-name command)})
     [{:event/type :db-admin.event/gis-user-is-absent

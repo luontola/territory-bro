@@ -81,12 +81,10 @@
 
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
-(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists? check-permit check-congregation-exists check-user-exists]}]
+(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists? check-permit]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:create-gis-user cong-id user-id])
-    (check-congregation-exists cong-id)
-    (check-user-exists user-id)
     (when (nil? (get-in state (username-path command)))
       [{:event/type :congregation.event/gis-user-created
         :event/version 1
@@ -98,12 +96,10 @@
                                (unique-username db-user-exists?))
         :gis-user/password (generate-password)}])))
 
-(defmethod command-handler :gis-user.command/delete-gis-user [command state {:keys [check-permit check-congregation-exists check-user-exists]}]
+(defmethod command-handler :gis-user.command/delete-gis-user [command state {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:delete-gis-user cong-id user-id])
-    (check-congregation-exists cong-id)
-    (check-user-exists user-id)
     (when-some [username (get-in state (username-path command))]
       [{:event/type :congregation.event/gis-user-deleted
         :event/version 1

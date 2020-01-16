@@ -4,14 +4,12 @@
 
 (ns territory-bro.gis-user-test
   (:require [clojure.test :refer :all]
-            [medley.core :refer [deep-merge dissoc-in]]
-            [territory-bro.commands :as commands]
             [territory-bro.events :as events]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.testutil :as testutil])
   (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro ValidationException NoPermitException)))
+           (territory_bro NoPermitException)))
 
 (def cong-id (UUID. 1 0))
 (def user-id (UUID. 2 0))
@@ -53,9 +51,7 @@
 (deftest create-gis-user-test
   (let [injections {:generate-password (constantly "secret123")
                     :db-user-exists? (constantly false)
-                    :check-permit (fn [_permit])
-                    :check-congregation-exists (fn [_cong-id])
-                    :check-user-exists (fn [_user-id])}
+                    :check-permit (fn [_permit])}
         command {:command/type :gis-user.command/create-gis-user
                  :command/time (Instant/now)
                  :command/system "test"
@@ -94,20 +90,6 @@
                              (conj events gis-user-created gis-user-deleted)
                              injections))))
 
-    (testing "checks congregation exists"
-      (let [injections (assoc injections
-                              :check-congregation-exists (fn [id]
-                                                           (is (= cong-id id))
-                                                           (throw (ValidationException. [[:dummy]]))))]
-        (is (thrown? ValidationException (handle-command command events injections)))))
-
-    (testing "checks user exists"
-      (let [injections (assoc injections
-                              :check-user-exists (fn [id]
-                                                   (is (= user-id id))
-                                                   (throw (ValidationException. [[:dummy]]))))]
-        (is (thrown? ValidationException (handle-command command events injections)))))
-
     (testing "checks permits"
       (let [injections (assoc injections
                               :check-permit (fn [permit]
@@ -117,9 +99,7 @@
                      (handle-command command events injections)))))))
 
 (deftest delete-gis-user-test
-  (let [injections {:check-permit (fn [_permit])
-                    :check-congregation-exists (fn [_cong-id])
-                    :check-user-exists (fn [_user-id])}
+  (let [injections {:check-permit (fn [_permit])}
         command {:command/type :gis-user.command/delete-gis-user
                  :command/time (Instant/now)
                  :command/system "test"
@@ -146,20 +126,6 @@
                                   (conj events gis-user-deleted)
                                   injections))
           "already deleted"))
-
-    (testing "checks congregation exists"
-      (let [injections (assoc injections
-                              :check-congregation-exists (fn [id]
-                                                           (is (= cong-id id))
-                                                           (throw (ValidationException. [[:dummy]]))))]
-        (is (thrown? ValidationException (handle-command command events injections)))))
-
-    (testing "checks user exists"
-      (let [injections (assoc injections
-                              :check-user-exists (fn [id]
-                                                   (is (= user-id id))
-                                                   (throw (ValidationException. [[:dummy]]))))]
-        (is (thrown? ValidationException (handle-command command events injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections

@@ -11,7 +11,7 @@
             [territory-bro.testutil :as testutil :refer [re-equals]])
   (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException ValidationException WriteConflictException)))
+           (territory_bro NoPermitException ValidationException)))
 
 (defn- apply-events [events]
   (testutil/apply-events congregation/congregations-view events))
@@ -149,8 +149,7 @@
         user-id (UUID. 0 2)
         injections {:generate-tenant-schema-name (fn [id]
                                                    (is (= cong-id id))
-                                                   "cong_schema")
-                    :check-new-stream (fn [_id])}
+                                                   "cong_schema")}
         create-command {:command/type :congregation.command/create-congregation
                         :command/time (Instant/now)
                         :command/user user-id
@@ -189,15 +188,8 @@
              ValidationException (re-equals "[[:missing-name]]")
              (handle-command command [] injections)))))
 
-    (let [injections (assoc injections :check-new-stream (fn [id]
-                                                           (is (= cong-id id))
-                                                           (throw (WriteConflictException.))))]
-      (testing "create is idempotent"
-        (is (empty? (handle-command create-command [created-event] injections))))
-
-      (testing "stream ID conflicts with another entity"
-        (is (thrown? WriteConflictException
-                     (handle-command create-command [] injections)))))))
+    (testing "create is idempotent"
+      (is (empty? (handle-command create-command [created-event] injections))))))
 
 (deftest rename-congregation-test
   (let [cong-id (UUID. 0 1)
@@ -247,10 +239,7 @@
   (let [cong-id (UUID. 0 1)
         admin-id (UUID. 0 2)
         new-user-id (UUID. 0 3)
-        invalid-user-id (UUID. 0 4)
-        injections {:check-permit (fn [_permit])
-                    :user-exists? (fn [user-id]
-                                    (= new-user-id user-id))}
+        injections {:check-permit (fn [_permit])}
         created-event {:event/type :congregation.event/congregation-created
                        :event/version 1
                        :congregation/id cong-id
@@ -284,13 +273,6 @@
     (testing "user already in congregation"
       (is (empty? (handle-command add-user-command [created-event view-granted] injections))))
 
-    (testing "user doesn't exist"
-      (let [invalid-command (assoc add-user-command
-                                   :user/id invalid-user-id)]
-        (is (thrown-with-msg?
-             ValidationException (re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000004\"]]")
-             (handle-command invalid-command [created-event] injections)))))
-
     (testing "checks permits"
       (let [injections (assoc injections
                               :check-permit (fn [permit]
@@ -303,10 +285,7 @@
   (let [cong-id (UUID. 0 1)
         admin-id (UUID. 0 2)
         target-user-id (UUID. 0 3)
-        invalid-user-id (UUID. 0 4)
-        injections {:check-permit (fn [_permit])
-                    :user-exists? (fn [user-id]
-                                    (= target-user-id user-id))}
+        injections {:check-permit (fn [_permit])}
         created-event {:event/type :congregation.event/congregation-created
                        :event/version 1
                        :congregation/id cong-id
@@ -359,15 +338,6 @@
         (is (= then (handle-command when given injections)))))
 
     (testing "user not in congregation") ;; TODO: should this command disallow adding new users?
-
-    (testing "user doesn't exist"
-      (let [given [created-event]
-            when (assoc set-user-permissions-command
-                        :user/id invalid-user-id
-                        :permission/ids [:view-congregation])]
-        (is (thrown-with-msg?
-             ValidationException (re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000004\"]]")
-             (handle-command when given injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections

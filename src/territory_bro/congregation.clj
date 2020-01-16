@@ -119,14 +119,13 @@
      :permission/id permission}))
 
 (defmethod command-handler :congregation.command/create-congregation
-  [command congregation {:keys [generate-tenant-schema-name check-new-stream]}]
+  [command congregation {:keys [generate-tenant-schema-name]}]
   (let [cong-id (:congregation/id command)
         user-id (:command/user command)
         name (:congregation/name command)]
     (when (str/blank? name)
       (throw (ValidationException. [[:missing-name]])))
     (when (nil? (:congregation/id congregation)) ; idempotence
-      (check-new-stream cong-id) ; avoid conflict with unrelated entities
       (cons {:event/type :congregation.event/congregation-created
              :event/version 1
              :congregation/id cong-id
@@ -136,20 +135,18 @@
             (admin-permissions-granted cong-id user-id)))))
 
 (defmethod command-handler :congregation.command/add-user
-  [command congregation {:keys [user-exists? check-permit]}]
+  [command congregation {:keys [check-permit]}]
   (let [cong-id (:congregation/id congregation)
         user-id (:user/id command)
         user-permissions (set (get-in congregation [:congregation/user-permissions user-id]))
         already-user? (contains? user-permissions :view-congregation)]
     (check-permit [:configure-congregation cong-id])
-    (when-not (user-exists? user-id)
-      (throw (ValidationException. [[:no-such-user user-id]])))
     (when-not already-user?
       ;; TODO: only grant :view-congregation to new users (after admin has a UI for editing permissions)
       (admin-permissions-granted cong-id user-id))))
 
 (defmethod command-handler :congregation.command/set-user-permissions
-  [command congregation {:keys [user-exists? check-permit]}]
+  [command congregation {:keys [check-permit]}]
   (let [cong-id (:congregation/id congregation)
         user-id (:user/id command)
         old-permissions (set (get-in congregation [:congregation/user-permissions user-id]))
@@ -157,8 +154,6 @@
         added-permissions (set/difference new-permissions old-permissions)
         removed-permissions (set/difference old-permissions new-permissions)]
     (check-permit [:configure-congregation cong-id])
-    (when-not (user-exists? user-id)
-      (throw (ValidationException. [[:no-such-user user-id]])))
     ;; TODO: remove :view-congregation only if removing all permissions
     ;; TODO: don't allow adding new users with this command?
     (concat
