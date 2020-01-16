@@ -18,6 +18,7 @@
            (com.zaxxer.hikari HikariDataSource)
            (java.net URL)
            (java.sql Date Timestamp PreparedStatement Array)
+           (java.time Instant)
            (org.flywaydb.core Flyway)
            (org.postgresql.util PGobject)))
 
@@ -40,18 +41,31 @@
   :start (connect! (getx config/env :database-url))
   :stop (disconnect! database))
 
-(defn to-date [^java.util.Date sql-date]
-  (-> sql-date (.getTime) (java.util.Date.)))
+
+;;; SQL type conversions
+
+(defn- array? [obj]
+  (.isArray (class obj)))
+
+(defn- array-to-vec
+  "Converts multi-dimensional arrays to nested vectors."
+  [obj]
+  (if (array? obj)
+    (mapv array-to-vec obj)
+    obj))
 
 (extend-protocol jdbc/IResultSetReadColumn
   Date
-  (result-set-read-column [v _ _] (to-date v))
+  (result-set-read-column [v _ _]
+    (.toLocalDate v))
 
   Timestamp
-  (result-set-read-column [v _ _] (to-date v))
+  (result-set-read-column [v _ _]
+    (.toInstant v))
 
   Array
-  (result-set-read-column [v _ _] (vec (.getArray v)))
+  (result-set-read-column [v _ _]
+    (array-to-vec (.getArray v)))
 
   PGobject
   (result-set-read-column [pgobj _metadata _index]
@@ -63,10 +77,10 @@
         "citext" (str value)
         value))))
 
-(extend-type java.util.Date
+(extend-type Instant
   jdbc/ISQLParameter
   (set-parameter [v ^PreparedStatement stmt idx]
-    (.setTimestamp stmt idx (Timestamp. (.getTime v)))))
+    (.setTimestamp stmt idx (Timestamp/from v))))
 
 (defn to-pg-json [value]
   (doto (PGobject.)
@@ -79,7 +93,8 @@
     (let [conn (.getConnection stmt)
           meta (.getParameterMetaData stmt)
           type-name (.getParameterTypeName meta idx)]
-      (if-let [elem-type (when (= (first type-name) \_) (apply str (rest type-name)))]
+      (if-let [elem-type (when (= \_ (first type-name))
+                           (apply str (rest type-name)))]
         (.setObject stmt idx (.createArrayOf conn elem-type (to-array v)))
         (.setObject stmt idx (to-pg-json v))))))
 
@@ -89,10 +104,11 @@
   IPersistentVector
   (sql-value [value] (to-pg-json value)))
 
-;; new stuff
 
-(defn- ^"[Ljava.lang.String;" strings [& strings]
-  (into-array String strings))
+;;; Database schemas
+
+(defn- ^"[Ljava.lang.String;" strings [& ss]
+  (into-array String ss))
 
 (defn ^Flyway master-schema [schema]
   (-> (Flyway/configure)
@@ -152,6 +168,9 @@
   (set-search-path conn [(:database-schema config/env)
                          tenant-schema
                          public-schema]))
+
+
+;;; Queries
 
 (defmacro with-db [binding & body]
   (let [conn (first binding)

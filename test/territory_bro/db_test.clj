@@ -3,11 +3,13 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns ^:slow territory-bro.db-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.java.jdbc :as jdbc]
+            [clojure.test :refer :all]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture]]
             [territory-bro.testutil :refer [re-contains]])
-  (:import (java.util UUID)))
+  (:import (java.time Instant LocalDate)
+           (java.util UUID)))
 
 (use-fixtures :once db-fixture)
 
@@ -30,3 +32,41 @@
   (is (thrown-with-msg? AssertionError (re-contains "Expected the database to be PostgreSQL 12 but it was PostgreSQL 11")
                         (db/check-database-version 12))
       "older than expected"))
+
+(deftest sql-type-conversions-test
+  (db/with-db [conn {:read-only? true}]
+
+    (testing "timestamp (with time zone)"
+      (is (= [{:value (Instant/ofEpochSecond 2)}]
+             (jdbc/query conn ["SELECT (?::timestamptz + interval '1 second')::timestamptz AS value"
+                               (Instant/ofEpochSecond 1)]))))
+
+    (testing "date"
+      (is (= [{:value (LocalDate/of 2001 1 1)}]
+             (jdbc/query conn ["SELECT (?::date + interval '1 day')::date AS value"
+                               (LocalDate/of 2000 12 31)]))))
+
+    (testing "json"
+      (is (= [{:value {:foo "bar"}}]
+             (jdbc/query conn ["SELECT ?::json AS value"
+                               {:foo "bar"}]))))
+
+    (testing "jsonb"
+      (is (= [{:value {:foo "bar"}}]
+             (jdbc/query conn ["SELECT ?::jsonb AS value"
+                               {:foo "bar"}]))))
+
+    (testing "array"
+      (is (= [{:value [1 2 3]}]
+             (jdbc/query conn ["SELECT '{1,2,3}'::integer[] AS value"]))
+          "one way")
+      (is (= [{:value [1 2 3]}]
+             (jdbc/query conn ["SELECT ?::integer[] AS value"
+                               [1 2 3]]))
+          "round trip"))
+
+    (testing "multi-dimensional array"
+      ;; TODO: support for input parameters?
+      (is (= [{:value [[1 2 3] [4 5 6]]}]
+             (jdbc/query conn ["SELECT '{{1,2,3},{4,5,6}}'::integer[][] AS value"]))
+          "one way"))))

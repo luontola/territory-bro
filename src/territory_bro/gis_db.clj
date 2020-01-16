@@ -9,7 +9,8 @@
             [schema.coerce :as coerce]
             [schema.core :as s]
             [territory-bro.db :as db])
-  (:import (java.util UUID Date)
+  (:import (java.time Instant)
+           (java.util UUID)
            (org.postgresql.util PSQLException)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/gis.sql"))
@@ -108,7 +109,7 @@
    :table (s/enum "territory" "congregation_boundary" "subregion" "card_minimap_viewport")
    :op (s/enum :INSERT :UPDATE :DELETE)
    :user s/Str
-   :time Date ; TODO: change to Instant
+   :time Instant
    :old (s/maybe GisFeature)
    :new (s/maybe GisFeature)})
 
