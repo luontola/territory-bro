@@ -33,40 +33,36 @@
 
 ;;;; Schemas
 
-(s/defschema UserCommand
+(s/defschema BaseCommand
   {:command/type s/Keyword
    :command/time Instant
-   :command/user (foreign-key/references :user UUID)})
-
-(s/defschema SystemCommand
-  {:command/type s/Keyword
-   :command/time Instant
-   :command/system s/Str})
+   (s/optional-key :command/user) (foreign-key/references :user UUID)
+   (s/optional-key :command/system) s/Str})
 
 
 ;;; Congregation
 
 (s/defschema CreateCongregation
-  (assoc UserCommand
+  (assoc BaseCommand
          :command/type (s/eq :congregation.command/create-congregation)
          :congregation/id (foreign-key/references :new UUID)
          :congregation/name s/Str))
 
 (s/defschema AddUser
-  (assoc UserCommand
+  (assoc BaseCommand
          :command/type (s/eq :congregation.command/add-user)
          :congregation/id (foreign-key/references :congregation UUID)
          :user/id (foreign-key/references :user UUID)))
 
 (s/defschema SetUserPermissions
-  (assoc UserCommand
+  (assoc BaseCommand
          :command/type (s/eq :congregation.command/set-user-permissions)
          :congregation/id (foreign-key/references :congregation UUID)
          :user/id (foreign-key/references :user UUID)
          :permission/ids [events/PermissionId]))
 
 (s/defschema RenameCongregation
-  (assoc UserCommand
+  (assoc BaseCommand
          :command/type (s/eq :congregation.command/rename-congregation)
          :congregation/id (foreign-key/references :congregation UUID)
          :congregation/name s/Str))
@@ -75,7 +71,7 @@
 ;;; DB Admin
 
 (s/defschema EnsureGisUserAbsent
-  (assoc SystemCommand
+  (assoc BaseCommand
          :command/type (s/eq :db-admin.command/ensure-gis-user-absent)
          :user/id (foreign-key/references :user UUID)
          :gis-user/username s/Str
@@ -83,7 +79,7 @@
          :congregation/schema-name s/Str))
 
 (s/defschema EnsureGisUserPresent
-  (assoc SystemCommand
+  (assoc BaseCommand
          :command/type (s/eq :db-admin.command/ensure-gis-user-present)
          :user/id (foreign-key/references :user UUID)
          :gis-user/username s/Str
@@ -92,7 +88,7 @@
          :congregation/schema-name s/Str))
 
 (s/defschema MigrateTenantSchema
-  (assoc SystemCommand
+  (assoc BaseCommand
          :command/type (s/eq :db-admin.command/migrate-tenant-schema)
          :congregation/id (foreign-key/references :congregation UUID)
          :congregation/schema-name s/Str))
@@ -101,13 +97,13 @@
 ;;; GIS User
 
 (s/defschema CreateGisUser
-  (assoc SystemCommand
+  (assoc BaseCommand
          :command/type (s/eq :gis-user.command/create-gis-user)
          :congregation/id (foreign-key/references :congregation UUID)
          :user/id (foreign-key/references :user UUID)))
 
 (s/defschema DeleteGisUser
-  (assoc SystemCommand
+  (assoc BaseCommand
          :command/type (s/eq :gis-user.command/delete-gis-user)
          :congregation/id (foreign-key/references :congregation UUID)
          :user/id (foreign-key/references :user UUID)))

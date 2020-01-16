@@ -340,18 +340,16 @@
       (is (unauthorized? response)))))
 
 (defn revoke-access-from-all! [cong-id]
-  ;; TODO: create an API for changing permissions
   (db/with-db [conn {}]
-    (let [state (projections/current-state conn)]
+    (let [state (projections/cached-state)]
       (doseq [user-id (congregation/get-users state cong-id)]
-        (dispatcher/command! conn state {:command/type :congregation.command/set-user-permissions
-                                         :command/time (Instant/now)
-                                         :command/user user-id
-                                         ;; TODO: allow all commands as either user or system
-                                         ;:command/system "test"
-                                         :congregation/id cong-id
-                                         :user/id user-id
-                                         :permission/ids []}))))
+        (dispatcher/command! conn state
+                             {:command/type :congregation.command/set-user-permissions
+                              :command/time (Instant/now)
+                              :command/system "test"
+                              :congregation/id cong-id
+                              :user/id user-id
+                              :permission/ids []}))))
   (projections/refresh-async!)
   (projections/await-refreshed (Duration/ofSeconds 1)))
 
@@ -422,13 +420,10 @@
 
     (testing "requires GIS access"
       (db/with-db [conn {}]
-        ;; TODO: change permissions via API?
         (dispatcher/command! conn (projections/cached-state)
                              {:command/type :congregation.command/set-user-permissions
                               :command/time (Instant/now)
-                              :command/user user-id
-                              ;; TODO: allow all commands as either user or system
-                              ;:command/system "test"
+                              :command/system "test"
                               :congregation/id cong-id
                               :user/id user-id
                               ;; TODO: create a command for removing a single permission? or produce the event directly from tests?
