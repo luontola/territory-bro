@@ -182,6 +182,13 @@
               gis-permission-granted]
              (handle-command create-command [] injections))))
 
+    (testing "created by system, should make no grants"
+      (let [command (-> create-command
+                        (dissoc :command/user)
+                        (assoc :command/system "test"))]
+        (is (= [created-event]
+               (handle-command command [] injections)))))
+
     (testing "error: name is blank"
       (let [command (assoc create-command :congregation/name "   ")]
         (is (thrown-with-msg?

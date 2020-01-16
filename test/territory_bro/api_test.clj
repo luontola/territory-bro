@@ -253,12 +253,11 @@
 
 (defn- create-congregation! [name]
   (db/with-db [conn {}]
-    (let [cong-id (UUID/randomUUID)
-          user-id (user/save-user! conn "cong-admin" {})]
+    (let [cong-id (UUID/randomUUID)]
       (dispatcher/command! conn (projections/cached-state)
                            {:command/type :congregation.command/create-congregation
                             :command/time (Instant/now)
-                            :command/user user-id
+                            :command/system "test"
                             :congregation/id cong-id
                             :congregation/name name})
       cong-id)))

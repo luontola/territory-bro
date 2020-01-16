@@ -121,8 +121,8 @@
 (defmethod command-handler :congregation.command/create-congregation
   [command congregation {:keys [generate-tenant-schema-name]}]
   (let [cong-id (:congregation/id command)
-        user-id (:command/user command)
-        name (:congregation/name command)]
+        name (:congregation/name command)
+        command-user (:command/user command)]
     (when (str/blank? name)
       (throw (ValidationException. [[:missing-name]])))
     (when (nil? (:congregation/id congregation)) ; idempotence
@@ -132,7 +132,8 @@
              :congregation/name name
              :congregation/schema-name (generate-tenant-schema-name cong-id)}
             ;; TODO: grant initial permissions using a process manager (after moving the events to a user stream)
-            (admin-permissions-granted cong-id user-id)))))
+            (when (some? command-user)
+              (admin-permissions-granted cong-id command-user))))))
 
 (defmethod command-handler :congregation.command/add-user
   [command congregation {:keys [check-permit]}]
