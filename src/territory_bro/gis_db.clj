@@ -6,8 +6,9 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [medley.core :refer [remove-vals]]
+            [schema.core :as s]
             [territory-bro.db :as db])
-  (:import (java.util UUID)
+  (:import (java.util UUID Date)
            (org.postgresql.util PSQLException)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/gis.sql"))
@@ -91,8 +92,27 @@
 
 ;;; Changes
 
+(s/defschema GisFeature
+  {:id s/Str ; TODO: change to UUID
+   :location s/Str
+   (s/optional-key :name) s/Str
+   (s/optional-key :number) s/Str
+   (s/optional-key :subregion) s/Str
+   (s/optional-key :addresses) s/Str
+   (s/optional-key :meta) {s/Any s/Any}})
+
+(s/defschema GisChange
+  {:id s/Int
+   :schema s/Str
+   :table s/Str
+   :op (s/enum "INSERT" "UPDATE" "DELETE") ; TODO: change to keywords
+   :user s/Str
+   :time Date ; TODO: change to Instant
+   :old (s/maybe GisFeature)
+   :new (s/maybe GisFeature)})
+
 (defn- format-gis-change [change]
-  change)
+  (s/validate GisChange change))
 
 (defn get-changes
   ([conn]
