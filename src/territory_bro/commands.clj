@@ -126,6 +126,8 @@
 
 ;;;; Validation
 
+(def ^:private command-validator (s/validator Command))
+
 (defn validate-command [command]
   (when-not (contains? command-schemas (:command/type command))
     (throw (ex-info (str "Unknown command type " (pr-str (:command/type command)))
@@ -133,7 +135,7 @@
   (assert (contains? command-schemas (:command/type command))
           {:error [:unknown-command-type (:command/type command)]
            :command command})
-  (s/validate Command command))
+  (command-validator command))
 
 (defn check-permit [state {user :command/user, system :command/system, :as command} permit]
   (cond

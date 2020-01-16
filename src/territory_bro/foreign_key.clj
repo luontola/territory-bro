@@ -13,15 +13,15 @@
 (defrecord References [entity-type id-schema]
   s/Schema
   (spec [this]
-    (let [checker (get *reference-checkers* entity-type)]
-      (when (nil? checker)
-        (throw (IllegalStateException. (str "No reference checker for " entity-type
-                                            " in " 'territory-bro.foreign-key/*reference-checkers*))))
-      (variant/variant-spec
-       spec/+no-precondition+
-       [{:schema id-schema}]
-       nil
-       (fn postcondition [id]
+    (variant/variant-spec
+     spec/+no-precondition+
+     [{:schema id-schema}]
+     nil
+     (fn postcondition [id]
+       (let [checker (get *reference-checkers* entity-type)]
+         (when (nil? checker)
+           (throw (IllegalStateException. (str "No reference checker for " entity-type
+                                               " in " 'territory-bro.foreign-key/*reference-checkers*))))
          (when-not (true? (checker id))
            (macros/validation-error this id (list 'foreign-key/references entity-type id) 'violated))))))
   (explain [_this]

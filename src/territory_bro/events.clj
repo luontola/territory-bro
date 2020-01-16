@@ -175,20 +175,24 @@
 
 ;;;; Validation
 
+(def ^:private event-validator (s/validator Event))
+
 (defn validate-event [event]
   (when-not (contains? event-schemas (:event/type event))
     (throw (ex-info (str "Unknown event type " (pr-str (:event/type event)))
                     {:event event})))
-  (s/validate Event event))
+  (event-validator event))
 
 (defn validate-events [events]
   (doseq [event events]
     (validate-event event))
   events)
 
+(def ^:private enriched-event-validator (s/validator EnrichedEvent))
+
 (defn strict-validate-event [event]
   (validate-event event)
-  (s/validate EnrichedEvent event))
+  (enriched-event-validator event))
 
 (defn strict-validate-events [events]
   (doseq [event events]
