@@ -7,7 +7,7 @@
             [clojure.test :refer :all]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture]]
-            [territory-bro.testutil :as testutil]
+            [territory-bro.testutil :refer [re-equals]]
             [territory-bro.user :as user])
   (:import (java.util UUID)
            (territory_bro ValidationException)))
@@ -92,5 +92,5 @@
 
       (testing "doesn't exist"
         (is (thrown-with-msg?
-             ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+             ValidationException (re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
              (user/check-user-exists conn (UUID. 0 0x666))))))))

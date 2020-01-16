@@ -5,11 +5,10 @@
 (ns territory-bro.congregation-test
   (:require [clojure.test :refer :all]
             [medley.core :refer [deep-merge]]
-            [territory-bro.commands :as commands]
             [territory-bro.congregation :as congregation]
             [territory-bro.events :as events]
             [territory-bro.permissions :as permissions]
-            [territory-bro.testutil :as testutil])
+            [territory-bro.testutil :as testutil :refer [re-equals]])
   (:import (java.time Instant)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
@@ -140,7 +139,7 @@
 
     (testing "doesn't exist"
       (is (thrown-with-msg?
-           ValidationException (testutil/re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           ValidationException (re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
            (congregation/check-congregation-exists state (UUID. 0 0x666)))))))
 
 ;;; Commands
@@ -187,7 +186,7 @@
     (testing "error: name is blank"
       (let [command (assoc create-command :congregation/name "   ")]
         (is (thrown-with-msg?
-             ValidationException (testutil/re-equals "[[:missing-name]]")
+             ValidationException (re-equals "[[:missing-name]]")
              (handle-command command [] injections)))))
 
     (let [injections (assoc injections :check-event-stream-does-not-exist (fn [id]
@@ -234,7 +233,7 @@
     (testing "error: name is blank"
       (let [command (assoc rename-command :congregation/name "   ")]
         (is (thrown-with-msg?
-             ValidationException (testutil/re-equals "[[:missing-name]]")
+             ValidationException (re-equals "[[:missing-name]]")
              (handle-command command [created-event] injections)))))
 
     (testing "checks permits"
@@ -288,8 +287,9 @@
     (testing "user doesn't exist"
       (let [invalid-command (assoc add-user-command
                                    :user/id invalid-user-id)]
-        (is (thrown-with-msg? ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000004\"]]")
-                              (handle-command invalid-command [created-event] injections)))))
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000004\"]]")
+             (handle-command invalid-command [created-event] injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections
@@ -365,8 +365,9 @@
             when (assoc set-user-permissions-command
                         :user/id invalid-user-id
                         :permission/ids [:view-congregation])]
-        (is (thrown-with-msg? ValidationException (testutil/re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000004\"]]")
-                              (handle-command when given injections)))))
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000004\"]]")
+             (handle-command when given injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections
