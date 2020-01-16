@@ -2,7 +2,7 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.api-test
+(ns ^:slow territory-bro.api-test
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer :all]

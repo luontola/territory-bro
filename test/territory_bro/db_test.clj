@@ -2,7 +2,7 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.db-test
+(ns ^:slow territory-bro.db-test
   (:require [clojure.test :refer :all]
             [territory-bro.db :as db]
             [territory-bro.fixtures :refer [db-fixture]]

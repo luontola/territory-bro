@@ -1,5 +1,10 @@
 #kaocha/v1
     {:capture-output? true
-     :tests [{:id :unit
+     :tests [{:id :fast
+              :skip-meta [:slow]
+              :test-paths ["src" "test"]
+              :ns-patterns ["^territory-bro"]}
+             {:id :slow
+              :focus-meta [:slow]
               :test-paths ["src" "test"]
               :ns-patterns ["^territory-bro"]}]}
