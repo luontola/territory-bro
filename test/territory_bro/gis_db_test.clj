@@ -106,9 +106,9 @@
           (let [changes (gis-db/get-changes conn)]
             (is (= 1 (count changes)))
             (is (= {:table "territory"
-                    :op "INSERT"
+                    :op :INSERT
                     :old nil
-                    :new {:id (str territory-id)
+                    :new {:id territory-id
                           :number "123"
                           :addresses "Street 1 A"
                           :subregion "Somewhere"
@@ -122,14 +122,14 @@
           (let [changes (gis-db/get-changes conn)]
             (is (= 2 (count changes)))
             (is (= {:table "territory"
-                    :op "UPDATE"
-                    :old {:id (str territory-id)
+                    :op :UPDATE
+                    :old {:id territory-id
                           :number "123"
                           :addresses "Street 1 A"
                           :subregion "Somewhere"
                           :meta {:foo "bar", :gazonk 42}
                           :location testdata/wkt-multi-polygon}
-                    :new {:id (str territory-id)
+                    :new {:id territory-id
                           :number "123"
                           :addresses "Another Street 2"
                           :subregion "Somewhere"
@@ -143,8 +143,8 @@
           (let [changes (gis-db/get-changes conn)]
             (is (= 3 (count changes)))
             (is (= {:table "territory"
-                    :op "DELETE"
-                    :old {:id (str territory-id)
+                    :op :DELETE
+                    :old {:id territory-id
                           :number "123"
                           :addresses "Another Street 2"
                           :subregion "Somewhere"
@@ -159,9 +159,9 @@
             changes (gis-db/get-changes conn)]
         (is (= 4 (count changes)))
         (is (= {:table "congregation_boundary"
-                :op "INSERT"
+                :op :INSERT
                 :old nil
-                :new {:id (str region-id)
+                :new {:id region-id
                       :location testdata/wkt-multi-polygon}}
                (-> (last changes)
                    (dissoc :id :schema :user :time))))))
@@ -171,9 +171,9 @@
             changes (gis-db/get-changes conn)]
         (is (= 5 (count changes)))
         (is (= {:table "subregion"
-                :op "INSERT"
+                :op :INSERT
                 :old nil
-                :new {:id (str region-id)
+                :new {:id region-id
                       :name "Somewhere"
                       :location testdata/wkt-multi-polygon}}
                (-> (last changes)
@@ -184,9 +184,9 @@
             changes (gis-db/get-changes conn)]
         (is (= 6 (count changes)))
         (is (= {:table "card_minimap_viewport"
-                :op "INSERT"
+                :op :INSERT
                 :old nil
-                :new {:id (str region-id)
+                :new {:id region-id
                       :location testdata/wkt-polygon}}
                (-> (last changes)
                    (dissoc :id :schema :user :time))))))
@@ -280,21 +280,21 @@
         (is (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon))))
 
     (testing "user ID is logged in GIS change log"
-      (is (= [{:op "INSERT",
-               :schema test-schema,
-               :table "territory",
+      (is (= [{:op :INSERT
+               :schema test-schema
+               :table "territory"
                :user test-username}
-              {:op "INSERT",
-               :schema test-schema,
-               :table "congregation_boundary",
+              {:op :INSERT
+               :schema test-schema
+               :table "congregation_boundary"
                :user test-username}
-              {:op "INSERT",
-               :schema test-schema,
-               :table "subregion",
+              {:op :INSERT
+               :schema test-schema
+               :table "subregion"
                :user test-username}
-              {:op "INSERT",
-               :schema test-schema,
-               :table "card_minimap_viewport",
+              {:op :INSERT
+               :schema test-schema
+               :table "card_minimap_viewport"
                :user test-username}]
              (->> (db/with-db [conn {}]
                     (gis-db/get-changes conn))

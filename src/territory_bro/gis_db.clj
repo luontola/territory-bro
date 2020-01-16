@@ -6,6 +6,7 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [medley.core :refer [remove-vals]]
+            [schema.coerce :as coerce]
             [schema.core :as s]
             [territory-bro.db :as db])
   (:import (java.util UUID Date)
@@ -93,7 +94,7 @@
 ;;; Changes
 
 (s/defschema GisFeature
-  {:id s/Str ; TODO: change to UUID
+  {:id UUID
    :location s/Str
    (s/optional-key :name) s/Str
    (s/optional-key :number) s/Str
@@ -104,17 +105,18 @@
 (s/defschema GisChange
   {:id s/Int
    :schema s/Str
-   :table s/Str
-   :op (s/enum "INSERT" "UPDATE" "DELETE") ; TODO: change to keywords
+   :table (s/enum "territory" "congregation_boundary" "subregion" "card_minimap_viewport")
+   :op (s/enum :INSERT :UPDATE :DELETE)
    :user s/Str
    :time Date ; TODO: change to Instant
    :old (s/maybe GisFeature)
    :new (s/maybe GisFeature)})
 
-(def ^:private gis-change-validator (s/validator GisChange))
+(def ^:private gis-change-coercer
+  (coerce/coercer! GisChange coerce/string-coercion-matcher))
 
 (defn- format-gis-change [change]
-  (gis-change-validator change))
+  (gis-change-coercer change))
 
 (defn get-changes
   ([conn]
