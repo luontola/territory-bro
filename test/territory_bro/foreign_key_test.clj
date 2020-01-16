@@ -6,8 +6,9 @@
   (:require [clojure.test :refer :all]
             [schema.core :as s]
             [territory-bro.foreign-key :as foreign-key]
-            [territory-bro.testutil :refer [re-equals re-contains]])
-  (:import (java.util UUID)))
+            [territory-bro.testutil :refer [re-equals]])
+  (:import (java.util UUID)
+           (territory_bro ValidationException)))
 
 (deftest foreign-key-references-test
   (binding [foreign-key/*reference-checkers* {:foo #(= % (UUID. 0 1))}]
@@ -25,12 +26,19 @@
                               {:foo/id 42})))))
 
     (testing "validates the foreign key constraint"
-      (is (= "{:foo/id (not (foreign-key/references :foo #uuid \"00000000-0000-0000-0000-000000000666\"))}"
+      (is (= "{:foo/id (violated (foreign-key/references :foo #uuid \"00000000-0000-0000-0000-000000000666\"))}"
              (pr-str (s/check {:foo/id (foreign-key/references :foo UUID)}
                               {:foo/id (UUID. 0 0x666)})))))
+
+    (testing "rethrows exceptions from checkers"
+      (binding [foreign-key/*reference-checkers* {:foo #(throw (ValidationException. [[:no-such-foo %]]))}]
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:no-such-foo #uuid \"00000000-0000-0000-0000-000000000001\"]]")
+             (s/validate {:foo/id (foreign-key/references :foo UUID)}
+                         {:foo/id (UUID. 0 1)})))))
 
     (testing "error: checker for entity type missing"
       (is (thrown-with-msg?
            IllegalStateException (re-equals "No reference checker for :bar in territory-bro.foreign-key/*reference-checkers*")
-           (s/check {:foo/id (foreign-key/references :bar UUID)}
-                    {:foo/id (UUID. 0 1)}))))))
+           (s/validate {:foo/id (foreign-key/references :bar UUID)}
+                       {:foo/id (UUID. 0 1)}))))))
