@@ -157,10 +157,14 @@
                        instant-gen
                        (gen/one-of [event-user-gen event-system-gen]))))
 
-(deftest event-serialization-test
+(deftest ^:slow event-serialization-gen-test
   (testing "round trip serialization"
     (doseq [event (gen/sample strict-event-gen 100)]
-      (is (= event (-> event events/event->json events/json->event)))))
+      (is (= event (-> event events/event->json events/json->event))))))
+
+(deftest event-serialization-test
+  (testing "round trip serialization"
+    (is (= valid-event (-> valid-event events/event->json events/json->event))))
 
   (testing "event->json validates events"
     (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown event type nil")

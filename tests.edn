@@ -8,4 +8,6 @@
               :test-paths ["src" "test"]
               :ns-patterns ["^territory-bro"]}]
      :kaocha/reporter [kaocha.report.progress/report]
+     :plugins [:kaocha.plugin/profiling]
+     :kaocha.plugin.profiling/count 3
      :capture-output? true}
