@@ -23,7 +23,22 @@
    :check-permit #(commands/check-permit state command %)
    :check-congregation-exists #(congregation/check-congregation-exists state %)
    :check-user-exists #(user/check-user-exists conn %)
-   :check-event-stream-does-not-exist #(event-store/check-event-stream-does-not-exist conn %)})
+   :check-new-stream #(event-store/check-new-stream conn %)})
+
+(defn- reference-checkers [conn state]
+  {:congregation (fn [cong-id]
+                   (congregation/check-congregation-exists state cong-id)
+                   true)
+   :user (fn [user-id]
+           (user/check-user-exists conn user-id)
+           true)
+   :new (fn [stream-id]
+          (event-store/check-new-stream conn stream-id)
+          true)})
+
+(defn- validate-command [command conn state]
+  (binding [foreign-key/*reference-checkers* (reference-checkers conn state)]
+    (commands/validate-command command)))
 
 (defn- write-stream! [conn stream-id f]
   (let [old-events (event-store/read-stream conn stream-id)
@@ -72,17 +87,10 @@
                (print "\n")
                (pprint/pprint object))))
 
-(defn- validate-command [command]
-  ;; TODO: real checkers
-  (binding [foreign-key/*reference-checkers* {:congregation (constantly true)
-                                              :new (constantly true)
-                                              :user (constantly true)}]
-    (commands/validate-command command)))
-
 (defn command! [conn state command]
   (let [command (-> command
                     (commands/sorted-keys)
-                    (validate-command))
+                    (validate-command conn state))
         _ (log/info "Dispatch command:" (pretty-str command))
         events (case (namespace (:command/type command))
                  "congregation.command" (congregation-command! conn command state)

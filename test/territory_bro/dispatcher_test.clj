@@ -1,14 +1,17 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.dispatcher-test
   (:require [clojure.test :refer :all]
             [territory-bro.dispatcher :as dispatcher]
-            [territory-bro.testutil :refer [re-contains]])
+            [territory-bro.event-store :as event-store]
+            [territory-bro.testutil :refer [re-equals re-contains]]
+            [territory-bro.user :as user])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
-           (java.util UUID)))
+           (java.util UUID)
+           (territory_bro ValidationException WriteConflictException)))
 
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
@@ -54,26 +57,62 @@
                   command state injections))))))
 
 (deftest dispatch-command-test
-  (testing "dispatches commands"
-    (let [conn :dummy-conn
-          state :dummy-state
-          command {:command/type :congregation.command/rename-congregation
-                   :command/time (Instant/now)
-                   :command/user user-id
-                   :congregation/id cong-id
-                   :congregation/name ""}
-          *spy (atom nil)]
-      (with-redefs [dispatcher/congregation-command! (fn [& args]
-                                                       (reset! *spy args)
-                                                       :dummy-return-value)]
-        (is (= :dummy-return-value
-               (dispatcher/command! conn state command))))
-      (is (= [conn command state] @*spy))))
+  (let [conn :dummy-conn
+        state {:territory-bro.congregation/congregations {cong-id {}}}]
+    (with-redefs [user/check-user-exists (fn [_conn id]
+                                           (when-not (= id user-id)
+                                             (throw (ValidationException. [[:no-such-user id]]))))
+                  event-store/check-new-stream (fn [_conn id]
+                                                 (when (= id (UUID. 0 0x666))
+                                                   (throw (WriteConflictException. (str "stream " id)))))]
 
-  (testing "validates commands"
-    (let [conn :dummy-conn
-          state :dummy-state
-          command {:command/type :congregation.command/rename-congregation}]
-      (is (thrown-with-msg?
-           ExceptionInfo (re-contains "Value does not match schema")
-           (dispatcher/command! conn state command))))))
+      (testing "dispatches commands"
+        (let [command {:command/type :congregation.command/rename-congregation
+                       :command/time (Instant/now)
+                       :command/user user-id
+                       :congregation/id cong-id
+                       :congregation/name ""}
+              *spy (atom nil)]
+          (with-redefs [dispatcher/congregation-command! (fn [& args]
+                                                           (reset! *spy args)
+                                                           :dummy-return-value)]
+            (is (= :dummy-return-value
+                   (dispatcher/command! conn state command))))
+          (is (= [conn command state] @*spy))))
+
+      (testing "validates commands"
+        (let [command {:command/type :congregation.command/rename-congregation}]
+          (is (thrown-with-msg?
+               ExceptionInfo (re-contains "Value does not match schema")
+               (dispatcher/command! conn state command)))))
+
+      (testing "validates foreign key references:"
+        (testing "congregation"
+          (let [command {:command/type :congregation.command/rename-congregation
+                         :command/time (Instant/now)
+                         :command/user user-id
+                         :congregation/id (UUID. 0 0x666)
+                         :congregation/name ""}]
+            (is (thrown-with-msg?
+                 ValidationException (re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+                 (dispatcher/command! conn state command)))))
+
+        (testing "user"
+          (let [command {:command/type :congregation.command/add-user
+                         :command/time (Instant/now)
+                         :command/user user-id
+                         :congregation/id cong-id
+                         :user/id (UUID. 0 0x666)}]
+            (is (thrown-with-msg?
+                 ValidationException (re-equals "[[:no-such-user #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+                 (dispatcher/command! conn state command)))))
+
+        (testing "new stream"
+          (let [command {:command/type :congregation.command/create-congregation
+                         :command/time (Instant/now)
+                         :command/user user-id
+                         :congregation/id (UUID. 0 0x666)
+                         :congregation/name "the name"}]
+            (is (thrown-with-msg?
+                 WriteConflictException (re-equals "stream 00000000-0000-0000-0000-000000000666")
+                 (dispatcher/command! conn state command)))))))))

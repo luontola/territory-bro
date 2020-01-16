@@ -224,9 +224,9 @@
         (event-store/save! conn existing-stream-id 0 [{:event/type :dummy-event}])
 
         (testing "stream does not exist"
-          (is (nil? (event-store/check-event-stream-does-not-exist conn non-existing-stream-id))))
+          (is (nil? (event-store/check-new-stream conn non-existing-stream-id))))
 
         (testing "stream exists"
           (is (thrown-with-msg?
                WriteConflictException (re-equals "Event stream 00000000-0000-0000-0000-000000000001 already exists")
-               (event-store/check-event-stream-does-not-exist conn existing-stream-id))))))))
+               (event-store/check-new-stream conn existing-stream-id))))))))

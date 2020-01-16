@@ -150,7 +150,7 @@
         injections {:generate-tenant-schema-name (fn [id]
                                                    (is (= cong-id id))
                                                    "cong_schema")
-                    :check-event-stream-does-not-exist (fn [_id])}
+                    :check-new-stream (fn [_id])}
         create-command {:command/type :congregation.command/create-congregation
                         :command/time (Instant/now)
                         :command/user user-id
@@ -189,9 +189,9 @@
              ValidationException (re-equals "[[:missing-name]]")
              (handle-command command [] injections)))))
 
-    (let [injections (assoc injections :check-event-stream-does-not-exist (fn [id]
-                                                                            (is (= cong-id id))
-                                                                            (throw (WriteConflictException.))))]
+    (let [injections (assoc injections :check-new-stream (fn [id]
+                                                           (is (= cong-id id))
+                                                           (throw (WriteConflictException.))))]
       (testing "create is idempotent"
         (is (empty? (handle-command create-command [created-event] injections))))
 
