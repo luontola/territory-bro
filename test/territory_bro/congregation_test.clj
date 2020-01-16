@@ -344,7 +344,21 @@
             then [(assoc permission-revoked-event :permission/id :view-congregation)]]
         (is (= then (handle-command when given injections)))))
 
-    (testing "user not in congregation") ;; TODO: should this command disallow adding new users?
+    (testing "cannot be used for adding new users to congregation"
+      (let [given [created-event]
+            when (assoc set-user-permissions-command :permission/ids [:view-congregation])]
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:user-not-in-congregation #uuid \"00000000-0000-0000-0000-000000000003\"]]")
+             (handle-command when given injections)))))
+
+    (testing "cannot revoke :view-congregation without also removing all other permissions"
+      (let [given [created-event
+                   (assoc permission-granted-event :permission/id :view-congregation)
+                   (assoc permission-granted-event :permission/id :configure-congregation)]
+            when (assoc set-user-permissions-command :permission/ids [:configure-congregation])]
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:cannot-revoke-view-congregation]]")
+             (handle-command when given injections)))))
 
     (testing "checks permits"
       (let [injections (assoc injections

@@ -155,8 +155,11 @@
         added-permissions (set/difference new-permissions old-permissions)
         removed-permissions (set/difference old-permissions new-permissions)]
     (check-permit [:configure-congregation cong-id])
-    ;; TODO: remove :view-congregation only if removing all permissions
-    ;; TODO: don't allow adding new users with this command?
+    (when (empty? old-permissions)
+      (throw (ValidationException. [[:user-not-in-congregation user-id]])))
+    (when-not (or (contains? new-permissions :view-congregation)
+                  (empty? new-permissions))
+      (throw (ValidationException. [[:cannot-revoke-view-congregation]])))
     (concat
      (for [added-permission (sort added-permissions)]
        {:event/type :congregation.event/permission-granted
