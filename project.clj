@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -63,7 +63,7 @@
                        :aot :all
                        :uberjar-name "territory-bro.jar"}
 
-             :kaocha {:dependencies [[lambdaisland/kaocha "0.0-529"]]}
+             :kaocha {:dependencies [[lambdaisland/kaocha "0.0-573"]]}
 
              :dev [:project/dev :profiles/dev]
              :test [:project/test :profiles/test]

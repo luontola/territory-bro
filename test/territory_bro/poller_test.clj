@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -13,11 +13,14 @@
            (java.util.concurrent CountDownLatch TimeUnit CyclicBarrier)
            (org.slf4j LoggerFactory)))
 
+;; slow enough to be noticed as a slow test, because normally this should never be reached
+(def ^Duration test-timeout (Duration/ofSeconds 5))
+
 (defn- await-latch [^CountDownLatch latch]
-  (.await latch 1 TimeUnit/SECONDS))
+  (.await latch (.toMillis test-timeout) TimeUnit/MILLISECONDS))
 
 (defn- await-barrier [^CyclicBarrier barrier]
-  (.await barrier 1 TimeUnit/SECONDS))
+  (.await barrier (.toMillis test-timeout) TimeUnit/MILLISECONDS))
 
 (deftest poller-test
   (testing "runs the task when triggered"
@@ -26,7 +29,8 @@
           *task-thread (atom nil)
           p (poller/create (fn []
                              (swap! *task-count inc)
-                             (reset! *task-thread (Thread/currentThread))))]
+                             (reset! *task-thread (Thread/currentThread))
+                             (.countDown task-finished)))]
       (poller/trigger! p)
       (await-latch task-finished)
       (poller/shutdown! p)
@@ -131,7 +135,7 @@
                              (Thread/yield)
                              (swap! *task-count inc)))]
       (poller/trigger! p)
-      (poller/await p (Duration/ofSeconds 1))
+      (poller/await p test-timeout)
 
       (is (= 1 @*task-count) "task count")
       (poller/shutdown! p))))
