@@ -188,9 +188,59 @@
                 :new nil}
                (change->command [congregation-created gis-user-created])))))
 
-  (testing "congregation_boundary insert") ; TODO
-  (testing "congregation_boundary update") ; TODO
-  (testing "congregation_boundary delete") ; TODO
+  (testing "congregation_boundary insert"
+    (is (= {:command/type :congregation-boundary.command/create-congregation-boundary
+            :command/user user-id
+            :command/time test-time
+            :congregation/id cong-id
+            :congregation-boundary/id congregation-boundary-id
+            :congregation-boundary/location testdata/wkt-multi-polygon}
+           (-> {:id change-id
+                :schema cong-schema
+                :table "congregation_boundary"
+                :user gis-username
+                :time test-time
+                :op :INSERT
+                :old nil
+                :new {:id congregation-boundary-id
+                      :location testdata/wkt-multi-polygon}}
+               (change->command [congregation-created gis-user-created])))))
+
+  (testing "congregation_boundary update"
+    (is (= {:command/type :congregation-boundary.command/update-congregation-boundary
+            :command/user user-id
+            :command/time test-time
+            :congregation/id cong-id
+            :congregation-boundary/id congregation-boundary-id
+            :congregation-boundary/location testdata/wkt-multi-polygon}
+           (-> {:id change-id
+                :schema cong-schema
+                :table "congregation_boundary"
+                :user gis-username
+                :time test-time
+                :op :UPDATE
+                :old {:id congregation-boundary-id
+                      :location ""}
+                :new {:id congregation-boundary-id
+                      :location testdata/wkt-multi-polygon}}
+               (change->command [congregation-created gis-user-created])))))
+
+  (testing "congregation_boundary delete"
+    (is (= {:command/type :congregation-boundary.command/delete-congregation-boundary
+            :command/user user-id
+            :command/time test-time
+            :congregation/id cong-id
+            :congregation-boundary/id congregation-boundary-id}
+           (-> {:id change-id
+                :schema cong-schema
+                :table "congregation_boundary"
+                :user gis-username
+                :time test-time
+                :op :DELETE
+                :old {:id congregation-boundary-id
+                      :location testdata/wkt-multi-polygon}
+                :new nil}
+               (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport insert") ; TODO
   (testing "card_minimap_viewport update") ; TODO
