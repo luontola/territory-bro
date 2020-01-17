@@ -39,7 +39,8 @@
 
       "subregion"
       (cond-> {:command/type (case op
-                               :INSERT :subregion.command/create-subregion)
+                               :INSERT :subregion.command/create-subregion
+                               :UPDATE :subregion.command/update-subregion)
                :command/user user-id
                :command/time time
                :congregation/id cong-id}

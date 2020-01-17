@@ -148,7 +148,28 @@
                       :location testdata/wkt-multi-polygon}}
                (change->command [congregation-created gis-user-created])))))
 
-  (testing "subregion update") ; TODO
+  (testing "subregion update"
+    (is (= {:command/type :subregion.command/update-subregion
+            :command/user user-id
+            :command/time test-time
+            :congregation/id cong-id
+            :subregion/id subregion-id
+            :subregion/name "Somewhere"
+            :subregion/location testdata/wkt-multi-polygon}
+           (-> {:id change-id
+                :schema cong-schema
+                :table "subregion"
+                :user gis-username
+                :time test-time
+                :op :UPDATE
+                :old {:id subregion-id
+                      :name ""
+                      :location ""}
+                :new {:id subregion-id
+                      :name "Somewhere"
+                      :location testdata/wkt-multi-polygon}}
+               (change->command [congregation-created gis-user-created])))))
+
   (testing "subregion delete") ; TODO
 
   (testing "congregation_boundary insert") ; TODO
