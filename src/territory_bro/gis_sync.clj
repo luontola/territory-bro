@@ -20,15 +20,17 @@
   (let [{:keys [id schema table user time op old new]} change
         cong-id (get-in state [::schema->cong-id schema])
         user-id (get-in state [::username->user-id user])]
-    {:command/type (case op
-                     :INSERT :territory.command/create-territory
-                     :UPDATE :territory.command/update-territory)
-     :command/user user-id
-     :command/time time
-     :congregation/id cong-id
-     :territory/id (:id new)
-     :territory/number (:number new)
-     :territory/addresses (:addresses new)
-     :territory/subregion (:subregion new)
-     :territory/meta (:meta new)
-     :territory/location (:location new)}))
+    (cond-> {:command/type (case op
+                             :INSERT :territory.command/create-territory
+                             :UPDATE :territory.command/update-territory
+                             :DELETE :territory.command/delete-territory)
+             :command/user user-id
+             :command/time time
+             :congregation/id cong-id}
+      (some? old) (assoc :territory/id (:id old))
+      (some? new) (assoc :territory/id (:id new)
+                         :territory/number (:number new)
+                         :territory/addresses (:addresses new)
+                         :territory/subregion (:subregion new)
+                         :territory/meta (:meta new)
+                         :territory/location (:location new)))))

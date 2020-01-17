@@ -17,6 +17,7 @@
 (def territory-id (UUID. 0 2))
 (def user-id (UUID. 0 3))
 (def gis-username "gis_user_3")
+(def test-time (Instant/ofEpochSecond 10))
 
 (def congregation-created
   {:event/type :congregation.event/congregation-created
@@ -45,7 +46,7 @@
   (testing "territory insert"
     (is (= {:command/type :territory.command/create-territory
             :command/user user-id
-            :command/time (Instant/ofEpochSecond 10)
+            :command/time test-time
             :congregation/id cong-id
             :territory/id territory-id
             :territory/number "123"
@@ -57,7 +58,7 @@
                 :schema cong-schema
                 :table "territory"
                 :user gis-username
-                :time (Instant/ofEpochSecond 10)
+                :time test-time
                 :op :INSERT
                 :old nil
                 :new {:id territory-id
@@ -71,7 +72,7 @@
   (testing "territory update"
     (is (= {:command/type :territory.command/update-territory
             :command/user user-id
-            :command/time (Instant/ofEpochSecond 10)
+            :command/time test-time
             :congregation/id cong-id
             :territory/id territory-id
             :territory/number "123"
@@ -83,7 +84,7 @@
                 :schema cong-schema
                 :table "territory"
                 :user gis-username
-                :time (Instant/ofEpochSecond 10)
+                :time test-time
                 :op :UPDATE
                 :old {:id territory-id
                       :number ""
@@ -97,4 +98,25 @@
                       :subregion "Somewhere"
                       :meta {:foo "bar", :gazonk 42}
                       :location testdata/wkt-multi-polygon}}
+               (change->command [congregation-created gis-user-created])))))
+
+  (testing "territory delete"
+    (is (= {:command/type :territory.command/delete-territory
+            :command/user user-id
+            :command/time test-time
+            :congregation/id cong-id
+            :territory/id territory-id}
+           (-> {:id 3
+                :schema cong-schema
+                :table "territory"
+                :user gis-username
+                :time test-time
+                :op :DELETE
+                :old {:id territory-id
+                      :number "123"
+                      :addresses "Street 1 A"
+                      :subregion "Somewhere"
+                      :meta {:foo "bar", :gazonk 42}
+                      :location testdata/wkt-multi-polygon}
+                :new nil}
                (change->command [congregation-created gis-user-created]))))))
