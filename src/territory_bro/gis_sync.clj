@@ -61,4 +61,15 @@
           (cond->
             (some? old) (assoc :congregation-boundary/id (:id old))
             (some? new) (assoc :congregation-boundary/id (:id new)
-                               :congregation-boundary/location (:location new)))))))
+                               :congregation-boundary/location (:location new))))
+
+      "card_minimap_viewport"
+      (-> base-command
+          (assoc :command/type (case op
+                                 :INSERT :card-minimap-viewport.command/create-card-minimap-viewport
+                                 :UPDATE :card-minimap-viewport.command/update-card-minimap-viewport
+                                 :DELETE :card-minimap-viewport.command/delete-card-minimap-viewport))
+          (cond->
+            (some? old) (assoc :card-minimap-viewport/id (:id old))
+            (some? new) (assoc :card-minimap-viewport/id (:id new)
+                               :card-minimap-viewport/location (:location new)))))))

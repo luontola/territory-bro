@@ -242,6 +242,56 @@
                 :new nil}
                (change->command [congregation-created gis-user-created])))))
 
-  (testing "card_minimap_viewport insert") ; TODO
-  (testing "card_minimap_viewport update") ; TODO
-  (testing "card_minimap_viewport delete")) ; TODO
+  (testing "card_minimap_viewport insert"
+    (is (= {:command/type :card-minimap-viewport.command/create-card-minimap-viewport
+            :command/user user-id
+            :command/time test-time
+            :congregation/id cong-id
+            :card-minimap-viewport/id card-minimap-viewport-id
+            :card-minimap-viewport/location testdata/wkt-multi-polygon}
+           (-> {:id change-id
+                :schema cong-schema
+                :table "card_minimap_viewport"
+                :user gis-username
+                :time test-time
+                :op :INSERT
+                :old nil
+                :new {:id card-minimap-viewport-id
+                      :location testdata/wkt-multi-polygon}}
+               (change->command [congregation-created gis-user-created])))))
+
+  (testing "card_minimap_viewport update"
+    (is (= {:command/type :card-minimap-viewport.command/update-card-minimap-viewport
+            :command/user user-id
+            :command/time test-time
+            :congregation/id cong-id
+            :card-minimap-viewport/id card-minimap-viewport-id
+            :card-minimap-viewport/location testdata/wkt-multi-polygon}
+           (-> {:id change-id
+                :schema cong-schema
+                :table "card_minimap_viewport"
+                :user gis-username
+                :time test-time
+                :op :UPDATE
+                :old {:id card-minimap-viewport-id
+                      :location ""}
+                :new {:id card-minimap-viewport-id
+                      :location testdata/wkt-multi-polygon}}
+               (change->command [congregation-created gis-user-created])))))
+
+  (testing "card_minimap_viewport delete"
+    (is (= {:command/type :card-minimap-viewport.command/delete-card-minimap-viewport
+            :command/user user-id
+            :command/time test-time
+            :congregation/id cong-id
+            :card-minimap-viewport/id card-minimap-viewport-id}
+           (-> {:id change-id
+                :schema cong-schema
+                :table "card_minimap_viewport"
+                :user gis-username
+                :time test-time
+                :op :DELETE
+                :old {:id card-minimap-viewport-id
+                      :location testdata/wkt-multi-polygon}
+                :new nil}
+               (change->command [congregation-created gis-user-created]))))))
