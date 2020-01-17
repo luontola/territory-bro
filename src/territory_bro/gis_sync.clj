@@ -20,17 +20,30 @@
   (let [{:keys [id schema table user time op old new]} change
         cong-id (get-in state [::schema->cong-id schema])
         user-id (get-in state [::username->user-id user])]
-    (cond-> {:command/type (case op
-                             :INSERT :territory.command/create-territory
-                             :UPDATE :territory.command/update-territory
-                             :DELETE :territory.command/delete-territory)
-             :command/user user-id
-             :command/time time
-             :congregation/id cong-id}
-      (some? old) (assoc :territory/id (:id old))
-      (some? new) (assoc :territory/id (:id new)
-                         :territory/number (:number new)
-                         :territory/addresses (:addresses new)
-                         :territory/subregion (:subregion new)
-                         :territory/meta (:meta new)
-                         :territory/location (:location new)))))
+    (case table
+      "territory"
+      (cond-> {:command/type (case op
+                               :INSERT :territory.command/create-territory
+                               :UPDATE :territory.command/update-territory
+                               :DELETE :territory.command/delete-territory)
+               :command/user user-id
+               :command/time time
+               :congregation/id cong-id}
+        (some? old) (assoc :territory/id (:id old))
+        (some? new) (assoc :territory/id (:id new)
+                           :territory/number (:number new)
+                           :territory/addresses (:addresses new)
+                           :territory/subregion (:subregion new)
+                           :territory/meta (:meta new)
+                           :territory/location (:location new)))
+
+      "subregion"
+      (cond-> {:command/type (case op
+                               :INSERT :subregion.command/create-subregion)
+               :command/user user-id
+               :command/time time
+               :congregation/id cong-id}
+        ;(some? old) (assoc :subregion/id (:id old))
+        (some? new) (assoc :subregion/id (:id new)
+                           :subregion/name (:name new)
+                           :subregion/location (:location new))))))

@@ -14,9 +14,16 @@
 
 (def cong-id (UUID. 0 1))
 (def cong-schema "cong1_schema")
-(def territory-id (UUID. 0 2))
-(def user-id (UUID. 0 3))
-(def gis-username "gis_user_3")
+
+(def user-id (UUID. 0 2))
+(def gis-username "gis_user_2")
+
+(def territory-id (UUID. 0 3))
+(def subregion-id (UUID. 0 4))
+(def congregation-boundary-id (UUID. 0 5))
+(def card-minimap-viewport-id (UUID. 0 6))
+
+(def change-id 100)
 (def test-time (Instant/ofEpochSecond 10))
 
 (def congregation-created
@@ -31,7 +38,7 @@
    :congregation/id cong-id
    :user/id user-id
    :gis-user/username gis-username
-   :gis-user/password "password123"})
+   :gis-user/password ""})
 
 (def gis-change-validator (s/validator gis-db/GisChange))
 
@@ -54,7 +61,7 @@
             :territory/subregion "Somewhere"
             :territory/meta {:foo "bar", :gazonk 42}
             :territory/location testdata/wkt-multi-polygon}
-           (-> {:id 3
+           (-> {:id change-id
                 :schema cong-schema
                 :table "territory"
                 :user gis-username
@@ -80,7 +87,7 @@
             :territory/subregion "Somewhere"
             :territory/meta {:foo "bar", :gazonk 42}
             :territory/location testdata/wkt-multi-polygon}
-           (-> {:id 3
+           (-> {:id change-id
                 :schema cong-schema
                 :table "territory"
                 :user gis-username
@@ -106,7 +113,7 @@
             :command/time test-time
             :congregation/id cong-id
             :territory/id territory-id}
-           (-> {:id 3
+           (-> {:id change-id
                 :schema cong-schema
                 :table "territory"
                 :user gis-username
@@ -119,4 +126,35 @@
                       :meta {:foo "bar", :gazonk 42}
                       :location testdata/wkt-multi-polygon}
                 :new nil}
-               (change->command [congregation-created gis-user-created]))))))
+               (change->command [congregation-created gis-user-created])))))
+
+  (testing "subregion insert"
+    (is (= {:command/type :subregion.command/create-subregion
+            :command/user user-id
+            :command/time test-time
+            :congregation/id cong-id
+            :subregion/id subregion-id
+            :subregion/name "Somewhere"
+            :subregion/location testdata/wkt-multi-polygon}
+           (-> {:id change-id
+                :schema cong-schema
+                :table "subregion"
+                :user gis-username
+                :time test-time
+                :op :INSERT
+                :old nil
+                :new {:id subregion-id
+                      :name "Somewhere"
+                      :location testdata/wkt-multi-polygon}}
+               (change->command [congregation-created gis-user-created])))))
+
+  (testing "subregion update") ; TODO
+  (testing "subregion delete") ; TODO
+
+  (testing "congregation_boundary insert") ; TODO
+  (testing "congregation_boundary update") ; TODO
+  (testing "congregation_boundary delete") ; TODO
+
+  (testing "card_minimap_viewport insert") ; TODO
+  (testing "card_minimap_viewport update") ; TODO
+  (testing "card_minimap_viewport delete")) ; TODO
