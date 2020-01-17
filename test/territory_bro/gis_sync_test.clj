@@ -46,7 +46,8 @@
   (let [state (testutil/apply-events gis-sync/projection old-events)]
     (-> change
         (gis-change-validator)
-        (gis-sync/change->command state))))
+        (gis-sync/change->command state)
+        (testutil/validate-command))))
 
 (deftest change->command-test
 

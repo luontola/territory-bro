@@ -28,8 +28,12 @@
        t#)))
 
 (def dummy-reference-checkers
-  {:congregation (constantly true)
+  {:card-minimap-viewport (constantly true)
+   :congregation (constantly true)
+   :congregation-boundary (constantly true)
    :new (constantly true)
+   :subregion (constantly true)
+   :territory (constantly true)
    :user (constantly true)})
 
 (defn validate-command [command]
