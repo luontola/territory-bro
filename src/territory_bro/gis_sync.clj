@@ -40,11 +40,12 @@
       "subregion"
       (cond-> {:command/type (case op
                                :INSERT :subregion.command/create-subregion
-                               :UPDATE :subregion.command/update-subregion)
+                               :UPDATE :subregion.command/update-subregion
+                               :DELETE :subregion.command/delete-subregion)
                :command/user user-id
                :command/time time
                :congregation/id cong-id}
-        ;(some? old) (assoc :subregion/id (:id old))
+        (some? old) (assoc :subregion/id (:id old))
         (some? new) (assoc :subregion/id (:id new)
                            :subregion/name (:name new)
                            :subregion/location (:location new))))))
