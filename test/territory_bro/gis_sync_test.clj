@@ -41,6 +41,7 @@
         (gis-sync/change->command state))))
 
 (deftest change->command-test
+
   (testing "territory insert"
     (is (= {:command/type :territory.command/create-territory
             :command/user user-id
@@ -59,6 +60,37 @@
                 :time (Instant/ofEpochSecond 10)
                 :op :INSERT
                 :old nil
+                :new {:id territory-id
+                      :number "123"
+                      :addresses "Street 1 A"
+                      :subregion "Somewhere"
+                      :meta {:foo "bar", :gazonk 42}
+                      :location testdata/wkt-multi-polygon}}
+               (change->command [congregation-created gis-user-created])))))
+
+  (testing "territory update"
+    (is (= {:command/type :territory.command/update-territory
+            :command/user user-id
+            :command/time (Instant/ofEpochSecond 10)
+            :congregation/id cong-id
+            :territory/id territory-id
+            :territory/number "123"
+            :territory/addresses "Street 1 A"
+            :territory/subregion "Somewhere"
+            :territory/meta {:foo "bar", :gazonk 42}
+            :territory/location testdata/wkt-multi-polygon}
+           (-> {:id 3
+                :schema cong-schema
+                :table "territory"
+                :user gis-username
+                :time (Instant/ofEpochSecond 10)
+                :op :UPDATE
+                :old {:id territory-id
+                      :number ""
+                      :addresses ""
+                      :subregion ""
+                      :meta {}
+                      :location ""}
                 :new {:id territory-id
                       :number "123"
                       :addresses "Street 1 A"
