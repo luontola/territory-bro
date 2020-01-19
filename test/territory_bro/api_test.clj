@@ -405,15 +405,12 @@
                            (merge session)
                            app)]
           (is (ok? response))
-          (is (= "demo" (:id (:body response)))
-              "replaces original ID")
-          (is (= "Demo Congregation" (:name (:body response)))
-              "replaces original name")
-          (is (= [] (:users (:body response)))
-              "may not view users")
-          (is (= {:viewCongregation true}
-                 (:permissions (:body response)))
-              "has read-only permissions")))
+          (is (= {:id "demo"
+                  :name "Demo Congregation"
+                  :users []
+                  :permissions {:viewCongregation true}}
+                 (select-keys (:body response) [:id :name :users :permissions]))
+              "returns an anonymized read-only congregation")))
 
       (testing "requires login"
         (let [response (-> (request :get (str "/api/congregation/demo"))
