@@ -29,54 +29,54 @@
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 (s/defschema Territory
-  {(s/required-key "id") s/Uuid
-   (s/required-key "number") s/Str
-   (s/required-key "addresses") s/Str
-   (s/required-key "subregion") s/Str
-   (s/required-key "meta") {s/Str s/Any}
-   (s/required-key "location") s/Str})
+  {:id s/Uuid
+   :number s/Str
+   :addresses s/Str
+   :subregion s/Str
+   :meta {s/Keyword s/Any}
+   :location s/Str})
 
 (s/defschema Subregion
-  {(s/required-key "id") s/Uuid
-   (s/required-key "name") s/Str
-   (s/required-key "location") s/Str})
+  {:id s/Uuid
+   :name s/Str
+   :location s/Str})
 
 (s/defschema CongregationBoundary
-  {(s/required-key "id") s/Uuid
-   (s/required-key "location") s/Str})
+  {:id s/Uuid
+   :location s/Str})
 
 (s/defschema CardMinimapViewport
-  {(s/required-key "id") s/Uuid
-   (s/required-key "location") s/Str})
+  {:id s/Uuid
+   :location s/Str})
 
 (s/defschema User
-  {(s/required-key "id") s/Uuid
-   (s/required-key "sub") s/Str
+  {:id s/Uuid
+   :sub s/Str
    ;; TODO: filter the user attributes in the API layer, to avoid a validation error if the DB contains some unexpected attribute
-   (s/optional-key "name") s/Str
-   (s/optional-key "nickname") s/Str
-   (s/optional-key "email") s/Str
-   (s/optional-key "emailVerified") s/Bool
-   (s/optional-key "picture") s/Str})
+   (s/optional-key :name) s/Str
+   (s/optional-key :nickname) s/Str
+   (s/optional-key :email) s/Str
+   (s/optional-key :emailVerified) s/Bool
+   (s/optional-key :picture) s/Str})
 
 (s/defschema Congregation
-  ;; TODO: change to keyword keys (maybe after moving away from liberator)
-  {(s/required-key "id") (s/conditional
-                          string? (s/eq "demo")
-                          :else s/Uuid)
-   (s/required-key "name") s/Str
-   (s/required-key "permissions") {s/Str (s/eq true)}
-   (s/required-key "territories") [Territory]
-   (s/required-key "subregions") [Subregion]
-   (s/required-key "congregationBoundaries") [CongregationBoundary]
-   (s/required-key "cardMinimapViewports") [CardMinimapViewport]
-   (s/required-key "users") [User]})
+  {:id (s/conditional
+        string? (s/eq "demo")
+        :else s/Uuid)
+   :name s/Str
+   :permissions {s/Keyword (s/eq true)}
+   :territories [Territory]
+   :subregions [Subregion]
+   :congregationBoundaries [CongregationBoundary]
+   :cardMinimapViewports [CardMinimapViewport]
+   :users [User]})
 
 (s/defschema CongregationSummary
   {:id s/Uuid
    :name s/Str})
 
-(def ^:private format-key-for-api (memoize (comp csk/->camelCaseString name)))
+;; camelCase keys are easier to use from JavaScript than kebab-case
+(def ^:private format-key-for-api (memoize (comp csk/->camelCaseKeyword name)))
 
 (defn format-for-api [m]
   (let [f (fn [x]

@@ -80,10 +80,10 @@
 
 (deftest format-for-api-test
   (is (= {} (api/format-for-api {})))
-  (is (= {"foo" 1} (api/format-for-api {:foo 1})))
-  (is (= {"fooBar" 1} (api/format-for-api {:foo-bar 1})))
-  (is (= {"bar" 1} (api/format-for-api {:foo/bar 1})))
-  (is (= [{"foo" 1} {"bar" 2}] (api/format-for-api [{:foo 1} {:bar 2}]))))
+  (is (= {:foo 1} (api/format-for-api {:foo 1})))
+  (is (= {:fooBar 1} (api/format-for-api {:foo-bar 1})))
+  (is (= {:bar 1} (api/format-for-api {:foo/bar 1})))
+  (is (= [{:fooBar 1} {:bar 2}] (api/format-for-api [{:foo-bar 1} {:foo/bar 2}]))))
 
 (deftest api-command-test
   (let [conn :dummy-conn
