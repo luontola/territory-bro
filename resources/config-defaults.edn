@@ -11,4 +11,5 @@
  :auth0-domain nil
  :auth0-client-id nil
  :super-users nil
- :support-email nil}
+ :support-email nil
+ :demo-congregation nil}

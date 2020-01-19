@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -25,7 +25,8 @@
                                       #"\s+")
                            (remove str/blank?)
                            (map try-parse-uuid)
-                           (set))))
+                           (set))
+         :demo-congregation (try-parse-uuid (:demo-congregation env))))
 
 (mount/defstate ^:dynamic env
   :start (-> (cprop/load-config :resource "config-defaults.edn") ; TODO: use ":as-is? true" and schema coercion?
