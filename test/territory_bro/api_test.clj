@@ -367,14 +367,7 @@
                          (merge session)
                          app)]
         (is (ok? response))
-        (is (= (str cong-id) (:id (:body response))))
-        ;; TODO: use response schemas to validate responses automatically and remove these checks
-        (is (sequential? (:territories (:body response))))
-        (is (sequential? (:congregationBoundaries (:body response))))
-        (is (sequential? (:subregions (:body response))))
-        (is (sequential? (:cardMinimapViewports (:body response))))
-        (is (sequential? (:users (:body response))))
-        (is (map? (:permissions (:body response))))))
+        (is (= (str cong-id) (:id (:body response))))))
 
     (testing "requires login"
       (let [response (-> (request :get (str "/api/congregation/" cong-id))
@@ -416,7 +409,7 @@
               "replaces original ID")
           (is (= "Demo Congregation" (:name (:body response)))
               "replaces original name")
-          (is (empty? (:users (:body response)))
+          (is (= [] (:users (:body response)))
               "may not view users")
           (is (= {:viewCongregation true}
                  (:permissions (:body response)))

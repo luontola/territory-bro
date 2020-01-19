@@ -10,6 +10,7 @@
             [medley.core :refer [map-keys]]
             [ring.util.http-response :refer :all]
             [ring.util.response :as response]
+            [schema.core :as s]
             [territory-bro.authentication :as auth]
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
@@ -26,6 +27,54 @@
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
+
+(s/defschema Territory
+  {(s/required-key "id") s/Uuid
+   (s/required-key "number") s/Str
+   (s/required-key "addresses") s/Str
+   (s/required-key "subregion") s/Str
+   (s/required-key "meta") {s/Str s/Any}
+   (s/required-key "location") s/Str})
+
+(s/defschema Subregion
+  {(s/required-key "id") s/Uuid
+   (s/required-key "name") s/Str
+   (s/required-key "location") s/Str})
+
+(s/defschema CongregationBoundary
+  {(s/required-key "id") s/Uuid
+   (s/required-key "location") s/Str})
+
+(s/defschema CardMinimapViewport
+  {(s/required-key "id") s/Uuid
+   (s/required-key "location") s/Str})
+
+(s/defschema User
+  {(s/required-key "id") s/Uuid
+   (s/required-key "sub") s/Str
+   ;; TODO: filter the user attributes in the API layer, to avoid a validation error if the DB contains some unexpected attribute
+   (s/optional-key "name") s/Str
+   (s/optional-key "nickname") s/Str
+   (s/optional-key "email") s/Str
+   (s/optional-key "emailVerified") s/Bool
+   (s/optional-key "picture") s/Str})
+
+(s/defschema Congregation
+  ;; TODO: change to keyword keys (maybe after moving away from liberator)
+  {(s/required-key "id") (s/conditional
+                          string? (s/eq "demo")
+                          :else s/Uuid)
+   (s/required-key "name") s/Str
+   (s/required-key "permissions") {s/Str (s/eq true)}
+   (s/required-key "territories") [Territory]
+   (s/required-key "subregions") [Subregion]
+   (s/required-key "congregationBoundaries") [CongregationBoundary]
+   (s/required-key "cardMinimapViewports") [CardMinimapViewport]
+   (s/required-key "users") [User]})
+
+(s/defschema CongregationSummary
+  {:id s/Uuid
+   :name s/Str})
 
 (def ^:private format-key-for-api (memoize (comp csk/->camelCaseString name)))
 
@@ -121,6 +170,8 @@
           (permissions/grant (current-user-id) [:configure-congregation]))
       state)))
 
+(def ^:private validate-congregation-list (s/validator [CongregationSummary]))
+
 (defn list-congregations [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -128,7 +179,8 @@
       (ok (->> (congregation/get-my-congregations state (current-user-id))
                (map (fn [congregation]
                       {:id (:congregation/id congregation)
-                       :name (:congregation/name congregation)})))))))
+                       :name (:congregation/name congregation)}))
+               (validate-congregation-list))))))
 
 (defn- fetch-congregation [conn state user-id congregation]
   (let [cong-id (:congregation/id congregation)]
@@ -149,6 +201,8 @@
                             (assoc :id (:user/id user))
                             (assoc :sub (:user/subject user))))))}))
 
+(def ^:private validate-congregation (s/validator Congregation))
+
 (defn get-congregation [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -159,7 +213,9 @@
             congregation (congregation/get-my-congregation state cong-id user-id)]
         (when-not congregation
           (forbidden! "No congregation access"))
-        (ok (format-for-api (fetch-congregation conn state user-id congregation)))))))
+        (ok (-> (fetch-congregation conn state user-id congregation)
+                (format-for-api)
+                (validate-congregation)))))))
 
 (defn get-demo-congregation [request]
   (auth/with-authenticated-user request
@@ -172,11 +228,13 @@
                            (congregation/get-unrestricted-congregation state cong-id))]
         (when-not congregation
           (forbidden! "No demo congregation"))
-        (ok (format-for-api (-> (fetch-congregation conn state user-id congregation)
-                                (assoc :id "demo")
-                                (assoc :name "Demo Congregation")
-                                (assoc :permissions {:viewCongregation true})
-                                (assoc :users []))))))))
+        (ok (-> (fetch-congregation conn state user-id congregation)
+                (assoc :id "demo")
+                (assoc :name "Demo Congregation")
+                (assoc :permissions {:viewCongregation true})
+                (assoc :users [])
+                (format-for-api)
+                (validate-congregation)))))))
 
 (defn api-command!
   ([conn state command]
