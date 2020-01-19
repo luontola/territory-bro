@@ -73,10 +73,12 @@
                                           [ring/ring-devel "1.7.1" :exclusions [ns-tracker]]
                                           [ring/ring-mock "0.4.0"]]
 
-                           :jvm-opts ["-Dconf=dev-config.edn"]
+                           :jvm-opts ["-Dconf=dev-config.edn"
+                                      "-XX:-OmitStackTraceInFastThrow"]
                            :repl-options {:init-ns user}
                            :injections [(require 'pjstadig.humane-test-output)
                                         (pjstadig.humane-test-output/activate!)]}
-             :project/test {:jvm-opts ["-Dconf=test-config.edn"]}
+             :project/test {:jvm-opts ["-Dconf=test-config.edn"
+                                       "-XX:-OmitStackTraceInFastThrow"]}
              :profiles/dev {}
              :profiles/test {}})
