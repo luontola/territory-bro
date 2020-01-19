@@ -130,6 +130,25 @@
                       {:id (:congregation/id congregation)
                        :name (:congregation/name congregation)})))))))
 
+(defn- fetch-congregation [conn state user-id congregation]
+  (let [cong-id (:congregation/id congregation)]
+    (db/use-tenant-schema conn (:congregation/schema-name congregation))
+    {:id (:congregation/id congregation)
+     :name (:congregation/name congregation)
+     :permissions (->> (permissions/list-permissions state user-id [cong-id])
+                       (map (fn [permission]
+                              [permission true]))
+                       (into {}))
+     :territories (gis-db/get-territories conn)
+     :congregation-boundaries (gis-db/get-congregation-boundaries conn)
+     :subregions (gis-db/get-subregions conn)
+     :card-minimap-viewports (gis-db/get-card-minimap-viewports conn)
+     :users (->> (user/get-users conn {:ids (congregation/get-users state cong-id)})
+                 (map (fn [user]
+                        (-> (:user/attributes user)
+                            (assoc :id (:user/id user))
+                            (assoc :sub (:user/subject user))))))}))
+
 (defn get-congregation [request]
   (auth/with-authenticated-user request
     (require-logged-in!)
@@ -140,22 +159,23 @@
             congregation (congregation/get-my-congregation state cong-id user-id)]
         (when-not congregation
           (forbidden! "No congregation access"))
-        (db/use-tenant-schema conn (:congregation/schema-name congregation))
-        (ok (format-for-api {:id (:congregation/id congregation)
-                             :name (:congregation/name congregation)
-                             :permissions (->> (permissions/list-permissions state user-id [cong-id])
-                                               (map (fn [permission]
-                                                      [permission true]))
-                                               (into {}))
-                             :territories (gis-db/get-territories conn)
-                             :congregation-boundaries (gis-db/get-congregation-boundaries conn)
-                             :subregions (gis-db/get-subregions conn)
-                             :card-minimap-viewports (gis-db/get-card-minimap-viewports conn)
-                             :users (->> (user/get-users conn {:ids (congregation/get-users state cong-id)})
-                                         (map (fn [user]
-                                                (-> (:user/attributes user)
-                                                    (assoc :id (:user/id user))
-                                                    (assoc :sub (:user/subject user))))))}))))))
+        (ok (format-for-api (fetch-congregation conn state user-id congregation)))))))
+
+(defn get-demo-congregation [request]
+  (auth/with-authenticated-user request
+    (require-logged-in!)
+    (db/with-db [conn {:read-only? true}]
+      (let [cong-id (:demo-congregation config/env)
+            user-id (current-user-id)
+            state (state-for-request request)
+            congregation (congregation/get-unrestricted-congregation state cong-id)]
+        (when-not congregation
+          (forbidden! "No demo congregation"))
+        (ok (format-for-api (-> (fetch-congregation conn state user-id congregation)
+                                (assoc :id "demo")
+                                (assoc :name "Demo Congregation")
+                                (assoc :permissions {:viewCongregation true})
+                                (assoc :users []))))))))
 
 (defn api-command!
   ([conn state command]
@@ -261,6 +281,7 @@
   (ANY "/api/settings" [] settings)
   (POST "/api/congregations" request (create-congregation request))
   (GET "/api/congregations" request (list-congregations request))
+  (GET "/api/congregation/demo" request (get-demo-congregation request))
   (GET "/api/congregation/:congregation" request (get-congregation request))
   (POST "/api/congregation/:congregation/add-user" request (add-user request))
   (POST "/api/congregation/:congregation/set-user-permissions" request (set-user-permissions request))

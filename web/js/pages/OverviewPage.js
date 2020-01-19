@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -38,6 +38,7 @@ function QgisProjectSection({territoryCount, regionCount, congregationIds, suppo
   );
 }
 
+const ViewDemoButton = () => <Link to="/congregation/demo" className="pure-button">View a Demo</Link>;
 const RegisterButton = () => <Link to="/register" className="pure-button">Register a New Congregation</Link>;
 const JoinButton = () => <Link to="/join" className="pure-button">Join an Existing Congregation</Link>;
 
@@ -60,7 +61,7 @@ const OverviewPage = () => {
           ))}
         </ul>
         <p style={{paddingTop: '1.5em'}}>
-          <RegisterButton/> <JoinButton/>
+          <ViewDemoButton/> <RegisterButton/> <JoinButton/>
         </p>
       </>
       }
@@ -70,6 +71,7 @@ const OverviewPage = () => {
         {!settings.user &&
         <p><LoginButton/></p>
         }
+        <p><ViewDemoButton/></p>
         <p><RegisterButton/></p>
         <p><JoinButton/></p>
       </div>

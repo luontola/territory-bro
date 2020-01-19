@@ -385,14 +385,55 @@
       (let [response (-> (request :get (str "/api/congregation/" (UUID/randomUUID)))
                          (merge session)
                          app)]
-        (is (forbidden? response)))) ; same as when ID exists but user has no access
+        ;; same as when ID exists but user has no access
+        (is (forbidden? response))
+        (is (= "No congregation access" (:body response)))))
 
     (testing "no access"
       (revoke-access-from-all! cong-id)
       (let [response (-> (request :get (str "/api/congregation/" cong-id))
                          (merge session)
                          app)]
-        (is (forbidden? response))))))
+        (is (forbidden? response))
+        (is (= "No congregation access" (:body response)))))))
+
+(deftest get-demo-congregation-test
+  (let [session (login! app)
+        response (-> (request :post "/api/congregations")
+                     (json-body {:name "foo"})
+                     (merge session)
+                     app
+                     (assert-response ok?))
+        cong-id (UUID/fromString (:id (:body response)))]
+    (binding [config/env (assoc config/env :demo-congregation cong-id)]
+
+      (testing "get demo congregation"
+        (let [response (-> (request :get (str "/api/congregation/demo"))
+                           (merge session)
+                           app)]
+          (is (ok? response))
+          (is (= "demo" (:id (:body response)))
+              "replaces original ID")
+          (is (= "Demo Congregation" (:name (:body response)))
+              "replaces original name")
+          (is (empty? (:users (:body response)))
+              "may not view users")
+          (is (= {:viewCongregation true}
+                 (:permissions (:body response)))
+              "has read-only permissions")))
+
+      (testing "requires login"
+        (let [response (-> (request :get (str "/api/congregation/demo"))
+                           app)]
+          (is (unauthorized? response)))))
+
+    (binding [config/env (assoc config/env :demo-congregation nil)]
+      (testing "no demo congregation"
+        (let [response (-> (request :get (str "/api/congregation/demo"))
+                           (merge session)
+                           app)]
+          (is (forbidden? response))
+          (is (= "No demo congregation" (:body response))))))))
 
 (deftest download-qgis-project-test
   (let [session (login! app)

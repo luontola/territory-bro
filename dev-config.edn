@@ -7,4 +7,5 @@
  :auth0-domain "luontola.eu.auth0.com"
  :auth0-client-id "8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"
  :super-users "developer"
- :support-email "support@example.com"}
+ :support-email "support@example.com"
+ :demo-congregation "89f8bcde-fa65-47cb-b5cc-9b11d01e410d"}
