@@ -154,6 +154,7 @@
                            :clientId (getx config/env :auth0-client-id)}
                    :supportEmail (when auth/*user*
                                    (getx config/env :support-email))
+                   :demoAvailable (some? (:demo-congregation config/env))
                    :user (when auth/*user*
                            (fix-user-for-liberator auth/*user*))}))))
 

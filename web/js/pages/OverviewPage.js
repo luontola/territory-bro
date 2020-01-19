@@ -61,7 +61,7 @@ const OverviewPage = () => {
           ))}
         </ul>
         <p style={{paddingTop: '1.5em'}}>
-          <ViewDemoButton/> <RegisterButton/> <JoinButton/>
+          {settings.demoAvailable && <ViewDemoButton/>} <RegisterButton/> <JoinButton/>
         </p>
       </>
       }
@@ -71,7 +71,7 @@ const OverviewPage = () => {
         {!settings.user &&
         <p><LoginButton/></p>
         }
-        <p><ViewDemoButton/></p>
+        {settings.demoAvailable && <p><ViewDemoButton/></p>}
         <p><RegisterButton/></p>
         <p><JoinButton/></p>
       </div>
