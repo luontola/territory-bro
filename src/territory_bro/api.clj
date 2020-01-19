@@ -168,7 +168,8 @@
       (let [cong-id (:demo-congregation config/env)
             user-id (current-user-id)
             state (state-for-request request)
-            congregation (congregation/get-unrestricted-congregation state cong-id)]
+            congregation (when cong-id
+                           (congregation/get-unrestricted-congregation state cong-id))]
         (when-not congregation
           (forbidden! "No demo congregation"))
         (ok (format-for-api (-> (fetch-congregation conn state user-id congregation)
