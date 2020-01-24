@@ -124,6 +124,12 @@
          :subregion/id UUID
          :subregion/name s/Str
          :subregion/location s/Str))
+(s/defschema SubregionDeleted
+  (assoc EventBase
+         :event/type (s/eq :subregion.event/subregion-deleted)
+         :event/version (s/eq 1)
+         :congregation/id UUID
+         :subregion/id UUID))
 
 ;;; DB Admin
 
@@ -159,6 +165,7 @@
    :congregation.event/gis-user-created GisUserCreated
    :congregation.event/gis-user-deleted GisUserDeleted
    :subregion.event/subregion-defined SubregionDefined
+   :subregion.event/subregion-deleted SubregionDeleted
    :db-admin.event/gis-schema-is-present GisSchemaIsPresent
    :db-admin.event/gis-user-is-present GisUserIsPresent
    :db-admin.event/gis-user-is-absent GisUserIsAbsent})

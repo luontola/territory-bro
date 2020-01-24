@@ -22,6 +22,10 @@
                         :subregion/id subregion-id
                         :subregion/name "the name"
                         :subregion/location testdata/wkt-multi-polygon})
+(def subregion-deleted {:event/type :subregion.event/subregion-deleted
+                        :event/version 1
+                        :congregation/id cong-id
+                        :subregion/id subregion-id})
 
 (defn- apply-events [events]
   (testutil/apply-events subregion/projection events))
@@ -49,6 +53,11 @@
                                    {::subregion/subregions
                                     {cong-id {subregion-id {:subregion/name "new name"
                                                             :subregion/location "new location"}}}})]
+          (is (= expected (apply-events events)))))
+
+      (testing "> deleted"
+        (let [events (conj events subregion-deleted)
+              expected {}]
           (is (= expected (apply-events events))))))))
 
 (deftest create-subregion-test
@@ -65,9 +74,12 @@
       (is (= [subregion-defined]
              (handle-command create-command [] injections))))
 
+    (testing "is idempotent"
+      (is (empty? (handle-command create-command [subregion-defined] injections))))
+
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        (is (= [:define-subregion cong-id subregion-id] permit))
+                                        (is (= [:create-subregion cong-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
                      (handle-command create-command [] injections)))))))
@@ -90,12 +102,35 @@
       (is (= [subregion-defined]
              (handle-command update-command [(assoc subregion-defined :subregion/location "old location")] injections))))
 
-    (testing "nothing changed"
+    (testing "nothing changed / is idempotent"
       (is (empty? (handle-command update-command [subregion-defined] injections))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        (is (= [:define-subregion cong-id subregion-id] permit))
+                                        (is (= [:update-subregion cong-id subregion-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
-                     (handle-command update-command [] injections)))))))
+                     (handle-command update-command [subregion-defined] injections)))))))
+
+(deftest delete-subregion-test
+  (let [injections {:check-permit (fn [_permit])}
+        delete-command {:command/type :subregion.command/delete-subregion
+                        :command/time (Instant/now)
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :subregion/id subregion-id}]
+
+    (testing "deleted"
+      (is (= [subregion-deleted]
+             (handle-command delete-command [subregion-defined] injections))))
+
+    (testing "is idempotent"
+      (is (empty? (handle-command delete-command [subregion-defined subregion-deleted] injections))))
+
+    (testing "checks permits"
+      (let [injections {:check-permit (fn [permit]
+                                        (is (= [:delete-subregion cong-id subregion-id] permit))
+                                        (throw (NoPermitException. nil nil)))}]
+        (is (thrown? NoPermitException
+                     (handle-command delete-command [subregion-defined] injections)))))))
+  
