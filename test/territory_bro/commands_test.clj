@@ -12,7 +12,8 @@
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException)))
+           (territory_bro NoPermitException)
+           (territory_bro.foreign_key References)))
 
 (def valid-command {:command/type :congregation.command/rename-congregation
                     :command/time (Instant/now)
@@ -51,12 +52,23 @@
       (is (s/check commands/Command unknown-command)))
 
     (testing "all UUIDs are foreign-key checked"
-      (doseq [[type schema] commands/command-schemas]
-        (doseq [[key val] schema]
-          ;; there should not be a schema where the value is a plain UUID
-          ;; instead of a (foreign-key/references :stuff UUID)
-          (is (not= UUID val)
-              (str "command " type " key " (pr-str key) " is missing a (foreign-key/references) check")))))))
+      (letfn [(check-schema [schema path]
+               ;; there should not be a schema where the value is a plain UUID
+               ;; instead of a (foreign-key/references :stuff UUID)
+                (is (not= UUID schema)
+                    (str "missing a foreign key check at " path))
+                (cond
+                  ;; don't recurse into foreign-key/references
+                  (instance? References schema) nil
+                  ;; map? matches also records, which is most schema types
+                  (map? schema) (doseq [[key val] schema]
+                                  (check-schema key (conj path key))
+                                  (check-schema val (conj path key)))
+                  (vector? schema) (doseq [[idx val] (map-indexed vector schema)]
+                                     (check-schema val (conj path idx)))))]
+        (doseq [[type schema] commands/command-schemas]
+          (testing {:command/type type}
+            (check-schema schema [])))))))
 
 (deftest validate-command-test
   (binding [foreign-key/*reference-checkers* testutil/dummy-reference-checkers]
