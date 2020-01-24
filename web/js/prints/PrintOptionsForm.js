@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -75,7 +75,7 @@ const PrintOptionsForm = ({congregationId}) => {
 
                 <div className="pure-g">
                   <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
-                    <label htmlFor="mapRaster">Template</label>
+                    <label htmlFor="template">Template</label>
                     <Field name="template" id="template" component="select" className="pure-input-1">
                       {templates.map(template =>
                         <option key={template.id} value={template.id}>{template.name}</option>)}
