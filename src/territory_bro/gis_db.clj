@@ -16,7 +16,7 @@
 (def ^:private query! (db/compile-queries "db/hugsql/gis.sql"))
 
 
-;;; Regions
+;;;; Regions
 
 (defn- format-region [territory]
   (remove-vals nil? {:region/id (:id territory)
@@ -60,7 +60,7 @@
     id))
 
 
-;;; Territories
+;;;; Territories
 
 (defn- format-territory [territory]
   {:territory/id (:id territory)
@@ -92,7 +92,7 @@
     id))
 
 
-;;; Changes
+;;;; Changes
 
 (s/defschema GisFeature
   {:id UUID
@@ -128,7 +128,7 @@
         (doall))))
 
 
-;;; Database users
+;;;; Database users
 
 (defn user-exists? [conn username]
   (not (empty? (jdbc/query conn ["SELECT 1 FROM pg_roles WHERE rolname = ?" username]))))

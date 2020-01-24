@@ -130,7 +130,7 @@
     (is (thrown? ExceptionInfo (events/strict-validate-events [invalid-event])))))
 
 
-;;; Generators for serialization tests
+;;;; Generators for serialization tests
 
 (def uuid-gen (gen/fmap (fn [[a b]]
                           (UUID. a b))

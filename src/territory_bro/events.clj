@@ -63,7 +63,6 @@
    (s/optional-key :event/user) UUID
    (s/optional-key :event/system) s/Str})
 
-
 ;;; Congregation
 
 (s/defschema CongregationCreated
@@ -114,7 +113,6 @@
          :congregation/id UUID
          :user/id UUID
          :gis-user/username s/Str))
-
 
 ;;; DB Admin
 

@@ -39,7 +39,6 @@
    (s/optional-key :command/user) (foreign-key/references :user UUID)
    (s/optional-key :command/system) s/Str})
 
-
 ;;; Congregation
 
 (s/defschema CreateCongregation
@@ -67,7 +66,6 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :congregation/name s/Str))
 
-
 ;;; DB Admin
 
 (s/defschema EnsureGisUserAbsent
@@ -93,7 +91,6 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :congregation/schema-name s/Str))
 
-
 ;;; GIS User
 
 (s/defschema CreateGisUser
@@ -107,7 +104,6 @@
          :command/type (s/eq :gis-user.command/delete-gis-user)
          :congregation/id (foreign-key/references :congregation UUID)
          :user/id (foreign-key/references :user UUID)))
-
 
 ;;; Territory
 
@@ -139,7 +135,6 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)))
 
-
 ;;; Subregion
 
 (s/defschema CreateSubregion
@@ -164,7 +159,6 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :subregion/id (foreign-key/references :subregion UUID)))
 
-
 ;;; Congregation Boundary
 
 (s/defschema CreateCongregationBoundary
@@ -186,7 +180,6 @@
          :command/type (s/eq :congregation-boundary.command/delete-congregation-boundary)
          :congregation/id (foreign-key/references :congregation UUID)
          :congregation-boundary/id (foreign-key/references :congregation-boundary UUID)))
-
 
 ;;; Card Minimap Viewport
 

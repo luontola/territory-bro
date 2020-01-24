@@ -8,7 +8,7 @@
   (:import (java.security SecureRandom)
            (java.util Base64)))
 
-;;; Read model
+;;;; Read model
 
 (defmulti gis-users-view (fn [_state event] (:event/type event)))
 
@@ -26,13 +26,13 @@
   (dissoc-in state [::gis-users (:congregation/id event) (:user/id event)]))
 
 
-;;; Queries
+;;;; Queries
 
 (defn get-gis-user [state cong-id user-id]
   (get-in state [::gis-users cong-id user-id]))
 
 
-;;; Write model
+;;;; Write model
 
 (defn- username-path [event-or-command]
   [::usernames-by-cong-user (select-keys event-or-command [:congregation/id :user/id])])
@@ -56,7 +56,7 @@
       (dissoc-in (username-path event))))
 
 
-;; Command Handlers
+;;;; Command Handlers
 
 (defn- uuid-prefix [uuid]
   (-> (str uuid)

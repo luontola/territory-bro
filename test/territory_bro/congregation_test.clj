@@ -142,7 +142,8 @@
            ValidationException (re-equals "[[:no-such-congregation #uuid \"00000000-0000-0000-0000-000000000666\"]]")
            (congregation/check-congregation-exists state (UUID. 0 0x666)))))))
 
-;;; Commands
+
+;;;; Commands
 
 (deftest create-congregation-test
   (let [cong-id (UUID. 0 1)

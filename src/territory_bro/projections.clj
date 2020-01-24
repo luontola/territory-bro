@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -18,7 +18,7 @@
            (java.time Duration)
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
 
-;;; Cache
+;;;; Cache
 
 (mount/defstate *cache
   :start (atom {:last-event nil
@@ -52,7 +52,7 @@
   (:state (apply-new-events @*cache conn)))
 
 
-;;; Refreshing
+;;;; Refreshing
 
 (defn- run-process-managers! [state]
   (let [commands (concat

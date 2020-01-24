@@ -42,7 +42,7 @@
   :stop (disconnect! database))
 
 
-;;; SQL type conversions
+;;;; SQL type conversions
 
 (defn- array? [obj]
   (.isArray (class obj)))
@@ -105,7 +105,7 @@
   (sql-value [value] (to-pg-json value)))
 
 
-;;; Database schemas
+;;;; Database schemas
 
 (defn- ^"[Ljava.lang.String;" strings [& ss]
   (into-array String ss))
@@ -170,7 +170,7 @@
                          public-schema]))
 
 
-;;; Queries
+;;;; Queries
 
 (defmacro with-db [binding & body]
   (let [conn (first binding)
