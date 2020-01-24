@@ -114,6 +114,17 @@
          :user/id UUID
          :gis-user/username s/Str))
 
+;;; Subregion
+
+(s/defschema SubregionDefined
+  (assoc EventBase
+         :event/type (s/eq :subregion.event/subregion-defined)
+         :event/version (s/eq 1)
+         :congregation/id UUID
+         :subregion/id UUID
+         :subregion/name s/Str
+         :subregion/location s/Str))
+
 ;;; DB Admin
 
 (s/defschema GisSchemaIsPresent
@@ -147,6 +158,7 @@
    :congregation.event/permission-revoked PermissionRevoked
    :congregation.event/gis-user-created GisUserCreated
    :congregation.event/gis-user-deleted GisUserDeleted
+   :subregion.event/subregion-defined SubregionDefined
    :db-admin.event/gis-schema-is-present GisSchemaIsPresent
    :db-admin.event/gis-user-is-present GisUserIsPresent
    :db-admin.event/gis-user-is-absent GisUserIsAbsent})
