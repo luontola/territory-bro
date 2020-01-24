@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -22,13 +22,14 @@ import SettingsPage from "./pages/SettingsPage";
 import UsersPage from "./pages/UsersPage";
 import JoinPage from "./pages/JoinPage";
 
-const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
-
 globalHistory.listen(({location, action}) => {
   console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
   logPageView();
 });
 
+document.querySelector('html').setAttribute('lang', language);
+
+const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <ErrorBoundary FallbackComponent={ErrorPage}>

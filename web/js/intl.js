@@ -51,9 +51,4 @@ const languagePreference: string[] = flatMap([
 
 export const language: string = languagePreference.find(getMessages) || 'en';
 
-const html = document.querySelector('html');
-if (html) {
-  html.setAttribute('lang', language);
-}
-
 export const messages: {} = getMessages(language);
