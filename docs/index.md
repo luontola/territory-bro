@@ -31,4 +31,6 @@ Print it on thick paper, cut with a sharp knife and ruler along the crop marks, 
 
 ## Learn More
 
+You can [view a demo of the printouts](https://beta.territorybro.com/congregation/demo/printouts) which are available in Territory Bro.
+
 To start creating new territory cards for your congregation, read more from the [User Guide](/guide/).

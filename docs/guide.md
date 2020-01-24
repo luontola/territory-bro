@@ -20,7 +20,7 @@ permalink: /guide/
 
 ## Getting Started
 
-1. Visit <https://beta.territorybro.com/register> to add a new congregation to Territory Bro. You will need to login using your Google or Facebook account.
+1. Visit <https://beta.territorybro.com> and register a new congregation in Territory Bro. You will need to login using your Google or Facebook account.
 
 2. After registering the congregation, there is a link to download a *QGIS project file* for your congregation. Save the project file on your computer.
 
