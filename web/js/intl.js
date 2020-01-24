@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -50,5 +50,10 @@ const languagePreference: string[] = flatMap([
 ], lang => [lang, withoutRegionCode(lang)]);
 
 export const language: string = languagePreference.find(getMessages) || 'en';
+
+const html = document.querySelector('html');
+if (html) {
+  html.setAttribute('lang', language);
+}
 
 export const messages: {} = getMessages(language);

@@ -151,7 +151,7 @@ const PrintOptionsForm = ({congregationId}) => {
           </div>
 
           <IntlProvider locale={values.language} messages={getMessages(values.language)}>
-            <>
+            <div lang={values.language}>
               {template.type === 'territory' &&
               values.territories.map(territoryId => {
                   return <template.component key={territoryId}
@@ -167,7 +167,7 @@ const PrintOptionsForm = ({congregationId}) => {
                                            congregationId={congregationId}
                                            mapRaster={mapRaster}/>;
               })}
-            </>
+            </div>
           </IntlProvider>
         </>);
     }}
