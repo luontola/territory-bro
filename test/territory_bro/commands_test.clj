@@ -48,7 +48,15 @@
 
     (testing "unknown command type"
       ;; TODO: produce a helpful error message
-      (is (s/check commands/Command unknown-command)))))
+      (is (s/check commands/Command unknown-command)))
+
+    (testing "all UUIDs are foreign-key checked"
+      (doseq [[type schema] commands/command-schemas]
+        (doseq [[key val] schema]
+          ;; there should not be a schema where the value is a plain UUID
+          ;; instead of a (foreign-key/references :stuff UUID)
+          (is (not= UUID val)
+              (str "command " type " key " (pr-str key) " is missing a (foreign-key/references) check")))))))
 
 (deftest validate-command-test
   (binding [foreign-key/*reference-checkers* testutil/dummy-reference-checkers]
