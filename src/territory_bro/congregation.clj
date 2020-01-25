@@ -64,7 +64,7 @@
                                             (:congregation/id event)])))
 
 
-(defn congregations-view [state event]
+(defn projection [state event]
   (-> state
       (update-in [::congregations (:congregation/id event)] update-congregation event)
       (update-permissions event)))

@@ -26,7 +26,7 @@
                        :gis-user/username "gis_user_0000000000000001_0000000000000002"})
 
 (defn- apply-events [events]
-  (testutil/apply-events gis-user/gis-users-view events))
+  (testutil/apply-events gis-user/projection events))
 
 (defn- handle-command [command events injections]
   (->> (gis-user/handle-command (testutil/validate-command command)
@@ -34,7 +34,7 @@
                                 injections)
        (events/validate-events)))
 
-(deftest gis-users-view-test
+(deftest gis-user-projection-test
   (testing "GIS user created"
     (let [events [gis-user-created]
           expected {::gis-user/gis-users

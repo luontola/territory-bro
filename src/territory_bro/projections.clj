@@ -26,10 +26,10 @@
 
 (defn- update-projections [state event]
   (-> state
-      (congregation/congregations-view event)
-      (gis-user/gis-users-view event)
+      (congregation/projection event)
+      (db-admin/projection event)
       (gis-user-process/projection event)
-      (db-admin/projection event)))
+      (gis-user/projection event)))
 
 (defn- apply-events [cache events]
   (update cache :state #(reduce update-projections % events)))

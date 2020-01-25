@@ -14,7 +14,7 @@
            (territory_bro NoPermitException ValidationException)))
 
 (defn- apply-events [events]
-  (testutil/apply-events congregation/congregations-view events))
+  (testutil/apply-events congregation/projection events))
 
 (defn- handle-command [command events injections]
   (->> (congregation/handle-command (testutil/validate-command command)
@@ -22,7 +22,7 @@
                                     injections)
        (events/validate-events)))
 
-(deftest congregations-view-test
+(deftest congregation-projection-test
   (testing "created"
     (let [cong-id (UUID. 0 1)
           events [{:event/type :congregation.event/congregation-created

@@ -10,18 +10,18 @@
 
 ;;;; Read model
 
-(defmulti gis-users-view (fn [_state event] (:event/type event)))
+(defmulti projection (fn [_state event] (:event/type event)))
 
-(defmethod gis-users-view :default
+(defmethod projection :default
   [state _event]
   state)
 
-(defmethod gis-users-view :congregation.event/gis-user-created
+(defmethod projection :congregation.event/gis-user-created
   [state event]
   (assoc-in state [::gis-users (:congregation/id event) (:user/id event)]
             (select-keys event [:user/id :gis-user/username :gis-user/password])))
 
-(defmethod gis-users-view :congregation.event/gis-user-deleted
+(defmethod projection :congregation.event/gis-user-deleted
   [state event]
   (dissoc-in state [::gis-users (:congregation/id event) (:user/id event)]))
 
