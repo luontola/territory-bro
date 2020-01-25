@@ -150,6 +150,22 @@
          :congregation/id UUID
          :subregion/id UUID))
 
+;;; Congregation Boundary
+
+(s/defschema CongregationBoundaryDefined
+  (assoc EventBase
+         :event/type (s/eq :congregation-boundary.event/congregation-boundary-defined)
+         :event/version (s/eq 1)
+         :congregation/id UUID
+         :congregation-boundary/id UUID
+         :congregation-boundary/location s/Str))
+(s/defschema CongregationBoundaryDeleted
+  (assoc EventBase
+         :event/type (s/eq :congregation-boundary.event/congregation-boundary-deleted)
+         :event/version (s/eq 1)
+         :congregation/id UUID
+         :congregation-boundary/id UUID))
+
 ;;; DB Admin
 
 (s/defschema GisSchemaIsPresent
@@ -187,6 +203,8 @@
    :territory.event/territory-deleted TerritoryDeleted
    :subregion.event/subregion-defined SubregionDefined
    :subregion.event/subregion-deleted SubregionDeleted
+   :congregation-boundary.event/congregation-boundary-defined CongregationBoundaryDefined
+   :congregation-boundary.event/congregation-boundary-deleted CongregationBoundaryDeleted
    :db-admin.event/gis-schema-is-present GisSchemaIsPresent
    :db-admin.event/gis-user-is-present GisUserIsPresent
    :db-admin.event/gis-user-is-absent GisUserIsAbsent})
