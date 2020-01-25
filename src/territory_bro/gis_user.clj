@@ -34,26 +34,9 @@
 
 ;;;; Write model
 
-(defn- username-path [event-or-command]
-  [::usernames-by-cong-user (select-keys event-or-command [:congregation/id :user/id])])
-
-(defmulti ^:private write-model (fn [_state event] (:event/type event)))
-
-(defmethod write-model :default
-  [state _event]
-  state)
-
-(defmethod write-model :congregation.event/gis-user-created
-  [state event]
-  (-> state
-      ;; TODO: reuse the read model?
-      (assoc-in (username-path event) (:gis-user/username event))))
-
-(defmethod write-model :congregation.event/gis-user-deleted
-  [state event]
-  (-> state
-      ;; TODO: reuse the read model?
-      (dissoc-in (username-path event))))
+(defn- write-model [command events]
+  (let [state (reduce projection nil events)]
+    (get-in state [::gis-users (:congregation/id command) (:user/id command)])))
 
 
 ;;;; Command Handlers
@@ -81,11 +64,11 @@
 
 (defmulti ^:private command-handler (fn [command _state _injections] (:command/type command)))
 
-(defmethod command-handler :gis-user.command/create-gis-user [command state {:keys [generate-password db-user-exists? check-permit]}]
+(defmethod command-handler :gis-user.command/create-gis-user [command gis-user {:keys [generate-password db-user-exists? check-permit]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:create-gis-user cong-id user-id])
-    (when (nil? (get-in state (username-path command)))
+    (when (nil? gis-user)
       [{:event/type :congregation.event/gis-user-created
         :event/version 1
         :congregation/id cong-id
@@ -96,17 +79,16 @@
                                (unique-username db-user-exists?))
         :gis-user/password (generate-password)}])))
 
-(defmethod command-handler :gis-user.command/delete-gis-user [command state {:keys [check-permit]}]
+(defmethod command-handler :gis-user.command/delete-gis-user [command gis-user {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
         user-id (:user/id command)]
     (check-permit [:delete-gis-user cong-id user-id])
-    (when-some [username (get-in state (username-path command))]
+    (when (some? gis-user)
       [{:event/type :congregation.event/gis-user-deleted
         :event/version 1
         :congregation/id cong-id
         :user/id user-id
-        :gis-user/username username}])))
+        :gis-user/username (:gis-user/username gis-user)}])))
 
 (defn handle-command [command events injections]
-  (let [state (reduce write-model nil events)]
-    (command-handler command state injections)))
+  (command-handler command (write-model command events) injections))
