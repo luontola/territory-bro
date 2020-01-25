@@ -43,39 +43,38 @@
 (defmulti ^:private command-handler (fn [command _territory _injections]
                                       (:command/type command)))
 
+(def ^:private data-keys
+  [:territory/number
+   :territory/addresses
+   :territory/subregion
+   :territory/meta
+   :territory/location])
+
 (defmethod command-handler :territory.command/create-territory
   [command territory {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
         territory-id (:territory/id command)]
     (check-permit [:create-territory cong-id])
     (when (nil? territory)
-      [{:event/type :territory.event/territory-defined
-        :event/version 1
-        :congregation/id cong-id
-        :territory/id territory-id
-        :territory/number (:territory/number command)
-        :territory/addresses (:territory/addresses command)
-        :territory/subregion (:territory/subregion command)
-        :territory/meta (:territory/meta command)
-        :territory/location (:territory/location command)}])))
+      [(merge {:event/type :territory.event/territory-defined
+               :event/version 1
+               :congregation/id cong-id
+               :territory/id territory-id}
+              (select-keys command data-keys))])))
 
 (defmethod command-handler :territory.command/update-territory
   [command territory {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
         territory-id (:territory/id command)
-        old-vals (select-keys territory [:territory/number :territory/addresses :territory/subregion :territory/meta :territory/location])
-        new-vals (select-keys command [:territory/number :territory/addresses :territory/subregion :territory/meta :territory/location])]
+        old-data (select-keys territory data-keys)
+        new-data (select-keys command data-keys)]
     (check-permit [:update-territory cong-id territory-id])
-    (when (not= old-vals new-vals)
-      [{:event/type :territory.event/territory-defined
-        :event/version 1
-        :congregation/id cong-id
-        :territory/id territory-id
-        :territory/number (:territory/number command)
-        :territory/addresses (:territory/addresses command)
-        :territory/subregion (:territory/subregion command)
-        :territory/meta (:territory/meta command)
-        :territory/location (:territory/location command)}])))
+    (when (not= old-data new-data)
+      [(merge {:event/type :territory.event/territory-defined
+               :event/version 1
+               :congregation/id cong-id
+               :territory/id territory-id}
+              new-data)])))
 
 (defmethod command-handler :territory.command/delete-territory
   [command territory {:keys [check-permit]}]
