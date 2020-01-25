@@ -1,2 +1,2 @@
 #!/bin/bash
-lein kaocha "$@"
+lein with-profile test kaocha "$@"

@@ -57,13 +57,13 @@
   :plugins [[lein-ancient "0.6.15"]]
 
   :aliases {"autotest" ["kaocha" "--watch"]
-            "kaocha" ["with-profile" "+kaocha,+test" "run" "-m" "kaocha.runner"]}
+            "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]}
 
   :profiles {:uberjar {:omit-source true
                        :aot :all
                        :uberjar-name "territory-bro.jar"}
 
-             :kaocha {:dependencies [[lambdaisland/kaocha "0.0-573"]]}
+             :kaocha {:dependencies [[lambdaisland/kaocha "0.0-581"]]}
 
              :dev [:project/dev :profiles/dev]
              :test [:project/test :profiles/test]
