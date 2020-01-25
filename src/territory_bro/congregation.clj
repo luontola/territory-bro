@@ -11,67 +11,51 @@
 
 ;;;; Read model
 
-(defmulti ^:private update-congregation (fn [_congregation event]
-                                          (:event/type event)))
+(defmulti projection (fn [_state event]
+                       (:event/type event)))
 
-(defmethod update-congregation :default [congregation _event]
-  congregation)
-
-(defmethod update-congregation :congregation.event/congregation-created
-  [congregation event]
-  (-> congregation
-      (assoc :congregation/id (:congregation/id event))
-      (assoc :congregation/name (:congregation/name event))
-      (assoc :congregation/schema-name (:congregation/schema-name event))))
-
-(defmethod update-congregation :congregation.event/congregation-renamed
-  [congregation event]
-  (-> congregation
-      (assoc :congregation/name (:congregation/name event))))
-
-(defmethod update-congregation :congregation.event/permission-granted
-  [congregation event]
-  (-> congregation
-      (update-in [:congregation/user-permissions (:user/id event)]
-                 conj-set
-                 (:permission/id event))))
-
-(defmethod update-congregation :congregation.event/permission-revoked
-  [congregation event]
-  (-> congregation
-      ;; TODO: remove user when no more permissions remain
-      (update-in [:congregation/user-permissions (:user/id event)]
-                 disj
-                 (:permission/id event))))
-
-
-(defmulti ^:private update-permissions (fn [_state event]
-                                         (:event/type event)))
-
-(defmethod update-permissions :default [state _event]
+(defmethod projection :default [state _event]
   state)
 
-(defmethod update-permissions :congregation.event/permission-granted
+(defn- update-cong [state event f]
+  (update-in state [::congregations (:congregation/id event)] f))
+
+(defmethod projection :congregation.event/congregation-created
   [state event]
   (-> state
+      (update-cong event (fn [congregation]
+                           (-> congregation
+                               (assoc :congregation/id (:congregation/id event))
+                               (assoc :congregation/name (:congregation/name event))
+                               (assoc :congregation/schema-name (:congregation/schema-name event)))))))
+
+(defmethod projection :congregation.event/congregation-renamed
+  [state event]
+  (-> state
+      (update-cong event (fn [congregation]
+                           (-> congregation
+                               (assoc :congregation/name (:congregation/name event)))))))
+
+(defmethod projection :congregation.event/permission-granted
+  [state event]
+  (-> state
+      (update-cong event (fn [congregation]
+                           (-> congregation
+                               (update-in [:congregation/user-permissions (:user/id event)]
+                                          conj-set (:permission/id event)))))
       (permissions/grant (:user/id event) [(:permission/id event)
                                            (:congregation/id event)])))
 
-(defmethod update-permissions :congregation.event/permission-revoked
+(defmethod projection :congregation.event/permission-revoked
   [state event]
   (-> state
+      (update-cong event (fn [congregation]
+                           (-> congregation
+                               ;; TODO: remove user when no more permissions remain
+                               (update-in [:congregation/user-permissions (:user/id event)]
+                                          disj (:permission/id event)))))
       (permissions/revoke (:user/id event) [(:permission/id event)
                                             (:congregation/id event)])))
-
-
-(defn projection [state event]
-  ;; XXX: this assert will fail once we start having non-congregation specific events
-  ;; TODO: change projection to be the multimethod instead of update-congregation
-  (assert (some? (:congregation/id event))
-          {:event event})
-  (-> state
-      (update-in [::congregations (:congregation/id event)] update-congregation event)
-      (update-permissions event)))
 
 (defn sudo [state user-id]
   (-> state
@@ -109,8 +93,9 @@
 
 ;;;; Write model
 
-(defn- write-model [events]
-  (reduce update-congregation nil events))
+(defn- write-model [command events]
+  (let [state (reduce projection nil events)]
+    (get-in state [::congregations (:congregation/id command)])))
 
 
 ;;;; Command handlers
@@ -197,7 +182,7 @@
         :congregation/name new-name}])))
 
 (defn handle-command [command events injections]
-  (command-handler command (write-model events) injections))
+  (command-handler command (write-model command events) injections))
 
 
 ;;;; User access
