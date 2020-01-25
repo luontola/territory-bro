@@ -73,6 +73,11 @@
       (update-in [::congregations (:congregation/id event)] update-congregation event)
       (update-permissions event)))
 
+(defn sudo [state user-id]
+  (-> state
+      (permissions/grant user-id [:view-congregation])
+      (permissions/grant user-id [:configure-congregation])))
+
 
 ;;;; Queries
 

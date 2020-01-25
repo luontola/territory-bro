@@ -123,7 +123,12 @@
           (is (empty? (congregation/get-users state unrelated-cong-id))
               "unrelated congregation"))))
 
-    (testing "superadmin can access all congregations"))) ; TODO
+    (testing "superadmin can access all congregations"
+      (let [state (congregation/sudo state user-id)]
+        (is (= #{cong-id unrelated-cong-id}
+               (->> (congregation/get-my-congregations state user-id)
+                    (map :congregation/id)
+                    (set))))))))
 
 (deftest check-congregation-exists-test
   (let [cong-id (UUID. 0 1)

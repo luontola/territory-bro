@@ -166,9 +166,7 @@
 (defn- state-for-request [request]
   (let [state (projections/cached-state)]
     (if (::sudo? (:session request))
-      (-> state
-          (permissions/grant (current-user-id) [:view-congregation])
-          (permissions/grant (current-user-id) [:configure-congregation]))
+      (congregation/sudo state (current-user-id))
       state)))
 
 (def ^:private validate-congregation-list (s/validator [CongregationSummary]))
