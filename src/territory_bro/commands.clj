@@ -5,9 +5,9 @@
 (ns territory-bro.commands
   (:require [schema-refined.core :as refined]
             [schema.core :as s]
-            [schema.utils]
             [territory-bro.events :as events]
             [territory-bro.foreign-key :as foreign-key]
+            [territory-bro.json :as json]
             [territory-bro.permissions :as permissions])
   (:import (java.time Instant)
            (java.util UUID)))
@@ -115,7 +115,7 @@
          :territory/number s/Str
          :territory/addresses s/Str
          :territory/subregion s/Str
-         :territory/meta {s/Any s/Any}
+         :territory/meta {s/Keyword json/Schema}
          :territory/location s/Str))
 
 (s/defschema UpdateTerritory
@@ -126,7 +126,7 @@
          :territory/number s/Str
          :territory/addresses s/Str
          :territory/subregion s/Str
-         :territory/meta {s/Any s/Any}
+         :territory/meta {s/Keyword json/Schema}
          :territory/location s/Str))
 
 (s/defschema DeleteTerritory

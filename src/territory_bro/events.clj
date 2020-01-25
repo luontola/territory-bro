@@ -8,7 +8,6 @@
             [schema-tools.core :as tools]
             [schema.coerce :as coerce]
             [schema.core :as s]
-            [schema.utils]
             [territory-bro.json :as json])
   (:import (java.time Instant)
            (java.util UUID)))
@@ -125,7 +124,7 @@
          :territory/number s/Str
          :territory/addresses s/Str
          :territory/subregion s/Str
-         :territory/meta {s/Any s/Any}
+         :territory/meta {s/Keyword json/Schema}
          :territory/location s/Str))
 (s/defschema TerritoryDeleted
   (assoc EventBase
