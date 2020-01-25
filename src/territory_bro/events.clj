@@ -166,6 +166,22 @@
          :congregation/id UUID
          :congregation-boundary/id UUID))
 
+;;; Card Minimap Viewport
+
+(s/defschema CardMinimapViewportDefined
+  (assoc EventBase
+         :event/type (s/eq :card-minimap-viewport.event/card-minimap-viewport-defined)
+         :event/version (s/eq 1)
+         :congregation/id UUID
+         :card-minimap-viewport/id UUID
+         :card-minimap-viewport/location s/Str))
+(s/defschema CardMinimapViewportDeleted
+  (assoc EventBase
+         :event/type (s/eq :card-minimap-viewport.event/card-minimap-viewport-deleted)
+         :event/version (s/eq 1)
+         :congregation/id UUID
+         :card-minimap-viewport/id UUID))
+
 ;;; DB Admin
 
 (s/defschema GisSchemaIsPresent
@@ -205,6 +221,8 @@
    :subregion.event/subregion-deleted SubregionDeleted
    :congregation-boundary.event/congregation-boundary-defined CongregationBoundaryDefined
    :congregation-boundary.event/congregation-boundary-deleted CongregationBoundaryDeleted
+   :card-minimap-viewport.event/card-minimap-viewport-defined CardMinimapViewportDefined
+   :card-minimap-viewport.event/card-minimap-viewport-deleted CardMinimapViewportDeleted
    :db-admin.event/gis-schema-is-present GisSchemaIsPresent
    :db-admin.event/gis-user-is-present GisUserIsPresent
    :db-admin.event/gis-user-is-absent GisUserIsAbsent})
