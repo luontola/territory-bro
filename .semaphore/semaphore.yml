@@ -21,6 +21,7 @@ blocks:
           commands:
             - cache restore m2-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
             - cache restore lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
+            - sem-version java 11
 
             - docker-compose up -d db
             - lein test
