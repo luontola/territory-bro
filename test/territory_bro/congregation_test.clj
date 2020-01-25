@@ -57,8 +57,8 @@
                                        :user/id user-id
                                        :permission/id :view-congregation})
                   expected (-> expected
-                               (deep-merge {::congregation/congregations
-                                            {cong-id {:congregation/user-permissions {user-id #{}}}}})
+                               (update-in [::congregation/congregations cong-id :congregation/user-permissions]
+                                          dissoc user-id)
                                (dissoc ::permissions/permissions))]
               (is (= expected (apply-events events)))))))
 

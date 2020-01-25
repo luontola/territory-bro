@@ -38,24 +38,34 @@
 
 (defmethod projection :congregation.event/permission-granted
   [state event]
-  (-> state
-      (update-cong event (fn [congregation]
-                           (-> congregation
-                               (update-in [:congregation/user-permissions (:user/id event)]
-                                          conj-set (:permission/id event)))))
-      (permissions/grant (:user/id event) [(:permission/id event)
-                                           (:congregation/id event)])))
+  (let [cong-id (:congregation/id event)
+        user-id (:user/id event)
+        permission (:permission/id event)]
+    (-> state
+        (update-cong event (fn [congregation]
+                             (-> congregation
+                                 (update-in [:congregation/user-permissions user-id]
+                                            conj-set permission))))
+        (permissions/grant user-id [permission cong-id]))))
+
+(defn- dissoc-empty [m k]
+  (if (empty? (get m k))
+    (dissoc m k)
+    m))
 
 (defmethod projection :congregation.event/permission-revoked
   [state event]
-  (-> state
-      (update-cong event (fn [congregation]
-                           (-> congregation
-                               ;; TODO: remove user when no more permissions remain
-                               (update-in [:congregation/user-permissions (:user/id event)]
-                                          disj (:permission/id event)))))
-      (permissions/revoke (:user/id event) [(:permission/id event)
-                                            (:congregation/id event)])))
+  (let [cong-id (:congregation/id event)
+        user-id (:user/id event)
+        permission (:permission/id event)]
+    (-> state
+        (update-cong event (fn [congregation]
+                             (-> congregation
+                                 (update-in [:congregation/user-permissions user-id]
+                                            disj permission)
+                                 (update :congregation/user-permissions
+                                         dissoc-empty user-id))))
+        (permissions/revoke user-id [permission cong-id]))))
 
 (defn sudo [state user-id]
   (-> state
@@ -189,8 +199,4 @@
 
 (defn get-users [state cong-id]
   (let [cong (get-unrestricted-congregation state cong-id)]
-    (->> (:congregation/user-permissions cong)
-         ;; TODO: remove old users already in the projection
-         (filter (fn [[_user-id permissions]]
-                   (not (empty? permissions))))
-         (keys))))
+    (keys (:congregation/user-permissions cong))))
