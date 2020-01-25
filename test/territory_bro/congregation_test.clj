@@ -36,7 +36,7 @@
                               :congregation/schema-name "cong1_schema"}}}]
       (is (= expected (apply-events events)))
 
-      (testing "> permission granted"
+      (testing "> view permission granted"
         (let [user-id (UUID. 0 2)
               events (conj events {:event/type :congregation.event/permission-granted
                                    :event/version 1
@@ -44,23 +44,48 @@
                                    :user/id user-id
                                    :permission/id :view-congregation})
               expected (deep-merge expected
-                                   {::congregation/congregations
-                                    {cong-id {:congregation/user-permissions {user-id #{:view-congregation}}}}
-                                    ::permissions/permissions
-                                    {user-id {cong-id {:view-congregation true}}}})]
+                                   {::congregation/congregations {cong-id {:congregation/user-permissions {user-id #{:view-congregation}}}}
+                                    ::congregation/user->cong-ids {user-id #{cong-id}}
+                                    ::permissions/permissions {user-id {cong-id {:view-congregation true}}}})]
           (is (= expected (apply-events events)))
 
-          (testing "> permissing revoked"
+          (testing "> view permissing revoked"
             (let [events (conj events {:event/type :congregation.event/permission-revoked
                                        :event/version 1
                                        :congregation/id cong-id
                                        :user/id user-id
                                        :permission/id :view-congregation})
                   expected (-> expected
+                               (deep-merge {::congregation/user->cong-ids {user-id #{}}})
                                (update-in [::congregation/congregations cong-id :congregation/user-permissions]
                                           dissoc user-id)
                                (dissoc ::permissions/permissions))]
-              (is (= expected (apply-events events)))))))
+              (is (= expected (apply-events events)))))
+
+          (testing "> other permission granted"
+            (let [events (conj events {:event/type :congregation.event/permission-granted
+                                       :event/version 1
+                                       :congregation/id cong-id
+                                       :user/id user-id
+                                       :permission/id :configure-congregation})
+                  expected (deep-merge expected
+                                       {::congregation/congregations {cong-id {:congregation/user-permissions {user-id #{:view-congregation
+                                                                                                                         :configure-congregation}}}}
+                                        ::permissions/permissions {user-id {cong-id {:configure-congregation true}}}})]
+              (is (= expected (apply-events events)))
+
+              (testing "> other permissing revoked"
+                (let [events (conj events {:event/type :congregation.event/permission-revoked
+                                           :event/version 1
+                                           :congregation/id cong-id
+                                           :user/id user-id
+                                           :permission/id :configure-congregation})
+                      expected (-> expected
+                                   (assoc-in [::congregation/congregations cong-id :congregation/user-permissions user-id]
+                                             #{:view-congregation})
+                                   (assoc-in [::permissions/permissions user-id cong-id]
+                                             {:view-congregation true}))]
+                  (is (= expected (apply-events events)))))))))
 
       (testing "> congregation renamed"
         (let [events (conj events {:event/type :congregation.event/congregation-renamed

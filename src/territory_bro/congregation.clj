@@ -46,6 +46,9 @@
                              (-> congregation
                                  (update-in [:congregation/user-permissions user-id]
                                             conj-set permission))))
+        (cond->
+          (= :view-congregation permission) (update-in [::user->cong-ids user-id]
+                                                       conj-set cong-id))
         (permissions/grant user-id [permission cong-id]))))
 
 (defn- dissoc-empty [m k]
@@ -65,10 +68,16 @@
                                             disj permission)
                                  (update :congregation/user-permissions
                                          dissoc-empty user-id))))
+        (cond->
+          (= :view-congregation permission) (update-in [::user->cong-ids user-id]
+                                                       disj cong-id))
         (permissions/revoke user-id [permission cong-id]))))
 
 (defn sudo [state user-id]
   (-> state
+      (assoc-in [::user->cong-ids user-id]
+                ;; no need to convert to set, because the state is transient
+                (keys (::congregations state)))
       (permissions/grant user-id [:view-congregation])
       (permissions/grant user-id [:configure-congregation])))
 
@@ -86,15 +95,13 @@
     (when (permissions/allowed? state user-id [:view-congregation (:congregation/id cong)])
       cong)))
 
-(defn get-my-congregations [state user-id]
-  ;; TODO: avoid the linear search
-  (->> (get-unrestricted-congregations state)
-       (map #(apply-user-permissions % state user-id))
-       (remove nil?)))
-
 (defn get-my-congregation [state cong-id user-id]
   (-> (get-unrestricted-congregation state cong-id)
       (apply-user-permissions state user-id)))
+
+(defn get-my-congregations [state user-id]
+  (let [cong-ids (get-in state [::user->cong-ids user-id])]
+    (map #(get-my-congregation state % user-id) cong-ids)))
 
 (defn check-congregation-exists [state cong-id]
   (when-not (contains? (::congregations state) cong-id)
