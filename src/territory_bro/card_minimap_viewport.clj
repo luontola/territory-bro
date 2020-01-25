@@ -28,10 +28,9 @@
 
 ;;;; Write model
 
-(defn- write-model [events]
-  (let [[{cong-id :congregation/id, card-minimap-viewport-id :card-minimap-viewport/id}] events]
-    (-> (reduce projection nil events)
-        (get-in [::card-minimap-viewports cong-id card-minimap-viewport-id]))))
+(defn- write-model [command events]
+  (let [state (reduce projection nil events)]
+    (get-in state [::card-minimap-viewports (:congregation/id command) (:card-minimap-viewport/id command)])))
 
 
 ;;;; Command handlers
@@ -80,4 +79,4 @@
         :card-minimap-viewport/id card-minimap-viewport-id}])))
 
 (defn handle-command [command events injections]
-  (command-handler command (write-model events) injections))
+  (command-handler command (write-model command events) injections))

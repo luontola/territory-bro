@@ -109,9 +109,8 @@
 
 ;;;; Write model
 
-(defn- write-model [congregation event]
-  (-> congregation
-      (update-congregation event)))
+(defn- write-model [events]
+  (reduce update-congregation nil events))
 
 
 ;;;; Command handlers
@@ -198,8 +197,7 @@
         :congregation/name new-name}])))
 
 (defn handle-command [command events injections]
-  (let [congregation (reduce write-model nil events)]
-    (command-handler command congregation injections)))
+  (command-handler command (write-model events) injections))
 
 
 ;;;; User access

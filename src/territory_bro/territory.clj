@@ -32,10 +32,9 @@
 
 ;;;; Write model
 
-(defn- write-model [events]
-  (let [[{cong-id :congregation/id, territory-id :territory/id}] events]
-    (-> (reduce projection nil events)
-        (get-in [::territories cong-id territory-id]))))
+(defn- write-model [command events]
+  (let [state (reduce projection nil events)]
+    (get-in state [::territories (:congregation/id command) (:territory/id command)])))
 
 
 ;;;; Command handlers
@@ -88,4 +87,4 @@
         :territory/id territory-id}])))
 
 (defn handle-command [command events injections]
-  (command-handler command (write-model events) injections))
+  (command-handler command (write-model command events) injections))
