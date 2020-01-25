@@ -4,7 +4,6 @@
 
 (ns territory-bro.subregion-test
   (:require [clojure.test :refer :all]
-            [medley.core :refer [deep-merge]]
             [territory-bro.events :as events]
             [territory-bro.subregion :as subregion]
             [territory-bro.testdata :as testdata]
@@ -49,10 +48,11 @@
         (let [events (conj events (assoc subregion-defined
                                          :subregion/name "new name"
                                          :subregion/location "new location"))
-              expected (deep-merge expected
-                                   {::subregion/subregions
-                                    {cong-id {subregion-id {:subregion/name "new name"
-                                                            :subregion/location "new location"}}}})]
+              expected (-> expected
+                           (assoc-in [::subregion/subregions cong-id subregion-id
+                                      :subregion/name] "new name")
+                           (assoc-in [::subregion/subregions cong-id subregion-id
+                                      :subregion/location] "new location"))]
           (is (= expected (apply-events events)))))
 
       (testing "> deleted"

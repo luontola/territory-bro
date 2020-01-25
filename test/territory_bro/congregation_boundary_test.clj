@@ -4,7 +4,6 @@
 
 (ns territory-bro.congregation-boundary-test
   (:require [clojure.test :refer :all]
-            [medley.core :refer [deep-merge]]
             [territory-bro.congregation-boundary :as congregation-boundary]
             [territory-bro.events :as events]
             [territory-bro.testdata :as testdata]
@@ -48,9 +47,8 @@
       (testing "> updated"
         (let [events (conj events (assoc congregation-boundary-defined
                                          :congregation-boundary/location "new location"))
-              expected (deep-merge expected
-                                   {::congregation-boundary/congregation-boundaries
-                                    {cong-id {congregation-boundary-id {:congregation-boundary/location "new location"}}}})]
+              expected (assoc-in expected [::congregation-boundary/congregation-boundaries cong-id congregation-boundary-id
+                                           :congregation-boundary/location] "new location")]
           (is (= expected (apply-events events)))))
 
       (testing "> deleted"

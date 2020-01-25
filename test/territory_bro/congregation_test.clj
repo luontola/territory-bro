@@ -4,7 +4,6 @@
 
 (ns territory-bro.congregation-test
   (:require [clojure.test :refer :all]
-            [medley.core :refer [deep-merge]]
             [territory-bro.congregation :as congregation]
             [territory-bro.events :as events]
             [territory-bro.permissions :as permissions]
@@ -43,10 +42,13 @@
                                    :congregation/id cong-id
                                    :user/id user-id
                                    :permission/id :view-congregation})
-              expected (deep-merge expected
-                                   {::congregation/congregations {cong-id {:congregation/user-permissions {user-id #{:view-congregation}}}}
-                                    ::congregation/user->cong-ids {user-id #{cong-id}}
-                                    ::permissions/permissions {user-id {cong-id {:view-congregation true}}}})]
+              expected (-> expected
+                           (assoc-in [::congregation/congregations cong-id :congregation/user-permissions user-id]
+                                     #{:view-congregation})
+                           (assoc-in [::congregation/user->cong-ids user-id]
+                                     #{cong-id})
+                           (assoc-in [::permissions/permissions user-id cong-id]
+                                     {:view-congregation true}))]
           (is (= expected (apply-events events)))
 
           (testing "> view permissing revoked"
@@ -56,9 +58,10 @@
                                        :user/id user-id
                                        :permission/id :view-congregation})
                   expected (-> expected
-                               (deep-merge {::congregation/user->cong-ids {user-id #{}}})
-                               (update-in [::congregation/congregations cong-id :congregation/user-permissions]
-                                          dissoc user-id)
+                               (assoc-in [::congregation/user->cong-ids user-id]
+                                         #{})
+                               (assoc-in [::congregation/congregations cong-id :congregation/user-permissions]
+                                         {})
                                (dissoc ::permissions/permissions))]
               (is (= expected (apply-events events)))))
 
@@ -68,10 +71,13 @@
                                        :congregation/id cong-id
                                        :user/id user-id
                                        :permission/id :configure-congregation})
-                  expected (deep-merge expected
-                                       {::congregation/congregations {cong-id {:congregation/user-permissions {user-id #{:view-congregation
-                                                                                                                         :configure-congregation}}}}
-                                        ::permissions/permissions {user-id {cong-id {:configure-congregation true}}}})]
+                  expected (-> expected
+                               (assoc-in [::congregation/congregations cong-id :congregation/user-permissions user-id]
+                                         #{:view-congregation
+                                           :configure-congregation})
+                               (assoc-in [::permissions/permissions user-id cong-id]
+                                         {:view-congregation true
+                                          :configure-congregation true}))]
               (is (= expected (apply-events events)))
 
               (testing "> other permissing revoked"
@@ -92,9 +98,8 @@
                                    :event/version 1
                                    :congregation/id cong-id
                                    :congregation/name "New Name"})
-              expected (deep-merge expected
-                                   {::congregation/congregations
-                                    {cong-id {:congregation/name "New Name"}}})]
+              expected (assoc-in expected [::congregation/congregations cong-id
+                                           :congregation/name] "New Name")]
           (is (= expected (apply-events events))))))))
 
 (deftest congregation-access-test

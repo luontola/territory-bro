@@ -4,7 +4,6 @@
 
 (ns territory-bro.card-minimap-viewport-test
   (:require [clojure.test :refer :all]
-            [medley.core :refer [deep-merge]]
             [territory-bro.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.events :as events]
             [territory-bro.testdata :as testdata]
@@ -48,9 +47,8 @@
       (testing "> updated"
         (let [events (conj events (assoc card-minimap-viewport-defined
                                          :card-minimap-viewport/location "new location"))
-              expected (deep-merge expected
-                                   {::card-minimap-viewport/card-minimap-viewports
-                                    {cong-id {card-minimap-viewport-id {:card-minimap-viewport/location "new location"}}}})]
+              expected (assoc-in expected [::card-minimap-viewport/card-minimap-viewports cong-id card-minimap-viewport-id
+                                           :card-minimap-viewport/location] "new location")]
           (is (= expected (apply-events events)))))
 
       (testing "> deleted"
