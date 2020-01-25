@@ -74,11 +74,13 @@
                                           [ring/ring-mock "0.4.0"]]
 
                            :jvm-opts ["-Dconf=dev-config.edn"
-                                      "-XX:-OmitStackTraceInFastThrow"]
+                                      "-XX:-OmitStackTraceInFastThrow"
+                                      "--illegal-access=deny"]
                            :repl-options {:init-ns user}
                            :injections [(require 'pjstadig.humane-test-output)
                                         (pjstadig.humane-test-output/activate!)]}
              :project/test {:jvm-opts ["-Dconf=test-config.edn"
-                                       "-XX:-OmitStackTraceInFastThrow"]}
+                                       "-XX:-OmitStackTraceInFastThrow"
+                                       "--illegal-access=deny"]}
              :profiles/dev {}
              :profiles/test {}})
