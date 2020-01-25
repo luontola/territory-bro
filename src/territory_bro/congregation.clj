@@ -65,6 +65,10 @@
 
 
 (defn projection [state event]
+  ;; XXX: this assert will fail once we start having non-congregation specific events
+  ;; TODO: change projection to be the multimethod instead of update-congregation
+  (assert (some? (:congregation/id event))
+          {:event event})
   (-> state
       (update-in [::congregations (:congregation/id event)] update-congregation event)
       (update-permissions event)))
