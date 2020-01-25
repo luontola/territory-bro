@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -50,7 +50,8 @@
                            (run-safely! task)))))
 
   (await [_ timeout]
-    (let [future ^Future (.submit executor ^Runnable (fn []))]
+    (let [^Duration timeout timeout
+          ^Future future (.submit executor ^Runnable (fn []))]
       (.get future (.toNanos timeout) TimeUnit/NANOSECONDS)))
 
   (shutdown! [_]
