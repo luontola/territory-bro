@@ -114,6 +114,26 @@
          :user/id UUID
          :gis-user/username s/Str))
 
+;;; Territory
+
+(s/defschema TerritoryDefined
+  (assoc EventBase
+         :event/type (s/eq :territory.event/territory-defined)
+         :event/version (s/eq 1)
+         :congregation/id UUID
+         :territory/id UUID
+         :territory/number s/Str
+         :territory/addresses s/Str
+         :territory/subregion s/Str
+         :territory/meta {s/Any s/Any}
+         :territory/location s/Str))
+(s/defschema TerritoryDeleted
+  (assoc EventBase
+         :event/type (s/eq :territory.event/territory-deleted)
+         :event/version (s/eq 1)
+         :congregation/id UUID
+         :territory/id UUID))
+
 ;;; Subregion
 
 (s/defschema SubregionDefined
@@ -164,6 +184,8 @@
    :congregation.event/permission-revoked PermissionRevoked
    :congregation.event/gis-user-created GisUserCreated
    :congregation.event/gis-user-deleted GisUserDeleted
+   :territory.event/territory-defined TerritoryDefined
+   :territory.event/territory-deleted TerritoryDeleted
    :subregion.event/subregion-defined SubregionDefined
    :subregion.event/subregion-deleted SubregionDeleted
    :db-admin.event/gis-schema-is-present GisSchemaIsPresent
