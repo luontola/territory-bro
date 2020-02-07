@@ -74,6 +74,15 @@ Run tests automatically on change
     lein autotest
     yarn run autotest
 
+View storybook visual tests
+
+    yarn run storybook
+
+Upgrade dependencies
+
+    lein ancient upgrade
+    yarn upgrade --latest
+
 Download dependency sources
 
     lein pom

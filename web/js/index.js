@@ -29,8 +29,7 @@ globalHistory.listen(({location, action}) => {
 
 document.querySelector('html').setAttribute('lang', language);
 
-const root = ReactDOM.unstable_createRoot(document.getElementById('root'));
-root.render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary FallbackComponent={ErrorPage}>
       <IntlProvider locale={language} messages={messages}>
