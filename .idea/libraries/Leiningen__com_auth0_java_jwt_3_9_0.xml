@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: com.auth0/java-jwt:3.9.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/auth0/java-jwt/3.9.0/java-jwt-3.9.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
