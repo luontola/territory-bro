@@ -8,5 +8,4 @@
 /.nrepl-port
 /node_modules/
 /pom.xml
-/profiles.clj
 /target/

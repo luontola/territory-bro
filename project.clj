@@ -54,7 +54,8 @@
   :global-vars {*warn-on-reflection* true
                 *print-namespace-maps* false}
 
-  :plugins [[lein-ancient "0.6.15"]]
+  :plugins [[lein-ancient "0.6.15"]
+            [lein-pprint "1.2.0"]]
 
   :aliases {"autotest" ["kaocha" "--watch"]
             "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]}
@@ -63,24 +64,17 @@
                        :aot :all
                        :uberjar-name "territory-bro.jar"}
 
-             :kaocha {:dependencies [[lambdaisland/kaocha "0.0-581"]]}
+             :dev {:dependencies [[ring/ring-devel "1.7.1" :exclusions [ns-tracker]]
+                                  [ring/ring-mock "0.4.0"]]
+                   :jvm-opts ^:replace ["-Dconf=dev-config.edn"
+                                        "-XX:-OmitStackTraceInFastThrow"
+                                        "--illegal-access=deny"]
+                   :repl-options {:init-ns territory-bro.main}}
 
-             :dev [:project/dev :profiles/dev]
-             :test [:project/test :profiles/test]
+             :test [:dev :test0]
+             :test0 {:jvm-opts ^:replace ["-Dconf=test-config.edn"
+                                          "-XX:-OmitStackTraceInFastThrow"
+                                          "--illegal-access=deny"]}
 
-             :project/dev {:dependencies [[bananaoomarang/ring-debug-logging "1.1.0"]
-                                          [pjstadig/humane-test-output "0.9.0"]
-                                          [ring/ring-devel "1.7.1" :exclusions [ns-tracker]]
-                                          [ring/ring-mock "0.4.0"]]
-
-                           :jvm-opts ["-Dconf=dev-config.edn"
-                                      "-XX:-OmitStackTraceInFastThrow"
-                                      "--illegal-access=deny"]
-                           :repl-options {:init-ns user}
-                           :injections [(require 'pjstadig.humane-test-output)
-                                        (pjstadig.humane-test-output/activate!)]}
-             :project/test {:jvm-opts ["-Dconf=test-config.edn"
-                                       "-XX:-OmitStackTraceInFastThrow"
-                                       "--illegal-access=deny"]}
-             :profiles/dev {}
-             :profiles/test {}})
+             :kaocha [:test :kaocha0]
+             :kaocha0 {:dependencies [[lambdaisland/kaocha "0.0-581"]]}})
