@@ -23,6 +23,7 @@
         base-command {:command/user user-id
                       :command/time time
                       :congregation/id cong-id}]
+    ;; TODO: add {:gis-change/id id} to all commands and events for traceability?
     ;; TODO: check for UPDATE with location MULTIPOLYGON EMPTY, i.e. user tried to delete the feature incorrectly
     (case table
       "territory"

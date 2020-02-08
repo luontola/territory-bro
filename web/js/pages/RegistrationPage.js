@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -40,6 +40,7 @@ const RegistrationPage = () => {
                   console.error('Form submit failed:', e);
                   alert(e);
                 } finally {
+                  // TODO: react-dom.development.js:88 Warning: Can't perform a React state update on an unmounted component. This is a no-op, but it indicates a memory leak in your application. To fix, cancel all subscriptions and asynchronous tasks in a useEffect cleanup function.
                   setSubmitting(false)
                 }
               }}>
