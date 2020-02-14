@@ -50,4 +50,12 @@ where 1 = 1
 /*~ (when (contains? params :since) */
   and id > :since
 /*~ ) ~*/
+/*~ (when (contains? params :processed?) */
+  and processed = :processed?
+/*~ ) ~*/
 order by id;
+
+-- :name mark-changes-processed :!
+update gis_change_log
+set processed = true
+where id = any (array[:v*:ids]::bigint[]);

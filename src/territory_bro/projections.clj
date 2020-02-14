@@ -123,12 +123,11 @@
 ;;;; GIS sync
 
 (defn sync-gis-changes! [conn]
-  ;; TODO: get only unprocessed changes
   (let [state (cached-state)
-        changes (gis-db/get-changes conn)
-        commands (map #(gis-sync/change->command % state) changes)]
-    (doseq [command commands]
-      ;; TODO: mark change as processed
-      ;; TODO: refresh state between every command?
-      ;; TODO: handle conflicting stream IDs
-      (dispatcher/command! conn state command))))
+        changes (gis-db/get-changes conn {:processed? false})]
+    (doseq [change changes]
+      (let [command (gis-sync/change->command change state)]
+        ;; TODO: does the state need to be refreshed at some points?
+        ;; TODO: handle conflicting stream IDs
+        (dispatcher/command! conn state command)))
+    (gis-db/mark-changes-processed! conn (map :id changes))))

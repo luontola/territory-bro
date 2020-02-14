@@ -208,7 +208,20 @@
         ;; should probably be an error, but an empty result is safer than returning all events
         (is (= []
                (gis-db/get-changes conn {:since nil}))
-            "since nil")))))
+            "since nil")))
+
+    (testing "marking changes processed"
+      (is (= [] (map :id (gis-db/get-changes conn {:processed? true})))
+          "processed, before")
+      (is (= [1 2 3 4 5 6] (map :id (gis-db/get-changes conn {:processed? false})))
+          "unprocessed, before")
+
+      (gis-db/mark-changes-processed! conn [1 2 4])
+
+      (is (= [1 2 4] (map :id (gis-db/get-changes conn {:processed? true})))
+          "processed, after")
+      (is (= [3 5 6] (map :id (gis-db/get-changes conn {:processed? false})))
+          "unprocessed, after"))))
 
 (defn- gis-db-spec [username password]
   {:connection-uri (-> (:database-url config/env)

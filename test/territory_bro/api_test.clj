@@ -75,6 +75,8 @@
   response)
 
 (defn refresh-projections! []
+  ;; TODO: do synchronously, or propagate errors from the async thread?
+  ;; TODO: propagating errors might be useful also in production
   (projections/refresh-async!)
   (projections/await-refreshed (Duration/ofSeconds 10)))
 
@@ -664,4 +666,9 @@
                (get-in state [::congregation-boundary/congregation-boundaries cong-id congregation-boundary-id])))
         (is (= {:card-minimap-viewport/id card-minimap-viewport-id
                 :card-minimap-viewport/location testdata/wkt-polygon}
-               (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id card-minimap-viewport-id])))))))
+               (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id card-minimap-viewport-id])))))
+
+    (testing "syncing changes is idempotent"
+      (let [state-before (projections/cached-state)]
+        (sync-gis-changes!) ;; should not process the already processed changes
+        (is (identical? state-before (projections/cached-state)))))))

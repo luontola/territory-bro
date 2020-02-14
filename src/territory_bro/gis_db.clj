@@ -127,6 +127,9 @@
         (map format-gis-change)
         (doall))))
 
+(defn mark-changes-processed! [conn ids]
+  (query! conn :mark-changes-processed {:ids ids}))
+
 
 ;;;; Database users
 
