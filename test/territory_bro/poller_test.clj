@@ -10,7 +10,7 @@
            (ch.qos.logback.classic.spi LoggingEvent)
            (ch.qos.logback.core.read ListAppender)
            (java.time Duration)
-           (java.util.concurrent CountDownLatch TimeUnit CyclicBarrier)
+           (java.util.concurrent CountDownLatch TimeUnit CyclicBarrier TimeoutException)
            (org.slf4j LoggerFactory)))
 
 ;; slow enough to be noticed as a slow test, because normally this should never be reached
@@ -138,4 +138,15 @@
       (poller/await p test-timeout)
 
       (is (= 1 @*task-count) "task count")
+      (poller/shutdown! p)))
+
+  (testing "await throws if the timeout is reached"
+    (let [test-finished (CountDownLatch. 1)
+          p (poller/create (fn []
+                             (.await test-finished 1 TimeUnit/SECONDS)))]
+      (poller/trigger! p)
+
+      (is (thrown? TimeoutException
+                   (poller/await p (Duration/ofMillis 0))))
+      (.countDown test-finished)
       (poller/shutdown! p))))
