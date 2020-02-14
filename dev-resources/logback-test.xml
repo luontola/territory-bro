@@ -10,7 +10,7 @@
         </encoder>
     </appender>
 
-    <logger name="territory-bro.foo" level="DEBUG"/>
+    <logger name="territory-bro" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

@@ -22,6 +22,8 @@
            (org.flywaydb.core Flyway)
            (org.postgresql.util PGobject)))
 
+(def ^:dynamic *explain* false)
+
 ;; PostgreSQL error codes
 ;; https://www.postgresql.org/docs/11/errcodes-appendix.html
 (def psql-serialization-failure "40001")
@@ -190,19 +192,45 @@
 
 (defn- load-queries [*queries]
   ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
-  (let [{queries :queries, resource :resource, old-last-modified :last-modified} @*queries
+  (let [{resource :resource, old-last-modified :last-modified, :as queries} @*queries
         new-last-modified (-> ^URL resource
                               (.openConnection)
                               (.getLastModified))]
     (if (= old-last-modified new-last-modified)
       queries
-      (:queries (reset! *queries {:resource resource
-                                  :queries (hugsql/map-of-db-fns resource)
-                                  :last-modified new-last-modified})))))
+      (reset! *queries {:resource resource
+                        :db-fns (hugsql/map-of-db-fns resource)
+                        :sqlvec-fns (hugsql/map-of-sqlvec-fns resource {:fn-suffix ""})
+                        :last-modified new-last-modified}))))
+
+(defn- explain-query [conn sql params]
+  (jdbc/execute! conn ["SAVEPOINT explain_analyze"])
+  (try
+    (->> (jdbc/query conn (cons (str "EXPLAIN (ANALYZE, VERBOSE, BUFFERS) " sql) params))
+         (map (keyword "query plan")))
+    (finally
+      ;; ANALYZE will actually execute the query, so any side effects
+      ;; must be rolled back to avoid executing them twice
+      (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT explain_analyze"]))))
+
+(defn- prefix-join [prefix ss]
+  (str prefix (str/join prefix ss)))
 
 (defn- query! [conn *queries name params]
-  (let [query-fn (get-in (load-queries *queries) [name :fn])]
+  (let [queries (load-queries *queries)
+        query-fn (get-in queries [:db-fns name :fn])]
     (assert query-fn (str "Query not found: " name))
+    (when *explain*
+      (let [sqlvec-fn (get-in queries [:sqlvec-fns name :fn])
+            [sql & params] (apply sqlvec-fn params)
+            query-plan (explain-query conn sql params)]
+        (log/debug (str "SQL query:\n"
+                        sql
+                        (when (not (empty? params))
+                          (str "\n-- Parameters:"
+                               (prefix-join "\n--\t" (map pr-str params))))
+                        "\n-- Query plan:"
+                        (prefix-join "\n--\t" query-plan)))))
     (apply query-fn conn params)))
 
 (defn compile-queries [path]
