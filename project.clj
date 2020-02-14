@@ -30,14 +30,12 @@
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/data.json "0.2.7"]
-                 [org.clojure/test.check "0.10.0"]
                  [org.clojure/tools.cli "0.4.2"]
                  [org.clojure/tools.logging "0.6.0"]
                  [org.clojure/tools.reader "1.3.2"] ;; XXX: overrides old version from metosin/ring-middleware-format
                  [org.flywaydb/flyway-core "6.2.3"]
                  [org.postgresql/postgresql "42.2.10"]
                  [prismatic/schema "1.1.12"]
-                 [prismatic/schema-generators "0.1.3"]
                  [ring-logger "1.0.1"]
                  [ring/ring-core "1.8.0"]
                  [ring/ring-defaults "0.3.2"]]
@@ -64,7 +62,10 @@
                        :aot :all
                        :uberjar-name "territory-bro.jar"}
 
-             :dev {:dependencies [[ring/ring-devel "1.8.0" :exclusions [ns-tracker]]
+             :dev {:dependencies [[com.github.kyleburton/clj-xpath "1.4.11"]
+                                  [org.clojure/test.check "0.10.0"]
+                                  [prismatic/schema-generators "0.1.3"]
+                                  [ring/ring-devel "1.8.0" :exclusions [ns-tracker]]
                                   [ring/ring-mock "0.4.0"]]
                    :jvm-opts ^:replace ["-Dconf=dev-config.edn"
                                         "-XX:-OmitStackTraceInFastThrow"

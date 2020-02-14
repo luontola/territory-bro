@@ -3,7 +3,9 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns ^:slow territory-bro.api-test
-  (:require [clojure.java.io :as io]
+  (:require [clj-xpath.core :as xpath]
+            [clojure.java.io :as io]
+            [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.test :refer :all]
             [ring.mock.request :refer :all]
@@ -22,6 +24,8 @@
             [territory-bro.jwt-test :as jwt-test]
             [territory-bro.projections :as projections]
             [territory-bro.router :as router]
+            [territory-bro.territory :as territory]
+            [territory-bro.testdata :as testdata]
             [territory-bro.user :as user])
   (:import (java.time Instant Duration)
            (java.util UUID)
@@ -145,6 +149,55 @@
                               :user/id user-id
                               :permission/ids []})))
     (refresh-projections!)))
+
+(defn- parse-qgis-datasource [datasource]
+  (let [required (fn [v]
+                   (if (nil? v)
+                     (throw (AssertionError. (str "Failed to parse: " datasource)))
+                     v))
+        [_ dbname] (required (re-find #"dbname='(.*?)'" datasource))
+        [_ host] (required (re-find #"host=(\S*)" datasource))
+        [_ port] (required (re-find #"port=(\S*)" datasource))
+        [_ user] (required (re-find #"user='(.*?)'" datasource))
+        [_ password] (required (re-find #"password='(.*?)'" datasource))
+        [_ schema table] (required (re-find #"table=\"(.*?)\".\"(.*?)\"" datasource))]
+    {:dbname dbname
+     :host host
+     :port (Long/parseLong port)
+     :user user
+     :password password
+     :schema schema
+     :table table}))
+
+(deftest parse-qgis-datasource-test
+  (is (= {:dbname "territorybro"
+          :host "localhost"
+          :port 5432
+          :user "gis_user_49a5ab7f34234ec4_5dce9e39cf744126"
+          :password "pfClEgNVadYRAt-ytE9x4iakLNjwsNGIfLIS6Mc_hfASiYajB8"
+          :schema "test_territorybro_49a5ab7f34234ec481b7f45bf9c4d3c2"
+          :table "territory"}
+         (parse-qgis-datasource "dbname='territorybro' host=localhost port=5432 user='gis_user_49a5ab7f34234ec4_5dce9e39cf744126' password='pfClEgNVadYRAt-ytE9x4iakLNjwsNGIfLIS6Mc_hfASiYajB8' sslmode=prefer key='id' srid=4326 type=MultiPolygon table=\"test_territorybro_49a5ab7f34234ec481b7f45bf9c4d3c2\".\"territory\" (location) sql="))))
+
+(defn get-gis-db-spec [session cong-id]
+  (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
+                     (merge session)
+                     app
+                     (assert-response ok?))
+        ;; XXX: the XML parser doesn't support DOCTYPE
+        qgis-project (str/replace-first (:body response) "<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>" "")
+        datasource (->> (xpath/$x "//datasource" qgis-project)
+                        (map :text)
+                        (filter #(str/starts-with? % "dbname="))
+                        (map parse-qgis-datasource)
+                        (first))]
+    {:dbtype "postgresql"
+     :dbname (:dbname datasource)
+     :host (:host datasource)
+     :port (:port datasource)
+     :user (:user datasource)
+     :password (:password datasource)
+     :currentSchema (:schema datasource)}))
 
 
 ;;;; Tests
@@ -563,3 +616,25 @@
       (revoke-access-from-all! cong-id)
       (let [response (try-rename-congregation! session cong-id "should not be allowed")]
         (is (forbidden? response))))))
+
+(deftest gis-changes-sync-test
+  (let [session (login! app)
+        cong-id (create-congregation! session "Old Name")
+        db-spec (get-gis-db-spec session cong-id)
+        territory-id (UUID/randomUUID)]
+
+    (testing "write to GIS database"
+      (jdbc/with-db-transaction [conn db-spec]
+        (jdbc/execute! conn ["insert into territory (id, number, addresses, subregion, meta, location) values (?, ?, ?, ?, ?::jsonb, (?)::public.geography)"
+                             territory-id "123" "the addresses" "the subregion" {:foo "bar"} testdata/wkt-multi-polygon]))
+      (refresh-projections!))
+
+    (testing "changes to GIS database are synced to event store"
+      (let [state (projections/cached-state)]
+        (is (= {:territory/id territory-id
+                :territory/number "123"
+                :territory/addresses "the addresses"
+                :territory/subregion "the subregion"
+                :territory/meta {:foo "bar"}
+                :territory/location testdata/wkt-multi-polygon}
+               (get-in state [::territory/territories cong-id territory-id])))))))
