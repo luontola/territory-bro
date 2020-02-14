@@ -16,7 +16,10 @@
             [territory-bro.foreign-key :as foreign-key]
             [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
+            [territory-bro.territory :as territory]
             [territory-bro.user :as user]))
+
+;;;; Helpers
 
 (defn- default-injections [command state]
   {:now (:now config/env)
@@ -49,6 +52,8 @@
        (events/strict-validate-events)))
 
 
+;;;; Command handlers
+
 (defn- congregation-command! [conn command state]
   (let [injections (assoc (default-injections command state)
                           :generate-tenant-schema-name (fn [cong-id]
@@ -76,15 +81,26 @@
                    (fn [old-events]
                      (call! gis-user/handle-command command old-events injections)))))
 
-(defn- pretty-str [object]
-  (str/trimr (with-out-str
-               (print "\n")
-               (pprint/pprint object))))
+(defn- territory-command! [conn command state]
+  (let [injections (default-injections command state)]
+    (write-stream! conn
+                   (:territory/id command)
+                   (fn [old-events]
+                     (call! territory/handle-command command old-events injections)))))
 
 (def ^:private command-handlers
   {"congregation.command" congregation-command!
    "db-admin.command" db-admin-command!
-   "gis-user.command" gis-user-command!})
+   "gis-user.command" gis-user-command!
+   "territory.command" territory-command!})
+
+
+;;;; Entry point with centralized validation and logging
+
+(defn- pretty-str [object]
+  (str/trimr (with-out-str
+               (print "\n")
+               (pprint/pprint object))))
 
 (defn command! [conn state command]
   (let [command (-> command

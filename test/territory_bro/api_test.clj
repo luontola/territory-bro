@@ -627,10 +627,13 @@
       (jdbc/with-db-transaction [conn db-spec]
         (jdbc/execute! conn ["insert into territory (id, number, addresses, subregion, meta, location) values (?, ?, ?, ?, ?::jsonb, (?)::public.geography)"
                              territory-id "123" "the addresses" "the subregion" {:foo "bar"} testdata/wkt-multi-polygon]))
+      (db/with-db [conn {}]
+        (projections/sync-gis-changes! conn))
       (refresh-projections!))
 
     (testing "changes to GIS database are synced to event store"
       (let [state (projections/cached-state)]
+        ;; TODO: test all entity types, so that all the command handlers and projections are plugged in properly
         (is (= {:territory/id territory-id
                 :territory/number "123"
                 :territory/addresses "the addresses"

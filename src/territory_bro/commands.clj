@@ -25,10 +25,10 @@
   (compare [(get key-order x 100) x]
            [(get key-order y 100) y]))
 
-(defn sorted-keys [event]
-  (when event
+(defn sorted-keys [command]
+  (when command
     (into (sorted-map-by key-comparator)
-          event)))
+          command)))
 
 
 ;;;; Schemas

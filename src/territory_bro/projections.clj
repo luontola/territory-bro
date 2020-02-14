@@ -11,9 +11,12 @@
             [territory-bro.db-admin :as db-admin]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.event-store :as event-store]
+            [territory-bro.gis-db :as gis-db]
+            [territory-bro.gis-sync :as gis-sync]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.gis-user-process :as gis-user-process]
-            [territory-bro.poller :as poller])
+            [territory-bro.poller :as poller]
+            [territory-bro.territory :as territory])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
@@ -28,8 +31,10 @@
   (-> state
       (congregation/projection event)
       (db-admin/projection event)
+      (gis-sync/projection event)
       (gis-user-process/projection event)
-      (gis-user/projection event)))
+      (gis-user/projection event)
+      (territory/projection event)))
 
 (defn- apply-events [cache events]
   (update cache :state #(reduce update-projections % events)))
@@ -52,7 +57,7 @@
   (:state (apply-new-events @*cache conn)))
 
 
-;;;; Refreshing
+;;;; Refreshing projections
 
 (defn- run-process-managers! [state]
   (let [commands (concat
@@ -107,3 +112,18 @@
   (count (:state @*cache))
   (refresh-async!)
   (refresh!))
+
+
+;;;; GIS sync
+
+(defn sync-gis-changes! [conn]
+  ;; TODO: get only unprocessed changes
+  (let [state (cached-state)
+        changes (gis-db/get-changes conn)
+        commands (map #(gis-sync/change->command % state) changes)
+        ;; TODO: process all changes
+        command (first commands)]
+    ;; TODO: mark change as processed
+    ;; TODO: refresh state between every command?
+    ;; TODO: handle conflicting stream IDs
+    (dispatcher/command! conn state command)))
