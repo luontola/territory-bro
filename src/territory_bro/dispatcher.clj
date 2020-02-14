@@ -130,13 +130,17 @@
                (pprint/pprint object))))
 
 (defn command! [conn state command]
-  (let [command (-> command
-                    (commands/sorted-keys)
-                    (validate-command conn state))
-        _ (log/info "Dispatch command:" (pretty-str command))
-        command-handler (or (get command-handlers (namespace (:command/type command)))
-                            (throw (AssertionError.
-                                    (str "No command handler for command: " (pr-str command)))))
-        events (command-handler conn command state)]
-    (log/info "Produced events:" (pretty-str events))
-    events))
+  (let [command (commands/sorted-keys command)]
+    (try
+      (log/info "Dispatch command:" (pretty-str command))
+      (let [command (validate-command command conn state)
+            command-handler (or (get command-handlers (namespace (:command/type command)))
+                                (throw (AssertionError.
+                                        (str "No command handler for command: " (pr-str command)))))
+            events (command-handler conn command state)]
+        (log/info "Produced events:" (pretty-str events))
+        events)
+      (catch Throwable t
+        ;; the full stack trace will be logged at a higher level
+        (log/warn "Command failed:" (str t))
+        (throw t)))))
