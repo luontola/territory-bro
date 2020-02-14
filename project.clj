@@ -10,7 +10,7 @@
   :dependencies [[camel-snake-kebab "0.4.1"]
                  [com.attendify/schema-refined "0.3.0-alpha4"]
                  [com.auth0/java-jwt "3.9.0"]
-                 [com.auth0/jwks-rsa "0.9.0"]
+                 [com.auth0/jwks-rsa "0.10.0"]
                  [com.fasterxml.jackson.core/jackson-core "2.10.2"]
                  [com.fasterxml.jackson.core/jackson-databind "2.10.2"]
                  [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.10.2"]
@@ -34,7 +34,7 @@
                  [org.clojure/tools.cli "0.4.2"]
                  [org.clojure/tools.logging "0.6.0"]
                  [org.clojure/tools.reader "1.3.2"] ;; XXX: overrides old version from metosin/ring-middleware-format
-                 [org.flywaydb/flyway-core "6.2.2"]
+                 [org.flywaydb/flyway-core "6.2.3"]
                  [org.postgresql/postgresql "42.2.10"]
                  [prismatic/schema "1.1.12"]
                  [prismatic/schema-generators "0.1.3"]
