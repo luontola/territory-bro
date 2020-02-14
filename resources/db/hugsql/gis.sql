@@ -1,3 +1,7 @@
+--  Copyright © 2015-2020 Esko Luontola
+--  This software is released under the Apache License 2.0.
+--  The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
 -- :name get-congregation-boundaries :? :*
 select id, ST_AsText(location) AS location
 from congregation_boundary;
@@ -30,7 +34,7 @@ select id, number, addresses, subregion, meta, ST_AsText(location) AS location
 from territory
 where 1 = 1
 /*~ (when (contains? params :ids) */
-  and id = any(array[:v*:ids]::uuid[])
+  and id = any (array[:v*:ids]::uuid[])
 /*~ ) ~*/
 ;
 
