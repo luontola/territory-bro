@@ -5,8 +5,10 @@
 (ns territory-bro.projections
   (:require [clojure.tools.logging :as log]
             [mount.core :as mount]
+            [territory-bro.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
+            [territory-bro.congregation-boundary :as congregation-boundary]
             [territory-bro.db :as db]
             [territory-bro.db-admin :as db-admin]
             [territory-bro.dispatcher :as dispatcher]
@@ -16,6 +18,7 @@
             [territory-bro.gis-user :as gis-user]
             [territory-bro.gis-user-process :as gis-user-process]
             [territory-bro.poller :as poller]
+            [territory-bro.subregion :as subregion]
             [territory-bro.territory :as territory])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
@@ -29,11 +32,14 @@
 
 (defn- update-projections [state event]
   (-> state
+      (card-minimap-viewport/projection event)
+      (congregation-boundary/projection event)
       (congregation/projection event)
       (db-admin/projection event)
       (gis-sync/projection event)
       (gis-user-process/projection event)
       (gis-user/projection event)
+      (subregion/projection event)
       (territory/projection event)))
 
 (defn- apply-events [cache events]
@@ -120,10 +126,9 @@
   ;; TODO: get only unprocessed changes
   (let [state (cached-state)
         changes (gis-db/get-changes conn)
-        commands (map #(gis-sync/change->command % state) changes)
-        ;; TODO: process all changes
-        command (first commands)]
-    ;; TODO: mark change as processed
-    ;; TODO: refresh state between every command?
-    ;; TODO: handle conflicting stream IDs
-    (dispatcher/command! conn state command)))
+        commands (map #(gis-sync/change->command % state) changes)]
+    (doseq [command commands]
+      ;; TODO: mark change as processed
+      ;; TODO: refresh state between every command?
+      ;; TODO: handle conflicting stream IDs
+      (dispatcher/command! conn state command))))

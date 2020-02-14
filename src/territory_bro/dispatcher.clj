@@ -6,9 +6,11 @@
   (:require [clojure.pprint :as pprint]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
+            [territory-bro.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.commands :as commands]
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
+            [territory-bro.congregation-boundary :as congregation-boundary]
             [territory-bro.db :as db]
             [territory-bro.db-admin :as db-admin]
             [territory-bro.event-store :as event-store]
@@ -16,6 +18,7 @@
             [territory-bro.foreign-key :as foreign-key]
             [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
+            [territory-bro.subregion :as subregion]
             [territory-bro.territory :as territory]
             [territory-bro.user :as user]))
 
@@ -54,6 +57,20 @@
 
 ;;;; Command handlers
 
+(defn- card-minimap-viewport-command! [conn command state]
+  (let [injections (default-injections command state)]
+    (write-stream! conn
+                   (:card-minimap-viewport/id command)
+                   (fn [old-events]
+                     (call! card-minimap-viewport/handle-command command old-events injections)))))
+
+(defn- congregation-boundary-command! [conn command state]
+  (let [injections (default-injections command state)]
+    (write-stream! conn
+                   (:congregation-boundary/id command)
+                   (fn [old-events]
+                     (call! congregation-boundary/handle-command command old-events injections)))))
+
 (defn- congregation-command! [conn command state]
   (let [injections (assoc (default-injections command state)
                           :generate-tenant-schema-name (fn [cong-id]
@@ -81,6 +98,13 @@
                    (fn [old-events]
                      (call! gis-user/handle-command command old-events injections)))))
 
+(defn- subregion-command! [conn command state]
+  (let [injections (default-injections command state)]
+    (write-stream! conn
+                   (:subregion/id command)
+                   (fn [old-events]
+                     (call! subregion/handle-command command old-events injections)))))
+
 (defn- territory-command! [conn command state]
   (let [injections (default-injections command state)]
     (write-stream! conn
@@ -89,9 +113,12 @@
                      (call! territory/handle-command command old-events injections)))))
 
 (def ^:private command-handlers
-  {"congregation.command" congregation-command!
+  {"card-minimap-viewport.command" card-minimap-viewport-command!
+   "congregation-boundary.command" congregation-boundary-command!
+   "congregation.command" congregation-command!
    "db-admin.command" db-admin-command!
    "gis-user.command" gis-user-command!
+   "subregion.command" subregion-command!
    "territory.command" territory-command!})
 
 

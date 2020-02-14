@@ -12,8 +12,10 @@
             [ring.util.http-predicates :refer :all]
             [territory-bro.api :as api]
             [territory-bro.authentication :as auth]
+            [territory-bro.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.config :as config]
             [territory-bro.congregation :as congregation]
+            [territory-bro.congregation-boundary :as congregation-boundary]
             [territory-bro.db :as db]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.fixtures :refer [db-fixture api-fixture]]
@@ -24,6 +26,7 @@
             [territory-bro.jwt-test :as jwt-test]
             [territory-bro.projections :as projections]
             [territory-bro.router :as router]
+            [territory-bro.subregion :as subregion]
             [territory-bro.territory :as territory]
             [territory-bro.testdata :as testdata]
             [territory-bro.user :as user])
@@ -621,23 +624,41 @@
   (let [session (login! app)
         cong-id (create-congregation! session "Old Name")
         db-spec (get-gis-db-spec session cong-id)
-        territory-id (UUID/randomUUID)]
+        territory-id (UUID/randomUUID)
+        subregion-id (UUID/randomUUID)
+        congregation-boundary-id (UUID/randomUUID)
+        card-minimap-viewport-id (UUID/randomUUID)]
 
     (testing "write to GIS database"
       (jdbc/with-db-transaction [conn db-spec]
-        (jdbc/execute! conn ["insert into territory (id, number, addresses, subregion, meta, location) values (?, ?, ?, ?, ?::jsonb, (?)::public.geography)"
-                             territory-id "123" "the addresses" "the subregion" {:foo "bar"} testdata/wkt-multi-polygon]))
+        (jdbc/execute! conn ["insert into territory (id, number, addresses, subregion, meta, location) values (?, ?, ?, ?, ?::jsonb, ?::public.geography)"
+                             territory-id "123" "the addresses" "the subregion" {:foo "bar"} testdata/wkt-multi-polygon])
+        (jdbc/execute! conn ["insert into subregion (id, name, location) values (?, ?, ?::public.geography)"
+                             subregion-id "Somewhere" testdata/wkt-multi-polygon])
+        (jdbc/execute! conn ["insert into congregation_boundary (id, location) values (?, ?::public.geography)"
+                             congregation-boundary-id testdata/wkt-multi-polygon])
+        (jdbc/execute! conn ["insert into card_minimap_viewport (id, location) values (?, ?::public.geography)"
+                             card-minimap-viewport-id testdata/wkt-polygon]))
       (db/with-db [conn {}]
         (projections/sync-gis-changes! conn))
       (refresh-projections!))
 
     (testing "changes to GIS database are synced to event store"
       (let [state (projections/cached-state)]
-        ;; TODO: test all entity types, so that all the command handlers and projections are plugged in properly
         (is (= {:territory/id territory-id
                 :territory/number "123"
                 :territory/addresses "the addresses"
                 :territory/subregion "the subregion"
                 :territory/meta {:foo "bar"}
                 :territory/location testdata/wkt-multi-polygon}
-               (get-in state [::territory/territories cong-id territory-id])))))))
+               (get-in state [::territory/territories cong-id territory-id])))
+        (is (= {:subregion/id subregion-id
+                :subregion/name "Somewhere"
+                :subregion/location testdata/wkt-multi-polygon}
+               (get-in state [::subregion/subregions cong-id subregion-id])))
+        (is (= {:congregation-boundary/id congregation-boundary-id
+                :congregation-boundary/location testdata/wkt-multi-polygon}
+               (get-in state [::congregation-boundary/congregation-boundaries cong-id congregation-boundary-id])))
+        (is (= {:card-minimap-viewport/id card-minimap-viewport-id
+                :card-minimap-viewport/location testdata/wkt-polygon}
+               (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id card-minimap-viewport-id])))))))

@@ -259,7 +259,7 @@
             :command/time test-time
             :congregation/id cong-id
             :card-minimap-viewport/id card-minimap-viewport-id
-            :card-minimap-viewport/location testdata/wkt-multi-polygon}
+            :card-minimap-viewport/location testdata/wkt-polygon}
            (-> {:id change-id
                 :schema cong-schema
                 :table "card_minimap_viewport"
@@ -268,7 +268,7 @@
                 :op :INSERT
                 :old nil
                 :new {:id card-minimap-viewport-id
-                      :location testdata/wkt-multi-polygon}}
+                      :location testdata/wkt-polygon}}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport update"
@@ -278,7 +278,7 @@
             :command/time test-time
             :congregation/id cong-id
             :card-minimap-viewport/id card-minimap-viewport-id
-            :card-minimap-viewport/location testdata/wkt-multi-polygon}
+            :card-minimap-viewport/location testdata/wkt-polygon}
            (-> {:id change-id
                 :schema cong-schema
                 :table "card_minimap_viewport"
@@ -288,7 +288,7 @@
                 :old {:id card-minimap-viewport-id
                       :location ""}
                 :new {:id card-minimap-viewport-id
-                      :location testdata/wkt-multi-polygon}}
+                      :location testdata/wkt-polygon}}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport delete"
@@ -305,6 +305,6 @@
                 :time test-time
                 :op :DELETE
                 :old {:id card-minimap-viewport-id
-                      :location testdata/wkt-multi-polygon}
+                      :location testdata/wkt-polygon}
                 :new nil}
                (change->command [congregation-created gis-user-created]))))))
