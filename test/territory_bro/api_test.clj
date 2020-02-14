@@ -67,6 +67,10 @@
           (str "Unexpected response " response))
   response)
 
+(defn refresh-projections! []
+  (projections/refresh-async!)
+  (projections/await-refreshed (Duration/ofSeconds 10)))
+
 
 ;;;; API Helpers
 
@@ -125,8 +129,7 @@
                             :command/system "test"
                             :congregation/id cong-id
                             :congregation/name name}))
-    (projections/refresh-async!)
-    (projections/await-refreshed (Duration/ofSeconds 1))
+    (refresh-projections!)
     cong-id))
 
 (defn revoke-access-from-all! [cong-id]
@@ -141,8 +144,7 @@
                               :congregation/id cong-id
                               :user/id user-id
                               :permission/ids []})))
-    (projections/refresh-async!)
-    (projections/await-refreshed (Duration/ofSeconds 1))))
+    (refresh-projections!)))
 
 
 ;;;; Tests
@@ -473,8 +475,7 @@
                               ;; TODO: create a command for removing a single permission? or produce the event directly from tests?
                               ;; removed :gis-access
                               :permission/ids [:view-congregation :configure-congregation]}))
-      (projections/refresh-async!)
-      (projections/await-refreshed (Duration/ofSeconds 1))
+      (refresh-projections!)
 
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
                          (merge session)
