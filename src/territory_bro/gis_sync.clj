@@ -16,11 +16,14 @@
   (assoc-in state [::username->user-id (:gis-user/username event)] (:user/id event)))
 
 
+(def ^:private system (str (ns-name *ns*)))
+
 (defn change->command [change state]
   (let [{:keys [id schema table user time op old new]} change
         cong-id (get-in state [::schema->cong-id schema])
         user-id (get-in state [::username->user-id user])
-        base-command {:command/user user-id
+        base-command {:command/system system
+                      :command/user user-id ; TODO: omit the key if user is not known
                       :command/time time
                       :congregation/id cong-id}]
     ;; TODO: add {:gis-change/id id} to all commands and events for traceability?

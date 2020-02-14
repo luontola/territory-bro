@@ -246,9 +246,7 @@
 
 (defn check-permit [state {user :command/user, system :command/system, :as command} permit]
   (cond
-    (= (nil? user)
-       (nil? system))
-    (throw (IllegalArgumentException.
-            (str "Either :command/user or :command/system required, but was: " (pr-str command))))
+    (some? system) nil ; allow everything for system
     (some? user) (permissions/check state user permit)
-    (some? system) nil)) ; allow everything for system
+    :else (throw (IllegalArgumentException.
+                  (str ":command/user or :command/system required, but was: " (pr-str command))))))

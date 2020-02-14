@@ -53,6 +53,7 @@
 
   (testing "territory insert"
     (is (= {:command/type :territory.command/create-territory
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -79,6 +80,7 @@
 
   (testing "territory update"
     (is (= {:command/type :territory.command/update-territory
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -110,6 +112,7 @@
 
   (testing "territory delete"
     (is (= {:command/type :territory.command/delete-territory
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -131,6 +134,7 @@
 
   (testing "subregion insert"
     (is (= {:command/type :subregion.command/create-subregion
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -151,6 +155,7 @@
 
   (testing "subregion update"
     (is (= {:command/type :subregion.command/update-subregion
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -173,6 +178,7 @@
 
   (testing "subregion delete"
     (is (= {:command/type :subregion.command/delete-subregion
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -191,6 +197,7 @@
 
   (testing "congregation_boundary insert"
     (is (= {:command/type :congregation-boundary.command/create-congregation-boundary
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -209,6 +216,7 @@
 
   (testing "congregation_boundary update"
     (is (= {:command/type :congregation-boundary.command/update-congregation-boundary
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -228,6 +236,7 @@
 
   (testing "congregation_boundary delete"
     (is (= {:command/type :congregation-boundary.command/delete-congregation-boundary
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -245,6 +254,7 @@
 
   (testing "card_minimap_viewport insert"
     (is (= {:command/type :card-minimap-viewport.command/create-card-minimap-viewport
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -263,6 +273,7 @@
 
   (testing "card_minimap_viewport update"
     (is (= {:command/type :card-minimap-viewport.command/update-card-minimap-viewport
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id
@@ -282,6 +293,7 @@
 
   (testing "card_minimap_viewport delete"
     (is (= {:command/type :card-minimap-viewport.command/delete-card-minimap-viewport
+            :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
             :congregation/id cong-id

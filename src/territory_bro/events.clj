@@ -242,9 +242,9 @@
        (required-key :event/time)
        (assoc s/Any s/Any))
    (fn [event]
-     (not= (contains? event :event/user)
-           (contains? event :event/system)))
-   '(xor-required-key :event/user :event/system)))
+     (or (contains? event :event/user)
+         (contains? event :event/system)))
+   '(any-of-required-keys :event/user :event/system)))
 
 
 ;;;; Validation

@@ -92,24 +92,24 @@
 
 (deftest check-permit-test
   (let [user-id (UUID. 0 1)
-        state (permissions/grant {} user-id [:foo])]
+        state (permissions/grant {} user-id [:some-user-permit])]
 
     (testing "user has permission"
-      (is (nil? (commands/check-permit state {:command/user user-id} [:foo]))))
+      (is (nil? (commands/check-permit state {:command/user user-id} [:some-user-permit]))))
 
     (testing "user doesn't have permission"
       (is (thrown? NoPermitException
-                   (commands/check-permit state {:command/user user-id} [:bar]))))
+                   (commands/check-permit state {:command/user user-id} [:arbitrary-permit]))))
 
     (testing "system always has permission"
-      (is (nil? (commands/check-permit state {:command/system "sys"} [:foo]))))
+      (is (nil? (commands/check-permit state {:command/system "sys"} [:some-user-permit])))
+      (is (nil? (commands/check-permit state {:command/system "sys"} [:arbitrary-permit]))))
+
+    (testing "system, on behalf of a user, always has permission"
+      (is (nil? (commands/check-permit state {:command/system "sys", :command/user user-id} [:some-user-permit])))
+      (is (nil? (commands/check-permit state {:command/system "sys", :command/user user-id} [:arbitrary-permit]))))
 
     (testing "error: user and system missing"
       (is (thrown-with-msg?
-           IllegalArgumentException (re-equals "Either :command/user or :command/system required, but was: {:foo 123}")
-           (commands/check-permit state {:foo 123} [:bar]))))
-
-    (testing "error: both user and system present"
-      (is (thrown-with-msg?
-           IllegalArgumentException (re-equals "Either :command/user or :command/system required, but was: {:command/user #uuid \"00000000-0000-0000-0000-000000000001\", :command/system \"sys\"}")
-           (commands/check-permit state {:command/user user-id, :command/system "sys"} [:bar]))))))
+           IllegalArgumentException (re-equals ":command/user or :command/system required, but was: {:foo 123}")
+           (commands/check-permit state {:foo 123} [:bar]))))))
