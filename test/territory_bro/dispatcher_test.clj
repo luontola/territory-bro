@@ -73,9 +73,9 @@
                        :congregation/id cong-id
                        :congregation/name ""}
               *spy (atom nil)]
-          (with-redefs [dispatcher/congregation-command! (fn [& args]
-                                                           (reset! *spy args)
-                                                           :dummy-return-value)]
+          (with-redefs [dispatcher/command-handlers {"congregation.command" (fn [& args]
+                                                                              (reset! *spy args)
+                                                                              :dummy-return-value)}]
             (is (= :dummy-return-value
                    (dispatcher/command! conn state command))))
           (is (= [conn command state] @*spy))))

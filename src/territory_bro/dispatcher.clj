@@ -58,15 +58,6 @@
                    (fn [old-events]
                      (call! congregation/handle-command command old-events injections)))))
 
-(defn- gis-user-command! [conn command state]
-  (let [injections (assoc (default-injections command state)
-                          :generate-password #(gis-user/generate-password 50)
-                          :db-user-exists? #(gis-db/user-exists? conn %))]
-    (write-stream! conn
-                   (:congregation/id command) ; TODO: the GIS user events would belong better to a user-specific stream
-                   (fn [old-events]
-                     (call! gis-user/handle-command command old-events injections)))))
-
 (defn- db-admin-command! [conn command state]
   (let [injections (assoc (default-injections command state)
                           :migrate-tenant-schema! db/migrate-tenant-schema!
@@ -76,20 +67,33 @@
                                                      (gis-db/ensure-user-absent! conn args)))]
     (call! db-admin/handle-command command state injections)))
 
+(defn- gis-user-command! [conn command state]
+  (let [injections (assoc (default-injections command state)
+                          :generate-password #(gis-user/generate-password 50)
+                          :db-user-exists? #(gis-db/user-exists? conn %))]
+    (write-stream! conn
+                   (:congregation/id command) ; TODO: the GIS user events would belong better to a user-specific stream
+                   (fn [old-events]
+                     (call! gis-user/handle-command command old-events injections)))))
+
 (defn- pretty-str [object]
   (str/trimr (with-out-str
                (print "\n")
                (pprint/pprint object))))
+
+(def ^:private command-handlers
+  {"congregation.command" congregation-command!
+   "db-admin.command" db-admin-command!
+   "gis-user.command" gis-user-command!})
 
 (defn command! [conn state command]
   (let [command (-> command
                     (commands/sorted-keys)
                     (validate-command conn state))
         _ (log/info "Dispatch command:" (pretty-str command))
-        events (case (namespace (:command/type command))
-                 "congregation.command" (congregation-command! conn command state)
-                 "gis-user.command" (gis-user-command! conn command state)
-                 "db-admin.command" (db-admin-command! conn command state)
-                 (throw (AssertionError. (str "Command handler not found: " (pr-str command)))))]
+        command-handler (or (get command-handlers (namespace (:command/type command)))
+                            (throw (AssertionError.
+                                    (str "No command handler for command: " (pr-str command)))))
+        events (command-handler conn command state)]
     (log/info "Produced events:" (pretty-str events))
     events))
