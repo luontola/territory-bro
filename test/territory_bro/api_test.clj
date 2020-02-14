@@ -78,6 +78,11 @@
   (projections/refresh-async!)
   (projections/await-refreshed (Duration/ofSeconds 10)))
 
+(defn sync-gis-changes! []
+  (db/with-db [conn {}]
+    (projections/sync-gis-changes! conn))
+  (refresh-projections!))
+
 
 ;;;; API Helpers
 
@@ -639,9 +644,7 @@
                              congregation-boundary-id testdata/wkt-multi-polygon])
         (jdbc/execute! conn ["insert into card_minimap_viewport (id, location) values (?, ?::public.geography)"
                              card-minimap-viewport-id testdata/wkt-polygon]))
-      (db/with-db [conn {}]
-        (projections/sync-gis-changes! conn))
-      (refresh-projections!))
+      (sync-gis-changes!))
 
     (testing "changes to GIS database are synced to event store"
       (let [state (projections/cached-state)]
