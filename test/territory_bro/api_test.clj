@@ -50,11 +50,14 @@
 (defn parse-json [body]
   (cond
     (nil? body) body
-    (string? body) body
+    (string? body) (json/parse-string body)
     :else (json/parse-string (slurp (io/reader body)))))
 
 (defn read-body [response]
-  (update response :body parse-json))
+  (let [content-type (get-in response [:headers "Content-Type"])]
+    (if (str/starts-with? content-type "application/json")
+      (update response :body parse-json)
+      response)))
 
 (defn app [request]
   (-> request router/app read-body))
@@ -63,6 +66,9 @@
   (assert (predicate response)
           (str "Unexpected response " response))
   response)
+
+
+;;;; API Helpers
 
 (defn login! [app]
   (let [response (-> (request :post "/api/login")
@@ -77,6 +83,69 @@
       app
       (assert-response ok?)))
 
+(defn get-user-id [session]
+  (let [response (-> (request :get "/api/settings")
+                     (merge session)
+                     app
+                     (assert-response ok?))
+        user-id (UUID/fromString (:id (:user (:body response))))]
+    user-id))
+
+(defn try-create-congregation! [session name]
+  (-> (request :post "/api/congregations")
+      (json-body {:name name})
+      (merge session)
+      app))
+
+(defn create-congregation! [session name]
+  (let [response (-> (try-create-congregation! session name)
+                     (assert-response ok?))
+        cong-id (UUID/fromString (:id (:body response)))]
+    cong-id))
+
+(defn try-rename-congregation! [session cong-id name]
+  (-> (request :post (str "/api/congregation/" cong-id "/rename"))
+      (json-body {:name name})
+      (merge session)
+      app))
+
+(defn try-add-user! [session cong-id user-id]
+  (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
+      (json-body {:userId (str user-id)})
+      (merge session)
+      app))
+
+(defn create-congregation-without-user! [name]
+  (let [cong-id (UUID/randomUUID)
+        state (projections/cached-state)]
+    (db/with-db [conn {}]
+      (dispatcher/command! conn state
+                           {:command/type :congregation.command/create-congregation
+                            :command/time (Instant/now)
+                            :command/system "test"
+                            :congregation/id cong-id
+                            :congregation/name name}))
+    (projections/refresh-async!)
+    (projections/await-refreshed (Duration/ofSeconds 1))
+    cong-id))
+
+(defn revoke-access-from-all! [cong-id]
+  (let [state (projections/cached-state)
+        user-ids (congregation/get-users state cong-id)]
+    (db/with-db [conn {}]
+      (doseq [user-id user-ids]
+        (dispatcher/command! conn state
+                             {:command/type :congregation.command/set-user-permissions
+                              :command/time (Instant/now)
+                              :command/system "test"
+                              :congregation/id cong-id
+                              :user/id user-id
+                              :permission/ids []})))
+    (projections/refresh-async!)
+    (projections/await-refreshed (Duration/ofSeconds 1))))
+
+
+;;;; Tests
 
 (deftest format-for-api-test
   (is (= {} (api/format-for-api {})))
@@ -244,26 +313,8 @@
                          app)]
         (is (unauthorized? response))))))
 
-(defn- get-user-id [session]
-  (let [response (-> (request :get "/api/settings")
-                     (merge session)
-                     app)]
-    (assert (ok? response) {:response response})
-    (UUID/fromString (get-in (json/parse-string (:body response)) [:user :id]))))
-
-(defn- create-congregation! [name]
-  (db/with-db [conn {}]
-    (let [cong-id (UUID/randomUUID)]
-      (dispatcher/command! conn (projections/cached-state)
-                           {:command/type :congregation.command/create-congregation
-                            :command/time (Instant/now)
-                            :command/system "test"
-                            :congregation/id cong-id
-                            :congregation/name name})
-      cong-id)))
-
 (deftest super-user-test
-  (let [cong-id (create-congregation! "sudo test")
+  (let [cong-id (create-congregation-without-user! "sudo test")
         session (login! app)
         user-id (get-user-id session)]
 
@@ -293,36 +344,29 @@
                        (str cong-id)))))
 
     (testing "super user can configure all congregations"
-      (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
-                         (json-body {:userId (str user-id)})
-                         (merge session)
-                         app)]
+      (let [response (try-add-user! session cong-id user-id)]
         (is (ok? response))))))
 
 (deftest create-congregation-test
   (let [session (login! app)
         user-id (get-user-id session)
-        response (-> (request :post "/api/congregations")
-                     (json-body {:name "foo"})
-                     (merge session)
-                     app)]
+        response (try-create-congregation! session "foo")]
     (is (ok? response))
     (is (:id (:body response)))
 
-    (let [cong-id (UUID/fromString (:id (:body response)))]
+    (let [cong-id (UUID/fromString (:id (:body response)))
+          state (projections/cached-state)]
       (testing "grants access to the current user"
-        (is (= 1 (count (congregation/get-users (projections/cached-state) cong-id)))))
+        (is (= 1 (count (congregation/get-users state cong-id)))))
 
       (testing "creates a GIS user for the current user"
-        (let [gis-user (gis-user/get-gis-user (projections/cached-state) cong-id user-id)]
+        (let [gis-user (gis-user/get-gis-user state cong-id user-id)]
           (is gis-user)
           (is (true? (db/with-db [conn {:read-only? true}]
                        (gis-db/user-exists? conn (:gis-user/username gis-user)))))))))
 
   (testing "requires login"
-    (let [response (-> (request :post "/api/congregations")
-                       (json-body {:name "foo"})
-                       app)]
+    (let [response (try-create-congregation! nil "foo")]
       (is (unauthorized? response)))))
 
 (deftest list-congregations-test
@@ -338,29 +382,9 @@
                        app)]
       (is (unauthorized? response)))))
 
-(defn revoke-access-from-all! [cong-id]
-  (db/with-db [conn {}]
-    (let [state (projections/cached-state)]
-      (doseq [user-id (congregation/get-users state cong-id)]
-        (dispatcher/command! conn state
-                             {:command/type :congregation.command/set-user-permissions
-                              :command/time (Instant/now)
-                              :command/system "test"
-                              :congregation/id cong-id
-                              :user/id user-id
-                              :permission/ids []}))))
-  (projections/refresh-async!)
-  (projections/await-refreshed (Duration/ofSeconds 1)))
-
-
 (deftest get-congregation-test
   (let [session (login! app)
-        response (-> (request :post "/api/congregations")
-                     (json-body {:name "foo"})
-                     (merge session)
-                     app
-                     (assert-response ok?))
-        cong-id (UUID/fromString (:id (:body response)))]
+        cong-id (create-congregation! session "foo")]
 
     (testing "get congregation"
       (let [response (-> (request :get (str "/api/congregation/" cong-id))
@@ -392,12 +416,7 @@
 
 (deftest get-demo-congregation-test
   (let [session (login! app)
-        response (-> (request :post "/api/congregations")
-                     (json-body {:name "foo"})
-                     (merge session)
-                     app
-                     (assert-response ok?))
-        cong-id (UUID/fromString (:id (:body response)))]
+        cong-id (create-congregation-without-user! "foo")]
     (binding [config/env (assoc config/env :demo-congregation cong-id)]
 
       (testing "get demo congregation"
@@ -428,12 +447,7 @@
 (deftest download-qgis-project-test
   (let [session (login! app)
         user-id (get-user-id session)
-        response (-> (request :post "/api/congregations")
-                     (json-body {:name "Example Congregation"})
-                     (merge session)
-                     app
-                     (assert-response ok?))
-        cong-id (UUID/fromString (:id (:body response)))]
+        cong-id (create-congregation! session "Example Congregation")]
 
     (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
                        (merge session)
@@ -470,57 +484,34 @@
 
 (deftest add-user-test
   (let [session (login! app)
-        response (-> (request :post "/api/congregations")
-                     (json-body {:name "Congregation"})
-                     (merge session)
-                     app
-                     (assert-response ok?))
-        cong-id (UUID/fromString (:id (:body response)))
+        cong-id (create-congregation! session "Congregation")
         new-user-id (db/with-db [conn {}]
                       (user/save-user! conn "user1" {:name "User 1"}))]
 
     (testing "add user"
-      (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
-                         (json-body {:userId (str new-user-id)})
-                         (merge session)
-                         app)]
-        (is (ok? response)))
-      ;; TODO: check the result through the API
-      (let [users (congregation/get-users (projections/cached-state) cong-id)]
-        (is (contains? (set users) new-user-id))))
+      (let [response (try-add-user! session cong-id new-user-id)]
+        (is (ok? response))
+        ;; TODO: check the result through the API
+        (let [users (congregation/get-users (projections/cached-state) cong-id)]
+          (is (contains? (set users) new-user-id)))))
 
     (testing "invalid user"
-      (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
-                         (json-body {:userId (str (UUID. 0 1))})
-                         (merge session)
-                         app)]
+      (let [response (try-add-user! session cong-id (UUID. 0 1))]
         (is (bad-request? response))
         (is (= {:errors [["no-such-user" "00000000-0000-0000-0000-000000000001"]]}
                (:body response)))))
 
     (testing "no access"
       (revoke-access-from-all! cong-id)
-      (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
-                         (json-body {:userId (str new-user-id)})
-                         (merge session)
-                         app)]
+      (let [response (try-add-user! session cong-id new-user-id)]
         (is (forbidden? response))))))
 
 (deftest set-user-permissions-test
   (let [session (login! app)
-        response (-> (request :post "/api/congregations")
-                     (json-body {:name "Congregation"})
-                     (merge session)
-                     app
-                     (assert-response ok?))
-        cong-id (UUID/fromString (:id (:body response)))
+        cong-id (create-congregation! session "Congregation")
         user-id (db/with-db [conn {}]
                   (user/save-user! conn "user1" {:name "User 1"}))]
-    (let [response (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
-                       (json-body {:userId (str user-id)})
-                       (merge session)
-                       app)]
-      (is (ok? response)))
+    (is (ok? (try-add-user! session cong-id user-id)))
 
     ;; TODO: test changing permissions (after new users no more get full admin access)?
 
@@ -556,18 +547,10 @@
 
 (deftest rename-congregation-test
   (let [session (login! app)
-        response (-> (request :post "/api/congregations")
-                     (json-body {:name "Old Name"})
-                     (merge session)
-                     app
-                     (assert-response ok?))
-        cong-id (UUID/fromString (:id (:body response)))]
+        cong-id (create-congregation! session "Old Name")]
 
     (testing "rename congregation"
-      (let [response (-> (request :post (str "/api/congregation/" cong-id "/rename"))
-                         (json-body {:name "New Name"})
-                         (merge session)
-                         app)]
+      (let [response (try-rename-congregation! session cong-id "New Name")]
         (is (ok? response)))
       (let [response (-> (request :get (str "/api/congregation/" cong-id))
                          (merge session)
@@ -577,8 +560,5 @@
 
     (testing "no access"
       (revoke-access-from-all! cong-id)
-      (let [response (-> (request :post (str "/api/congregation/" cong-id "/rename"))
-                         (json-body {:name "should not be allowed"})
-                         (merge session)
-                         app)]
+      (let [response (try-rename-congregation! session cong-id "should not be allowed")]
         (is (forbidden? response))))))
