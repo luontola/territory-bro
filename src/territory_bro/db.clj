@@ -17,6 +17,7 @@
   (:import (clojure.lang IPersistentMap IPersistentVector)
            (com.zaxxer.hikari HikariDataSource)
            (java.net URL)
+           (java.nio.file Paths)
            (java.sql Date Timestamp PreparedStatement Array)
            (java.time Instant)
            (org.flywaydb.core Flyway)
@@ -217,15 +218,16 @@
 (defn- prefix-join [prefix ss]
   (str prefix (str/join prefix ss)))
 
-(defn- query! [conn *queries name params]
+(defn- query! [conn *queries query-name params]
   (let [queries (load-queries *queries)
-        query-fn (get-in queries [:db-fns name :fn])]
-    (assert query-fn (str "Query not found: " name))
+        query-fn (get-in queries [:db-fns query-name :fn])]
+    (assert query-fn (str "Query not found: " query-name))
     (when *explain*
-      (let [sqlvec-fn (get-in queries [:sqlvec-fns name :fn])
+      (let [filename (.getFileName (Paths/get (.toURI ^URL (:resource queries))))
+            sqlvec-fn (get-in queries [:sqlvec-fns query-name :fn])
             [sql & params] (apply sqlvec-fn params)
             query-plan (explain-query conn sql params)]
-        (log/debug (str "SQL query:\n"
+        (log/debug (str "SQL query " (name query-name) " in " filename ":\n"
                         sql
                         (when (not (empty? params))
                           (str "\n-- Parameters:"
