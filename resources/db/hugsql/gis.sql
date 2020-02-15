@@ -59,3 +59,18 @@ order by id;
 update gis_change_log
 set processed = true
 where id = any (array[:v*:ids]::bigint[]);
+
+-- :name replace-id-of-entity :!
+update :i:schema_table
+set id = :new_id
+where id = :old_id;
+
+-- :name replace-id-of-changes :!
+update gis_change_log
+set replacement_id = :new_id
+where schema = :schema
+  and "table" = :table
+  and ((new ->> 'id')::uuid = :old_id
+    or (old ->> 'id')::uuid = :old_id)
+  and replacement_id is null
+  and processed is false;

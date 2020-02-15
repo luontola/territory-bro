@@ -15,13 +15,19 @@
            (org.postgresql.util PSQLException)))
 
 (def test-schema "test_gis_schema")
+(def test-schema2 "test_gis_schema2")
 (def test-username "test_gis_user")
 
+(defn- with-tenant-schema [schema-name f]
+  (let [schema (db/tenant-schema schema-name (:database-schema config/env))]
+    (try
+      (.migrate schema)
+      (f)
+      (finally
+        (.clean schema)))))
+
 (defn- test-schema-setup [f]
-  (let [schema (db/tenant-schema test-schema (:database-schema config/env))]
-    (.migrate schema)
-    (f)
-    (.clean schema)))
+  (with-tenant-schema test-schema f))
 
 (use-fixtures :each (join-fixtures [db-fixture test-schema-setup]))
 
@@ -235,6 +241,138 @@
           "processed, after")
       (is (= [3 5 6] (map :id (gis-db/get-changes conn {:processed? false})))
           "unprocessed, after"))))
+
+(deftest gis-change-log-replace-id-test
+  (db/with-db [conn {}]
+    (jdbc/db-set-rollback-only! conn)
+    (db/use-tenant-schema conn test-schema)
+
+    (testing "replace ID of INSERT changes"
+      (let [old-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+            new-id (UUID/randomUUID)]
+
+        (gis-db/replace-id! conn test-schema "subregion" old-id new-id)
+
+        (is (= [{:table "subregion"
+                 :op :INSERT
+                 :old nil
+                 :new {:id old-id
+                       :name "Somewhere"
+                       :location testdata/wkt-multi-polygon}
+                 :processed false
+                 :replacement_id new-id}
+                {:table "subregion"
+                 :op :UPDATE
+                 :old {:id old-id
+                       :name "Somewhere"
+                       :location testdata/wkt-multi-polygon}
+                 :new {:id new-id
+                       :name "Somewhere"
+                       :location testdata/wkt-multi-polygon}
+                 :processed false
+                 :replacement_id new-id}]
+               (->> (gis-db/get-changes conn)
+                    (map #(dissoc % :id :schema :user :time))))))))
+
+  (db/with-db [conn {}]
+    (jdbc/db-set-rollback-only! conn)
+    (db/use-tenant-schema conn test-schema)
+
+    (testing "replace ID of UPDATE and DELETE changes"
+      (let [old-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+            new-id (UUID/randomUUID)]
+        (jdbc/execute! conn ["UPDATE subregion SET name = ? WHERE id = ?"
+                             "Updated" old-id])
+        (jdbc/execute! conn ["DELETE FROM subregion WHERE id = ?"
+                             old-id])
+
+        (gis-db/replace-id! conn test-schema "subregion" old-id new-id)
+
+        (is (= [{:table "subregion"
+                 :op :INSERT
+                 :old nil
+                 :new {:id old-id
+                       :name "Somewhere"
+                       :location testdata/wkt-multi-polygon}
+                 :processed false
+                 :replacement_id new-id}
+                {:table "subregion"
+                 :op :UPDATE
+                 :old {:id old-id
+                       :name "Somewhere"
+                       :location testdata/wkt-multi-polygon}
+                 :new {:id old-id
+                       :name "Updated"
+                       :location testdata/wkt-multi-polygon}
+                 :processed false
+                 :replacement_id new-id}
+                {:table "subregion"
+                 :op :DELETE
+                 :old {:id old-id
+                       :name "Updated"
+                       :location testdata/wkt-multi-polygon}
+                 :new nil
+                 :processed false
+                 :replacement_id new-id}]
+               (->> (gis-db/get-changes conn)
+                    (map #(dissoc % :id :schema :user :time))))))))
+
+  (with-tenant-schema test-schema2
+    (fn []
+      (db/with-db [conn {}]
+        (jdbc/db-set-rollback-only! conn)
+        (db/use-tenant-schema conn test-schema)
+        (let [actual-schema test-schema
+              actual-table "subregion"
+              actual-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+              new-id (UUID/randomUUID)
+              original-changes (gis-db/get-changes conn)]
+
+          (testing "does not replace ID of unrelated entities"
+            (gis-db/replace-id! conn actual-schema actual-table (UUID/randomUUID) new-id)
+            (is (= original-changes (gis-db/get-changes conn))))
+
+          (testing "does not replace ID of unrelated tables"
+            (gis-db/replace-id! conn actual-schema "territory" actual-id new-id)
+            (is (= original-changes (gis-db/get-changes conn))))
+
+          (testing "does not replace ID of unrelated schemas"
+            (gis-db/replace-id! conn test-schema2 actual-table actual-id new-id)
+            (is (= original-changes (gis-db/get-changes conn))))))))
+
+  (db/with-db [conn {}]
+    (jdbc/db-set-rollback-only! conn)
+    (db/use-tenant-schema conn test-schema)
+
+    (testing "does not replace ID of already replaced changes"
+      (let [old-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+            new-id (UUID/randomUUID)
+            _ (gis-db/replace-id! conn test-schema "subregion" old-id new-id)
+            original-changes (gis-db/get-changes conn)]
+        (is (= [new-id new-id] (map :replacement_id original-changes))
+            "expected setup")
+
+        (gis-db/replace-id! conn test-schema "subregion" old-id (UUID/randomUUID))
+
+        (is (= original-changes (gis-db/get-changes conn))))))
+
+  (db/with-db [conn {}]
+    (jdbc/db-set-rollback-only! conn)
+    (db/use-tenant-schema conn test-schema)
+
+    (testing "does not replace ID of already processed changes"
+      (let [old-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+            ;; Use case: An entity has existed with the same ID in the past,
+            ;;           and now a new entity is added with the same ID.
+            _ (jdbc/execute! conn ["DELETE FROM subregion WHERE id = ?" old-id])
+            _ (gis-db/mark-changes-processed! conn (map :id (gis-db/get-changes conn)))
+            original-changes (gis-db/get-changes conn)]
+        (is (= [true true] (map :processed original-changes))
+            "expected setup")
+
+        (gis-db/replace-id! conn test-schema "subregion" old-id (UUID/randomUUID))
+
+        (is (= original-changes (gis-db/get-changes conn)))))))
 
 (defn- gis-db-spec [username password]
   {:connection-uri (-> (:database-url config/env)

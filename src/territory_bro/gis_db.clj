@@ -132,6 +132,15 @@
 (defn mark-changes-processed! [conn ids]
   (query! conn :mark-changes-processed {:ids ids}))
 
+(defn replace-id! [conn schema table old-id new-id]
+  (query! conn :replace-id-of-entity {:schema_table (str schema "." table)
+                                      :old_id old-id
+                                      :new_id new-id})
+  (query! conn :replace-id-of-changes {:schema schema
+                                       :table table
+                                       :old_id old-id
+                                       :new_id new-id}))
+
 
 ;;;; Database users
 
