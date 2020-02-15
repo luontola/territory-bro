@@ -199,8 +199,9 @@
     (if (= old-last-modified new-last-modified)
       queries
       (reset! *queries {:resource resource
-                        :db-fns (hugsql/map-of-db-fns resource)
-                        :sqlvec-fns (hugsql/map-of-sqlvec-fns resource {:fn-suffix ""})
+                        :db-fns (hugsql/map-of-db-fns resource {:quoting :ansi})
+                        :sqlvec-fns (hugsql/map-of-sqlvec-fns resource {:quoting :ansi
+                                                                        :fn-suffix ""})
                         :last-modified new-last-modified}))))
 
 (defn- explain-query [conn sql params]
