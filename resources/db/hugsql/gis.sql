@@ -44,7 +44,7 @@ values (:id, :number, :addresses, :subregion, :meta, ST_Multi(ST_GeomFromText(:l
 
 
 -- :name get-gis-changes :? :*
-select id, schema, "table", op, "user", time, old, new
+select id, schema, "table", op, "user", time, old, new, processed, replacement_id
 from gis_change_log
 where 1 = 1
 /*~ (when (contains? params :since) */

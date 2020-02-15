@@ -111,7 +111,9 @@
    :user s/Str
    :time Instant
    :old (s/maybe GisFeature)
-   :new (s/maybe GisFeature)})
+   :new (s/maybe GisFeature)
+   :processed s/Bool
+   :replacement_id (s/maybe s/Uuid)})
 
 (def ^:private gis-change-coercer
   (coerce/coercer! GisChange coerce/string-coercion-matcher))

@@ -11,7 +11,8 @@
             [territory-bro.fixtures :refer [db-fixture]]
             [territory-bro.gis-db :as gis-db]
             [territory-bro.testdata :as testdata])
-  (:import (org.postgresql.util PSQLException)))
+  (:import (java.util UUID)
+           (org.postgresql.util PSQLException)))
 
 (def test-schema "test_gis_schema")
 (def test-username "test_gis_user")
@@ -113,7 +114,9 @@
                           :addresses "Street 1 A"
                           :subregion "Somewhere"
                           :meta {:foo "bar", :gazonk 42}
-                          :location testdata/wkt-multi-polygon}}
+                          :location testdata/wkt-multi-polygon}
+                    :processed false
+                    :replacement_id nil}
                    (-> (last changes)
                        (dissoc :id :schema :user :time))))))
 
@@ -134,7 +137,9 @@
                           :addresses "Another Street 2"
                           :subregion "Somewhere"
                           :meta {:foo "bar", :gazonk 42}
-                          :location testdata/wkt-multi-polygon}}
+                          :location testdata/wkt-multi-polygon}
+                    :processed false
+                    :replacement_id nil}
                    (-> (last changes)
                        (dissoc :id :schema :user :time))))))
 
@@ -150,7 +155,9 @@
                           :subregion "Somewhere"
                           :meta {:foo "bar", :gazonk 42}
                           :location testdata/wkt-multi-polygon}
-                    :new nil}
+                    :new nil
+                    :processed false
+                    :replacement_id nil}
                    (-> (last changes)
                        (dissoc :id :schema :user :time))))))))
 
@@ -162,7 +169,9 @@
                 :op :INSERT
                 :old nil
                 :new {:id region-id
-                      :location testdata/wkt-multi-polygon}}
+                      :location testdata/wkt-multi-polygon}
+                :processed false
+                :replacement_id nil}
                (-> (last changes)
                    (dissoc :id :schema :user :time))))))
 
@@ -175,7 +184,9 @@
                 :old nil
                 :new {:id region-id
                       :name "Somewhere"
-                      :location testdata/wkt-multi-polygon}}
+                      :location testdata/wkt-multi-polygon}
+                :processed false
+                :replacement_id nil}
                (-> (last changes)
                    (dissoc :id :schema :user :time))))))
 
@@ -187,7 +198,9 @@
                 :op :INSERT
                 :old nil
                 :new {:id region-id
-                      :location testdata/wkt-polygon}}
+                      :location testdata/wkt-polygon}
+                :processed false
+                :replacement_id nil}
                (-> (last changes)
                    (dissoc :id :schema :user :time))))))
 
@@ -311,7 +324,7 @@
                :user test-username}]
              (->> (db/with-db [conn {}]
                     (gis-db/get-changes conn))
-                  (map #(dissoc % :id :time :old :new))))))
+                  (map #(dissoc % :id :time :old :new :processed :replacement_id))))))
 
     (testing "cannot view the master schema"
       (is (thrown-with-msg? PSQLException #"ERROR: permission denied for schema"

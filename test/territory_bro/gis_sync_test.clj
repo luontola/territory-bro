@@ -75,7 +75,9 @@
                       :addresses "Street 1 A"
                       :subregion "Somewhere"
                       :meta {:foo "bar", :gazonk 42}
-                      :location testdata/wkt-multi-polygon}}
+                      :location testdata/wkt-multi-polygon}
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "territory update"
@@ -107,7 +109,9 @@
                       :addresses "Street 1 A"
                       :subregion "Somewhere"
                       :meta {:foo "bar", :gazonk 42}
-                      :location testdata/wkt-multi-polygon}}
+                      :location testdata/wkt-multi-polygon}
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "territory delete"
@@ -129,7 +133,9 @@
                       :subregion "Somewhere"
                       :meta {:foo "bar", :gazonk 42}
                       :location testdata/wkt-multi-polygon}
-                :new nil}
+                :new nil
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "subregion insert"
@@ -150,7 +156,9 @@
                 :old nil
                 :new {:id subregion-id
                       :name "Somewhere"
-                      :location testdata/wkt-multi-polygon}}
+                      :location testdata/wkt-multi-polygon}
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "subregion update"
@@ -173,7 +181,9 @@
                       :location ""}
                 :new {:id subregion-id
                       :name "Somewhere"
-                      :location testdata/wkt-multi-polygon}}
+                      :location testdata/wkt-multi-polygon}
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "subregion delete"
@@ -192,7 +202,9 @@
                 :old {:id subregion-id
                       :name "Somewhere"
                       :location testdata/wkt-multi-polygon}
-                :new nil}
+                :new nil
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "congregation_boundary insert"
@@ -211,7 +223,9 @@
                 :op :INSERT
                 :old nil
                 :new {:id congregation-boundary-id
-                      :location testdata/wkt-multi-polygon}}
+                      :location testdata/wkt-multi-polygon}
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "congregation_boundary update"
@@ -231,7 +245,9 @@
                 :old {:id congregation-boundary-id
                       :location ""}
                 :new {:id congregation-boundary-id
-                      :location testdata/wkt-multi-polygon}}
+                      :location testdata/wkt-multi-polygon}
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "congregation_boundary delete"
@@ -249,7 +265,9 @@
                 :op :DELETE
                 :old {:id congregation-boundary-id
                       :location testdata/wkt-multi-polygon}
-                :new nil}
+                :new nil
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport insert"
@@ -268,7 +286,9 @@
                 :op :INSERT
                 :old nil
                 :new {:id card-minimap-viewport-id
-                      :location testdata/wkt-polygon}}
+                      :location testdata/wkt-polygon}
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport update"
@@ -288,7 +308,9 @@
                 :old {:id card-minimap-viewport-id
                       :location ""}
                 :new {:id card-minimap-viewport-id
-                      :location testdata/wkt-polygon}}
+                      :location testdata/wkt-polygon}
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport delete"
@@ -306,5 +328,7 @@
                 :op :DELETE
                 :old {:id card-minimap-viewport-id
                       :location testdata/wkt-polygon}
-                :new nil}
+                :new nil
+                :processed false
+                :replacement_id nil}
                (change->command [congregation-created gis-user-created]))))))
