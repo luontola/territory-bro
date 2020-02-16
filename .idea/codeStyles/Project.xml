@@ -22,6 +22,7 @@
   :secretary.core/defroute :only-indent
   :territory-bro.authentication/with-authenticated-user 1
   :territory-bro.db/as-tenant 1
+  :territory-bro.db/auto-explain 2
   :territory-bro.gis-db-test/with-tenant-schema 1
   :territory-bro.testutil/grab-exception 0
 }</ClojureCodeStyleSettings>

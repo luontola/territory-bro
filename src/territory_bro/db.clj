@@ -191,6 +191,22 @@
               (str "Expected the database to be PostgreSQL " minimum-version " but it was "
                    (.getDatabaseProductName metadata) " " (.getDatabaseProductVersion metadata))))))
 
+(defn auto-explain* [conn min-duration f]
+  (jdbc/execute! conn ["LOAD 'auto_explain'"])
+  (jdbc/execute! conn [(str "SET auto_explain.log_min_duration = " (int min-duration))])
+  (jdbc/execute! conn ["SET auto_explain.log_analyze = true"])
+  (jdbc/execute! conn ["SET auto_explain.log_buffers = true"])
+  (jdbc/execute! conn ["SET auto_explain.log_triggers = true"])
+  (jdbc/execute! conn ["SET auto_explain.log_verbose = true"])
+  ;; will explain also the queries inside triggers, which territory-bro.db/explain-query cannot do
+  (jdbc/execute! conn ["SET auto_explain.log_nested_statements = true"])
+  (let [result (f)]
+    (jdbc/execute! conn ["SET auto_explain.log_min_duration = -1"])
+    result))
+
+(defmacro auto-explain [conn min-duration & body]
+  `(auto-explain* ~conn ~min-duration (fn [] ~@body)))
+
 (defn- load-queries [*queries]
   ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
   (let [{resource :resource, old-last-modified :last-modified, :as queries} @*queries
@@ -208,6 +224,7 @@
 (defn- explain-query [conn sql params]
   (jdbc/execute! conn ["SAVEPOINT explain_analyze"])
   (try
+    ;; TODO: upgrade to PostgreSQL 12 and add SETTINGS to the options
     (->> (jdbc/query conn (cons (str "EXPLAIN (ANALYZE, VERBOSE, BUFFERS) " sql) params))
          (map (keyword "query plan")))
     (finally
