@@ -82,7 +82,7 @@
 
 (defn sync-gis-changes! []
   (db/with-db [conn {}]
-    (projections/sync-gis-changes! conn))
+    (projections/sync-gis-changes! conn (projections/cached-state)))
   (refresh-projections!))
 
 
