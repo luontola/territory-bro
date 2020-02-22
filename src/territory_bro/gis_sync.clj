@@ -30,10 +30,10 @@
   (let [{:keys [id schema table user time op old new]} (apply-replacement-id change)
         cong-id (get-in state [::schema->cong-id schema])
         user-id (get-in state [::username->user-id user])
-        base-command {:command/system system
-                      :command/user user-id ; TODO: omit the key if user is not known
-                      :command/time time
-                      :congregation/id cong-id}]
+        base-command (cond-> {:command/system system
+                              :command/time time
+                              :congregation/id cong-id}
+                       (some? user-id) (assoc :command/user user-id))]
     ;; TODO: add {:gis-change/id id} to all commands and events for traceability?
     ;; TODO: check for UPDATE with location MULTIPOLYGON EMPTY, i.e. user tried to delete the feature incorrectly
     (case table

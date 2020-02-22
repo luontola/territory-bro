@@ -22,6 +22,7 @@
             [territory-bro.territory :as territory])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
+           (java.util UUID)
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
 
 ;;;; Cache
@@ -124,10 +125,23 @@
 
 (defn sync-gis-changes! [conn]
   (let [state (cached-state)
-        changes (gis-db/get-changes conn {:processed? false})]
-    (doseq [change changes]
-      (let [command (gis-sync/change->command change state)]
-        ;; TODO: does the state need to be refreshed at some points?
-        ;; TODO: handle conflicting stream IDs
-        (dispatcher/command! conn state command)))
-    (gis-db/mark-changes-processed! conn (map :id changes))))
+        ;; TODO: limit 1
+        change (first (gis-db/get-changes conn {:processed? false}))]
+    (when change
+      (let [new-id (when (= :INSERT (:op change))
+                     (when (nil? (:replacement_id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)
+                       (:id (:new change))))
+            command (gis-sync/change->command change state)]
+        (if (and new-id (event-store/stream-exists? conn new-id))
+          (do
+            (let [replacement-id (UUID/randomUUID)
+                  {:keys [schema table]} change]
+              (log/info "Replacing" (str schema "." table) "ID" new-id "with" replacement-id)
+              (assert (not (event-store/stream-exists? conn replacement-id))
+                      {:replacement-id replacement-id})
+              (gis-db/replace-id! conn schema table new-id replacement-id)
+              (recur conn)))
+          (do
+            (dispatcher/command! conn state command)
+            (gis-db/mark-changes-processed! conn [(:id change)])
+            (recur conn)))))))

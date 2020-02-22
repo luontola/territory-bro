@@ -7,10 +7,10 @@
             [territory-bro.events :as events]
             [territory-bro.subregion :as subregion]
             [territory-bro.testdata :as testdata]
-            [territory-bro.testutil :as testutil])
+            [territory-bro.testutil :as testutil :refer [re-equals]])
   (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException)))
+           (territory_bro NoPermitException ValidationException)))
 
 (def cong-id (UUID. 0 1))
 (def subregion-id (UUID. 0 2))
@@ -34,6 +34,9 @@
                                  (events/validate-events events)
                                  injections)
        (events/validate-events)))
+
+
+;;;; Projection
 
 (deftest subregion-projection-test
   (testing "created"
@@ -59,6 +62,23 @@
         (let [events (conj events subregion-deleted)
               expected {}]
           (is (= expected (apply-events events))))))))
+
+
+;;;; Queries
+
+(deftest check-subregion-exists-test
+  (let [state (apply-events [subregion-defined])]
+
+    (testing "exists"
+      (is (nil? (subregion/check-subregion-exists state cong-id subregion-id))))
+
+    (testing "doesn't exist"
+      (is (thrown-with-msg?
+           ValidationException (re-equals "[[:no-such-subregion #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (subregion/check-subregion-exists state cong-id (UUID. 0 0x666)))))))
+
+
+;;;; Commands
 
 (deftest create-subregion-test
   (let [injections {:check-permit (fn [_permit])}

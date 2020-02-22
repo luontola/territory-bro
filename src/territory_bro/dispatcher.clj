@@ -28,10 +28,13 @@
   {:now (:now config/env)
    :check-permit #(commands/check-permit state command %)})
 
-(defn- reference-checkers [conn state]
+(defn- reference-checkers [command conn state]
   {:congregation (fn [cong-id]
                    (congregation/check-congregation-exists state cong-id)
                    true)
+   :subregion (fn [subregion-id]
+                (subregion/check-subregion-exists state (:congregation/id command) subregion-id)
+                true)
    :user (fn [user-id]
            (user/check-user-exists conn user-id)
            true)
@@ -40,7 +43,7 @@
           true)})
 
 (defn- validate-command [command conn state]
-  (binding [foreign-key/*reference-checkers* (reference-checkers conn state)]
+  (binding [foreign-key/*reference-checkers* (reference-checkers command conn state)]
     (commands/validate-command command)))
 
 (defn- write-stream! [conn stream-id f]

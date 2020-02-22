@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.subregion
-  (:require [medley.core :refer [dissoc-in]]))
+  (:require [medley.core :refer [dissoc-in]])
+  (:import (territory_bro ValidationException)))
 
 ;;;; Read model
 
@@ -25,6 +26,13 @@
 (defmethod projection :subregion.event/subregion-deleted
   [state event]
   (dissoc-in state [::subregions (:congregation/id event) (:subregion/id event)]))
+
+
+;;;; Queries
+
+(defn check-subregion-exists [state cong-id subregion-id]
+  (when (nil? (get-in state [::subregions cong-id subregion-id]))
+    (throw (ValidationException. [[:no-such-subregion cong-id subregion-id]]))))
 
 
 ;;;; Write model

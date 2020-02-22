@@ -647,6 +647,7 @@
         (jdbc/execute! conn ["insert into card_minimap_viewport (id, location) values (?, ?::public.geography)"
                              card-minimap-viewport-id testdata/wkt-polygon]))
       (sync-gis-changes!))
+    ;; TODO: also update all entities, needed to drive the reference checkers
 
     (testing "changes to GIS database are synced to event store"
       (let [state (projections/cached-state)]
@@ -671,4 +672,27 @@
     (testing "syncing changes is idempotent"
       (let [state-before (projections/cached-state)]
         (sync-gis-changes!) ;; should not process the already processed changes
-        (is (identical? state-before (projections/cached-state)))))))
+        (is (identical? state-before (projections/cached-state)))))
+
+    (testing "on stream ID conflict a new replacement ID will be generated"
+      (let [conflicting-stream-id (create-congregation-without-user! "foo")]
+        (jdbc/with-db-transaction [conn db-spec]
+          (jdbc/execute! conn ["insert into subregion (id, name, location) values (?, ?, ?::public.geography)"
+                               conflicting-stream-id "Conflicting ID" testdata/wkt-multi-polygon]))
+        (sync-gis-changes!)
+        (let [state (projections/cached-state)
+              replacement-id (-> (set (keys (get-in state [::subregion/subregions cong-id])))
+                                 (disj subregion-id) ; produced by earlier tests
+                                 (first))]
+          (is (some? replacement-id))
+          (is (not= conflicting-stream-id replacement-id))
+          (is (= [{:subregion/id replacement-id
+                   :subregion/name "Conflicting ID"
+                   :subregion/location testdata/wkt-multi-polygon}
+                  {:subregion/id subregion-id
+                   :subregion/name "Somewhere"
+                   :subregion/location testdata/wkt-multi-polygon}]
+                 (->> (vals (get-in state [::subregion/subregions cong-id]))
+                      (sort-by :subregion/name)))))))))
+
+;; TODO: delete territory and then restore it to same congregation
