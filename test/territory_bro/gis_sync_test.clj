@@ -22,6 +22,7 @@
 (def subregion-id (UUID. 0 4))
 (def congregation-boundary-id (UUID. 0 5))
 (def card-minimap-viewport-id (UUID. 0 6))
+(def replacement-id (UUID. 0 0xF))
 
 (def change-id 100)
 (def test-time (Instant/ofEpochSecond 10))
@@ -331,4 +332,99 @@
                 :new nil
                 :processed false
                 :replacement_id nil}
-               (change->command [congregation-created gis-user-created]))))))
+               (change->command [congregation-created gis-user-created])))))
+
+  (testing "replacement ID"
+    (testing "insert"
+      (is (= {:command/type :subregion.command/create-subregion
+              :command/system "territory-bro.gis-sync"
+              :command/user user-id
+              :command/time test-time
+              :congregation/id cong-id
+              :subregion/id replacement-id
+              :subregion/name "Somewhere"
+              :subregion/location testdata/wkt-multi-polygon}
+             (-> {:id change-id
+                  :schema cong-schema
+                  :table "subregion"
+                  :user gis-username
+                  :time test-time
+                  :op :INSERT
+                  :old nil
+                  :new {:id subregion-id
+                        :name "Somewhere"
+                        :location testdata/wkt-multi-polygon}
+                  :processed false
+                  :replacement_id replacement-id}
+                 (change->command [congregation-created gis-user-created])))))
+
+    (testing "update"
+      (is (= {:command/type :subregion.command/update-subregion
+              :command/system "territory-bro.gis-sync"
+              :command/user user-id
+              :command/time test-time
+              :congregation/id cong-id
+              :subregion/id replacement-id
+              :subregion/name "Somewhere"
+              :subregion/location testdata/wkt-multi-polygon}
+             (-> {:id change-id
+                  :schema cong-schema
+                  :table "subregion"
+                  :user gis-username
+                  :time test-time
+                  :op :UPDATE
+                  :old {:id subregion-id
+                        :name ""
+                        :location ""}
+                  :new {:id subregion-id
+                        :name "Somewhere"
+                        :location testdata/wkt-multi-polygon}
+                  :processed false
+                  :replacement_id replacement-id}
+                 (change->command [congregation-created gis-user-created])))))
+
+    (testing "delete"
+      (is (= {:command/type :subregion.command/delete-subregion
+              :command/system "territory-bro.gis-sync"
+              :command/user user-id
+              :command/time test-time
+              :congregation/id cong-id
+              :subregion/id replacement-id}
+             (-> {:id change-id
+                  :schema cong-schema
+                  :table "subregion"
+                  :user gis-username
+                  :time test-time
+                  :op :DELETE
+                  :old {:id subregion-id
+                        :name "Somewhere"
+                        :location testdata/wkt-multi-polygon}
+                  :new nil
+                  :processed false
+                  :replacement_id replacement-id}
+                 (change->command [congregation-created gis-user-created])))))
+
+    (testing "update due to ID replacement"
+      (is (= {:command/type :subregion.command/update-subregion
+              :command/system "territory-bro.gis-sync"
+              :command/user user-id
+              :command/time test-time
+              :congregation/id cong-id
+              :subregion/id replacement-id
+              :subregion/name "Somewhere"
+              :subregion/location testdata/wkt-multi-polygon}
+             (-> {:id change-id
+                  :schema cong-schema
+                  :table "subregion"
+                  :user gis-username
+                  :time test-time
+                  :op :UPDATE
+                  :old {:id subregion-id
+                        :name "Somewhere"
+                        :location testdata/wkt-multi-polygon}
+                  :new {:id replacement-id
+                        :name "Somewhere"
+                        :location testdata/wkt-multi-polygon}
+                  :processed false
+                  :replacement_id replacement-id}
+                 (change->command [congregation-created gis-user-created])))))))
