@@ -5,7 +5,7 @@
 (ns territory-bro.gis-db
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
-            [medley.core :refer [remove-vals]]
+            [medley.core :refer [map-keys remove-vals]]
             [schema.coerce :as coerce]
             [schema.core :as s]
             [territory-bro.db :as db])
@@ -104,22 +104,36 @@
    (s/optional-key :meta) {s/Any s/Any}})
 
 (s/defschema GisChange
-  {:id s/Int
-   :schema s/Str
-   :table (s/enum "territory" "congregation_boundary" "subregion" "card_minimap_viewport")
-   :op (s/enum :INSERT :UPDATE :DELETE)
-   :user s/Str
-   :time Instant
-   :old (s/maybe GisFeature)
-   :new (s/maybe GisFeature)
-   :processed s/Bool
-   :replacement_id (s/maybe s/Uuid)})
+  {:gis-change/id s/Int
+   :gis-change/schema s/Str
+   :gis-change/table (s/enum "territory" "congregation_boundary" "subregion" "card_minimap_viewport")
+   :gis-change/op (s/enum :INSERT :UPDATE :DELETE)
+   :gis-change/user s/Str
+   :gis-change/time Instant
+   :gis-change/old (s/maybe GisFeature)
+   :gis-change/new (s/maybe GisFeature)
+   :gis-change/processed? s/Bool
+   :gis-change/replacement-id (s/maybe s/Uuid)})
 
 (def ^:private gis-change-coercer
   (coerce/coercer! GisChange coerce/string-coercion-matcher))
 
+(def ^:private column->key
+  {:id :gis-change/id
+   :schema :gis-change/schema
+   :table :gis-change/table
+   :op :gis-change/op
+   :user :gis-change/user
+   :time :gis-change/time
+   :old :gis-change/old
+   :new :gis-change/new
+   :processed :gis-change/processed?
+   :replacement_id :gis-change/replacement-id})
+
 (defn- format-gis-change [change]
-  (gis-change-coercer change))
+  (->> change
+       (map-keys #(get column->key % %))
+       (gis-change-coercer)))
 
 (defn get-changes
   ([conn]

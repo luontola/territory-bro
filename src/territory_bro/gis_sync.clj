@@ -18,16 +18,15 @@
 
 (def ^:private system (str (ns-name *ns*)))
 
-(defn- apply-replacement-id [change]
-  (let [replacement-id (:replacement_id change)]
-    (if (some? replacement-id)
-      (cond-> change
-        (some? (:old change)) (assoc-in [:old :id] replacement-id)
-        (some? (:new change)) (assoc-in [:new :id] replacement-id))
-      change)))
+(defn- apply-replacement-id [{:gis-change/keys [replacement-id old new], :as change}]
+  (if (some? replacement-id)
+    (cond-> change
+      (some? old) (assoc-in [:gis-change/old :id] replacement-id)
+      (some? new) (assoc-in [:gis-change/new :id] replacement-id))
+    change))
 
 (defn change->command [change state]
-  (let [{:keys [id schema table user time op old new]} (apply-replacement-id change)
+  (let [{change-id :gis-change/id, :gis-change/keys [schema table user time op old new]} (apply-replacement-id change)
         cong-id (get-in state [::schema->cong-id schema])
         user-id (get-in state [::username->user-id user])
         base-command (cond-> {:command/system system

@@ -126,12 +126,12 @@
 (defn sync-gis-changes! [conn state]
   (let [change (gis-db/next-unprocessed-change conn)]
     (when change
-      (let [new-id (when (= :INSERT (:op change))
-                     (when (nil? (:replacement_id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)
-                       (:id (:new change))))]
+      (let [new-id (when (= :INSERT (:gis-change/op change))
+                     (when (nil? (:gis-change/replacement-id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)
+                       (:id (:gis-change/new change))))]
         (if (and new-id (event-store/stream-exists? conn new-id))
           (let [replacement-id (UUID/randomUUID)
-                {:keys [schema table]} change]
+                {:gis-change/keys [schema table]} change]
             (log/info "Replacing" (str schema "." table) "ID" new-id "with" replacement-id)
             (assert (not (event-store/stream-exists? conn replacement-id))
                     {:replacement-id replacement-id})
@@ -141,7 +141,7 @@
                 events (dispatcher/command! conn state command)
                 ;; the state needs to be updated for e.g. command validation's foreign key checks
                 state (reduce update-projections state events)]
-            (gis-db/mark-changes-processed! conn [(:id change)])
+            (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
             ;; TODO: call (projections/refresh-async!) when transaction finished
             ;; TODO: commit between every change?
             (recur conn state)))))))
