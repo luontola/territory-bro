@@ -639,9 +639,15 @@
     (testing "write to GIS database"
       (jdbc/with-db-transaction [conn db-spec]
         (jdbc/execute! conn ["insert into territory (id, number, addresses, subregion, meta, location) values (?, ?, ?, ?, ?::jsonb, ?::public.geography)"
-                             territory-id "123" "the addresses" "the subregion" {:foo "bar"} testdata/wkt-multi-polygon])
+                             territory-id "123" "the addresses" "the subregion" {:foo "bar"} testdata/wkt-multi-polygon2])
+        (jdbc/execute! conn ["update territory set location = ?::public.geography where id = ?"
+                             testdata/wkt-multi-polygon territory-id])
+
         (jdbc/execute! conn ["insert into subregion (id, name, location) values (?, ?, ?::public.geography)"
-                             subregion-id "Somewhere" testdata/wkt-multi-polygon])
+                             subregion-id "Somewhere" testdata/wkt-multi-polygon2])
+        (jdbc/execute! conn ["update subregion set location = ?::public.geography where id = ?"
+                             testdata/wkt-multi-polygon subregion-id])
+
         (jdbc/execute! conn ["insert into congregation_boundary (id, location) values (?, ?::public.geography)"
                              congregation-boundary-id testdata/wkt-multi-polygon])
         (jdbc/execute! conn ["insert into card_minimap_viewport (id, location) values (?, ?::public.geography)"

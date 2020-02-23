@@ -7,10 +7,10 @@
             [territory-bro.events :as events]
             [territory-bro.territory :as territory]
             [territory-bro.testdata :as testdata]
-            [territory-bro.testutil :as testutil])
+            [territory-bro.testutil :as testutil :refer [re-equals]])
   (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException)))
+           (territory_bro NoPermitException ValidationException)))
 
 (def cong-id (UUID. 0 1))
 (def territory-id (UUID. 0 2))
@@ -69,6 +69,23 @@
         (let [events (conj events territory-deleted)
               expected {}]
           (is (= expected (apply-events events))))))))
+
+
+;;;; Queries
+
+(deftest check-territory-exists-test
+  (let [state (apply-events [territory-defined])]
+
+    (testing "exists"
+      (is (nil? (territory/check-territory-exists state cong-id territory-id))))
+
+    (testing "doesn't exist"
+      (is (thrown-with-msg?
+           ValidationException (re-equals "[[:no-such-territory #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (territory/check-territory-exists state cong-id (UUID. 0 0x666)))))))
+
+
+;;;; Commands
 
 (deftest create-territory-test
   (let [injections {:check-permit (fn [_permit])}

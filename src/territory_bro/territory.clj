@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.territory
-  (:require [medley.core :refer [dissoc-in]]))
+  (:require [medley.core :refer [dissoc-in]])
+  (:import (territory_bro ValidationException)))
 
 ;;;; Read model
 
@@ -28,6 +29,13 @@
 (defmethod projection :territory.event/territory-deleted
   [state event]
   (dissoc-in state [::territories (:congregation/id event) (:territory/id event)]))
+
+
+;;;; Queries
+
+(defn check-territory-exists [state cong-id territory-id]
+  (when (nil? (get-in state [::territories cong-id territory-id]))
+    (throw (ValidationException. [[:no-such-territory cong-id territory-id]]))))
 
 
 ;;;; Write model

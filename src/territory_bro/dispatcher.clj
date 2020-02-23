@@ -35,6 +35,9 @@
    :subregion (fn [subregion-id]
                 (subregion/check-subregion-exists state (:congregation/id command) subregion-id)
                 true)
+   :territory (fn [territory-id]
+                (territory/check-territory-exists state (:congregation/id command) territory-id)
+                true)
    :user (fn [user-id]
            (user/check-user-exists conn user-id)
            true)
