@@ -124,8 +124,7 @@
 ;;;; GIS sync
 
 (defn sync-gis-changes! [conn state]
-  (let [;; TODO: limit 1
-        change (first (gis-db/get-changes conn {:processed? false}))]
+  (let [change (gis-db/next-unprocessed-change conn)]
     (when change
       (let [new-id (when (= :INSERT (:op change))
                      (when (nil? (:replacement_id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)

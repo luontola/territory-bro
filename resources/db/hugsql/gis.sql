@@ -53,7 +53,11 @@ where 1 = 1
 /*~ (when (contains? params :processed?) */
   and processed = :processed?
 /*~ ) ~*/
-order by id;
+order by id
+/*~ (when (contains? params :limit) */
+limit :limit
+/*~ ) ~*/
+;
 
 -- :name mark-changes-processed :!
 update gis_change_log

@@ -101,7 +101,8 @@
     (db/use-tenant-schema conn test-schema)
 
     (testing "before making changes"
-      (is (= [] (gis-db/get-changes conn))))
+      (is (= [] (gis-db/get-changes conn)))
+      (is (nil? (gis-db/next-unprocessed-change conn))))
 
     (testing "territory table change log,"
       (let [territory-id (gis-db/create-territory! conn {:territory/number "123"
@@ -229,18 +230,38 @@
                (gis-db/get-changes conn {:since nil}))
             "since nil")))
 
+    (testing "get changes, limit"
+      (let [all-changes (gis-db/get-changes conn)]
+        (is (= []
+               (gis-db/get-changes conn {:limit 0}))
+            "limit 0")
+        (is (= (take 1 all-changes)
+               (gis-db/get-changes conn {:limit 1}))
+            "limit 1")
+        (is (= (take 2 all-changes)
+               (gis-db/get-changes conn {:limit 2}))
+            "limit 2")
+        ;; in PostgreSQL, LIMIT NULL (or LIMIT ALL) is the same as omitting the LIMIT
+        (is (= all-changes
+               (gis-db/get-changes conn {:limit nil}))
+            "limit nil")))
+
     (testing "marking changes processed"
       (is (= [] (map :id (gis-db/get-changes conn {:processed? true})))
           "processed, before")
       (is (= [1 2 3 4 5 6] (map :id (gis-db/get-changes conn {:processed? false})))
           "unprocessed, before")
+      (is (= 1 (:id (gis-db/next-unprocessed-change conn)))
+          "next unprocessed, before")
 
       (gis-db/mark-changes-processed! conn [1 2 4])
 
       (is (= [1 2 4] (map :id (gis-db/get-changes conn {:processed? true})))
           "processed, after")
       (is (= [3 5 6] (map :id (gis-db/get-changes conn {:processed? false})))
-          "unprocessed, after"))))
+          "unprocessed, after")
+      (is (= 3 (:id (gis-db/next-unprocessed-change conn)))
+          "next unprocessed, after"))))
 
 (deftest gis-change-log-replace-id-test
   (db/with-db [conn {}]

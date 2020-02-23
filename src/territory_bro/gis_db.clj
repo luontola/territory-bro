@@ -129,6 +129,10 @@
         (map format-gis-change)
         (doall))))
 
+(defn next-unprocessed-change [conn]
+  (first (get-changes conn {:processed? false
+                            :limit 1})))
+
 (defn mark-changes-processed! [conn ids]
   (query! conn :mark-changes-processed {:ids ids}))
 
