@@ -29,7 +29,10 @@
    :check-permit #(commands/check-permit state command %)})
 
 (defn- reference-checkers [command conn state]
-  {:congregation-boundary (fn [congregation-boundary-id]
+  {:card-minimap-viewport (fn [card-minimap-viewport-id]
+                            (card-minimap-viewport/check-card-minimap-viewport-exists state (:congregation/id command) card-minimap-viewport-id)
+                            true)
+   :congregation-boundary (fn [congregation-boundary-id]
                             (congregation-boundary/check-congregation-boundary-exists state (:congregation/id command) congregation-boundary-id)
                             true)
    :congregation (fn [cong-id]

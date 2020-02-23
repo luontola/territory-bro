@@ -7,10 +7,10 @@
             [territory-bro.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.events :as events]
             [territory-bro.testdata :as testdata]
-            [territory-bro.testutil :as testutil])
+            [territory-bro.testutil :as testutil :refer [re-equals]])
   (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException)))
+           (territory_bro NoPermitException ValidationException)))
 
 (def cong-id (UUID. 0 1))
 (def card-minimap-viewport-id (UUID. 0 2))
@@ -36,6 +36,9 @@
                                              injections)
        (events/validate-events)))
 
+
+;;;; Projection
+
 (deftest card-minimap-viewport-projection-test
   (testing "created"
     (let [events [card-minimap-viewport-defined]
@@ -55,6 +58,23 @@
         (let [events (conj events card-minimap-viewport-deleted)
               expected {}]
           (is (= expected (apply-events events))))))))
+
+
+;;;; Queries
+
+(deftest check-card-minimap-viewport-exists-test
+  (let [state (apply-events [card-minimap-viewport-defined])]
+
+    (testing "exists"
+      (is (nil? (card-minimap-viewport/check-card-minimap-viewport-exists state cong-id card-minimap-viewport-id))))
+
+    (testing "doesn't exist"
+      (is (thrown-with-msg?
+           ValidationException (re-equals "[[:no-such-card-minimap-viewport #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (card-minimap-viewport/check-card-minimap-viewport-exists state cong-id (UUID. 0 0x666)))))))
+
+
+;;;; Commands
 
 (deftest create-card-minimap-viewport-test
   (let [injections {:check-permit (fn [_permit])}

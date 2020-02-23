@@ -654,9 +654,10 @@
                              testdata/wkt-multi-polygon congregation-boundary-id])
 
         (jdbc/execute! conn ["insert into card_minimap_viewport (id, location) values (?, ?::public.geography)"
-                             card-minimap-viewport-id testdata/wkt-polygon]))
+                             card-minimap-viewport-id testdata/wkt-polygon2])
+        (jdbc/execute! conn ["update card_minimap_viewport set location = ?::public.geography where id = ?"
+                             testdata/wkt-polygon card-minimap-viewport-id]))
       (sync-gis-changes!))
-    ;; TODO: also update all entities, needed to drive the reference checkers
 
     (testing "changes to GIS database are synced to event store"
       (let [state (projections/cached-state)]

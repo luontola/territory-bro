@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.card-minimap-viewport
-  (:require [medley.core :refer [dissoc-in]]))
+  (:require [medley.core :refer [dissoc-in]])
+  (:import (territory_bro ValidationException)))
 
 ;;;; Read model
 
@@ -24,6 +25,13 @@
 (defmethod projection :card-minimap-viewport.event/card-minimap-viewport-deleted
   [state event]
   (dissoc-in state [::card-minimap-viewports (:congregation/id event) (:card-minimap-viewport/id event)]))
+
+
+;;;; Queries
+
+(defn check-card-minimap-viewport-exists [state cong-id card-minimap-viewport-id]
+  (when (nil? (get-in state [::card-minimap-viewports cong-id card-minimap-viewport-id]))
+    (throw (ValidationException. [[:no-such-card-minimap-viewport cong-id card-minimap-viewport-id]]))))
 
 
 ;;;; Write model
