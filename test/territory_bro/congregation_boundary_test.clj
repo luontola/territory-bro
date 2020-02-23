@@ -7,10 +7,10 @@
             [territory-bro.congregation-boundary :as congregation-boundary]
             [territory-bro.events :as events]
             [territory-bro.testdata :as testdata]
-            [territory-bro.testutil :as testutil])
+            [territory-bro.testutil :as testutil :refer [re-equals]])
   (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException)))
+           (territory_bro NoPermitException ValidationException)))
 
 (def cong-id (UUID. 0 1))
 (def congregation-boundary-id (UUID. 0 2))
@@ -36,6 +36,9 @@
                                              injections)
        (events/validate-events)))
 
+
+;;;; Projection
+
 (deftest congregation-boundary-projection-test
   (testing "created"
     (let [events [congregation-boundary-defined]
@@ -55,6 +58,23 @@
         (let [events (conj events congregation-boundary-deleted)
               expected {}]
           (is (= expected (apply-events events))))))))
+
+
+;;;; Queries
+
+(deftest check-congregation-boundary-exists-test
+  (let [state (apply-events [congregation-boundary-defined])]
+
+    (testing "exists"
+      (is (nil? (congregation-boundary/check-congregation-boundary-exists state cong-id congregation-boundary-id))))
+
+    (testing "doesn't exist"
+      (is (thrown-with-msg?
+           ValidationException (re-equals "[[:no-such-congregation-boundary #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (congregation-boundary/check-congregation-boundary-exists state cong-id (UUID. 0 0x666)))))))
+
+
+;;;; Commands
 
 (deftest create-congregation-boundary-test
   (let [injections {:check-permit (fn [_permit])}

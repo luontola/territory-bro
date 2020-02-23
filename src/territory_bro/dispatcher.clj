@@ -29,7 +29,10 @@
    :check-permit #(commands/check-permit state command %)})
 
 (defn- reference-checkers [command conn state]
-  {:congregation (fn [cong-id]
+  {:congregation-boundary (fn [congregation-boundary-id]
+                            (congregation-boundary/check-congregation-boundary-exists state (:congregation/id command) congregation-boundary-id)
+                            true)
+   :congregation (fn [cong-id]
                    (congregation/check-congregation-exists state cong-id)
                    true)
    :subregion (fn [subregion-id]

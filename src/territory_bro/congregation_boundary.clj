@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.congregation-boundary
-  (:require [medley.core :refer [dissoc-in]]))
+  (:require [medley.core :refer [dissoc-in]])
+  (:import (territory_bro ValidationException)))
 
 ;;;; Read model
 
@@ -24,6 +25,13 @@
 (defmethod projection :congregation-boundary.event/congregation-boundary-deleted
   [state event]
   (dissoc-in state [::congregation-boundaries (:congregation/id event) (:congregation-boundary/id event)]))
+
+
+;;;; Queries
+
+(defn check-congregation-boundary-exists [state cong-id congregation-boundary-id]
+  (when (nil? (get-in state [::congregation-boundaries cong-id congregation-boundary-id]))
+    (throw (ValidationException. [[:no-such-congregation-boundary cong-id congregation-boundary-id]]))))
 
 
 ;;;; Write model

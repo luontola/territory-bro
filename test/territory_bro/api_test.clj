@@ -649,7 +649,10 @@
                              testdata/wkt-multi-polygon subregion-id])
 
         (jdbc/execute! conn ["insert into congregation_boundary (id, location) values (?, ?::public.geography)"
-                             congregation-boundary-id testdata/wkt-multi-polygon])
+                             congregation-boundary-id testdata/wkt-multi-polygon2])
+        (jdbc/execute! conn ["update congregation_boundary set location = ?::public.geography where id = ?"
+                             testdata/wkt-multi-polygon congregation-boundary-id])
+
         (jdbc/execute! conn ["insert into card_minimap_viewport (id, location) values (?, ?::public.geography)"
                              card-minimap-viewport-id testdata/wkt-polygon]))
       (sync-gis-changes!))
