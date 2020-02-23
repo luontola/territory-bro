@@ -15,15 +15,18 @@
 (def cong-id (UUID. 0 1))
 (def card-minimap-viewport-id (UUID. 0 2))
 (def user-id (UUID. 0 3))
+(def gis-change-id 42)
 (def card-minimap-viewport-defined
   {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined
    :event/version 1
+   :gis-change/id gis-change-id
    :congregation/id cong-id
    :card-minimap-viewport/id card-minimap-viewport-id
    :card-minimap-viewport/location testdata/wkt-polygon})
 (def card-minimap-viewport-deleted
   {:event/type :card-minimap-viewport.event/card-minimap-viewport-deleted
    :event/version 1
+   :gis-change/id gis-change-id
    :congregation/id cong-id
    :card-minimap-viewport/id card-minimap-viewport-id})
 
@@ -81,6 +84,7 @@
         create-command {:command/type :card-minimap-viewport.command/create-card-minimap-viewport
                         :command/time (Instant/now)
                         :command/user user-id
+                        :gis-change/id gis-change-id
                         :congregation/id cong-id
                         :card-minimap-viewport/id card-minimap-viewport-id
                         :card-minimap-viewport/location testdata/wkt-polygon}]
@@ -104,6 +108,7 @@
         update-command {:command/type :card-minimap-viewport.command/update-card-minimap-viewport
                         :command/time (Instant/now)
                         :command/user user-id
+                        :gis-change/id gis-change-id
                         :congregation/id cong-id
                         :card-minimap-viewport/id card-minimap-viewport-id
                         :card-minimap-viewport/location testdata/wkt-polygon}]
@@ -127,6 +132,7 @@
         delete-command {:command/type :card-minimap-viewport.command/delete-card-minimap-viewport
                         :command/time (Instant/now)
                         :command/user user-id
+                        :gis-change/id gis-change-id
                         :congregation/id cong-id
                         :card-minimap-viewport/id card-minimap-viewport-id}]
 

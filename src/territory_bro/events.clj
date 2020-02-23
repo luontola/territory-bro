@@ -52,7 +52,7 @@
 
 ;;;; Schemas
 
-(s/defschema EventBase
+(s/defschema BaseEvent
   {(s/optional-key :event/stream-id) UUID
    (s/optional-key :event/stream-revision) s/Int
    (s/optional-key :event/global-revision) s/Int
@@ -62,17 +62,21 @@
    (s/optional-key :event/user) UUID
    (s/optional-key :event/system) s/Str})
 
+(s/defschema GisSyncEvent
+  (assoc BaseEvent
+         (s/optional-key :gis-change/id) s/Int))
+
 ;;; Congregation
 
 (s/defschema CongregationCreated
-  (assoc EventBase
+  (assoc BaseEvent
          :event/type (s/eq :congregation.event/congregation-created)
          :event/version (s/eq 1)
          :congregation/id UUID
          :congregation/name s/Str
          :congregation/schema-name s/Str))
 (s/defschema CongregationRenamed
-  (assoc EventBase
+  (assoc BaseEvent
          :event/type (s/eq :congregation.event/congregation-renamed)
          :event/version (s/eq 1)
          :congregation/id UUID
@@ -83,14 +87,14 @@
           :configure-congregation
           :gis-access))
 (s/defschema PermissionGranted
-  (assoc EventBase
+  (assoc BaseEvent
          :event/type (s/eq :congregation.event/permission-granted)
          :event/version (s/eq 1)
          :congregation/id UUID
          :user/id UUID
          :permission/id PermissionId))
 (s/defschema PermissionRevoked
-  (assoc EventBase
+  (assoc BaseEvent
          :event/type (s/eq :congregation.event/permission-revoked)
          :event/version (s/eq 1)
          :congregation/id UUID
@@ -98,7 +102,7 @@
          :permission/id PermissionId))
 
 (s/defschema GisUserCreated
-  (assoc EventBase
+  (assoc BaseEvent
          :event/type (s/eq :congregation.event/gis-user-created)
          :event/version (s/eq 1)
          :congregation/id UUID
@@ -106,7 +110,7 @@
          :gis-user/username s/Str
          :gis-user/password s/Str))
 (s/defschema GisUserDeleted
-  (assoc EventBase
+  (assoc BaseEvent
          :event/type (s/eq :congregation.event/gis-user-deleted)
          :event/version (s/eq 1)
          :congregation/id UUID
@@ -116,7 +120,7 @@
 ;;; Territory
 
 (s/defschema TerritoryDefined
-  (assoc EventBase
+  (assoc GisSyncEvent
          :event/type (s/eq :territory.event/territory-defined)
          :event/version (s/eq 1)
          :congregation/id UUID
@@ -127,7 +131,7 @@
          :territory/meta {s/Keyword json/Schema}
          :territory/location s/Str))
 (s/defschema TerritoryDeleted
-  (assoc EventBase
+  (assoc GisSyncEvent
          :event/type (s/eq :territory.event/territory-deleted)
          :event/version (s/eq 1)
          :congregation/id UUID
@@ -136,7 +140,7 @@
 ;;; Subregion
 
 (s/defschema SubregionDefined
-  (assoc EventBase
+  (assoc GisSyncEvent
          :event/type (s/eq :subregion.event/subregion-defined)
          :event/version (s/eq 1)
          :congregation/id UUID
@@ -144,7 +148,7 @@
          :subregion/name s/Str
          :subregion/location s/Str))
 (s/defschema SubregionDeleted
-  (assoc EventBase
+  (assoc GisSyncEvent
          :event/type (s/eq :subregion.event/subregion-deleted)
          :event/version (s/eq 1)
          :congregation/id UUID
@@ -153,14 +157,14 @@
 ;;; Congregation Boundary
 
 (s/defschema CongregationBoundaryDefined
-  (assoc EventBase
+  (assoc GisSyncEvent
          :event/type (s/eq :congregation-boundary.event/congregation-boundary-defined)
          :event/version (s/eq 1)
          :congregation/id UUID
          :congregation-boundary/id UUID
          :congregation-boundary/location s/Str))
 (s/defschema CongregationBoundaryDeleted
-  (assoc EventBase
+  (assoc GisSyncEvent
          :event/type (s/eq :congregation-boundary.event/congregation-boundary-deleted)
          :event/version (s/eq 1)
          :congregation/id UUID
@@ -169,14 +173,14 @@
 ;;; Card Minimap Viewport
 
 (s/defschema CardMinimapViewportDefined
-  (assoc EventBase
+  (assoc GisSyncEvent
          :event/type (s/eq :card-minimap-viewport.event/card-minimap-viewport-defined)
          :event/version (s/eq 1)
          :congregation/id UUID
          :card-minimap-viewport/id UUID
          :card-minimap-viewport/location s/Str))
 (s/defschema CardMinimapViewportDeleted
-  (assoc EventBase
+  (assoc GisSyncEvent
          :event/type (s/eq :card-minimap-viewport.event/card-minimap-viewport-deleted)
          :event/version (s/eq 1)
          :congregation/id UUID
@@ -185,14 +189,14 @@
 ;;; DB Admin
 
 (s/defschema GisSchemaIsPresent
-  (assoc EventBase
+  (assoc BaseEvent
          :event/type (s/eq :db-admin.event/gis-schema-is-present)
          :event/version (s/eq 1)
          :event/transient? (s/eq true)
          :congregation/id UUID
          :congregation/schema-name s/Str))
 (s/defschema GisUserIsPresent
-  (assoc EventBase
+  (assoc BaseEvent
          :event/type (s/eq :db-admin.event/gis-user-is-present)
          :event/version (s/eq 1)
          :event/transient? (s/eq true)
@@ -200,7 +204,7 @@
          :user/id UUID
          :gis-user/username s/Str))
 (s/defschema GisUserIsAbsent
-  (assoc EventBase
+  (assoc BaseEvent
          :event/type (s/eq :db-admin.event/gis-user-is-absent)
          :event/version (s/eq 1)
          :event/transient? (s/eq true)
@@ -238,7 +242,7 @@
 
 (s/defschema EnrichedEvent
   (s/constrained
-   (-> EventBase
+   (-> BaseEvent
        (required-key :event/time)
        (assoc s/Any s/Any))
    (fn [event]
@@ -289,7 +293,7 @@
       (coerce/string-coercion-matcher schema)))
 
 (def ^:private coerce-event-commons
-  (coerce/coercer! (tools/open-schema EventBase) coercion-matcher))
+  (coerce/coercer! (tools/open-schema BaseEvent) coercion-matcher))
 
 (def ^:private coerce-event-specifics
   (coerce/coercer! Event coercion-matcher))

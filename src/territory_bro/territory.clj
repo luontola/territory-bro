@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.territory
-  (:require [medley.core :refer [dissoc-in]])
+  (:require [medley.core :refer [dissoc-in]]
+            [territory-bro.gis-sync :as gis-sync])
   (:import (territory_bro ValidationException)))
 
 ;;;; Read model
@@ -67,6 +68,7 @@
                :event/version 1
                :congregation/id cong-id
                :territory/id territory-id}
+              (gis-sync/event-metadata command)
               (select-keys command data-keys))])))
 
 (defmethod command-handler :territory.command/update-territory
@@ -81,6 +83,7 @@
                :event/version 1
                :congregation/id cong-id
                :territory/id territory-id}
+              (gis-sync/event-metadata command)
               new-data)])))
 
 (defmethod command-handler :territory.command/delete-territory
@@ -89,10 +92,11 @@
         territory-id (:territory/id command)]
     (check-permit [:delete-territory cong-id territory-id])
     (when (some? territory)
-      [{:event/type :territory.event/territory-deleted
-        :event/version 1
-        :congregation/id cong-id
-        :territory/id territory-id}])))
+      [(merge {:event/type :territory.event/territory-deleted
+               :event/version 1
+               :congregation/id cong-id
+               :territory/id territory-id}
+              (gis-sync/event-metadata command))])))
 
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))

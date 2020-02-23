@@ -39,6 +39,10 @@
    (s/optional-key :command/user) (foreign-key/references :user UUID)
    (s/optional-key :command/system) s/Str})
 
+(s/defschema GisSyncCommand
+  (assoc BaseCommand
+         (s/optional-key :gis-change/id) s/Int))
+
 ;;; Congregation
 
 (s/defschema CreateCongregation
@@ -108,7 +112,7 @@
 ;;; Territory
 
 (s/defschema CreateTerritory
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :territory.command/create-territory)
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :new UUID)
@@ -119,7 +123,7 @@
          :territory/location s/Str))
 
 (s/defschema UpdateTerritory
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :territory.command/update-territory)
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)
@@ -130,7 +134,7 @@
          :territory/location s/Str))
 
 (s/defschema DeleteTerritory
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :territory.command/delete-territory)
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)))
@@ -138,7 +142,7 @@
 ;;; Subregion
 
 (s/defschema CreateSubregion
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :subregion.command/create-subregion)
          :congregation/id (foreign-key/references :congregation UUID)
          :subregion/id (foreign-key/references :new UUID)
@@ -146,7 +150,7 @@
          :subregion/location s/Str))
 
 (s/defschema UpdateSubregion
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :subregion.command/update-subregion)
          :congregation/id (foreign-key/references :congregation UUID)
          :subregion/id (foreign-key/references :subregion UUID)
@@ -154,7 +158,7 @@
          :subregion/location s/Str))
 
 (s/defschema DeleteSubregion
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :subregion.command/delete-subregion)
          :congregation/id (foreign-key/references :congregation UUID)
          :subregion/id (foreign-key/references :subregion UUID)))
@@ -162,21 +166,21 @@
 ;;; Congregation Boundary
 
 (s/defschema CreateCongregationBoundary
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :congregation-boundary.command/create-congregation-boundary)
          :congregation/id (foreign-key/references :congregation UUID)
          :congregation-boundary/id (foreign-key/references :new UUID)
          :congregation-boundary/location s/Str))
 
 (s/defschema UpdateCongregationBoundary
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :congregation-boundary.command/update-congregation-boundary)
          :congregation/id (foreign-key/references :congregation UUID)
          :congregation-boundary/id (foreign-key/references :congregation-boundary UUID)
          :congregation-boundary/location s/Str))
 
 (s/defschema DeleteCongregationBoundary
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :congregation-boundary.command/delete-congregation-boundary)
          :congregation/id (foreign-key/references :congregation UUID)
          :congregation-boundary/id (foreign-key/references :congregation-boundary UUID)))
@@ -184,21 +188,21 @@
 ;;; Card Minimap Viewport
 
 (s/defschema CreateCardMinimapViewport
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :card-minimap-viewport.command/create-card-minimap-viewport)
          :congregation/id (foreign-key/references :congregation UUID)
          :card-minimap-viewport/id (foreign-key/references :new UUID)
          :card-minimap-viewport/location s/Str))
 
 (s/defschema UpdateCardMinimapViewport
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :card-minimap-viewport.command/update-card-minimap-viewport)
          :congregation/id (foreign-key/references :congregation UUID)
          :card-minimap-viewport/id (foreign-key/references :card-minimap-viewport UUID)
          :card-minimap-viewport/location s/Str))
 
 (s/defschema DeleteCardMinimapViewport
-  (assoc BaseCommand
+  (assoc GisSyncCommand
          :command/type (s/eq :card-minimap-viewport.command/delete-card-minimap-viewport)
          :congregation/id (foreign-key/references :congregation UUID)
          :card-minimap-viewport/id (foreign-key/references :card-minimap-viewport UUID)))

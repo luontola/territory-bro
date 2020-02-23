@@ -31,6 +31,7 @@
         user-id (get-in state [::username->user-id user])
         base-command (cond-> {:command/system system
                               :command/time time
+                              :gis-change/id change-id
                               :congregation/id cong-id}
                        (some? user-id) (assoc :command/user user-id))]
     ;; TODO: add {:gis-change/id id} to all commands and events for traceability?
@@ -84,3 +85,6 @@
             (some? old) (assoc :card-minimap-viewport/id (:id old))
             (some? new) (assoc :card-minimap-viewport/id (:id new)
                                :card-minimap-viewport/location (:location new)))))))
+
+(defn event-metadata [command]
+  (select-keys command [:gis-change/id]))

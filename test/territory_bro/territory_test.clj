@@ -15,19 +15,24 @@
 (def cong-id (UUID. 0 1))
 (def territory-id (UUID. 0 2))
 (def user-id (UUID. 0 3))
-(def territory-defined {:event/type :territory.event/territory-defined
-                        :event/version 1
-                        :congregation/id cong-id
-                        :territory/id territory-id
-                        :territory/number "123"
-                        :territory/addresses "the addresses"
-                        :territory/subregion "the subregion"
-                        :territory/meta {:foo "bar"}
-                        :territory/location testdata/wkt-multi-polygon})
-(def territory-deleted {:event/type :territory.event/territory-deleted
-                        :event/version 1
-                        :congregation/id cong-id
-                        :territory/id territory-id})
+(def gis-change-id 42)
+(def territory-defined
+  {:event/type :territory.event/territory-defined
+   :event/version 1
+   :gis-change/id gis-change-id
+   :congregation/id cong-id
+   :territory/id territory-id
+   :territory/number "123"
+   :territory/addresses "the addresses"
+   :territory/subregion "the subregion"
+   :territory/meta {:foo "bar"}
+   :territory/location testdata/wkt-multi-polygon})
+(def territory-deleted
+  {:event/type :territory.event/territory-deleted
+   :event/version 1
+   :gis-change/id gis-change-id
+   :congregation/id cong-id
+   :territory/id territory-id})
 
 (defn- apply-events [events]
   (testutil/apply-events territory/projection events))
@@ -92,6 +97,7 @@
         create-command {:command/type :territory.command/create-territory
                         :command/time (Instant/now)
                         :command/user user-id
+                        :gis-change/id gis-change-id
                         :congregation/id cong-id
                         :territory/id territory-id
                         :territory/number "123"
@@ -119,6 +125,7 @@
         update-command {:command/type :territory.command/update-territory
                         :command/time (Instant/now)
                         :command/user user-id
+                        :gis-change/id gis-change-id
                         :congregation/id cong-id
                         :territory/id territory-id
                         :territory/number "123"
@@ -162,6 +169,7 @@
         delete-command {:command/type :territory.command/delete-territory
                         :command/time (Instant/now)
                         :command/user user-id
+                        :gis-change/id gis-change-id
                         :congregation/id cong-id
                         :territory/id territory-id}]
 

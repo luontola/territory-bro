@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.subregion
-  (:require [medley.core :refer [dissoc-in]])
+  (:require [medley.core :refer [dissoc-in]]
+            [territory-bro.gis-sync :as gis-sync])
   (:import (territory_bro ValidationException)))
 
 ;;;; Read model
@@ -61,6 +62,7 @@
                :event/version 1
                :congregation/id cong-id
                :subregion/id subregion-id}
+              (gis-sync/event-metadata command)
               (select-keys command data-keys))])))
 
 (defmethod command-handler :subregion.command/update-subregion
@@ -75,6 +77,7 @@
                :event/version 1
                :congregation/id cong-id
                :subregion/id subregion-id}
+              (gis-sync/event-metadata command)
               new-data)])))
 
 (defmethod command-handler :subregion.command/delete-subregion
@@ -83,10 +86,11 @@
         subregion-id (:subregion/id command)]
     (check-permit [:delete-subregion cong-id subregion-id])
     (when (some? subregion)
-      [{:event/type :subregion.event/subregion-deleted
-        :event/version 1
-        :congregation/id cong-id
-        :subregion/id subregion-id}])))
+      [(merge {:event/type :subregion.event/subregion-deleted
+               :event/version 1
+               :congregation/id cong-id
+               :subregion/id subregion-id}
+              (gis-sync/event-metadata command))])))
 
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))

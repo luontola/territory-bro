@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.card-minimap-viewport
-  (:require [medley.core :refer [dissoc-in]])
+  (:require [medley.core :refer [dissoc-in]]
+            [territory-bro.gis-sync :as gis-sync])
   (:import (territory_bro ValidationException)))
 
 ;;;; Read model
@@ -59,6 +60,7 @@
                :event/version 1
                :congregation/id cong-id
                :card-minimap-viewport/id card-minimap-viewport-id}
+              (gis-sync/event-metadata command)
               (select-keys command data-keys))])))
 
 (defmethod command-handler :card-minimap-viewport.command/update-card-minimap-viewport
@@ -73,6 +75,7 @@
                :event/version 1
                :congregation/id cong-id
                :card-minimap-viewport/id card-minimap-viewport-id}
+              (gis-sync/event-metadata command)
               new-data)])))
 
 (defmethod command-handler :card-minimap-viewport.command/delete-card-minimap-viewport
@@ -81,10 +84,11 @@
         card-minimap-viewport-id (:card-minimap-viewport/id command)]
     (check-permit [:delete-card-minimap-viewport cong-id card-minimap-viewport-id])
     (when (some? card-minimap-viewport)
-      [{:event/type :card-minimap-viewport.event/card-minimap-viewport-deleted
-        :event/version 1
-        :congregation/id cong-id
-        :card-minimap-viewport/id card-minimap-viewport-id}])))
+      [(merge {:event/type :card-minimap-viewport.event/card-minimap-viewport-deleted
+               :event/version 1
+               :congregation/id cong-id
+               :card-minimap-viewport/id card-minimap-viewport-id}
+              (gis-sync/event-metadata command))])))
 
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))

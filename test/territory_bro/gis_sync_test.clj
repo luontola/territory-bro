@@ -57,6 +57,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :territory/id territory-id
             :territory/number "123"
@@ -86,6 +87,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :territory/id territory-id
             :territory/number "123"
@@ -120,6 +122,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :territory/id territory-id}
            (-> {:gis-change/id change-id
@@ -144,6 +147,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :subregion/id subregion-id
             :subregion/name "Somewhere"
@@ -167,6 +171,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :subregion/id subregion-id
             :subregion/name "Somewhere"
@@ -192,6 +197,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :subregion/id subregion-id}
            (-> {:gis-change/id change-id
@@ -213,6 +219,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :congregation-boundary/id congregation-boundary-id
             :congregation-boundary/location testdata/wkt-multi-polygon}
@@ -234,6 +241,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :congregation-boundary/id congregation-boundary-id
             :congregation-boundary/location testdata/wkt-multi-polygon}
@@ -256,6 +264,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :congregation-boundary/id congregation-boundary-id}
            (-> {:gis-change/id change-id
@@ -276,6 +285,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :card-minimap-viewport/id card-minimap-viewport-id
             :card-minimap-viewport/location testdata/wkt-polygon}
@@ -297,6 +307,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :card-minimap-viewport/id card-minimap-viewport-id
             :card-minimap-viewport/location testdata/wkt-polygon}
@@ -319,6 +330,7 @@
             :command/system "territory-bro.gis-sync"
             :command/user user-id
             :command/time test-time
+            :gis-change/id change-id
             :congregation/id cong-id
             :card-minimap-viewport/id card-minimap-viewport-id}
            (-> {:gis-change/id change-id
@@ -340,6 +352,7 @@
               :command/system "territory-bro.gis-sync"
               :command/user user-id
               :command/time test-time
+              :gis-change/id change-id
               :congregation/id cong-id
               :subregion/id replacement-id
               :subregion/name "Somewhere"
@@ -363,6 +376,7 @@
               :command/system "territory-bro.gis-sync"
               :command/user user-id
               :command/time test-time
+              :gis-change/id change-id
               :congregation/id cong-id
               :subregion/id replacement-id
               :subregion/name "Somewhere"
@@ -388,6 +402,7 @@
               :command/system "territory-bro.gis-sync"
               :command/user user-id
               :command/time test-time
+              :gis-change/id change-id
               :congregation/id cong-id
               :subregion/id replacement-id}
              (-> {:gis-change/id change-id
@@ -409,6 +424,7 @@
               :command/system "territory-bro.gis-sync"
               :command/user user-id
               :command/time test-time
+              :gis-change/id change-id
               :congregation/id cong-id
               :subregion/id replacement-id
               :subregion/name "Somewhere"

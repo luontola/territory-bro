@@ -15,16 +15,21 @@
 (def cong-id (UUID. 0 1))
 (def subregion-id (UUID. 0 2))
 (def user-id (UUID. 0 3))
-(def subregion-defined {:event/type :subregion.event/subregion-defined
-                        :event/version 1
-                        :congregation/id cong-id
-                        :subregion/id subregion-id
-                        :subregion/name "the name"
-                        :subregion/location testdata/wkt-multi-polygon})
-(def subregion-deleted {:event/type :subregion.event/subregion-deleted
-                        :event/version 1
-                        :congregation/id cong-id
-                        :subregion/id subregion-id})
+(def gis-change-id 42)
+(def subregion-defined
+  {:event/type :subregion.event/subregion-defined
+   :event/version 1
+   :gis-change/id gis-change-id
+   :congregation/id cong-id
+   :subregion/id subregion-id
+   :subregion/name "the name"
+   :subregion/location testdata/wkt-multi-polygon})
+(def subregion-deleted
+  {:event/type :subregion.event/subregion-deleted
+   :event/version 1
+   :gis-change/id gis-change-id
+   :congregation/id cong-id
+   :subregion/id subregion-id})
 
 (defn- apply-events [events]
   (testutil/apply-events subregion/projection events))
@@ -85,6 +90,7 @@
         create-command {:command/type :subregion.command/create-subregion
                         :command/time (Instant/now)
                         :command/user user-id
+                        :gis-change/id gis-change-id
                         :congregation/id cong-id
                         :subregion/id subregion-id
                         :subregion/name "the name"
@@ -109,6 +115,7 @@
         update-command {:command/type :subregion.command/update-subregion
                         :command/time (Instant/now)
                         :command/user user-id
+                        :gis-change/id gis-change-id
                         :congregation/id cong-id
                         :subregion/id subregion-id
                         :subregion/name "the name"
@@ -137,6 +144,7 @@
         delete-command {:command/type :subregion.command/delete-subregion
                         :command/time (Instant/now)
                         :command/user user-id
+                        :gis-change/id gis-change-id
                         :congregation/id cong-id
                         :subregion/id subregion-id}]
 
