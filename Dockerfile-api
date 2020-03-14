@@ -34,6 +34,6 @@ EXPOSE 8080
 ENV PORT=8080 \
     NREPL_BIND=0.0.0.0 \
     DATABASE_URL="jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
-ENTRYPOINT ["java", "-Xmx50m", "--illegal-access=deny", "-jar", "territory-bro.jar"]
+ENTRYPOINT ["java", "--illegal-access=deny", "-jar", "territory-bro.jar"]
 
 COPY --from=builder /project/target/uberjar/territory-bro.jar /app/territory-bro.jar
