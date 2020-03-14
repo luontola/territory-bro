@@ -4,7 +4,6 @@
 
 (ns territory-bro.api
   (:require [camel-snake-kebab.core :as csk]
-            [clojure.test :refer :all]
             [clojure.tools.logging :as log]
             [compojure.core :refer [defroutes GET POST ANY]]
             [liberator.core :refer [defresource]]
@@ -19,7 +18,6 @@
             [territory-bro.congregation-boundary :as congregation-boundary]
             [territory-bro.db :as db]
             [territory-bro.dispatcher :as dispatcher]
-            [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.jwt :as jwt]
             [territory-bro.permissions :as permissions]
@@ -188,35 +186,17 @@
 
 (defn- fetch-congregation [conn state user-id congregation]
   (let [cong-id (:congregation/id congregation)]
-    (db/use-tenant-schema conn (:congregation/schema-name congregation))
     {:id (:congregation/id congregation)
      :name (:congregation/name congregation)
      :permissions (->> (permissions/list-permissions state user-id [cong-id])
                        (map (fn [permission]
                               [permission true]))
                        (into {}))
-     :territories (gis-db/get-territories conn)
-     :congregation-boundaries (gis-db/get-congregation-boundaries conn)
-     :subregions (gis-db/get-subregions conn)
-     :card-minimap-viewports (gis-db/get-card-minimap-viewports conn)
-     :users (->> (user/get-users conn {:ids (congregation/get-users state cong-id)})
-                 (map (fn [user]
-                        (-> (:user/attributes user)
-                            (assoc :id (:user/id user))
-                            (assoc :sub (:user/subject user))))))}))
-
-(defn- fetch-congregation2 [conn state user-id congregation]
-  (let [cong-id (:congregation/id congregation)]
-    {:id (:congregation/id congregation)
-     :name (:congregation/name congregation)
-     :permissions (->> (permissions/list-permissions state user-id [cong-id])
-                       (map (fn [permission]
-                              [permission true]))
-                       (into {}))
-     :territories (vec (vals (get-in state [::territory/territories cong-id])))
-     :congregation-boundaries (vec (vals (get-in state [::congregation-boundary/congregation-boundaries cong-id])))
-     :subregions (vec (vals (get-in state [::subregion/subregions cong-id])))
-     :card-minimap-viewports (vec (vals (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id])))
+     ;; TODO: extract query functions
+     :territories (sequence (vals (get-in state [::territory/territories cong-id])))
+     :congregation-boundaries (sequence (vals (get-in state [::congregation-boundary/congregation-boundaries cong-id])))
+     :subregions (sequence (vals (get-in state [::subregion/subregions cong-id])))
+     :card-minimap-viewports (sequence (vals (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id])))
      :users (->> (user/get-users conn {:ids (congregation/get-users state cong-id)})
                  (map (fn [user]
                         (-> (:user/attributes user)
@@ -235,10 +215,7 @@
             congregation (congregation/get-my-congregation state cong-id user-id)]
         (when-not congregation
           (forbidden! "No congregation access"))
-        (ok (-> ((if (contains? (:query-params request) "new") ; TODO: remove old impl
-                   fetch-congregation2
-                   fetch-congregation)
-                 conn state user-id congregation)
+        (ok (-> (fetch-congregation conn state user-id congregation)
                 (format-for-api)
                 (validate-congregation)))))))
 
@@ -376,23 +353,3 @@
   (db/with-db [conn {:read-only? true}]
     (->> (user/get-users conn)
          (filter #(= "" (:name (:user/attributes %)))))))
-
-(deftest test-api-equivalence
-  (let [state (projections/cached-state)]
-    (db/with-db [conn {}]
-      (doseq [cong (congregation/get-unrestricted-congregations state)]
-        (testing (str (:congregation/id cong) " " (:congregation/name cong))
-          (is (= (-> (fetch-congregation conn state nil cong)
-                     (update :territories #(sort-by :territory/id %))
-                     (update :congregation-boundaries #(sort-by :region/id %))
-                     (update :subregions #(sort-by :region/id %))
-                     (update :card-minimap-viewports #(sort-by :region/id %))
-                     (format-for-api))
-                 (-> (fetch-congregation2 conn state nil cong)
-                     (update :territories #(sort-by :territory/id %))
-                     (update :congregation-boundaries #(sort-by :congregation-boundary/id %))
-                     (update :subregions #(sort-by :subregion/id %))
-                     (update :card-minimap-viewports #(sort-by :card-minimap-viewport/id %))
-                     (format-for-api)))))))))
-
-(test-api-equivalence)
