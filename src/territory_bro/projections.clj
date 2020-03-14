@@ -123,25 +123,51 @@
 
 ;;;; GIS sync
 
-(defn sync-gis-changes! [conn state]
-  (let [change (gis-db/next-unprocessed-change conn)]
-    (when change
-      (let [new-id (when (= :INSERT (:gis-change/op change))
-                     (when (nil? (:gis-change/replacement-id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)
-                       (:id (:gis-change/new change))))]
-        (if (and new-id (event-store/stream-exists? conn new-id))
-          (let [replacement-id (UUID/randomUUID)
-                {:gis-change/keys [schema table]} change]
-            (log/info "Replacing" (str schema "." table) "ID" new-id "with" replacement-id)
-            (assert (not (event-store/stream-exists? conn replacement-id))
-                    {:replacement-id replacement-id})
-            (gis-db/replace-id! conn schema table new-id replacement-id)
-            (recur conn state))
-          (let [command (gis-sync/change->command change state)
-                events (dispatcher/command! conn state command)
-                ;; the state needs to be updated for e.g. command validation's foreign key checks
-                state (reduce update-projections state events)]
-            (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
-            ;; TODO: call (projections/refresh-async!) when transaction finished
-            ;; TODO: commit between every change?
-            (recur conn state)))))))
+;; TODO: extract to a new namespace?
+(defn refresh-gis-changes!
+  ([]
+   (log/info "Refreshing GIS changes")
+   (db/with-db [conn {}]
+     (refresh-gis-changes! conn (cached-state)))
+   ;; TODO: refresh only if there were some changes
+   (refresh-async!))
+  ([conn state]
+   (let [change (gis-db/next-unprocessed-change conn)]
+     (when change
+       (let [new-id (when (= :INSERT (:gis-change/op change))
+                      (when (nil? (:gis-change/replacement-id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)
+                        (:id (:gis-change/new change))))]
+         (if (and new-id (event-store/stream-exists? conn new-id))
+           (let [replacement-id (UUID/randomUUID)
+                 {:gis-change/keys [schema table]} change]
+             (log/info "Replacing" (str schema "." table) "ID" new-id "with" replacement-id)
+             (assert (not (event-store/stream-exists? conn replacement-id))
+                     {:replacement-id replacement-id})
+             (gis-db/replace-id! conn schema table new-id replacement-id)
+             (recur conn state))
+           (let [command (gis-sync/change->command change state)
+                 events (dispatcher/command! conn state command)
+                 ;; the state needs to be updated for e.g. command validation's foreign key checks
+                 state (reduce update-projections state events)]
+             (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
+             ;; TODO: commit between every change?
+             (recur conn state))))))))
+
+(mount/defstate gis-refresher
+  :start (poller/create refresh-gis-changes!)
+  :stop (poller/shutdown! gis-refresher))
+
+(defn refresh-gis-async! []
+  (poller/trigger! gis-refresher))
+
+(defn await-gis-refreshed [^Duration duration]
+  (poller/await gis-refresher duration))
+
+(mount/defstate scheduled-gis-refresh
+  :start (doto (Executors/newScheduledThreadPool 1 (-> (ThreadFactoryBuilder.)
+                                                       (.setNameFormat "territory-bro.projections/scheduled-gis-refresh")
+                                                       (.setDaemon true)
+                                                       (.build)))
+           ;; TODO: increase to 60 seconds once we have a non-polling trigger mechanism
+           (.scheduleWithFixedDelay refresh-gis-async! 0 10 TimeUnit/SECONDS))
+  :stop (.shutdown ^ScheduledExecutorService scheduled-gis-refresh))

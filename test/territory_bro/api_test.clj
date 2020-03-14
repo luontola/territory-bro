@@ -81,8 +81,7 @@
   (projections/await-refreshed (Duration/ofSeconds 10)))
 
 (defn sync-gis-changes! []
-  (db/with-db [conn {}]
-    (projections/sync-gis-changes! conn (projections/cached-state)))
+  (projections/refresh-gis-changes!)
   (refresh-projections!))
 
 

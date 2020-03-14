@@ -34,7 +34,8 @@
   (db/check-database-version 11)
   (db/migrate-master-schema!)
   ;; process managers will migrate tenant schemas and create missing GIS users
-  (projections/refresh!))
+  (projections/refresh!)
+  (projections/refresh-gis-changes!))
 
 (defn- log-mount-states [result]
   (doseq [component (:started result)]
@@ -49,7 +50,9 @@
 (defn start-app []
   (try
     ;; start the public API only after the database is ready
-    (log-mount-states (mount/start-without #'http-server #'projections/scheduled-refresh))
+    (log-mount-states (mount/start-without #'http-server
+                                           #'projections/scheduled-refresh
+                                           #'projections/scheduled-gis-refresh))
     (migrate-database!)
     (log-mount-states (mount/start))
 
