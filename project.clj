@@ -39,6 +39,8 @@
                  [ring-logger "1.0.1"]
                  [ring/ring-core "1.8.0"]
                  [ring/ring-defaults "0.3.2"]]
+  ;; TODO: use managed dependencies to solve version conflicts, have no version numbers elsewhere
+  :pedantic? :warn
 
   :min-lein-version "2.0.0"
 
