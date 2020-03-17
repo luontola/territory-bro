@@ -9,19 +9,19 @@
 
   :dependencies [[camel-snake-kebab "0.4.1"]
                  [com.attendify/schema-refined "0.3.0-alpha4"]
-                 [com.auth0/java-jwt "3.9.0"]
-                 [com.auth0/jwks-rsa "0.10.0"]
-                 [com.fasterxml.jackson.core/jackson-core "2.10.2"]
-                 [com.fasterxml.jackson.core/jackson-databind "2.10.2"]
-                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.10.2"]
+                 [com.auth0/java-jwt "3.10.1"]
+                 [com.auth0/jwks-rsa "0.11.0"]
+                 [com.fasterxml.jackson.core/jackson-core "2.10.3"]
+                 [com.fasterxml.jackson.core/jackson-databind "2.10.3"]
+                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.10.3"]
                  [com.layerware/hugsql "0.5.1"]
                  [compojure "1.6.1"]
                  [conman "0.8.4"]
-                 [cprop "0.1.15"]
+                 [cprop "0.1.16"]
                  [liberator "0.15.3"]
                  [luminus-immutant "0.2.5"]
                  [luminus-nrepl "0.1.6"]
-                 [medley "1.2.0"]
+                 [medley "1.3.0"]
                  [metosin/jsonista "0.2.5"]
                  [metosin/ring-http-response "0.9.1"]
                  [metosin/ring-middleware-format "0.6.0"] ;; TODO: replace with newer library
@@ -29,12 +29,12 @@
                  [mount "0.1.16"]
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.10.1"]
-                 [org.clojure/data.json "0.2.7"]
-                 [org.clojure/tools.cli "0.4.2"]
-                 [org.clojure/tools.logging "0.6.0"]
+                 [org.clojure/data.json "1.0.0"]
+                 [org.clojure/tools.cli "1.0.194"]
+                 [org.clojure/tools.logging "1.0.0"]
                  [org.clojure/tools.reader "1.3.2"] ;; XXX: overrides old version from metosin/ring-middleware-format
-                 [org.flywaydb/flyway-core "6.2.3"]
-                 [org.postgresql/postgresql "42.2.10"]
+                 [org.flywaydb/flyway-core "6.3.1"]
+                 [org.postgresql/postgresql "42.2.11"]
                  [prismatic/schema "1.1.12"]
                  [ring-logger "1.0.1"]
                  [ring/ring-core "1.8.0"]
@@ -63,7 +63,7 @@
                        :uberjar-name "territory-bro.jar"}
 
              :dev {:dependencies [[com.github.kyleburton/clj-xpath "1.4.11"]
-                                  [org.clojure/test.check "0.10.0"]
+                                  [org.clojure/test.check "1.0.0"]
                                   [prismatic/schema-generators "0.1.3"]
                                   [ring/ring-devel "1.8.0" :exclusions [ns-tracker]]
                                   [ring/ring-mock "0.4.0"]]
@@ -78,4 +78,4 @@
                                           "--illegal-access=deny"]}
 
              :kaocha [:test :kaocha0]
-             :kaocha0 {:dependencies [[lambdaisland/kaocha "0.0-590"]]}})
+             :kaocha0 {:dependencies [[lambdaisland/kaocha "0.0-601"]]}})

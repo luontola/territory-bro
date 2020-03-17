@@ -5,9 +5,10 @@
 (ns territory-bro.jwt-test
   (:require [clojure.test :refer :all]
             [territory-bro.jwt :as jwt :refer :all]
-            [territory-bro.testutil :refer [re-equals]])
+            [territory-bro.testutil :refer [re-equals]]
+            [clojure.string :as str])
   (:import (com.auth0.jwk JwkProvider Jwk)
-           (java.util Map)
+           (java.util Map Base64)
            (java.time Instant)
            (com.auth0.jwt.exceptions SignatureVerificationException TokenExpiredException InvalidClaimException)))
 
@@ -34,6 +35,18 @@
         (.setAccessible m true)
         (.invoke m nil (into-array [jwk]))))))
 
+(defn- base64-url-decode ^bytes [^String s]
+  (.decode (Base64/getUrlDecoder) s))
+
+(defn- base64-url-encode ^String [^bytes bs]
+  (.encodeToString (Base64/getUrlEncoder) bs))
+
+(defn- mutate-jwt-signature [token]
+  (let [[header payload signature] (str/split token #"\.")
+        sig (base64-url-decode signature)]
+    (aset-byte sig 0 (inc (aget sig 0)))
+    (str header "." payload "." (base64-url-encode sig))))
+
 (deftest jwt-validate-test
   (binding [jwk-provider fake-jwk-provider]
     (testing "decodes valid tokens"
@@ -45,7 +58,7 @@
 
     (testing "verifies token signature"
       (is (thrown-with-msg? SignatureVerificationException #"The Token's Signature resulted invalid"
-                            (jwt/validate (clojure.string/replace token #"A$" "a") env))))
+                            (jwt/validate (mutate-jwt-signature token) env))))
 
     (testing "validates token expiration"
       (is (thrown-with-msg? TokenExpiredException #"The Token has expired"
