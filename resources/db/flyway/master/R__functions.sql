@@ -25,6 +25,8 @@ begin
                else jsonb_set(row_to_json(new)::jsonb, '{location}', to_jsonb(public.ST_AsText(new.location)))
                end;
 
+    notify gis_change;
+
     return null;
 end
 $$ language plpgsql security definer;

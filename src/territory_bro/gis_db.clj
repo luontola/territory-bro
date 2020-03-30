@@ -9,8 +9,9 @@
             [schema.coerce :as coerce]
             [schema.core :as s]
             [territory-bro.db :as db])
-  (:import (java.time Instant)
+  (:import (java.time Instant Duration)
            (java.util UUID)
+           (org.postgresql PGNotification PGConnection)
            (org.postgresql.util PSQLException)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/gis.sql"))
@@ -158,6 +159,23 @@
                                        :table table
                                        :old_id old-id
                                        :new_id new-id}))
+
+(defn listen-for-gis-changes [notify]
+  (jdbc/with-db-connection [conn db/database {}]
+    (db/use-master-schema conn)
+    (jdbc/execute! conn ["LISTEN gis_change"])
+    (let [timeout (Duration/ofSeconds 30)
+          pg-conn ^PGConnection (-> (jdbc/db-connection conn)
+                                    (.unwrap PGConnection))]
+      (log/info "Started listening for GIS changes")
+      (loop []
+        ;; getNotifications is not interruptible, so it will take up to `timeout` for this loop to exit
+        (let [notifications (.getNotifications pg-conn (.toMillis timeout))]
+          (when-not (.isInterrupted (Thread/currentThread))
+            (doseq [^PGNotification n notifications]
+              (notify n))
+            (recur))))
+      (log/info "Stopped listening for GIS changes"))))
 
 
 ;;;; Database users

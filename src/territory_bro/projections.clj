@@ -111,6 +111,7 @@
                                                        (.setNameFormat "territory-bro.projections/scheduled-refresh")
                                                        (.setDaemon true)
                                                        (.build)))
+           ; TODO: install uncaught exception handler
            (.scheduleWithFixedDelay refresh-async! 0 60 TimeUnit/SECONDS))
   :stop (.shutdown ^ScheduledExecutorService scheduled-refresh))
 
@@ -168,6 +169,16 @@
                                                        (.setNameFormat "territory-bro.projections/scheduled-gis-refresh")
                                                        (.setDaemon true)
                                                        (.build)))
-           ;; TODO: increase to 60 seconds once we have a non-polling trigger mechanism
-           (.scheduleWithFixedDelay refresh-gis-async! 0 10 TimeUnit/SECONDS))
+           ; TODO: install uncaught exception handler
+           (.scheduleWithFixedDelay refresh-gis-async! 0 5 TimeUnit/MINUTES))
   :stop (.shutdown ^ScheduledExecutorService scheduled-gis-refresh))
+
+(mount/defstate notified-gis-refresh
+  :start (doto (Executors/newFixedThreadPool 1 (-> (ThreadFactoryBuilder.)
+                                                   (.setNameFormat "territory-bro.projections/notified-gis-refresh")
+                                                   (.setDaemon true)
+                                                   (.build)))
+           ; TODO: install uncaught exception handler
+           (.submit ^Runnable (partial gis-db/listen-for-gis-changes (fn [_] ; TODO: remove the parameter
+                                                                       (refresh-gis-async!)))))
+  :stop (.shutdownNow ^ScheduledExecutorService notified-gis-refresh))
