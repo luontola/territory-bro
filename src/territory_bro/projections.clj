@@ -117,7 +117,7 @@
 (mount/defstate scheduled-refresh
   :start (doto (Executors/newScheduledThreadPool 1 scheduled-refresh-thread-factory)
            (.scheduleWithFixedDelay (executors/safe-task refresh-async!)
-                                    0 60 TimeUnit/SECONDS))
+                                    0 1 TimeUnit/MINUTES))
   :stop (.shutdown ^ScheduledExecutorService scheduled-refresh))
 
 
@@ -133,31 +133,32 @@
 (defn refresh-gis-changes!
   ([]
    (log/info "Refreshing GIS changes")
-   (db/with-db [conn {}]
-     (refresh-gis-changes! conn (cached-state)))
-   ;; TODO: refresh only if there were some changes
-   (refresh-async!))
-  ([conn state]
+   (when (db/with-db [conn {}]
+           (refresh-gis-changes! conn (cached-state) false))
+     (refresh-async!)))
+  ([conn state had-changes?]
    (let [change (gis-db/next-unprocessed-change conn)]
-     (when change
+     (if change
        (let [new-id (when (= :INSERT (:gis-change/op change))
                       (when (nil? (:gis-change/replacement-id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)
                         (:id (:gis-change/new change))))]
          (if (and new-id (event-store/stream-exists? conn new-id))
+           ;; conflict
            (let [replacement-id (UUID/randomUUID)
                  {:gis-change/keys [schema table]} change]
              (log/info "Replacing" (str schema "." table) "ID" new-id "with" replacement-id)
              (assert (not (event-store/stream-exists? conn replacement-id))
                      {:replacement-id replacement-id})
              (gis-db/replace-id! conn schema table new-id replacement-id)
-             (recur conn state))
+             (recur conn state true))
+           ;; no conflict
            (let [command (gis-sync/change->command change state)
                  events (dispatcher/command! conn state command)
                  ;; the state needs to be updated for e.g. command validation's foreign key checks
                  state (reduce update-projections state events)]
              (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
-             ;; TODO: commit between every change?
-             (recur conn state))))))))
+             (recur conn state true))))
+       had-changes?))))
 
 (mount/defstate gis-refresher
   :start (poller/create refresh-gis-changes!)
@@ -180,7 +181,7 @@
 (mount/defstate scheduled-gis-refresh
   :start (doto (Executors/newScheduledThreadPool 1 scheduled-gis-refresh-thread-factory)
            (.scheduleWithFixedDelay (executors/safe-task refresh-gis-async!)
-                                    0 5 TimeUnit/MINUTES))
+                                    0 1 TimeUnit/MINUTES))
   :stop (.shutdown ^ScheduledExecutorService scheduled-gis-refresh))
 
 
