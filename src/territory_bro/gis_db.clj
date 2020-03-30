@@ -165,7 +165,7 @@
     (db/use-master-schema conn)
     (jdbc/execute! conn ["LISTEN gis_change"])
     (let [timeout (Duration/ofSeconds 30)
-          pg-conn ^PGConnection (-> (jdbc/db-connection conn)
+          ^PGConnection pg-conn (-> (jdbc/db-connection conn)
                                     (.unwrap PGConnection))]
       (log/info "Started listening for GIS changes")
       (loop []
