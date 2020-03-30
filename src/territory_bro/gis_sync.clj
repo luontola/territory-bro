@@ -99,7 +99,14 @@
       (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
       (.build)))
 
+(defn- until-interrupted [task]
+  (fn []
+    (while (not (.isInterrupted (Thread/currentThread)))
+      (task))))
+
 (mount/defstate notified-refresh
   :start (doto (Executors/newFixedThreadPool 1 notified-refresh-thread-factory)
-           (.submit (executors/safe-task #(listen-for-gis-changes refresh-async!))))
+           (.submit ^Callable (until-interrupted
+                               (executors/safe-task
+                                #(listen-for-gis-changes refresh-async!)))))
   :stop (.shutdownNow ^ScheduledExecutorService notified-refresh))
