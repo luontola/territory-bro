@@ -15,13 +15,6 @@
   (await [this ^Duration timeout])
   (shutdown! [this]))
 
-(defonce ^:private thread-factory
-  (-> (ThreadFactoryBuilder.)
-      (.setNameFormat "territory-bro.poller/%d")
-      (.setDaemon true)
-      (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
-      (.build)))
-
 (defrecord AsyncPoller [^Queue available-tasks
                         ^ExecutorService executor]
   Poller
@@ -42,6 +35,13 @@
       (.shutdown)
       (.awaitTermination 1 TimeUnit/MINUTES)
       (.shutdownNow))))
+
+(defonce ^:private thread-factory
+  (-> (ThreadFactoryBuilder.)
+      (.setNameFormat "territory-bro.poller/%d")
+      (.setDaemon true)
+      (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
+      (.build)))
 
 (defn create [task]
   (assert (fn? task) {:task task})
