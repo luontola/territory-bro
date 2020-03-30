@@ -182,7 +182,5 @@
                                                    (.setDaemon true)
                                                    (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
                                                    (.build)))
-           (.submit (executors/safe-task
-                     (partial gis-db/listen-for-gis-changes (fn [_] ; TODO: remove the parameter
-                                                              (refresh-gis-async!))))))
+           (.submit (executors/safe-task #(gis-db/listen-for-gis-changes refresh-gis-async!))))
   :stop (.shutdownNow ^ScheduledExecutorService notified-gis-refresh))

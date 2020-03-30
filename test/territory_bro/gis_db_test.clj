@@ -267,7 +267,7 @@
 
 (deftest listen-for-gis-changes-test
   (let [notifications (SynchronousQueue.)
-        worker (doto (Thread. ^Runnable (partial gis-db/listen-for-gis-changes #(.put notifications %)))
+        worker (doto (Thread. ^Runnable (partial gis-db/listen-for-gis-changes #(.put notifications "notified")))
                  (.setDaemon true)
                  (.start))]
     (try
@@ -275,10 +275,7 @@
         (db/with-db [conn {}]
           (db/use-tenant-schema conn test-schema)
           (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
-
-        (let [notification ^PGNotification (.poll notifications 1 TimeUnit/SECONDS)]
-          (is (some? notification))
-          (is (= "gis_change" (.getName notification)))))
+        (is (some? (.poll notifications 1 TimeUnit/SECONDS))))
 
       (finally
         (.interrupt worker)))))

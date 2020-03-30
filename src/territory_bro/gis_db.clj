@@ -11,7 +11,7 @@
             [territory-bro.db :as db])
   (:import (java.time Instant Duration)
            (java.util UUID)
-           (org.postgresql PGNotification PGConnection)
+           (org.postgresql PGConnection)
            (org.postgresql.util PSQLException)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/gis.sql"))
@@ -172,8 +172,8 @@
         ;; getNotifications is not interruptible, so it will take up to `timeout` for this loop to exit
         (let [notifications (.getNotifications pg-conn (.toMillis timeout))]
           (when-not (.isInterrupted (Thread/currentThread))
-            (doseq [^PGNotification n notifications]
-              (notify n))
+            (doseq [_ notifications]
+              (notify))
             (recur))))
       (log/info "Stopped listening for GIS changes"))))
 
