@@ -4,9 +4,8 @@
 
 (ns territory-bro.poller
   (:refer-clojure :exclude [await])
-  (:require [clojure.tools.logging :as log])
+  (:require [territory-bro.executors :as executors])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
-           (java.lang Thread$UncaughtExceptionHandler)
            (java.time Duration)
            (java.util Queue)
            (java.util.concurrent ExecutorService Executors TimeUnit ArrayBlockingQueue Future)))
@@ -16,38 +15,22 @@
   (await [this ^Duration timeout])
   (shutdown! [this]))
 
-(def ^:private uncaught-exception-handler
-  (reify Thread$UncaughtExceptionHandler
-    (uncaughtException [_this _thread exception]
-     ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
-      (log/error exception (str "Uncaught exception in worker thread\n" (pr-str exception))))))
-
 (def ^:private thread-factory
   (-> (ThreadFactoryBuilder.)
       (.setNameFormat "territory-bro.poller/%d")
       (.setDaemon true)
-      (.setUncaughtExceptionHandler uncaught-exception-handler)
+      (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
       (.build)))
-
-(defn- run-safely! [task]
-  (try
-    (task)
-    (catch InterruptedException _
-      (.interrupt (Thread/currentThread)))
-    (catch Throwable e
-      (let [t (Thread/currentThread)]
-        (if-let [handler (.getUncaughtExceptionHandler t)]
-          (.uncaughtException handler t e)
-          (.printStackTrace e))))))
 
 (defrecord AsyncPoller [^Queue available-tasks
                         ^ExecutorService executor]
   Poller
   (trigger! [_]
     (when-let [task (.poll available-tasks)]
-      (.execute executor (fn []
-                           (.add available-tasks task)
-                           (run-safely! task)))))
+      (.execute executor (executors/safe-task
+                          (fn []
+                            (.add available-tasks task)
+                            (task))))))
 
   (await [_ timeout]
     (let [^Duration timeout timeout

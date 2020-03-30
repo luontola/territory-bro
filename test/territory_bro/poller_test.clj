@@ -116,7 +116,7 @@
   (testing "logs uncaught exceptions"
     (let [appender (doto (ListAppender.)
                      (.start))
-          logger (doto ^Logger (LoggerFactory/getLogger "territory-bro.poller")
+          logger (doto ^Logger (LoggerFactory/getLogger "territory-bro.executors")
                    (.addAppender appender))
           p (poller/create (fn []
                              (throw (RuntimeException. "dummy"))))]
@@ -126,7 +126,7 @@
 
       (is (= 1 (count (.-list appender))) "log event count")
       (let [event ^LoggingEvent (first (.-list appender))]
-        (is (str/starts-with? (.getMessage event) "Uncaught exception in worker thread"))
+        (is (str/starts-with? (.getMessage event) "Uncaught exception"))
         (is (= "dummy" (.getMessage (.getThrowableProxy event)))))))
 
   (testing "await blocks until the current task is finished"

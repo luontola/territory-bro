@@ -13,6 +13,7 @@
             [territory-bro.db-admin :as db-admin]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.event-store :as event-store]
+            [territory-bro.executors :as executors]
             [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-sync :as gis-sync]
             [territory-bro.gis-user :as gis-user]
@@ -110,9 +111,10 @@
   :start (doto (Executors/newScheduledThreadPool 1 (-> (ThreadFactoryBuilder.)
                                                        (.setNameFormat "territory-bro.projections/scheduled-refresh")
                                                        (.setDaemon true)
+                                                       (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
                                                        (.build)))
-           ; TODO: install uncaught exception handler
-           (.scheduleWithFixedDelay refresh-async! 0 60 TimeUnit/SECONDS))
+           (.scheduleWithFixedDelay (executors/safe-task refresh-async!)
+                                    0 60 TimeUnit/SECONDS))
   :stop (.shutdown ^ScheduledExecutorService scheduled-refresh))
 
 
@@ -168,17 +170,19 @@
   :start (doto (Executors/newScheduledThreadPool 1 (-> (ThreadFactoryBuilder.)
                                                        (.setNameFormat "territory-bro.projections/scheduled-gis-refresh")
                                                        (.setDaemon true)
+                                                       (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
                                                        (.build)))
-           ; TODO: install uncaught exception handler
-           (.scheduleWithFixedDelay refresh-gis-async! 0 5 TimeUnit/MINUTES))
+           (.scheduleWithFixedDelay (executors/safe-task refresh-gis-async!)
+                                    0 5 TimeUnit/MINUTES))
   :stop (.shutdown ^ScheduledExecutorService scheduled-gis-refresh))
 
 (mount/defstate notified-gis-refresh
   :start (doto (Executors/newFixedThreadPool 1 (-> (ThreadFactoryBuilder.)
                                                    (.setNameFormat "territory-bro.projections/notified-gis-refresh")
                                                    (.setDaemon true)
+                                                   (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
                                                    (.build)))
-           ; TODO: install uncaught exception handler
-           (.submit ^Runnable (partial gis-db/listen-for-gis-changes (fn [_] ; TODO: remove the parameter
-                                                                       (refresh-gis-async!)))))
+           (.submit (executors/safe-task
+                     (partial gis-db/listen-for-gis-changes (fn [_] ; TODO: remove the parameter
+                                                              (refresh-gis-async!))))))
   :stop (.shutdownNow ^ScheduledExecutorService notified-gis-refresh))
