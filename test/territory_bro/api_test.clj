@@ -20,6 +20,7 @@
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.fixtures :refer [db-fixture api-fixture]]
             [territory-bro.gis-db :as gis-db]
+            [territory-bro.gis-sync :as gis-sync]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.json :as json]
             [territory-bro.jwt :as jwt]
@@ -84,8 +85,8 @@
   (projections/await-refreshed (Duration/ofSeconds 10)))
 
 (defn sync-gis-changes! []
-  (projections/refresh-gis-async!)
-  (projections/await-gis-refreshed (Duration/ofSeconds 10))
+  (gis-sync/refresh-async!)
+  (gis-sync/await-refreshed (Duration/ofSeconds 10))
   (projections/await-refreshed (Duration/ofSeconds 10)))
 
 

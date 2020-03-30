@@ -9,6 +9,7 @@
             [mount.core :as mount]
             [territory-bro.config :as config]
             [territory-bro.db :as db]
+            [territory-bro.gis-sync :as gis-sync]
             [territory-bro.projections :as projections]
             [territory-bro.router :as router])
   (:gen-class))
@@ -35,7 +36,7 @@
   (db/migrate-master-schema!)
   ;; process managers will migrate tenant schemas and create missing GIS users
   (projections/refresh!)
-  (projections/refresh-gis-changes!))
+  (gis-sync/refresh!))
 
 (defn- log-mount-states [result]
   (doseq [component (:started result)]
@@ -52,7 +53,7 @@
     ;; start the public API only after the database is ready
     (log-mount-states (mount/start-without #'http-server
                                            #'projections/scheduled-refresh
-                                           #'projections/scheduled-gis-refresh))
+                                           #'gis-sync/scheduled-refresh))
     (migrate-database!)
     (log-mount-states (mount/start))
 

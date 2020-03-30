@@ -15,7 +15,6 @@
             [territory-bro.event-store :as event-store]
             [territory-bro.executors :as executors]
             [territory-bro.gis-change :as gis-change]
-            [territory-bro.gis-db :as gis-db]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.gis-user-process :as gis-user-process]
             [territory-bro.poller :as poller]
@@ -23,7 +22,6 @@
             [territory-bro.territory :as territory])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
-           (java.util UUID)
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
 
 ;;;; Cache
@@ -32,7 +30,7 @@
   :start (atom {:last-event nil
                 :state nil}))
 
-(defn- update-projections [state event]
+(defn update-projections [state event]
   (-> state
       (card-minimap-viewport/projection event)
       (congregation-boundary/projection event)
@@ -125,74 +123,3 @@
   (count (:state @*cache))
   (refresh-async!)
   (refresh!))
-
-
-;;;; GIS sync
-
-;; TODO: extract to a new namespace?
-(defn refresh-gis-changes!
-  ([]
-   (log/info "Refreshing GIS changes")
-   (when (db/with-db [conn {}]
-           (refresh-gis-changes! conn (cached-state) false))
-     (refresh-async!)))
-  ([conn state had-changes?]
-   (let [change (gis-db/next-unprocessed-change conn)]
-     (if change
-       (let [new-id (when (= :INSERT (:gis-change/op change))
-                      (when (nil? (:gis-change/replacement-id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)
-                        (:id (:gis-change/new change))))]
-         (if (and new-id (event-store/stream-exists? conn new-id))
-           ;; conflict
-           (let [replacement-id (UUID/randomUUID)
-                 {:gis-change/keys [schema table]} change]
-             (log/info "Replacing" (str schema "." table) "ID" new-id "with" replacement-id)
-             (assert (not (event-store/stream-exists? conn replacement-id))
-                     {:replacement-id replacement-id})
-             (gis-db/replace-id! conn schema table new-id replacement-id)
-             (recur conn state true))
-           ;; no conflict
-           (let [command (gis-change/change->command change state)
-                 events (dispatcher/command! conn state command)
-                 ;; the state needs to be updated for e.g. command validation's foreign key checks
-                 state (reduce update-projections state events)]
-             (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
-             (recur conn state true))))
-       had-changes?))))
-
-(mount/defstate gis-refresher
-  :start (poller/create refresh-gis-changes!)
-  :stop (poller/shutdown! gis-refresher))
-
-(defn refresh-gis-async! []
-  (poller/trigger! gis-refresher))
-
-(defn await-gis-refreshed [^Duration duration]
-  (poller/await gis-refresher duration))
-
-
-(defonce ^:private scheduled-gis-refresh-thread-factory
-  (-> (ThreadFactoryBuilder.)
-      (.setNameFormat "territory-bro.projections/scheduled-gis-refresh-%d")
-      (.setDaemon true)
-      (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
-      (.build)))
-
-(mount/defstate scheduled-gis-refresh
-  :start (doto (Executors/newScheduledThreadPool 1 scheduled-gis-refresh-thread-factory)
-           (.scheduleWithFixedDelay (executors/safe-task refresh-gis-async!)
-                                    0 1 TimeUnit/MINUTES))
-  :stop (.shutdown ^ScheduledExecutorService scheduled-gis-refresh))
-
-
-(defonce ^:private notified-gis-refresh-thread-factory
-  (-> (ThreadFactoryBuilder.)
-      (.setNameFormat "territory-bro.projections/notified-gis-refresh-%d")
-      (.setDaemon true)
-      (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
-      (.build)))
-
-(mount/defstate notified-gis-refresh
-  :start (doto (Executors/newFixedThreadPool 1 notified-gis-refresh-thread-factory)
-           (.submit (executors/safe-task #(gis-db/listen-for-gis-changes refresh-gis-async!))))
-  :stop (.shutdownNow ^ScheduledExecutorService notified-gis-refresh))
