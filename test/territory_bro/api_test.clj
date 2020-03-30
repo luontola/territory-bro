@@ -211,7 +211,7 @@
      :port (:port datasource)
      :user (:user datasource)
      :password (:password datasource)
-     :currentSchema (:schema datasource)}))
+     :currentSchema (str (:schema datasource) ",public")}))
 
 
 ;;;; Tests
@@ -687,6 +687,22 @@
       (let [state-before (projections/cached-state)]
         (sync-gis-changes!) ;; should not process the already processed changes
         (is (identical? state-before (projections/cached-state)))))
+
+    (testing "syncing changes is triggered automatically"
+      (let [new-id (jdbc/with-db-transaction [conn db-spec]
+                     (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon))
+            deadline (-> (Instant/now) (.plus (Duration/ofSeconds 5)))]
+        (loop []
+          (cond
+            (= new-id (get-in (projections/cached-state) [::congregation-boundary/congregation-boundaries cong-id new-id :congregation-boundary/id]))
+            (is true "was synced")
+
+            (-> (Instant/now) (.isAfter deadline))
+            (is false "deadline reached, was not synced")
+
+            :else
+            (do (Thread/sleep 10)
+                (recur))))))
 
     (testing "on stream ID conflict a new replacement ID will be generated"
       (let [conflicting-stream-id (create-congregation-without-user! "foo")]
