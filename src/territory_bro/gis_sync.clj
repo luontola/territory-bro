@@ -20,35 +20,34 @@
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)
            (org.postgresql PGConnection)))
 
-(defn refresh!
-  ([]
-   (log/info "Refreshing GIS changes")
-   (when (db/with-db [conn {}]
-           (refresh! conn (projections/cached-state) false))
-     (projections/refresh-async!)))
-  ([conn state had-changes?]
-   (let [change (gis-db/next-unprocessed-change conn)]
-     (if change
-       (let [new-id (when (= :INSERT (:gis-change/op change))
-                      (when (nil? (:gis-change/replacement-id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)
-                        (:id (:gis-change/new change))))]
-         (if (and new-id (event-store/stream-exists? conn new-id))
-           ;; conflict
-           (let [replacement-id (UUID/randomUUID)
-                 {:gis-change/keys [schema table]} change]
-             (log/info "Replacing" (str schema "." table) "ID" new-id "with" replacement-id)
-             (assert (not (event-store/stream-exists? conn replacement-id))
-                     {:replacement-id replacement-id})
-             (gis-db/replace-id! conn schema table new-id replacement-id)
-             (recur conn state true))
-           ;; no conflict
-           (let [command (gis-change/change->command change state)
-                 events (dispatcher/command! conn state command)
-                 ;; the state needs to be updated for e.g. command validation's foreign key checks
-                 state (reduce projections/update-projections state events)]
-             (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
-             (recur conn state true))))
-       had-changes?))))
+(defn- process-changes! [conn state had-changes?]
+  (if-some [change (gis-db/next-unprocessed-change conn)]
+    (let [new-id (when (= :INSERT (:gis-change/op change))
+                   (when (nil? (:gis-change/replacement-id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)
+                     (:id (:gis-change/new change))))]
+      (if (and new-id (event-store/stream-exists? conn new-id))
+        ;; conflict
+        (let [replacement-id (UUID/randomUUID)
+              {:gis-change/keys [schema table]} change]
+          (log/info "Replacing" (str schema "." table) "ID" new-id "with" replacement-id)
+          (assert (not (event-store/stream-exists? conn replacement-id))
+                  {:replacement-id replacement-id})
+          (gis-db/replace-id! conn schema table new-id replacement-id)
+          (recur conn state true))
+        ;; no conflict
+        (let [command (gis-change/change->command change state)
+              events (dispatcher/command! conn state command)
+              ;; the state needs to be updated for e.g. command validation's foreign key checks
+              state (reduce projections/update-projections state events)]
+          (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
+          (recur conn state true))))
+    had-changes?))
+
+(defn refresh! []
+  (log/info "Refreshing GIS changes")
+  (when (db/with-db [conn {}]
+          (process-changes! conn (projections/cached-state) false))
+    (projections/refresh-async!)))
 
 (mount/defstate refresher
   :start (poller/create refresh!)
