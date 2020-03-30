@@ -76,13 +76,17 @@
 
 (defn refresh-projections! []
   ;; TODO: do synchronously, or propagate errors from the async thread?
+  ;;           - GIS changes cannot be synced in test thread, because
+  ;;             it will produce transaction conflicts with the worker
+  ;;             thread which is triggered by DB notifications
   ;; TODO: propagating errors might be useful also in production
   (projections/refresh-async!)
   (projections/await-refreshed (Duration/ofSeconds 10)))
 
 (defn sync-gis-changes! []
-  (projections/refresh-gis-changes!)
-  (refresh-projections!))
+  (projections/refresh-gis-async!)
+  (projections/await-gis-refreshed (Duration/ofSeconds 10))
+  (projections/await-refreshed (Duration/ofSeconds 10)))
 
 
 ;;;; API Helpers
