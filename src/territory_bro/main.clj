@@ -36,6 +36,7 @@
   (db/migrate-master-schema!)
   ;; process managers will migrate tenant schemas and create missing GIS users
   (projections/refresh!)
+  ;; process any pending GIS changes, in case GIS sync was down for a long time
   (gis-sync/refresh!))
 
 (defn- log-mount-states [result]
@@ -51,11 +52,12 @@
 (defn start-app []
   (try
     ;; start the public API only after the database is ready
-    (log-mount-states (mount/start-without #'http-server
-                                           #'projections/scheduled-refresh
-                                           #'gis-sync/scheduled-refresh
-                                           #'gis-sync/notified-refresh))
+    (log-mount-states (mount/start #'config/env
+                                   #'db/database
+                                   #'projections/*cache
+                                   #'projections/refresher))
     (migrate-database!)
+    (log/info "Database migrated")
     (log-mount-states (mount/start))
 
     (doto (Runtime/getRuntime)
