@@ -53,7 +53,8 @@
     ;; start the public API only after the database is ready
     (log-mount-states (mount/start-without #'http-server
                                            #'projections/scheduled-refresh
-                                           #'gis-sync/scheduled-refresh))
+                                           #'gis-sync/scheduled-refresh
+                                           #'gis-sync/notified-refresh))
     (migrate-database!)
     (log-mount-states (mount/start))
 

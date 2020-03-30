@@ -83,6 +83,7 @@
           ^PGConnection pg-conn (-> (jdbc/db-connection conn)
                                     (.unwrap PGConnection))]
       (log/info "Started listening for GIS changes")
+      (notify)
       (loop []
         ;; getNotifications is not interruptible, so it will take up to `timeout` for this loop to exit
         (let [notifications (.getNotifications pg-conn (.toMillis timeout))]

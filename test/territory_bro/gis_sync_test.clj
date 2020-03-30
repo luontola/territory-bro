@@ -20,11 +20,23 @@
                  (.setDaemon true)
                  (.start))]
     (try
+      (testing "initial notification on startup"
+        ;; This feature exists mainly to make these tests less fragile.
+        ;; These tests used to be fail if the GIS changes were made before
+        ;; the background thread had executed its LISTEN command.
+        (is (some? (.poll notifications 1 TimeUnit/SECONDS))))
+
       (testing "notifies when there are GIS changes"
+        (is (nil? (.poll notifications 1 TimeUnit/MILLISECONDS))
+            "before change")
         (db/with-db [conn {}]
           (db/use-tenant-schema conn test-schema)
           (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
-        (is (some? (.poll notifications 1 TimeUnit/SECONDS))))
+        (is (some? (.poll notifications 1 TimeUnit/SECONDS))
+            "after change"))
+
+      (testing "no notifications when there are no GIS changes"
+        (is (nil? (.poll notifications 1 TimeUnit/MILLISECONDS))))
 
       (finally
         (.interrupt worker)))))
