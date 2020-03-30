@@ -15,7 +15,7 @@
   (await [this ^Duration timeout])
   (shutdown! [this]))
 
-(def ^:private thread-factory
+(defonce ^:private thread-factory
   (-> (ThreadFactoryBuilder.)
       (.setNameFormat "territory-bro.poller/%d")
       (.setDaemon true)

@@ -107,12 +107,15 @@
   (poller/await refresher duration))
 
 
+(defonce ^:private scheduled-refresh-thread-factory
+  (-> (ThreadFactoryBuilder.)
+      (.setNameFormat "territory-bro.projections/scheduled-refresh-%d")
+      (.setDaemon true)
+      (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
+      (.build)))
+
 (mount/defstate scheduled-refresh
-  :start (doto (Executors/newScheduledThreadPool 1 (-> (ThreadFactoryBuilder.)
-                                                       (.setNameFormat "territory-bro.projections/scheduled-refresh")
-                                                       (.setDaemon true)
-                                                       (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
-                                                       (.build)))
+  :start (doto (Executors/newScheduledThreadPool 1 scheduled-refresh-thread-factory)
            (.scheduleWithFixedDelay (executors/safe-task refresh-async!)
                                     0 60 TimeUnit/SECONDS))
   :stop (.shutdown ^ScheduledExecutorService scheduled-refresh))
@@ -166,21 +169,29 @@
 (defn await-gis-refreshed [^Duration duration]
   (poller/await gis-refresher duration))
 
+
+(defonce ^:private scheduled-gis-refresh-thread-factory
+  (-> (ThreadFactoryBuilder.)
+      (.setNameFormat "territory-bro.projections/scheduled-gis-refresh-%d")
+      (.setDaemon true)
+      (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
+      (.build)))
+
 (mount/defstate scheduled-gis-refresh
-  :start (doto (Executors/newScheduledThreadPool 1 (-> (ThreadFactoryBuilder.)
-                                                       (.setNameFormat "territory-bro.projections/scheduled-gis-refresh")
-                                                       (.setDaemon true)
-                                                       (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
-                                                       (.build)))
+  :start (doto (Executors/newScheduledThreadPool 1 scheduled-gis-refresh-thread-factory)
            (.scheduleWithFixedDelay (executors/safe-task refresh-gis-async!)
                                     0 5 TimeUnit/MINUTES))
   :stop (.shutdown ^ScheduledExecutorService scheduled-gis-refresh))
 
+
+(defonce ^:private notified-gis-refresh-thread-factory
+  (-> (ThreadFactoryBuilder.)
+      (.setNameFormat "territory-bro.projections/notified-gis-refresh-%d")
+      (.setDaemon true)
+      (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
+      (.build)))
+
 (mount/defstate notified-gis-refresh
-  :start (doto (Executors/newFixedThreadPool 1 (-> (ThreadFactoryBuilder.)
-                                                   (.setNameFormat "territory-bro.projections/notified-gis-refresh")
-                                                   (.setDaemon true)
-                                                   (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
-                                                   (.build)))
+  :start (doto (Executors/newFixedThreadPool 1 notified-gis-refresh-thread-factory)
            (.submit (executors/safe-task #(gis-db/listen-for-gis-changes refresh-gis-async!))))
   :stop (.shutdownNow ^ScheduledExecutorService notified-gis-refresh))
