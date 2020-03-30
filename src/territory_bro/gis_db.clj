@@ -160,23 +160,6 @@
                                        :old_id old-id
                                        :new_id new-id}))
 
-(defn listen-for-gis-changes [notify]
-  (jdbc/with-db-connection [conn db/database {}]
-    (db/use-master-schema conn)
-    (jdbc/execute! conn ["LISTEN gis_change"])
-    (let [timeout (Duration/ofSeconds 30)
-          ^PGConnection pg-conn (-> (jdbc/db-connection conn)
-                                    (.unwrap PGConnection))]
-      (log/info "Started listening for GIS changes")
-      (loop []
-        ;; getNotifications is not interruptible, so it will take up to `timeout` for this loop to exit
-        (let [notifications (.getNotifications pg-conn (.toMillis timeout))]
-          (when-not (.isInterrupted (Thread/currentThread))
-            (doseq [_ notifications]
-              (notify))
-            (recur))))
-      (log/info "Stopped listening for GIS changes"))))
-
 
 ;;;; Database users
 

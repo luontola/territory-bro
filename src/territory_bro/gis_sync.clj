@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis-sync
-  (:require [clojure.tools.logging :as log]
+  (:require [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
             [mount.core :as mount]
             [territory-bro.db :as db]
             [territory-bro.dispatcher :as dispatcher]
@@ -16,7 +17,8 @@
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
            (java.util UUID)
-           (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
+           (java.util.concurrent Executors ScheduledExecutorService TimeUnit)
+           (org.postgresql PGConnection)))
 
 (defn refresh!
   ([]
@@ -73,6 +75,23 @@
   :stop (.shutdown ^ScheduledExecutorService scheduled-refresh))
 
 
+(defn listen-for-gis-changes [notify]
+  (jdbc/with-db-connection [conn db/database {}]
+    (db/use-master-schema conn)
+    (jdbc/execute! conn ["LISTEN gis_change"])
+    (let [timeout (Duration/ofSeconds 30)
+          ^PGConnection pg-conn (-> (jdbc/db-connection conn)
+                                    (.unwrap PGConnection))]
+      (log/info "Started listening for GIS changes")
+      (loop []
+        ;; getNotifications is not interruptible, so it will take up to `timeout` for this loop to exit
+        (let [notifications (.getNotifications pg-conn (.toMillis timeout))]
+          (when-not (.isInterrupted (Thread/currentThread))
+            (doseq [_ notifications]
+              (notify))
+            (recur))))
+      (log/info "Stopped listening for GIS changes"))))
+
 (defonce ^:private notified-refresh-thread-factory
   (-> (ThreadFactoryBuilder.)
       (.setNameFormat "territory-bro.gis-sync/notified-refresh-%d")
@@ -82,5 +101,5 @@
 
 (mount/defstate notified-refresh
   :start (doto (Executors/newFixedThreadPool 1 notified-refresh-thread-factory)
-           (.submit (executors/safe-task #(gis-db/listen-for-gis-changes refresh-async!))))
+           (.submit (executors/safe-task #(listen-for-gis-changes refresh-async!))))
   :stop (.shutdownNow ^ScheduledExecutorService notified-refresh))

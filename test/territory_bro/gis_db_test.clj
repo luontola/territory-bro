@@ -12,8 +12,6 @@
             [territory-bro.gis-db :as gis-db]
             [territory-bro.testdata :as testdata])
   (:import (java.util UUID)
-           (java.util.concurrent SynchronousQueue TimeUnit)
-           (org.postgresql PGNotification)
            (org.postgresql.util PSQLException)))
 
 (def test-schema "test_gis_schema")
@@ -28,10 +26,10 @@
       (finally
         (.clean schema)))))
 
-(defn- test-schema-setup [f]
+(defn test-schema-fixture [f]
   (with-tenant-schema test-schema f))
 
-(use-fixtures :each (join-fixtures [db-fixture test-schema-setup]))
+(use-fixtures :each (join-fixtures [db-fixture test-schema-fixture]))
 
 (deftest regions-test
   (db/with-db [conn {}]
@@ -264,21 +262,6 @@
           "unprocessed, after")
       (is (= 3 (:gis-change/id (gis-db/next-unprocessed-change conn)))
           "next unprocessed, after"))))
-
-(deftest listen-for-gis-changes-test
-  (let [notifications (SynchronousQueue.)
-        worker (doto (Thread. ^Runnable (partial gis-db/listen-for-gis-changes #(.put notifications "notified")))
-                 (.setDaemon true)
-                 (.start))]
-    (try
-      (testing "notifies when there are GIS changes"
-        (db/with-db [conn {}]
-          (db/use-tenant-schema conn test-schema)
-          (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
-        (is (some? (.poll notifications 1 TimeUnit/SECONDS))))
-
-      (finally
-        (.interrupt worker)))))
 
 (deftest gis-change-log-replace-id-test
   (db/with-db [conn {}]
