@@ -2,7 +2,7 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.gis-sync)
+(ns territory-bro.gis-change)
 
 (defmulti projection (fn [_state event] (:event/type event)))
 (defmethod projection :default [state _event] state)

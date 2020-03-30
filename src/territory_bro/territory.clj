@@ -4,7 +4,7 @@
 
 (ns territory-bro.territory
   (:require [medley.core :refer [dissoc-in]]
-            [territory-bro.gis-sync :as gis-sync])
+            [territory-bro.gis-change :as gis-change])
   (:import (territory_bro ValidationException)))
 
 ;;;; Read model
@@ -68,7 +68,7 @@
                :event/version 1
                :congregation/id cong-id
                :territory/id territory-id}
-              (gis-sync/event-metadata command)
+              (gis-change/event-metadata command)
               (select-keys command data-keys))])))
 
 (defmethod command-handler :territory.command/update-territory
@@ -83,7 +83,7 @@
                :event/version 1
                :congregation/id cong-id
                :territory/id territory-id}
-              (gis-sync/event-metadata command)
+              (gis-change/event-metadata command)
               new-data)])))
 
 (defmethod command-handler :territory.command/delete-territory
@@ -96,7 +96,7 @@
                :event/version 1
                :congregation/id cong-id
                :territory/id territory-id}
-              (gis-sync/event-metadata command))])))
+              (gis-change/event-metadata command))])))
 
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))

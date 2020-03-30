@@ -14,8 +14,8 @@
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.event-store :as event-store]
             [territory-bro.executors :as executors]
+            [territory-bro.gis-change :as gis-change]
             [territory-bro.gis-db :as gis-db]
-            [territory-bro.gis-sync :as gis-sync]
             [territory-bro.gis-user :as gis-user]
             [territory-bro.gis-user-process :as gis-user-process]
             [territory-bro.poller :as poller]
@@ -38,7 +38,7 @@
       (congregation-boundary/projection event)
       (congregation/projection event)
       (db-admin/projection event)
-      (gis-sync/projection event)
+      (gis-change/projection event)
       (gis-user-process/projection event)
       (gis-user/projection event)
       (subregion/projection event)
@@ -152,7 +152,7 @@
              (gis-db/replace-id! conn schema table new-id replacement-id)
              (recur conn state true))
            ;; no conflict
-           (let [command (gis-sync/change->command change state)
+           (let [command (gis-change/change->command change state)
                  events (dispatcher/command! conn state command)
                  ;; the state needs to be updated for e.g. command validation's foreign key checks
                  state (reduce update-projections state events)]

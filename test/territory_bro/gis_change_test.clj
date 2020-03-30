@@ -2,11 +2,11 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.gis-sync-test
+(ns territory-bro.gis-change-test
   (:require [clojure.test :refer :all]
             [schema.core :as s]
+            [territory-bro.gis-change :as gis-change]
             [territory-bro.gis-db :as gis-db]
-            [territory-bro.gis-sync :as gis-sync]
             [territory-bro.testdata :as testdata]
             [territory-bro.testutil :as testutil])
   (:import (java.util UUID)
@@ -44,17 +44,17 @@
 (def gis-change-validator (s/validator gis-db/GisChange))
 
 (defn- change->command [change old-events]
-  (let [state (testutil/apply-events gis-sync/projection old-events)]
+  (let [state (testutil/apply-events gis-change/projection old-events)]
     (-> change
         (gis-change-validator)
-        (gis-sync/change->command state)
+        (gis-change/change->command state)
         (testutil/validate-command))))
 
 (deftest change->command-test
 
   (testing "territory insert"
     (is (= {:command/type :territory.command/create-territory
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -84,7 +84,7 @@
 
   (testing "territory update"
     (is (= {:command/type :territory.command/update-territory
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -119,7 +119,7 @@
 
   (testing "territory delete"
     (is (= {:command/type :territory.command/delete-territory
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -144,7 +144,7 @@
 
   (testing "subregion insert"
     (is (= {:command/type :subregion.command/create-subregion
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -168,7 +168,7 @@
 
   (testing "subregion update"
     (is (= {:command/type :subregion.command/update-subregion
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -194,7 +194,7 @@
 
   (testing "subregion delete"
     (is (= {:command/type :subregion.command/delete-subregion
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -216,7 +216,7 @@
 
   (testing "congregation_boundary insert"
     (is (= {:command/type :congregation-boundary.command/create-congregation-boundary
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -238,7 +238,7 @@
 
   (testing "congregation_boundary update"
     (is (= {:command/type :congregation-boundary.command/update-congregation-boundary
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -261,7 +261,7 @@
 
   (testing "congregation_boundary delete"
     (is (= {:command/type :congregation-boundary.command/delete-congregation-boundary
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -282,7 +282,7 @@
 
   (testing "card_minimap_viewport insert"
     (is (= {:command/type :card-minimap-viewport.command/create-card-minimap-viewport
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -304,7 +304,7 @@
 
   (testing "card_minimap_viewport update"
     (is (= {:command/type :card-minimap-viewport.command/update-card-minimap-viewport
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -327,7 +327,7 @@
 
   (testing "card_minimap_viewport delete"
     (is (= {:command/type :card-minimap-viewport.command/delete-card-minimap-viewport
-            :command/system "territory-bro.gis-sync"
+            :command/system "territory-bro.gis-change"
             :command/user user-id
             :command/time test-time
             :gis-change/id change-id
@@ -349,7 +349,7 @@
   (testing "replacement ID"
     (testing "insert"
       (is (= {:command/type :subregion.command/create-subregion
-              :command/system "territory-bro.gis-sync"
+              :command/system "territory-bro.gis-change"
               :command/user user-id
               :command/time test-time
               :gis-change/id change-id
@@ -373,7 +373,7 @@
 
     (testing "update"
       (is (= {:command/type :subregion.command/update-subregion
-              :command/system "territory-bro.gis-sync"
+              :command/system "territory-bro.gis-change"
               :command/user user-id
               :command/time test-time
               :gis-change/id change-id
@@ -399,7 +399,7 @@
 
     (testing "delete"
       (is (= {:command/type :subregion.command/delete-subregion
-              :command/system "territory-bro.gis-sync"
+              :command/system "territory-bro.gis-change"
               :command/user user-id
               :command/time test-time
               :gis-change/id change-id
@@ -421,7 +421,7 @@
 
     (testing "update due to ID replacement"
       (is (= {:command/type :subregion.command/update-subregion
-              :command/system "territory-bro.gis-sync"
+              :command/system "territory-bro.gis-change"
               :command/user user-id
               :command/time test-time
               :gis-change/id change-id
