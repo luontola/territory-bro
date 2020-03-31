@@ -92,17 +92,17 @@
             (recur))))
       (log/info "Stopped listening for GIS changes"))))
 
+(defn- until-interrupted [task]
+  (fn []
+    (while (not (.isInterrupted (Thread/currentThread)))
+      (task))))
+
 (defonce ^:private notified-refresh-thread-factory
   (-> (ThreadFactoryBuilder.)
       (.setNameFormat "territory-bro.gis-sync/notified-refresh-%d")
       (.setDaemon true)
       (.setUncaughtExceptionHandler executors/uncaught-exception-handler)
       (.build)))
-
-(defn- until-interrupted [task]
-  (fn []
-    (while (not (.isInterrupted (Thread/currentThread)))
-      (task))))
 
 (mount/defstate notified-refresh
   :start (doto (Executors/newFixedThreadPool 1 notified-refresh-thread-factory)
