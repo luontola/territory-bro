@@ -7,11 +7,11 @@
             [luminus.http-server :as http]
             [luminus.repl-server :as repl]
             [mount.core :as mount]
-            [territory-bro.config :as config]
-            [territory-bro.db :as db]
-            [territory-bro.gis-sync :as gis-sync]
-            [territory-bro.projections :as projections]
-            [territory-bro.router :as router])
+            [territory-bro.gis.gis-sync :as gis-sync]
+            [territory-bro.infra.config :as config]
+            [territory-bro.infra.db :as db]
+            [territory-bro.infra.router :as router]
+            [territory-bro.projections :as projections])
   (:gen-class))
 
 (mount/defstate ^{:on-reload :noop} http-server

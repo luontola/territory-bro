@@ -6,14 +6,14 @@
   (:require [clojure.test :refer :all]
             [schema.core :as s]
             [territory-bro.commands :as commands]
-            [territory-bro.foreign-key :as foreign-key]
-            [territory-bro.permissions :as permissions]
-            [territory-bro.testutil :as testutil :refer [re-equals re-contains]])
+            [territory-bro.infra.foreign-key :as foreign-key]
+            [territory-bro.infra.permissions :as permissions]
+            [territory-bro.test.testutil :as testutil :refer [re-equals re-contains]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)
            (territory_bro NoPermitException)
-           (territory_bro.foreign_key References)))
+           (territory_bro.infra.foreign_key References)))
 
 (def valid-command {:command/type :congregation.command/rename-congregation
                     :command/time (Instant/now)

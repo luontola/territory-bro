@@ -5,9 +5,9 @@
 (ns territory-bro.dispatcher-test
   (:require [clojure.test :refer :all]
             [territory-bro.dispatcher :as dispatcher]
-            [territory-bro.event-store :as event-store]
-            [territory-bro.testutil :refer [re-equals re-contains]]
-            [territory-bro.user :as user])
+            [territory-bro.infra.event-store :as event-store]
+            [territory-bro.infra.user :as user]
+            [territory-bro.test.testutil :refer [re-equals re-contains]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)
@@ -58,7 +58,7 @@
 
 (deftest dispatch-command-test
   (let [conn :dummy-conn
-        state {:territory-bro.congregation/congregations {cong-id {}}}]
+        state {:territory-bro.domain.congregation/congregations {cong-id {}}}]
     (with-redefs [user/check-user-exists (fn [_conn id]
                                            (when-not (= id user-id)
                                              (throw (ValidationException. [[:no-such-user id]]))))

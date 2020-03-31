@@ -8,7 +8,7 @@
             [schema-tools.core :as tools]
             [schema.coerce :as coerce]
             [schema.core :as s]
-            [territory-bro.json :as json])
+            [territory-bro.infra.json :as json])
   (:import (java.time Instant)
            (java.util UUID)))
 

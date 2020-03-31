@@ -6,9 +6,9 @@
   (:require [schema-refined.core :as refined]
             [schema.core :as s]
             [territory-bro.events :as events]
-            [territory-bro.foreign-key :as foreign-key]
-            [territory-bro.json :as json]
-            [territory-bro.permissions :as permissions])
+            [territory-bro.infra.foreign-key :as foreign-key]
+            [territory-bro.infra.json :as json]
+            [territory-bro.infra.permissions :as permissions])
   (:import (java.time Instant)
            (java.util UUID)))
 

@@ -9,7 +9,7 @@
             [schema-generators.generators :as sg]
             [schema.core :as s]
             [territory-bro.events :as events]
-            [territory-bro.testutil :refer [re-equals re-contains]])
+            [territory-bro.test.testutil :refer [re-equals re-contains]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)))

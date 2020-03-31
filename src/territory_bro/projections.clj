@@ -5,21 +5,21 @@
 (ns territory-bro.projections
   (:require [clojure.tools.logging :as log]
             [mount.core :as mount]
-            [territory-bro.card-minimap-viewport :as card-minimap-viewport]
-            [territory-bro.config :as config]
-            [territory-bro.congregation :as congregation]
-            [territory-bro.congregation-boundary :as congregation-boundary]
-            [territory-bro.db :as db]
-            [territory-bro.db-admin :as db-admin]
             [territory-bro.dispatcher :as dispatcher]
-            [territory-bro.event-store :as event-store]
-            [territory-bro.executors :as executors]
-            [territory-bro.gis-change :as gis-change]
-            [territory-bro.gis-user :as gis-user]
-            [territory-bro.gis-user-process :as gis-user-process]
-            [territory-bro.poller :as poller]
-            [territory-bro.subregion :as subregion]
-            [territory-bro.territory :as territory])
+            [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
+            [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.congregation-boundary :as congregation-boundary]
+            [territory-bro.domain.subregion :as subregion]
+            [territory-bro.domain.territory :as territory]
+            [territory-bro.gis.db-admin :as db-admin]
+            [territory-bro.gis.gis-change :as gis-change]
+            [territory-bro.gis.gis-user :as gis-user]
+            [territory-bro.gis.gis-user-process :as gis-user-process]
+            [territory-bro.infra.config :as config]
+            [territory-bro.infra.db :as db]
+            [territory-bro.infra.event-store :as event-store]
+            [territory-bro.infra.executors :as executors]
+            [territory-bro.infra.poller :as poller])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
            (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
