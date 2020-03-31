@@ -80,6 +80,7 @@
                        :uberjar-name "territory-bro.jar"}
 
              :dev {:dependencies [[com.github.kyleburton/clj-xpath "1.4.11"]
+                                  [lambdaisland/kaocha "1.0-612"]
                                   [org.clojure/test.check "1.0.0"]
                                   [prismatic/schema-generators "0.1.3"]
                                   [ring/ring-devel "1.8.0"]
@@ -93,6 +94,4 @@
              :test0 {:jvm-opts ^:replace ["-Dconf=test-config.edn"
                                           "-XX:-OmitStackTraceInFastThrow"
                                           "--illegal-access=deny"]}
-
-             :kaocha [:test :kaocha0]
-             :kaocha0 {:dependencies [[lambdaisland/kaocha "1.0-612"]]}})
+             :kaocha [:test]})
