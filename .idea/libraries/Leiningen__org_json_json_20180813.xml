@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.json/json:20180813">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/json/json/20180813/json-20180813.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

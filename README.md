@@ -80,7 +80,7 @@ View storybook visual tests
 
 Upgrade dependencies
 
-    lein ancient upgrade
+    lein ancient upgrade :all :check-clojure :no-tests
     yarn upgrade --latest
 
 Download dependency sources
