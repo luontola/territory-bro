@@ -58,8 +58,8 @@
 (defn parse-json [body]
   (cond
     (nil? body) body
-    (string? body) (json/parse-string body)
-    :else (json/parse-string (slurp (io/reader body)))))
+    (string? body) (json/read-value body)
+    :else (json/read-value (slurp (io/reader body)))))
 
 (defn read-body [response]
   (let [content-type (get-in response [:headers "Content-Type"])]

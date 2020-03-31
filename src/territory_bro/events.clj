@@ -305,7 +305,7 @@
 
 (defn json->event [json]
   (when json
-    (coerce-event (json/parse-string json))))
+    (coerce-event (json/read-value json))))
 
 (defn event->json [event]
-  (json/generate-string (strict-validate-event event)))
+  (json/write-value-as-string (strict-validate-event event)))

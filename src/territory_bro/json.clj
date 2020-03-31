@@ -3,18 +3,18 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.json
-  (:require [jsonista.core :as j]
+  (:require [jsonista.core :as json]
             [schema.core :as s])
   (:import (com.fasterxml.jackson.databind ObjectMapper)))
 
-(def ^ObjectMapper mapper
-  (j/object-mapper {:decode-key-fn true}))
+(def ^:private ^ObjectMapper default-mapper
+  (json/object-mapper {:decode-key-fn true}))
 
-(defn ^String generate-string [obj]
-  (j/write-value-as-string obj mapper))
+(defn ^String write-value-as-string [obj]
+  (json/write-value-as-string obj default-mapper))
 
-(defn parse-string [^String json]
-  (j/read-value json mapper))
+(defn read-value [^String json]
+  (json/read-value json default-mapper))
 
 (s/defschema Schema
   (s/maybe

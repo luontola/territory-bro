@@ -3,9 +3,9 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.jwt
-  (:require [clojure.data.json :as json]
-            [mount.core :as mount]
+  (:require [mount.core :as mount]
             [territory-bro.config :refer [env]]
+            [territory-bro.json :as json]
             [territory-bro.util :refer [getx]])
   (:import (com.auth0.jwk JwkProviderBuilder JwkProvider)
            (com.auth0.jwt JWT JWTVerifier$BaseVerification)
@@ -42,7 +42,7 @@
     (-> (.verify verifier jwt)
         (.getPayload)
         (decode-base64url)
-        (json/read-str :key-fn keyword))))
+        (json/read-value))))
 
 (defn expired?
   ([jwt]

@@ -75,8 +75,8 @@
     (let [type (.getType pgobj)
           value (.getValue pgobj)]
       (case type
-        "json" (json/parse-string value)
-        "jsonb" (json/parse-string value)
+        "json" (json/read-value value)
+        "jsonb" (json/read-value value)
         "citext" (str value)
         value))))
 
@@ -88,7 +88,7 @@
 (defn to-pg-json [value]
   (doto (PGobject.)
     (.setType "jsonb")
-    (.setValue (json/generate-string value))))
+    (.setValue (json/write-value-as-string value))))
 
 (extend-type IPersistentVector
   jdbc/ISQLParameter

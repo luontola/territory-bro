@@ -19,10 +19,10 @@
 (use-fixtures :once db-fixture)
 
 (defn event->json-no-validate [event]
-  (json/generate-string event))
+  (json/write-value-as-string event))
 
 (defn json->event-no-validate [json]
-  (-> (json/parse-string json)
+  (-> (json/read-value json)
       (update :event/type keyword)))
 
 (deftest event-store-test
