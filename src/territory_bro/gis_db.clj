@@ -9,9 +9,8 @@
             [schema.coerce :as coerce]
             [schema.core :as s]
             [territory-bro.db :as db])
-  (:import (java.time Instant Duration)
+  (:import (java.time Instant)
            (java.util UUID)
-           (org.postgresql PGConnection)
            (org.postgresql.util PSQLException)))
 
 (def ^:private query! (db/compile-queries "db/hugsql/gis.sql"))

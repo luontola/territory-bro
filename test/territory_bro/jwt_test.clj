@@ -4,13 +4,13 @@
 
 (ns territory-bro.jwt-test
   (:require [clojure.test :refer :all]
-            [territory-bro.jwt :as jwt :refer :all]
+            [territory-bro.jwt :as jwt]
             [territory-bro.testutil :refer [re-equals]]
             [clojure.string :as str])
   (:import (com.auth0.jwk JwkProvider Jwk)
-           (java.util Map Base64)
+           (com.auth0.jwt.exceptions SignatureVerificationException TokenExpiredException InvalidClaimException)
            (java.time Instant)
-           (com.auth0.jwt.exceptions SignatureVerificationException TokenExpiredException InvalidClaimException)))
+           (java.util Map Base64)))
 
 ;; key cached from https://luontola.eu.auth0.com/.well-known/jwks.json
 (def jwk {"alg" "RS256",
@@ -48,7 +48,7 @@
     (str header "." payload "." (base64-url-encode sig))))
 
 (deftest jwt-validate-test
-  (binding [jwk-provider fake-jwk-provider]
+  (binding [jwt/jwk-provider fake-jwk-provider]
     (testing "decodes valid tokens"
       (is (= {:name "Esko Luontola"}
              (select-keys (jwt/validate token env) [:name]))))
