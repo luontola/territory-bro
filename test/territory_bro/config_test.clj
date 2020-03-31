@@ -10,10 +10,13 @@
            (java.util UUID)))
 
 (deftest enrich-env-test
-  (let [env (config/enrich-env {:auth0-domain "example.eu.auth0.com"
-                                :auth0-client-id "m14ziOMuEVgHB4LIzoLKeDXazSReXCZo"
-                                :super-users "user1 user2 ac66bb30-0b9b-11ea-8d71-362b9e155667"
-                                :demo-congregation "7df983b1-6be6-42a4-b3b7-75b165005b03"})]
+  (let [env (-> (config/load-config)
+                (assoc :auth0-domain "example.eu.auth0.com"
+                       :auth0-client-id "m14ziOMuEVgHB4LIzoLKeDXazSReXCZo"
+                       :super-users "user1 user2 ac66bb30-0b9b-11ea-8d71-362b9e155667"
+                       :demo-congregation "7df983b1-6be6-42a4-b3b7-75b165005b03")
+                (config/enrich-env)
+                (config/validate-env))]
 
     (testing ":now is a function which returns current time"
       (let [result ((getx env :now))]
