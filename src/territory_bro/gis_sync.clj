@@ -17,7 +17,7 @@
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
            (java.util UUID)
-           (java.util.concurrent Executors ScheduledExecutorService TimeUnit)
+           (java.util.concurrent Executors ExecutorService TimeUnit)
            (org.postgresql PGConnection)))
 
 (defn- process-changes! [conn state had-changes?]
@@ -71,7 +71,7 @@
   :start (doto (Executors/newScheduledThreadPool 1 scheduled-refresh-thread-factory)
            (.scheduleWithFixedDelay (executors/safe-task refresh-async!)
                                     0 1 TimeUnit/MINUTES))
-  :stop (.shutdown ^ScheduledExecutorService scheduled-refresh))
+  :stop (.shutdown ^ExecutorService scheduled-refresh))
 
 
 (defn listen-for-gis-changes [notify]
@@ -109,4 +109,4 @@
            (.submit ^Callable (until-interrupted
                                (executors/safe-task
                                 #(listen-for-gis-changes refresh-async!)))))
-  :stop (.shutdownNow ^ScheduledExecutorService notified-refresh))
+  :stop (.shutdownNow ^ExecutorService notified-refresh))
