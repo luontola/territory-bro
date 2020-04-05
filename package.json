@@ -48,7 +48,6 @@
     "@types/lodash": "^4.14.149",
     "babel-loader": "^8.1.0",
     "babel-plugin-react-intl": "^7.1.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-react-app": "^9.1.2",
     "chai": "^4.2.0",
     "cross-env": "^7.0.2",

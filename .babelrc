@@ -10,7 +10,6 @@
     "@babel/preset-typescript"
   ],
   "plugins": [
-    "@babel/plugin-proposal-object-rest-spread",
     ["react-intl", {
       "messagesDir": "./target/messages/"
     }]
