@@ -5,7 +5,7 @@
 const path = require('path');
 
 module.exports = {
-  entry: './web/js/index.js',
+  entry: './web/js/index.tsx',
   output: {
     path: path.resolve(__dirname, 'target/webpack'),
     filename: 'bundle.js',
@@ -13,7 +13,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(js|ts|tsx)$/,
         exclude: path.resolve(__dirname, 'node_modules'),
         use: ['babel-loader'],
       },
@@ -40,6 +40,9 @@ module.exports = {
         use: ['style-loader', 'css-loader'],
       },
     ]
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
   },
   devtool: 'source-map',
   devServer: {

@@ -1,8 +1,7 @@
 FROM node:12 AS builder
 
-# flow depends on libelf.so.1
 RUN apt-get update && \
-    apt-get install -y libelf1 zopfli && \
+    apt-get install -y zopfli && \
     rm -rf /var/lib/apt/lists/*
 
 # working directory
@@ -17,11 +16,10 @@ RUN yarn install --frozen-lockfile --non-interactive --no-progress && \
     yarn cache clean
 
 # do the build
-COPY --chown=node .babelrc .flowconfig webpack.config.js /project/
+COPY --chown=node .babelrc webpack.config.js /project/
 COPY --chown=node web/html /project/web/html
 COPY --chown=node web/js /project/web/js
-RUN yarn run flow check && \
-    yarn run test && \
+RUN yarn run test && \
     yarn run build --no-progress --no-colors
 
 # offline compress static resources

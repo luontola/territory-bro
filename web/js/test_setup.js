@@ -2,6 +2,6 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-/* @flow */
-
-// polyfills should no more be needed here due to useBuiltIns=usage
+// Needed according to https://github.com/mochajs/mocha-examples/tree/master/packages/typescript-babel
+const register = require('@babel/register').default;
+register({extensions: ['.ts', '.tsx', '.js', '.jsx']});

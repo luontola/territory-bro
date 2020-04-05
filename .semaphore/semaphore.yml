@@ -35,7 +35,6 @@ blocks:
             - nvm install 11
 
             - yarn install
-            - yarn run flow check
             - yarn run test
 
             - cache store

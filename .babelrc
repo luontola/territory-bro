@@ -7,12 +7,12 @@
       "debug": false
     }],
     "@babel/react",
-    "@babel/flow"
+    "@babel/preset-typescript"
   ],
   "plugins": [
     "@babel/plugin-proposal-object-rest-spread",
     ["react-intl", {
-      "messagesDir": "./target/messages/",
+      "messagesDir": "./target/messages/"
     }]
   ],
   "env": {
@@ -22,7 +22,7 @@
           "targets": {"node": true}
         }],
         "@babel/react",
-        "@babel/flow"
+        "@babel/preset-typescript"
       ]
     }
   }

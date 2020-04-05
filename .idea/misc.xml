@@ -8,7 +8,7 @@
     <entry_points version="2.0" />
   </component>
   <component name="JavaScriptSettings">
-    <option name="languageLevel" value="FLOW" />
+    <option name="languageLevel" value="ES6" />
   </component>
   <component name="LeiningenProjectsManager">
     <option name="projectFiles">
