@@ -3,10 +3,14 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React from "react";
-import {ErrorMessage, Field, Form, Formik} from "formik";
+import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import {createCongregation, getSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
 import {navigate} from "@reach/router";
+
+interface FormValues {
+  congregationName: string;
+}
 
 const RegistrationPage = () => {
   const settings = getSettings();
@@ -24,9 +28,9 @@ const RegistrationPage = () => {
     <h1>Register a New Congregation</h1>
 
     <Formik
-      initialValues={{congregationName: ""}}
+      initialValues={{congregationName: ""} as FormValues}
       validate={values => {
-        let errors = {};
+        let errors: FormikErrors<FormValues> = {};
         if (!values.congregationName) {
           errors.congregationName = "Congregation name is required.";
         }

@@ -5,16 +5,20 @@
 import React from "react";
 import {getCongregationById, renameCongregation} from "../api";
 import {Link} from "@reach/router";
-import {ErrorMessage, Field, Form, Formik} from "formik";
+import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
+
+interface FormValues {
+  congregationName: string;
+}
 
 const SettingsPage = ({congregationId, navigate}) => {
   const congregation = getCongregationById(congregationId);
   return <Formik
     initialValues={{
       congregationName: congregation.name
-    }}
+    } as FormValues}
     validate={values => {
-      let errors = {};
+      let errors: FormikErrors<FormValues> = {};
       if (!values.congregationName) {
         errors.congregationName = 'Congregation name is required.';
       }

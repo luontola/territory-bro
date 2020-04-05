@@ -41,6 +41,14 @@ const templates = [{
   type: 'region'
 }];
 
+interface FormValues {
+  template: string;
+  language: string;
+  mapRaster: string;
+  regions: [string];
+  territories: [string];
+}
+
 const PrintOptionsForm = ({congregationId}) => {
   const availableMapRasters = mapRasters;
   const congregation = getCongregationById(congregationId);
@@ -53,6 +61,8 @@ const PrintOptionsForm = ({congregationId}) => {
       mapRaster: availableMapRasters[0].id,
       regions: availableRegions.length > 0 ? [availableRegions[0].id] : [],
       territories: availableTerritories.length > 0 ? [availableTerritories[0].id] : []
+    } as FormValues}
+    onSubmit={() => {
     }}>
     {({values, setFieldValue}) => {
       const template = templates.find(t => t.id === values.template);

@@ -4,10 +4,16 @@
 
 const GA_MEASUREMENT_ID = 'UA-5984051-10';
 
+declare global {
+  interface Window {
+    dataLayer: Array<any>
+  }
+}
+
 window.dataLayer = window.dataLayer || [];
 
-function gtag() {
-  dataLayer.push(arguments);
+function gtag(...args) {
+  window.dataLayer.push(args);
 }
 
 export function logPageView() {

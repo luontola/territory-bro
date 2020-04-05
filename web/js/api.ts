@@ -11,27 +11,16 @@ import {unstable_createResource} from "@luontola/react-cache";
 import WKT from "ol/format/WKT";
 import MultiPolygon from "ol/geom/MultiPolygon";
 
-function requestConfig(congregationId: string | null | undefined) {
-  const config = {
-    headers: {}
-  };
-  if (congregationId) {
-    config.headers['X-Tenant'] = congregationId;
-  }
-  return config;
-}
-
-
 // ====== Settings & Authentication ======
 
 export type User = {
   id: string;
-  sub: string | null | undefined;
-  name: string | null | undefined;
-  nickname: string | null | undefined;
-  email: string | null | undefined;
-  emailVerified: boolean | null | undefined;
-  picture: string | null | undefined;
+  sub?: string;
+  name?: string;
+  nickname?: string;
+  email?: string;
+  emailVerified?: boolean;
+  picture?: string;
 };
 
 export type Settings = {
@@ -42,7 +31,7 @@ export type Settings = {
   };
   supportEmail: string;
   demoAvailable: boolean;
-  user: User | null | undefined;
+  user?: User;
 };
 
 let SettingsCache;
@@ -78,7 +67,7 @@ export async function logout() {
 }
 
 function sortUsers(users: Array<User>): Array<User> {
-  return sortBy(users, [(u: User) => (u.name || '').toLowerCase(), 'id']);
+  return sortBy(users, [u => (u.name || '').toLowerCase(), 'id']);
 }
 
 
@@ -93,9 +82,9 @@ export type Congregation = {
   location: string;
   congregationBoundaries: Array<Boundary>;
   territories: Array<Territory>;
-  getTerritoryById: (arg0: string) => Territory;
+  getTerritoryById: (id: string) => Territory;
   subregions: Array<Subregion>;
-  getSubregionById: (arg0: string) => Subregion;
+  getSubregionById: (id: string) => Subregion;
   cardMinimapViewports: Array<Viewport>;
   users: Array<User>;
 };
@@ -118,10 +107,10 @@ function refreshCongregations() {
 }
 
 function sortCongregations(congregations: Array<Congregation>): Array<Congregation> {
-  return sortBy(congregations, (c: Congregation) => c.name.toLowerCase());
+  return sortBy(congregations, c => c.name.toLowerCase());
 }
 
-export function enrichCongregation(congregation: Congregation): Congregation {
+export function enrichCongregation(congregation): Congregation {
   congregation.users = sortUsers(congregation.users);
   congregation.territories = sortTerritories(congregation.territories);
   congregation.subregions = sortSubregions(congregation.subregions);
@@ -144,7 +133,7 @@ export function enrichCongregation(congregation: Congregation): Congregation {
   return congregation;
 }
 
-function getEnclosing(innerWkt: string, enclosingCandidateWkts: Array<string>): string | null | undefined {
+function getEnclosing(innerWkt: string, enclosingCandidateWkts: Array<string>): string | null {
   const wkt = new WKT();
   // TODO: sort by overlapping area instead of center point
   const centerPoint = wkt.readFeature(innerWkt).getGeometry().getInteriorPoints().getPoint(0);
@@ -159,7 +148,7 @@ function getEnclosing(innerWkt: string, enclosingCandidateWkts: Array<string>): 
   return result;
 }
 
-function mergeMultiPolygons(multiPolygons: Array<string>): string | null | undefined {
+function mergeMultiPolygons(multiPolygons: Array<string>): string | null {
   if (multiPolygons.length === 0) {
     return null;
   }
@@ -208,16 +197,14 @@ export type Territory = {
   addresses: string;
   subregion: string;
   location: string;
-  enclosingSubregion: string | null | undefined;
-  enclosingMinimapViewport: string | null | undefined;
+  meta: { [key: string]: any };
+  enclosingSubregion?: string;
+  enclosingMinimapViewport?: string;
 };
 
-// TODO: create library definitions for alphanum-sort and lodash-es, so that we can remove all this type noise
-// https://flow.org/en/docs/libdefs/creation/
-
 function sortTerritories(territories: Array<Territory>): Array<Territory> {
-  const numbers: Array<string> = alphanumSort(territories.map((t: Territory) => t.number));
-  return sortBy(territories, (t: Territory) => findIndex(numbers, (n: string) => n === t.number));
+  const numbers: Array<string> = alphanumSort(territories.map(t => t.number));
+  return sortBy(territories, t => findIndex(numbers, n => n === t.number));
 }
 
 // ====== Regions ======

@@ -5,7 +5,7 @@
 import React, {useState} from "react";
 import {addUser, getCongregationById, getSettings, setUserPermissions} from "../api";
 import {Link, navigate} from "@reach/router";
-import {ErrorMessage, Field, Form, Formik} from "formik";
+import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import sortBy from "lodash/sortBy";
 import styles from "./UsersPage.css";
 import {formatApiError} from "../errorMessages";
@@ -56,9 +56,11 @@ function useForceUpdate() {
 
 const UUID_PATTERN = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
-const UsersPage = ({
-                     congregationId
-                   }) => {
+interface FormValues {
+  userId: string;
+}
+
+const UsersPage = ({congregationId}) => {
   const [newUser, setNewUser] = useState(null);
   const forceUpdate = useForceUpdate(); // to trigger re-rendering with the updated user list
   const congregation = getCongregationById(congregationId);
@@ -70,9 +72,9 @@ const UsersPage = ({
   return <Formik
     initialValues={{
       userId: ''
-    }}
+    } as FormValues}
     validate={values => {
-      let errors = {};
+      let errors: FormikErrors<FormValues> = {};
       const userId = values.userId.trim();
       if (!userId) {
         errors.userId = 'User ID is required.';

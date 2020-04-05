@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import auth0 from "auth0-js";
+import auth0, {Auth0DecodedHash} from "auth0-js";
 import {loginWithIdToken} from "./api";
 
 export function buildAuthenticator(auth0Domain: string, auth0ClientId: string) {
@@ -14,7 +14,7 @@ export function buildAuthenticator(auth0Domain: string, auth0ClientId: string) {
     redirectUri: `${window.location.origin}/login-callback?return=${window.location.pathname}`
   });
 
-  function findAuthResult() {
+  function findAuthResult(): Promise<Auth0DecodedHash> {
     return new Promise((resolve, reject) => {
       webAuth.parseHash(function (err, authResult) {
         if (err) {
