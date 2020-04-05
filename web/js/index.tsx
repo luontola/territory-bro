@@ -22,37 +22,37 @@ import SettingsPage from "./pages/SettingsPage";
 import UsersPage from "./pages/UsersPage";
 import JoinPage from "./pages/JoinPage";
 
-globalHistory.listen(({
-  location,
-  action
-}) => {
+globalHistory.listen(({location, action}) => {
   console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
   logPageView();
 });
 
-document.querySelector('html').setAttribute('lang', language);
+document.querySelector('html')
+  .setAttribute('lang', language);
 
-ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode>
-    <ErrorBoundary FallbackComponent={ErrorPage}>
-      <IntlProvider locale={language} messages={messages}>
-        <React.Suspense fallback={<p>Loading....</p>}>
-          <Layout>
-            <Router>
-              <OverviewPage path="/" />
-              <JoinPage path="/join" />
-              <LoginCallbackPage path="/login-callback" />
-              <RegistrationPage path="/register" />
-              <SupportPage path="/support" />
+ReactDOM.createRoot(document.getElementById('root'))
+  .render(
+    <React.StrictMode>
+      <ErrorBoundary FallbackComponent={ErrorPage}>
+        <IntlProvider locale={language} messages={messages}>
+          <React.Suspense fallback={<p>Loading....</p>}>
+            <Layout>
+              <Router>
+                <OverviewPage path="/"/>
+                <JoinPage path="/join"/>
+                <LoginCallbackPage path="/login-callback"/>
+                <RegistrationPage path="/register"/>
+                <SupportPage path="/support"/>
 
-              <CongregationPage path="/congregation/:congregationId" />
-              <PrintoutPage path="/congregation/:congregationId/printouts" />
-              <SettingsPage path="/congregation/:congregationId/settings" />
-              <UsersPage path="/congregation/:congregationId/users" />
+                <CongregationPage path="/congregation/:congregationId"/>
+                <PrintoutPage path="/congregation/:congregationId/printouts"/>
+                <SettingsPage path="/congregation/:congregationId/settings"/>
+                <UsersPage path="/congregation/:congregationId/users"/>
 
-              <NotFoundPage default />
-            </Router>
-          </Layout>
-        </React.Suspense>
-      </IntlProvider>
-    </ErrorBoundary>
-  </React.StrictMode>);
+                <NotFoundPage default/>
+              </Router>
+            </Layout>
+          </React.Suspense>
+        </IntlProvider>
+      </ErrorBoundary>
+    </React.StrictMode>);

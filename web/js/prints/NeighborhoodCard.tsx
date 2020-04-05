@@ -9,19 +9,19 @@ import CropMarks from "./CropMarks";
 import styles from "./NeighborhoodCard.css";
 
 const NeighborhoodCard = ({
-  territory,
-  territoryId,
-  congregation,
-  congregationId,
-  mapRaster
-}) => {
+                            territory,
+                            territoryId,
+                            congregation,
+                            congregationId,
+                            mapRaster
+                          }) => {
   congregation = congregation || getCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
   return <CropMarks>
-      <div className={styles.root}>
-        <NeighborhoodMap territory={territory} mapRaster={mapRaster} />
-      </div>
-    </CropMarks>;
+    <div className={styles.root}>
+      <NeighborhoodMap territory={territory} mapRaster={mapRaster}/>
+    </div>
+  </CropMarks>;
 };
 
 export default NeighborhoodCard;

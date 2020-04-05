@@ -2,7 +2,6 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-
 import React from "react";
 import LoginButton from "./LoginButton";
 import LogoutButton from "./LogoutButton";
@@ -15,12 +14,12 @@ let AuthenticationPanel = () => {
   if (settings.user) {
     const fullName = settings.user.name;
     return <p>
-        Logged in as {fullName} <LogoutButton />
-      </p>;
+      Logged in as {fullName} <LogoutButton/>
+    </p>;
   } else {
     return <p>
-        <LoginButton /> {dev && <DevLoginButton />}
-      </p>;
+      <LoginButton/> {dev && <DevLoginButton/>}
+    </p>;
   }
 };
 

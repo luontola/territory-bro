@@ -2,7 +2,6 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-
 import "./defaultStyles";
 import * as React from "react";
 import AuthenticationPanel from "./AuthenticationPanel";
@@ -30,21 +29,21 @@ class Layout extends React.Component<Props> {
     } = this.props;
     return <div id="layout">
 
-        <nav className="no-print">
-          <AuthenticationPanel />
-          <ul>
-            <li><Link to="/">Home</Link></li>
-            <li><a href="https://territorybro.com/guide/">User Guide</a></li>
-            <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">Updates</a></li>
-            <li><Link to="/support">Support</Link></li>
-          </ul>
-        </nav>
+      <nav className="no-print">
+        <AuthenticationPanel/>
+        <ul>
+          <li><Link to="/">Home</Link></li>
+          <li><a href="https://territorybro.com/guide/">User Guide</a></li>
+          <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">Updates</a></li>
+          <li><Link to="/support">Support</Link></li>
+        </ul>
+      </nav>
 
-        <main className="container">
-          {children}
-        </main>
+      <main className="container">
+        {children}
+      </main>
 
-      </div>;
+    </div>;
   }
 }
 

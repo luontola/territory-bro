@@ -14,46 +14,46 @@ import PrintDateNotice from "./PrintDateNotice";
 // TODO: deduplicate with TerritoryCard
 
 const TerritoryCardMapOnly = ({
-  territory,
-  territoryId,
-  congregation,
-  congregationId,
-  mapRaster
-}) => {
+                                territory,
+                                territoryId,
+                                congregation,
+                                congregationId,
+                                mapRaster
+                              }) => {
   congregation = congregation || getCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
   return <CropMarks>
-      <div className={styles.root}>
+    <div className={styles.root}>
 
-        <div className={styles.minimap}>
-          <TerritoryMiniMap territory={territory} congregation={congregation} />
-        </div>
-
-        <div className={styles.header}>
-          <div className={styles.title}>
-            <FormattedMessage id="TerritoryCard.title" defaultMessage="Territory Map Card" />
-          </div>
-          <div className={styles.subregion}>
-            {territory.subregion}
-          </div>
-        </div>
-
-        <div className={styles.number}>
-          {territory.number}
-        </div>
-
-        <div className={styles.map}>
-          <PrintDateNotice>
-            <TerritoryMap territory={territory} mapRaster={mapRaster} />
-          </PrintDateNotice>
-        </div>
-
-        <div className={styles.footer}>
-          <FormattedMessage id="TerritoryCard.footer" />
-        </div>
-
+      <div className={styles.minimap}>
+        <TerritoryMiniMap territory={territory} congregation={congregation}/>
       </div>
-    </CropMarks>;
+
+      <div className={styles.header}>
+        <div className={styles.title}>
+          <FormattedMessage id="TerritoryCard.title" defaultMessage="Territory Map Card"/>
+        </div>
+        <div className={styles.subregion}>
+          {territory.subregion}
+        </div>
+      </div>
+
+      <div className={styles.number}>
+        {territory.number}
+      </div>
+
+      <div className={styles.map}>
+        <PrintDateNotice>
+          <TerritoryMap territory={territory} mapRaster={mapRaster}/>
+        </PrintDateNotice>
+      </div>
+
+      <div className={styles.footer}>
+        <FormattedMessage id="TerritoryCard.footer"/>
+      </div>
+
+    </div>
+  </CropMarks>;
 };
 
 export default TerritoryCardMapOnly;

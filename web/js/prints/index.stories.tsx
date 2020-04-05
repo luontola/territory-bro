@@ -14,22 +14,37 @@ import {language, messages} from "../intl";
 import {IntlProvider} from "react-intl";
 import RegionPrintout from "./RegionPrintout";
 
-const Box = ({
-  children
-}) => <IntlProvider locale={language} messages={messages}>
-    {children}
-  </IntlProvider>;
+const Box = ({children}) => <IntlProvider locale={language} messages={messages}>
+  {children}
+</IntlProvider>;
 
-storiesOf('Printouts', module).add('TerritoryCard', () => <Box>
-      <TerritoryCard territory={territory101} congregation={demoCongregation} mapRaster={mapRasters[0]} />
-    </Box>).add('NeighborhoodCard', () => <Box>
-      <NeighborhoodCard territory={territory101} congregation={demoCongregation} mapRaster={mapRasters[0]} />
-    </Box>).add('RuralTerritoryCard', () => <Box>
-      <RuralTerritoryCard territory={territory101} congregation={demoCongregation} mapRaster={mapRasters[0]} />
-    </Box>).add('RegionPrintout', () => <Box>
-      <RegionPrintout region={subregionKatajanokka} congregation={demoCongregation} mapRaster={mapRasters[0]} />
-    </Box>).add('RegionPrintout, multi-polygon', () => <Box>
-      <RegionPrintout region={subregionKaivopuisto} congregation={demoCongregation} mapRaster={mapRasters[0]} />
-    </Box>).add('RegionPrintout, congregation', () => <Box>
-      <RegionPrintout region={demoCongregation} congregation={demoCongregation} mapRaster={mapRasters[0]} />
+storiesOf('Printouts', module)
+  .add('TerritoryCard', () =>
+    <Box>
+      <TerritoryCard territory={territory101} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
+    </Box>)
+
+  .add('NeighborhoodCard', () =>
+    <Box>
+      <NeighborhoodCard territory={territory101} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
+    </Box>)
+
+  .add('RuralTerritoryCard', () =>
+    <Box>
+      <RuralTerritoryCard territory={territory101} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
+    </Box>)
+
+  .add('RegionPrintout', () =>
+    <Box>
+      <RegionPrintout region={subregionKatajanokka} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
+    </Box>)
+
+  .add('RegionPrintout, multi-polygon', () =>
+    <Box>
+      <RegionPrintout region={subregionKaivopuisto} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
+    </Box>)
+
+  .add('RegionPrintout, congregation', () =>
+    <Box>
+      <RegionPrintout region={demoCongregation} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
     </Box>);

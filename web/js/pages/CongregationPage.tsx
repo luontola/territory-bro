@@ -6,19 +6,18 @@ import React from "react";
 import {Link} from "@reach/router";
 import {getCongregationById} from "../api";
 
-const CongregationPage = ({
-  congregationId
-}) => {
+const CongregationPage = ({congregationId}) => {
   const congregation = getCongregationById(congregationId);
   return <>
-      <h1>{congregation.name}</h1>
-      <p><Link to="printouts">Printouts</Link></p>
-      {congregation.permissions.gisAccess && <p><a href={`/api/congregation/${congregationId}/qgis-project`}>Download QGIS project</a></p>}
-      {congregation.permissions.configureCongregation && <>
-        <p><Link to="users">Users</Link></p>
-        <p><Link to="settings">Settings</Link></p>
-      </>}
-    </>;
+    <h1>{congregation.name}</h1>
+    <p><Link to="printouts">Printouts</Link></p>
+    {congregation.permissions.gisAccess &&
+    <p><a href={`/api/congregation/${congregationId}/qgis-project`}>Download QGIS project</a></p>}
+    {congregation.permissions.configureCongregation && <>
+      <p><Link to="users">Users</Link></p>
+      <p><Link to="settings">Settings</Link></p>
+    </>}
+  </>;
 };
 
 export default CongregationPage;

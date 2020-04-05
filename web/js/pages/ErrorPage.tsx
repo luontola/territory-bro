@@ -17,10 +17,7 @@ function login() {
   auth.login();
 }
 
-const ErrorPage = ({
-  componentStack,
-  error
-}) => {
+const ErrorPage = ({componentStack, error}) => {
   const httpStatus = error.isAxiosError && error.response && error.response.status;
   if (httpStatus === 401) {
     login();
@@ -35,10 +32,10 @@ const ErrorPage = ({
     logFatalException(description);
   }
   return <>
-      <h1>{title}</h1>
-      <p><a href="/">Return to the front page and try again</a></p>
-      <pre>{description}</pre>
-    </>;
+    <h1>{title}</h1>
+    <p><a href="/">Return to the front page and try again</a></p>
+    <pre>{description}</pre>
+  </>;
 };
 
 export default ErrorPage;

@@ -9,9 +9,7 @@
     display: grid;
     grid-template-columns: var(--minimap-size) auto var(--minimap-size);
     grid-template-rows: var(--minimap-size) auto;
-    grid-template-areas:
-            "minimap header number"
-            "map map map";
+    grid-template-areas: "minimap header number" "map map map";
 }
 
 .header {

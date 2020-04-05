@@ -7,16 +7,14 @@ import PrintOptionsForm from "../prints/PrintOptionsForm";
 import {getCongregationById} from "../api";
 import {Link} from "@reach/router";
 
-const PrintoutPage = ({
-  congregationId
-}) => {
+const PrintoutPage = ({congregationId}) => {
   const congregation = getCongregationById(congregationId);
   return <>
-      <div className="no-print">
-        <h1><Link to="..">{congregation.name}</Link>: Printouts</h1>
-      </div>
-      <PrintOptionsForm congregationId={congregationId} />
-    </>;
+    <div className="no-print">
+      <h1><Link to="..">{congregation.name}</Link>: Printouts</h1>
+    </div>
+    <PrintOptionsForm congregationId={congregationId}/>
+  </>;
 };
 
 export default PrintoutPage;

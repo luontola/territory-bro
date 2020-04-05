@@ -2,7 +2,6 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-
 import Feature from "ol/Feature";
 import {Attribution, defaults as controlDefaults} from "ol/control";
 import Source from "ol/source/Source";
@@ -47,7 +46,7 @@ export const mapRasters: Array<MapRaster> = [{
   name: "Finland - Vantaan kaupunkikartta",
   source: new TileWMS({
     url: 'https://gis.vantaa.fi/geoserver/wms',
-    params: { 'LAYERS': 'taustakartta:kaupunkikartta_single_layer', 'TILED': true },
+    params: {'LAYERS': 'taustakartta:kaupunkikartta_single_layer', 'TILED': true},
     serverType: 'geoserver',
     attributions: '&copy; Vantaan kaupunki'
   })
@@ -78,7 +77,7 @@ export function makeControls() {
     className: 'map-attribution',
     collapsible: false
   });
-  return controlDefaults({ attribution: false }).extend([attribution]);
+  return controlDefaults({attribution: false}).extend([attribution]);
 }
 
 // visual style
@@ -100,8 +99,8 @@ export function territoryTextStyle(territoryNumber: string, fontSize: string) {
   return new Text({
     text: territoryNumber,
     font: 'bold ' + fontSize + ' sans-serif',
-    fill: new Fill({ color: 'rgba(0, 0, 0, 1.0)' }),
-    stroke: new Stroke({ color: 'rgba(255, 255, 255, 1.0)', width: 3.0 }),
+    fill: new Fill({color: 'rgba(0, 0, 0, 1.0)'}),
+    stroke: new Stroke({color: 'rgba(255, 255, 255, 1.0)', width: 3.0}),
     overflow: true
   });
 }

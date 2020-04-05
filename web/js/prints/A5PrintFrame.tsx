@@ -2,7 +2,6 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-
 import * as React from "react";
 import styles from "./A5PrintFrame.css";
 
@@ -12,10 +11,8 @@ type Props = {
 
 // TODO: parameterize the printout size?
 
-const A5PrintFrame = ({
-  children
-}: Props) => <div className={styles.cropArea}>
-    {children}
-  </div>;
+const A5PrintFrame = ({children}: Props) => <div className={styles.cropArea}>
+  {children}
+</div>;
 
 export default A5PrintFrame;

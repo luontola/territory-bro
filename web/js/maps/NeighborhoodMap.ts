@@ -2,7 +2,6 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-
 import Map from "ol/Map";
 import View from "ol/View";
 import VectorLayer from "ol/layer/Vector";

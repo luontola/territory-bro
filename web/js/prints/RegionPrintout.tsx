@@ -9,22 +9,22 @@ import A4PrintFrame from "./A4PrintFrame";
 import styles from "./RegionPrintout.css";
 
 const RegionPrintout = ({
-  region,
-  regionId,
-  congregation,
-  congregationId,
-  mapRaster
-}) => {
+                          region,
+                          regionId,
+                          congregation,
+                          congregationId,
+                          mapRaster
+                        }) => {
   congregation = congregation || getCongregationById(congregationId);
   region = region || (regionId === congregationId ? congregation : congregation.getSubregionById(regionId));
   return <A4PrintFrame>
-      <div className={styles.root}>
-        <div className={styles.name}>{region.name}</div>
-        <div className={styles.map}>
-          <RegionMap region={region} territories={congregation.territories} mapRaster={mapRaster} />
-        </div>
+    <div className={styles.root}>
+      <div className={styles.name}>{region.name}</div>
+      <div className={styles.map}>
+        <RegionMap region={region} territories={congregation.territories} mapRaster={mapRaster}/>
       </div>
-    </A4PrintFrame>;
+    </div>
+  </A4PrintFrame>;
 };
 
 export default RegionPrintout;

@@ -2,7 +2,6 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-
 import {api} from "./util";
 import alphanumSort from "alphanum-sort";
 import sortBy from "lodash/sortBy";
@@ -64,12 +63,12 @@ export function getSettings(): Settings {
 }
 
 export async function loginWithIdToken(idToken: string) {
-  await api.post('/api/login', { idToken });
+  await api.post('/api/login', {idToken});
   refreshSettings();
 }
 
 export async function devLogin() {
-  await api.post('/api/dev-login', { sub: "developer", name: "Developer", email: "developer@example.com" });
+  await api.post('/api/dev-login', {sub: "developer", name: "Developer", email: "developer@example.com"});
   refreshSettings();
 }
 
@@ -180,23 +179,23 @@ export function getCongregationById(congregationId: string): Congregation {
 }
 
 export async function createCongregation(name: string) {
-  const response = await api.post('/api/congregations', { name });
+  const response = await api.post('/api/congregations', {name});
   refreshCongregations();
   return response.data.id;
 }
 
 export async function addUser(congregationId: string, userId: string) {
-  await api.post(`/api/congregation/${congregationId}/add-user`, { userId });
+  await api.post(`/api/congregation/${congregationId}/add-user`, {userId});
   refreshCongregations();
 }
 
 export async function setUserPermissions(congregationId: string, userId: string, permissions: Array<string>) {
-  await api.post(`/api/congregation/${congregationId}/set-user-permissions`, { userId, permissions });
+  await api.post(`/api/congregation/${congregationId}/set-user-permissions`, {userId, permissions});
   refreshCongregations();
 }
 
 export async function renameCongregation(congregationId: string, name: string) {
-  await api.post(`/api/congregation/${congregationId}/rename`, { name });
+  await api.post(`/api/congregation/${congregationId}/rename`, {name});
   refreshCongregations();
 }
 

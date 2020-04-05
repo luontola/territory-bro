@@ -9,16 +9,19 @@ import {territory101, territory102} from "../testdata";
 import TerritoryMap from "./TerritoryMap";
 import {mapRasters} from "./mapOptions";
 
-const Box = ({
-  children
-}) => <div style={{ width: '15cm', height: '10cm' }}>
+const Box = ({children}) =>
+  <div style={{width: '15cm', height: '10cm'}}>
     {children}
   </div>;
 
-const stories = storiesOf('TerritoryMap', module).add('default', () => <Box>
-      <TerritoryMap territory={territory101} mapRaster={mapRasters[0]} />
-    </Box>).add('multi-polygon', () => <Box>
-      <TerritoryMap territory={territory102} mapRaster={mapRasters[0]} />
+const stories = storiesOf('TerritoryMap', module)
+  .add('default', () =>
+    <Box>
+      <TerritoryMap territory={territory101} mapRaster={mapRasters[0]}/>
+    </Box>)
+  .add('multi-polygon', () =>
+    <Box>
+      <TerritoryMap territory={territory102} mapRaster={mapRasters[0]}/>
     </Box>);
 
 mapRasters.forEach(mapRaster => {
@@ -31,7 +34,7 @@ mapRasters.forEach(mapRaster => {
       };
     }
     return <Box>
-        <TerritoryMap territory={territory} mapRaster={mapRaster} />
-      </Box>;
+      <TerritoryMap territory={territory} mapRaster={mapRaster}/>
+    </Box>;
   });
 });

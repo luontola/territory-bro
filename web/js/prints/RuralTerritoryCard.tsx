@@ -12,42 +12,42 @@ import A5PrintFrame from "./A5PrintFrame";
 import PrintDateNotice from "./PrintDateNotice";
 
 const RuralTerritoryCard = ({
-  territory,
-  territoryId,
-  congregation,
-  congregationId,
-  mapRaster
-}) => {
+                              territory,
+                              territoryId,
+                              congregation,
+                              congregationId,
+                              mapRaster
+                            }) => {
   congregation = congregation || getCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
   return <A5PrintFrame>
-      <div className={styles.root}>
+    <div className={styles.root}>
 
-        <div className={styles.minimap}>
-          <TerritoryMiniMap territory={territory} congregation={congregation} />
-        </div>
-
-        <div className={styles.header}>
-          <div className={styles.title}>
-            <FormattedMessage id="TerritoryCard.title" />
-          </div>
-          <div className={styles.subregion}>
-            {territory.subregion}
-          </div>
-        </div>
-
-        <div className={styles.number}>
-          {territory.number}
-        </div>
-
-        <div className={styles.map}>
-          <PrintDateNotice>
-            <TerritoryMap territory={territory} mapRaster={mapRaster} />
-          </PrintDateNotice>
-        </div>
-
+      <div className={styles.minimap}>
+        <TerritoryMiniMap territory={territory} congregation={congregation}/>
       </div>
-    </A5PrintFrame>;
+
+      <div className={styles.header}>
+        <div className={styles.title}>
+          <FormattedMessage id="TerritoryCard.title"/>
+        </div>
+        <div className={styles.subregion}>
+          {territory.subregion}
+        </div>
+      </div>
+
+      <div className={styles.number}>
+        {territory.number}
+      </div>
+
+      <div className={styles.map}>
+        <PrintDateNotice>
+          <TerritoryMap territory={territory} mapRaster={mapRaster}/>
+        </PrintDateNotice>
+      </div>
+
+    </div>
+  </A5PrintFrame>;
 };
 
 export default RuralTerritoryCard;
