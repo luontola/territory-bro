@@ -1,0 +1,10 @@
+form.search {
+    margin: 0.5em 0;
+    display: flex;
+    max-width: 30em;
+}
+
+form.search input {
+    margin: 0 0.5em;
+    flex-grow: 1;
+}
