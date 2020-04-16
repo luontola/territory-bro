@@ -1,4 +1,4 @@
-FROM openjdk:11-jdk AS builder
+FROM adoptopenjdk:14-jdk-hotspot AS builder
 
 # tools
 ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/local/bin/lein
@@ -26,7 +26,7 @@ RUN lein uberjar
 
 # ------------------------------------------------------------
 
-FROM openjdk:11-jre-slim
+FROM adoptopenjdk:14-jre-hotspot
 
 RUN adduser --system --home /app app
 WORKDIR /app

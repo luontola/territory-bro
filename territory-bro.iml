@@ -115,7 +115,7 @@
     <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-io:9.4.22.v20191022" level="project" />
     <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-server:9.4.22.v20191022" level="project" />
     <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-util:9.4.22.v20191022" level="project" />
-    <orderEntry type="library" name="Leiningen: org.flywaydb/flyway-core:6.3.2" level="project" />
+    <orderEntry type="library" name="Leiningen: org.flywaydb/flyway-core:6.3.3" level="project" />
     <orderEntry type="library" name="Leiningen: org.immutant/core:2.1.10" level="project" />
     <orderEntry type="library" name="Leiningen: org.immutant/web:2.1.10" level="project" />
     <orderEntry type="library" name="Leiningen: org.javassist/javassist:3.18.1-GA" level="project" />
@@ -127,7 +127,7 @@
     <orderEntry type="library" name="Leiningen: org.jboss.xnio/xnio-nio:3.3.6.Final" level="project" />
     <orderEntry type="library" name="Leiningen: org.json/json:20180813" level="project" />
     <orderEntry type="library" name="Leiningen: org.msgpack/msgpack:0.6.10" level="project" />
-    <orderEntry type="library" name="Leiningen: org.postgresql/postgresql:42.2.11" level="project" />
+    <orderEntry type="library" name="Leiningen: org.postgresql/postgresql:42.2.12" level="project" />
     <orderEntry type="library" name="Leiningen: org.projectodd.wunderboss/wunderboss-clojure:0.13.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.projectodd.wunderboss/wunderboss-core:0.13.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.projectodd.wunderboss/wunderboss-web-undertow:0.13.1" level="project" />
@@ -153,7 +153,7 @@
     <orderEntry type="library" name="Leiningen: ring/ring-servlet:1.8.0" level="project" />
     <orderEntry type="library" name="Leiningen: ring/ring-ssl:0.3.0" level="project" />
     <orderEntry type="library" name="Leiningen: ring:1.8.0" level="project" />
-    <orderEntry type="library" name="Leiningen: seancorfield/next.jdbc:1.0.409" level="project" />
+    <orderEntry type="library" name="Leiningen: seancorfield/next.jdbc:1.0.424" level="project" />
     <orderEntry type="library" name="Leiningen: slingshot:0.12.2" level="project" />
     <orderEntry type="library" name="Leiningen: tech.droit/clj-diff:1.0.1" level="project" />
     <orderEntry type="library" name="Leiningen: tigris:0.1.2" level="project" />

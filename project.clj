@@ -27,8 +27,8 @@
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/tools.logging "1.0.0"] ; TODO: consider switching to Timbre
-                 [org.flywaydb/flyway-core "6.3.2"]
-                 [org.postgresql/postgresql "42.2.11"]
+                 [org.flywaydb/flyway-core "6.3.3"]
+                 [org.postgresql/postgresql "42.2.12"]
                  [prismatic/schema "1.1.12"]
                  [ring-logger "1.0.1"]
                  [ring/ring-defaults "0.3.2"]]
@@ -53,15 +53,14 @@
                          [ring/ring-core "1.8.0"]
                          [ring/ring-jetty-adapter "1.8.0"]
                          [ring/ring-servlet "1.8.0"]
-                         [seancorfield/next.jdbc "1.0.409"]]
+                         [seancorfield/next.jdbc "1.0.424"]]
   :exclusions [ns-tracker]
   :pedantic? :warn
-
-  :min-lein-version "2.0.0"
+  :min-lein-version "2.9.0"
 
   :source-paths ["src"]
   :java-source-paths ["src-java"]
-  :javac-options ["-source" "8" "-target" "8"]
+  :javac-options ["--release" "11"]
   :test-paths ["test"]
   :resource-paths ["resources"]
   :target-path "target/%s/"
