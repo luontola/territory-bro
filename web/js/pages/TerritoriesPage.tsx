@@ -65,7 +65,9 @@ const TerritoriesPage = ({congregationId}) => {
         .filter(territory => matchesSearch(territory, search))
         .map(territory =>
           <tr key={territory.id}>
-            <td>{territory.number}</td>
+            <td className={styles.number}>
+              <Link to={territory.id}>{territory.number}</Link>
+            </td>
             <td>{territory.subregion}</td>
             <td>{territory.addresses}</td>
           </tr>

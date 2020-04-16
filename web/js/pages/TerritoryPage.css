@@ -1,0 +1,21 @@
+.details {
+    padding: 0.5em;
+}
+
+.details table {
+    width: 100%;
+}
+
+.details table th {
+    text-align: left;
+    vertical-align: top;
+}
+
+.details table td {
+    white-space: pre-line;
+}
+
+.map {
+    padding: 0.5em;
+    height: 600px;
+}

@@ -8,3 +8,24 @@ form.search input {
     margin: 0 0.5em;
     flex-grow: 1;
 }
+
+td.number {
+    padding: 0;
+}
+
+td.number a {
+    /*
+    make the whole cell clickable:
+    - block link (for 100% width)
+    - move padding from cell to link (for 100% height)
+    */
+    display: block;
+    padding: 0 1em;
+
+    text-align: center;
+    font-size: 140%;
+}
+
+td.number:hover a {
+    font-weight: bold;
+}
