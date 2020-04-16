@@ -21,6 +21,7 @@ import {logPageView} from "./analytics";
 import SettingsPage from "./pages/SettingsPage";
 import UsersPage from "./pages/UsersPage";
 import JoinPage from "./pages/JoinPage";
+import TerritoriesPage from "./pages/TerritoriesPage";
 
 globalHistory.listen(({location, action}) => {
   console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
@@ -45,6 +46,7 @@ ReactDOM.createRoot(document.getElementById('root'))
                 <SupportPage path="/support"/>
 
                 <CongregationPage path="/congregation/:congregationId"/>
+                <TerritoriesPage path="/congregation/:congregationId/territories"/>
                 <PrintoutPage path="/congregation/:congregationId/printouts"/>
                 <SettingsPage path="/congregation/:congregationId/settings"/>
                 <UsersPage path="/congregation/:congregationId/users"/>
