@@ -4,6 +4,8 @@ FROM openjdk:11-jdk AS builder
 ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/local/bin/lein
 RUN chmod 755 /usr/local/bin/lein
 
+# TODO: install postgres & run all tests
+
 # working directory
 RUN useradd --create-home app && \
     mkdir -p /project && \

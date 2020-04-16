@@ -30,6 +30,7 @@ export default class TerritoryMiniMap extends OpenLayersMap<Props> {
     if (congregation.location) {
       initTerritoryMiniMap(this.element, territory, congregation);
     } else {
+      // TODO: this is never reached because of the default congregation boundary
       this.element.innerText = "Error: Congregation boundary is not defined";
     }
   }
