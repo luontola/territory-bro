@@ -62,7 +62,7 @@
 
     (let [territory-id (gis-db/create-territory! conn {:territory/number "123"
                                                        :territory/addresses "Street 1 A"
-                                                       :territory/subregion "Somewhere"
+                                                       :territory/region "Somewhere"
                                                        :territory/meta {:foo "bar", :gazonk 42}
                                                        :territory/location testdata/wkt-multi-polygon})]
 
@@ -73,7 +73,7 @@
         (is (= {:territory/id territory-id
                 :territory/number "123"
                 :territory/addresses "Street 1 A"
-                :territory/subregion "Somewhere"
+                :territory/region "Somewhere"
                 :territory/meta {:foo "bar", :gazonk 42}
                 :territory/location testdata/wkt-multi-polygon}
                (gis-db/get-territory-by-id conn territory-id))))
@@ -107,7 +107,7 @@
     (testing "territory table change log,"
       (let [territory-id (gis-db/create-territory! conn {:territory/number "123"
                                                          :territory/addresses "Street 1 A"
-                                                         :territory/subregion "Somewhere"
+                                                         :territory/region "Somewhere"
                                                          :territory/meta {:foo "bar", :gazonk 42}
                                                          :territory/location testdata/wkt-multi-polygon})]
         (testing "insert"
@@ -457,7 +457,7 @@
         (db/use-tenant-schema conn test-schema)
         (is (gis-db/create-territory! conn {:territory/number "123"
                                             :territory/addresses "Street 1 A"
-                                            :territory/subregion "Somewhere"
+                                            :territory/region "Somewhere"
                                             :territory/meta {:foo "bar", :gazonk 42}
                                             :territory/location testdata/wkt-multi-polygon}))
         (is (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon))

@@ -127,7 +127,7 @@
          :territory/id UUID
          :territory/number s/Str
          :territory/addresses s/Str
-         :territory/subregion s/Str
+         :territory/region s/Str
          :territory/meta {s/Keyword json/Schema}
          :territory/location s/Str))
 (s/defschema TerritoryDeleted
@@ -137,22 +137,22 @@
          :congregation/id UUID
          :territory/id UUID))
 
-;;; Subregion
+;;; Region
 
 (s/defschema RegionDefined
   (assoc GisSyncEvent
-         :event/type (s/eq :subregion.event/subregion-defined)
+         :event/type (s/eq :region.event/region-defined)
          :event/version (s/eq 1)
          :congregation/id UUID
-         :subregion/id UUID
-         :subregion/name s/Str
-         :subregion/location s/Str))
+         :region/id UUID
+         :region/name s/Str
+         :region/location s/Str))
 (s/defschema RegionDeleted
   (assoc GisSyncEvent
-         :event/type (s/eq :subregion.event/subregion-deleted)
+         :event/type (s/eq :region.event/region-deleted)
          :event/version (s/eq 1)
          :congregation/id UUID
-         :subregion/id UUID))
+         :region/id UUID))
 
 ;;; Congregation Boundary
 
@@ -221,8 +221,8 @@
    :congregation.event/gis-user-deleted GisUserDeleted
    :territory.event/territory-defined TerritoryDefined
    :territory.event/territory-deleted TerritoryDeleted
-   :subregion.event/subregion-defined RegionDefined
-   :subregion.event/subregion-deleted RegionDeleted
+   :region.event/region-defined RegionDefined
+   :region.event/region-deleted RegionDeleted
    :congregation-boundary.event/congregation-boundary-defined CongregationBoundaryDefined
    :congregation-boundary.event/congregation-boundary-deleted CongregationBoundaryDeleted
    :card-minimap-viewport.event/card-minimap-viewport-defined CardMinimapViewportDefined

@@ -35,7 +35,7 @@
   {:id s/Uuid
    :number s/Str
    :addresses s/Str
-   :subregion s/Str
+   :region s/Str
    :meta {s/Keyword s/Any}
    :location s/Str})
 

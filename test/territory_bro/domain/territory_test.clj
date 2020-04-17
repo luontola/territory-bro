@@ -24,7 +24,7 @@
    :territory/id territory-id
    :territory/number "123"
    :territory/addresses "the addresses"
-   :territory/subregion "the region"
+   :territory/region "the region"
    :territory/meta {:foo "bar"}
    :territory/location testdata/wkt-multi-polygon})
 (def territory-deleted
@@ -50,7 +50,7 @@
                     {cong-id {territory-id {:territory/id territory-id
                                             :territory/number "123"
                                             :territory/addresses "the addresses"
-                                            :territory/subregion "the region"
+                                            :territory/region "the region"
                                             :territory/meta {:foo "bar"}
                                             :territory/location testdata/wkt-multi-polygon}}}}]
       (is (= expected (apply-events events)))
@@ -59,13 +59,13 @@
         (let [events (conj events (assoc territory-defined
                                          :territory/number "456"
                                          :territory/addresses "new addresses"
-                                         :territory/subregion "new region"
+                                         :territory/region "new region"
                                          :territory/meta {:new-meta "new stuff"}
                                          :territory/location "new location"))
               expected (update-in expected [::territory/territories cong-id territory-id]
                                   merge {:territory/number "456"
                                          :territory/addresses "new addresses"
-                                         :territory/subregion "new region"
+                                         :territory/region "new region"
                                          :territory/meta {:new-meta "new stuff"}
                                          :territory/location "new location"})]
           (is (= expected (apply-events events)))))
@@ -102,7 +102,7 @@
                         :territory/id territory-id
                         :territory/number "123"
                         :territory/addresses "the addresses"
-                        :territory/subregion "the region"
+                        :territory/region "the region"
                         :territory/meta {:foo "bar"}
                         :territory/location testdata/wkt-multi-polygon}]
 
@@ -130,7 +130,7 @@
                         :territory/id territory-id
                         :territory/number "123"
                         :territory/addresses "the addresses"
-                        :territory/subregion "the region"
+                        :territory/region "the region"
                         :territory/meta {:foo "bar"}
                         :territory/location testdata/wkt-multi-polygon}]
 
@@ -144,7 +144,7 @@
 
     (testing "region changed"
       (is (= [territory-defined]
-             (handle-command update-command [(assoc territory-defined :territory/subregion "old region")] injections))))
+             (handle-command update-command [(assoc territory-defined :territory/region "old region")] injections))))
 
     (testing "meta changed"
       (is (= [territory-defined]

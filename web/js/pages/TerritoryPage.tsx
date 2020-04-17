@@ -33,7 +33,7 @@ const TerritoryPage = ({congregationId, territoryId}) => {
             </tr>
             <tr>
               <th>Region</th>
-              <td>{territory.subregion}</td>
+              <td>{territory.region}</td>
             </tr>
             <tr>
               <th>Addresses</th>

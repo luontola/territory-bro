@@ -66,7 +66,7 @@
   {:territory/id (:id territory)
    :territory/number (:number territory)
    :territory/addresses (:addresses territory)
-   :territory/subregion (:subregion territory)
+   :territory/region (:subregion territory)
    :territory/meta (:meta territory)
    :territory/location (:location territory)})
 
@@ -86,7 +86,7 @@
     (query! conn :create-territory {:id id
                                     :number (:territory/number territory)
                                     :addresses (:territory/addresses territory)
-                                    :subregion (:territory/subregion territory)
+                                    :subregion (:territory/region territory)
                                     :meta (:territory/meta territory)
                                     :location (:territory/location territory)})
     id))

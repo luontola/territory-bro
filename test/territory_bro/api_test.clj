@@ -668,13 +668,13 @@
         (is (= {:territory/id territory-id
                 :territory/number "123"
                 :territory/addresses "the addresses"
-                :territory/subregion "the region"
+                :territory/region "the region"
                 :territory/meta {:foo "bar"}
                 :territory/location testdata/wkt-multi-polygon}
                (get-in state [::territory/territories cong-id territory-id])))
-        (is (= {:subregion/id region-id
-                :subregion/name "Somewhere"
-                :subregion/location testdata/wkt-multi-polygon}
+        (is (= {:region/id region-id
+                :region/name "Somewhere"
+                :region/location testdata/wkt-multi-polygon}
                (get-in state [::region/regions cong-id region-id])))
         (is (= {:congregation-boundary/id congregation-boundary-id
                 :congregation-boundary/location testdata/wkt-multi-polygon}
@@ -716,13 +716,13 @@
                                  (first))]
           (is (some? replacement-id))
           (is (not= conflicting-stream-id replacement-id))
-          (is (= [{:subregion/id replacement-id
-                   :subregion/name "Conflicting ID"
-                   :subregion/location testdata/wkt-multi-polygon}
-                  {:subregion/id region-id
-                   :subregion/name "Somewhere"
-                   :subregion/location testdata/wkt-multi-polygon}]
+          (is (= [{:region/id replacement-id
+                   :region/name "Conflicting ID"
+                   :region/location testdata/wkt-multi-polygon}
+                  {:region/id region-id
+                   :region/name "Somewhere"
+                   :region/location testdata/wkt-multi-polygon}]
                  (->> (vals (get-in state [::region/regions cong-id]))
-                      (sort-by :subregion/name)))))))))
+                      (sort-by :region/name)))))))))
 
 ;; TODO: delete territory and then restore it to same congregation

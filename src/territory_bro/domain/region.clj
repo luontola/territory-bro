@@ -15,18 +15,18 @@
 (defmethod projection :default [state _event]
   state)
 
-(defmethod projection :subregion.event/subregion-defined
+(defmethod projection :region.event/region-defined
   [state event]
-  (update-in state [::regions (:congregation/id event) (:subregion/id event)]
+  (update-in state [::regions (:congregation/id event) (:region/id event)]
              (fn [region]
                (-> region
-                   (assoc :subregion/id (:subregion/id event))
-                   (assoc :subregion/name (:subregion/name event))
-                   (assoc :subregion/location (:subregion/location event))))))
+                   (assoc :region/id (:region/id event))
+                   (assoc :region/name (:region/name event))
+                   (assoc :region/location (:region/location event))))))
 
-(defmethod projection :subregion.event/subregion-deleted
+(defmethod projection :region.event/region-deleted
   [state event]
-  (dissoc-in state [::regions (:congregation/id event) (:subregion/id event)]))
+  (dissoc-in state [::regions (:congregation/id event) (:region/id event)]))
 
 
 ;;;; Queries
@@ -40,7 +40,7 @@
 
 (defn- write-model [command events]
   (let [state (reduce projection nil events)]
-    (get-in state [::regions (:congregation/id command) (:subregion/id command)])))
+    (get-in state [::regions (:congregation/id command) (:region/id command)])))
 
 
 ;;;; Command handlers
@@ -49,47 +49,47 @@
                                       (:command/type command)))
 
 (def ^:private data-keys
-  [:subregion/name
-   :subregion/location])
+  [:region/name
+   :region/location])
 
 (defmethod command-handler :region.command/create-region
   [command region {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
-        region-id (:subregion/id command)]
+        region-id (:region/id command)]
     (check-permit [:create-region cong-id])
     (when (nil? region)
-      [(merge {:event/type :subregion.event/subregion-defined
+      [(merge {:event/type :region.event/region-defined
                :event/version 1
                :congregation/id cong-id
-               :subregion/id region-id}
+               :region/id region-id}
               (gis-change/event-metadata command)
               (select-keys command data-keys))])))
 
 (defmethod command-handler :region.command/update-region
   [command region {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
-        region-id (:subregion/id command)
+        region-id (:region/id command)
         old-data (select-keys region data-keys)
         new-data (select-keys command data-keys)]
     (check-permit [:update-region cong-id region-id])
     (when (not= old-data new-data)
-      [(merge {:event/type :subregion.event/subregion-defined
+      [(merge {:event/type :region.event/region-defined
                :event/version 1
                :congregation/id cong-id
-               :subregion/id region-id}
+               :region/id region-id}
               (gis-change/event-metadata command)
               new-data)])))
 
 (defmethod command-handler :region.command/delete-region
   [command region {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
-        region-id (:subregion/id command)]
+        region-id (:region/id command)]
     (check-permit [:delete-region cong-id region-id])
     (when (some? region)
-      [(merge {:event/type :subregion.event/subregion-deleted
+      [(merge {:event/type :region.event/region-deleted
                :event/version 1
                :congregation/id cong-id
-               :subregion/id region-id}
+               :region/id region-id}
               (gis-change/event-metadata command))])))
 
 (defn handle-command [command events injections]

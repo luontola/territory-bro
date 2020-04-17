@@ -118,7 +118,7 @@
          :territory/id (foreign-key/references :new UUID)
          :territory/number s/Str
          :territory/addresses s/Str
-         :territory/subregion s/Str
+         :territory/region s/Str
          :territory/meta {s/Keyword json/Schema}
          :territory/location s/Str))
 
@@ -129,7 +129,7 @@
          :territory/id (foreign-key/references :territory UUID)
          :territory/number s/Str
          :territory/addresses s/Str
-         :territory/subregion s/Str
+         :territory/region s/Str
          :territory/meta {s/Keyword json/Schema}
          :territory/location s/Str))
 
@@ -145,23 +145,23 @@
   (assoc GisSyncCommand
          :command/type (s/eq :region.command/create-region)
          :congregation/id (foreign-key/references :congregation UUID)
-         :subregion/id (foreign-key/references :new UUID)
-         :subregion/name s/Str
-         :subregion/location s/Str))
+         :region/id (foreign-key/references :new UUID)
+         :region/name s/Str
+         :region/location s/Str))
 
 (s/defschema UpdateRegion
   (assoc GisSyncCommand
          :command/type (s/eq :region.command/update-region)
          :congregation/id (foreign-key/references :congregation UUID)
-         :subregion/id (foreign-key/references :region UUID)
-         :subregion/name s/Str
-         :subregion/location s/Str))
+         :region/id (foreign-key/references :region UUID)
+         :region/name s/Str
+         :region/location s/Str))
 
 (s/defschema DeleteRegion
   (assoc GisSyncCommand
          :command/type (s/eq :region.command/delete-region)
          :congregation/id (foreign-key/references :congregation UUID)
-         :subregion/id (foreign-key/references :region UUID)))
+         :region/id (foreign-key/references :region UUID)))
 
 ;;; Congregation Boundary
 

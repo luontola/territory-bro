@@ -17,19 +17,19 @@
 (def user-id (UUID. 0 3))
 (def gis-change-id 42)
 (def region-defined
-  {:event/type :subregion.event/subregion-defined
+  {:event/type :region.event/region-defined
    :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
-   :subregion/id region-id
-   :subregion/name "the name"
-   :subregion/location testdata/wkt-multi-polygon})
+   :region/id region-id
+   :region/name "the name"
+   :region/location testdata/wkt-multi-polygon})
 (def region-deleted
-  {:event/type :subregion.event/subregion-deleted
+  {:event/type :region.event/region-deleted
    :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
-   :subregion/id region-id})
+   :region/id region-id})
 
 (defn- apply-events [events]
   (testutil/apply-events region/projection events))
@@ -47,20 +47,20 @@
   (testing "created"
     (let [events [region-defined]
           expected {::region/regions
-                    {cong-id {region-id {:subregion/id region-id
-                                         :subregion/name "the name"
-                                         :subregion/location testdata/wkt-multi-polygon}}}}]
+                    {cong-id {region-id {:region/id region-id
+                                         :region/name "the name"
+                                         :region/location testdata/wkt-multi-polygon}}}}]
       (is (= expected (apply-events events)))
 
       (testing "> updated"
         (let [events (conj events (assoc region-defined
-                                         :subregion/name "new name"
-                                         :subregion/location "new location"))
+                                         :region/name "new name"
+                                         :region/location "new location"))
               expected (-> expected
                            (assoc-in [::region/regions cong-id region-id
-                                      :subregion/name] "new name")
+                                      :region/name] "new name")
                            (assoc-in [::region/regions cong-id region-id
-                                      :subregion/location] "new location"))]
+                                      :region/location] "new location"))]
           (is (= expected (apply-events events)))))
 
       (testing "> deleted"
@@ -92,9 +92,9 @@
                         :command/user user-id
                         :gis-change/id gis-change-id
                         :congregation/id cong-id
-                        :subregion/id region-id
-                        :subregion/name "the name"
-                        :subregion/location testdata/wkt-multi-polygon}]
+                        :region/id region-id
+                        :region/name "the name"
+                        :region/location testdata/wkt-multi-polygon}]
 
     (testing "created"
       (is (= [region-defined]
@@ -117,17 +117,17 @@
                         :command/user user-id
                         :gis-change/id gis-change-id
                         :congregation/id cong-id
-                        :subregion/id region-id
-                        :subregion/name "the name"
-                        :subregion/location testdata/wkt-multi-polygon}]
+                        :region/id region-id
+                        :region/name "the name"
+                        :region/location testdata/wkt-multi-polygon}]
 
     (testing "name changed"
       (is (= [region-defined]
-             (handle-command update-command [(assoc region-defined :subregion/name "old name")] injections))))
+             (handle-command update-command [(assoc region-defined :region/name "old name")] injections))))
 
     (testing "location changed"
       (is (= [region-defined]
-             (handle-command update-command [(assoc region-defined :subregion/location "old location")] injections))))
+             (handle-command update-command [(assoc region-defined :region/location "old location")] injections))))
 
     (testing "nothing changed / is idempotent"
       (is (empty? (handle-command update-command [region-defined] injections))))
@@ -146,7 +146,7 @@
                         :command/user user-id
                         :gis-change/id gis-change-id
                         :congregation/id cong-id
-                        :subregion/id region-id}]
+                        :region/id region-id}]
 
     (testing "deleted"
       (is (= [region-deleted]

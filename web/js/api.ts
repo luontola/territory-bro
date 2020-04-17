@@ -195,7 +195,7 @@ export type Territory = {
   id: string;
   number: string;
   addresses: string;
-  subregion: string;
+  region: string;
   location: string;
   meta: { [key: string]: any };
   enclosingRegion?: string;

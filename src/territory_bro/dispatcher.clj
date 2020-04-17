@@ -113,7 +113,7 @@
 (defn- region-command! [conn command state]
   (let [injections (default-injections command state)]
     (write-stream! conn
-                   (:subregion/id command)
+                   (:region/id command)
                    (fn [old-events]
                      (call! region/handle-command command old-events injections)))))
 

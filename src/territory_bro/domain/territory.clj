@@ -23,7 +23,7 @@
                    (assoc :territory/id (:territory/id event))
                    (assoc :territory/number (:territory/number event))
                    (assoc :territory/addresses (:territory/addresses event))
-                   (assoc :territory/subregion (:territory/subregion event))
+                   (assoc :territory/region (:territory/region event))
                    (assoc :territory/meta (:territory/meta event))
                    (assoc :territory/location (:territory/location event))))))
 
@@ -54,7 +54,7 @@
 (def ^:private data-keys
   [:territory/number
    :territory/addresses
-   :territory/subregion
+   :territory/region
    :territory/meta
    :territory/location])
 

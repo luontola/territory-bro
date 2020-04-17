@@ -32,7 +32,7 @@ const RuralTerritoryCard = ({
           <FormattedMessage id="TerritoryCard.title"/>
         </div>
         <div className={styles.region}>
-          {territory.subregion}
+          {territory.region}
         </div>
       </div>
 

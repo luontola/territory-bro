@@ -39,10 +39,10 @@ function matchesSearch(territory: Territory, search: string): boolean {
   if (search === '') {
     return true;
   }
-  const {number, subregion, addresses} = territory;
+  const {number, region, addresses} = territory;
   search = search.toLowerCase();
   return number.toLowerCase().includes(search)
-    || subregion.toLowerCase().includes(search)
+    || region.toLowerCase().includes(search)
     || addresses.toLowerCase().includes(search);
 }
 
@@ -68,7 +68,7 @@ const TerritoriesPage = ({congregationId}) => {
             <td className={styles.number}>
               <Link to={territory.id}>{territory.number}</Link>
             </td>
-            <td>{territory.subregion}</td>
+            <td>{territory.region}</td>
             <td>{territory.addresses}</td>
           </tr>
         )}

@@ -48,7 +48,7 @@
             (some? new) (assoc :territory/id (:id new)
                                :territory/number (:number new)
                                :territory/addresses (:addresses new)
-                               :territory/subregion (:subregion new)
+                               :territory/region (:subregion new)
                                :territory/meta (:meta new)
                                :territory/location (:location new))))
 
@@ -59,10 +59,10 @@
                                  :UPDATE :region.command/update-region
                                  :DELETE :region.command/delete-region))
           (cond->
-            (some? old) (assoc :subregion/id (:id old))
-            (some? new) (assoc :subregion/id (:id new)
-                               :subregion/name (:name new)
-                               :subregion/location (:location new))))
+            (some? old) (assoc :region/id (:id old))
+            (some? new) (assoc :region/id (:id new)
+                               :region/name (:name new)
+                               :region/location (:location new))))
 
       "congregation_boundary"
       (-> base-command

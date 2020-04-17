@@ -61,7 +61,7 @@
             :territory/id territory-id
             :territory/number "123"
             :territory/addresses "Street 1 A"
-            :territory/subregion "Somewhere"
+            :territory/region "Somewhere"
             :territory/meta {:foo "bar", :gazonk 42}
             :territory/location testdata/wkt-multi-polygon}
            (-> {:gis-change/id change-id
@@ -91,7 +91,7 @@
             :territory/id territory-id
             :territory/number "123"
             :territory/addresses "Street 1 A"
-            :territory/subregion "Somewhere"
+            :territory/region "Somewhere"
             :territory/meta {:foo "bar", :gazonk 42}
             :territory/location testdata/wkt-multi-polygon}
            (-> {:gis-change/id change-id
@@ -148,9 +148,9 @@
             :command/time test-time
             :gis-change/id change-id
             :congregation/id cong-id
-            :subregion/id region-id
-            :subregion/name "Somewhere"
-            :subregion/location testdata/wkt-multi-polygon}
+            :region/id region-id
+            :region/name "Somewhere"
+            :region/location testdata/wkt-multi-polygon}
            (-> {:gis-change/id change-id
                 :gis-change/schema cong-schema
                 :gis-change/table "subregion"
@@ -172,9 +172,9 @@
             :command/time test-time
             :gis-change/id change-id
             :congregation/id cong-id
-            :subregion/id region-id
-            :subregion/name "Somewhere"
-            :subregion/location testdata/wkt-multi-polygon}
+            :region/id region-id
+            :region/name "Somewhere"
+            :region/location testdata/wkt-multi-polygon}
            (-> {:gis-change/id change-id
                 :gis-change/schema cong-schema
                 :gis-change/table "subregion"
@@ -198,7 +198,7 @@
             :command/time test-time
             :gis-change/id change-id
             :congregation/id cong-id
-            :subregion/id region-id}
+            :region/id region-id}
            (-> {:gis-change/id change-id
                 :gis-change/schema cong-schema
                 :gis-change/table "subregion"
@@ -353,9 +353,9 @@
               :command/time test-time
               :gis-change/id change-id
               :congregation/id cong-id
-              :subregion/id replacement-id
-              :subregion/name "Somewhere"
-              :subregion/location testdata/wkt-multi-polygon}
+              :region/id replacement-id
+              :region/name "Somewhere"
+              :region/location testdata/wkt-multi-polygon}
              (-> {:gis-change/id change-id
                   :gis-change/schema cong-schema
                   :gis-change/table "subregion"
@@ -377,9 +377,9 @@
               :command/time test-time
               :gis-change/id change-id
               :congregation/id cong-id
-              :subregion/id replacement-id
-              :subregion/name "Somewhere"
-              :subregion/location testdata/wkt-multi-polygon}
+              :region/id replacement-id
+              :region/name "Somewhere"
+              :region/location testdata/wkt-multi-polygon}
              (-> {:gis-change/id change-id
                   :gis-change/schema cong-schema
                   :gis-change/table "subregion"
@@ -403,7 +403,7 @@
               :command/time test-time
               :gis-change/id change-id
               :congregation/id cong-id
-              :subregion/id replacement-id}
+              :region/id replacement-id}
              (-> {:gis-change/id change-id
                   :gis-change/schema cong-schema
                   :gis-change/table "subregion"
@@ -425,9 +425,9 @@
               :command/time test-time
               :gis-change/id change-id
               :congregation/id cong-id
-              :subregion/id replacement-id
-              :subregion/name "Somewhere"
-              :subregion/location testdata/wkt-multi-polygon}
+              :region/id replacement-id
+              :region/name "Somewhere"
+              :region/location testdata/wkt-multi-polygon}
              (-> {:gis-change/id change-id
                   :gis-change/schema cong-schema
                   :gis-change/table "subregion"

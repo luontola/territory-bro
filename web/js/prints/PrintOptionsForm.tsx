@@ -122,7 +122,7 @@ const PrintOptionsForm = ({congregationId}) => {
                          className="pure-input-1"
                          onChange={event => setFieldValue("territories", [].slice.call(event.target.selectedOptions).map(option => option.value))}>
                     {availableTerritories.map(territory => <option key={territory.id} value={territory.id}>
-                      {territory.subregion ? `${territory.number} - ${territory.subregion}` : territory.number}
+                      {territory.region ? `${territory.number} - ${territory.region}` : territory.number}
                     </option>)}
                   </Field>
                 </div>
