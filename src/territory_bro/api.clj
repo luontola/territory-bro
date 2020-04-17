@@ -39,7 +39,7 @@
    :meta {s/Keyword s/Any}
    :location s/Str})
 
-(s/defschema Subregion
+(s/defschema Region
   {:id s/Uuid
    :name s/Str
    :location s/Str})
@@ -69,7 +69,7 @@
    :name s/Str
    :permissions {s/Keyword (s/eq true)}
    :territories [Territory]
-   :subregions [Subregion]
+   :regions [Region]
    :congregationBoundaries [CongregationBoundary]
    :cardMinimapViewports [CardMinimapViewport]
    :users [User]})
@@ -195,7 +195,7 @@
      ;; TODO: extract query functions
      :territories (sequence (vals (get-in state [::territory/territories cong-id])))
      :congregation-boundaries (sequence (vals (get-in state [::congregation-boundary/congregation-boundaries cong-id])))
-     :subregions (sequence (vals (get-in state [::region/subregions cong-id])))
+     :regions (sequence (vals (get-in state [::region/regions cong-id])))
      :card-minimap-viewports (sequence (vals (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id])))
      :users (->> (user/get-users conn {:ids (congregation/get-users state cong-id)})
                  (map (fn [user]

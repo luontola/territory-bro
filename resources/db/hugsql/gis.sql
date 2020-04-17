@@ -11,11 +11,13 @@ insert into congregation_boundary (id, location)
 values (:id, ST_Multi(ST_GeomFromText(:location)));
 
 
--- :name get-subregions :? :*
+-- TODO: rename subregion to region the next time other incompatible changes are needed
+
+-- :name get-regions :? :*
 select id, name, ST_AsText(location) AS location
 from subregion;
 
--- :name create-subregion :!
+-- :name create-region :!
 insert into subregion (id, name, location)
 values (:id, :name, ST_Multi(ST_GeomFromText(:location)));
 
@@ -28,6 +30,8 @@ from card_minimap_viewport;
 insert into card_minimap_viewport (id, location)
 values (:id, ST_GeomFromText(:location));
 
+
+-- TODO: rename subregion to region the next time other incompatible changes are needed
 
 -- :name get-territories :? :*
 select id, number, addresses, subregion, meta, ST_AsText(location) AS location
@@ -63,6 +67,10 @@ limit :limit
 update gis_change_log
 set processed = true
 where id = any (array[:v*:ids]::bigint[]);
+
+--  Copyright © 2015-2020 Esko Luontola
+--  This software is released under the Apache License 2.0.
+--  The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 -- :name replace-id-of-entity :!
 update :i:schema_table

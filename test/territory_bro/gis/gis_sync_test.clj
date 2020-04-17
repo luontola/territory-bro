@@ -31,7 +31,7 @@
             "before change")
         (db/with-db [conn {}]
           (db/use-tenant-schema conn test-schema)
-          (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
+          (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon))
         (is (some? (.poll notifications 1 TimeUnit/SECONDS))
             "after change"))
 

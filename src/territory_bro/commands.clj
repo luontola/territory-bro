@@ -139,29 +139,29 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)))
 
-;;; Subregion
+;;; Region
 
-(s/defschema CreateSubregion
+(s/defschema CreateRegion
   (assoc GisSyncCommand
-         :command/type (s/eq :subregion.command/create-subregion)
+         :command/type (s/eq :region.command/create-region)
          :congregation/id (foreign-key/references :congregation UUID)
          :subregion/id (foreign-key/references :new UUID)
          :subregion/name s/Str
          :subregion/location s/Str))
 
-(s/defschema UpdateSubregion
+(s/defschema UpdateRegion
   (assoc GisSyncCommand
-         :command/type (s/eq :subregion.command/update-subregion)
+         :command/type (s/eq :region.command/update-region)
          :congregation/id (foreign-key/references :congregation UUID)
-         :subregion/id (foreign-key/references :subregion UUID)
+         :subregion/id (foreign-key/references :region UUID)
          :subregion/name s/Str
          :subregion/location s/Str))
 
-(s/defschema DeleteSubregion
+(s/defschema DeleteRegion
   (assoc GisSyncCommand
-         :command/type (s/eq :subregion.command/delete-subregion)
+         :command/type (s/eq :region.command/delete-region)
          :congregation/id (foreign-key/references :congregation UUID)
-         :subregion/id (foreign-key/references :subregion UUID)))
+         :subregion/id (foreign-key/references :region UUID)))
 
 ;;; Congregation Boundary
 
@@ -224,9 +224,9 @@
    :db-admin.command/migrate-tenant-schema MigrateTenantSchema
    :gis-user.command/create-gis-user CreateGisUser
    :gis-user.command/delete-gis-user DeleteGisUser
-   :subregion.command/create-subregion CreateSubregion
-   :subregion.command/delete-subregion DeleteSubregion
-   :subregion.command/update-subregion UpdateSubregion
+   :region.command/create-region CreateRegion
+   :region.command/delete-region DeleteRegion
+   :region.command/update-region UpdateRegion
    :territory.command/create-territory CreateTerritory
    :territory.command/delete-territory DeleteTerritory
    :territory.command/update-territory UpdateTerritory})

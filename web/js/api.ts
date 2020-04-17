@@ -83,8 +83,8 @@ export type Congregation = {
   congregationBoundaries: Array<Boundary>;
   territories: Array<Territory>;
   getTerritoryById: (id: string) => Territory;
-  subregions: Array<Subregion>;
-  getSubregionById: (id: string) => Subregion;
+  regions: Array<Region>;
+  getRegionById: (id: string) => Region;
   cardMinimapViewports: Array<Viewport>;
   users: Array<User>;
 };
@@ -113,9 +113,9 @@ function sortCongregations(congregations: Array<Congregation>): Array<Congregati
 export function enrichCongregation(congregation): Congregation {
   congregation.users = sortUsers(congregation.users);
   congregation.territories = sortTerritories(congregation.territories);
-  congregation.subregions = sortSubregions(congregation.subregions);
+  congregation.regions = sortRegions(congregation.regions);
   congregation.territories.forEach(territory => {
-    territory.enclosingSubregion = getEnclosing(territory.location, congregation.subregions.map(subregion => subregion.location));
+    territory.enclosingRegion = getEnclosing(territory.location, congregation.regions.map(region => region.location));
     territory.enclosingMinimapViewport = getEnclosing(territory.location, congregation.cardMinimapViewports.map(viewport => viewport.location));
   });
   congregation.location = mergeMultiPolygons(congregation.congregationBoundaries.map(boundary => boundary.location)) || "MULTIPOLYGON(((180 90,180 -90,-180 -90,-180 90,180 90)))";
@@ -125,9 +125,9 @@ export function enrichCongregation(congregation): Congregation {
     throw Error(`Territory not found: ${id}`);
   })();
 
-  const subregionsById = keyBy(congregation.subregions, 'id');
-  congregation.getSubregionById = id => subregionsById[id] || (() => {
-    throw Error(`Subregion not found: ${id}`);
+  const regionsById = keyBy(congregation.regions, 'id');
+  congregation.getRegionById = id => regionsById[id] || (() => {
+    throw Error(`Region not found: ${id}`);
   })();
 
   return congregation;
@@ -198,7 +198,7 @@ export type Territory = {
   subregion: string;
   location: string;
   meta: { [key: string]: any };
-  enclosingSubregion?: string;
+  enclosingRegion?: string;
   enclosingMinimapViewport?: string;
 };
 
@@ -209,14 +209,14 @@ function sortTerritories(territories: Array<Territory>): Array<Territory> {
 
 // ====== Regions ======
 
-export type Subregion = {
+export type Region = {
   id: string;
   name: string;
   location: string;
 };
 
-function sortSubregions(subregions: Array<Subregion>): Array<Subregion> {
-  return sortBy(subregions, (r: Subregion) => r.name.toLowerCase());
+function sortRegions(regions: Array<Region>): Array<Region> {
+  return sortBy(regions, (r: Region) => r.name.toLowerCase());
 }
 
 export type Boundary = {

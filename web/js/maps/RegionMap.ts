@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,11 +17,11 @@ import {
   wktToFeature,
   wktToFeatures
 } from "./mapOptions";
-import {Congregation, Subregion, Territory} from "../api";
+import {Congregation, Region, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 
 type Props = {
-  region: Subregion | Congregation;
+  region: Region | Congregation;
   territories: Array<Territory>;
   mapRaster: MapRaster;
 };
@@ -48,7 +48,7 @@ export default class RegionMap extends OpenLayersMap<Props> {
   }
 }
 
-function initRegionMap(element: HTMLDivElement, region: Subregion | Congregation, territories: Array<Territory>): any {
+function initRegionMap(element: HTMLDivElement, region: Region | Congregation, territories: Array<Territory>): any {
   const regionLayer = new VectorLayer({
     source: new VectorSource({
       features: wktToFeatures(region.location)

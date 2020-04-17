@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -16,7 +16,7 @@ const RegionPrintout = ({
                           mapRaster
                         }) => {
   congregation = congregation || getCongregationById(congregationId);
-  region = region || (regionId === congregationId ? congregation : congregation.getSubregionById(regionId));
+  region = region || (regionId === congregationId ? congregation : congregation.getRegionById(regionId));
   return <A4PrintFrame>
     <div className={styles.root}>
       <div className={styles.name}>{region.name}</div>

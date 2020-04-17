@@ -15,8 +15,8 @@
     composes: title from "./TerritoryCard.css";
 }
 
-.subregion {
-    composes: subregion from "./TerritoryCard.css";
+.region {
+    composes: region from "./TerritoryCard.css";
 }
 
 .number {

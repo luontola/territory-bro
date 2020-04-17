@@ -35,16 +35,16 @@
     id))
 
 
-(defn get-subregions [conn]
-  (->> (query! conn :get-subregions)
+(defn get-regions [conn]
+  (->> (query! conn :get-regions)
        (map format-region)
        (doall)))
 
-(defn create-subregion! [conn name location]
+(defn create-region! [conn name location]
   (let [id (UUID/randomUUID)]
-    (query! conn :create-subregion {:id id
-                                    :name name
-                                    :location location})
+    (query! conn :create-region {:id id
+                                 :name name
+                                 :location location})
     id))
 
 

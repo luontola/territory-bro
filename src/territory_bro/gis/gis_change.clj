@@ -55,9 +55,9 @@
       "subregion"
       (-> base-command
           (assoc :command/type (case op
-                                 :INSERT :subregion.command/create-subregion
-                                 :UPDATE :subregion.command/update-subregion
-                                 :DELETE :subregion.command/delete-subregion))
+                                 :INSERT :region.command/create-region
+                                 :UPDATE :region.command/update-region
+                                 :DELETE :region.command/delete-region))
           (cond->
             (some? old) (assoc :subregion/id (:id old))
             (some? new) (assoc :subregion/id (:id new)

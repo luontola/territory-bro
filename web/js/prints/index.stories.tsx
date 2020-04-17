@@ -1,11 +1,11 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import "../layout/defaultStyles";
 import React from "react";
 import {storiesOf} from "@storybook/react";
-import {demoCongregation, subregionKaivopuisto, subregionKatajanokka, territory101} from "../testdata";
+import {demoCongregation, regionKaivopuisto, regionKatajanokka, territory101} from "../testdata";
 import {mapRasters} from "../maps/mapOptions";
 import TerritoryCard from "./TerritoryCard";
 import NeighborhoodCard from "./NeighborhoodCard";
@@ -36,12 +36,12 @@ storiesOf('Printouts', module)
 
   .add('RegionPrintout', () =>
     <Box>
-      <RegionPrintout region={subregionKatajanokka} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
+      <RegionPrintout region={regionKatajanokka} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
     </Box>)
 
   .add('RegionPrintout, multi-polygon', () =>
     <Box>
-      <RegionPrintout region={subregionKaivopuisto} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
+      <RegionPrintout region={regionKaivopuisto} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
     </Box>)
 
   .add('RegionPrintout, congregation', () =>

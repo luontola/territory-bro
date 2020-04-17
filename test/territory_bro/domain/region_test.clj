@@ -13,23 +13,23 @@
            (territory_bro NoPermitException ValidationException)))
 
 (def cong-id (UUID. 0 1))
-(def subregion-id (UUID. 0 2))
+(def region-id (UUID. 0 2))
 (def user-id (UUID. 0 3))
 (def gis-change-id 42)
-(def subregion-defined
+(def region-defined
   {:event/type :subregion.event/subregion-defined
    :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
-   :subregion/id subregion-id
+   :subregion/id region-id
    :subregion/name "the name"
    :subregion/location testdata/wkt-multi-polygon})
-(def subregion-deleted
+(def region-deleted
   {:event/type :subregion.event/subregion-deleted
    :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
-   :subregion/id subregion-id})
+   :subregion/id region-id})
 
 (defn- apply-events [events]
   (testutil/apply-events region/projection events))
@@ -43,122 +43,122 @@
 
 ;;;; Projection
 
-(deftest subregion-projection-test
+(deftest region-projection-test
   (testing "created"
-    (let [events [subregion-defined]
-          expected {::region/subregions
-                    {cong-id {subregion-id {:subregion/id subregion-id
-                                            :subregion/name "the name"
-                                            :subregion/location testdata/wkt-multi-polygon}}}}]
+    (let [events [region-defined]
+          expected {::region/regions
+                    {cong-id {region-id {:subregion/id region-id
+                                         :subregion/name "the name"
+                                         :subregion/location testdata/wkt-multi-polygon}}}}]
       (is (= expected (apply-events events)))
 
       (testing "> updated"
-        (let [events (conj events (assoc subregion-defined
+        (let [events (conj events (assoc region-defined
                                          :subregion/name "new name"
                                          :subregion/location "new location"))
               expected (-> expected
-                           (assoc-in [::region/subregions cong-id subregion-id
+                           (assoc-in [::region/regions cong-id region-id
                                       :subregion/name] "new name")
-                           (assoc-in [::region/subregions cong-id subregion-id
+                           (assoc-in [::region/regions cong-id region-id
                                       :subregion/location] "new location"))]
           (is (= expected (apply-events events)))))
 
       (testing "> deleted"
-        (let [events (conj events subregion-deleted)
+        (let [events (conj events region-deleted)
               expected {}]
           (is (= expected (apply-events events))))))))
 
 
 ;;;; Queries
 
-(deftest check-subregion-exists-test
-  (let [state (apply-events [subregion-defined])]
+(deftest check-region-exists-test
+  (let [state (apply-events [region-defined])]
 
     (testing "exists"
-      (is (nil? (region/check-subregion-exists state cong-id subregion-id))))
+      (is (nil? (region/check-region-exists state cong-id region-id))))
 
     (testing "doesn't exist"
       (is (thrown-with-msg?
-           ValidationException (re-equals "[[:no-such-subregion #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (region/check-subregion-exists state cong-id (UUID. 0 0x666)))))))
+           ValidationException (re-equals "[[:no-such-region #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (region/check-region-exists state cong-id (UUID. 0 0x666)))))))
 
 
 ;;;; Commands
 
-(deftest create-subregion-test
+(deftest create-region-test
   (let [injections {:check-permit (fn [_permit])}
-        create-command {:command/type :subregion.command/create-subregion
+        create-command {:command/type :region.command/create-region
                         :command/time (Instant/now)
                         :command/user user-id
                         :gis-change/id gis-change-id
                         :congregation/id cong-id
-                        :subregion/id subregion-id
+                        :subregion/id region-id
                         :subregion/name "the name"
                         :subregion/location testdata/wkt-multi-polygon}]
 
     (testing "created"
-      (is (= [subregion-defined]
+      (is (= [region-defined]
              (handle-command create-command [] injections))))
 
     (testing "is idempotent"
-      (is (empty? (handle-command create-command [subregion-defined] injections))))
+      (is (empty? (handle-command create-command [region-defined] injections))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        (is (= [:create-subregion cong-id] permit))
+                                        (is (= [:create-region cong-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
                      (handle-command create-command [] injections)))))))
 
-(deftest update-subregion-test
+(deftest update-region-test
   (let [injections {:check-permit (fn [_permit])}
-        update-command {:command/type :subregion.command/update-subregion
+        update-command {:command/type :region.command/update-region
                         :command/time (Instant/now)
                         :command/user user-id
                         :gis-change/id gis-change-id
                         :congregation/id cong-id
-                        :subregion/id subregion-id
+                        :subregion/id region-id
                         :subregion/name "the name"
                         :subregion/location testdata/wkt-multi-polygon}]
 
     (testing "name changed"
-      (is (= [subregion-defined]
-             (handle-command update-command [(assoc subregion-defined :subregion/name "old name")] injections))))
+      (is (= [region-defined]
+             (handle-command update-command [(assoc region-defined :subregion/name "old name")] injections))))
 
     (testing "location changed"
-      (is (= [subregion-defined]
-             (handle-command update-command [(assoc subregion-defined :subregion/location "old location")] injections))))
+      (is (= [region-defined]
+             (handle-command update-command [(assoc region-defined :subregion/location "old location")] injections))))
 
     (testing "nothing changed / is idempotent"
-      (is (empty? (handle-command update-command [subregion-defined] injections))))
+      (is (empty? (handle-command update-command [region-defined] injections))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        (is (= [:update-subregion cong-id subregion-id] permit))
+                                        (is (= [:update-region cong-id region-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
-                     (handle-command update-command [subregion-defined] injections)))))))
+                     (handle-command update-command [region-defined] injections)))))))
 
-(deftest delete-subregion-test
+(deftest delete-region-test
   (let [injections {:check-permit (fn [_permit])}
-        delete-command {:command/type :subregion.command/delete-subregion
+        delete-command {:command/type :region.command/delete-region
                         :command/time (Instant/now)
                         :command/user user-id
                         :gis-change/id gis-change-id
                         :congregation/id cong-id
-                        :subregion/id subregion-id}]
+                        :subregion/id region-id}]
 
     (testing "deleted"
-      (is (= [subregion-deleted]
-             (handle-command delete-command [subregion-defined] injections))))
+      (is (= [region-deleted]
+             (handle-command delete-command [region-defined] injections))))
 
     (testing "is idempotent"
-      (is (empty? (handle-command delete-command [subregion-defined subregion-deleted] injections))))
+      (is (empty? (handle-command delete-command [region-defined region-deleted] injections))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        (is (= [:delete-subregion cong-id subregion-id] permit))
+                                        (is (= [:delete-region cong-id region-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
-                     (handle-command delete-command [subregion-defined] injections)))))))
+                     (handle-command delete-command [region-defined] injections)))))))
   

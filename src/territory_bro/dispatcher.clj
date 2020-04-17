@@ -38,9 +38,9 @@
    :congregation (fn [cong-id]
                    (congregation/check-congregation-exists state cong-id)
                    true)
-   :subregion (fn [subregion-id]
-                (region/check-subregion-exists state (:congregation/id command) subregion-id)
-                true)
+   :region (fn [region-id]
+             (region/check-region-exists state (:congregation/id command) region-id)
+             true)
    :territory (fn [territory-id]
                 (territory/check-territory-exists state (:congregation/id command) territory-id)
                 true)
@@ -110,7 +110,7 @@
                    (fn [old-events]
                      (call! gis-user/handle-command command old-events injections)))))
 
-(defn- subregion-command! [conn command state]
+(defn- region-command! [conn command state]
   (let [injections (default-injections command state)]
     (write-stream! conn
                    (:subregion/id command)
@@ -130,7 +130,7 @@
    "congregation.command" congregation-command!
    "db-admin.command" db-admin-command!
    "gis-user.command" gis-user-command!
-   "subregion.command" subregion-command!
+   "region.command" region-command!
    "territory.command" territory-command!})
 
 

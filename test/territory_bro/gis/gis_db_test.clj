@@ -42,12 +42,12 @@
                  :region/location testdata/wkt-multi-polygon}]
                (gis-db/get-congregation-boundaries conn)))))
 
-    (testing "create & list subregions"
-      (let [id (gis-db/create-subregion! conn "the name" testdata/wkt-multi-polygon)]
+    (testing "create & list regions"
+      (let [id (gis-db/create-region! conn "the name" testdata/wkt-multi-polygon)]
         (is (= [{:region/id id
                  :region/name "the name"
                  :region/location testdata/wkt-multi-polygon}]
-               (gis-db/get-subregions conn)))))
+               (gis-db/get-regions conn)))))
 
     (testing "create & list card minimap viewports"
       (let [id (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon)]
@@ -182,8 +182,8 @@
                (-> (last changes)
                    (dissoc :gis-change/id :gis-change/schema :gis-change/user :gis-change/time))))))
 
-    (testing "subregion table change log"
-      (let [region-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+    (testing "region table change log"
+      (let [region-id (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon)
             changes (gis-db/get-changes conn)]
         (is (= 5 (count changes)))
         (is (= {:gis-change/table "subregion"
@@ -269,7 +269,7 @@
     (db/use-tenant-schema conn test-schema)
 
     (testing "replace ID of INSERT changes"
-      (let [old-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+      (let [old-id (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon)
             new-id (UUID/randomUUID)]
 
         (gis-db/replace-id! conn test-schema "subregion" old-id new-id)
@@ -300,7 +300,7 @@
     (db/use-tenant-schema conn test-schema)
 
     (testing "replace ID of UPDATE and DELETE changes"
-      (let [old-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+      (let [old-id (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon)
             new-id (UUID/randomUUID)]
         (jdbc/execute! conn ["UPDATE subregion SET name = ? WHERE id = ?"
                              "Updated" old-id])
@@ -345,7 +345,7 @@
         (db/use-tenant-schema conn test-schema)
         (let [actual-schema test-schema
               actual-table "subregion"
-              actual-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+              actual-id (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon)
               new-id (UUID/randomUUID)
               original-changes (gis-db/get-changes conn)]
 
@@ -366,7 +366,7 @@
     (db/use-tenant-schema conn test-schema)
 
     (testing "does not replace ID of already replaced changes"
-      (let [old-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+      (let [old-id (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon)
             new-id (UUID/randomUUID)
             _ (gis-db/replace-id! conn test-schema "subregion" old-id new-id)
             original-changes (gis-db/get-changes conn)]
@@ -382,7 +382,7 @@
     (db/use-tenant-schema conn test-schema)
 
     (testing "does not replace ID of already processed changes"
-      (let [old-id (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon)
+      (let [old-id (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon)
             ;; Use case: An entity has existed with the same ID in the past,
             ;;           and now a new entity is added with the same ID.
             _ (jdbc/execute! conn ["DELETE FROM subregion WHERE id = ?" old-id])
@@ -461,7 +461,7 @@
                                             :territory/meta {:foo "bar", :gazonk 42}
                                             :territory/location testdata/wkt-multi-polygon}))
         (is (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon))
-        (is (gis-db/create-subregion! conn "Somewhere" testdata/wkt-multi-polygon))
+        (is (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon))
         (is (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon))))
 
     (testing "user ID is logged in GIS change log"

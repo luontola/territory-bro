@@ -32,7 +32,7 @@
    :congregation (constantly true)
    :congregation-boundary (constantly true)
    :new (constantly true)
-   :subregion (constantly true)
+   :region (constantly true)
    :territory (constantly true)
    :user (constantly true)})
 

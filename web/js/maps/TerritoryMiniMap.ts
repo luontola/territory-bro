@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -80,9 +80,9 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
     })
   });
 
-  const subregionsLayer = new VectorLayer({
+  const regionsLayer = new VectorLayer({
     source: new VectorSource({
-      features: wktToFeatures(territory.enclosingSubregion)
+      features: wktToFeatures(territory.enclosingRegion)
     }),
     style: new Style({
       fill: new Fill({
@@ -96,7 +96,7 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
   const map = new Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
-    layers: [streetLayer, subregionsLayer, congregationLayer, territoryLayer],
+    layers: [streetLayer, regionsLayer, congregationLayer, territoryLayer],
     controls: [],
     interactions: [],
     view: new View({

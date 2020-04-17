@@ -53,7 +53,7 @@ const PrintOptionsForm = ({congregationId}) => {
   const availableMapRasters = mapRasters;
   const congregation = getCongregationById(congregationId);
   const availableTerritories = congregation.territories;
-  const availableRegions = [{id: congregation.id, name: congregation.name}, ...congregation.subregions];
+  const availableRegions = [{id: congregation.id, name: congregation.name}, ...congregation.regions];
   return <Formik
     initialValues={{
       template: templates[0].id,

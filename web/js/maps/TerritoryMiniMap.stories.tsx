@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -19,7 +19,7 @@ storiesOf('TerritoryMiniMap', module)
       <TerritoryMiniMap
         territory={{
           location: territory101.location,
-          enclosingSubregion: territory101.enclosingSubregion,
+          enclosingRegion: territory101.enclosingRegion,
           enclosingMinimapViewport: territory101.enclosingMinimapViewport
         }}
         congregation={{
@@ -27,12 +27,12 @@ storiesOf('TerritoryMiniMap', module)
         }}/>
     </Box>)
 
-  .add('without subregion', () =>
+  .add('without region', () =>
     <Box>
       <TerritoryMiniMap
         territory={{
           location: territory101.location,
-          enclosingSubregion: null,
+          enclosingRegion: null,
           enclosingMinimapViewport: territory101.enclosingMinimapViewport
         }}
         congregation={{
@@ -45,7 +45,7 @@ storiesOf('TerritoryMiniMap', module)
       <TerritoryMiniMap
         territory={{
           location: territory101.location,
-          enclosingSubregion: territory101.enclosingSubregion,
+          enclosingRegion: territory101.enclosingRegion,
           enclosingMinimapViewport: null
         }}
         congregation={{
@@ -58,7 +58,7 @@ storiesOf('TerritoryMiniMap', module)
       <TerritoryMiniMap
         territory={{
           location: territory101.location,
-          enclosingSubregion: territory101.enclosingSubregion,
+          enclosingRegion: territory101.enclosingRegion,
           enclosingMinimapViewport: territory101.enclosingMinimapViewport
         }}
         congregation={{

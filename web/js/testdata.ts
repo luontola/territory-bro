@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -36,7 +36,7 @@ const data = {
     "id": "75a8a893-e1c8-4e0e-bb8a-3e42d4e9501a",
     "location": "MULTIPOLYGON(((24.9708434168563 60.148594222891,24.9760707434339 60.1518267449349,24.9868422042604 60.1518267449349,24.9971384535799 60.1479634498273,24.9958712228944 60.1429168297027,24.9901686848098 60.1360553384673,24.9803476469974 60.1373173293208,24.9700513976779 60.1453613830363,24.9708434168563 60.148594222891)))"
   }],
-  "subregions": [{
+  "regions": [{
     "id": "bb930579-6dee-4c7b-8225-318d736d9836",
     "name": "Katajanokka",
     "location": "MULTIPOLYGON(((24.9788725748902 60.1700084007474,24.9686917179976 60.1706852977515,24.959367665893 60.1693314897967,24.9558900464594 60.1668744365705,24.9696493233489 60.1622105444979,24.9833077996751 60.166648779613,24.9788725748902 60.1700084007474)))"
@@ -60,8 +60,8 @@ export const territory101 = demoCongregation.getTerritoryById("36075e2f-c703-40f
 export const territory102 = demoCongregation.getTerritoryById("eb771c05-139b-4023-ac65-5b9fb3ef30e1");
 export const territory201 = demoCongregation.getTerritoryById("5be622a7-6588-455c-bb9a-f9ae0616d273");
 
-export const subregionKaivopuisto = demoCongregation.getSubregionById("c6b72a21-72ca-47b5-b930-9892d785be63");
-export const subregionKatajanokka = demoCongregation.getSubregionById("bb930579-6dee-4c7b-8225-318d736d9836");
+export const regionKaivopuisto = demoCongregation.getRegionById("c6b72a21-72ca-47b5-b930-9892d785be63");
+export const regionKatajanokka = demoCongregation.getRegionById("bb930579-6dee-4c7b-8225-318d736d9836");
 
 export const viewportHelsinki = demoCongregation.cardMinimapViewports[1];
 export const viewportSuomenlinna = demoCongregation.cardMinimapViewports[0];

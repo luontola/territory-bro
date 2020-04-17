@@ -636,21 +636,21 @@
         cong-id (create-congregation! session "Old Name")
         db-spec (get-gis-db-spec session cong-id)
         territory-id (UUID/randomUUID)
-        subregion-id (UUID/randomUUID)
+        region-id (UUID/randomUUID)
         congregation-boundary-id (UUID/randomUUID)
         card-minimap-viewport-id (UUID/randomUUID)]
 
     (testing "write to GIS database"
       (jdbc/with-db-transaction [conn db-spec]
         (jdbc/execute! conn ["insert into territory (id, number, addresses, subregion, meta, location) values (?, ?, ?, ?, ?::jsonb, ?::public.geography)"
-                             territory-id "123" "the addresses" "the subregion" {:foo "bar"} testdata/wkt-multi-polygon2])
+                             territory-id "123" "the addresses" "the region" {:foo "bar"} testdata/wkt-multi-polygon2])
         (jdbc/execute! conn ["update territory set location = ?::public.geography where id = ?"
                              testdata/wkt-multi-polygon territory-id])
 
         (jdbc/execute! conn ["insert into subregion (id, name, location) values (?, ?, ?::public.geography)"
-                             subregion-id "Somewhere" testdata/wkt-multi-polygon2])
+                             region-id "Somewhere" testdata/wkt-multi-polygon2])
         (jdbc/execute! conn ["update subregion set location = ?::public.geography where id = ?"
-                             testdata/wkt-multi-polygon subregion-id])
+                             testdata/wkt-multi-polygon region-id])
 
         (jdbc/execute! conn ["insert into congregation_boundary (id, location) values (?, ?::public.geography)"
                              congregation-boundary-id testdata/wkt-multi-polygon2])
@@ -668,14 +668,14 @@
         (is (= {:territory/id territory-id
                 :territory/number "123"
                 :territory/addresses "the addresses"
-                :territory/subregion "the subregion"
+                :territory/subregion "the region"
                 :territory/meta {:foo "bar"}
                 :territory/location testdata/wkt-multi-polygon}
                (get-in state [::territory/territories cong-id territory-id])))
-        (is (= {:subregion/id subregion-id
+        (is (= {:subregion/id region-id
                 :subregion/name "Somewhere"
                 :subregion/location testdata/wkt-multi-polygon}
-               (get-in state [::region/subregions cong-id subregion-id])))
+               (get-in state [::region/regions cong-id region-id])))
         (is (= {:congregation-boundary/id congregation-boundary-id
                 :congregation-boundary/location testdata/wkt-multi-polygon}
                (get-in state [::congregation-boundary/congregation-boundaries cong-id congregation-boundary-id])))
@@ -711,18 +711,18 @@
                                conflicting-stream-id "Conflicting ID" testdata/wkt-multi-polygon]))
         (sync-gis-changes!)
         (let [state (projections/cached-state)
-              replacement-id (-> (set (keys (get-in state [::region/subregions cong-id])))
-                                 (disj subregion-id) ; produced by earlier tests
+              replacement-id (-> (set (keys (get-in state [::region/regions cong-id])))
+                                 (disj region-id) ; produced by earlier tests
                                  (first))]
           (is (some? replacement-id))
           (is (not= conflicting-stream-id replacement-id))
           (is (= [{:subregion/id replacement-id
                    :subregion/name "Conflicting ID"
                    :subregion/location testdata/wkt-multi-polygon}
-                  {:subregion/id subregion-id
+                  {:subregion/id region-id
                    :subregion/name "Somewhere"
                    :subregion/location testdata/wkt-multi-polygon}]
-                 (->> (vals (get-in state [::region/subregions cong-id]))
+                 (->> (vals (get-in state [::region/regions cong-id]))
                       (sort-by :subregion/name)))))))))
 
 ;; TODO: delete territory and then restore it to same congregation

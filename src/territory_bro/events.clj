@@ -139,7 +139,7 @@
 
 ;;; Subregion
 
-(s/defschema SubregionDefined
+(s/defschema RegionDefined
   (assoc GisSyncEvent
          :event/type (s/eq :subregion.event/subregion-defined)
          :event/version (s/eq 1)
@@ -147,7 +147,7 @@
          :subregion/id UUID
          :subregion/name s/Str
          :subregion/location s/Str))
-(s/defschema SubregionDeleted
+(s/defschema RegionDeleted
   (assoc GisSyncEvent
          :event/type (s/eq :subregion.event/subregion-deleted)
          :event/version (s/eq 1)
@@ -221,8 +221,8 @@
    :congregation.event/gis-user-deleted GisUserDeleted
    :territory.event/territory-defined TerritoryDefined
    :territory.event/territory-deleted TerritoryDeleted
-   :subregion.event/subregion-defined SubregionDefined
-   :subregion.event/subregion-deleted SubregionDeleted
+   :subregion.event/subregion-defined RegionDefined
+   :subregion.event/subregion-deleted RegionDeleted
    :congregation-boundary.event/congregation-boundary-defined CongregationBoundaryDefined
    :congregation-boundary.event/congregation-boundary-deleted CongregationBoundaryDeleted
    :card-minimap-viewport.event/card-minimap-viewport-defined CardMinimapViewportDefined
