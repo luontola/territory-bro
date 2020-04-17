@@ -1,36 +1,30 @@
--- rename :territory/subregion -> :territory/region
+-- field :territory/subregion -> :territory/region
 update event
-set data = jsonb_set(data - 'territory/subregion', '{territory/region}', data -> 'territory/subregion')
+set data = (data
+    - 'territory/subregion')
+    || jsonb_build_object('territory/region', data -> 'territory/subregion')
 where data ->> 'event/type' = 'territory.event/territory-defined';
 
-
--- rename :subregion.event/subregion-defined -> :region.event/region-defined
+-- event :subregion.event/subregion-defined -> :region.event/region-defined
+-- field :subregion/id -> :region/id
+-- field :subregion/name -> :region/name
+-- field :subregion/location -> :region/location
 update event
-set data = jsonb_set(data, '{event/type}', '"region.event/region-defined"')
+set data = (data
+    - 'subregion/id'
+    - 'subregion/name'
+    - 'subregion/location')
+    || jsonb_build_object('event/type', 'region.event/region-defined',
+                          'region/id', data -> 'subregion/id',
+                          'region/name', data -> 'subregion/name',
+                          'region/location', data -> 'subregion/location')
 where data ->> 'event/type' = 'subregion.event/subregion-defined';
 
--- rename :subregion/id -> :region/id
+-- event :subregion.event/subregion-deleted -> :region.event/region-deleted
+-- field :subregion/id -> :region/id
 update event
-set data = jsonb_set(data - 'subregion/id', '{region/id}', data -> 'subregion/id')
-where data ->> 'event/type' = 'region.event/region-defined';
-
--- rename :subregion/name -> :region/name
-update event
-set data = jsonb_set(data - 'subregion/name', '{region/name}', data -> 'subregion/name')
-where data ->> 'event/type' = 'region.event/region-defined';
-
--- rename :subregion/location -> :region/location
-update event
-set data = jsonb_set(data - 'subregion/location', '{region/location}', data -> 'subregion/location')
-where data ->> 'event/type' = 'region.event/region-defined';
-
-
--- rename :subregion.event/subregion-deleted -> :region.event/region-deleted
-update event
-set data = jsonb_set(data, '{event/type}', '"region.event/region-deleted"')
+set data = (data
+    - 'subregion/id')
+    || jsonb_build_object('event/type', 'region.event/region-deleted',
+                          'region/id', data -> 'subregion/id')
 where data ->> 'event/type' = 'subregion.event/subregion-deleted';
-
--- rename :subregion/id -> :region/id
-update event
-set data = jsonb_set(data - 'subregion/id', '{region/id}', data -> 'subregion/id')
-where data ->> 'event/type' = 'region.event/region-deleted';
