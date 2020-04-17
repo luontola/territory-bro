@@ -5,7 +5,7 @@
 import React, {useState} from "react";
 import {Link} from "@reach/router";
 import {getCongregationById, Territory} from "../api";
-import styles from "./TerritoriesPage.css";
+import styles from "./TerritoryListPage.css";
 
 function SearchForm({search, setSearch}) {
   const id = 'territory-search';
@@ -46,7 +46,7 @@ function matchesSearch(territory: Territory, search: string): boolean {
     || addresses.toLowerCase().includes(search);
 }
 
-const TerritoriesPage = ({congregationId}) => {
+const TerritoryListPage = ({congregationId}) => {
   const congregation = getCongregationById(congregationId);
   const [search, setSearch] = useState('')
   return <>
@@ -77,4 +77,4 @@ const TerritoriesPage = ({congregationId}) => {
   </>;
 };
 
-export default TerritoriesPage;
+export default TerritoryListPage;
