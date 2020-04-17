@@ -41,7 +41,7 @@ const ViewDemoButton = () => <Link to="/congregation/demo" className="pure-butto
 const RegisterButton = () => <Link to="/register" className="pure-button">Register a New Congregation</Link>;
 const JoinButton = () => <Link to="/join" className="pure-button">Join an Existing Congregation</Link>;
 
-const OverviewPage = () => {
+const HomePage = () => {
   const settings = getSettings();
   const congregations = settings.user ? getCongregations() : [];
   return <>
@@ -70,4 +70,4 @@ const OverviewPage = () => {
   </>;
 };
 
-export default OverviewPage;
+export default HomePage;

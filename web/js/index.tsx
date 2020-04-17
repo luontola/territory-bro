@@ -8,7 +8,7 @@ import {globalHistory, Router} from "@reach/router";
 import {IntlProvider} from "react-intl";
 import {language, messages} from "./intl";
 import ErrorBoundary from "react-error-boundary";
-import OverviewPage from "./pages/OverviewPage";
+import HomePage from "./pages/HomePage";
 import CongregationPage from "./pages/CongregationPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import LoginCallbackPage from "./pages/LoginCallbackPage";
@@ -40,7 +40,7 @@ ReactDOM.createRoot(document.getElementById('root'))
           <React.Suspense fallback={<p>Loading....</p>}>
             <Layout>
               <Router>
-                <OverviewPage path="/"/>
+                <HomePage path="/"/>
                 <JoinPage path="/join"/>
                 <LoginCallbackPage path="/login-callback"/>
                 <RegistrationPage path="/register"/>
