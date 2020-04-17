@@ -13,9 +13,9 @@
             [territory-bro.api :as api]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
-            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
-            [territory-bro.domain.subregion :as subregion]
+            [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.region :as region]
             [territory-bro.domain.territory :as territory]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.gis-db :as gis-db]
@@ -675,7 +675,7 @@
         (is (= {:subregion/id subregion-id
                 :subregion/name "Somewhere"
                 :subregion/location testdata/wkt-multi-polygon}
-               (get-in state [::subregion/subregions cong-id subregion-id])))
+               (get-in state [::region/subregions cong-id subregion-id])))
         (is (= {:congregation-boundary/id congregation-boundary-id
                 :congregation-boundary/location testdata/wkt-multi-polygon}
                (get-in state [::congregation-boundary/congregation-boundaries cong-id congregation-boundary-id])))
@@ -711,7 +711,7 @@
                                conflicting-stream-id "Conflicting ID" testdata/wkt-multi-polygon]))
         (sync-gis-changes!)
         (let [state (projections/cached-state)
-              replacement-id (-> (set (keys (get-in state [::subregion/subregions cong-id])))
+              replacement-id (-> (set (keys (get-in state [::region/subregions cong-id])))
                                  (disj subregion-id) ; produced by earlier tests
                                  (first))]
           (is (some? replacement-id))
@@ -722,7 +722,7 @@
                   {:subregion/id subregion-id
                    :subregion/name "Somewhere"
                    :subregion/location testdata/wkt-multi-polygon}]
-                 (->> (vals (get-in state [::subregion/subregions cong-id]))
+                 (->> (vals (get-in state [::region/subregions cong-id]))
                       (sort-by :subregion/name)))))))))
 
 ;; TODO: delete territory and then restore it to same congregation

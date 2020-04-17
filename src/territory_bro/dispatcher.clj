@@ -8,9 +8,9 @@
             [clojure.tools.logging :as log]
             [territory-bro.commands :as commands]
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
-            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
-            [territory-bro.domain.subregion :as subregion]
+            [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.region :as region]
             [territory-bro.domain.territory :as territory]
             [territory-bro.events :as events]
             [territory-bro.gis.db-admin :as db-admin]
@@ -39,7 +39,7 @@
                    (congregation/check-congregation-exists state cong-id)
                    true)
    :subregion (fn [subregion-id]
-                (subregion/check-subregion-exists state (:congregation/id command) subregion-id)
+                (region/check-subregion-exists state (:congregation/id command) subregion-id)
                 true)
    :territory (fn [territory-id]
                 (territory/check-territory-exists state (:congregation/id command) territory-id)
@@ -115,7 +115,7 @@
     (write-stream! conn
                    (:subregion/id command)
                    (fn [old-events]
-                     (call! subregion/handle-command command old-events injections)))))
+                     (call! region/handle-command command old-events injections)))))
 
 (defn- territory-command! [conn command state]
   (let [injections (default-injections command state)]

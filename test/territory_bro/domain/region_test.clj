@@ -2,9 +2,9 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns territory-bro.domain.subregion-test
+(ns territory-bro.domain.region-test
   (:require [clojure.test :refer :all]
-            [territory-bro.domain.subregion :as subregion]
+            [territory-bro.domain.region :as region]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.events :as events]
             [territory-bro.test.testutil :as testutil :refer [re-equals]])
@@ -32,12 +32,12 @@
    :subregion/id subregion-id})
 
 (defn- apply-events [events]
-  (testutil/apply-events subregion/projection events))
+  (testutil/apply-events region/projection events))
 
 (defn- handle-command [command events injections]
-  (->> (subregion/handle-command (testutil/validate-command command)
-                                 (events/validate-events events)
-                                 injections)
+  (->> (region/handle-command (testutil/validate-command command)
+                              (events/validate-events events)
+                              injections)
        (events/validate-events)))
 
 
@@ -46,7 +46,7 @@
 (deftest subregion-projection-test
   (testing "created"
     (let [events [subregion-defined]
-          expected {::subregion/subregions
+          expected {::region/subregions
                     {cong-id {subregion-id {:subregion/id subregion-id
                                             :subregion/name "the name"
                                             :subregion/location testdata/wkt-multi-polygon}}}}]
@@ -57,9 +57,9 @@
                                          :subregion/name "new name"
                                          :subregion/location "new location"))
               expected (-> expected
-                           (assoc-in [::subregion/subregions cong-id subregion-id
+                           (assoc-in [::region/subregions cong-id subregion-id
                                       :subregion/name] "new name")
-                           (assoc-in [::subregion/subregions cong-id subregion-id
+                           (assoc-in [::region/subregions cong-id subregion-id
                                       :subregion/location] "new location"))]
           (is (= expected (apply-events events)))))
 
@@ -75,12 +75,12 @@
   (let [state (apply-events [subregion-defined])]
 
     (testing "exists"
-      (is (nil? (subregion/check-subregion-exists state cong-id subregion-id))))
+      (is (nil? (region/check-subregion-exists state cong-id subregion-id))))
 
     (testing "doesn't exist"
       (is (thrown-with-msg?
            ValidationException (re-equals "[[:no-such-subregion #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000666\"]]")
-           (subregion/check-subregion-exists state cong-id (UUID. 0 0x666)))))))
+           (region/check-subregion-exists state cong-id (UUID. 0 0x666)))))))
 
 
 ;;;; Commands

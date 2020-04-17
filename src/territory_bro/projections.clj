@@ -7,14 +7,14 @@
             [mount.core :as mount]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
-            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
-            [territory-bro.domain.subregion :as subregion]
+            [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.region :as region]
             [territory-bro.domain.territory :as territory]
             [territory-bro.gis.db-admin :as db-admin]
             [territory-bro.gis.gis-change :as gis-change]
-            [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.gis.gis-user-process :as gis-user-process]
+            [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
@@ -39,7 +39,7 @@
       (gis-change/projection event)
       (gis-user-process/projection event)
       (gis-user/projection event)
-      (subregion/projection event)
+      (region/projection event)
       (territory/projection event)))
 
 (defn- apply-events [cache events]

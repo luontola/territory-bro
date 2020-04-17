@@ -13,9 +13,9 @@
             [schema.core :as s]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
-            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
-            [territory-bro.domain.subregion :as subregion]
+            [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.region :as region]
             [territory-bro.domain.territory :as territory]
             [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.gis.qgis :as qgis]
@@ -195,7 +195,7 @@
      ;; TODO: extract query functions
      :territories (sequence (vals (get-in state [::territory/territories cong-id])))
      :congregation-boundaries (sequence (vals (get-in state [::congregation-boundary/congregation-boundaries cong-id])))
-     :subregions (sequence (vals (get-in state [::subregion/subregions cong-id])))
+     :subregions (sequence (vals (get-in state [::region/subregions cong-id])))
      :card-minimap-viewports (sequence (vals (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id])))
      :users (->> (user/get-users conn {:ids (congregation/get-users state cong-id)})
                  (map (fn [user]
