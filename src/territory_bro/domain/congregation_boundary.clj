@@ -57,7 +57,6 @@
     (check-permit [:create-congregation-boundary cong-id])
     (when (nil? congregation-boundary)
       [(merge {:event/type :congregation-boundary.event/congregation-boundary-defined
-               :event/version 1
                :congregation/id cong-id
                :congregation-boundary/id congregation-boundary-id}
               (gis-change/event-metadata command)
@@ -72,7 +71,6 @@
     (check-permit [:update-congregation-boundary cong-id congregation-boundary-id])
     (when (not= old-data new-data)
       [(merge {:event/type :congregation-boundary.event/congregation-boundary-defined
-               :event/version 1
                :congregation/id cong-id
                :congregation-boundary/id congregation-boundary-id}
               (gis-change/event-metadata command)
@@ -85,7 +83,6 @@
     (check-permit [:delete-congregation-boundary cong-id congregation-boundary-id])
     (when (some? congregation-boundary)
       [(merge {:event/type :congregation-boundary.event/congregation-boundary-deleted
-               :event/version 1
                :congregation/id cong-id
                :congregation-boundary/id congregation-boundary-id}
               (gis-change/event-metadata command))])))

@@ -101,7 +101,6 @@
     (check-permit [:migrate-tenant-schema cong-id])
     (migrate-tenant-schema! (:congregation/schema-name command))
     [{:event/type :db-admin.event/gis-schema-is-present
-      :event/version 1
       :event/transient? true
       :congregation/id cong-id
       :congregation/schema-name (:congregation/schema-name command)}]))
@@ -114,7 +113,6 @@
                                :password (:gis-user/password command)
                                :schema (:congregation/schema-name command)})
     [{:event/type :db-admin.event/gis-user-is-present
-      :event/version 1
       :event/transient? true
       :congregation/id cong-id
       :user/id user-id
@@ -127,7 +125,6 @@
     (ensure-gis-user-absent! {:username (:gis-user/username command)
                               :schema (:congregation/schema-name command)})
     [{:event/type :db-admin.event/gis-user-is-absent
-      :event/version 1
       :event/transient? true
       :congregation/id (:congregation/id command)
       :user/id (:user/id command)

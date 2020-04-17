@@ -18,7 +18,6 @@
 (def gis-change-id 42)
 (def territory-defined
   {:event/type :territory.event/territory-defined
-   :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
    :territory/id territory-id
@@ -29,7 +28,6 @@
    :territory/location testdata/wkt-multi-polygon})
 (def territory-deleted
   {:event/type :territory.event/territory-deleted
-   :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
    :territory/id territory-id})

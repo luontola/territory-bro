@@ -25,7 +25,6 @@
   (testing "created"
     (let [cong-id (UUID. 0 1)
           events [{:event/type :congregation.event/congregation-created
-                   :event/version 1
                    :congregation/id cong-id
                    :congregation/name "Cong1 Name"
                    :congregation/schema-name "cong1_schema"}]
@@ -38,7 +37,6 @@
       (testing "> view permission granted"
         (let [user-id (UUID. 0 2)
               events (conj events {:event/type :congregation.event/permission-granted
-                                   :event/version 1
                                    :congregation/id cong-id
                                    :user/id user-id
                                    :permission/id :view-congregation})
@@ -53,7 +51,6 @@
 
           (testing "> view permissing revoked"
             (let [events (conj events {:event/type :congregation.event/permission-revoked
-                                       :event/version 1
                                        :congregation/id cong-id
                                        :user/id user-id
                                        :permission/id :view-congregation})
@@ -67,7 +64,6 @@
 
           (testing "> other permission granted"
             (let [events (conj events {:event/type :congregation.event/permission-granted
-                                       :event/version 1
                                        :congregation/id cong-id
                                        :user/id user-id
                                        :permission/id :configure-congregation})
@@ -82,7 +78,6 @@
 
               (testing "> other permissing revoked"
                 (let [events (conj events {:event/type :congregation.event/permission-revoked
-                                           :event/version 1
                                            :congregation/id cong-id
                                            :user/id user-id
                                            :permission/id :configure-congregation})
@@ -95,7 +90,6 @@
 
       (testing "> congregation renamed"
         (let [events (conj events {:event/type :congregation.event/congregation-renamed
-                                   :event/version 1
                                    :congregation/id cong-id
                                    :congregation/name "New Name"})
               expected (assoc-in expected [::congregation/congregations cong-id
@@ -107,12 +101,10 @@
         unrelated-cong-id (UUID. 0 2)
         user-id (UUID. 0 3)
         events [{:event/type :congregation.event/congregation-created
-                 :event/version 1
                  :congregation/id cong-id
                  :congregation/name "Cong1 Name"
                  :congregation/schema-name "cong1_schema"}
                 {:event/type :congregation.event/congregation-created
-                 :event/version 1
                  :congregation/id unrelated-cong-id
                  :congregation/name "Cong2 Name"
                  :congregation/schema-name "cong2_schema"}]
@@ -123,7 +115,6 @@
       (is (empty? (congregation/get-my-congregations state user-id))))
 
     (let [events (conj events {:event/type :congregation.event/permission-granted
-                               :event/version 1
                                :congregation/id cong-id
                                :user/id user-id
                                :permission/id :view-congregation})
@@ -139,7 +130,6 @@
             "unrelated congregation"))
 
       (let [events (conj events {:event/type :congregation.event/permission-revoked
-                                 :event/version 1
                                  :congregation/id cong-id
                                  :user/id user-id
                                  :permission/id :view-congregation})
@@ -163,7 +153,6 @@
 (deftest check-congregation-exists-test
   (let [cong-id (UUID. 0 1)
         events [{:event/type :congregation.event/congregation-created
-                 :event/version 1
                  :congregation/id cong-id
                  :congregation/name "Cong1 Name"
                  :congregation/schema-name "cong1_schema"}]
@@ -192,22 +181,18 @@
                         :congregation/id cong-id
                         :congregation/name "the name"}
         created-event {:event/type :congregation.event/congregation-created
-                       :event/version 1
                        :congregation/id cong-id
                        :congregation/name "the name"
                        :congregation/schema-name "cong_schema"}
         view-permission-granted {:event/type :congregation.event/permission-granted
-                                 :event/version 1
                                  :congregation/id cong-id
                                  :user/id user-id
                                  :permission/id :view-congregation}
         configure-permission-granted {:event/type :congregation.event/permission-granted
-                                      :event/version 1
                                       :congregation/id cong-id
                                       :user/id user-id
                                       :permission/id :configure-congregation}
         gis-permission-granted {:event/type :congregation.event/permission-granted
-                                :event/version 1
                                 :congregation/id cong-id
                                 :user/id user-id
                                 :permission/id :gis-access}]
@@ -239,7 +224,6 @@
         user-id (UUID. 0 2)
         injections {:check-permit (fn [_permit])}
         created-event {:event/type :congregation.event/congregation-created
-                       :event/version 1
                        :congregation/id cong-id
                        :congregation/name "old name"
                        :congregation/schema-name ""}
@@ -249,7 +233,6 @@
                         :congregation/id cong-id
                         :congregation/name "new name"}
         renamed-event {:event/type :congregation.event/congregation-renamed
-                       :event/version 1
                        :congregation/id cong-id
                        :congregation/name "new name"}]
 
@@ -284,7 +267,6 @@
         new-user-id (UUID. 0 3)
         injections {:check-permit (fn [_permit])}
         created-event {:event/type :congregation.event/congregation-created
-                       :event/version 1
                        :congregation/id cong-id
                        :congregation/name ""
                        :congregation/schema-name ""}
@@ -294,17 +276,14 @@
                           :congregation/id cong-id
                           :user/id new-user-id}
         view-granted {:event/type :congregation.event/permission-granted
-                      :event/version 1
                       :congregation/id cong-id
                       :user/id new-user-id
                       :permission/id :view-congregation}
         configure-granted {:event/type :congregation.event/permission-granted
-                           :event/version 1
                            :congregation/id cong-id
                            :user/id new-user-id
                            :permission/id :configure-congregation}
         gis-access-granted {:event/type :congregation.event/permission-granted
-                            :event/version 1
                             :congregation/id cong-id
                             :user/id new-user-id
                             :permission/id :gis-access}]
@@ -330,17 +309,14 @@
         target-user-id (UUID. 0 3)
         injections {:check-permit (fn [_permit])}
         created-event {:event/type :congregation.event/congregation-created
-                       :event/version 1
                        :congregation/id cong-id
                        :congregation/name ""
                        :congregation/schema-name ""}
         permission-granted-event {:event/type :congregation.event/permission-granted
-                                  :event/version 1
                                   :congregation/id cong-id
                                   :user/id target-user-id
                                   :permission/id :PLACEHOLDER}
         permission-revoked-event {:event/type :congregation.event/permission-revoked
-                                  :event/version 1
                                   :congregation/id cong-id
                                   :user/id target-user-id
                                   :permission/id :PLACEHOLDER}

@@ -29,13 +29,11 @@
 
 (def congregation-created
   {:event/type :congregation.event/congregation-created
-   :event/version 1
    :congregation/id cong-id
    :congregation/name ""
    :congregation/schema-name cong-schema})
 (def gis-user-created
   {:event/type :congregation.event/gis-user-created
-   :event/version 1
    :congregation/id cong-id
    :user/id user-id
    :gis-user/username gis-username

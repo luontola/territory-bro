@@ -46,7 +46,6 @@
              (events/enrich-events {:command/system system, :command/user user} injections events))))))
 
 (def valid-event {:event/type :congregation.event/congregation-created
-                  :event/version 1
                   :event/time (Instant/now)
                   :event/user (UUID/randomUUID)
                   :congregation/id (UUID/randomUUID)
@@ -59,7 +58,6 @@
 (deftest sorted-keys-test
   (is (nil? (events/sorted-keys nil)))
   (is (= [:event/type
-          :event/version
           :event/user
           :event/time
           :congregation/id

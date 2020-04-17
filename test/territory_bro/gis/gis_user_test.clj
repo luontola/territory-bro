@@ -14,13 +14,11 @@
 (def cong-id (UUID. 1 0))
 (def user-id (UUID. 2 0))
 (def gis-user-created {:event/type :congregation.event/gis-user-created
-                       :event/version 1
                        :congregation/id cong-id
                        :user/id user-id
                        :gis-user/username "gis_user_0000000000000001_0000000000000002"
                        :gis-user/password "secret123"})
 (def gis-user-deleted {:event/type :congregation.event/gis-user-deleted
-                       :event/version 1
                        :congregation/id cong-id
                        :user/id user-id
                        :gis-user/username "gis_user_0000000000000001_0000000000000002"})

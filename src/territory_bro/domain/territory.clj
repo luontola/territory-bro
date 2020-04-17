@@ -65,7 +65,6 @@
     (check-permit [:create-territory cong-id])
     (when (nil? territory)
       [(merge {:event/type :territory.event/territory-defined
-               :event/version 1
                :congregation/id cong-id
                :territory/id territory-id}
               (gis-change/event-metadata command)
@@ -80,7 +79,6 @@
     (check-permit [:update-territory cong-id territory-id])
     (when (not= old-data new-data)
       [(merge {:event/type :territory.event/territory-defined
-               :event/version 1
                :congregation/id cong-id
                :territory/id territory-id}
               (gis-change/event-metadata command)
@@ -93,7 +91,6 @@
     (check-permit [:delete-territory cong-id territory-id])
     (when (some? territory)
       [(merge {:event/type :territory.event/territory-deleted
-               :event/version 1
                :congregation/id cong-id
                :territory/id territory-id}
               (gis-change/event-metadata command))])))

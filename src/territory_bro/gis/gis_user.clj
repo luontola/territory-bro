@@ -70,7 +70,6 @@
     (check-permit [:create-gis-user cong-id user-id])
     (when (nil? gis-user)
       [{:event/type :congregation.event/gis-user-created
-        :event/version 1
         :congregation/id cong-id
         :user/id user-id
         ;; Due to PostgreSQL identifier length limits, the username is based on
@@ -85,7 +84,6 @@
     (check-permit [:delete-gis-user cong-id user-id])
     (when (some? gis-user)
       [{:event/type :congregation.event/gis-user-deleted
-        :event/version 1
         :congregation/id cong-id
         :user/id user-id
         :gis-user/username (:gis-user/username gis-user)}])))

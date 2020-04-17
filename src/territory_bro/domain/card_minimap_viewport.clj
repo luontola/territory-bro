@@ -57,7 +57,6 @@
     (check-permit [:create-card-minimap-viewport cong-id])
     (when (nil? card-minimap-viewport)
       [(merge {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined
-               :event/version 1
                :congregation/id cong-id
                :card-minimap-viewport/id card-minimap-viewport-id}
               (gis-change/event-metadata command)
@@ -72,7 +71,6 @@
     (check-permit [:update-card-minimap-viewport cong-id card-minimap-viewport-id])
     (when (not= old-data new-data)
       [(merge {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined
-               :event/version 1
                :congregation/id cong-id
                :card-minimap-viewport/id card-minimap-viewport-id}
               (gis-change/event-metadata command)
@@ -85,7 +83,6 @@
     (check-permit [:delete-card-minimap-viewport cong-id card-minimap-viewport-id])
     (when (some? card-minimap-viewport)
       [(merge {:event/type :card-minimap-viewport.event/card-minimap-viewport-deleted
-               :event/version 1
                :congregation/id cong-id
                :card-minimap-viewport/id card-minimap-viewport-id}
               (gis-change/event-metadata command))])))

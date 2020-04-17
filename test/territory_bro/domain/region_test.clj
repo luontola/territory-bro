@@ -18,7 +18,6 @@
 (def gis-change-id 42)
 (def region-defined
   {:event/type :region.event/region-defined
-   :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
    :region/id region-id
@@ -26,7 +25,6 @@
    :region/location testdata/wkt-multi-polygon})
 (def region-deleted
   {:event/type :region.event/region-deleted
-   :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
    :region/id region-id})

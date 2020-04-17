@@ -59,7 +59,6 @@
     (check-permit [:create-region cong-id])
     (when (nil? region)
       [(merge {:event/type :region.event/region-defined
-               :event/version 1
                :congregation/id cong-id
                :region/id region-id}
               (gis-change/event-metadata command)
@@ -74,7 +73,6 @@
     (check-permit [:update-region cong-id region-id])
     (when (not= old-data new-data)
       [(merge {:event/type :region.event/region-defined
-               :event/version 1
                :congregation/id cong-id
                :region/id region-id}
               (gis-change/event-metadata command)
@@ -87,7 +85,6 @@
     (check-permit [:delete-region cong-id region-id])
     (when (some? region)
       [(merge {:event/type :region.event/region-deleted
-               :event/version 1
                :congregation/id cong-id
                :region/id region-id}
               (gis-change/event-metadata command))])))

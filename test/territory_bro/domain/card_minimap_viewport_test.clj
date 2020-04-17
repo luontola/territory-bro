@@ -18,14 +18,12 @@
 (def gis-change-id 42)
 (def card-minimap-viewport-defined
   {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined
-   :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
    :card-minimap-viewport/id card-minimap-viewport-id
    :card-minimap-viewport/location testdata/wkt-polygon})
 (def card-minimap-viewport-deleted
   {:event/type :card-minimap-viewport.event/card-minimap-viewport-deleted
-   :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
    :card-minimap-viewport/id card-minimap-viewport-id})

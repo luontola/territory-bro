@@ -18,14 +18,12 @@
 (def gis-change-id 42)
 (def congregation-boundary-defined
   {:event/type :congregation-boundary.event/congregation-boundary-defined
-   :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
    :congregation-boundary/id congregation-boundary-id
    :congregation-boundary/location testdata/wkt-multi-polygon})
 (def congregation-boundary-deleted
   {:event/type :congregation-boundary.event/congregation-boundary-deleted
-   :event/version 1
    :gis-change/id gis-change-id
    :congregation/id cong-id
    :congregation-boundary/id congregation-boundary-id})

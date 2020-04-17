@@ -123,7 +123,6 @@
 (defn- admin-permissions-granted [cong-id user-id]
   (for [permission [:view-congregation :configure-congregation :gis-access]]
     {:event/type :congregation.event/permission-granted
-     :event/version 1
      :congregation/id cong-id
      :user/id user-id
      :permission/id permission}))
@@ -137,7 +136,6 @@
       (throw (ValidationException. [[:missing-name]])))
     (when (nil? (:congregation/id congregation)) ; idempotence
       (cons {:event/type :congregation.event/congregation-created
-             :event/version 1
              :congregation/id cong-id
              :congregation/name name
              :congregation/schema-name (generate-tenant-schema-name cong-id)}
@@ -173,13 +171,11 @@
     (concat
      (for [added-permission (sort added-permissions)]
        {:event/type :congregation.event/permission-granted
-        :event/version 1
         :congregation/id cong-id
         :user/id user-id
         :permission/id added-permission})
      (for [removed-permission (sort removed-permissions)]
        {:event/type :congregation.event/permission-revoked
-        :event/version 1
         :congregation/id cong-id
         :user/id user-id
         :permission/id removed-permission}))))
@@ -194,7 +190,6 @@
       (throw (ValidationException. [[:missing-name]])))
     (when-not (= old-name new-name)
       [{:event/type :congregation.event/congregation-renamed
-        :event/version 1
         :congregation/id cong-id
         :congregation/name new-name}])))
 

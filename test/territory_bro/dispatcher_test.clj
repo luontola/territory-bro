@@ -37,12 +37,10 @@
       (is (= [{:event/type :congregation.event/congregation-renamed
                :event/time test-time ; added
                :event/user user-id ; added
-               :event/version 1
                :congregation/id cong-id
                :congregation/name ""}]
              (call! (fn [& _]
                       [{:event/type :congregation.event/congregation-renamed
-                        :event/version 1
                         :congregation/id cong-id
                         :congregation/name ""}])
                     command state injections))))
@@ -52,7 +50,6 @@
            ExceptionInfo (re-contains "Value does not match schema")
            (call! (fn [& _]
                     [{:event/type :congregation.event/congregation-renamed
-                      :event/version 1
                       :congregation/id cong-id}])
                   command state injections))))))
 

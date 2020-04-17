@@ -16,34 +16,28 @@
 (def user-id (UUID. 0 2))
 (def test-time (Instant/ofEpochSecond 42))
 (def congregation-created {:event/type :congregation.event/congregation-created
-                           :event/version 1
                            :congregation/id cong-id
                            :congregation/name "Cong1 Name"
                            :congregation/schema-name "cong1_schema"})
 (def gis-user-created {:event/type :congregation.event/gis-user-created
-                       :event/version 1
                        :congregation/id cong-id
                        :user/id user-id
                        :gis-user/username "username123"
                        :gis-user/password "password123"})
 (def gis-user-deleted {:event/type :congregation.event/gis-user-deleted
-                       :event/version 1
                        :congregation/id cong-id
                        :user/id user-id
                        :gis-user/username "username123"})
 (def gis-schema-is-present {:event/type :db-admin.event/gis-schema-is-present
-                            :event/version 1
                             :event/transient? true
                             :congregation/id cong-id
                             :congregation/schema-name "cong1_schema"})
 (def gis-user-is-present {:event/type :db-admin.event/gis-user-is-present
-                          :event/version 1
                           :event/transient? true
                           :congregation/id cong-id
                           :user/id user-id
                           :gis-user/username "username123"})
 (def gis-user-is-absent {:event/type :db-admin.event/gis-user-is-absent
-                         :event/version 1
                          :event/transient? true
                          :congregation/id cong-id
                          :user/id user-id

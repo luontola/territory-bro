@@ -27,7 +27,6 @@
 
     (testing "GIS permission granted"
       (let [events (conj events {:event/type :congregation.event/permission-granted
-                                 :event/version 1
                                  :congregation/id cong-id
                                  :user/id user-id
                                  :permission/id :gis-access})]
@@ -40,7 +39,6 @@
 
         (testing "> GIS user created"
           (let [events (conj events {:event/type :congregation.event/gis-user-created
-                                     :event/version 1
                                      :congregation/id cong-id
                                      :user/id user-id
                                      :gis-user/username "username123"
@@ -49,7 +47,6 @@
 
             (testing "> GIS permission revoked"
               (let [events (conj events {:event/type :congregation.event/permission-revoked
-                                         :event/version 1
                                          :congregation/id cong-id
                                          :user/id user-id
                                          :permission/id :gis-access})]
@@ -62,7 +59,6 @@
 
                 (testing "> GIS user deleted"
                   (let [events (conj events {:event/type :congregation.event/gis-user-deleted
-                                             :event/version 1
                                              :congregation/id cong-id
                                              :user/id user-id
                                              :gis-user/username "username123"})]
@@ -70,7 +66,6 @@
 
         (testing "> GIS permission revoked"
           (let [events (conj events {:event/type :congregation.event/permission-revoked
-                                     :event/version 1
                                      :congregation/id cong-id
                                      :user/id user-id
                                      :permission/id :gis-access})]
@@ -78,7 +73,6 @@
 
         (testing "> unrelated permission revoked"
           (let [events (conj events {:event/type :congregation.event/permission-revoked
-                                     :event/version 1
                                      :congregation/id cong-id
                                      :user/id user-id
                                      :permission/id :view-congregation})]
@@ -91,7 +85,6 @@
 
     (testing "unrelated permission granted"
       (let [events (conj events {:event/type :congregation.event/permission-granted
-                                 :event/version 1
                                  :congregation/id cong-id
                                  :user/id user-id
                                  :permission/id :view-congregation})]
