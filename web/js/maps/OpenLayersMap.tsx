@@ -13,12 +13,11 @@ export default class OpenLayersMap<Props> extends React.Component<Props> {
   element: HTMLDivElement;
 
   render() {
-    return <div className={styles.root}
-                tabIndex={0}
-                ref={el => {
-                  if (el) {
-                    this.element = el;
-                  }
-                }}/>;
+    const setElement = el => {
+      if (el) {
+        this.element = el;
+      }
+    };
+    return <div className={styles.root} ref={setElement}/>;
   }
 }
