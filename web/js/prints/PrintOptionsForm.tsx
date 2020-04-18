@@ -135,11 +135,15 @@ const PrintOptionsForm = ({congregationId}) => {
         <IntlProvider locale={values.language} messages={getMessages(values.language)}>
           <div lang={values.language}>
             {template.type === 'territory' && values.territories.map(territoryId => {
-              return <template.component key={territoryId} territoryId={territoryId}
-                                         congregationId={congregationId} mapRaster={mapRaster}/>;
+              return <template.component key={territoryId}
+                                         territoryId={territoryId}
+                                         congregationId={congregationId}
+                                         mapRaster={mapRaster}/>;
             })}
             {template.type === 'region' && values.regions.map(regionId => {
-              return <template.component key={regionId} regionId={regionId} congregationId={congregationId}
+              return <template.component key={regionId}
+                                         regionId={regionId}
+                                         congregationId={congregationId}
                                          mapRaster={mapRaster}/>;
             })}
           </div>

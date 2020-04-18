@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,11 +17,15 @@ const Box = ({children}) =>
 const stories = storiesOf('TerritoryMap', module)
   .add('default', () =>
     <Box>
-      <TerritoryMap territory={territory101} mapRaster={mapRasters[0]}/>
+      <TerritoryMap territory={territory101}
+                    mapRaster={mapRasters[0]}
+                    printout={true}/>
     </Box>)
   .add('multi-polygon', () =>
     <Box>
-      <TerritoryMap territory={territory102} mapRaster={mapRasters[0]}/>
+      <TerritoryMap territory={territory102}
+                    mapRaster={mapRasters[0]}
+                    printout={true}/>
     </Box>);
 
 mapRasters.forEach(mapRaster => {
@@ -34,7 +38,9 @@ mapRasters.forEach(mapRaster => {
       };
     }
     return <Box>
-      <TerritoryMap territory={territory} mapRaster={mapRaster}/>
+      <TerritoryMap territory={territory}
+                    mapRaster={mapRaster}
+                    printout={true}/>
     </Box>;
   });
 });

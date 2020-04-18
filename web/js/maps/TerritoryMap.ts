@@ -23,7 +23,7 @@ import OpenLayersMap from "./OpenLayersMap";
 type Props = {
   territory: Territory;
   mapRaster: MapRaster;
-  printout?: boolean;
+  printout: boolean;
 };
 
 export default class TerritoryMap extends OpenLayersMap<Props> {
@@ -34,7 +34,7 @@ export default class TerritoryMap extends OpenLayersMap<Props> {
     const {
       territory,
       mapRaster,
-      printout = true
+      printout,
     } = this.props;
     this.map = initTerritoryMap(this.element, territory, printout);
     this.map.setStreetsLayerRaster(mapRaster);

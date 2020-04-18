@@ -19,6 +19,7 @@ import OpenLayersMap from "./OpenLayersMap";
 type Props = {
   territory: Territory;
   congregation: Congregation;
+  printout: boolean; // TODO: this should be always true and not needed here
 };
 
 export default class TerritoryMiniMap extends OpenLayersMap<Props> {
@@ -26,7 +27,7 @@ export default class TerritoryMiniMap extends OpenLayersMap<Props> {
   componentDidMount() {
     const {
       territory,
-      congregation
+      congregation,
     } = this.props;
     if (congregation.location) {
       initTerritoryMiniMap(this.element, territory, congregation);

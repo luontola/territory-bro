@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -19,7 +19,7 @@ const NeighborhoodCard = ({
   territory = territory || congregation.getTerritoryById(territoryId);
   return <CropMarks>
     <div className={styles.root}>
-      <NeighborhoodMap territory={territory} mapRaster={mapRaster}/>
+      <NeighborhoodMap territory={territory} mapRaster={mapRaster} printout={true}/>
     </div>
   </CropMarks>;
 };

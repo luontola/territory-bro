@@ -21,7 +21,7 @@ const RegionPrintout = ({
     <div className={styles.root}>
       <div className={styles.name}>{region.name}</div>
       <div className={styles.map}>
-        <RegionMap region={region} territories={congregation.territories} mapRaster={mapRaster}/>
+        <RegionMap region={region} territories={congregation.territories} mapRaster={mapRaster} printout={true}/>
       </div>
     </div>
   </A4PrintFrame>;

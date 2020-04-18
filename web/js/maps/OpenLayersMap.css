@@ -10,10 +10,14 @@
     text-align: right;
     bottom: 0;
     right: 0;
-    font-size: 6px;
+    font-size: 12px;
     padding: 2px;
     border-radius: 3px;
     background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.printout :global .map-attribution {
+    font-size: 6px;
 }
 
 .root :global .map-attribution ul {
@@ -27,7 +31,7 @@
     line-height: inherit;
 }
 
-.root :global .map-attribution a {
+.printout :global .map-attribution a {
     color: inherit !important;
     text-decoration: none !important;
 }

@@ -25,6 +25,7 @@ type Props = {
   region: Region | Congregation;
   territories: Array<Territory>;
   mapRaster: MapRaster;
+  printout: boolean; // TODO: this should be always true and not needed here
 };
 
 export default class RegionMap extends OpenLayersMap<Props> {

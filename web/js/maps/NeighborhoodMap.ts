@@ -23,6 +23,7 @@ import OpenLayersMap from "./OpenLayersMap";
 type Props = {
   territory: Territory;
   mapRaster: MapRaster;
+  printout: boolean; // TODO: this should be always true and not needed here
 };
 
 export default class NeighborhoodMap extends OpenLayersMap<Props> {

@@ -6,18 +6,25 @@ import "ol/ol.css";
 import React from "react";
 import styles from "./OpenLayersMap.css";
 
-type Props = {};
+type Props = {
+  printout: boolean
+};
 
-export default class OpenLayersMap<Props> extends React.Component<Props> {
+export default class OpenLayersMap<P extends Props> extends React.Component<P> {
 
   element: HTMLDivElement;
 
   render() {
+    const {printout} = this.props;
+    let className = styles.root;
+    if (printout) {
+      className += " " + styles.printout;
+    }
     const setElement = el => {
       if (el) {
         this.element = el;
       }
     };
-    return <div className={styles.root} ref={setElement}/>;
+    return <div className={className} ref={setElement}/>;
   }
 }

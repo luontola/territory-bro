@@ -26,7 +26,7 @@ const TerritoryCardMapOnly = ({
     <div className={styles.root}>
 
       <div className={styles.minimap}>
-        <TerritoryMiniMap territory={territory} congregation={congregation}/>
+        <TerritoryMiniMap territory={territory} congregation={congregation} printout={true}/>
       </div>
 
       <div className={styles.header}>
@@ -44,7 +44,7 @@ const TerritoryCardMapOnly = ({
 
       <div className={styles.map}>
         <PrintDateNotice>
-          <TerritoryMap territory={territory} mapRaster={mapRaster}/>
+          <TerritoryMap territory={territory} mapRaster={mapRaster} printout={true}/>
         </PrintDateNotice>
       </div>
 
