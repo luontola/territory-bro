@@ -10,6 +10,7 @@ import Stroke from "ol/style/Stroke";
 import {fromLonLat} from "ol/proj";
 import {
   makeControls,
+  makeInteractions,
   makeStreetsLayer,
   MapRaster,
   territoryStrokeStyle,
@@ -85,6 +86,7 @@ function initRegionMap(element: HTMLDivElement, region: Region | Congregation, t
     pixelRatio: 2, // render at high DPI for printing
     layers: [streetsLayer, regionLayer, territoryLayer],
     controls: makeControls(),
+    interactions: makeInteractions(),
     view: new View({
       center: fromLonLat([0.0, 0.0]),
       zoom: 1,

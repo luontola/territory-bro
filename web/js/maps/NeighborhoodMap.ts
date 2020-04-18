@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -10,6 +10,7 @@ import Style from "ol/style/Style";
 import {fromLonLat} from "ol/proj";
 import {
   makeControls,
+  makeInteractions,
   makeStreetsLayer,
   MapRaster,
   territoryFillStyle,
@@ -68,6 +69,7 @@ function initNeighborhoodMap(element: HTMLDivElement, territory: Territory): any
     pixelRatio: 2, // render at high DPI for printing
     layers: [streetsLayer, territoryLayer],
     controls: makeControls(),
+    interactions: makeInteractions(),
     view: new View({
       center: fromLonLat([0.0, 0.0]),
       zoom: 1,

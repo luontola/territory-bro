@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -13,6 +13,8 @@ import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
 import Text from "ol/style/Text";
 import TileWMS from "ol/source/TileWMS";
+import {defaults as interactionDefaults, DragPan, MouseWheelZoom} from "ol/interaction";
+import {platformModifierKeyOnly} from "ol/events/condition";
 
 export type MapRaster = {
   id: string;
@@ -73,11 +75,25 @@ export function makeStreetsLayer() {
 }
 
 export function makeControls() {
-  const attribution = new Attribution({
-    className: 'map-attribution',
-    collapsible: false
-  });
-  return controlDefaults({attribution: false}).extend([attribution]);
+  return controlDefaults({attribution: false}).extend([
+    new Attribution({
+      className: 'map-attribution',
+      collapsible: false
+    })
+  ]);
+}
+
+export function makeInteractions() {
+  return interactionDefaults({dragPan: false, mouseWheelZoom: false}).extend([
+    new DragPan({
+      condition: function (event) {
+        return this.getPointerCount() === 2 || platformModifierKeyOnly(event);
+      }
+    }),
+    new MouseWheelZoom({
+      condition: platformModifierKeyOnly
+    })
+  ])
 }
 
 // visual style
