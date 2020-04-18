@@ -3,7 +3,8 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import Feature from "ol/Feature";
-import {Attribution, defaults as controlDefaults} from "ol/control";
+import {defaults as controlDefaults} from "ol/control";
+import Attribution from "ol/control/Attribution";
 import Source from "ol/source/Source";
 import OSM, {ATTRIBUTION as OSM_ATTRIBUTION} from "ol/source/OSM";
 import XYZ from "ol/source/XYZ";
@@ -13,7 +14,9 @@ import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
 import Text from "ol/style/Text";
 import TileWMS from "ol/source/TileWMS";
-import {defaults as interactionDefaults, DragPan, MouseWheelZoom} from "ol/interaction";
+import {defaults as interactionDefaults} from "ol/interaction";
+import DragPan from "ol/interaction/DragPan"
+import MouseWheelZoom from "ol/interaction/MouseWheelZoom"
 import {platformModifierKeyOnly} from "ol/events/condition";
 
 export type MapRaster = {
