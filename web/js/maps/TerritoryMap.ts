@@ -63,18 +63,22 @@ function initTerritoryMap(element: HTMLDivElement, territory: Territory, printou
 
   const streetsLayer = makeStreetsLayer();
 
+  function resetZoom(map) {
+    map.getView().fit(territoryLayer.getSource().getExtent(), {
+      padding: [20, 20, 20, 20],
+      minResolution: 1.25 // prevent zooming too close, show more surrounding for small territories
+    });
+  }
+
   const map = new Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
     layers: [streetsLayer, territoryLayer],
-    controls: makeControls(),
+    controls: makeControls({resetZoom}),
     interactions: makeInteractions(),
     view: printout ? makePrintoutView() : makeView({})
   });
-  map.getView().fit(territoryLayer.getSource().getExtent(), {
-    padding: [20, 20, 20, 20],
-    minResolution: 1.25 // prevent zooming too close, show more surrounding for small territories
-  });
+  resetZoom(map);
 
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {

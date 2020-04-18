@@ -82,18 +82,22 @@ function initRegionMap(element: HTMLDivElement, region: Region | Congregation, t
 
   const streetsLayer = makeStreetsLayer();
 
+  function resetZoom(map) {
+    map.getView().fit(regionLayer.getSource().getExtent(), {
+      padding: [5, 5, 5, 5],
+      minResolution: 3.0
+    });
+  }
+
   const map = new Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
     layers: [streetsLayer, regionLayer, territoryLayer],
-    controls: makeControls(),
+    controls: makeControls({resetZoom}),
     interactions: makeInteractions(),
     view: makePrintoutView()
   });
-  map.getView().fit(regionLayer.getSource().getExtent(), {
-    padding: [5, 5, 5, 5],
-    minResolution: 3.0
-  });
+  resetZoom(map);
 
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {

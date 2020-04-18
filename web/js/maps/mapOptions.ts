@@ -20,6 +20,7 @@ import DragPan from "ol/interaction/DragPan";
 import MouseWheelZoom from "ol/interaction/MouseWheelZoom";
 import {platformModifierKeyOnly} from "ol/events/condition";
 import {fromLonLat} from "ol/proj";
+import ResetZoom from "./ResetZoom";
 
 export type MapRaster = {
   id: string;
@@ -79,12 +80,13 @@ export function makeStreetsLayer() {
   });
 }
 
-export function makeControls() {
+export function makeControls({resetZoom}) {
   return controlDefaults({attribution: false}).extend([
+    new ResetZoom(resetZoom),
     new Attribution({
       className: 'map-attribution',
       collapsible: false
-    })
+    }),
   ]);
 }
 
