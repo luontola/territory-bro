@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -11,12 +11,10 @@ function formatErrorMessage(error) {
 }
 
 export function formatApiError(error) {
-  if (error.response) {
-    const data = error.response.data;
-    if (Array.isArray(data.errors)) {
-      const messages = data.errors.map(formatErrorMessage);
-      return messages.join("\n");
-    }
+  const errors = error.response?.data.errors;
+  if (Array.isArray(errors)) {
+    const messages = errors.map(formatErrorMessage);
+    return messages.join("\n");
   }
   return error;
 }

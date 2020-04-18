@@ -27,10 +27,8 @@ import TerritoryPage from "./pages/TerritoryPage";
 globalHistory.listen(({location, action}) => {
   console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
   logPageView();
-  const main = document.querySelector('main');
-  if (main) {
-    main.scrollIntoView({block: "start"});
-  }
+  document.querySelector('main')
+    ?.scrollIntoView({block: "start"});
 });
 
 document.querySelector('html')
