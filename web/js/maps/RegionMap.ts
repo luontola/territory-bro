@@ -3,15 +3,14 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import Map from "ol/Map";
-import View from "ol/View";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
-import {fromLonLat} from "ol/proj";
 import {
   makeControls,
   makeInteractions,
+  makePrintoutView,
   makeStreetsLayer,
   MapRaster,
   territoryStrokeStyle,
@@ -88,12 +87,7 @@ function initRegionMap(element: HTMLDivElement, region: Region | Congregation, t
     layers: [streetsLayer, regionLayer, territoryLayer],
     controls: makeControls(),
     interactions: makeInteractions(),
-    view: new View({
-      center: fromLonLat([0.0, 0.0]),
-      zoom: 1,
-      minResolution: 0.1,
-      zoomFactor: 1.1 // zoom in small steps to enable fine tuning
-    })
+    view: makePrintoutView()
   });
   map.getView().fit(regionLayer.getSource().getExtent(), {
     padding: [5, 5, 5, 5],

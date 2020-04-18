@@ -46,7 +46,7 @@ const TerritoryPage = ({congregationId, territoryId}) => {
 
       <div className="pure-u-1 pure-u-lg-2-3 pure-u-xl-3-4">
         <div className={styles.map}>
-          <TerritoryMap territory={territory} mapRaster={mapRaster}/>
+          <TerritoryMap territory={territory} mapRaster={mapRaster} printout={false}/>
         </div>
       </div>
     </div>

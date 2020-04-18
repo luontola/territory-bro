@@ -3,15 +3,15 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import Map from "ol/Map";
-import View from "ol/View";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Style from "ol/style/Style";
-import {fromLonLat} from "ol/proj";
 import {
   makeControls,
   makeInteractions,
+  makePrintoutView,
   makeStreetsLayer,
+  makeView,
   MapRaster,
   territoryFillStyle,
   territoryStrokeStyle,
@@ -23,6 +23,7 @@ import OpenLayersMap from "./OpenLayersMap";
 type Props = {
   territory: Territory;
   mapRaster: MapRaster;
+  printout?: boolean;
 };
 
 export default class TerritoryMap extends OpenLayersMap<Props> {
@@ -32,9 +33,10 @@ export default class TerritoryMap extends OpenLayersMap<Props> {
   componentDidMount() {
     const {
       territory,
-      mapRaster
+      mapRaster,
+      printout = true
     } = this.props;
-    this.map = initTerritoryMap(this.element, territory);
+    this.map = initTerritoryMap(this.element, territory, printout);
     this.map.setStreetsLayerRaster(mapRaster);
   }
 
@@ -46,7 +48,7 @@ export default class TerritoryMap extends OpenLayersMap<Props> {
   }
 }
 
-function initTerritoryMap(element: HTMLDivElement, territory: Territory): any {
+function initTerritoryMap(element: HTMLDivElement, territory: Territory, printout: boolean): any {
   const territoryWkt = territory.location;
 
   const territoryLayer = new VectorLayer({
@@ -67,12 +69,7 @@ function initTerritoryMap(element: HTMLDivElement, territory: Territory): any {
     layers: [streetsLayer, territoryLayer],
     controls: makeControls(),
     interactions: makeInteractions(),
-    view: new View({
-      center: fromLonLat([0.0, 0.0]),
-      zoom: 1,
-      minResolution: 0.1,
-      zoomFactor: 1.1 // zoom in small steps to enable fine tuning
-    })
+    view: printout ? makePrintoutView() : makeView({})
   });
   map.getView().fit(territoryLayer.getSource().getExtent(), {
     padding: [20, 20, 20, 20],

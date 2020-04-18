@@ -7,6 +7,7 @@ import {defaults as controlDefaults} from "ol/control";
 import Attribution from "ol/control/Attribution";
 import Source from "ol/source/Source";
 import OSM, {ATTRIBUTION as OSM_ATTRIBUTION} from "ol/source/OSM";
+import View from "ol/View";
 import XYZ from "ol/source/XYZ";
 import WKT from "ol/format/WKT";
 import Tile from "ol/layer/Tile";
@@ -15,9 +16,10 @@ import Fill from "ol/style/Fill";
 import Text from "ol/style/Text";
 import TileWMS from "ol/source/TileWMS";
 import {defaults as interactionDefaults} from "ol/interaction";
-import DragPan from "ol/interaction/DragPan"
-import MouseWheelZoom from "ol/interaction/MouseWheelZoom"
+import DragPan from "ol/interaction/DragPan";
+import MouseWheelZoom from "ol/interaction/MouseWheelZoom";
 import {platformModifierKeyOnly} from "ol/events/condition";
+import {fromLonLat} from "ol/proj";
 
 export type MapRaster = {
   id: string;
@@ -97,6 +99,21 @@ export function makeInteractions() {
       condition: platformModifierKeyOnly
     })
   ])
+}
+
+export function makePrintoutView() {
+  return makeView({
+    zoomFactor: 1.1, // zoom in small steps to enable fine tuning
+  });
+}
+
+export function makeView(opts: {}) {
+  return new View({
+    center: fromLonLat([0.0, 0.0]),
+    zoom: 1,
+    minResolution: 0.1,
+    ...opts,
+  });
 }
 
 // visual style
