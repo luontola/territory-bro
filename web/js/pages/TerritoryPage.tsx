@@ -7,13 +7,9 @@ import {Link} from "@reach/router";
 import {getCongregationById} from "../api";
 import styles from "./TerritoryPage.css"
 import TerritoryMap from "../maps/TerritoryMap";
-import OSM from "ol/source/OSM";
+import {mapRasters} from "../maps/mapOptions";
 
-const mapRaster = {
-  id: '',
-  name: '',
-  source: new OSM()
-};
+const mapRaster = mapRasters[0];
 
 const TerritoryPage = ({congregationId, territoryId}) => {
   const congregation = getCongregationById(congregationId);
