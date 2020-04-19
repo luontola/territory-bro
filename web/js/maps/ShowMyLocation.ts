@@ -11,10 +11,15 @@ class ShowMyLocation extends Control {
       element: document.createElement('div')
     });
 
+    const icon = document.createElement('i');
+    icon.setAttribute('class', 'fas fa-crosshairs');
+    // icon.setAttribute('class', 'fas fa-location-arrow');
+    // icon.setAttribute('class', 'fas fa-street-view');
+
     const button = document.createElement('button');
     button.setAttribute('type', 'button');
     button.title = "Show my location";
-    button.appendChild(document.createTextNode("👀"));
+    button.appendChild(icon);
 
     let geolocation = null;
     const onClick = event => {
@@ -68,7 +73,7 @@ class ShowMyLocation extends Control {
 
     const element = this.element;
     element.className = 'ol-unselectable ol-control';
-    element.style = 'bottom: .5em; left: .5em;'
+    element.style = 'top: 7.15em; left: .5em;'
     element.appendChild(button);
   }
 }

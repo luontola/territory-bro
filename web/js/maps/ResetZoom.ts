@@ -10,10 +10,13 @@ class ResetZoom extends Control {
       element: document.createElement('div')
     });
 
+    const icon = document.createElement('i');
+    icon.setAttribute('class', 'fas fa-search-location');
+
     const button = document.createElement('button');
     button.setAttribute('type', 'button');
     button.title = "Reset zoom";
-    button.appendChild(document.createTextNode("🔄"));
+    button.appendChild(icon);
 
     const onClick = event => {
       event.preventDefault();
