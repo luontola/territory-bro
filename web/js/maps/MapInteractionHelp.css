@@ -1,0 +1,43 @@
+
+.root {
+    margin: 0.5em 0;
+    padding: 13px 20px;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-left-color: #1b809e;
+    border-radius: 3px;
+    background-color: #fcfcfc;
+}
+
+.title {
+    font-weight: bold;
+    margin-bottom: 0.5em;
+}
+
+.title {
+    color: #1b809e;
+    font-size: 1rem;
+}
+
+.content {
+    font-size: 0.9rem;
+}
+
+.content p {
+    margin-block-start: 0.4em;
+    margin-block-end: 0;
+}
+
+.root kbd {
+    display: inline-block;
+    margin: -.1em .1em;
+    padding: .1em .6em;
+    font-size: 90%;
+    color: #242729;
+    text-shadow: 0 1px 0 #fff;
+    background-color: #e1e3e5;
+    border: 1px solid #adb3b8;
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(12, 13, 14, 0.2), 0 0 0 2px #fff inset;
+    white-space: nowrap;
+}

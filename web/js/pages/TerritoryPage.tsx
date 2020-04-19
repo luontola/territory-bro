@@ -8,6 +8,7 @@ import {getCongregationById} from "../api";
 import styles from "./TerritoryPage.css"
 import TerritoryMap from "../maps/TerritoryMap";
 import {mapRasters} from "../maps/mapOptions";
+import MapInteractionHelp from "../maps/MapInteractionHelp";
 
 const mapRaster = mapRasters[0];
 
@@ -44,6 +45,7 @@ const TerritoryPage = ({congregationId, territoryId}) => {
         <div className={styles.map}>
           <TerritoryMap territory={territory} mapRaster={mapRaster} printout={false}/>
         </div>
+        <MapInteractionHelp/>
       </div>
     </div>
   </>;
