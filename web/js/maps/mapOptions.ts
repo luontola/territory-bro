@@ -29,23 +29,23 @@ export type MapRaster = {
   source: Source;
 };
 export const mapRasters: Array<MapRaster> = [{
-  id: 'osm',
+  id: 'osmhd',
   name: "World - OpenStreetMap",
   source: new XYZ({
-    url: '//a.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
+    url: 'https://{a-c}.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
     tileSize: [256, 256],
     tilePixelRatio: 2,
     attributions: OSM_ATTRIBUTION
   })
 }, {
-  id: 'osmBackup',
+  id: 'osm',
   name: "World - OpenStreetMap (backup server, low DPI)",
   source: new OSM()
 }, {
   id: 'mmlTaustakartta',
   name: "Finland - Maanmittauslaitoksen taustakarttasarja",
   source: new XYZ({
-    url: '//tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
+    url: 'https://tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
     tileSize: [128, 128],
     tilePixelRatio: 2,
     attributions: '&copy; Maanmittauslaitos'
