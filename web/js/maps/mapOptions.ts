@@ -98,7 +98,10 @@ export function makeInteractions() {
   return interactionDefaults({dragPan: false, mouseWheelZoom: false}).extend([
     new DragPan({
       condition: function (event) {
-        return this.getPointerCount() === 2 || platformModifierKeyOnly(event);
+        if (event.originalEvent.pointerType === 'touch') {
+          return this.getPointerCount() === 2 || platformModifierKeyOnly(event);
+        }
+        return true
       }
     }),
     new MouseWheelZoom({
