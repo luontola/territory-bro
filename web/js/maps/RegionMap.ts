@@ -82,10 +82,11 @@ function initRegionMap(element: HTMLDivElement, region: Region | Congregation, t
 
   const streetsLayer = makeStreetsLayer();
 
-  function resetZoom(map) {
+  function resetZoom(map, opts) {
     map.getView().fit(regionLayer.getSource().getExtent(), {
       padding: [5, 5, 5, 5],
-      minResolution: 3.0
+      minResolution: 3.0,
+      ...opts,
     });
   }
 
@@ -95,9 +96,9 @@ function initRegionMap(element: HTMLDivElement, region: Region | Congregation, t
     layers: [streetsLayer, regionLayer, territoryLayer],
     controls: makeControls({resetZoom}),
     interactions: makeInteractions(),
-    view: makePrintoutView()
+    view: makePrintoutView(),
   });
-  resetZoom(map);
+  resetZoom(map, {});
 
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {

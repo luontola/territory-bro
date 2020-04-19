@@ -29,7 +29,8 @@ class ShowMyLocation extends Control {
 
       function zoomOutToFit(geom) {
         const view = map.getView();
-        view.fit(extend(view.calculateExtent(), buffer(geom.getExtent(), 20)));
+        const extent = extend(view.calculateExtent(), buffer(geom.getExtent(), 20));
+        view.fit(extent, {duration: 500});
       }
 
       // On first click we must wait asynchronously until

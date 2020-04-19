@@ -64,10 +64,11 @@ function initNeighborhoodMap(element: HTMLDivElement, territory: Territory): any
 
   const streetsLayer = makeStreetsLayer();
 
-  function resetZoom(map) {
+  function resetZoom(map, opts) {
     map.getView().fit(territoryLayer.getSource().getExtent(), {
       padding: [5, 5, 5, 5],
-      minResolution: 3.0
+      minResolution: 3.0,
+      ...opts,
     });
   }
 
@@ -79,7 +80,7 @@ function initNeighborhoodMap(element: HTMLDivElement, territory: Territory): any
     interactions: makeInteractions(),
     view: makePrintoutView(),
   });
-  resetZoom(map);
+  resetZoom(map, {});
 
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {

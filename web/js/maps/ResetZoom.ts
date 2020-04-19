@@ -5,7 +5,7 @@
 import Control from "ol/control/Control";
 
 class ResetZoom extends Control {
-  constructor(resetZoom: (map: any) => void) {
+  constructor(resetZoom: (map: any, opts: {}) => void) {
     super({
       element: document.createElement('div')
     });
@@ -17,7 +17,7 @@ class ResetZoom extends Control {
 
     const onClick = event => {
       event.preventDefault();
-      resetZoom(super.getMap());
+      resetZoom(super.getMap(), {duration: 500});
     };
     button.addEventListener('click', onClick, false);
 
