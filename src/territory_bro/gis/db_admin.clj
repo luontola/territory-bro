@@ -93,6 +93,25 @@
       :congregation/id (:congregation/id gis-user)
       :congregation/schema-name (:congregation/schema-name gis-user)})))
 
+(defn init-present-users [state {:keys [get-present-users]}]
+  (let [schema->cong-id (->> (vals (::congregations state))
+                             (map (fn [cong]
+                                    [(:congregation/schema-name cong) (:congregation/id cong)]))
+                             (into {}))
+        username->user-id (->> (vals (::gis-users state))
+                               (map (fn [gis-user]
+                                      [(:gis-user/username gis-user) (:user/id gis-user)]))
+                               (into {}))]
+    (for [{:keys [username schema]} (get-present-users)
+          :let [cong-id (schema->cong-id schema)
+                user-id (username->user-id username)]
+          :when (some? cong-id)
+          :when (some? user-id)]
+      {:event/type :db-admin.event/gis-user-is-present
+       :event/transient? true
+       :congregation/id cong-id
+       :user/id user-id
+       :gis-user/username username})))
 
 (defmulti ^:private command-handler (fn [command _injections] (:command/type command)))
 

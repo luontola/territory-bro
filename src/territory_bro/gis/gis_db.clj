@@ -215,3 +215,31 @@
 (defn ensure-user-absent! [conn {:keys [username schema]}]
   (log/info "Deleting GIS user:" username)
   (drop-role-cascade! conn username [schema]))
+
+(defn- validate-grants [grants]
+  (let [[{:keys [grantee table_schema]}] grants
+        expected-grants (->> ["territory"
+                              "subregion"
+                              "congregation_boundary"
+                              "card_minimap_viewport"]
+                             (mapcat (fn [table_name]
+                                       [{:table_name table_name :privilege_type "SELECT"}
+                                        {:table_name table_name :privilege_type "INSERT"}
+                                        {:table_name table_name :privilege_type "UPDATE"}
+                                        {:table_name table_name :privilege_type "DELETE"}]))
+                             (map #(-> %
+                                       (assoc :grantee grantee)
+                                       (assoc :table_schema table_schema))))]
+    (when (= (set expected-grants)
+             (set grants))
+      {:username grantee
+       :schema table_schema})))
+
+(defn get-present-users [conn {:keys [username-prefix schema-prefix]}]
+  (->> (query! conn :find-roles {:role (str username-prefix "%")
+                                 :schema (str schema-prefix "%")})
+       (group-by (juxt :grantee :table_schema))
+       (vals)
+       (map validate-grants)
+       (filter some?)
+       (doall)))

@@ -17,6 +17,7 @@
 (def test-schema "test_gis_schema")
 (def test-schema2 "test_gis_schema2")
 (def test-username "test_gis_user")
+(def test-username2 "test_gis_user2")
 
 (defn- with-tenant-schema [schema-name f]
   (let [schema (db/tenant-schema schema-name (:database-schema config/env))]
@@ -499,3 +500,61 @@
                                           :schema test-schema}))
       (is (thrown-with-msg? PSQLException #"FATAL: password authentication failed for user"
                             (jdbc/query db-spec ["select 1 as test"]))))))
+
+(deftest validate-grants-test
+  (let [grants [{:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "territory", :privilege_type "SELECT"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "territory", :privilege_type "INSERT"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "territory", :privilege_type "UPDATE"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "territory", :privilege_type "DELETE"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "subregion", :privilege_type "SELECT"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "subregion", :privilege_type "INSERT"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "subregion", :privilege_type "UPDATE"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "subregion", :privilege_type "DELETE"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "congregation_boundary", :privilege_type "SELECT"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "congregation_boundary", :privilege_type "INSERT"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "congregation_boundary", :privilege_type "UPDATE"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "congregation_boundary", :privilege_type "DELETE"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "card_minimap_viewport", :privilege_type "SELECT"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "card_minimap_viewport", :privilege_type "INSERT"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "card_minimap_viewport", :privilege_type "UPDATE"}
+                {:grantee "test_gis_user", :table_schema "test_gis_schema", :table_name "card_minimap_viewport", :privilege_type "DELETE"}]]
+    (is (= {:username "test_gis_user"
+            :schema "test_gis_schema"}
+           (#'gis-db/validate-grants grants)))
+    (is (nil? (#'gis-db/validate-grants (drop 1 grants))))
+    (is (nil? (#'gis-db/validate-grants (assoc-in grants [0 :grantee] "foo"))))
+    (is (nil? (#'gis-db/validate-grants (assoc-in grants [0 :privilege_type] "foo"))))
+    (is (nil? (#'gis-db/validate-grants (assoc-in grants [0 :table_name] "foo"))))
+    (is (nil? (#'gis-db/validate-grants (assoc-in grants [0 :table_schema] "foo"))))))
+
+(deftest get-present-users-test
+  (with-tenant-schema test-schema2
+    (fn []
+      (testing "lists GIS users present in the database"
+        (db/with-db [conn {}]
+          (jdbc/db-set-rollback-only! conn)
+          (gis-db/ensure-user-present! conn {:username test-username
+                                             :password "password"
+                                             :schema test-schema})
+          (gis-db/ensure-user-present! conn {:username test-username2
+                                             :password "password"
+                                             :schema test-schema})
+          (gis-db/ensure-user-present! conn {:username test-username
+                                             :password "password"
+                                             :schema test-schema2})
+          (is (= #{{:username test-username :schema test-schema}
+                   {:username test-username2 :schema test-schema}
+                   {:username test-username :schema test-schema2}}
+                 (set (gis-db/get-present-users conn {:username-prefix test-username
+                                                      :schema-prefix test-schema}))))))
+
+      (testing "doesn't list GIS users with missing grants"
+        (db/with-db [conn {}]
+          (jdbc/db-set-rollback-only! conn)
+          (gis-db/ensure-user-present! conn {:username test-username
+                                             :password "password"
+                                             :schema test-schema})
+          (jdbc/execute! conn [(str "REVOKE DELETE ON TABLE " test-schema ".territory FROM " test-username)])
+          (is (= []
+                 (gis-db/get-present-users conn {:username-prefix test-username
+                                                 :schema-prefix test-schema}))))))))

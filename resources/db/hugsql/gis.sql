@@ -68,10 +68,6 @@ update gis_change_log
 set processed = true
 where id = any (array[:v*:ids]::bigint[]);
 
---  Copyright © 2015-2020 Esko Luontola
---  This software is released under the Apache License 2.0.
---  The license text is at http://www.apache.org/licenses/LICENSE-2.0
-
 -- :name replace-id-of-entity :!
 update :i:schema_table
 set id = :new_id
@@ -86,3 +82,11 @@ where schema = :schema
     or (old ->> 'id')::uuid = :old_id)
   and replacement_id is null
   and processed is false;
+
+
+-- :name find-roles :? :*
+select grantee, table_schema, table_name, privilege_type
+from information_schema.role_table_grants
+where table_schema like :schema
+  and grantee like :role
+order by table_schema, grantee, table_name;

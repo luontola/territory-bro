@@ -115,6 +115,34 @@
                         (let [events (conj events gis-user-is-absent)]
                           (is (empty? (generate-commands events))))))))))))))))
 
+(defn- init-present-users [events present-users]
+  (->> (db-admin/init-present-users (apply-events events)
+                                    {:get-present-users (fn [] present-users)})
+       (events/validate-events)))
+
+(deftest init-present-users-test
+  (testing "no users present in database"
+    (is (empty? (init-present-users [] []))))
+
+  (testing "some users present in database"
+    (is (= [gis-user-is-present]
+           (init-present-users [congregation-created
+                                gis-user-created]
+                               [{:username "username123"
+                                 :schema "cong1_schema"}]))))
+
+  (testing "username not found"
+    (is (empty? (init-present-users [congregation-created
+                                     gis-user-created]
+                                    [{:username "foo"
+                                      :schema "cong1_schema"}]))))
+
+  (testing "schema not found"
+    (is (empty? (init-present-users [congregation-created
+                                     gis-user-created]
+                                    [{:username "username123"
+                                      :schema "foo"}])))))
+
 (deftest migrate-tenant-schema-test
   (let [spy (spy/spy)
         state (apply-events [congregation-created])
