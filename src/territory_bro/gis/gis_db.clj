@@ -16,16 +16,17 @@
 (def ^:private query! (db/compile-queries "db/hugsql/gis.sql"))
 
 
-;;;; Regions
+;;;; Features
 
-(defn- format-region [territory]
-  (remove-vals nil? {:region/id (:id territory)
-                     :region/name (:name territory)
-                     :region/location (:location territory)}))
+(defn- format-feature [feature]
+  (map-keys #(keyword "gis-feature" (name %))
+            feature))
 
+
+;; TODO: not used in production code; remove?
 (defn get-congregation-boundaries [conn]
   (->> (query! conn :get-congregation-boundaries)
-       (map format-region)
+       (map format-feature)
        (doall)))
 
 (defn create-congregation-boundary! [conn location]
@@ -35,9 +36,10 @@
     id))
 
 
+;; TODO: not used in production code; remove?
 (defn get-regions [conn]
   (->> (query! conn :get-regions)
-       (map format-region)
+       (map format-feature)
        (doall)))
 
 (defn create-region! [conn name location]
@@ -48,9 +50,10 @@
     id))
 
 
+;; TODO: not used in production code; remove?
 (defn get-card-minimap-viewports [conn]
   (->> (query! conn :get-card-minimap-viewports)
-       (map format-region)
+       (map format-feature)
        (doall)))
 
 (defn create-card-minimap-viewport! [conn location]
@@ -60,22 +63,13 @@
     id))
 
 
-;;;; Territories
-
-(defn- format-territory [territory]
-  {:territory/id (:id territory)
-   :territory/number (:number territory)
-   :territory/addresses (:addresses territory)
-   :territory/region (:subregion territory)
-   :territory/meta (:meta territory)
-   :territory/location (:location territory)})
-
+;; TODO: not used in production code; remove?
 (defn get-territories
   ([conn]
    (get-territories conn {}))
   ([conn search]
    (->> (query! conn :get-territories search)
-        (map format-territory)
+        (map format-feature)
         (doall))))
 
 (defn get-territory-by-id [conn id]

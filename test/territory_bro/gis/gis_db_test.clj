@@ -39,21 +39,21 @@
 
     (testing "create & list congregation boundaries"
       (let [id (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon)]
-        (is (= [{:region/id id
-                 :region/location testdata/wkt-multi-polygon}]
+        (is (= [{:gis-feature/id id
+                 :gis-feature/location testdata/wkt-multi-polygon}]
                (gis-db/get-congregation-boundaries conn)))))
 
     (testing "create & list regions"
       (let [id (gis-db/create-region! conn "the name" testdata/wkt-multi-polygon)]
-        (is (= [{:region/id id
-                 :region/name "the name"
-                 :region/location testdata/wkt-multi-polygon}]
+        (is (= [{:gis-feature/id id
+                 :gis-feature/name "the name"
+                 :gis-feature/location testdata/wkt-multi-polygon}]
                (gis-db/get-regions conn)))))
 
     (testing "create & list card minimap viewports"
       (let [id (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon)]
-        (is (= [{:region/id id
-                 :region/location testdata/wkt-polygon}]
+        (is (= [{:gis-feature/id id
+                 :gis-feature/location testdata/wkt-polygon}]
                (gis-db/get-card-minimap-viewports conn)))))))
 
 (deftest territories-test
@@ -71,29 +71,29 @@
         (is territory-id))
 
       (testing "get territory by ID"
-        (is (= {:territory/id territory-id
-                :territory/number "123"
-                :territory/addresses "Street 1 A"
-                :territory/region "Somewhere"
-                :territory/meta {:foo "bar", :gazonk 42}
-                :territory/location testdata/wkt-multi-polygon}
+        (is (= {:gis-feature/id territory-id
+                :gis-feature/number "123"
+                :gis-feature/addresses "Street 1 A"
+                :gis-feature/subregion "Somewhere"
+                :gis-feature/meta {:foo "bar", :gazonk 42}
+                :gis-feature/location testdata/wkt-multi-polygon}
                (gis-db/get-territory-by-id conn territory-id))))
 
       (testing "get territories by IDs"
         (is (= [territory-id]
                (->> (gis-db/get-territories conn {:ids [territory-id]})
-                    (map :territory/id))))
+                    (map :gis-feature/id))))
         (is (= []
                (->> (gis-db/get-territories conn {:ids []})
-                    (map :territory/id))))
+                    (map :gis-feature/id))))
         (is (= []
                (->> (gis-db/get-territories conn {:ids nil})
-                    (map :territory/id)))))
+                    (map :gis-feature/id)))))
 
       (testing "list territories"
         (is (= ["123"]
                (->> (gis-db/get-territories conn)
-                    (map :territory/number)
+                    (map :gis-feature/number)
                     (sort))))))))
 
 (deftest gis-change-log-test
