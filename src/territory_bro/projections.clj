@@ -13,6 +13,7 @@
             [territory-bro.domain.territory :as territory]
             [territory-bro.gis.db-admin :as db-admin]
             [territory-bro.gis.gis-change :as gis-change]
+            [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.gis.gis-user-process :as gis-user-process]
             [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.infra.config :as config]
@@ -65,6 +66,17 @@
 
 ;;;; Refreshing projections
 
+(defn- refresh-projections! []
+  (let [[old new] (swap-vals! *cache (fn [cached]
+                                       ;; Though this reads the database and is thus a slow
+                                       ;; operation, retries on updating the atom should not
+                                       ;; happen because it's called from a single thread.
+                                       (db/with-db [conn {:read-only? true}]
+                                         (apply-new-events cached conn))))]
+    (when-not (identical? old new)
+      (log/info "Updated from revision" (:event/global-revision (:last-event old))
+                "to" (:event/global-revision (:last-event new))))))
+
 (defn- run-process-managers! [state]
   (let [commands (concat
                   (gis-user-process/generate-commands state {:now (:now config/env)})
@@ -76,23 +88,43 @@
                         (doall))]
     (seq new-events)))
 
+(defn- update-with-transient-events [new-events]
+  (when-some [transient-events (seq (filter :event/transient? new-events))]
+    (swap! *cache apply-events transient-events)
+    (log/info "Updated with" (count transient-events) "transient events")))
+
+(defn- refresh-process-managers! []
+  (when-some [new-events (run-process-managers! (cached-state))]
+    (update-with-transient-events new-events)
+    ;; Some process managers produce persisted events which in turn
+    ;; trigger other process managers (e.g. :congregation.event/gis-user-created),
+    ;; so we have to refresh the projections and re-run the process managers
+    ;; until there are no more commands to execute
+    (refresh-projections!)
+    (recur)))
+
+(defn- run-startup-optimizations! []
+  (db/with-db [conn {:read-only? true}]
+    (let [state (cached-state)
+          injections {:get-present-users (fn []
+                                           (gis-db/get-present-users conn {:username-prefix ""
+                                                                           :schema-prefix ""}))}]
+      (db-admin/init-present-users state injections))))
+
+(defn- refresh-startup-optimizations! []
+  (let [new-events (run-startup-optimizations!)]
+    (update-with-transient-events new-events)))
+
 (defn refresh! []
   (log/info "Refreshing projections")
-  (let [[old new] (swap-vals! *cache (fn [cached]
-                                       ;; Though this reads the database and is thus a slow
-                                       ;; operation, retries on updating the atom should not
-                                       ;; happen because it's called from a single thread.
-                                       (db/with-db [conn {:read-only? true}]
-                                         (apply-new-events cached conn))))]
-    (when-not (identical? old new)
-      (log/info "Updated from revision" (:event/global-revision (:last-event old))
-                "to" (:event/global-revision (:last-event new)))))
+  (refresh-projections!)
+  (refresh-process-managers!))
 
-  (when-some [new-events (run-process-managers! (cached-state))]
-    (when-some [transient-events (seq (filter :event/transient? new-events))]
-      (swap! *cache apply-events transient-events)
-      (log/info "Updated with" (count transient-events) "transient events"))
-    (recur)))
+(defn refresh-on-startup! []
+  (log/info "Refreshing projections on startup")
+  (refresh-projections!)
+  (refresh-startup-optimizations!)
+  (refresh-process-managers!))
 
 (mount/defstate refresher
   :start (poller/create refresh!)

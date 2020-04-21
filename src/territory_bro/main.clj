@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -35,7 +35,7 @@
   (db/check-database-version 11)
   (db/migrate-master-schema!)
   ;; process managers will migrate tenant schemas and create missing GIS users
-  (projections/refresh!)
+  (projections/refresh-on-startup!)
   ;; process any pending GIS changes, in case GIS sync was down for a long time
   (gis-sync/refresh!))
 
