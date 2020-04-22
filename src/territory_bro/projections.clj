@@ -106,10 +106,14 @@
 (defn- run-startup-optimizations! []
   (db/with-db [conn {:read-only? true}]
     (let [state (cached-state)
-          injections {:get-present-users (fn []
+          injections {:get-present-schemas (fn []
+                                             (gis-db/get-present-schemas conn {:schema-prefix ""}))
+                      :get-present-users (fn []
                                            (gis-db/get-present-users conn {:username-prefix ""
                                                                            :schema-prefix ""}))}]
-      (db-admin/init-present-users state injections))))
+      (concat
+       (db-admin/init-present-schemas state injections)
+       (db-admin/init-present-users state injections)))))
 
 (defn- refresh-startup-optimizations! []
   (let [new-events (run-startup-optimizations!)]

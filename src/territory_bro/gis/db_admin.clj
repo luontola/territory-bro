@@ -93,6 +93,19 @@
       :congregation/id (:congregation/id gis-user)
       :congregation/schema-name (:congregation/schema-name gis-user)})))
 
+(defn init-present-schemas [state {:keys [get-present-schemas]}]
+  (let [schema->cong-id (->> (vals (::congregations state))
+                             (map (fn [cong]
+                                    [(:congregation/schema-name cong) (:congregation/id cong)]))
+                             (into {}))]
+    (for [schema (get-present-schemas)
+          :let [cong-id (schema->cong-id schema)]
+          :when (some? cong-id)]
+      {:event/type :db-admin.event/gis-schema-is-present
+       :event/transient? true
+       :congregation/id cong-id
+       :congregation/schema-name schema})))
+
 (defn init-present-users [state {:keys [get-present-users]}]
   (let [schema->cong-id (->> (vals (::congregations state))
                              (map (fn [cong]
