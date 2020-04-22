@@ -2,6 +2,20 @@ body {
     margin: 0 12px;
 }
 
+a {
+    /* accessible colors selected with http://colorsafe.co */
+    color: #3455db;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #9932cc;
+}
+
+a:active {
+    color: #f1d874;
+}
+
 @media print {
     body {
         margin: 0;
