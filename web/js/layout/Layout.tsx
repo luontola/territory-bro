@@ -35,7 +35,7 @@ class Layout extends React.Component<Props> {
           <li><Link to="/">Home</Link></li>
           <li><a href="https://territorybro.com/guide/">User Guide</a></li>
           <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">Updates</a></li>
-          <li><Link to="/support">Support</Link></li>
+          <li><Link to="/help">Help</Link></li>
         </ul>
       </nav>
 

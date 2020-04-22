@@ -16,7 +16,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import Layout from "./layout/Layout";
 import PrintoutPage from "./pages/PrintoutPage";
 import ErrorPage from "./pages/ErrorPage";
-import SupportPage from "./pages/SupportPage";
+import HelpPage from "./pages/HelpPage";
 import {logPageView} from "./analytics";
 import SettingsPage from "./pages/SettingsPage";
 import UsersPage from "./pages/UsersPage";
@@ -46,7 +46,7 @@ ReactDOM.createRoot(document.getElementById('root'))
                 <JoinPage path="/join"/>
                 <LoginCallbackPage path="/login-callback"/>
                 <RegistrationPage path="/register"/>
-                <SupportPage path="/support"/>
+                <HelpPage path="/help"/>
 
                 <CongregationPage path="/congregation/:congregationId"/>
                 <TerritoryListPage path="/congregation/:congregationId/territories"/>
