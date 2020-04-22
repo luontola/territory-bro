@@ -1,8 +1,9 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import "./defaultStyles";
+import styles from "./Layout.css";
 import * as React from "react";
 import AuthenticationPanel from "./AuthenticationPanel";
 import {Link} from "@reach/router";
@@ -27,9 +28,8 @@ class Layout extends React.Component<Props> {
     const {
       children
     } = this.props;
-    return <div id="layout">
-
-      <nav className="no-print">
+    return <>
+      <nav className={`${styles.navigation} no-print`}>
         <AuthenticationPanel/>
         <ul>
           <li><Link to="/">Home</Link></li>
@@ -39,11 +39,10 @@ class Layout extends React.Component<Props> {
         </ul>
       </nav>
 
-      <main className="container">
+      <main className={styles.content}>
         {children}
       </main>
-
-    </div>;
+    </>;
   }
 }
 
