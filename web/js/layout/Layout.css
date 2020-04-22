@@ -19,12 +19,32 @@ a:active {
 
 /* layout */
 
-.navigation {
+.navbar {
     position: relative;
-    padding: 0.5em 2em;
-    min-height: 4em;
+    padding: 0.5em 0.5em;
     background-color: #fcfcfc;
     border-bottom: 2px solid #f0f0f0;
+}
+
+.nav {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    font-size: 18px;
+}
+
+.nav li {
+    text-align: center;
+    margin: 8px auto;
+    padding: 0 1em;
+    white-space: nowrap;
+}
+
+.auth {
+    text-align: center;
+    margin: 4px auto;
+    padding: 0 1em;
+    font-size: 16px;
 }
 
 .content {
@@ -34,6 +54,32 @@ a:active {
 
 h1 {
     margin-top: 0;
+}
+
+@media screen and (min-width: 768px) {
+    .navbar {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .nav {
+        display: flex;
+        justify-content: center;
+        flex: auto;
+    }
+
+    .nav li {
+        flex: auto;
+        border-right: 1px solid #ccc;
+    }
+
+    .nav li:last-of-type {
+        border-right: none;
+    }
+
+    .auth {
+        flex: none;
+    }
 }
 
 @media print {

@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -13,13 +13,13 @@ let AuthenticationPanel = () => {
   const dev = settings.dev;
   if (settings.user) {
     const fullName = settings.user.name;
-    return <p>
+    return <>
       Logged in as {fullName} <LogoutButton/>
-    </p>;
+    </>;
   } else {
-    return <p>
+    return <>
       <LoginButton/> {dev && <DevLoginButton/>}
-    </p>;
+    </>;
   }
 };
 

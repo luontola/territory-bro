@@ -17,7 +17,7 @@ type Props = {
 
 const HomeNav = ({}) => {
   return (
-    <ul>
+    <ul className={styles.nav}>
       <li><Link to="/">Home</Link></li>
       <li><a href="https://territorybro.com/guide/">User Guide</a></li>
       <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">News</a></li>
@@ -29,20 +29,24 @@ const HomeNav = ({}) => {
 const CongregationNav = ({congregationId}) => {
   const congregation = getCongregationById(congregationId);
   return (
-    <ul>
+    <ul className={styles.nav}>
       <li><Link to="/">Home</Link></li>
       <li>{congregation.name}</li>
-      <ul>
-        <li><Link to="territories">Territories</Link></li>
-        <li><Link to="printouts">Printouts</Link></li>
-        {congregation.permissions.configureCongregation && <>
-          <li><Link to="users">Users</Link></li>
-          <li><Link to="settings">Settings</Link></li>
-        </>}
-      </ul>
+      <li><Link to="territories">Territories</Link></li>
+      <li><Link to="printouts">Printouts</Link></li>
+      {congregation.permissions.configureCongregation && <>
+        <li><Link to="users">Users</Link></li>
+        <li><Link to="settings">Settings</Link></li>
+      </>}
       <li><Link to="/help">Help</Link></li>
     </ul>
   );
+}
+
+function RouterComponent({children}) {
+  // Workaround for Reach Router to not render in a <div> which messes up flexbox.
+  // See https://github.com/reach/router/issues/63#issuecomment-524297867
+  return <>{children}</>;
 }
 
 const Layout = ({title, children}: Props) => {
@@ -53,12 +57,14 @@ const Layout = ({title, children}: Props) => {
   }, []);
 
   return <>
-    <nav className={`${styles.navigation} no-print`}>
-      <AuthenticationPanel/>
-      <Router>
+    <nav className={`${styles.navbar} no-print`}>
+      <Router primary={false} component={RouterComponent}>
         <HomeNav path="/*"/>
         <CongregationNav path="/congregation/:congregationId/*"/>
       </Router>
+      <div className={styles.auth}>
+        <AuthenticationPanel/>
+      </div>
     </nav>
 
     <main className={styles.content}>
