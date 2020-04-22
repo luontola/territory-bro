@@ -55,6 +55,7 @@
 }
 
 .cropArea {
+    composes: defaults from "./printout.css";
     grid-area: content;
     /* enable the children to fill all space */
     display: flex;

@@ -1,5 +1,6 @@
 
 .cropArea {
+    composes: defaults from "./printout.css";
     page-break-inside: avoid;
     /* A4 portrait */
     width: 210mm;

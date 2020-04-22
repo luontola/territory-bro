@@ -19,6 +19,7 @@ a:active {
 @media print {
     body {
         margin: 0;
+        background-color: #ffffff;
     }
 
     :global .no-print {
