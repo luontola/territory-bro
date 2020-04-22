@@ -4,6 +4,8 @@
       <root url="jar://$MAVEN_REPOSITORY$/com/zaxxer/HikariCP/3.4.2/HikariCP-3.4.2.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/zaxxer/HikariCP/3.4.2/HikariCP-3.4.2-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

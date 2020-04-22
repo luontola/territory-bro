@@ -4,6 +4,7 @@
 
 (ns territory-bro.gis.gis-db
   (:require [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [medley.core :refer [map-keys remove-vals]]
             [schema.coerce :as coerce]
@@ -237,3 +238,38 @@
        (map validate-grants)
        (filter some?)
        (doall)))
+
+
+;;;; Tenant schemas
+
+(defn- schema-history-query [schema]
+  (format "SELECT '%s' AS schema, * FROM %s.flyway_schema_history" schema schema))
+
+(defn- simplify-schema-history [rows]
+  (->> rows
+       (sort-by :installed_rank)
+       (remove #(= "SCHEMA" (:type %)))
+       (map #(select-keys % [:version :type :script :checksum]))))
+
+(defn get-present-schemas [conn {:keys [schema-prefix]}]
+  (let [schemas (->> (jdbc/query conn [(str "SELECT table_schema "
+                                            "FROM information_schema.tables "
+                                            "WHERE table_name = 'flyway_schema_history' "
+                                            "AND table_schema LIKE ? "
+                                            "ORDER BY table_schema")
+                                       (str schema-prefix "%")])
+                     (map :table_schema))
+        reference-schema (->> schemas
+                              (take 10) ; short-cut in case all tenant schemas are out of date
+                              (filter db/tenant-schema-up-to-date?)
+                              (first))]
+    (when reference-schema
+      (let [reference-history (simplify-schema-history (jdbc/query conn [(schema-history-query reference-schema)]))]
+        (->> (jdbc/query conn [(->> schemas
+                                    (map schema-history-query)
+                                    (str/join " UNION ALL "))])
+             (group-by :schema)
+             (filter (fn [[_schema history]]
+                       (= reference-history (simplify-schema-history history))))
+             (keys)
+             (doall))))))

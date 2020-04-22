@@ -20,6 +20,7 @@
            (java.nio.file Paths)
            (java.sql Date Timestamp PreparedStatement Array)
            (java.time Instant)
+           (org.flywaydb.core.api FlywayException)
            (org.flywaydb.core Flyway)
            (org.postgresql.util PGobject)))
 
@@ -139,6 +140,14 @@
   (log/info "Migrating tenant schema:" schema)
   (-> (tenant-schema schema (:database-schema config/env))
       (.migrate)))
+
+(defn tenant-schema-up-to-date? [schema]
+  (try
+    (-> (tenant-schema schema (:database-schema config/env))
+        (.validate))
+    true
+    (catch FlywayException _
+      false)))
 
 (defn get-schemas [conn]
   (->> (jdbc/query conn ["select schema_name from information_schema.schemata"])

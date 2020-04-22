@@ -11,7 +11,8 @@
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.test.fixtures :refer [db-fixture]])
-  (:import (java.util UUID)
+  (:import (java.sql Connection)
+           (java.util UUID)
            (org.postgresql.util PSQLException)))
 
 (def test-schema "test_gis_schema")
@@ -558,3 +559,18 @@
           (is (= []
                  (gis-db/get-present-users conn {:username-prefix test-username
                                                  :schema-prefix test-schema}))))))))
+
+(deftest get-present-schemas-test
+  (with-tenant-schema test-schema2
+    (fn []
+      (testing "lists tenant schemas present in the database"
+        (db/with-db [conn {}]
+          (is (= [test-schema test-schema2]
+                 (sort (gis-db/get-present-schemas conn {:schema-prefix test-schema}))))))
+
+      (testing "doesn't list tenant schemas whose migrations are not up to date"
+        (db/with-db [conn {}]
+          (jdbc/execute! conn [(format "UPDATE %s.flyway_schema_history SET checksum = 42 WHERE version = '1'" test-schema2)])
+          (.commit ^Connection (:connection conn)) ; commit so that Flyway will see the changes, since it uses a new DB connection
+          (is (= [test-schema]
+                 (sort (gis-db/get-present-schemas conn {:schema-prefix test-schema})))))))))
