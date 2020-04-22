@@ -3,7 +3,6 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React from "react";
-import {Link} from "@reach/router";
 import {getCongregationById} from "../api";
 import styles from "./TerritoryPage.css"
 import TerritoryMap from "../maps/TerritoryMap";
@@ -17,7 +16,7 @@ const TerritoryPage = ({congregationId, territoryId}) => {
   const territory = congregation.getTerritoryById(territoryId);
   // TODO: consider using a grid layout for responsiveness so that the details area has fixed width
   return <>
-    <h1><Link to="../..">{congregation.name}</Link>: <Link to="..">Territories</Link>: Territory {territory.number}</h1>
+    <h1>Territory {territory.number}</h1>
 
     <div className="pure-g">
       <div className="pure-u-1 pure-u-sm-2-3 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4">

@@ -10,18 +10,26 @@ import AuthenticationPanel from "./AuthenticationPanel";
 import {Link, Router} from "@reach/router";
 import {getCongregationById} from "../api";
 
-type Props = {
-  title?: string;
-  children?: React.ReactNode;
-};
+const NavLink = (props) => (
+  <Link {...props}
+        getProps={({href, isCurrent, isPartiallyCurrent}) => {
+          // the object returned here is passed to the anchor element's props
+          const active = (href === '/') ? isCurrent : isPartiallyCurrent;
+          return {
+            className: active ? styles.active : undefined
+          };
+        }}/>
+);
 
 const HomeNav = ({}) => {
   return (
     <ul className={styles.nav}>
-      <li><Link to="/">Home</Link></li>
-      <li><a href="https://territorybro.com/guide/">User Guide</a></li>
-      <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">News</a></li>
-      <li><Link to="/help">Help</Link></li>
+      <li><NavLink to="/">Home</NavLink></li>
+      <li><a href="https://territorybro.com/guide/">
+        User Guide <i className="fas fa-external-link-alt" title="External link"/></a></li>
+      <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">
+        News <i className="fas fa-external-link-alt" title="External link"/></a></li>
+      <li><NavLink to="/help">Help</NavLink></li>
     </ul>
   );
 }
@@ -30,15 +38,15 @@ const CongregationNav = ({congregationId}) => {
   const congregation = getCongregationById(congregationId);
   return (
     <ul className={styles.nav}>
-      <li><Link to="/">Home</Link></li>
-      <li>{congregation.name}</li>
-      <li><Link to="territories">Territories</Link></li>
-      <li><Link to="printouts">Printouts</Link></li>
+      <li><NavLink to="/">Home</NavLink></li>
+      <li><NavLink to=".">{congregation.name}</NavLink></li>
+      <li><NavLink to="territories">Territories</NavLink></li>
+      <li><NavLink to="printouts">Printouts</NavLink></li>
       {congregation.permissions.configureCongregation && <>
-        <li><Link to="users">Users</Link></li>
-        <li><Link to="settings">Settings</Link></li>
+        <li><NavLink to="users">Users</NavLink></li>
+        <li><NavLink to="settings">Settings</NavLink></li>
       </>}
-      <li><Link to="/help">Help</Link></li>
+      <li><NavLink to="/help">Help</NavLink></li>
     </ul>
   );
 }
@@ -48,6 +56,11 @@ function RouterComponent({children}) {
   // See https://github.com/reach/router/issues/63#issuecomment-524297867
   return <>{children}</>;
 }
+
+type Props = {
+  title?: string;
+  children?: React.ReactNode;
+};
 
 const Layout = ({title, children}: Props) => {
   useEffect(() => {

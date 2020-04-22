@@ -50,7 +50,7 @@ const TerritoryListPage = ({congregationId}) => {
   const congregation = getCongregationById(congregationId);
   const [search, setSearch] = useState('')
   return <>
-    <h1><Link to="..">{congregation.name}</Link>: Territories</h1>
+    <h1>Territories</h1>
     <SearchForm search={search} setSearch={setSearch}/>
     <table className="pure-table pure-table-striped">
       <thead>

@@ -98,7 +98,7 @@ const UsersPage = ({congregationId}) => {
       }
     }}>
     {({isSubmitting}) => <>
-      <h1><Link to="..">{congregation.name}</Link>: Users</h1>
+      <h1>Users</h1>
 
       <Form className="pure-form pure-form-aligned">
         <fieldset>

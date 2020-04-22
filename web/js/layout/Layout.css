@@ -40,6 +40,10 @@ a:active {
     white-space: nowrap;
 }
 
+.active {
+    font-weight: bold;
+}
+
 .auth {
     text-align: center;
     margin: 4px auto;

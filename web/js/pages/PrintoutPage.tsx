@@ -5,14 +5,13 @@
 import React from "react";
 import PrintOptionsForm from "../prints/PrintOptionsForm";
 import {getCongregationById} from "../api";
-import {Link} from "@reach/router";
 import MapInteractionHelp from "../maps/MapInteractionHelp";
 
 const PrintoutPage = ({congregationId}) => {
   const congregation = getCongregationById(congregationId);
   return <>
     <div className="no-print">
-      <h1><Link to="..">{congregation.name}</Link>: Printouts</h1>
+      <h1>Printouts</h1>
     </div>
     <PrintOptionsForm congregationId={congregationId}/>
     <div className="no-print">

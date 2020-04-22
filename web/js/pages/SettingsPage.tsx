@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2020 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -36,7 +36,7 @@ const SettingsPage = ({congregationId, navigate}) => {
       }
     }}>
     {({isSubmitting}) => <>
-      <h1><Link to="..">{congregation.name}</Link>: Settings</h1>
+      <h1>Settings</h1>
       <Form className="pure-form pure-form-aligned">
         <fieldset>
           <div className="pure-control-group">
