@@ -252,12 +252,7 @@
        (map #(select-keys % [:version :type :script :checksum]))))
 
 (defn get-present-schemas [conn {:keys [schema-prefix]}]
-  (let [schemas (->> (jdbc/query conn [(str "SELECT table_schema "
-                                            "FROM information_schema.tables "
-                                            "WHERE table_name = 'flyway_schema_history' "
-                                            "AND table_schema LIKE ? "
-                                            "ORDER BY table_schema")
-                                       (str schema-prefix "%")])
+  (let [schemas (->> (query! conn :find-flyway-managed-schemas {:schema (str schema-prefix "%")})
                      (map :table_schema))
         reference-schema (->> schemas
                               (take 10) ; short-cut in case all tenant schemas are out of date

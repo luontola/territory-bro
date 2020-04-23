@@ -90,3 +90,10 @@ from information_schema.role_table_grants
 where table_schema like :schema
   and grantee like :role
 order by table_schema, grantee, table_name;
+
+-- :name find-flyway-managed-schemas :? :*
+select table_schema
+from information_schema.tables
+where table_name = 'flyway_schema_history'
+  and table_schema like :schema
+order by table_schema;
