@@ -26,6 +26,8 @@
       (.migrate schema)
       (f)
       (finally
+        (db/with-db [conn {}]
+          (jdbc/execute! conn ["DELETE FROM gis_change_log"]))
         (.clean schema)))))
 
 (defn test-schema-fixture [f]
