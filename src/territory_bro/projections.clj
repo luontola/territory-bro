@@ -78,9 +78,10 @@
                 "to" (:event/global-revision (:last-event new))))))
 
 (defn- run-process-managers! [state]
-  (let [commands (concat
-                  (gis-user-process/generate-commands state {:now (:now config/env)})
-                  (db-admin/generate-commands state {:now (:now config/env)}))
+  (let [injections {:now (:now config/env)}
+        commands (concat
+                  (gis-user-process/generate-commands state injections)
+                  (db-admin/generate-commands state injections))
         new-events (->> commands
                         (mapcat (fn [command]
                                   (db/with-db [conn {}]
