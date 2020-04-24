@@ -18,7 +18,8 @@
            (java.time Duration)
            (java.util UUID)
            (java.util.concurrent Executors ExecutorService TimeUnit)
-           (org.postgresql PGConnection)))
+           (org.postgresql PGConnection)
+           (org.postgresql.util PSQLException)))
 
 (defn- process-changes! [conn state had-changes?]
   (if-some [change (gis-db/next-unprocessed-change conn)]
@@ -85,7 +86,13 @@
       (notify)
       (loop []
         ;; getNotifications is not interruptible, so it will take up to `timeout` for this loop to exit
-        (let [notifications (.getNotifications pg-conn (.toMillis timeout))]
+        (let [notifications (try
+                              (.getNotifications pg-conn (.toMillis timeout))
+                              (catch PSQLException e
+                                ;; hide failures during shutdown; the database connection was closed while waiting for notifications
+                                (if (.isInterrupted (Thread/currentThread))
+                                  (log/info "Ignoring errors during shutdown:" (str e))
+                                  (throw e))))]
           (when-not (.isInterrupted (Thread/currentThread))
             (doseq [_ notifications]
               (notify))
@@ -109,4 +116,5 @@
            (.submit ^Callable (until-interrupted
                                (executors/safe-task
                                 #(listen-for-gis-changes refresh-async!)))))
+  ;; XXX: not awaiting termination, because PGConnection.getNotifications() is not interruptible
   :stop (.shutdownNow ^ExecutorService notified-refresh))
