@@ -1,27 +1,46 @@
 FROM adoptopenjdk:14-jdk-hotspot AS builder
 
-# tools
+# Leiningen
 ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/local/bin/lein
 RUN chmod 755 /usr/local/bin/lein
 
-# TODO: install postgres & run all tests
+# avoid tzdata installation starting to ask questions
+ARG DEBIAN_FRONTEND=noninteractive
+
+# PostgreSQL
+RUN apt-get update && \
+    apt-get install -y gnupg && \
+    echo 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main' > /etc/apt/sources.list.d/pgdg.list  && \
+    curl --silent https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+    apt-get update && \
+    apt-get install -y postgresql-11 postgresql-11-postgis-3 sudo
 
 # working directory
-RUN useradd --create-home app && \
-    mkdir -p /project && \
-    chown app /project
+RUN mkdir -p /project
 WORKDIR /project
-USER app
 
 # cache Leiningen dependencies
-COPY --chown=app project.clj /project/
+COPY project.clj /project/
 RUN lein deps
 
-# do the build
-COPY --chown=app resources /project/resources
-COPY --chown=app test /project/test
-COPY --chown=app src /project/src
-COPY --chown=app src-java /project/src-java
+# source code
+COPY resources /project/resources
+COPY test /project/test
+COPY src /project/src
+COPY src-java /project/src-java
+
+# run tests
+COPY test-config.edn /project/
+RUN service postgresql start && \
+    sudo -u postgres psql -c "CREATE USER territorybro WITH CREATEROLE PASSWORD 'territorybro';" && \
+    sudo -u postgres psql -c "CREATE DATABASE territorybro OWNER territorybro;" && \
+    sudo -u postgres psql -d territorybro -c "CREATE EXTENSION postgis;" && \
+    # XXX since the territorybro user is not SUPERUSER, the REVOKE in resources/db/flyway/master/R__permissions.sql does nothing
+    sudo -u postgres psql -d territorybro -c "REVOKE CREATE ON SCHEMA public FROM PUBLIC;" && \
+    lein kaocha && \
+    service postgresql stop
+
+# build the binary
 RUN lein uberjar
 
 # ------------------------------------------------------------
