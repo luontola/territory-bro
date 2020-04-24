@@ -43,18 +43,34 @@ RUN service postgresql start && \
 # build the binary
 RUN lein uberjar
 
+# prepare AppCDS class list
+RUN service postgresql start && \
+    java -XX:DumpLoadedClassList=classes.lst -Dconf=test-config.edn -jar target/uberjar/territory-bro.jar app-cds-setup && \
+    service postgresql stop
+
 # ------------------------------------------------------------
 
 FROM adoptopenjdk:14-jre-hotspot
-
-RUN adduser --system --home /app app
-WORKDIR /app
-USER app
 
 EXPOSE 8080
 ENV PORT=8080 \
     NREPL_BIND=0.0.0.0 \
     DATABASE_URL="jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
-ENTRYPOINT ["java", "--illegal-access=deny", "-jar", "territory-bro.jar"]
 
-COPY --from=builder /project/target/uberjar/territory-bro.jar /app/territory-bro.jar
+# the user should have no write permissions, even to its home
+RUN adduser --no-create-home --home /app app && \
+    mkdir /app
+WORKDIR /app
+
+COPY --from=builder /project/target/uberjar/territory-bro.jar /app/
+
+# prepare AppCDS shared archive
+COPY --from=builder /project/classes.lst /app/
+RUN java -Xshare:dump \
+        -XX:SharedClassListFile=classes.lst \
+        -XX:SharedArchiveFile=classes.jsa \
+        --class-path territory-bro.jar && \
+    rm classes.lst
+
+USER app
+ENTRYPOINT ["java", "--illegal-access=deny", "-XX:SharedArchiveFile=classes.jsa", "-jar", "territory-bro.jar"]
