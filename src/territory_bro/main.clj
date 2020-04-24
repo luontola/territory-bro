@@ -50,23 +50,23 @@
   (shutdown-agents))
 
 (defn start-app []
-  (try
-    ;; start the public API only after the database is ready
-    (log-mount-states (mount/start #'config/env
-                                   #'db/database
-                                   #'projections/*cache
-                                   #'projections/refresher))
-    (migrate-database!)
-    (log/info "Database migrated")
-    (log-mount-states (mount/start))
+  ;; start the public API only after the database is ready
+  (log-mount-states (mount/start #'config/env
+                                 #'db/database
+                                 #'projections/*cache
+                                 #'projections/refresher))
+  (migrate-database!)
+  (log/info "Database migrated")
+  (log-mount-states (mount/start))
 
-    (doto (Runtime/getRuntime)
-      (.addShutdownHook (Thread. ^Runnable stop-app)))
-    (log/info "Started")
+  (doto (Runtime/getRuntime)
+    (.addShutdownHook (Thread. ^Runnable stop-app)))
+  (log/info "Started"))
+
+(defn -main [& _args]
+  (try
+    (start-app)
     (catch Throwable t
       ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
       (log/error t (str "Failed to start\n" (pr-str t)))
-      (stop-app))))
-
-(defn -main [& _args]
-  (start-app))
+      (System/exit 1))))
