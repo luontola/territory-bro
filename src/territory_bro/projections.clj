@@ -88,14 +88,14 @@
                         (doall))]
     (seq new-events)))
 
-(defn- update-with-transient-events [new-events]
+(defn- update-with-transient-events! [new-events]
   (when-some [transient-events (seq (filter :event/transient? new-events))]
     (swap! *cache apply-events transient-events)
     (log/info "Updated with" (count transient-events) "transient events")))
 
 (defn- refresh-process-managers! []
   (when-some [new-events (run-process-managers! (cached-state))]
-    (update-with-transient-events new-events)
+    (update-with-transient-events! new-events)
     ;; Some process managers produce persisted events which in turn
     ;; trigger other process managers (e.g. :congregation.event/gis-user-created),
     ;; so we have to refresh the projections and re-run the process managers
@@ -103,7 +103,7 @@
     (refresh-projections!)
     (recur)))
 
-(defn- run-startup-optimizations! []
+(defn- startup-optimizations []
   (db/with-db [conn {:read-only? true}]
     (let [state (cached-state)
           injections {:get-present-schemas (fn []
@@ -116,8 +116,8 @@
        (db-admin/init-present-users state injections)))))
 
 (defn- refresh-startup-optimizations! []
-  (let [new-events (run-startup-optimizations!)]
-    (update-with-transient-events new-events)))
+  (let [new-events (startup-optimizations)]
+    (update-with-transient-events! new-events)))
 
 (defn refresh! []
   (log/info "Refreshing projections")
