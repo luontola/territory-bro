@@ -30,7 +30,7 @@ COPY src /project/src
 COPY src-java /project/src-java
 
 # run tests
-COPY test-config.edn /project/
+COPY test-config.edn tests.edn /project/
 RUN service postgresql start && \
     sudo -u postgres psql -c "CREATE USER territorybro WITH CREATEROLE PASSWORD 'territorybro';" && \
     sudo -u postgres psql -c "CREATE DATABASE territorybro OWNER territorybro;" && \

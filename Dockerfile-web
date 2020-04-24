@@ -16,7 +16,7 @@ RUN yarn install --frozen-lockfile --non-interactive --no-progress && \
     yarn cache clean
 
 # do the build
-COPY --chown=node .babelrc webpack.config.js /project/
+COPY --chown=node .babelrc tsconfig.json webpack.config.js /project/
 COPY --chown=node web/html /project/web/html
 COPY --chown=node web/js /project/web/js
 RUN yarn run test && \
