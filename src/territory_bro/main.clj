@@ -69,8 +69,4 @@
       (stop-app))))
 
 (defn -main [& _args]
-  (log-mount-states (mount/start #'config/env))
-  (when (nil? (:database-url config/env))
-    (log/error "Database configuration not found, :database-url must be set before running")
-    (System/exit 1))
   (start-app))
