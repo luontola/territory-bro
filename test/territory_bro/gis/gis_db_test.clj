@@ -493,7 +493,7 @@
 
     (testing "cannot create objects in the public schema"
       (is (thrown-with-msg? PSQLException #"ERROR: permission denied for schema public"
-                            (jdbc/query db-spec ["create table public.foo (id serial primary key)"]))))
+                            (jdbc/execute! db-spec ["create table public.foo (id serial primary key)"]))))
 
     (testing "cannot login to database after user is deleted"
       (db/with-db [conn {}]
