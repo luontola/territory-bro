@@ -2,18 +2,86 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import React from "react";
-import {getCongregationById} from "../api";
+import React, {useState} from "react";
+import {getCongregationById, getSettings} from "../api";
 import styles from "./TerritoryPage.css"
 import TerritoryMap from "../maps/TerritoryMap";
 import {mapRasters} from "../maps/mapOptions";
 import MapInteractionHelp from "../maps/MapInteractionHelp";
+import ClipboardJS from "clipboard";
 
 const mapRaster = mapRasters[0];
+
+new ClipboardJS('#copy-share-link');
+
+const ShareButton = ({congregationId, territoryId}) => {
+  const [open, setOpen] = useState(false);
+  const [shareButton, setShareButton] = useState(null);
+  const shareUrl = 'http://example.com'; // TODO: generate link
+
+  const togglePopup = () => {
+    setOpen(!open);
+  }
+  const closePopup = () => {
+    shareButton?.focus();
+    setOpen(false);
+  }
+  const autoSelectAll = element => {
+    if (element) {
+      element.focus();
+      element.select?.();
+    }
+  }
+
+  return (
+    <form className="pure-form" onSubmit={event => event.preventDefault()}>
+      <button type="button"
+              className={`pure-button${open ? ' pure-button-active' : ''}`}
+              aria-expanded={open ? 'true' : 'false'}
+              onClick={togglePopup}
+              ref={setShareButton}>
+        <i className="fas fa-share-alt"/> Share a link
+      </button>
+
+      {open &&
+      <div className={styles.sharePopup}>
+        <button type="button"
+                className={`${styles.closeButton} pure-button`}
+                onClick={closePopup}>
+          <i className="fas fa-times" title="Close"/>
+        </button>
+
+        <label htmlFor="share-link">
+          People with this link will be able to view this territory map without logging in:
+        </label>
+
+        <div className={styles.shareLink}>
+          <input type="text"
+                 id="share-link"
+                 value={shareUrl}
+                 ref={autoSelectAll}
+            // effectively read-only, but allow selection
+            // with keyboard and don't show it grayed out
+                 onChange={() => null}
+                 aria-readonly="true"/>
+
+          <button type="button"
+                  id="copy-share-link"
+                  className="pure-button"
+                  data-clipboard-target="#share-link">
+            <i className="fas fa-copy" title="Copy to clipboard"/>
+          </button>
+        </div>
+      </div>
+      }
+    </form>
+  );
+}
 
 const TerritoryPage = ({congregationId, territoryId}) => {
   const congregation = getCongregationById(congregationId);
   const territory = congregation.getTerritoryById(territoryId);
+  const settings = getSettings();
   // TODO: consider using a grid layout for responsiveness so that the details area has fixed width
   return <>
     <h1>Territory {territory.number}</h1>
@@ -38,6 +106,13 @@ const TerritoryPage = ({congregationId, territoryId}) => {
             </tbody>
           </table>
         </div>
+
+        {settings.dev && // TODO: remove feature toggle
+        <div className={styles.actions}>
+          <ShareButton congregationId={congregationId}
+                       territoryId={territoryId}/>
+        </div>
+        }
       </div>
 
       <div className="pure-u-1 pure-u-lg-2-3 pure-u-xl-3-4">

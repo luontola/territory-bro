@@ -1,3 +1,5 @@
+/* Details panel */
+
 .details {
     padding: 0.5em;
 }
@@ -14,6 +16,45 @@
 .details table td {
     white-space: pre-line;
 }
+
+/* Actions panel */
+
+.actions {
+    padding: 0.5em;
+}
+
+.sharePopup {
+    margin: 0 0 0.5em;
+    padding: 0.5em;
+    border: 1px solid #eee;
+    border-radius: 3px;
+    background-color: #fcfcfc;
+}
+
+.sharePopup label {
+    display: block;
+    margin: 0 0 0.3em;
+}
+
+.closeButton {
+    float: right;
+    background-color: transparent;
+    font-size: 75%;
+}
+
+.shareLink {
+    display: flex;
+}
+
+.shareLink > input {
+    flex: auto;
+}
+
+.shareLink > button {
+    flex: none;
+}
+
+/* Map */
 
 .map {
     padding: 0.5em;
