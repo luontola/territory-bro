@@ -1,8 +1,8 @@
 FROM adoptopenjdk:14-jdk-hotspot-bionic AS builder
 
 # Leiningen
-ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/local/bin/lein
-RUN chmod 755 /usr/local/bin/lein
+RUN curl -SL https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein && \
+    chmod 755 /usr/local/bin/lein
 
 # avoid tzdata installation starting to ask questions
 ARG DEBIAN_FRONTEND=noninteractive
@@ -11,7 +11,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y gnupg && \
     echo 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main' > /etc/apt/sources.list.d/pgdg.list  && \
-    curl --silent https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+    curl -SL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
     apt-get update && \
     apt-get install -y postgresql-11 postgresql-11-postgis-3 sudo && \
     rm -rf /var/lib/apt/lists/*
