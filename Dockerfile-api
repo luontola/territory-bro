@@ -1,4 +1,4 @@
-FROM adoptopenjdk:14-jdk-hotspot AS builder
+FROM adoptopenjdk:14-jdk-hotspot-bionic AS builder
 
 # Leiningen
 ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /usr/local/bin/lein
@@ -50,7 +50,7 @@ RUN service postgresql start && \
 
 # ------------------------------------------------------------
 
-FROM adoptopenjdk:14-jre-hotspot
+FROM adoptopenjdk:14-jre-hotspot-bionic
 
 EXPOSE 8080
 ENV PORT=8080 \
