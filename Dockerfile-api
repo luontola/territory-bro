@@ -73,4 +73,4 @@ RUN java -Xshare:dump \
     rm classes.lst
 
 USER app
-ENTRYPOINT ["java", "--illegal-access=deny", "-XX:SharedArchiveFile=classes.jsa", "-jar", "territory-bro.jar"]
+ENTRYPOINT ["java", "--illegal-access=deny", "-Xshare:on", "-XX:SharedArchiveFile=classes.jsa", "-jar", "territory-bro.jar"]
