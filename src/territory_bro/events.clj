@@ -193,24 +193,37 @@
          :user/id UUID
          :gis-user/username s/Str))
 
+;;; Shares
+
+(s/defschema ShareCreated
+  (assoc BaseEvent
+         :event/type (s/eq :share.event/share-created)
+         :share/id UUID
+         :share/key s/Str
+         :share/type (s/enum :link :qr-code)
+         :congregation/id UUID
+         :territory/id UUID))
+
+
 (def event-schemas
-  {:congregation.event/congregation-created CongregationCreated
-   :congregation.event/congregation-renamed CongregationRenamed
-   :congregation.event/permission-granted PermissionGranted
-   :congregation.event/permission-revoked PermissionRevoked
-   :congregation.event/gis-user-created GisUserCreated
-   :congregation.event/gis-user-deleted GisUserDeleted
-   :territory.event/territory-defined TerritoryDefined
-   :territory.event/territory-deleted TerritoryDeleted
-   :region.event/region-defined RegionDefined
-   :region.event/region-deleted RegionDeleted
+  {:card-minimap-viewport.event/card-minimap-viewport-defined CardMinimapViewportDefined
+   :card-minimap-viewport.event/card-minimap-viewport-deleted CardMinimapViewportDeleted
    :congregation-boundary.event/congregation-boundary-defined CongregationBoundaryDefined
    :congregation-boundary.event/congregation-boundary-deleted CongregationBoundaryDeleted
-   :card-minimap-viewport.event/card-minimap-viewport-defined CardMinimapViewportDefined
-   :card-minimap-viewport.event/card-minimap-viewport-deleted CardMinimapViewportDeleted
+   :congregation.event/congregation-created CongregationCreated
+   :congregation.event/congregation-renamed CongregationRenamed
+   :congregation.event/gis-user-created GisUserCreated
+   :congregation.event/gis-user-deleted GisUserDeleted
+   :congregation.event/permission-granted PermissionGranted
+   :congregation.event/permission-revoked PermissionRevoked
    :db-admin.event/gis-schema-is-present GisSchemaIsPresent
+   :db-admin.event/gis-user-is-absent GisUserIsAbsent
    :db-admin.event/gis-user-is-present GisUserIsPresent
-   :db-admin.event/gis-user-is-absent GisUserIsAbsent})
+   :region.event/region-defined RegionDefined
+   :region.event/region-deleted RegionDeleted
+   :share.event/share-created ShareCreated
+   :territory.event/territory-defined TerritoryDefined
+   :territory.event/territory-deleted TerritoryDeleted})
 
 (s/defschema Event
   (apply refined/dispatch-on :event/type (flatten (seq event-schemas))))

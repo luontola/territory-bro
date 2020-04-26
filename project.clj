@@ -24,6 +24,7 @@
                  [metosin/ring-middleware-format "0.6.0"] ;; TODO: replace with newer library
                  [metosin/schema-tools "0.12.2"]
                  [mount "0.1.16"]
+                 [org.apache.commons/commons-lang3 "3.10"]
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/tools.logging "1.0.0"] ; TODO: consider switching to Timbre

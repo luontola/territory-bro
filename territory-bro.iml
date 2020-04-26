@@ -89,6 +89,7 @@
     <orderEntry type="library" name="Leiningen: net.java.dev.jna/jna:3.2.2" level="project" />
     <orderEntry type="library" name="Leiningen: nrepl:0.6.0" level="project" />
     <orderEntry type="library" name="Leiningen: orchestra:2019.02.06-1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.apache.commons/commons-lang3:3.10" level="project" />
     <orderEntry type="library" name="Leiningen: org.apache.directory.studio/org.apache.commons.codec:1.8" level="project" />
     <orderEntry type="library" name="Leiningen: org.checkerframework/checker-qual:2.5.2" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojars.luontola/ns-tracker:0.3.1-patch1" level="project" />
