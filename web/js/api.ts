@@ -207,6 +207,11 @@ function sortTerritories(territories: Array<Territory>): Array<Territory> {
   return sortBy(territories, t => findIndex(numbers, n => n === t.number));
 }
 
+export async function shareTerritory(congregationId: string, territoryId: string) {
+  const response = await api.post(`/api/congregation/${congregationId}/territory/${territoryId}/share`, {});
+  return response.data.url;
+}
+
 // ====== Regions ======
 
 export type Region = {

@@ -8,9 +8,10 @@
             [clojure.tools.logging :as log]
             [territory-bro.commands :as commands]
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
-            [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.region :as region]
+            [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
             [territory-bro.events :as events]
             [territory-bro.gis.db-admin :as db-admin]
@@ -117,6 +118,13 @@
                    (fn [old-events]
                      (call! region/handle-command command old-events injections)))))
 
+(defn- share-command! [conn command state]
+  (let [injections (default-injections command state)]
+    (write-stream! conn
+                   (:share/id command)
+                   (fn [old-events]
+                     (call! share/handle-command command old-events injections)))))
+
 (defn- territory-command! [conn command state]
   (let [injections (default-injections command state)]
     (write-stream! conn
@@ -131,6 +139,7 @@
    "db-admin.command" db-admin-command!
    "gis-user.command" gis-user-command!
    "region.command" region-command!
+   "share.command" share-command!
    "territory.command" territory-command!})
 
 

@@ -78,10 +78,12 @@
          :congregation/id UUID
          :congregation/name s/Str))
 
+;; TODO: remove duplication of the default grants list
 (s/defschema PermissionId
   (s/enum :view-congregation
           :configure-congregation
-          :gis-access))
+          :gis-access
+          :share-territory-link))
 (s/defschema PermissionGranted
   (assoc BaseEvent
          :event/type (s/eq :congregation.event/permission-granted)

@@ -5,8 +5,10 @@
 (ns territory-bro.infra.config-test
   (:require [clojure.test :refer :all]
             [territory-bro.infra.config :as config]
-            [territory-bro.infra.util :refer [getx]])
-  (:import (java.time Instant)
+            [territory-bro.infra.util :refer [getx]]
+            [territory-bro.test.testutil :refer [re-contains]])
+  (:import (clojure.lang ExceptionInfo)
+           (java.time Instant)
            (java.util UUID)))
 
 (deftest enrich-env-test
@@ -39,4 +41,11 @@
 
     (testing ":demo-congregation is parsed as a UUID"
       (is (= (UUID/fromString "7df983b1-6be6-42a4-b3b7-75b165005b03")
-             (getx env :demo-congregation))))))
+             (getx env :demo-congregation))))
+
+    (testing ":public-url must not end in a slash"
+      (is (thrown-with-msg?
+           ExceptionInfo (re-contains "{:public-url (not (re-matches \"https?://.+[^/]\" \"https://example.com/\"))}")
+           (-> env
+               (assoc :public-url "https://example.com/")
+               (config/validate-env)))))))

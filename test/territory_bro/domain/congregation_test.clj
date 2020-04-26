@@ -184,6 +184,7 @@
                        :congregation/id cong-id
                        :congregation/name "the name"
                        :congregation/schema-name "cong_schema"}
+        ;; TODO: remove duplication of the default grants list
         view-permission-granted {:event/type :congregation.event/permission-granted
                                  :congregation/id cong-id
                                  :user/id user-id
@@ -195,12 +196,17 @@
         gis-permission-granted {:event/type :congregation.event/permission-granted
                                 :congregation/id cong-id
                                 :user/id user-id
-                                :permission/id :gis-access}]
+                                :permission/id :gis-access}
+        share-territory-link-granted {:event/type :congregation.event/permission-granted
+                                      :congregation/id cong-id
+                                      :user/id user-id
+                                      :permission/id :share-territory-link}]
     (testing "created"
       (is (= [created-event
               view-permission-granted
               configure-permission-granted
-              gis-permission-granted]
+              gis-permission-granted
+              share-territory-link-granted]
              (handle-command create-command [] injections))))
 
     (testing "created by system, should make no grants"
@@ -275,6 +281,7 @@
                           :command/user admin-id
                           :congregation/id cong-id
                           :user/id new-user-id}
+        ;; TODO: remove duplication of the default grants list
         view-granted {:event/type :congregation.event/permission-granted
                       :congregation/id cong-id
                       :user/id new-user-id
@@ -286,10 +293,14 @@
         gis-access-granted {:event/type :congregation.event/permission-granted
                             :congregation/id cong-id
                             :user/id new-user-id
-                            :permission/id :gis-access}]
+                            :permission/id :gis-access}
+        share-territory-link-granted {:event/type :congregation.event/permission-granted
+                                      :congregation/id cong-id
+                                      :user/id new-user-id
+                                      :permission/id :share-territory-link}]
 
     (testing "user added"
-      (is (= [view-granted configure-granted gis-access-granted]
+      (is (= [view-granted configure-granted gis-access-granted share-territory-link-granted]
              (handle-command add-user-command [created-event] injections))))
 
     (testing "user already in congregation"

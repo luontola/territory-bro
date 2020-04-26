@@ -11,9 +11,15 @@
   (:import (java.time Instant)
            (java.util UUID)))
 
+(s/set-max-value-length! 50)
+
+(def ^:private base-url-pattern #"https?://.+[^/]")
+
 (s/defschema Env
   {:auth0-client-id s/Str
    :auth0-domain s/Str
+   :public-url (s/conditional string? (s/pred #(re-matches base-url-pattern %)
+                                              (symbol (str "re-matches \"" base-url-pattern "\""))))
    :database-schema s/Str
    :database-url s/Str
    :demo-congregation (s/maybe s/Uuid)

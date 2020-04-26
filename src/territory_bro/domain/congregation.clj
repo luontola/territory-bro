@@ -121,7 +121,11 @@
                                       (:command/type command)))
 
 (defn- admin-permissions-granted [cong-id user-id]
-  (for [permission [:view-congregation :configure-congregation :gis-access]]
+  ;; TODO: remove duplication of the default grants list
+  (for [permission [:view-congregation
+                    :configure-congregation
+                    :gis-access
+                    :share-territory-link]]
     {:event/type :congregation.event/permission-granted
      :congregation/id cong-id
      :user/id user-id

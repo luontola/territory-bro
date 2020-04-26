@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React, {useState} from "react";
-import {getCongregationById, getSettings} from "../api";
+import {getCongregationById, getSettings, shareTerritory} from "../api";
 import styles from "./TerritoryPage.css"
 import TerritoryMap from "../maps/TerritoryMap";
 import {mapRasters} from "../maps/mapOptions";
@@ -17,9 +17,13 @@ new ClipboardJS('#copy-share-link');
 const ShareButton = ({congregationId, territoryId}) => {
   const [open, setOpen] = useState(false);
   const [shareButton, setShareButton] = useState(null);
-  const shareUrl = 'http://example.com'; // TODO: generate link
+  const [shareUrl, setShareUrl] = useState(null);
 
-  const togglePopup = () => {
+  const togglePopup = async () => {
+    if (!shareUrl) {
+      const url = await shareTerritory(congregationId, territoryId);
+      setShareUrl(url);
+    }
     setOpen(!open);
   }
   const closePopup = () => {

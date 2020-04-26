@@ -164,6 +164,23 @@
                               :permission/ids []})))
     (refresh-projections!)))
 
+(defn- create-territory! [cong-id]
+  (let [territory-id (UUID/randomUUID)]
+    (db/with-db [conn {}]
+      (dispatcher/command! conn (projections/cached-state)
+                           {:command/type :territory.command/create-territory
+                            :command/time (Instant/now)
+                            :command/system "test"
+                            :congregation/id cong-id
+                            :territory/id territory-id
+                            :territory/number "123"
+                            :territory/addresses "the addresses"
+                            :territory/region "the region"
+                            :territory/meta {:foo "bar"}
+                            :territory/location testdata/wkt-multi-polygon}))
+    (refresh-projections!)
+    territory-id))
+
 (defn- parse-qgis-datasource [datasource]
   (let [required (fn [v]
                    (if (nil? v)
@@ -630,6 +647,24 @@
       (revoke-access-from-all! cong-id)
       (let [response (try-rename-congregation! session cong-id "should not be allowed")]
         (is (forbidden? response))))))
+
+(deftest share-territory-link-test
+  (let [session (login! app)
+        cong-id (create-congregation! session "Congregation")
+        territory-id (create-territory! cong-id)
+        *share-url (atom nil)]
+
+    (testing "create a share link"
+      (let [response (-> (request :post (str "/api/congregation/" cong-id "/territory/" territory-id "/share"))
+                         (json-body {})
+                         (merge session)
+                         app)
+            share-url (:url (:body response))]
+        (is (ok? response))
+        (is (str/starts-with? share-url "http://localhost:8080/share/"))
+        (reset! *share-url share-url)))
+
+    (testing "open share link"))) ; TODO
 
 (deftest gis-changes-sync-test
   (let [session (login! app)

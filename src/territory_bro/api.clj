@@ -13,9 +13,10 @@
             [schema.core :as s]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
-            [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.region :as region]
+            [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
             [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.gis.qgis :as qgis]
@@ -333,6 +334,21 @@
             (response/content-type "application/octet-stream")
             (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\"")))))))
 
+(defn share-territory-link [request]
+  (auth/with-authenticated-user request
+    (require-logged-in!)
+    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+          territory-id (UUID/fromString (get-in request [:params :territory]))
+          state (state-for-request request)
+          share-key (share/generate-share-key)]
+      (db/with-db [conn {}]
+        (api-command! conn state {:command/type :share.command/share-territory-link
+                                  :share/id (UUID/randomUUID)
+                                  :share/key share-key
+                                  :congregation/id cong-id
+                                  :territory/id territory-id}
+                      {:url (str (:public-url config/env) "/share/" share-key)})))))
+
 (defroutes api-routes
   (GET "/" [] (ok "Territory Bro"))
   (POST "/api/login" request (login request))
@@ -347,7 +363,8 @@
   (POST "/api/congregation/:congregation/add-user" request (add-user request))
   (POST "/api/congregation/:congregation/set-user-permissions" request (set-user-permissions request))
   (POST "/api/congregation/:congregation/rename" request (rename-congregation request))
-  (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request)))
+  (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request))
+  (POST "/api/congregation/:congregation/territory/:territory/share" request (share-territory-link request)))
 
 (comment
   (db/with-db [conn {:read-only? true}]
