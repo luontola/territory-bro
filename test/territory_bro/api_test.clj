@@ -652,19 +652,42 @@
   (let [session (login! app)
         cong-id (create-congregation! session "Congregation")
         territory-id (create-territory! cong-id)
-        *share-url (atom nil)]
+        *share-key (atom nil)]
 
     (testing "create a share link"
       (let [response (-> (request :post (str "/api/congregation/" cong-id "/territory/" territory-id "/share"))
                          (json-body {})
                          (merge session)
                          app)
+            share-key (:key (:body response))
             share-url (:url (:body response))]
         (is (ok? response))
-        (is (str/starts-with? share-url "http://localhost:8080/share/"))
-        (reset! *share-url share-url)))
+        (is (not (str/blank? share-key)))
+        (is (= (str "http://localhost:8080/share/" share-key)
+               share-url))
+        (reset! *share-key share-key)))
 
-    (testing "open share link"))) ; TODO
+    (testing "open share link"
+      (let [response (-> (request :get (str "/api/share/" @*share-key))
+                         (json-body {})
+                         (merge session)
+                         app)]
+        (is (ok? response))
+        (is (= {:congregation (str cong-id)
+                :territory (str territory-id)}
+               (:body response)))))
+
+    (testing "can view the shared territory") ; TODO
+
+    (testing "cannot view other territories") ; TODO
+
+    (testing "non-existing share link"
+      (let [response (-> (request :get "/api/share/foo")
+                         (json-body {})
+                         (merge session)
+                         app)]
+        (is (not-found? response))
+        (is (= "Not found" (:body response)))))))
 
 (deftest gis-changes-sync-test
   (let [session (login! app)

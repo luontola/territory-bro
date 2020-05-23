@@ -347,7 +347,21 @@
                                   :share/key share-key
                                   :congregation/id cong-id
                                   :territory/id territory-id}
-                      {:url (str (:public-url config/env) "/share/" share-key)})))))
+                      {:url (str (:public-url config/env) "/share/" share-key)
+                       :key share-key})))))
+
+(defn open-share [request]
+  (let [share-key (get-in request [:params :share-key])
+        state (state-for-request request)
+        ;; TODO: extract query function
+        share-id (get-in state [:territory-bro.domain.share/share-keys share-key])
+        share (get-in state [:territory-bro.domain.share/shares share-id])]
+    ;; TODO: record that the share was opened
+    ;; TODO: allow the current session to view the territory
+    (if share
+      (ok {:congregation (:congregation/id share)
+           :territory (:territory/id share)})
+      (not-found "Not found"))))
 
 (defroutes api-routes
   (GET "/" [] (ok "Territory Bro"))
@@ -364,7 +378,8 @@
   (POST "/api/congregation/:congregation/set-user-permissions" request (set-user-permissions request))
   (POST "/api/congregation/:congregation/rename" request (rename-congregation request))
   (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request))
-  (POST "/api/congregation/:congregation/territory/:territory/share" request (share-territory-link request)))
+  (POST "/api/congregation/:congregation/territory/:territory/share" request (share-territory-link request))
+  (GET "/api/share/:share-key" request (open-share request)))
 
 (comment
   (db/with-db [conn {:read-only? true}]
