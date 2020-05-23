@@ -97,23 +97,6 @@
     (is (thrown-with-msg? ExceptionInfo (re-contains "{:event/time missing-required-key}")
                           (events/strict-validate-event lax-event))))
 
-  (let [both-missing (dissoc valid-event :event/user :event/system)
-        user-only (assoc both-missing :event/user (UUID. 0 1))
-        system-only (assoc both-missing :event/system "sys")
-        both-present (merge user-only system-only)]
-    (testing "basic validation: user and system can be missing"
-      (is (= both-missing (events/validate-event both-missing)))
-      (is (= user-only (events/validate-event user-only)))
-      (is (= system-only (events/validate-event system-only)))
-      (is (= both-present (events/validate-event both-present))))
-
-    (testing "strict validation: require at least one of user and system"
-      (is (thrown-with-msg? ExceptionInfo (re-contains "(any-of-required-keys :event/user :event/system)")
-                            (events/strict-validate-event both-missing)))
-      (is (= user-only (events/strict-validate-event user-only)))
-      (is (= system-only (events/strict-validate-event system-only)))
-      (is (= both-present (events/strict-validate-event both-present)))))
-
   (testing "unknown event type"
     (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown event type :foo")
                           (events/validate-event unknown-event)))))

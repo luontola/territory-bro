@@ -237,14 +237,9 @@
             m))
 
 (s/defschema EnrichedEvent
-  (s/constrained
-   (-> BaseEvent
-       (required-key :event/time)
-       (assoc s/Any s/Any))
-   (fn [event]
-     (or (contains? event :event/user)
-         (contains? event :event/system)))
-   '(any-of-required-keys :event/user :event/system)))
+  (-> BaseEvent
+      (required-key :event/time)
+      (assoc s/Any s/Any)))
 
 
 ;;;; Validation
