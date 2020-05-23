@@ -9,13 +9,14 @@
             [territory-bro.test.testutil :as testutil :refer [re-equals]])
   (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException WriteConflictException)))
+           (territory_bro NoPermitException WriteConflictException ValidationException)))
 
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
 (def territory-id (UUID. 0 3))
 (def share-id (UUID. 0 4))
 (def share-key "abc123")
+(def test-time (Instant/ofEpochSecond 42))
 
 (def link-share-created
   {:event/type :share.event/share-created
@@ -24,6 +25,10 @@
    :share/type :link
    :congregation/id cong-id
    :territory/id territory-id})
+(def share-opened
+  {:event/type :share.event/share-opened
+   :event/time test-time
+   :share/id share-id})
 
 (defn- apply-events [events]
   (testutil/apply-events share/projection events))
@@ -44,10 +49,26 @@
                     ::share/shares {share-id {:share/id share-id
                                               :congregation/id cong-id
                                               :territory/id territory-id}}}]
-      (is (= expected (apply-events events))))))
+      (is (= expected (apply-events events)))
+
+      (testing "> opened"
+        (let [events (conj events share-opened)
+              expected (assoc-in expected [::share/shares share-id :share/last-opened] test-time)]
+          (is (= expected (apply-events events))))))))
 
 
 ;;;; Queries
+
+(deftest check-share-exists-test
+  (let [state (apply-events [link-share-created])]
+
+    (testing "exists"
+      (is (nil? (share/check-share-exists state share-id))))
+
+    (testing "doesn't exist"
+      (is (thrown-with-msg?
+           ValidationException (re-equals "[[:no-such-share #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+           (share/check-share-exists state (UUID. 0 0x666)))))))
 
 (deftest find-share-by-key-test
   (let [state (apply-events [link-share-created])]
@@ -103,3 +124,14 @@
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
                      (handle-command create-command [] injections)))))))
+
+(deftest record-share-opened-test
+  (let [injections {}
+        anonymous-command {:command/type :share.command/record-share-opened
+                           :command/time (Instant/now)
+                           :share/id share-id}
+        user-command (assoc anonymous-command :command/user user-id)]
+    (is (= [{:event/type :share.event/share-opened
+             :share/id share-id}]
+           (handle-command anonymous-command [link-share-created] injections)
+           (handle-command user-command [link-share-created] injections)))))

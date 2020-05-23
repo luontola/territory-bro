@@ -6,7 +6,7 @@
   (:import (java.security SecureRandom)
            (java.util Base64)
            (org.apache.commons.lang3 StringUtils)
-           (territory_bro WriteConflictException)))
+           (territory_bro WriteConflictException ValidationException)))
 
 ;;;; Read model
 
@@ -24,13 +24,23 @@
                                                                  :congregation/id
                                                                  :territory/id]))))
 
+(defmethod projection :share.event/share-opened
+  [state event]
+  (-> state
+      (assoc-in [::shares (:share/id event) :share/last-opened] (:event/time event))))
+
 
 ;;;; Queries
+
+(defn check-share-exists [state share-id]
+  (when (nil? (get-in state [::shares share-id]))
+    (throw (ValidationException. [[:no-such-share share-id]]))))
 
 (defn find-share-by-key [state share-key]
   (let [share-id (get-in state [::share-keys share-key])
         share (get-in state [::shares share-id])]
     share))
+
 
 ;;;; Write model
 
@@ -71,6 +81,11 @@
         :share/type :link
         :congregation/id cong-id
         :territory/id territory-id}])))
+
+(defmethod command-handler :share.command/record-share-opened
+  [_command share _injections]
+  [{:event/type :share.event/share-opened
+    :share/id (:share/id share)}])
 
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))

@@ -29,6 +29,7 @@
             [territory-bro.infra.util :refer [getx]]
             [territory-bro.projections :as projections])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
+           (java.time Duration)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
@@ -162,8 +163,11 @@
                    :user (when auth/*user*
                            (fix-user-for-liberator auth/*user*))}))))
 
+(defn- current-user-id-or-nil []
+  (:user/id auth/*user*))
+
 (defn- current-user-id []
-  (let [id (:user/id auth/*user*)]
+  (let [id (current-user-id-or-nil)]
     (assert id)
     id))
 
@@ -239,16 +243,25 @@
                 (format-for-api)
                 (validate-congregation)))))))
 
+(defn- enrich-command [command]
+  (let [user-id (current-user-id-or-nil)]
+    (-> command
+        (assoc :command/time ((:now config/env)))
+        (cond->
+          (some? user-id) (assoc :command/user user-id)))))
+
+(defn- dispatch! [conn state command]
+  (dispatcher/command! conn state (enrich-command command)))
+
 (defn api-command!
   ([conn state command]
    (api-command! conn state command {:message "OK"}))
   ([conn state command ok-response]
-   (let [command (assoc command
-                        :command/time ((:now config/env))
-                        :command/user (current-user-id))]
+   (let [command (enrich-command command)]
      (try
        (dispatcher/command! conn state command)
        (ok ok-response)
+       ;; TODO: move the error handling to router middleware, so that it would cover also other calls to dispatch
        (catch ValidationException e
          (log/warn e "Invalid command:" command)
          (bad-request {:errors (.getErrors e)}))
@@ -350,15 +363,26 @@
                       {:url (str (:public-url config/env) "/share/" share-key)
                        :key share-key})))))
 
+(defn- refresh-projections! []
+  (projections/refresh-async!)
+  (projections/await-refreshed (Duration/ofSeconds 10)))
+
+(defn- record-share-opened! [share state]
+  (db/with-db [conn {}]
+    (dispatch! conn state {:command/type :share.command/record-share-opened
+                           :share/id (:share/id share)}))
+  (refresh-projections!)) ; XXX: this is a GET request, so it doesn't trigger automatic refresh
+
 (defn open-share [request]
   (let [share-key (get-in request [:params :share-key])
         state (state-for-request request)
         share (share/find-share-by-key state share-key)]
-    ;; TODO: record that the share was opened
     ;; TODO: allow the current session to view the territory
     (if share
-      (ok {:congregation (:congregation/id share)
-           :territory (:territory/id share)})
+      (do
+        (record-share-opened! share state)
+        (ok {:congregation (:congregation/id share)
+             :territory (:territory/id share)}))
       (not-found "Not found"))))
 
 (defroutes api-routes

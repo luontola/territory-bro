@@ -206,6 +206,11 @@
          :congregation/id UUID
          :territory/id UUID))
 
+(s/defschema ShareOpened
+  (assoc BaseEvent
+         :event/type (s/eq :share.event/share-opened)
+         :share/id UUID))
+
 
 (def event-schemas
   {:card-minimap-viewport.event/card-minimap-viewport-defined CardMinimapViewportDefined
@@ -224,6 +229,7 @@
    :region.event/region-defined RegionDefined
    :region.event/region-deleted RegionDeleted
    :share.event/share-created ShareCreated
+   :share.event/share-opened ShareOpened
    :territory.event/territory-defined TerritoryDefined
    :territory.event/territory-deleted TerritoryDeleted})
 

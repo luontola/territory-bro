@@ -33,6 +33,7 @@
    :congregation-boundary (constantly true)
    :new (constantly true)
    :region (constantly true)
+   :share (constantly true)
    :territory (constantly true)
    :user (constantly true)})
 

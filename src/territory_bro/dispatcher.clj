@@ -42,6 +42,9 @@
    :region (fn [region-id]
              (region/check-region-exists state (:congregation/id command) region-id)
              true)
+   :share (fn [share-id]
+            (share/check-share-exists state share-id)
+            true)
    :territory (fn [territory-id]
                 (territory/check-territory-exists state (:congregation/id command) territory-id)
                 true)

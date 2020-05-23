@@ -13,9 +13,10 @@
             [territory-bro.api :as api]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
-            [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.region :as region]
+            [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.gis-db :as gis-db]
@@ -676,6 +677,9 @@
         (is (= {:congregation (str cong-id)
                 :territory (str territory-id)}
                (:body response)))))
+
+    (testing "records that the share was opened"
+      (is (some? (:share/last-opened (share/find-share-by-key (projections/cached-state) @*share-key)))))
 
     (testing "can view the shared territory") ; TODO
 

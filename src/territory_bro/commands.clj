@@ -217,6 +217,11 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)))
 
+(s/defschema RecordShareOpened
+  (assoc BaseCommand
+         :command/type (s/eq :share.command/record-share-opened)
+         :share/id (foreign-key/references :share UUID)))
+
 
 (def command-schemas
   {:card-minimap-viewport.command/create-card-minimap-viewport CreateCardMinimapViewport
@@ -237,6 +242,7 @@
    :region.command/create-region CreateRegion
    :region.command/delete-region DeleteRegion
    :region.command/update-region UpdateRegion
+   :share.command/record-share-opened RecordShareOpened
    :share.command/share-territory-link ShareTerritoryLink
    :territory.command/create-territory CreateTerritory
    :territory.command/delete-territory DeleteTerritory
