@@ -20,12 +20,17 @@
   [state event]
   (-> state
       (assoc-in [::share-keys (:share/key event)] (:share/id event))
-      (assoc-in [::shares (:share/id event)] (select-keys event [:congregation/id
+      (assoc-in [::shares (:share/id event)] (select-keys event [:share/id
+                                                                 :congregation/id
                                                                  :territory/id]))))
 
 
 ;;;; Queries
 
+(defn find-share-by-key [state share-key]
+  (let [share-id (get-in state [::share-keys share-key])
+        share (get-in state [::shares share-id])]
+    share))
 
 ;;;; Write model
 

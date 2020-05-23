@@ -353,9 +353,7 @@
 (defn open-share [request]
   (let [share-key (get-in request [:params :share-key])
         state (state-for-request request)
-        ;; TODO: extract query function
-        share-id (get-in state [:territory-bro.domain.share/share-keys share-key])
-        share (get-in state [:territory-bro.domain.share/shares share-id])]
+        share (share/find-share-by-key state share-key)]
     ;; TODO: record that the share was opened
     ;; TODO: allow the current session to view the territory
     (if share

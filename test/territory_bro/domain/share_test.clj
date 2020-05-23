@@ -41,12 +41,24 @@
   (testing "created"
     (let [events [link-share-created]
           expected {::share/share-keys {share-key share-id}
-                    ::share/shares {share-id {:congregation/id cong-id
+                    ::share/shares {share-id {:share/id share-id
+                                              :congregation/id cong-id
                                               :territory/id territory-id}}}]
       (is (= expected (apply-events events))))))
 
 
 ;;;; Queries
+
+(deftest find-share-by-key-test
+  (let [state (apply-events [link-share-created])]
+    (testing "existing share"
+      (is (= {:share/id share-id
+              :congregation/id cong-id
+              :territory/id territory-id}
+             (share/find-share-by-key state share-key))))
+
+    (testing "invalid share key"
+      (is (nil? (share/find-share-by-key state "foo"))))))
 
 
 ;;;; Commands
