@@ -381,9 +381,10 @@
     (if share
       (do
         (record-share-opened! share state)
-        (ok {:congregation (:congregation/id share)
-             :territory (:territory/id share)}))
-      (not-found "Not found"))))
+        (-> (ok {:congregation (:congregation/id share)
+                 :territory (:territory/id share)})
+            (assoc :session (:session request))))
+      (not-found {:message "Share not found"}))))
 
 (defroutes api-routes
   (GET "/" [] (ok "Territory Bro"))

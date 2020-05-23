@@ -93,12 +93,15 @@
 
 ;;;; API Helpers
 
+(defn get-session [response]
+  {:cookies (get-cookies response)})
+
 (defn login! [app]
   (let [response (-> (request :post "/api/login")
                      (json-body {:idToken jwt-test/token})
                      app
                      (assert-response ok?))]
-    {:cookies (get-cookies response)}))
+    (get-session response)))
 
 (defn logout! [app session]
   (-> (request :post "/api/logout")
@@ -650,15 +653,16 @@
         (is (forbidden? response))))))
 
 (deftest share-territory-link-test
-  (let [session (login! app)
-        cong-id (create-congregation! session "Congregation")
+  (let [*session (atom (login! app))
+        cong-id (create-congregation! @*session "Congregation")
         territory-id (create-territory! cong-id)
+        territory-id2 (create-territory! cong-id)
         *share-key (atom nil)]
 
     (testing "create a share link"
       (let [response (-> (request :post (str "/api/congregation/" cong-id "/territory/" territory-id "/share"))
                          (json-body {})
-                         (merge session)
+                         (merge @*session)
                          app)
             share-key (:key (:body response))
             share-url (:url (:body response))]
@@ -668,11 +672,14 @@
                share-url))
         (reset! *share-key share-key)))
 
+    ;; The rest of this test is ran as an anonymous user
+    (reset! *session nil)
+
     (testing "open share link"
       (let [response (-> (request :get (str "/api/share/" @*share-key))
-                         (json-body {})
-                         (merge session)
+                         (merge @*session)
                          app)]
+        (reset! *session (get-session response)) ; TODO: stateful HTTP client which remembers the cookies automatically
         (is (ok? response))
         (is (= {:congregation (str cong-id)
                 :territory (str territory-id)}
@@ -687,11 +694,11 @@
 
     (testing "non-existing share link"
       (let [response (-> (request :get "/api/share/foo")
-                         (json-body {})
-                         (merge session)
+                         (merge @*session)
                          app)]
         (is (not-found? response))
-        (is (= "Not found" (:body response)))))))
+        (is (= {:message "Share not found"}
+               (:body response)))))))
 
 (deftest gis-changes-sync-test
   (let [session (login! app)
