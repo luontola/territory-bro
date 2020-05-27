@@ -26,7 +26,7 @@
             [territory-bro.infra.jwt :as jwt]
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.infra.user :as user]
-            [territory-bro.infra.util :refer [getx]]
+            [territory-bro.infra.util :refer [getx conj-set]]
             [territory-bro.projections :as projections])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
            (java.time Duration)
@@ -171,11 +171,22 @@
     (assert id)
     id))
 
+(defn- grant-opened-share [state share-id] ; TODO: move to share ns
+  (if-some [share (get-in state [::share/shares share-id])]
+    (permissions/grant state
+                       (or (current-user-id-or-nil) auth/anonymous-user-id) ; TODO: refactor
+                       [:view-congregation (:congregation/id share)]) ; TODO: limited permissions
+    state))
+
+(defn- grant-opened-shares [state share-ids]
+  (reduce grant-opened-share state share-ids))
+
 (defn- state-for-request [request]
-  (let [state (projections/cached-state)]
-    (if (::sudo? (:session request))
-      (congregation/sudo state (current-user-id))
-      state)))
+  (let [session (:session request)
+        state (projections/cached-state)]
+    (cond-> state
+      (::sudo? session) (congregation/sudo (current-user-id))
+      (some? (::opened-shares session)) (grant-opened-shares (::opened-shares session)))))
 
 (def ^:private validate-congregation-list (s/validator [CongregationSummary]))
 
@@ -212,17 +223,22 @@
 
 (defn get-congregation [request]
   (auth/with-authenticated-user request
-    (require-logged-in!)
-    (db/with-db [conn {:read-only? true}]
-      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-            user-id (current-user-id)
-            state (state-for-request request)
-            congregation (congregation/get-my-congregation state cong-id user-id)]
-        (when-not congregation
-          (forbidden! "No congregation access"))
-        (ok (-> (fetch-congregation conn state user-id congregation)
-                (format-for-api)
-                (validate-congregation)))))))
+    ;; TODO: refactor anonymous user handling
+    (binding [auth/*user* (if (and (nil? auth/*user*)
+                                   (some? (::opened-shares (:session request))))
+                            auth/anonymous-user
+                            auth/*user*)]
+      (require-logged-in!)
+      (db/with-db [conn {:read-only? true}]
+        (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+              user-id (current-user-id)
+              state (state-for-request request)
+              congregation (congregation/get-my-congregation state cong-id user-id)]
+          (when-not congregation
+            (forbidden! "No congregation access"))
+          (ok (-> (fetch-congregation conn state user-id congregation)
+                  (format-for-api)
+                  (validate-congregation))))))))
 
 (defn get-demo-congregation [request]
   (auth/with-authenticated-user request
@@ -377,13 +393,13 @@
   (let [share-key (get-in request [:params :share-key])
         state (state-for-request request)
         share (share/find-share-by-key state share-key)]
-    ;; TODO: allow the current session to view the territory
     (if share
-      (do
+      (let [session (-> (:session request)
+                        (update ::opened-shares conj-set (:share/id share)))]
         (record-share-opened! share state)
         (-> (ok {:congregation (:congregation/id share)
                  :territory (:territory/id share)})
-            (assoc :session (:session request))))
+            (assoc :session session)))
       (not-found {:message "Share not found"}))))
 
 (defroutes api-routes

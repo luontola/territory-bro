@@ -3,11 +3,14 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.authentication
-  (:require [territory-bro.infra.config :refer [env]]))
+  (:require [territory-bro.infra.config :refer [env]])
+  (:import (java.util UUID)))
 
 (def ^:dynamic *user*)
 
 (def user-profile-keys [:sub :name :nickname :email :email_verified :picture])
+(def anonymous-user-id (UUID. 0 0))
+(def anonymous-user {:user/id anonymous-user-id})
 
 (defn user-session [jwt user-id]
   {::user (-> (select-keys jwt user-profile-keys)
