@@ -231,9 +231,10 @@
 (defn get-demo-congregation [request]
   (auth/with-authenticated-user request
     (require-logged-in!) ; TODO: allow demo for anonymous users?
-    (let [user-id (current-user-id)
+    (let [cong-id (:demo-congregation config/env)
+          user-id (current-user-id)
           state (state-for-request request)
-          congregation (facade/get-demo-congregation state user-id)]
+          congregation (facade/get-demo-congregation state cong-id user-id)]
       (when-not congregation
         (forbidden! "No demo congregation"))
       (ok (-> congregation

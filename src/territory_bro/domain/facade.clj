@@ -8,7 +8,6 @@
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.territory :as territory]
-            [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]))
 
 (defn- merge-congregation-details [congregation state user-id]
@@ -32,8 +31,8 @@
   (some-> (congregation/get-my-congregation state cong-id user-id)
           (merge-congregation-details state user-id)))
 
-(defn get-demo-congregation [state user-id]
-  (when-some [cong-id (:demo-congregation config/env)]
+(defn get-demo-congregation [state cong-id user-id]
+  (when cong-id
     (some-> (congregation/get-unrestricted-congregation state cong-id)
             (merge-congregation-details state user-id)
             (assoc :id "demo")

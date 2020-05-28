@@ -142,11 +142,10 @@
                                             :card-minimap-viewport/location testdata/wkt-polygon}]}]
 
     (testing "no demo congregation"
-      (is (nil? (facade/get-demo-congregation state user-id))))
+      (is (nil? (facade/get-demo-congregation state nil user-id))))
 
-    (binding [config/env {:demo-congregation cong-id}]
-      (testing "can see the demo congregation"
-        (is (= expected (facade/get-demo-congregation state user-id))))
+    (testing "can see the demo congregation"
+      (is (= expected (facade/get-demo-congregation state cong-id user-id))))
 
-      (testing "cannot see the demo congregation as own congregation"
-        (is (nil? (facade/get-my-congregation state cong-id user-id)))))))
+    (testing "cannot see the demo congregation as own congregation"
+      (is (nil? (facade/get-my-congregation state cong-id user-id))))))
