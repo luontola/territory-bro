@@ -92,7 +92,7 @@
   (testutil/apply-events projections/projection events))
 
 
-(deftest test-get-my-congregation
+(deftest test-get-congregation
   (let [state (apply-events test-events)
         expected {:id cong-id
                   :name "Cong1 Name"
@@ -120,20 +120,27 @@
                                             :card-minimap-viewport/location testdata/wkt-polygon}]}]
 
     (testing "has view permissions"
-      (is (= expected (facade/get-my-congregation state cong-id user-id))))
+      (is (= expected (facade/get-congregation state cong-id user-id))))
 
     (let [user-id (UUID. 0 0x666)]
       (testing "no permissions"
-        (is (nil? (facade/get-my-congregation state cong-id user-id))))
+        (is (nil? (facade/get-congregation state cong-id user-id))))
 
-      #_(testing "opened a share" ; TODO
-          (let [state (facade/grant-opened-shares state [share-id] user-id)
-                expected (-> expected
-                             (assoc :users []
-                                    :congregation-boundaries []
-                                    :regions []
-                                    :card-minimap-viewports []))]
-            (is (= expected (facade/get-my-congregation state cong-id user-id))))))))
+      (testing "opened a share"
+        (let [state (facade/grant-opened-shares state [share-id] user-id)
+              expected (assoc expected
+                              :permissions {}
+                              :users []
+                              :territories [{:territory/id territory-id
+                                             :territory/number "123"
+                                             :territory/addresses "the addresses"
+                                             :territory/region "the region"
+                                             :territory/meta {:foo "bar"}
+                                             :territory/location testdata/wkt-multi-polygon}]
+                              :congregation-boundaries []
+                              :regions []
+                              :card-minimap-viewports [])]
+          (is (= expected (facade/get-congregation state cong-id user-id))))))))
 
 (deftest test-get-demo-congregation
   (let [state (apply-events test-events)
@@ -169,4 +176,4 @@
       (is (= expected (facade/get-demo-congregation state cong-id user-id))))
 
     (testing "cannot see the demo congregation as own congregation"
-      (is (nil? (facade/get-my-congregation state cong-id user-id))))))
+      (is (nil? (facade/get-congregation state cong-id user-id))))))

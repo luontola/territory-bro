@@ -172,7 +172,10 @@
         state (projections/cached-state)]
     (cond-> state
       (::sudo? session) (congregation/sudo (current-user-id))
-      (some? (::opened-shares session)) (facade/grant-opened-shares (::opened-shares session) (current-user-id-or-nil)))))
+      (some? (::opened-shares session)) (facade/grant-opened-shares (::opened-shares session)
+                                                                    ;; TODO: avoid nil user-id
+                                                                    (or (current-user-id-or-nil)
+                                                                        auth/anonymous-user-id)))))
 
 (def ^:private validate-congregation-list (s/validator [CongregationSummary]))
 
@@ -208,7 +211,7 @@
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             user-id (current-user-id)
             state (state-for-request request)
-            congregation (facade/get-my-congregation state cong-id user-id)]
+            congregation (facade/get-congregation state cong-id user-id)]
         (when-not congregation
           (forbidden! "No congregation access"))
         (db/with-db [conn {:read-only? true}]

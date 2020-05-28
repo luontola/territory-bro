@@ -700,18 +700,18 @@
                             (set))
                        (str territory-id)))
 
-        #_(testing "- but cannot view other territories" ; TODO
-            (is (= 1 (count (:territories (:body response))))))
+        (testing "- but cannot view other territories"
+          (is (= 1 (count (:territories (:body response))))))
 
-        #_(testing "- cannot view other congregation details" ; TODO
-            (is (= [] (:regions (:body response)))
-                "regions")
-            (is (= [] (:congregationBoundaries (:body response)))
-                "congregation boundaries")
-            (is (= [] (:cardMinimapViewports (:body response)))
-                "card minimap viewports")
-            (is (= [] (:users (:body response)))
-                "users"))))
+        (testing "- cannot view other congregation details"
+          (is (= [] (:regions (:body response)))
+              "regions")
+          (is (= [] (:congregationBoundaries (:body response)))
+              "congregation boundaries")
+          (is (= [] (:cardMinimapViewports (:body response)))
+              "card minimap viewports")
+          (is (= [] (:users (:body response)))
+              "users"))))
 
     (testing "non-existing share link"
       (let [response (-> (request :get "/api/share/foo")
