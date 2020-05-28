@@ -39,7 +39,7 @@
         (let [command (gis-change/change->command change state)
               events (dispatcher/command! conn state command)
               ;; the state needs to be updated for e.g. command validation's foreign key checks
-              state (reduce projections/update-projections state events)]
+              state (reduce projections/projection state events)]
           (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
           (recur conn state true))))
     had-changes?))

@@ -32,7 +32,7 @@
   :start (atom {:last-event nil
                 :state nil}))
 
-(defn update-projections [state event]
+(defn projection [state event]
   (-> state
       (card-minimap-viewport/projection event)
       (congregation-boundary/projection event)
@@ -46,7 +46,7 @@
       (territory/projection event)))
 
 (defn- apply-events [cache events]
-  (update cache :state #(reduce update-projections % events)))
+  (update cache :state #(reduce projection % events)))
 
 (defn- apply-new-events [cache conn]
   (let [new-events (event-store/read-all-events conn {:since (:event/global-revision (:last-event cache))})]

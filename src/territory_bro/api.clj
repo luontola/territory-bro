@@ -12,12 +12,9 @@
             [ring.util.response :as response]
             [schema.core :as s]
             [territory-bro.dispatcher :as dispatcher]
-            [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.domain.congregation :as congregation]
-            [territory-bro.domain.congregation-boundary :as congregation-boundary]
-            [territory-bro.domain.region :as region]
+            [territory-bro.domain.facade :as facade]
             [territory-bro.domain.share :as share]
-            [territory-bro.domain.territory :as territory]
             [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.gis.qgis :as qgis]
             [territory-bro.infra.authentication :as auth]
@@ -200,32 +197,14 @@
                        :name (:congregation/name congregation)}))
                (validate-congregation-list))))))
 
-(defn- merge-congregation-details [congregation state user-id]
-  ;; TODO: fine-grained permission checks
-  (let [cong-id (:congregation/id congregation)]
-    {:id (:congregation/id congregation)
-     :name (:congregation/name congregation)
-     :permissions (->> (permissions/list-permissions state user-id [cong-id])
-                       (map (fn [permission]
-                              [permission true]))
-                       (into {}))
-     ;; TODO: extract query functions
-     :territories (sequence (vals (get-in state [::territory/territories cong-id])))
-     :congregation-boundaries (sequence (vals (get-in state [::congregation-boundary/congregation-boundaries cong-id])))
-     :regions (sequence (vals (get-in state [::region/regions cong-id])))
-     :card-minimap-viewports (sequence (vals (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id])))
-     :users (for [user-id (congregation/get-users state cong-id)]
-              {:id user-id})}))
-
-(defn- enrich-congregation [congregation conn]
+(defn- enrich-congregation-users [congregation conn]
   (let [user-ids (->> (:users congregation)
-                      (map :id))]
-    (-> congregation
-        (assoc :users (->> (user/get-users conn {:ids user-ids})
-                           (map (fn [user]
-                                  (-> (:user/attributes user)
-                                      (assoc :id (:user/id user))
-                                      (assoc :sub (:user/subject user))))))))))
+                      (map :id))
+        users (for [user (user/get-users conn {:ids user-ids})]
+                (-> (:user/attributes user)
+                    (assoc :id (:user/id user))
+                    (assoc :sub (:user/subject user))))]
+    (assoc congregation :users users)))
 
 (def ^:private validate-congregation (s/validator Congregation))
 
@@ -237,39 +216,29 @@
                             auth/anonymous-user
                             auth/*user*)]
       (require-logged-in!)
-      (db/with-db [conn {:read-only? true}]
-        (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-              user-id (current-user-id)
-              state (state-for-request request)
-              congregation (congregation/get-my-congregation state cong-id user-id)]
-          (when-not congregation
-            (forbidden! "No congregation access"))
+      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+            user-id (current-user-id)
+            state (state-for-request request)
+            congregation (facade/get-my-congregation state cong-id user-id)]
+        (when-not congregation
+          (forbidden! "No congregation access"))
+        (db/with-db [conn {:read-only? true}]
           (ok (-> congregation
-                  (merge-congregation-details state user-id)
-                  (enrich-congregation conn)
+                  (enrich-congregation-users conn)
                   (format-for-api)
                   (validate-congregation))))))))
 
 (defn get-demo-congregation [request]
   (auth/with-authenticated-user request
-    (require-logged-in!)
-    (db/with-db [conn {:read-only? true}]
-      (let [cong-id (:demo-congregation config/env)
-            user-id (current-user-id)
-            state (state-for-request request)
-            congregation (when cong-id
-                           (congregation/get-unrestricted-congregation state cong-id))]
-        (when-not congregation
-          (forbidden! "No demo congregation"))
-        (ok (-> congregation
-                (merge-congregation-details state user-id)
-                (enrich-congregation conn)
-                (assoc :id "demo")
-                (assoc :name "Demo Congregation")
-                (assoc :permissions {:viewCongregation true})
-                (assoc :users [])
-                (format-for-api)
-                (validate-congregation)))))))
+    (require-logged-in!) ; TODO: allow demo for anonymous users?
+    (let [user-id (current-user-id)
+          state (state-for-request request)
+          congregation (facade/get-demo-congregation state user-id)]
+      (when-not congregation
+        (forbidden! "No demo congregation"))
+      (ok (-> congregation
+              (format-for-api)
+              (validate-congregation))))))
 
 (defn- enrich-command [command]
   (let [user-id (current-user-id-or-nil)]
