@@ -200,7 +200,8 @@
                        :name (:congregation/name congregation)}))
                (validate-congregation-list))))))
 
-(defn- fetch-congregation [conn state user-id congregation]
+(defn- merge-congregation-details [congregation state user-id]
+  ;; TODO: fine-grained permission checks
   (let [cong-id (:congregation/id congregation)]
     {:id (:congregation/id congregation)
      :name (:congregation/name congregation)
@@ -213,11 +214,18 @@
      :congregation-boundaries (sequence (vals (get-in state [::congregation-boundary/congregation-boundaries cong-id])))
      :regions (sequence (vals (get-in state [::region/regions cong-id])))
      :card-minimap-viewports (sequence (vals (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id])))
-     :users (->> (user/get-users conn {:ids (congregation/get-users state cong-id)})
-                 (map (fn [user]
-                        (-> (:user/attributes user)
-                            (assoc :id (:user/id user))
-                            (assoc :sub (:user/subject user))))))}))
+     :users (for [user-id (congregation/get-users state cong-id)]
+              {:id user-id})}))
+
+(defn- enrich-congregation [congregation conn]
+  (let [user-ids (->> (:users congregation)
+                      (map :id))]
+    (-> congregation
+        (assoc :users (->> (user/get-users conn {:ids user-ids})
+                           (map (fn [user]
+                                  (-> (:user/attributes user)
+                                      (assoc :id (:user/id user))
+                                      (assoc :sub (:user/subject user))))))))))
 
 (def ^:private validate-congregation (s/validator Congregation))
 
@@ -236,7 +244,9 @@
               congregation (congregation/get-my-congregation state cong-id user-id)]
           (when-not congregation
             (forbidden! "No congregation access"))
-          (ok (-> (fetch-congregation conn state user-id congregation)
+          (ok (-> congregation
+                  (merge-congregation-details state user-id)
+                  (enrich-congregation conn)
                   (format-for-api)
                   (validate-congregation))))))))
 
@@ -251,7 +261,9 @@
                            (congregation/get-unrestricted-congregation state cong-id))]
         (when-not congregation
           (forbidden! "No demo congregation"))
-        (ok (-> (fetch-congregation conn state user-id congregation)
+        (ok (-> congregation
+                (merge-congregation-details state user-id)
+                (enrich-congregation conn)
                 (assoc :id "demo")
                 (assoc :name "Demo Congregation")
                 (assoc :permissions {:viewCongregation true})
