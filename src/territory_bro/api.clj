@@ -21,7 +21,6 @@
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.jwt :as jwt]
-            [territory-bro.infra.permissions :as permissions]
             [territory-bro.infra.user :as user]
             [territory-bro.infra.util :refer [getx conj-set]]
             [territory-bro.projections :as projections])
@@ -168,22 +167,12 @@
     (assert id)
     id))
 
-(defn- grant-opened-share [state share-id] ; TODO: move to share ns
-  (if-some [share (get-in state [::share/shares share-id])]
-    (permissions/grant state
-                       (or (current-user-id-or-nil) auth/anonymous-user-id) ; TODO: refactor
-                       [:view-congregation (:congregation/id share)]) ; TODO: limited permissions
-    state))
-
-(defn- grant-opened-shares [state share-ids]
-  (reduce grant-opened-share state share-ids))
-
 (defn- state-for-request [request]
   (let [session (:session request)
         state (projections/cached-state)]
     (cond-> state
       (::sudo? session) (congregation/sudo (current-user-id))
-      (some? (::opened-shares session)) (grant-opened-shares (::opened-shares session)))))
+      (some? (::opened-shares session)) (facade/grant-opened-shares (::opened-shares session) (current-user-id-or-nil)))))
 
 (def ^:private validate-congregation-list (s/validator [CongregationSummary]))
 

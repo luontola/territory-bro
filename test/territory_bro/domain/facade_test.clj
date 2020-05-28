@@ -6,7 +6,6 @@
   (:require [clojure.test :refer :all]
             [territory-bro.domain.facade :as facade]
             [territory-bro.domain.testdata :as testdata]
-            [territory-bro.infra.config :as config]
             [territory-bro.projections :as projections]
             [territory-bro.test.testutil :as testutil])
   (:import (java.util UUID)))
@@ -19,6 +18,8 @@
 (def congregation-boundary-id (UUID. 0 6))
 (def region-id (UUID. 0 7))
 (def card-minimap-viewport-id (UUID. 0 8))
+(def share-id (UUID. 0 9))
+(def share-key "abc123")
 
 (def congregation-created
   {:event/type :congregation.event/congregation-created
@@ -68,20 +69,31 @@
    :card-minimap-viewport/id card-minimap-viewport-id
    :card-minimap-viewport/location testdata/wkt-polygon})
 
+(def share-created
+  {:event/type :share.event/share-created
+   :share/id share-id
+   :share/key share-key
+   :share/type :link
+   :congregation/id cong-id
+   :territory/id territory-id})
+
+(def test-events
+  [congregation-created
+   view-congregation-granted
+   view-congregation-granted2
+   territory-defined
+   territory-defined2
+   congregation-boundary-defined
+   region-defined
+   card-minimap-viewport-defined
+   share-created])
+
 (defn- apply-events [events]
   (testutil/apply-events projections/projection events))
 
-(def events [congregation-created
-             view-congregation-granted
-             view-congregation-granted2
-             territory-defined
-             territory-defined2
-             congregation-boundary-defined
-             region-defined
-             card-minimap-viewport-defined])
 
 (deftest test-get-my-congregation
-  (let [state (apply-events events)
+  (let [state (apply-events test-events)
         expected {:id cong-id
                   :name "Cong1 Name"
                   :permissions {:view-congregation true}
@@ -107,15 +119,24 @@
                   :card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                             :card-minimap-viewport/location testdata/wkt-polygon}]}]
 
-    (testing "no permissions"
-      (let [user-id (UUID. 0 0x666)]
-        (is (nil? (facade/get-my-congregation state cong-id user-id)))))
+    (testing "has view permissions"
+      (is (= expected (facade/get-my-congregation state cong-id user-id))))
 
-    (testing "full view permissions"
-      (is (= expected (facade/get-my-congregation state cong-id user-id))))))
+    (let [user-id (UUID. 0 0x666)]
+      (testing "no permissions"
+        (is (nil? (facade/get-my-congregation state cong-id user-id))))
+
+      #_(testing "opened a share" ; TODO
+          (let [state (facade/grant-opened-shares state [share-id] user-id)
+                expected (-> expected
+                             (assoc :users []
+                                    :congregation-boundaries []
+                                    :regions []
+                                    :card-minimap-viewports []))]
+            (is (= expected (facade/get-my-congregation state cong-id user-id))))))))
 
 (deftest test-get-demo-congregation
-  (let [state (apply-events events)
+  (let [state (apply-events test-events)
         user-id (UUID. 0 0x666)
         expected {:id "demo" ; changed
                   :name "Demo Congregation" ; changed

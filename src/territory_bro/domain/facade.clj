@@ -7,7 +7,9 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.region :as region]
+            [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.permissions :as permissions]))
 
 (defn- merge-congregation-details [congregation state user-id]
@@ -39,3 +41,16 @@
             (assoc :name "Demo Congregation")
             (assoc :permissions {:view-congregation true})
             (assoc :users []))))
+
+
+;;;; Shares
+
+(defn- grant-opened-share [state share-id user-id] ; TODO: move to share ns
+  (if-some [share (get-in state [::share/shares share-id])]
+    (permissions/grant state
+                       (or user-id auth/anonymous-user-id) ; TODO: refactor to never user nil user-id?
+                       [:view-congregation (:congregation/id share)]) ; TODO: limited permissions
+    state))
+
+(defn grant-opened-shares [state share-ids user-id]
+  (reduce #(grant-opened-share %1 %2 user-id) state share-ids))
