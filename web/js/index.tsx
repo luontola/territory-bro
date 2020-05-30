@@ -23,6 +23,7 @@ import UsersPage from "./pages/UsersPage";
 import JoinPage from "./pages/JoinPage";
 import TerritoryListPage from "./pages/TerritoryListPage";
 import TerritoryPage from "./pages/TerritoryPage";
+import ShareRedirect from "./pages/ShareRedirect";
 
 globalHistory.listen(({location, action}) => {
   console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
@@ -47,6 +48,7 @@ ReactDOM.createRoot(document.getElementById('root'))
                 <LoginCallbackPage path="/login-callback"/>
                 <RegistrationPage path="/register"/>
                 <HelpPage path="/help"/>
+                <ShareRedirect path="/share/:shareKey"/>
 
                 <CongregationPage path="/congregation/:congregationId"/>
                 <TerritoryListPage path="/congregation/:congregationId/territories"/>

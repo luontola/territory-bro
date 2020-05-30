@@ -212,6 +212,11 @@ export async function shareTerritory(congregationId: string, territoryId: string
   return response.data.url;
 }
 
+export async function openShare(shareKey: string) {
+  const response = await api.get(`/api/share/${shareKey}`);
+  return response.data;
+}
+
 // ====== Regions ======
 
 export type Region = {
