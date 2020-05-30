@@ -6,6 +6,7 @@
   (:require [medley.core :refer [dissoc-in]])
   (:import (territory_bro NoPermitException)))
 
+;; TODO: rename resource-ids to context or scope?
 (defn- path [user-id [permission & resource-ids]]
   (assert (keyword? permission) {:permission permission})
   (assert (every? some? resource-ids) {:resource-ids resource-ids})
@@ -25,7 +26,7 @@
   (cond
     (empty? permit) false
     ;; has exact permit?
-    (get-in state (path user-id permit)) true
+    (true? (get-in state (path user-id permit))) true
     ;; has broader permit?
     :else (recur state user-id (drop-last permit))))
 
