@@ -31,8 +31,8 @@
 ;; TODO: deduplicate with congregation/apply-user-permissions
 (defn- apply-user-permissions [cong state user-id]
   (let [cong-id (:id cong)
-        territory-ids (for [[_ _ territory-id] (permissions/match state user-id [:view-territory cong-id '*])]
-                        territory-id)]
+        territory-ids (lazy-seq (for [[_ _ territory-id] (permissions/match state user-id [:view-territory cong-id '*])]
+                                  territory-id))]
     (cond
       (permissions/allowed? state user-id [:view-congregation cong-id])
       cong
