@@ -100,9 +100,9 @@
                    (permissions/revoke user-id [:foo cong-id]))))))
 
     (testing "error: empty permit"
-      (is (thrown-with-msg? AssertionError (re-contains "{:permission nil}")
+      (is (thrown-with-msg? AssertionError (re-contains "{:permit []}")
                             (permissions/grant nil user-id [])))
-      (is (thrown-with-msg? AssertionError (re-contains "{:permission nil}")
+      (is (thrown-with-msg? AssertionError (re-contains "{:permit nil}")
                             (permissions/grant nil user-id nil))))))
 
 (deftest checking-permissions-test
@@ -152,13 +152,13 @@
                        (permissions/check state user-id [:bar cong-id]))))))
 
     (testing "error: nil parameters"
-      (is (thrown-with-msg? AssertionError (re-contains "{:permission nil}")
+      (is (thrown-with-msg? AssertionError (re-contains "{:permit [nil]}")
                             (permissions/allowed? nil user-id [nil])))
-      (is (thrown-with-msg? AssertionError (re-contains "{:resource-ids (nil)}")
+      (is (thrown-with-msg? AssertionError (re-contains "{:permit [:foo nil]}")
                             (permissions/allowed? nil user-id [:foo nil])))
-      (is (thrown-with-msg? AssertionError (re-contains "{:resource-ids (nil #uuid \"00000000-0000-0000-0000-000000000064\")}")
+      (is (thrown-with-msg? AssertionError (re-contains "{:permit [:foo nil #uuid \"00000000-0000-0000-0000-000000000064\"]}")
                             (permissions/allowed? nil user-id [:foo nil resource-id])))
-      (is (thrown-with-msg? AssertionError (re-contains "{:resource-ids (#uuid \"00000000-0000-0000-0000-00000000000a\" nil)}")
+      (is (thrown-with-msg? AssertionError (re-contains "{:permit [:foo #uuid \"00000000-0000-0000-0000-00000000000a\" nil]}")
                             (permissions/allowed? nil user-id [:foo cong-id nil]))))
 
     (testing "error: empty permit" ; due to recursion it's not an error, but it should at least be always false
@@ -210,6 +210,8 @@
                     (permissions/grant user-id [:bar cong-id2 resource-id2])
                     (permissions/grant user-id2 [:foo cong-id]))]
       (testing "not found"
+        (is (= []
+               (permissions/match state user-id [:foo (UUID. 0 0x666)])))
         (is (= []
                (permissions/match state user-id [:gazonk cong-id]))))
 

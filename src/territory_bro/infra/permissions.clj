@@ -6,16 +6,30 @@
   (:require [medley.core :refer [dissoc-in]])
   (:import (territory_bro NoPermitException)))
 
-;; TODO: rename resource-ids to context or scope?
-;; TODO: deduplicate with twist/untwist?
-(defn- path [user-id [permission & resource-ids]]
-  (assert (keyword? permission) {:permission permission})
-  (assert (every? some? resource-ids) {:resource-ids resource-ids})
-  (->> nil
-       (cons permission)
-       (concat resource-ids)
+;; The search index is arranged so that the permission keyword
+;; is the last element, even though outside this module it's
+;; always the first element, because that makes it easier to
+;; find all permissions that relate to a particular scope.
+;; The public permit format must be twisted to the internal
+;; format and then untwisted back to the public format.
+
+(defn- twist [permit]
+  (concat (rest permit) (cons (first permit) nil)))
+
+(defn- untwist [permit]
+  (cons (last permit) (drop-last permit)))
+
+(defn- permit? [permit]
+  (let [[permission & scope] permit]
+    (and (keyword? permission)
+         (every? some? scope))))
+
+(defn- path [user-id permit]
+  (assert (permit? permit) {:permit permit})
+  (->> (twist permit)
        (cons user-id)
        (cons ::permissions)))
+
 
 (defn grant [state user-id permit]
   (assoc-in state (path user-id permit) true))
@@ -35,35 +49,31 @@
   (when-not (allowed? state user-id permit)
     (throw (NoPermitException. user-id permit))))
 
-(defn list-permissions [state user-id resource-ids]
-  (let [parent-path (drop-last (path user-id (cons :dummy resource-ids)))
-        permision-map (get-in state parent-path)
-        permissions (set (filter keyword? (keys permision-map)))]
-    (if (empty? resource-ids)
+(defn list-permissions [state user-id scope]
+  (let [parent-path (drop-last (path user-id (cons :dummy scope)))
+        permission-map (get-in state parent-path)
+        permissions (set (filter keyword? (keys permission-map)))]
+    (if (empty? scope)
       permissions
-      (into permissions (list-permissions state user-id (drop-last resource-ids))))))
+      (into permissions (list-permissions state user-id (drop-last scope))))))
 
-(defn- match0 [m parents matcher]
-  (let [[x & xs] matcher]
+(defn- match0 [haystack matched needle]
+  (let [[k & ks] needle]
     (cond
-      (nil? x) []
-      (= '* x) (mapcat (fn [x]
-                         (match0 (get m x)
-                                 (conj parents x)
-                                 xs))
-                       (keys m))
-      (empty? xs) (if (true? (get m x))
-                    [(conj parents x)]
-                    [])
-      :else (recur (get m x) (conj parents x) xs))))
-
-(defn- twist [xs]
-  (concat (rest xs) [(first xs)]))
-
-(defn- untwist [xs]
-  (cons (last xs) (drop-last xs)))
+      ;; end of search tree
+      (true? haystack) (when (empty? needle)
+                         [matched])
+      ;; exact match
+      (contains? haystack k) (recur (get haystack k)
+                                    (conj matched k)
+                                    ks)
+      ;; wildcard match
+      (= '* k) (mapcat (fn [k]
+                         (match0 (get haystack k)
+                                 (conj matched k)
+                                 ks))
+                       (keys haystack)))))
 
 (defn match [state user-id matcher]
-  (let [user-permits (get-in state [::permissions user-id])]
-    (->> (match0 user-permits [] (twist matcher))
-         (map untwist))))
+  (->> (match0 (get-in state [::permissions user-id]) [] (twist matcher))
+       (map untwist)))
