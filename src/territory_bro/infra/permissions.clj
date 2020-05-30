@@ -1,4 +1,4 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2020 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,6 +7,7 @@
   (:import (territory_bro NoPermitException)))
 
 ;; TODO: rename resource-ids to context or scope?
+;; TODO: deduplicate with twist/untwist?
 (defn- path [user-id [permission & resource-ids]]
   (assert (keyword? permission) {:permission permission})
   (assert (every? some? resource-ids) {:resource-ids resource-ids})
@@ -41,3 +42,23 @@
     (if (empty? resource-ids)
       permissions
       (into permissions (list-permissions state user-id (drop-last resource-ids))))))
+
+(defn- match0 [m matched remaining]
+  (let [[x & xs] remaining]
+    (cond
+      (nil? x) []
+      (empty? xs) (if (true? (get m x))
+                    [(conj matched x)]
+                    [])
+      :else (recur (get m x) (conj matched x) xs))))
+
+(defn- twist [xs]
+  (concat (rest xs) [(first xs)]))
+
+(defn- untwist [xs]
+  (cons (last xs) (drop-last xs)))
+
+(defn match [state user-id matcher]
+  (let [user-permits (get-in state [::permissions user-id])]
+    (->> (match0 user-permits [] (twist matcher))
+         (map untwist))))

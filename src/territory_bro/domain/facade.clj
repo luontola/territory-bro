@@ -38,7 +38,7 @@
       ;; TODO: more powerful function to inspect permissions (to replace permissions/list-permissions)
       #_(= [[:view-territory cong-id territory-id1]
             [:view-territory cong-id territory-id2]]
-           (permissions/find state user-id [:view-territory cong-id :ANY]))
+           (permissions/match state user-id [:view-territory cong-id :ANY]))
       (not (empty? (get-in state [::permissions/permissions user-id cong-id])))
       (-> cong
           (assoc :users [])

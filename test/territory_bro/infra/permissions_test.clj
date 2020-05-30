@@ -192,3 +192,33 @@
         (let [state (permissions/grant state user-id [:admin])]
           (is (= #{:admin} (permissions/list-permissions state user-id [])))
           (is (= #{:foo :bar :admin} (permissions/list-permissions state user-id [cong-id]))))))))
+
+(deftest finding-permissions-test
+  (let [user-id (UUID. 0 0x1)
+        user-id2 (UUID. 0 0x2)
+        cong-id (UUID. 0 0x10)
+        cong-id2 (UUID. 0 0x20)
+        resource-id (UUID. 0 0x100)
+        resource-id2 (UUID. 0 0x200)]
+
+    (let [state (-> nil
+                    (permissions/grant user-id [:foo cong-id])
+                    (permissions/grant user-id [:foo cong-id2])
+                    (permissions/grant user-id [:bar cong-id resource-id])
+                    (permissions/grant user-id [:bar cong-id resource-id2]))]
+      #_(clojure.pprint/pprint state)
+
+      (testing "not found"
+        (is (= []
+               (permissions/match state user-id [:gazonk cong-id]))))
+
+      (testing "exact find"
+        (is (= [[:foo cong-id]]
+               (permissions/match state user-id [:foo cong-id])))
+        (is (= [[:bar cong-id resource-id]]
+               (permissions/match state user-id [:bar cong-id resource-id]))))
+
+      #_(testing "wildcard find"
+          (is (= [[:foo cong-id]
+                  [:foo cong-id2]]
+                 (permissions/match state user-id [:foo '*])))))))
