@@ -30,24 +30,21 @@
 ;; TODO: use namespaced keys
 ;; TODO: deduplicate with congregation/apply-user-permissions
 (defn- apply-user-permissions [cong state user-id]
-  (let [cong-id (:id cong)]
+  (let [cong-id (:id cong)
+        territory-ids (for [[_ _ territory-id] (permissions/match state user-id [:view-territory cong-id '*])]
+                        territory-id)]
     (cond
       (permissions/allowed? state user-id [:view-congregation cong-id])
       cong
 
-      ;; TODO: more powerful function to inspect permissions (to replace permissions/list-permissions)
-      #_(= [[:view-territory cong-id territory-id1]
-            [:view-territory cong-id territory-id2]]
-           (permissions/match state user-id [:view-territory cong-id :ANY]))
-      (not (empty? (get-in state [::permissions/permissions user-id cong-id])))
+      (not (empty? territory-ids))
       (-> cong
           (assoc :users [])
           (assoc :congregation-boundaries [])
           (assoc :regions [])
           (assoc :card-minimap-viewports [])
-          (assoc :territories (filter (fn [territory]
-                                        (permissions/allowed? state user-id [:view-territory cong-id (:territory/id territory)]))
-                                      (:territories cong))))
+          (assoc :territories (for [territory-id territory-ids]
+                                (get-in state [::territory/territories cong-id territory-id]))))
 
       :else
       nil)))

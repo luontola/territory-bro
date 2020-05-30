@@ -43,14 +43,19 @@
       permissions
       (into permissions (list-permissions state user-id (drop-last resource-ids))))))
 
-(defn- match0 [m matched remaining]
-  (let [[x & xs] remaining]
+(defn- match0 [m parents matcher]
+  (let [[x & xs] matcher]
     (cond
       (nil? x) []
+      (= '* x) (mapcat (fn [x]
+                         (match0 (get m x)
+                                 (conj parents x)
+                                 xs))
+                       (keys m))
       (empty? xs) (if (true? (get m x))
-                    [(conj matched x)]
+                    [(conj parents x)]
                     [])
-      :else (recur (get m x) (conj matched x) xs))))
+      :else (recur (get m x) (conj parents x) xs))))
 
 (defn- twist [xs]
   (concat (rest xs) [(first xs)]))

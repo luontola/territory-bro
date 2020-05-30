@@ -205,20 +205,34 @@
                     (permissions/grant user-id [:foo cong-id])
                     (permissions/grant user-id [:foo cong-id2])
                     (permissions/grant user-id [:bar cong-id resource-id])
-                    (permissions/grant user-id [:bar cong-id resource-id2]))]
-      #_(clojure.pprint/pprint state)
-
+                    (permissions/grant user-id [:bar cong-id resource-id2])
+                    (permissions/grant user-id [:bar cong-id2 resource-id])
+                    (permissions/grant user-id [:bar cong-id2 resource-id2])
+                    (permissions/grant user-id2 [:foo cong-id]))]
       (testing "not found"
         (is (= []
                (permissions/match state user-id [:gazonk cong-id]))))
 
-      (testing "exact find"
+      (testing "exact match"
         (is (= [[:foo cong-id]]
                (permissions/match state user-id [:foo cong-id])))
         (is (= [[:bar cong-id resource-id]]
                (permissions/match state user-id [:bar cong-id resource-id]))))
 
-      #_(testing "wildcard find"
-          (is (= [[:foo cong-id]
-                  [:foo cong-id2]]
-                 (permissions/match state user-id [:foo '*])))))))
+      (testing "resource wildcards"
+        (is (= [[:foo cong-id]
+                [:foo cong-id2]]
+               (permissions/match state user-id [:foo '*])))
+        (is (= [[:bar cong-id resource-id]
+                [:bar cong-id resource-id2]]
+               (permissions/match state user-id [:bar cong-id '*])))
+        (is (= [[:bar cong-id resource-id]
+                [:bar cong-id2 resource-id]]
+               (permissions/match state user-id [:bar '* resource-id])))
+        (is (= [[:bar cong-id resource-id]
+                [:bar cong-id resource-id2]
+                [:bar cong-id2 resource-id]
+                [:bar cong-id2 resource-id2]]
+               (permissions/match state user-id [:bar '* '*]))))
+
+      (testing "permission wildcards")))) ; TODO
