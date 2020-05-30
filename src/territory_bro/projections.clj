@@ -123,15 +123,13 @@
     (update-with-transient-events! new-events)))
 
 (defn refresh! []
-  (log/info "Refreshing projections")
-  (refresh-projections!)
-  (refresh-process-managers!))
-
-(defn refresh-on-startup! []
-  (log/info "Refreshing projections on startup")
-  (refresh-projections!)
-  (refresh-startup-optimizations!)
-  (refresh-process-managers!))
+  (let [startup? (nil? (cached-state))]
+    (log/info "Refreshing projections")
+    (refresh-projections!)
+    (when startup?
+      (log/info "Using startup optimizations")
+      (refresh-startup-optimizations!))
+    (refresh-process-managers!)))
 
 (mount/defstate refresher
   :start (poller/create refresh!)

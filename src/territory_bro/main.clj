@@ -37,7 +37,7 @@
   (db/check-database-version 11)
   (db/migrate-master-schema!)
   ;; process managers will migrate tenant schemas and create missing GIS users
-  (projections/refresh-on-startup!)
+  (projections/refresh!)
   ;; process any pending GIS changes, in case GIS sync was down for a long time
   (gis-sync/refresh!))
 
