@@ -124,7 +124,9 @@ const TerritoryPage = ({congregationId, territoryId}) => {
         <div className={styles.map}>
           <TerritoryMap territory={territory} mapRaster={mapRaster} printout={false}/>
         </div>
-        <MapInteractionHelp/>
+        <div className="no-print">
+          <MapInteractionHelp/>
+        </div>
       </div>
     </div>
   </>;
