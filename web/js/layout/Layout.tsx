@@ -41,7 +41,8 @@ const CongregationNav = ({congregationId}) => {
       <li><NavLink to="/">Home</NavLink></li>
       <li><NavLink to=".">{congregation.name}</NavLink></li>
       <li><NavLink to="territories">Territories</NavLink></li>
-      <li><NavLink to="printouts">Printouts</NavLink></li>
+      {congregation.permissions.viewCongregation &&
+      <li><NavLink to="printouts">Printouts</NavLink></li>}
       {congregation.permissions.configureCongregation && <>
         <li><NavLink to="users">Users</NavLink></li>
         <li><NavLink to="settings">Settings</NavLink></li>

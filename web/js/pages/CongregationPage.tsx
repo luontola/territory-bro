@@ -11,7 +11,8 @@ const CongregationPage = ({congregationId}) => {
   return <>
     <h1>{congregation.name}</h1>
     <p><Link to="territories">Territories</Link></p>
-    <p><Link to="printouts">Printouts</Link></p>
+    {congregation.permissions.viewCongregation &&
+    <p><Link to="printouts">Printouts</Link></p>}
     {congregation.permissions.gisAccess &&
     <p><a href={`/api/congregation/${congregationId}/qgis-project`}>Download QGIS project</a></p>}
     {congregation.permissions.configureCongregation && <>
