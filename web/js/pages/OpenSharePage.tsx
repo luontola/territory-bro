@@ -6,14 +6,15 @@ import React, {useEffect, useState} from "react";
 import {openShare} from "../api";
 import {navigate} from "@reach/router";
 
-const ShareRedirect = ({shareKey}) => {
+const OpenSharePage = ({shareKey}) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
     (async () => {
       try {
         const share = await openShare(shareKey);
-        navigate(`/congregation/${share.congregation}/territories/${share.territory}`);
+        navigate(`/congregation/${share.congregation}/territories/${share.territory}`,
+          {replace: true});
       } catch (e) {
         setError(e);
       }
@@ -26,8 +27,8 @@ const ShareRedirect = ({shareKey}) => {
       <p>The link you opened may be incorrect or it has expired.</p>
     </>;
   } else {
-    return <h1>Please wait...</h1>;
+    return <p>Please wait...</p>;
   }
 };
 
-export default ShareRedirect;
+export default OpenSharePage;
