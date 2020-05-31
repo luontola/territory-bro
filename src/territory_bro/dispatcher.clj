@@ -17,6 +17,7 @@
             [territory-bro.gis.db-admin :as db-admin]
             [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.gis.gis-user :as gis-user]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
@@ -51,6 +52,10 @@
    :user (fn [user-id]
            (user/check-user-exists conn user-id)
            true)
+   :user-or-anonymous (fn [user-id]
+                        (when-not (auth/anonymous? user-id)
+                          (user/check-user-exists conn user-id))
+                        true)
    :new (fn [stream-id]
           (event-store/check-new-stream conn stream-id)
           true)})

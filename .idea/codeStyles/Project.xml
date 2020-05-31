@@ -22,7 +22,7 @@
   :re-frame.core/reg-sub 1000
   :secretary.core/defroute :only-indent
   :territory-bro.gis.gis-db-test/with-tenant-schema 1
-  :territory-bro.infra.authentication/with-authenticated-user 1
+  :territory-bro.infra.authentication/with-user-from-session 1
   :territory-bro.infra.db/as-tenant 1
   :territory-bro.infra.db/auto-explain 2
   :territory-bro.test.testutil/grab-exception 0

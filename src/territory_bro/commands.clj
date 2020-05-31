@@ -36,7 +36,7 @@
 (s/defschema BaseCommand
   {:command/type s/Keyword
    :command/time Instant
-   (s/optional-key :command/user) (foreign-key/references :user UUID)
+   (s/optional-key :command/user) (foreign-key/references :user-or-anonymous UUID)
    (s/optional-key :command/system) s/Str})
 
 (s/defschema GisSyncCommand

@@ -35,7 +35,8 @@
    :region (constantly true)
    :share (constantly true)
    :territory (constantly true)
-   :user (constantly true)})
+   :user (constantly true)
+   :user-or-anonymous (constantly true)})
 
 (defn validate-command [command]
   (binding [foreign-key/*reference-checkers* dummy-reference-checkers]

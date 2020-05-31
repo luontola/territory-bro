@@ -87,7 +87,7 @@
     (clojure.walk/postwalk f m)))
 
 (defn require-logged-in! []
-  (if-not auth/*user*
+  (if-not (auth/logged-in?)
     (unauthorized! "Not logged in")))
 
 (defn ^:dynamic save-user-from-jwt! [jwt]
@@ -129,7 +129,7 @@
       (contains? (:super-users config/env) (:sub auth/*user*))))
 
 (defn sudo [request]
-  (auth/with-authenticated-user request
+  (auth/with-user-from-session request
     (require-logged-in!)
     (if (super-user?)
       (let [session (-> (:session request)
@@ -148,22 +148,19 @@
 (defresource settings
   :available-media-types ["application/json"]
   :handle-ok (fn [{:keys [request]}]
-               (auth/with-authenticated-user request
+               (auth/with-user-from-session request
                  (format-for-api
                   {:dev (getx config/env :dev)
                    :auth0 {:domain (getx config/env :auth0-domain)
                            :clientId (getx config/env :auth0-client-id)}
-                   :supportEmail (when auth/*user*
+                   :supportEmail (when (auth/logged-in?)
                                    (getx config/env :support-email))
                    :demoAvailable (some? (:demo-congregation config/env))
-                   :user (when auth/*user*
+                   :user (when (auth/logged-in?)
                            (fix-user-for-liberator auth/*user*))}))))
 
-(defn- current-user-id-or-nil []
-  (:user/id auth/*user*))
-
 (defn- current-user-id []
-  (let [id (current-user-id-or-nil)]
+  (let [id (:user/id auth/*user*)]
     (assert id)
     id))
 
@@ -173,14 +170,12 @@
     (cond-> state
       (::sudo? session) (congregation/sudo (current-user-id))
       (some? (::opened-shares session)) (facade/grant-opened-shares (::opened-shares session)
-                                                                    ;; TODO: avoid nil user-id
-                                                                    (or (current-user-id-or-nil)
-                                                                        auth/anonymous-user-id)))))
+                                                                    (current-user-id)))))
 
 (def ^:private validate-congregation-list (s/validator [CongregationSummary]))
 
 (defn list-congregations [request]
-  (auth/with-authenticated-user request
+  (auth/with-user-from-session request
     (require-logged-in!)
     (let [state (state-for-request request)]
       (ok (->> (congregation/get-my-congregations state (current-user-id))
@@ -201,27 +196,26 @@
 (def ^:private validate-congregation (s/validator Congregation))
 
 (defn get-congregation [request]
-  (auth/with-authenticated-user request
-    ;; TODO: refactor anonymous user handling
-    (binding [auth/*user* (if (and (nil? auth/*user*)
-                                   (some? (::opened-shares (:session request))))
-                            auth/anonymous-user
-                            auth/*user*)]
-      (require-logged-in!)
-      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-            user-id (current-user-id)
-            state (state-for-request request)
-            congregation (facade/get-congregation state cong-id user-id)]
-        (when-not congregation
-          (forbidden! "No congregation access"))
-        (db/with-db [conn {:read-only? true}]
-          (ok (-> congregation
-                  (enrich-congregation-users conn)
-                  (format-for-api)
-                  (validate-congregation))))))))
+  (auth/with-user-from-session request
+    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+          user-id (current-user-id)
+          state (state-for-request request)
+          congregation (facade/get-congregation state cong-id user-id)]
+      (when-not congregation
+        ;; This function must support anonymous access for opened shares.
+        ;; If anonymous user cannot see the congregation, first prompt them
+        ;; to login before giving the forbidden error.
+        ;; TODO: refactor other routes to use this same pattern?
+        (require-logged-in!)
+        (forbidden! "No congregation access"))
+      (db/with-db [conn {:read-only? true}]
+        (ok (-> congregation
+                (enrich-congregation-users conn)
+                (format-for-api)
+                (validate-congregation)))))))
 
 (defn get-demo-congregation [request]
-  (auth/with-authenticated-user request
+  (auth/with-user-from-session request
     (require-logged-in!) ; TODO: allow demo for anonymous users?
     (let [cong-id (:demo-congregation config/env)
           user-id (current-user-id)
@@ -234,11 +228,10 @@
               (validate-congregation))))))
 
 (defn- enrich-command [command]
-  (let [user-id (current-user-id-or-nil)]
+  (let [user-id (current-user-id)]
     (-> command
         (assoc :command/time ((:now config/env)))
-        (cond->
-          (some? user-id) (assoc :command/user user-id)))))
+        (assoc :command/user user-id))))
 
 (defn- dispatch! [conn state command]
   (dispatcher/command! conn state (enrich-command command)))
@@ -270,7 +263,7 @@
          (internal-server-error {:message "Internal Server Error"}))))))
 
 (defn create-congregation [request]
-  (auth/with-authenticated-user request
+  (auth/with-user-from-session request
     (require-logged-in!)
     (let [cong-id (UUID/randomUUID)
           name (get-in request [:params :name])
@@ -282,7 +275,7 @@
                       {:id cong-id})))))
 
 (defn add-user [request]
-  (auth/with-authenticated-user request
+  (auth/with-user-from-session request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           user-id (UUID/fromString (get-in request [:params :userId]))
@@ -293,7 +286,7 @@
                                   :user/id user-id})))))
 
 (defn set-user-permissions [request]
-  (auth/with-authenticated-user request
+  (auth/with-user-from-session request
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           user-id (UUID/fromString (get-in request [:params :userId]))
           permissions (->> (get-in request [:params :permissions])
@@ -306,7 +299,7 @@
                                   :permission/ids permissions})))))
 
 (defn rename-congregation [request]
-  (auth/with-authenticated-user request
+  (auth/with-user-from-session request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           name (get-in request [:params :name])
@@ -317,7 +310,7 @@
                                   :congregation/name name})))))
 
 (defn download-qgis-project [request]
-  (auth/with-authenticated-user request
+  (auth/with-user-from-session request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           user-id (current-user-id)
@@ -338,7 +331,7 @@
             (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\"")))))))
 
 (defn share-territory-link [request]
-  (auth/with-authenticated-user request
+  (auth/with-user-from-session request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           territory-id (UUID/fromString (get-in request [:params :territory]))
@@ -364,17 +357,18 @@
   (refresh-projections!)) ; XXX: this is a GET request, so it doesn't trigger automatic refresh
 
 (defn open-share [request]
-  (let [share-key (get-in request [:params :share-key])
-        state (state-for-request request)
-        share (share/find-share-by-key state share-key)]
-    (if share
-      (let [session (-> (:session request)
-                        (update ::opened-shares conj-set (:share/id share)))]
-        (record-share-opened! share state)
-        (-> (ok {:congregation (:congregation/id share)
-                 :territory (:territory/id share)})
-            (assoc :session session)))
-      (not-found {:message "Share not found"}))))
+  (auth/with-user-from-session request
+    (let [share-key (get-in request [:params :share-key])
+          state (state-for-request request)
+          share (share/find-share-by-key state share-key)]
+      (if share
+        (let [session (-> (:session request)
+                          (update ::opened-shares conj-set (:share/id share)))]
+          (record-share-opened! share state)
+          (-> (ok {:congregation (:congregation/id share)
+                   :territory (:territory/id share)})
+              (assoc :session session)))
+        (not-found {:message "Share not found"})))))
 
 (defroutes api-routes
   (GET "/" [] (ok "Territory Bro"))

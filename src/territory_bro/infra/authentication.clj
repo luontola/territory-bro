@@ -10,15 +10,29 @@
 
 (def user-profile-keys [:sub :name :nickname :email :email_verified :picture])
 (def anonymous-user-id (UUID. 0 0))
-(def anonymous-user {:user/id anonymous-user-id})
+(def ^:private anonymous-user {:user/id anonymous-user-id})
+
+(defn anonymous?
+  ([]
+   (anonymous? (:user/id *user*)))
+  ([user-id]
+   (or (nil? user-id)
+       (= anonymous-user-id user-id))))
+
+(defn logged-in?
+  ([]
+   (not (anonymous?)))
+  ([user-id]
+   (not (anonymous? user-id))))
 
 (defn user-session [jwt user-id]
   {::user (-> (select-keys jwt user-profile-keys)
               (assoc :user/id user-id))})
 
-(defn with-authenticated-user* [request f]
-  (binding [*user* (get-in request [:session ::user])]
+(defn with-user* [request f]
+  (binding [*user* (or (get-in request [:session ::user])
+                       anonymous-user)]
     (f)))
 
-(defmacro with-authenticated-user [request & body]
-  `(with-authenticated-user* ~request (fn [] ~@body)))
+(defmacro with-user-from-session [request & body]
+  `(with-user* ~request (fn [] ~@body)))
