@@ -112,6 +112,7 @@ const TerritoryPage = ({congregationId, territoryId}) => {
         </div>
 
         {settings.dev && // TODO: remove feature toggle
+        congregation.permissions.shareTerritoryLink &&
         <div className={styles.actions}>
           <ShareButton congregationId={congregationId}
                        territoryId={territoryId}/>
