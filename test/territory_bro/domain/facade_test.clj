@@ -94,30 +94,30 @@
 
 (deftest test-get-congregation
   (let [state (apply-events test-events)
-        expected {:id cong-id
-                  :name "Cong1 Name"
-                  :permissions {:view-congregation true}
-                  :users [{:id user-id}
-                          {:id user-id2}]
-                  :territories [{:territory/id territory-id
-                                 :territory/number "123"
-                                 :territory/addresses "the addresses"
-                                 :territory/region "the region"
-                                 :territory/meta {:foo "bar"}
-                                 :territory/location testdata/wkt-multi-polygon}
-                                {:territory/id territory-id2
-                                 :territory/number "456"
-                                 :territory/addresses "the addresses"
-                                 :territory/region "the region"
-                                 :territory/meta {:foo "bar"}
-                                 :territory/location testdata/wkt-multi-polygon}]
-                  :congregation-boundaries [{:congregation-boundary/id congregation-boundary-id
-                                             :congregation-boundary/location testdata/wkt-multi-polygon}]
-                  :regions [{:region/id region-id
-                             :region/name "the name"
-                             :region/location testdata/wkt-multi-polygon}]
-                  :card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
-                                            :card-minimap-viewport/location testdata/wkt-polygon}]}]
+        expected {:congregation/id cong-id
+                  :congregation/name "Cong1 Name"
+                  :congregation/permissions {:view-congregation true}
+                  :congregation/users [{:user/id user-id}
+                                       {:user/id user-id2}]
+                  :congregation/territories [{:territory/id territory-id
+                                              :territory/number "123"
+                                              :territory/addresses "the addresses"
+                                              :territory/region "the region"
+                                              :territory/meta {:foo "bar"}
+                                              :territory/location testdata/wkt-multi-polygon}
+                                             {:territory/id territory-id2
+                                              :territory/number "456"
+                                              :territory/addresses "the addresses"
+                                              :territory/region "the region"
+                                              :territory/meta {:foo "bar"}
+                                              :territory/location testdata/wkt-multi-polygon}]
+                  :congregation/congregation-boundaries [{:congregation-boundary/id congregation-boundary-id
+                                                          :congregation-boundary/location testdata/wkt-multi-polygon}]
+                  :congregation/regions [{:region/id region-id
+                                          :region/name "the name"
+                                          :region/location testdata/wkt-multi-polygon}]
+                  :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
+                                                         :card-minimap-viewport/location testdata/wkt-polygon}]}]
 
     (testing "has view permissions"
       (is (= expected (facade/get-congregation state cong-id user-id))))
@@ -129,45 +129,45 @@
       (testing "opened a share"
         (let [state (facade/grant-opened-shares state [share-id] user-id)
               expected (assoc expected
-                              :permissions {}
-                              :users []
-                              :territories [{:territory/id territory-id
-                                             :territory/number "123"
-                                             :territory/addresses "the addresses"
-                                             :territory/region "the region"
-                                             :territory/meta {:foo "bar"}
-                                             :territory/location testdata/wkt-multi-polygon}]
-                              :congregation-boundaries []
-                              :regions []
-                              :card-minimap-viewports [])]
+                              :congregation/permissions {}
+                              :congregation/users []
+                              :congregation/territories [{:territory/id territory-id
+                                                          :territory/number "123"
+                                                          :territory/addresses "the addresses"
+                                                          :territory/region "the region"
+                                                          :territory/meta {:foo "bar"}
+                                                          :territory/location testdata/wkt-multi-polygon}]
+                              :congregation/congregation-boundaries []
+                              :congregation/regions []
+                              :congregation/card-minimap-viewports [])]
           (is (= expected (facade/get-congregation state cong-id user-id))))))))
 
 (deftest test-get-demo-congregation
   (let [state (apply-events test-events)
         user-id (UUID. 0 0x666)
-        expected {:id "demo" ; changed
-                  :name "Demo Congregation" ; changed
-                  :permissions {:view-congregation true} ; changed
-                  :users [] ; changed
-                  :territories [{:territory/id territory-id
-                                 :territory/number "123"
-                                 :territory/addresses "the addresses"
-                                 :territory/region "the region"
-                                 :territory/meta {:foo "bar"}
-                                 :territory/location testdata/wkt-multi-polygon}
-                                {:territory/id territory-id2
-                                 :territory/number "456"
-                                 :territory/addresses "the addresses"
-                                 :territory/region "the region"
-                                 :territory/meta {:foo "bar"}
-                                 :territory/location testdata/wkt-multi-polygon}]
-                  :congregation-boundaries [{:congregation-boundary/id congregation-boundary-id
-                                             :congregation-boundary/location testdata/wkt-multi-polygon}]
-                  :regions [{:region/id region-id
-                             :region/name "the name"
-                             :region/location testdata/wkt-multi-polygon}]
-                  :card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
-                                            :card-minimap-viewport/location testdata/wkt-polygon}]}]
+        expected {:congregation/id "demo" ; changed
+                  :congregation/name "Demo Congregation" ; changed
+                  :congregation/permissions {:view-congregation true} ; changed
+                  :congregation/users [] ; changed
+                  :congregation/territories [{:territory/id territory-id
+                                              :territory/number "123"
+                                              :territory/addresses "the addresses"
+                                              :territory/region "the region"
+                                              :territory/meta {:foo "bar"}
+                                              :territory/location testdata/wkt-multi-polygon}
+                                             {:territory/id territory-id2
+                                              :territory/number "456"
+                                              :territory/addresses "the addresses"
+                                              :territory/region "the region"
+                                              :territory/meta {:foo "bar"}
+                                              :territory/location testdata/wkt-multi-polygon}]
+                  :congregation/congregation-boundaries [{:congregation-boundary/id congregation-boundary-id
+                                                          :congregation-boundary/location testdata/wkt-multi-polygon}]
+                  :congregation/regions [{:region/id region-id
+                                          :region/name "the name"
+                                          :region/location testdata/wkt-multi-polygon}]
+                  :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
+                                                         :card-minimap-viewport/location testdata/wkt-polygon}]}]
 
     (testing "no demo congregation"
       (is (nil? (facade/get-demo-congregation state nil user-id))))

@@ -13,24 +13,23 @@
 
 (defn- enrich-congregation [cong state user-id]
   (let [cong-id (:congregation/id cong)]
-    {:id cong-id
-     :name (:congregation/name cong)
-     :permissions (->> (permissions/list-permissions state user-id [cong-id])
-                       (map (fn [permission]
-                              [permission true]))
-                       (into {}))
-     :users (for [user-id (congregation/get-users state cong-id)]
-              {:id user-id})
+    {:congregation/id cong-id
+     :congregation/name (:congregation/name cong)
+     :congregation/permissions (->> (permissions/list-permissions state user-id [cong-id])
+                                    (map (fn [permission]
+                                           [permission true]))
+                                    (into {}))
+     :congregation/users (for [user-id (congregation/get-users state cong-id)]
+                           {:user/id user-id})
      ;; TODO: extract query functions
-     :territories (sequence (vals (get-in state [::territory/territories cong-id])))
-     :congregation-boundaries (sequence (vals (get-in state [::congregation-boundary/congregation-boundaries cong-id])))
-     :regions (sequence (vals (get-in state [::region/regions cong-id])))
-     :card-minimap-viewports (sequence (vals (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id])))}))
+     :congregation/territories (sequence (vals (get-in state [::territory/territories cong-id])))
+     :congregation/congregation-boundaries (sequence (vals (get-in state [::congregation-boundary/congregation-boundaries cong-id])))
+     :congregation/regions (sequence (vals (get-in state [::region/regions cong-id])))
+     :congregation/card-minimap-viewports (sequence (vals (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id])))}))
 
-;; TODO: use namespaced keys
 ;; TODO: deduplicate with congregation/apply-user-permissions
 (defn- apply-user-permissions [cong state user-id]
-  (let [cong-id (:id cong)
+  (let [cong-id (:congregation/id cong)
         territory-ids (lazy-seq (for [[_ _ territory-id] (permissions/match state user-id [:view-territory cong-id '*])]
                                   territory-id))]
     (cond
@@ -39,12 +38,12 @@
 
       (not (empty? territory-ids))
       (-> cong
-          (assoc :users [])
-          (assoc :congregation-boundaries [])
-          (assoc :regions [])
-          (assoc :card-minimap-viewports [])
-          (assoc :territories (for [territory-id territory-ids]
-                                (get-in state [::territory/territories cong-id territory-id]))))
+          (assoc :congregation/users [])
+          (assoc :congregation/congregation-boundaries [])
+          (assoc :congregation/regions [])
+          (assoc :congregation/card-minimap-viewports [])
+          (assoc :congregation/territories (for [territory-id territory-ids]
+                                             (get-in state [::territory/territories cong-id territory-id]))))
 
       :else
       nil)))
@@ -58,10 +57,10 @@
   (when cong-id
     (some-> (congregation/get-unrestricted-congregation state cong-id)
             (enrich-congregation state user-id)
-            (assoc :id "demo")
-            (assoc :name "Demo Congregation")
-            (assoc :permissions {:view-congregation true})
-            (assoc :users []))))
+            (assoc :congregation/id "demo")
+            (assoc :congregation/name "Demo Congregation")
+            (assoc :congregation/permissions {:view-congregation true})
+            (assoc :congregation/users []))))
 
 
 ;;;; Shares

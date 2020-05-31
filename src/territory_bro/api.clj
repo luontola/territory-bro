@@ -185,13 +185,13 @@
                (validate-congregation-list))))))
 
 (defn- enrich-congregation-users [congregation conn]
-  (let [user-ids (->> (:users congregation)
-                      (map :id))
+  (let [user-ids (->> (:congregation/users congregation)
+                      (map :user/id))
         users (for [user (user/get-users conn {:ids user-ids})]
                 (-> (:user/attributes user)
                     (assoc :id (:user/id user))
                     (assoc :sub (:user/subject user))))]
-    (assoc congregation :users users)))
+    (assoc congregation :congregation/users users)))
 
 (def ^:private validate-congregation (s/validator Congregation))
 
