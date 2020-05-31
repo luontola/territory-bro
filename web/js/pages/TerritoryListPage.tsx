@@ -4,8 +4,22 @@
 
 import React, {useState} from "react";
 import {Link} from "@reach/router";
-import {getCongregationById, Territory} from "../api";
+import {getCongregationById, getSettings, Territory} from "../api";
 import styles from "./TerritoryListPage.css";
+import InfoBox from "../maps/InfoBox";
+
+function LimitedVisibilityHelp() {
+  const settings = getSettings();
+  return (
+    <InfoBox title={"Why so few territories?"}>
+      <p>Only those territories which have been shared with you are currently shown.
+        {settings.user ?
+          <> You will need to <Link to="/join">request access</Link> to see the rest.</> :
+          <> You will need to login to see the rest.</>}
+      </p>
+    </InfoBox>
+  );
+}
 
 function SearchForm({search, setSearch}) {
   const id = 'territory-search';
@@ -48,9 +62,12 @@ function matchesSearch(territory: Territory, search: string): boolean {
 
 const TerritoryListPage = ({congregationId}) => {
   const congregation = getCongregationById(congregationId);
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState('');
   return <>
     <h1>Territories</h1>
+    {!congregation.permissions.viewCongregation &&
+    <LimitedVisibilityHelp/>
+    }
     <SearchForm search={search} setSearch={setSearch}/>
     <table className="pure-table pure-table-striped">
       <thead>
