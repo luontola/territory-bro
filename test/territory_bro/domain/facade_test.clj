@@ -5,6 +5,7 @@
 (ns territory-bro.domain.facade-test
   (:require [clojure.test :refer :all]
             [territory-bro.domain.facade :as facade]
+            [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.projections :as projections]
             [territory-bro.test.testutil :as testutil])
@@ -127,7 +128,7 @@
         (is (nil? (facade/get-congregation state cong-id user-id))))
 
       (testing "opened a share"
-        (let [state (facade/grant-opened-shares state [share-id] user-id)
+        (let [state (share/grant-opened-shares state [share-id] user-id)
               expected (assoc expected
                               :congregation/permissions {}
                               :congregation/users []

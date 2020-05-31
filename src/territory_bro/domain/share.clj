@@ -3,6 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.domain.share
+  (:require [territory-bro.infra.permissions :as permissions])
   (:import (java.security SecureRandom)
            (java.util Base64)
            (org.apache.commons.lang3 StringUtils)
@@ -28,6 +29,14 @@
   [state event]
   (-> state
       (assoc-in [::shares (:share/id event) :share/last-opened] (:event/time event))))
+
+(defn- grant-opened-share [state share-id user-id]
+  (if-some [share (get-in state [::shares share-id])]
+    (permissions/grant state user-id [:view-territory (:congregation/id share) (:territory/id share)])
+    state))
+
+(defn grant-opened-shares [state share-ids user-id]
+  (reduce #(grant-opened-share %1 %2 user-id) state share-ids))
 
 
 ;;;; Queries

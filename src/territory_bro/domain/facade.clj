@@ -7,7 +7,6 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.region :as region]
-            [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
             [territory-bro.infra.permissions :as permissions]))
 
@@ -61,14 +60,3 @@
             (assoc :congregation/name "Demo Congregation")
             (assoc :congregation/permissions {:view-congregation true})
             (assoc :congregation/users []))))
-
-
-;;;; Shares
-
-(defn- grant-opened-share [state share-id user-id] ; TODO: move to share ns
-  (if-some [share (get-in state [::share/shares share-id])]
-    (permissions/grant state user-id [:view-territory (:congregation/id share) (:territory/id share)])
-    state))
-
-(defn grant-opened-shares [state share-ids user-id]
-  (reduce #(grant-opened-share %1 %2 user-id) state share-ids))

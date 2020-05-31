@@ -169,8 +169,8 @@
         state (projections/cached-state)]
     (cond-> state
       (::sudo? session) (congregation/sudo (current-user-id))
-      (some? (::opened-shares session)) (facade/grant-opened-shares (::opened-shares session)
-                                                                    (current-user-id)))))
+      (some? (::opened-shares session)) (share/grant-opened-shares (::opened-shares session)
+                                                                   (current-user-id)))))
 
 (def ^:private validate-congregation-list (s/validator [CongregationSummary]))
 

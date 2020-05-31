@@ -6,6 +6,7 @@
   (:require [clojure.test :refer :all]
             [territory-bro.domain.share :as share]
             [territory-bro.events :as events]
+            [territory-bro.infra.permissions :as permissions]
             [territory-bro.test.testutil :as testutil :refer [re-equals]])
   (:import (java.time Instant)
            (java.util UUID)
@@ -14,8 +15,11 @@
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
 (def territory-id (UUID. 0 3))
-(def share-id (UUID. 0 4))
+(def territory-id2 (UUID. 0 4))
+(def share-id (UUID. 0 0x10))
+(def share-id2 (UUID. 0 0x20))
 (def share-key "abc123")
+(def share-key2 "def456")
 (def test-time (Instant/ofEpochSecond 42))
 
 (def link-share-created
@@ -25,6 +29,11 @@
    :share/type :link
    :congregation/id cong-id
    :territory/id territory-id})
+(def link-share-created2
+  (assoc link-share-created
+         :share/id share-id2
+         :share/key share-key2
+         :territory/id territory-id2))
 (def share-opened
   {:event/type :share.event/share-opened
    :event/time test-time
@@ -55,6 +64,25 @@
         (let [events (conj events share-opened)
               expected (assoc-in expected [::share/shares share-id :share/last-opened] test-time)]
           (is (= expected (apply-events events))))))))
+
+(deftest grant-opened-shares-test
+  (let [state (apply-events [link-share-created
+                             link-share-created2])
+        permit1 [:view-territory cong-id territory-id]
+        permit2 [:view-territory cong-id territory-id2]]
+    (testing "no shares opened"
+      (is (not (permissions/allowed? state user-id permit1)))
+      (is (not (permissions/allowed? state user-id permit2))))
+
+    (testing "one share opened"
+      (let [state (share/grant-opened-shares state [share-id] user-id)]
+        (is (permissions/allowed? state user-id permit1))
+        (is (not (permissions/allowed? state user-id permit2)))))
+
+    (testing "many shares opened"
+      (let [state (share/grant-opened-shares state [share-id share-id2] user-id)]
+        (is (permissions/allowed? state user-id permit1))
+        (is (permissions/allowed? state user-id permit2))))))
 
 
 ;;;; Queries
@@ -115,7 +143,7 @@
       ;; trying to create a new share (i.e. new share ID) with the same old share key
       (let [conflicting-command (assoc create-command :share/id (UUID/randomUUID))]
         (is (thrown-with-msg?
-             WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000004")
+             WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
              (handle-command conflicting-command [link-share-created] injections)))))
 
     (testing "checks permits"
