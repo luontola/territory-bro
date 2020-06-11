@@ -169,6 +169,18 @@
 
 ;;;; Commands
 
+(deftest admin-permissions-granted-test
+  (let [cong-id (UUID. 0 1)
+        user-id (UUID. 0 2)
+        events (congregation/admin-permissions-granted cong-id user-id)]
+    (is (= {:event/type :congregation.event/permission-granted
+            :congregation/id cong-id
+            :user/id user-id
+            :permission/id :view-congregation}
+           (first events)))
+    (is (= congregation/all-permissions
+           (map :permission/id events)))))
+
 (deftest create-congregation-test
   (let [cong-id (UUID. 0 1)
         user-id (UUID. 0 2)
@@ -184,29 +196,10 @@
                        :congregation/id cong-id
                        :congregation/name "the name"
                        :congregation/schema-name "cong_schema"}
-        ;; TODO: remove duplication of the default grants list
-        view-permission-granted {:event/type :congregation.event/permission-granted
-                                 :congregation/id cong-id
-                                 :user/id user-id
-                                 :permission/id :view-congregation}
-        configure-permission-granted {:event/type :congregation.event/permission-granted
-                                      :congregation/id cong-id
-                                      :user/id user-id
-                                      :permission/id :configure-congregation}
-        gis-permission-granted {:event/type :congregation.event/permission-granted
-                                :congregation/id cong-id
-                                :user/id user-id
-                                :permission/id :gis-access}
-        share-territory-link-granted {:event/type :congregation.event/permission-granted
-                                      :congregation/id cong-id
-                                      :user/id user-id
-                                      :permission/id :share-territory-link}]
+        admin-grants (congregation/admin-permissions-granted cong-id user-id)]
+
     (testing "created"
-      (is (= [created-event
-              view-permission-granted
-              configure-permission-granted
-              gis-permission-granted
-              share-territory-link-granted]
+      (is (= (concat [created-event] admin-grants)
              (handle-command create-command [] injections))))
 
     (testing "created by system, should make no grants"
@@ -281,26 +274,14 @@
                           :command/user admin-id
                           :congregation/id cong-id
                           :user/id new-user-id}
-        ;; TODO: remove duplication of the default grants list
+        admin-grants (congregation/admin-permissions-granted cong-id new-user-id)
         view-granted {:event/type :congregation.event/permission-granted
                       :congregation/id cong-id
                       :user/id new-user-id
-                      :permission/id :view-congregation}
-        configure-granted {:event/type :congregation.event/permission-granted
-                           :congregation/id cong-id
-                           :user/id new-user-id
-                           :permission/id :configure-congregation}
-        gis-access-granted {:event/type :congregation.event/permission-granted
-                            :congregation/id cong-id
-                            :user/id new-user-id
-                            :permission/id :gis-access}
-        share-territory-link-granted {:event/type :congregation.event/permission-granted
-                                      :congregation/id cong-id
-                                      :user/id new-user-id
-                                      :permission/id :share-territory-link}]
+                      :permission/id :view-congregation}]
 
     (testing "user added"
-      (is (= [view-granted configure-granted gis-access-granted share-territory-link-granted]
+      (is (= admin-grants
              (handle-command add-user-command [created-event] injections))))
 
     (testing "user already in congregation"

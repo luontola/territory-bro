@@ -9,6 +9,12 @@
             [territory-bro.infra.util :refer [conj-set]])
   (:import (territory_bro ValidationException)))
 
+(def all-permissions
+  [:view-congregation
+   :configure-congregation
+   :gis-access
+   :share-territory-link])
+
 ;;;; Read model
 
 (defmulti projection (fn [_state event]
@@ -120,12 +126,8 @@
 (defmulti ^:private command-handler (fn [command _congregation _injections]
                                       (:command/type command)))
 
-(defn- admin-permissions-granted [cong-id user-id]
-  ;; TODO: remove duplication of the default grants list
-  (for [permission [:view-congregation
-                    :configure-congregation
-                    :gis-access
-                    :share-territory-link]]
+(defn admin-permissions-granted [cong-id user-id]
+  (for [permission all-permissions]
     {:event/type :congregation.event/permission-granted
      :congregation/id cong-id
      :user/id user-id

@@ -8,6 +8,7 @@
             [schema-tools.core :as tools]
             [schema.coerce :as coerce]
             [schema.core :as s]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.json :as json])
   (:import (java.time Instant)
            (java.util UUID)))
@@ -78,12 +79,8 @@
          :congregation/id UUID
          :congregation/name s/Str))
 
-;; TODO: remove duplication of the default grants list
 (s/defschema PermissionId
-  (s/enum :view-congregation
-          :configure-congregation
-          :gis-access
-          :share-territory-link))
+  (apply s/enum congregation/all-permissions))
 (s/defschema PermissionGranted
   (assoc BaseEvent
          :event/type (s/eq :congregation.event/permission-granted)
