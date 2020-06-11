@@ -7,10 +7,12 @@
             [luminus.http-server :as http]
             [luminus.repl-server :as repl]
             [mount.core :as mount]
+            [territory-bro.dispatcher :as dispatcher]
             [territory-bro.gis.gis-sync :as gis-sync]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.router :as router]
+            [territory-bro.migration :as migration]
             [territory-bro.projections :as projections])
   (:import (java.net URI)
            (java.net.http HttpClient HttpRequest HttpResponse$BodyHandlers))
@@ -33,11 +35,19 @@
   (when repl-server
     (repl/stop repl-server)))
 
+(defn- migrate-application-state! []
+  (let [injections {:now (:now config/env)}
+        state (projections/cached-state)]
+    (db/with-db [conn {}]
+      (doseq [command (migration/generate-commands state injections)]
+        (dispatcher/command! conn state command)))))
+
 (defn migrate-database! []
   (db/check-database-version 11)
   (db/migrate-master-schema!)
   ;; process managers will migrate tenant schemas and create missing GIS users
   (projections/refresh!)
+  (migrate-application-state!)
   ;; process any pending GIS changes, in case GIS sync was down for a long time
   (gis-sync/refresh!))
 
