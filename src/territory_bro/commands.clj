@@ -260,9 +260,6 @@
   (when-not (contains? command-schemas (:command/type command))
     (throw (ex-info (str "Unknown command type " (pr-str (:command/type command)))
                     {:command command})))
-  (assert (contains? command-schemas (:command/type command))
-          {:error [:unknown-command-type (:command/type command)]
-           :command command})
   (command-validator command))
 
 (defn check-permit [state {user :command/user, system :command/system, :as command} permit]
