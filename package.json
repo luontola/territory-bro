@@ -30,6 +30,7 @@
     "react-dom": "^0.0.0-experimental-e5d06e34b",
     "react-error-boundary": "^1.2.5",
     "react-intl": "^4.3.1",
+    "react-qr-svg": "^2.2.2",
     "regenerator-runtime": "^0.13.5"
   },
   "devDependencies": {
