@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.apache.commons/commons-lang3:3.11">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.11/commons-lang3-3.11.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
