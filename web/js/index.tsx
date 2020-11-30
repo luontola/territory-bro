@@ -35,7 +35,7 @@ globalHistory.listen(({location, action}) => {
 document.querySelector('html')
   .setAttribute('lang', language);
 
-ReactDOM.createRoot(document.getElementById('root'))
+ReactDOM.unstable_createRoot(document.getElementById('root'))
   .render(
     <React.StrictMode>
       <ErrorBoundary FallbackComponent={ErrorPage}>
