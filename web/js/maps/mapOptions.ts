@@ -55,7 +55,7 @@ export const mapRasters: Array<MapRaster> = [{
   name: "Finland - Vantaan kaupunkikartta",
   source: new TileWMS({
     url: 'https://gis.vantaa.fi/geoserver/wms',
-    params: {'LAYERS': 'taustakartta:kaupunkikartta_single_layer', 'TILED': true},
+    params: {'LAYERS': 'taustakartta:kaupunkikartta', 'TILED': true},
     serverType: 'geoserver',
     attributions: '&copy; Vantaan kaupunki'
   })
