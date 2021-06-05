@@ -48,10 +48,6 @@ Start the database
 
     docker-compose up -d db
 
-Run database migrations
-
-    lein run migrate
-
 Start the API backend
 
     lein run
