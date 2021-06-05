@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -36,10 +36,14 @@
           (gis-db/replace-id! conn schema table new-id replacement-id)
           (recur conn state true))
         ;; no conflict
-        (let [command (gis-change/change->command change state)
-              events (dispatcher/command! conn state command)
-              ;; the state needs to be updated for e.g. command validation's foreign key checks
-              state (reduce projections/projection state events)]
+        (let [changes (gis-change/normalize-change change)
+              state (reduce (fn [state change]
+                              (let [command (gis-change/change->command change state)
+                                    events (dispatcher/command! conn state command)]
+                                ;; the state needs to be updated for e.g. command validation's foreign key checks
+                                (reduce projections/projection state events)))
+                            state
+                            changes)]
           (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
           (recur conn state true))))
     had-changes?))

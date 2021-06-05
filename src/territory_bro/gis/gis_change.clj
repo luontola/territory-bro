@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,6 +17,20 @@
 
 
 (def ^:private system (str (ns-name *ns*)))
+
+(defn normalize-change [change]
+  (if (and (= :UPDATE (:gis-change/op change))
+           (not= (:id (:gis-change/old change))
+                 (:id (:gis-change/new change)))
+           (not= (:gis-change/replacement-id change)
+                 (:id (:gis-change/new change))))
+    [(assoc change
+            :gis-change/op :DELETE
+            :gis-change/new nil)
+     (assoc change
+            :gis-change/op :INSERT
+            :gis-change/old nil)]
+    [change]))
 
 (defn- apply-replacement-id [{:gis-change/keys [replacement-id old new], :as change}]
   (if (some? replacement-id)

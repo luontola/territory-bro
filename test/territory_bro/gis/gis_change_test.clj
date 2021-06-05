@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -38,6 +38,49 @@
    :user/id user-id
    :gis-user/username gis-username
    :gis-user/password ""})
+
+(deftest normalize-change-test
+  (testing "normal event"
+    (let [change {:gis-change/id change-id
+                  :gis-change/op :UPDATE
+                  :gis-change/old {:id territory-id
+                                   :number "100"}
+                  :gis-change/new {:id territory-id
+                                   :number "200"}}]
+      (is (= [change]
+             (gis-change/normalize-change change)))))
+
+  (testing "ID change"
+    (let [territory-id2 (UUID/randomUUID)
+          change {:gis-change/id change-id
+                  :gis-change/op :UPDATE
+                  :gis-change/old {:id territory-id
+                                   :number "100"}
+                  :gis-change/new {:id territory-id2
+                                   :number "200"}}
+          delete {:gis-change/id change-id
+                  :gis-change/op :DELETE
+                  :gis-change/old {:id territory-id
+                                   :number "100"}
+                  :gis-change/new nil}
+          insert {:gis-change/id change-id
+                  :gis-change/op :INSERT
+                  :gis-change/old nil
+                  :gis-change/new {:id territory-id2
+                                   :number "200"}}]
+      (is (= [delete insert]
+             (gis-change/normalize-change change)))))
+
+  (testing "ignores replacement IDs"
+    (let [change {:gis-change/id change-id
+                  :gis-change/op :UPDATE
+                  :gis-change/old {:id territory-id
+                                   :number "100"}
+                  :gis-change/new {:id replacement-id
+                                   :number "200"}
+                  :gis-change/replacement-id replacement-id}]
+      (is (= [change]
+             (gis-change/normalize-change change))))))
 
 (def gis-change-validator (s/validator gis-db/GisChange))
 

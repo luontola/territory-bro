@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -813,6 +813,25 @@
                    :region/name "Somewhere"
                    :region/location testdata/wkt-multi-polygon}]
                  (->> (vals (get-in state [::region/regions cong-id]))
-                      (sort-by :region/name)))))))))
+                      (sort-by :region/name)))))))
+
+    ;; TODO: also test changing the ID to a conflicting stream ID - there is a high risk of feature interaction
+    (testing "changing the ID will delete the old territory and create a new one"
+      (let [new-territory-id (UUID/randomUUID)]
+        (jdbc/with-db-transaction [conn db-spec]
+          (jdbc/execute! conn ["update territory set id = ? where id = ?"
+                               new-territory-id territory-id]))
+        (sync-gis-changes!)
+        (let [state (projections/cached-state)]
+          (is (nil? (get-in state [::territory/territories cong-id territory-id]))
+              "old ID")
+          (is (= {:territory/id new-territory-id
+                  :territory/number "123"
+                  :territory/addresses "the addresses"
+                  :territory/region "the region"
+                  :territory/meta {:foo "bar"}
+                  :territory/location testdata/wkt-multi-polygon}
+                 (get-in state [::territory/territories cong-id new-territory-id]))
+              "new ID"))))))
 
 ;; TODO: delete territory and then restore it to same congregation

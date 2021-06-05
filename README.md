@@ -90,6 +90,6 @@ Produce canonical XML for better diffs
 
 ## License
 
-Copyright © 2015-2018, [Esko Luontola](http://www.luontola.fi)
+Copyright © 2015-2021, [Esko Luontola](http://www.luontola.fi)
 
 This software is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
