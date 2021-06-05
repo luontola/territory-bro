@@ -11,11 +11,10 @@ For more information, see <https://territorybro.com>
 
 The easiest way to run this application is to use [Docker](https://www.docker.com/products/docker-desktop).
 
-Start the database and run database migration scripts to initialize the database
+Start the database
 
     docker-compose pull
     docker-compose up -d db
-    docker-compose run --rm api migrate
 
 Start the application
 
