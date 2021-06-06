@@ -4,8 +4,7 @@ Territory Bro is a tool for managing territory cards in the congregations of Jeh
 
 For more information, see <https://territorybro.com>
 
-[Semaphore CI](https://luontola.semaphoreci.com/projects/territory-bro)
-
+[![Build Status](https://luontola.semaphoreci.com/badges/territory-bro/branches/master.svg?style=shields)](https://luontola.semaphoreci.com/projects/territory-bro)
 
 ## Running
 
@@ -29,7 +28,6 @@ Stop the application
 Stop the application and remove all data
 
     docker compose down
-
 
 ## Developing
 
@@ -83,7 +81,6 @@ Download dependency sources
 Produce canonical XML for better diffs
 
     xmllint --c14n11 example.qgs > resources/template-territories.qgs
-
 
 ## License
 
