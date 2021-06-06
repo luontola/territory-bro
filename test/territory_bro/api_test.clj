@@ -815,7 +815,6 @@
                  (->> (vals (get-in state [::region/regions cong-id]))
                       (sort-by :region/name)))))))
 
-    ;; TODO: also test changing the ID to a conflicting stream ID - there is a high risk of feature interaction
     (testing "changing the ID will delete the old territory and create a new one"
       (let [new-territory-id (UUID/randomUUID)]
         (jdbc/with-db-transaction [conn db-spec]
@@ -832,6 +831,40 @@
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-multi-polygon}
                  (get-in state [::territory/territories cong-id new-territory-id]))
-              "new ID"))))))
+              "new ID"))))
+
+    ;; TODO
+    #_(testing "changing the ID to a conflicting ID"
+        ;; combination of the previous two tests, to ensure that the features to not conflict
+        (let [conflicting-stream-id (create-congregation-without-user! "foo")]
+          (jdbc/with-db-transaction [conn db-spec]
+            (jdbc/execute! conn ["update subregion set id = ? where id = ?"
+                                 conflicting-stream-id region-id]))
+          (sync-gis-changes!)
+          (let [state (projections/cached-state)
+                replacement-id (-> (set (keys (get-in state [::region/regions cong-id])))
+                                   (disj region-id) ; produced by earlier tests
+                                   (first))]
+            (prn 'conflicting-stream-id conflicting-stream-id)
+            (prn 'region-id region-id)
+            (prn 'replacement-id replacement-id)
+            #_(is (= "" (set (keys (get-in state [::region/regions cong-id])))))
+            #_(is (some? replacement-id))
+            #_(is (not= conflicting-stream-id replacement-id))
+            #_(is (= [{:region/id replacement-id
+                       :region/name "Conflicting ID"
+                       :region/location testdata/wkt-multi-polygon}
+                      {:region/id region-id
+                       :region/name "Somewhere"
+                       :region/location testdata/wkt-multi-polygon}]
+                     (->> (vals (get-in state [::region/regions cong-id]))
+                          (sort-by :region/name))))
+
+            (is (nil? (get-in state [::region/regions cong-id region-id]))
+                "old ID")
+            (is (nil? (get-in state [::region/regions cong-id conflicting-stream-id]))
+                "conflicting ID")
+            (is (some? (get-in state [::region/regions cong-id replacement-id]))
+                "replacement ID"))))))
 
 ;; TODO: delete territory and then restore it to same congregation
