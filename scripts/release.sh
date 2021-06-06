@@ -6,7 +6,7 @@ TAG="${1:-$DEFAULT_TAG}"
 echo TAG="$TAG"
 set -x
 
-docker-compose build --pull
+docker compose build --pull
 
 git tag "$TAG"
 

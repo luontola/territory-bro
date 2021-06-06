@@ -13,22 +13,22 @@ The easiest way to run this application is to use [Docker](https://www.docker.co
 
 Start the database
 
-    docker-compose pull
-    docker-compose up -d db
+    docker compose pull
+    docker compose up -d db
 
 Start the application
 
-    docker-compose up -d
+    docker compose up -d
 
 The application will run at http://localhost:8080
 
 Stop the application
 
-    docker-compose stop
+    docker compose stop
 
 Stop the application and remove all data
 
-    docker-compose down
+    docker compose down
 
 
 ## Developing
@@ -43,7 +43,7 @@ It might also be useful to have the [PostgreSQL](https://www.postgresql.org/) co
 
 Start the database
 
-    docker-compose up -d db
+    docker compose up -d db
 
 Start the API backend
 
