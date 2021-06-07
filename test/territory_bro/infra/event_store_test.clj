@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -147,6 +147,65 @@
                    :event/type :event-4
                    :stuff "gazonk"}]
                  (event-store/read-stream conn stream-1 {:since 2}))))))
+
+    (db/with-db [conn {}]
+      (jdbc/db-set-rollback-only! conn)
+      (let [dummy-event {:event/type :event-1
+                         :stuff "foo"}
+            cong (UUID. 0 1)
+            cong-event {:event/type :territory.event/example
+                        :congregation/id cong
+                        :stuff "foo"}]
+
+        (testing "adds a row to stream table when events are saved,"
+          (testing "dummy event"
+            (let [stream (UUID/randomUUID)]
+              (event-store/save! conn stream 0 [dummy-event])
+              (is (= [{:stream_id stream
+                       :entity_type nil
+                       :congregation nil
+                       :gis_schema nil
+                       :gis_table nil}]
+                     (jdbc/query conn ["select * from stream where stream_id = ?"
+                                       stream])))))
+
+          (testing "congregation event"
+            (let [stream (UUID/randomUUID)]
+              (event-store/save! conn stream 0 [cong-event])
+              (is (= [{:stream_id stream
+                       :entity_type "territory"
+                       :congregation cong
+                       :gis_schema nil
+                       :gis_table nil}]
+                     (jdbc/query conn ["select * from stream where stream_id = ?"
+                                       stream]))))))
+
+        (testing "the stream table row may exist before events are saved,"
+          (testing "dummy event"
+            (let [stream (UUID/randomUUID)]
+              (jdbc/execute! conn ["insert into stream (stream_id, gis_schema, gis_table) values (?, ?, ?)"
+                                   stream "the_schema" "the_table"])
+              (event-store/save! conn stream 0 [dummy-event])
+              (is (= [{:stream_id stream
+                       :entity_type nil
+                       :congregation nil
+                       :gis_schema "the_schema"
+                       :gis_table "the_table"}]
+                     (jdbc/query conn ["select * from stream where stream_id = ?"
+                                       stream])))))
+
+          (testing "congregation event"
+            (let [stream (UUID/randomUUID)]
+              (jdbc/execute! conn ["insert into stream (stream_id, gis_schema, gis_table) values (?, ?, ?)"
+                                   stream "the_schema" "the_table"])
+              (event-store/save! conn stream 0 [cong-event])
+              (is (= [{:stream_id stream
+                       :entity_type "territory"
+                       :congregation cong
+                       :gis_schema "the_schema"
+                       :gis_table "the_table"}]
+                     (jdbc/query conn ["select * from stream where stream_id = ?"
+                                       stream]))))))))
 
     (db/with-db [conn {}]
       (jdbc/db-set-rollback-only! conn)

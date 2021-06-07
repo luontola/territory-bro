@@ -36,8 +36,13 @@ $$
 declare
     next_global_revision bigint;
     next_stream_revision integer;
+    new_entity_type varchar;
+    new_congregation uuid;
 begin
+    -- only one writer, but don't block readers
     lock table ${masterSchema}.event in share row exclusive mode;
+
+    -- monotonically increasing revision numbers
 
     select coalesce(max(global_revision), 0) + 1
     into next_global_revision
@@ -47,6 +52,8 @@ begin
     into next_stream_revision
     from ${masterSchema}.event
     where stream_id = new.stream_id;
+
+    -- optimistic concurrency control
 
     if new.stream_revision is null then
         new.stream_revision = next_stream_revision;
@@ -61,6 +68,27 @@ begin
     end if;
 
     new.global_revision = next_global_revision;
+
+    -- populate stream table
+
+    new_entity_type = substring(new.data ->> 'event/type' from '^[^.]+');
+    if new_entity_type not in ('card-minimap-viewport',
+                               'congregation',
+                               'congregation-boundary',
+                               'region',
+                               'share',
+                               'territory') then
+        new_entity_type = null;
+    end if;
+
+    new_congregation = (new.data ->> 'congregation/id')::uuid;
+
+    insert into stream (stream_id, entity_type, congregation)
+    values (new.stream_id, new_entity_type, new_congregation)
+    on conflict (stream_id) do update
+        set entity_type  = new_entity_type,
+            congregation = new_congregation;
+
     return new;
 end
 $$ language plpgsql;
