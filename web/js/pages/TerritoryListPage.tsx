@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2021 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -83,7 +83,7 @@ const TerritoryListPage = ({congregationId}) => {
         .map(territory =>
           <tr key={territory.id}>
             <td className={styles.number}>
-              <Link to={territory.id}>{territory.number}</Link>
+              <Link to={territory.id}>{territory.number === '' ? '-' : territory.number}</Link>
             </td>
             <td>{territory.region}</td>
             <td>{territory.addresses}</td>
