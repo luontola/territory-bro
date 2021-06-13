@@ -161,24 +161,22 @@
           (testing "dummy event"
             (let [stream (UUID/randomUUID)]
               (event-store/save! conn stream 0 [dummy-event])
-              (is (= [{:stream_id stream
-                       :entity_type nil
-                       :congregation nil
-                       :gis_schema nil
-                       :gis_table nil}]
-                     (jdbc/query conn ["select * from stream where stream_id = ?"
-                                       stream])))))
+              (is (= {:stream_id stream
+                      :entity_type nil
+                      :congregation nil
+                      :gis_schema nil
+                      :gis_table nil}
+                     (event-store/stream-info conn stream)))))
 
           (testing "congregation event"
             (let [stream (UUID/randomUUID)]
               (event-store/save! conn stream 0 [cong-event])
-              (is (= [{:stream_id stream
-                       :entity_type "territory"
-                       :congregation cong
-                       :gis_schema nil
-                       :gis_table nil}]
-                     (jdbc/query conn ["select * from stream where stream_id = ?"
-                                       stream]))))))
+              (is (= {:stream_id stream
+                      :entity_type "territory"
+                      :congregation cong
+                      :gis_schema nil
+                      :gis_table nil}
+                     (event-store/stream-info conn stream))))))
 
         (testing "the stream table row may exist before events are saved,"
           (testing "dummy event"
@@ -186,26 +184,24 @@
               (jdbc/execute! conn ["insert into stream (stream_id, gis_schema, gis_table) values (?, ?, ?)"
                                    stream "the_schema" "the_table"])
               (event-store/save! conn stream 0 [dummy-event])
-              (is (= [{:stream_id stream
-                       :entity_type nil
-                       :congregation nil
-                       :gis_schema "the_schema"
-                       :gis_table "the_table"}]
-                     (jdbc/query conn ["select * from stream where stream_id = ?"
-                                       stream])))))
+              (is (= {:stream_id stream
+                      :entity_type nil
+                      :congregation nil
+                      :gis_schema "the_schema"
+                      :gis_table "the_table"}
+                     (event-store/stream-info conn stream)))))
 
           (testing "congregation event"
             (let [stream (UUID/randomUUID)]
               (jdbc/execute! conn ["insert into stream (stream_id, gis_schema, gis_table) values (?, ?, ?)"
                                    stream "the_schema" "the_table"])
               (event-store/save! conn stream 0 [cong-event])
-              (is (= [{:stream_id stream
-                       :entity_type "territory"
-                       :congregation cong
-                       :gis_schema "the_schema"
-                       :gis_table "the_table"}]
-                     (jdbc/query conn ["select * from stream where stream_id = ?"
-                                       stream]))))))
+              (is (= {:stream_id stream
+                      :entity_type "territory"
+                      :congregation cong
+                      :gis_schema "the_schema"
+                      :gis_table "the_table"}
+                     (event-store/stream-info conn stream))))))
 
         (testing "only the first event in the stream will update the stream table"
           (let [stream (UUID/randomUUID)
@@ -220,13 +216,13 @@
 
             (event-store/save! conn stream 0 [event-1 event-2])
 
-            (is (= [{:stream_id stream
-                     :entity_type "region"
-                     :congregation cong-1
-                     :gis_schema nil
-                     :gis_table nil}]
-                   (jdbc/query conn ["select * from stream where stream_id = ?"
-                                     stream])))))))
+            (is (= {:stream_id stream
+                    :entity_type "region"
+                    :congregation cong-1
+                    :gis_schema nil
+                    :gis_table nil}
+                   (event-store/stream-info conn stream)))))))
+
 
     (db/with-db [conn {}]
       (jdbc/db-set-rollback-only! conn)

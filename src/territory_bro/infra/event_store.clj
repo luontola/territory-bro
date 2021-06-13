@@ -1,9 +1,10 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.event-store
-  (:require [territory-bro.events :as events]
+  (:require [clojure.java.jdbc :as jdbc]
+            [territory-bro.events :as events]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db])
   (:import (java.util UUID)
@@ -84,6 +85,10 @@
                 (assoc :event/global-revision (:global_revision result))
                 (sorted-keys)))))
        (doall)))
+
+(defn stream-info [conn stream-id]
+  (first (jdbc/query conn ["select * from stream where stream_id = ?"
+                           stream-id])))
 
 (comment
   (db/with-db [conn {:read-only? true}]
