@@ -4,6 +4,8 @@
       <root url="jar://$MAVEN_REPOSITORY$/org/postgresql/postgresql/42.2.18/postgresql-42.2.18.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/postgresql/postgresql/42.2.18/postgresql-42.2.18-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

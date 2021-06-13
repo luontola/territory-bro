@@ -71,23 +71,25 @@ begin
 
     -- populate stream table
 
-    new_entity_type = substring(new.data ->> 'event/type' from '^[^.]+');
-    if new_entity_type not in ('card-minimap-viewport',
-                               'congregation',
-                               'congregation-boundary',
-                               'region',
-                               'share',
-                               'territory') then
-        new_entity_type = null;
+    if next_stream_revision = 1 then
+        new_entity_type = substring(new.data ->> 'event/type' from '^[^.]+');
+        if new_entity_type not in ('card-minimap-viewport',
+                                   'congregation',
+                                   'congregation-boundary',
+                                   'region',
+                                   'share',
+                                   'territory') then
+            new_entity_type = null;
+        end if;
+
+        new_congregation = (new.data ->> 'congregation/id')::uuid;
+
+        insert into stream (stream_id, entity_type, congregation)
+        values (new.stream_id, new_entity_type, new_congregation)
+        on conflict (stream_id) do update
+            set entity_type  = new_entity_type,
+                congregation = new_congregation;
     end if;
-
-    new_congregation = (new.data ->> 'congregation/id')::uuid;
-
-    insert into stream (stream_id, entity_type, congregation)
-    values (new.stream_id, new_entity_type, new_congregation)
-    on conflict (stream_id) do update
-        set entity_type  = new_entity_type,
-            congregation = new_congregation;
 
     return new;
 end

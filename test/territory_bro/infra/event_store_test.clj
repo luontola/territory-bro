@@ -205,7 +205,28 @@
                        :gis_schema "the_schema"
                        :gis_table "the_table"}]
                      (jdbc/query conn ["select * from stream where stream_id = ?"
-                                       stream]))))))))
+                                       stream]))))))
+
+        (testing "only the first event in the stream will update the stream table"
+          (let [stream (UUID/randomUUID)
+                cong-1 (UUID/randomUUID)
+                event-1 {:event/type :region.event/example
+                         :congregation/id cong-1}
+                event-2 cong-event]
+            (is (not= (namespace (:event/type event-1))
+                      (namespace (:event/type event-2))))
+            (is (not= (:congregation/id event-1)
+                      (:congregation/id event-2)))
+
+            (event-store/save! conn stream 0 [event-1 event-2])
+
+            (is (= [{:stream_id stream
+                     :entity_type "region"
+                     :congregation cong-1
+                     :gis_schema nil
+                     :gis_table nil}]
+                   (jdbc/query conn ["select * from stream where stream_id = ?"
+                                     stream])))))))
 
     (db/with-db [conn {}]
       (jdbc/db-set-rollback-only! conn)
