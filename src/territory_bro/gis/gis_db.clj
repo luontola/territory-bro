@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -43,12 +43,14 @@
        (map format-feature)
        (doall)))
 
+(defn create-region-with-id! [conn id name location]
+  (query! conn :create-region {:id id
+                               :name name
+                               :location location})
+  id)
+
 (defn create-region! [conn name location]
-  (let [id (UUID/randomUUID)]
-    (query! conn :create-region {:id id
-                                 :name name
-                                 :location location})
-    id))
+  (create-region-with-id! conn (UUID/randomUUID) name location))
 
 
 ;; TODO: not used in production code; remove?

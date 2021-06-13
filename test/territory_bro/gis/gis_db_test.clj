@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -10,9 +10,11 @@
             [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
+            [territory-bro.infra.event-store :as event-store]
             [territory-bro.test.fixtures :refer [db-fixture]])
-  (:import (java.sql Connection)
+  (:import (java.sql Connection SQLException)
            (java.util UUID)
+           (java.util.regex Pattern)
            (org.postgresql.util PSQLException)))
 
 (def test-schema "test_gis_schema")
@@ -34,6 +36,13 @@
   (with-tenant-schema test-schema f))
 
 (use-fixtures :each (join-fixtures [db-fixture test-schema-fixture]))
+
+(def example-territory
+  {:territory/number "123"
+   :territory/addresses "Street 1 A"
+   :territory/region "Somewhere"
+   :territory/meta {:foo "bar", :gazonk 42}
+   :territory/location testdata/wkt-multi-polygon})
 
 (deftest regions-test
   (db/with-db [conn {}]
@@ -64,11 +73,7 @@
     (jdbc/db-set-rollback-only! conn)
     (db/use-tenant-schema conn test-schema)
 
-    (let [territory-id (gis-db/create-territory! conn {:territory/number "123"
-                                                       :territory/addresses "Street 1 A"
-                                                       :territory/region "Somewhere"
-                                                       :territory/meta {:foo "bar", :gazonk 42}
-                                                       :territory/location testdata/wkt-multi-polygon})]
+    (let [territory-id (gis-db/create-territory! conn example-territory)]
 
       (testing "create new territory"
         (is territory-id))
@@ -99,6 +104,102 @@
                     (map :gis-feature/number)
                     (sort))))))))
 
+(defn- init-stream! [conn id gis-schema, gis-table]
+  (jdbc/execute! conn ["INSERT INTO stream (stream_id, gis_schema, gis_table) VALUES (?, ?, ?)"
+                       id gis-schema gis-table])
+  id)
+
+(deftest validate-gis-change-test
+  (db/with-db [conn {}]
+    (jdbc/db-set-rollback-only! conn)
+    (db/use-tenant-schema conn test-schema)
+
+    (testing "populates the stream table on insert"
+      (let [id (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon)]
+        (is (= {:stream_id id
+                :entity_type nil
+                :congregation nil
+                :gis_schema test-schema
+                :gis_table "congregation_boundary"}
+               (event-store/stream-info conn id))
+            "congregation boundary"))
+      (let [id (gis-db/create-region! conn "the name" testdata/wkt-multi-polygon)]
+        (is (= {:stream_id id
+                :entity_type nil
+                :congregation nil
+                :gis_schema test-schema
+                :gis_table "subregion"}
+               (event-store/stream-info conn id))
+            "region"))
+      (let [id (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon)]
+        (is (= {:stream_id id
+                :entity_type nil
+                :congregation nil
+                :gis_schema test-schema
+                :gis_table "card_minimap_viewport"}
+               (event-store/stream-info conn id))
+            "card minimap viewport"))
+      (let [id (gis-db/create-territory! conn example-territory)]
+        (is (= {:stream_id id
+                :entity_type nil
+                :congregation nil
+                :gis_schema test-schema
+                :gis_table "territory"}
+               (event-store/stream-info conn id))
+            "territory")))
+
+    (testing "populates the stream table on ID change"
+      (let [old-id (gis-db/create-region! conn "test" testdata/wkt-multi-polygon)
+            new-id (UUID/randomUUID)]
+        (jdbc/execute! conn ["UPDATE subregion SET id = ? WHERE id = ?"
+                             new-id old-id])
+        (is (= {:stream_id old-id
+                :entity_type nil
+                :congregation nil
+                :gis_schema test-schema
+                :gis_table "subregion"}
+               (event-store/stream-info conn old-id))
+            "old stream")
+        (is (= {:stream_id new-id
+                :entity_type nil
+                :congregation nil
+                :gis_schema test-schema
+                :gis_table "subregion"}
+               (event-store/stream-info conn new-id))
+            "new stream")))
+
+    (testing "ok: stream ID is used by current schema and table"
+      (let [old-id (init-stream! conn (UUID/randomUUID) test-schema "subregion")
+            new-id (gis-db/create-region-with-id! conn old-id "reused" testdata/wkt-multi-polygon)]
+        (is (= old-id new-id))
+        (is (= [{:name "reused"}]
+               (jdbc/query conn ["SELECT name FROM subregion WHERE id = ?"
+                                 new-id]))))))
+
+  (db/with-db [conn {}]
+    (db/use-tenant-schema conn test-schema)
+    (testing "error: stream ID is used by another schema"
+      (let [id (init-stream! conn (UUID/randomUUID) "another_schema" "subregion")]
+        (is (thrown-with-msg?
+             SQLException (Pattern/compile (str "ID " id " is already used in some other table and schema"))
+             (gis-db/create-region-with-id! conn id "reused" testdata/wkt-multi-polygon))))))
+
+  (db/with-db [conn {}]
+    (db/use-tenant-schema conn test-schema)
+    (testing "error: stream ID is used by another table"
+      (let [id (init-stream! conn (UUID/randomUUID) test-schema "territory")]
+        (is (thrown-with-msg?
+             SQLException (Pattern/compile (str "ID " id " is already used in some other table and schema"))
+             (gis-db/create-region-with-id! conn id "reused" testdata/wkt-multi-polygon))))))
+
+  (db/with-db [conn {}]
+    (db/use-tenant-schema conn test-schema)
+    (testing "error: stream ID is used by non-gis entity"
+      (let [id (init-stream! conn (UUID/randomUUID) nil nil)]
+        (is (thrown-with-msg?
+             SQLException (Pattern/compile (str "ID " id " is already used in some other table and schema"))
+             (gis-db/create-region-with-id! conn id "reused" testdata/wkt-multi-polygon)))))))
+
 (deftest gis-change-log-test
   (db/with-db [conn {}]
     (jdbc/db-set-rollback-only! conn)
@@ -109,11 +210,7 @@
       (is (nil? (gis-db/next-unprocessed-change conn))))
 
     (testing "territory table change log,"
-      (let [territory-id (gis-db/create-territory! conn {:territory/number "123"
-                                                         :territory/addresses "Street 1 A"
-                                                         :territory/region "Somewhere"
-                                                         :territory/meta {:foo "bar", :gazonk 42}
-                                                         :territory/location testdata/wkt-multi-polygon})]
+      (let [territory-id (gis-db/create-territory! conn example-territory)]
         (testing "insert"
           (let [changes (gis-db/get-changes conn)]
             (is (= 1 (count changes)))
@@ -459,11 +556,7 @@
     (testing "can modify data in the tenant schema"
       (jdbc/with-db-transaction [conn db-spec]
         (db/use-tenant-schema conn test-schema)
-        (is (gis-db/create-territory! conn {:territory/number "123"
-                                            :territory/addresses "Street 1 A"
-                                            :territory/region "Somewhere"
-                                            :territory/meta {:foo "bar", :gazonk 42}
-                                            :territory/location testdata/wkt-multi-polygon}))
+        (is (gis-db/create-territory! conn example-territory))
         (is (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon))
         (is (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon))
         (is (gis-db/create-card-minimap-viewport! conn testdata/wkt-polygon))))

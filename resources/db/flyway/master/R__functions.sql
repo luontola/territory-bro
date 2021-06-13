@@ -1,3 +1,37 @@
+create or replace function validate_gis_change() returns trigger as
+$$
+declare
+    old_stream_id uuid;
+    old_gis_schema varchar;
+    old_gis_table varchar;
+begin
+    select stream_id, gis_schema, gis_table
+    into old_stream_id, old_gis_schema, old_gis_table
+    from ${masterSchema}.stream
+    where stream_id = new.id;
+
+    if old_stream_id is null then
+        -- updating an existing row or restoring a deleted row
+
+        insert into ${masterSchema}.stream (stream_id, gis_schema, gis_table)
+        values (new.id, tg_table_schema, tg_table_name);
+
+        return new;
+    end if;
+
+    if old_gis_schema = tg_table_schema and
+       old_gis_table = tg_table_name then
+        -- inserting a new row
+
+        return new;
+    end if;
+
+    raise exception 'duplicate key value violates unique constraint'
+        using errcode = 'unique_violation',
+            hint = ('ID ' || new.id || ' is already used in some other table and schema');
+end
+$$ language plpgsql security definer;
+
 create or replace function append_gis_change_log() returns trigger as
 $$
 declare
