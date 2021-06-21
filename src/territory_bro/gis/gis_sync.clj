@@ -10,42 +10,27 @@
             [territory-bro.gis.gis-change :as gis-change]
             [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.infra.db :as db]
-            [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.executors :as executors]
             [territory-bro.infra.poller :as poller]
             [territory-bro.projections :as projections])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
-           (java.util UUID)
            (java.util.concurrent Executors ExecutorService TimeUnit)
            (org.postgresql PGConnection)
            (org.postgresql.util PSQLException)))
 
 (defn- process-changes! [conn state had-changes?]
   (if-some [change (gis-db/next-unprocessed-change conn)]
-    (let [new-id (when (= :INSERT (:gis-change/op change))
-                   (when (nil? (:gis-change/replacement-id change)) ; the replacement ID should already be unused, and replacing it a second time would bring chaos (e.g. infinite loop)
-                     (:id (:gis-change/new change))))]
-      (if (and new-id (event-store/stream-exists? conn new-id))
-        ;; conflict
-        (let [replacement-id (UUID/randomUUID)
-              {:gis-change/keys [schema table]} change]
-          (log/info "Replacing" (str schema "." table) "ID" new-id "with" replacement-id)
-          (assert (not (event-store/stream-exists? conn replacement-id))
-                  {:replacement-id replacement-id})
-          (gis-db/replace-id! conn schema table new-id replacement-id)
-          (recur conn state true))
-        ;; no conflict
-        (let [changes (gis-change/normalize-change change)
-              state (reduce (fn [state change]
-                              (let [command (gis-change/change->command change state)
-                                    events (dispatcher/command! conn state command)]
-                                ;; the state needs to be updated for e.g. command validation's foreign key checks
-                                (reduce projections/projection state events)))
-                            state
-                            changes)]
-          (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
-          (recur conn state true))))
+    (let [changes (gis-change/normalize-change change)
+          state (reduce (fn [state change]
+                          (let [command (gis-change/change->command change state)
+                                events (dispatcher/command! conn state command)]
+                            ;; the state needs to be updated for e.g. command validation's foreign key checks
+                            (reduce projections/projection state events)))
+                        state
+                        changes)]
+      (gis-db/mark-changes-processed! conn [(:gis-change/id change)])
+      (recur conn state true))
     had-changes?))
 
 (defn refresh! []

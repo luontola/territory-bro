@@ -102,8 +102,7 @@
    :gis-change/time Instant
    :gis-change/old (s/maybe GisFeature)
    :gis-change/new (s/maybe GisFeature)
-   :gis-change/processed? s/Bool
-   :gis-change/replacement-id (s/maybe s/Uuid)})
+   :gis-change/processed? s/Bool})
 
 (def ^:private gis-change-coercer
   (coerce/coercer! GisChange coerce/string-coercion-matcher))
@@ -117,8 +116,7 @@
    :time :gis-change/time
    :old :gis-change/old
    :new :gis-change/new
-   :processed :gis-change/processed?
-   :replacement_id :gis-change/replacement-id})
+   :processed :gis-change/processed?})
 
 (defn- format-gis-change [change]
   (->> change
@@ -139,15 +137,6 @@
 
 (defn mark-changes-processed! [conn ids]
   (query! conn :mark-changes-processed {:ids ids}))
-
-(defn replace-id! [conn schema table old-id new-id]
-  (query! conn :replace-id-of-entity {:schema_table (str schema "." table)
-                                      :old_id old-id
-                                      :new_id new-id})
-  (query! conn :replace-id-of-changes {:schema schema
-                                       :table table
-                                       :old_id old-id
-                                       :new_id new-id}))
 
 
 ;;;; Database users

@@ -22,7 +22,6 @@
 (def region-id (UUID. 0 4))
 (def congregation-boundary-id (UUID. 0 5))
 (def card-minimap-viewport-id (UUID. 0 6))
-(def replacement-id (UUID. 0 0xF))
 
 (def change-id 100)
 (def test-time (Instant/ofEpochSecond 10))
@@ -69,17 +68,6 @@
                   :gis-change/new {:id territory-id2
                                    :number "200"}}]
       (is (= [delete insert]
-             (gis-change/normalize-change change)))))
-
-  (testing "ignores replacement IDs"
-    (let [change {:gis-change/id change-id
-                  :gis-change/op :UPDATE
-                  :gis-change/old {:id territory-id
-                                   :number "100"}
-                  :gis-change/new {:id replacement-id
-                                   :number "200"}
-                  :gis-change/replacement-id replacement-id}]
-      (is (= [change]
              (gis-change/normalize-change change))))))
 
 (def gis-change-validator (s/validator gis-db/GisChange))
@@ -118,8 +106,7 @@
                                  :subregion "Somewhere"
                                  :meta {:foo "bar", :gazonk 42}
                                  :location testdata/wkt-multi-polygon}
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "territory update"
@@ -153,8 +140,7 @@
                                  :subregion "Somewhere"
                                  :meta {:foo "bar", :gazonk 42}
                                  :location testdata/wkt-multi-polygon}
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "territory delete"
@@ -178,8 +164,7 @@
                                  :meta {:foo "bar", :gazonk 42}
                                  :location testdata/wkt-multi-polygon}
                 :gis-change/new nil
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "region insert"
@@ -202,8 +187,7 @@
                 :gis-change/new {:id region-id
                                  :name "Somewhere"
                                  :location testdata/wkt-multi-polygon}
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "region update"
@@ -228,8 +212,7 @@
                 :gis-change/new {:id region-id
                                  :name "Somewhere"
                                  :location testdata/wkt-multi-polygon}
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "region delete"
@@ -250,8 +233,7 @@
                                  :name "Somewhere"
                                  :location testdata/wkt-multi-polygon}
                 :gis-change/new nil
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "congregation_boundary insert"
@@ -272,8 +254,7 @@
                 :gis-change/old nil
                 :gis-change/new {:id congregation-boundary-id
                                  :location testdata/wkt-multi-polygon}
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "congregation_boundary update"
@@ -295,8 +276,7 @@
                                  :location ""}
                 :gis-change/new {:id congregation-boundary-id
                                  :location testdata/wkt-multi-polygon}
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "congregation_boundary delete"
@@ -316,8 +296,7 @@
                 :gis-change/old {:id congregation-boundary-id
                                  :location testdata/wkt-multi-polygon}
                 :gis-change/new nil
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport insert"
@@ -338,8 +317,7 @@
                 :gis-change/old nil
                 :gis-change/new {:id card-minimap-viewport-id
                                  :location testdata/wkt-polygon}
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport update"
@@ -361,8 +339,7 @@
                                  :location ""}
                 :gis-change/new {:id card-minimap-viewport-id
                                  :location testdata/wkt-polygon}
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
+                :gis-change/processed? false}
                (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport delete"
@@ -382,105 +359,5 @@
                 :gis-change/old {:id card-minimap-viewport-id
                                  :location testdata/wkt-polygon}
                 :gis-change/new nil
-                :gis-change/processed? false
-                :gis-change/replacement-id nil}
-               (change->command [congregation-created gis-user-created])))))
-
-  (testing "replacement ID"
-    (testing "insert"
-      (is (= {:command/type :region.command/create-region
-              :command/system "territory-bro.gis.gis-change"
-              :command/user user-id
-              :command/time test-time
-              :gis-change/id change-id
-              :congregation/id cong-id
-              :region/id replacement-id
-              :region/name "Somewhere"
-              :region/location testdata/wkt-multi-polygon}
-             (-> {:gis-change/id change-id
-                  :gis-change/schema cong-schema
-                  :gis-change/table "subregion"
-                  :gis-change/user gis-username
-                  :gis-change/time test-time
-                  :gis-change/op :INSERT
-                  :gis-change/old nil
-                  :gis-change/new {:id region-id
-                                   :name "Somewhere"
-                                   :location testdata/wkt-multi-polygon}
-                  :gis-change/processed? false
-                  :gis-change/replacement-id replacement-id}
-                 (change->command [congregation-created gis-user-created])))))
-
-    (testing "update"
-      (is (= {:command/type :region.command/update-region
-              :command/system "territory-bro.gis.gis-change"
-              :command/user user-id
-              :command/time test-time
-              :gis-change/id change-id
-              :congregation/id cong-id
-              :region/id replacement-id
-              :region/name "Somewhere"
-              :region/location testdata/wkt-multi-polygon}
-             (-> {:gis-change/id change-id
-                  :gis-change/schema cong-schema
-                  :gis-change/table "subregion"
-                  :gis-change/user gis-username
-                  :gis-change/time test-time
-                  :gis-change/op :UPDATE
-                  :gis-change/old {:id region-id
-                                   :name ""
-                                   :location ""}
-                  :gis-change/new {:id region-id
-                                   :name "Somewhere"
-                                   :location testdata/wkt-multi-polygon}
-                  :gis-change/processed? false
-                  :gis-change/replacement-id replacement-id}
-                 (change->command [congregation-created gis-user-created])))))
-
-    (testing "delete"
-      (is (= {:command/type :region.command/delete-region
-              :command/system "territory-bro.gis.gis-change"
-              :command/user user-id
-              :command/time test-time
-              :gis-change/id change-id
-              :congregation/id cong-id
-              :region/id replacement-id}
-             (-> {:gis-change/id change-id
-                  :gis-change/schema cong-schema
-                  :gis-change/table "subregion"
-                  :gis-change/user gis-username
-                  :gis-change/time test-time
-                  :gis-change/op :DELETE
-                  :gis-change/old {:id region-id
-                                   :name "Somewhere"
-                                   :location testdata/wkt-multi-polygon}
-                  :gis-change/new nil
-                  :gis-change/processed? false
-                  :gis-change/replacement-id replacement-id}
-                 (change->command [congregation-created gis-user-created])))))
-
-    (testing "update due to ID replacement"
-      (is (= {:command/type :region.command/update-region
-              :command/system "territory-bro.gis.gis-change"
-              :command/user user-id
-              :command/time test-time
-              :gis-change/id change-id
-              :congregation/id cong-id
-              :region/id replacement-id
-              :region/name "Somewhere"
-              :region/location testdata/wkt-multi-polygon}
-             (-> {:gis-change/id change-id
-                  :gis-change/schema cong-schema
-                  :gis-change/table "subregion"
-                  :gis-change/user gis-username
-                  :gis-change/time test-time
-                  :gis-change/op :UPDATE
-                  :gis-change/old {:id region-id
-                                   :name "Somewhere"
-                                   :location testdata/wkt-multi-polygon}
-                  :gis-change/new {:id replacement-id
-                                   :name "Somewhere"
-                                   :location testdata/wkt-multi-polygon}
-                  :gis-change/processed? false
-                  :gis-change/replacement-id replacement-id}
-                 (change->command [congregation-created gis-user-created])))))))
+                :gis-change/processed? false}
+               (change->command [congregation-created gis-user-created]))))))

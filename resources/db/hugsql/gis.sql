@@ -52,7 +52,7 @@ returning id;
 
 
 -- :name get-gis-changes :? :*
-select id, schema, "table", op, "user", time, old, new, processed, replacement_id
+select id, schema, "table", op, "user", time, old, new, processed
 from gis_change_log
 where 1 = 1
 /*~ (when (contains? params :since) */
@@ -71,21 +71,6 @@ limit :limit
 update gis_change_log
 set processed = true
 where id = any (array[:v*:ids]::bigint[]);
-
--- :name replace-id-of-entity :!
-update :i:schema_table
-set id = :new_id
-where id = :old_id;
-
--- :name replace-id-of-changes :!
-update gis_change_log
-set replacement_id = :new_id
-where schema = :schema
-  and "table" = :table
-  and ((new ->> 'id')::uuid = :old_id
-    or (old ->> 'id')::uuid = :old_id)
-  and replacement_id is null
-  and processed is false;
 
 
 -- :name find-roles :? :*

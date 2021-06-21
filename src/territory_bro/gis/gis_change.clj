@@ -21,8 +21,6 @@
 (defn normalize-change [change]
   (if (and (= :UPDATE (:gis-change/op change))
            (not= (:id (:gis-change/old change))
-                 (:id (:gis-change/new change)))
-           (not= (:gis-change/replacement-id change)
                  (:id (:gis-change/new change))))
     [(assoc change
             :gis-change/op :DELETE
@@ -32,15 +30,8 @@
             :gis-change/old nil)]
     [change]))
 
-(defn- apply-replacement-id [{:gis-change/keys [replacement-id old new], :as change}]
-  (if (some? replacement-id)
-    (cond-> change
-      (some? old) (assoc-in [:gis-change/old :id] replacement-id)
-      (some? new) (assoc-in [:gis-change/new :id] replacement-id))
-    change))
-
 (defn change->command [change state]
-  (let [{change-id :gis-change/id, :gis-change/keys [schema table user time op old new]} (apply-replacement-id change)
+  (let [{change-id :gis-change/id, :gis-change/keys [schema table user time op old new]} change
         cong-id (get-in state [::schema->cong-id schema])
         user-id (get-in state [::username->user-id user])
         base-command (cond-> {:command/system system
