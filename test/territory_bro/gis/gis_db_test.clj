@@ -168,37 +168,41 @@
                (event-store/stream-info conn new-id))
             "new stream")))
 
-    (testing "ok: stream ID is used by current schema and table"
-      (let [old-id (init-stream! conn (UUID/randomUUID) test-schema "subregion")
-            new-id (gis-db/create-region-with-id! conn old-id "reused" testdata/wkt-multi-polygon)]
-        (is (= old-id new-id))
-        (is (= [{:name "reused"}]
-               (jdbc/query conn ["SELECT name FROM subregion WHERE id = ?"
-                                 new-id]))))))
+    (testing "stream ID conflict detection:"
+      (testing "stream ID is used by current schema and table -> keeps ID"
+        (let [old-id (init-stream! conn (UUID/randomUUID) test-schema "subregion")
+              new-id (gis-db/create-region-with-id! conn old-id "reused" testdata/wkt-multi-polygon)]
+          (is (= old-id new-id))
+          (is (= [{:name "reused"}]
+                 (jdbc/query conn ["SELECT name FROM subregion WHERE id = ?"
+                                   new-id])))))
 
-  (db/with-db [conn {}]
-    (db/use-tenant-schema conn test-schema)
-    (testing "error: stream ID is used by another schema"
-      (let [id (init-stream! conn (UUID/randomUUID) "another_schema" "subregion")]
-        (is (thrown-with-msg?
-             SQLException (Pattern/compile (str "ID " id " is already used in some other table and schema"))
-             (gis-db/create-region-with-id! conn id "reused" testdata/wkt-multi-polygon))))))
+      (testing "stream ID is used by another schema -> replaces ID"
+        (let [old-id (init-stream! conn (UUID/randomUUID) "another_schema" "subregion")
+              new-id (gis-db/create-region-with-id! conn old-id "reused" testdata/wkt-multi-polygon)]
+          (is (uuid? new-id))
+          (is (not= old-id new-id))
+          (is (= [{:name "reused"}]
+                 (jdbc/query conn ["SELECT name FROM subregion WHERE id = ?"
+                                   new-id])))))
 
-  (db/with-db [conn {}]
-    (db/use-tenant-schema conn test-schema)
-    (testing "error: stream ID is used by another table"
-      (let [id (init-stream! conn (UUID/randomUUID) test-schema "territory")]
-        (is (thrown-with-msg?
-             SQLException (Pattern/compile (str "ID " id " is already used in some other table and schema"))
-             (gis-db/create-region-with-id! conn id "reused" testdata/wkt-multi-polygon))))))
+      (testing "stream ID is used by another table -> replaces ID"
+        (let [old-id (init-stream! conn (UUID/randomUUID) test-schema "territory")
+              new-id (gis-db/create-region-with-id! conn old-id "reused" testdata/wkt-multi-polygon)]
+          (is (uuid? new-id))
+          (is (not= old-id new-id))
+          (is (= [{:name "reused"}]
+                 (jdbc/query conn ["SELECT name FROM subregion WHERE id = ?"
+                                   new-id])))))
 
-  (db/with-db [conn {}]
-    (db/use-tenant-schema conn test-schema)
-    (testing "error: stream ID is used by non-gis entity"
-      (let [id (init-stream! conn (UUID/randomUUID) nil nil)]
-        (is (thrown-with-msg?
-             SQLException (Pattern/compile (str "ID " id " is already used in some other table and schema"))
-             (gis-db/create-region-with-id! conn id "reused" testdata/wkt-multi-polygon)))))))
+      (testing "stream ID is used by non-GIS entity -> replaces ID"
+        (let [old-id (init-stream! conn (UUID/randomUUID) nil nil)
+              new-id (gis-db/create-region-with-id! conn old-id "reused" testdata/wkt-multi-polygon)]
+          (is (uuid? new-id))
+          (is (not= old-id new-id))
+          (is (= [{:name "reused"}]
+                 (jdbc/query conn ["SELECT name FROM subregion WHERE id = ?"
+                                   new-id]))))))))
 
 (deftest gis-change-log-test
   (db/with-db [conn {}]

@@ -728,7 +728,8 @@
         territory-id (UUID/randomUUID)
         region-id (UUID/randomUUID)
         congregation-boundary-id (UUID/randomUUID)
-        card-minimap-viewport-id (UUID/randomUUID)]
+        card-minimap-viewport-id (UUID/randomUUID)
+        conflicting-stream-id (create-congregation-without-user! "foo")]
 
     (testing "write to GIS database"
       (jdbc/with-db-transaction [conn db-spec]
@@ -794,27 +795,6 @@
             (do (Thread/sleep 10)
                 (recur))))))
 
-    (testing "on stream ID conflict a new replacement ID will be generated"
-      (let [conflicting-stream-id (create-congregation-without-user! "foo")]
-        (jdbc/with-db-transaction [conn db-spec]
-          (jdbc/execute! conn ["insert into subregion (id, name, location) values (?, ?, ?::public.geography)"
-                               conflicting-stream-id "Conflicting ID" testdata/wkt-multi-polygon]))
-        (sync-gis-changes!)
-        (let [state (projections/cached-state)
-              replacement-id (-> (set (keys (get-in state [::region/regions cong-id])))
-                                 (disj region-id) ; produced by earlier tests
-                                 (first))]
-          (is (some? replacement-id))
-          (is (not= conflicting-stream-id replacement-id))
-          (is (= [{:region/id replacement-id
-                   :region/name "Conflicting ID"
-                   :region/location testdata/wkt-multi-polygon}
-                  {:region/id region-id
-                   :region/name "Somewhere"
-                   :region/location testdata/wkt-multi-polygon}]
-                 (->> (vals (get-in state [::region/regions cong-id]))
-                      (sort-by :region/name)))))))
-
     (testing "changing the ID will delete the old territory and create a new one"
       (let [new-territory-id (UUID/randomUUID)]
         (jdbc/with-db-transaction [conn db-spec]
@@ -833,38 +813,34 @@
                  (get-in state [::territory/territories cong-id new-territory-id]))
               "new ID"))))
 
-    ;; TODO
-    #_(testing "changing the ID to a conflicting ID"
-        ;; combination of the previous two tests, to ensure that the features to not conflict
-        (let [conflicting-stream-id (create-congregation-without-user! "foo")]
-          (jdbc/with-db-transaction [conn db-spec]
-            (jdbc/execute! conn ["update subregion set id = ? where id = ?"
-                                 conflicting-stream-id region-id]))
-          (sync-gis-changes!)
-          (let [state (projections/cached-state)
-                replacement-id (-> (set (keys (get-in state [::region/regions cong-id])))
-                                   (disj region-id) ; produced by earlier tests
-                                   (first))]
-            (prn 'conflicting-stream-id conflicting-stream-id)
-            (prn 'region-id region-id)
-            (prn 'replacement-id replacement-id)
-            #_(is (= "" (set (keys (get-in state [::region/regions cong-id])))))
-            #_(is (some? replacement-id))
-            #_(is (not= conflicting-stream-id replacement-id))
-            #_(is (= [{:region/id replacement-id
-                       :region/name "Conflicting ID"
-                       :region/location testdata/wkt-multi-polygon}
-                      {:region/id region-id
-                       :region/name "Somewhere"
-                       :region/location testdata/wkt-multi-polygon}]
-                     (->> (vals (get-in state [::region/regions cong-id]))
-                          (sort-by :region/name))))
+    (testing "stream ID conflict on insert -> generates a new replacement ID"
+      (jdbc/with-db-transaction [conn db-spec]
+        (jdbc/execute! conn ["delete from subregion"])
+        (jdbc/execute! conn ["insert into subregion (id, name, location) values (?, ?, ?::public.geography)"
+                             conflicting-stream-id "Conflicting insert" testdata/wkt-multi-polygon]))
+      (sync-gis-changes!)
+      (let [state (projections/cached-state)
+            replacement-id (first (keys (get-in state [::region/regions cong-id])))]
+        (is (some? replacement-id))
+        (is (not= conflicting-stream-id replacement-id))
+        (is (= [{:region/id replacement-id
+                 :region/name "Conflicting insert"
+                 :region/location testdata/wkt-multi-polygon}]
+               (vals (get-in state [::region/regions cong-id]))))))
 
-            (is (nil? (get-in state [::region/regions cong-id region-id]))
-                "old ID")
-            (is (nil? (get-in state [::region/regions cong-id conflicting-stream-id]))
-                "conflicting ID")
-            (is (some? (get-in state [::region/regions cong-id replacement-id]))
-                "replacement ID"))))))
+    (testing "stream ID conflict on ID update -> generates a new replacement ID"
+      ;; combination of the previous two tests, to ensure that the features to not conflict
+      (jdbc/with-db-transaction [conn db-spec]
+        (jdbc/execute! conn ["update subregion set id = ?, name = ?"
+                             conflicting-stream-id "Conflicting update"]))
+      (sync-gis-changes!)
+      (let [state (projections/cached-state)
+            replacement-id (first (keys (get-in state [::region/regions cong-id])))]
+        (is (some? replacement-id))
+        (is (not= conflicting-stream-id replacement-id))
+        (is (= [{:region/id replacement-id
+                 :region/name "Conflicting update"
+                 :region/location testdata/wkt-multi-polygon}]
+               (vals (get-in state [::region/regions cong-id]))))))))
 
 ;; TODO: delete territory and then restore it to same congregation
