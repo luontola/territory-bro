@@ -34,12 +34,14 @@ services:
       - "127.0.0.1:7000:7000"
 
   db:
-    image: mdillon/postgis:11
+    image: postgis/postgis:13-3.1
     environment:
       POSTGRES_USER: territorybro
       POSTGRES_PASSWORD: territorybro
-    mem_reservation: 30m
-    mem_limit: 150m
+    volumes:
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql
+    mem_reservation: 100m
+    mem_limit: 200m
     ports:
       - "127.0.0.1:5432:5432"
 

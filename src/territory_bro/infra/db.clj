@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -24,6 +24,7 @@
            (org.flywaydb.core Flyway)
            (org.postgresql.util PGobject)))
 
+(def expected-postgresql-version 13)
 (def ^:dynamic *explain* false)
 
 ;; PostgreSQL error codes

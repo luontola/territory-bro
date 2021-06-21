@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -25,14 +25,15 @@
            (db/generate-tenant-schema-name conn (UUID. 0 1))))))
 
 (deftest check-database-version-test
-  (is (nil? (db/check-database-version 10))
-      "newer than expected")
-  (is (nil? (db/check-database-version 11))
-      "same as expected")
-  (is (thrown-with-msg?
-       AssertionError (re-contains "Expected the database to be PostgreSQL 12 but it was PostgreSQL 11")
-       (db/check-database-version 12))
-      "older than expected"))
+  (let [current-version db/expected-postgresql-version]
+    (is (nil? (db/check-database-version (dec current-version)))
+        "newer than expected")
+    (is (nil? (db/check-database-version current-version))
+        "same as expected")
+    (is (thrown-with-msg?
+         AssertionError (re-contains "Expected the database to be PostgreSQL 14 but it was PostgreSQL 13")
+         (db/check-database-version (inc current-version)))
+        "older than expected")))
 
 (deftest sql-type-conversions-test
   (db/with-db [conn {:read-only? true}]

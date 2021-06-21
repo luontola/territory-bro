@@ -13,7 +13,7 @@ RUN apt-get update && \
     echo 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main' > /etc/apt/sources.list.d/pgdg.list  && \
     curl -SL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
     apt-get update && \
-    apt-get install -y postgresql-11 postgresql-11-postgis-3 sudo && \
+    apt-get install -y postgresql-13 postgresql-13-postgis-3 sudo && \
     rm -rf /var/lib/apt/lists/*
 
 # working directory
@@ -31,13 +31,13 @@ COPY src /project/src
 COPY src-java /project/src-java
 
 # run tests
-COPY test-config.edn tests.edn /project/
+COPY test-config.edn tests.edn postgres-init.sql /project/
 RUN service postgresql start && \
     sudo -u postgres psql -c "CREATE USER territorybro WITH CREATEROLE PASSWORD 'territorybro';" && \
     sudo -u postgres psql -c "CREATE DATABASE territorybro OWNER territorybro;" && \
-    sudo -u postgres psql -d territorybro -c "CREATE EXTENSION postgis;" && \
+    sudo -u postgres psql -d territorybro -f postgres-init.sql && \
     # XXX since the territorybro user is not SUPERUSER, the REVOKE in resources/db/flyway/master/R__permissions.sql does nothing
-    sudo -u postgres psql -d territorybro -c "REVOKE CREATE ON SCHEMA public FROM PUBLIC;" && \
+    sudo -u postgres psql -d territorybro -f resources/db/flyway/master/R__permissions.sql && \
     lein kaocha && \
     service postgresql stop
 
