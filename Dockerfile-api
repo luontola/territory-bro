@@ -1,4 +1,4 @@
-FROM adoptopenjdk:14-jdk-hotspot-bionic AS builder
+FROM adoptopenjdk:16-jdk-hotspot-focal AS builder
 
 # Leiningen
 RUN curl -SL https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein && \
@@ -10,7 +10,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # PostgreSQL
 RUN apt-get update && \
     apt-get install -y gnupg && \
-    echo 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main' > /etc/apt/sources.list.d/pgdg.list  && \
+    echo 'deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main' > /etc/apt/sources.list.d/pgdg.list  && \
     curl -SL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
     apt-get update && \
     apt-get install -y postgresql-13 postgresql-13-postgis-3 sudo && \
@@ -51,7 +51,7 @@ RUN service postgresql start && \
 
 # ------------------------------------------------------------
 
-FROM adoptopenjdk:14-jre-hotspot-bionic
+FROM adoptopenjdk:16-jre-hotspot-focal
 
 EXPOSE 8080
 ENV PORT=8080 \
