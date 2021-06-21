@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2021 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -88,12 +88,10 @@
                                   [ring/ring-devel "1.8.2"]
                                   [ring/ring-mock "0.4.0"]]
                    :jvm-opts ^:replace ["-Dconf=dev-config.edn"
-                                        "-XX:-OmitStackTraceInFastThrow"
-                                        "--illegal-access=deny"]
+                                        "-XX:-OmitStackTraceInFastThrow"]
                    :repl-options {:init-ns territory-bro.main}}
 
              :test [:dev :test0]
              :test0 {:jvm-opts ^:replace ["-Dconf=test-config.edn"
-                                          "-XX:-OmitStackTraceInFastThrow"
-                                          "--illegal-access=deny"]}
+                                          "-XX:-OmitStackTraceInFastThrow"]}
              :kaocha [:test]})
