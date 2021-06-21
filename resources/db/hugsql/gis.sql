@@ -6,9 +6,10 @@
 select id, ST_AsText(location) AS location
 from congregation_boundary;
 
--- :name create-congregation-boundary :!
+-- :name create-congregation-boundary :<! :1
 insert into congregation_boundary (id, location)
-values (:id, ST_Multi(ST_GeomFromText(:location)));
+values (:id, ST_Multi(ST_GeomFromText(:location)))
+returning id;
 
 
 -- TODO: rename subregion to region the next time other incompatible changes are needed
@@ -17,18 +18,20 @@ values (:id, ST_Multi(ST_GeomFromText(:location)));
 select id, name, ST_AsText(location) AS location
 from subregion;
 
--- :name create-region :!
+-- :name create-region :<! :1
 insert into subregion (id, name, location)
-values (:id, :name, ST_Multi(ST_GeomFromText(:location)));
+values (:id, :name, ST_Multi(ST_GeomFromText(:location)))
+returning id;
 
 
 -- :name get-card-minimap-viewports :? :*
 select id, ST_AsText(location) AS location
 from card_minimap_viewport;
 
--- :name create-card-minimap-viewport :!
+-- :name create-card-minimap-viewport :<! :1
 insert into card_minimap_viewport (id, location)
-values (:id, ST_GeomFromText(:location));
+values (:id, ST_GeomFromText(:location))
+returning id;
 
 
 -- TODO: rename subregion to region the next time other incompatible changes are needed
@@ -42,9 +45,10 @@ where 1 = 1
 /*~ ) ~*/
 ;
 
--- :name create-territory :!
+-- :name create-territory :<! :1
 insert into territory (id, number, addresses, subregion, meta, location)
-values (:id, :number, :addresses, :subregion, :meta, ST_Multi(ST_GeomFromText(:location)));
+values (:id, :number, :addresses, :subregion, :meta, ST_Multi(ST_GeomFromText(:location)))
+returning id;
 
 
 -- :name get-gis-changes :? :*

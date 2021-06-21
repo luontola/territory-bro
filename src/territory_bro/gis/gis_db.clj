@@ -31,10 +31,8 @@
        (doall)))
 
 (defn create-congregation-boundary! [conn location]
-  (let [id (UUID/randomUUID)]
-    (query! conn :create-congregation-boundary {:id id
-                                                :location location})
-    id))
+  (:id (query! conn :create-congregation-boundary {:id (UUID/randomUUID)
+                                                   :location location})))
 
 
 ;; TODO: not used in production code; remove?
@@ -44,10 +42,9 @@
        (doall)))
 
 (defn create-region-with-id! [conn id name location]
-  (query! conn :create-region {:id id
-                               :name name
-                               :location location})
-  id)
+  (:id (query! conn :create-region {:id id
+                                    :name name
+                                    :location location})))
 
 (defn create-region! [conn name location]
   (create-region-with-id! conn (UUID/randomUUID) name location))
@@ -60,10 +57,8 @@
        (doall)))
 
 (defn create-card-minimap-viewport! [conn location]
-  (let [id (UUID/randomUUID)]
-    (query! conn :create-card-minimap-viewport {:id id
-                                                :location location})
-    id))
+  (:id (query! conn :create-card-minimap-viewport {:id (UUID/randomUUID)
+                                                   :location location})))
 
 
 ;; TODO: not used in production code; remove?
@@ -79,14 +74,12 @@
   (first (get-territories conn {:ids [id]})))
 
 (defn create-territory! [conn territory]
-  (let [id (UUID/randomUUID)]
-    (query! conn :create-territory {:id id
-                                    :number (:territory/number territory)
-                                    :addresses (:territory/addresses territory)
-                                    :subregion (:territory/region territory)
-                                    :meta (:territory/meta territory)
-                                    :location (:territory/location territory)})
-    id))
+  (:id (query! conn :create-territory {:id (UUID/randomUUID)
+                                       :number (:territory/number territory)
+                                       :addresses (:territory/addresses territory)
+                                       :subregion (:territory/region territory)
+                                       :meta (:territory/meta territory)
+                                       :location (:territory/location territory)})))
 
 
 ;;;; Changes
