@@ -1,4 +1,4 @@
-// Copyright © 2015-2019 Esko Luontola
+// Copyright © 2015-2021 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,6 +6,7 @@ import React, {useEffect} from "react";
 import {getSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
 import {navigate} from "@reach/router";
+import {sanitizeReturnPath} from "../authenticationUtil";
 
 const LoginCallbackPage = () => {
   const settings = getSettings();
@@ -18,7 +19,7 @@ const LoginCallbackPage = () => {
   useEffect(() => {
     (async () => {
       const params = new URLSearchParams(document.location.search.substring(1));
-      const returnPath = params.get('return') || '/';
+      const returnPath = sanitizeReturnPath(params.get('return') || '/');
       if (settings.user) {
         await navigate(returnPath);
       } else {
