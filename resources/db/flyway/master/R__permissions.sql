@@ -1,2 +1,3 @@
--- basic hardening due to GIS users
-revoke create on schema public from public;
+-- TODO: remove this file, requires running "flyway repair"
+-- https://github.com/flyway/flyway/issues/2533
+-- https://flywaydb.org/blog/flyway-7.0.0-beta

@@ -36,8 +36,6 @@ RUN service postgresql start && \
     sudo -u postgres psql -c "CREATE USER territorybro WITH CREATEROLE PASSWORD 'territorybro';" && \
     sudo -u postgres psql -c "CREATE DATABASE territorybro OWNER territorybro;" && \
     sudo -u postgres psql -d territorybro -f postgres-init.sql && \
-    # XXX since the territorybro user is not SUPERUSER, the REVOKE in resources/db/flyway/master/R__permissions.sql does nothing
-    sudo -u postgres psql -d territorybro -f resources/db/flyway/master/R__permissions.sql && \
     lein kaocha && \
     service postgresql stop
 
