@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -77,9 +77,9 @@
 
 ;;;; Commands
 
-(deftest create-congregation-boundary-test
+(deftest create-congregation-boundary-test ; TODO: create + update -> define
   (let [injections {:check-permit (fn [_permit])}
-        create-command {:command/type :congregation-boundary.command/create-congregation-boundary
+        create-command {:command/type :congregation-boundary.command/define-congregation-boundary
                         :command/time (Instant/now)
                         :command/user user-id
                         :gis-change/id gis-change-id
@@ -101,7 +101,7 @@
         (is (thrown? NoPermitException
                      (handle-command create-command [] injections)))))))
 
-(deftest update-congregation-boundary-test
+(deftest update-congregation-boundary-test ; TODO: create + update -> define
   (let [injections {:check-permit (fn [_permit])}
         update-command {:command/type :congregation-boundary.command/update-congregation-boundary
                         :command/time (Instant/now)

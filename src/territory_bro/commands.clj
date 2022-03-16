@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -111,9 +111,9 @@
 
 ;;; Territory
 
-(s/defschema CreateTerritory
+(s/defschema DefineTerritory
   (assoc GisSyncCommand
-         :command/type (s/eq :territory.command/create-territory)
+         :command/type (s/eq :territory.command/define-territory)
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :new UUID)
          :territory/number s/Str
@@ -122,7 +122,7 @@
          :territory/meta {s/Keyword json/Schema}
          :territory/location s/Str))
 
-(s/defschema UpdateTerritory
+(s/defschema UpdateTerritory ; TODO: remove me
   (assoc GisSyncCommand
          :command/type (s/eq :territory.command/update-territory)
          :congregation/id (foreign-key/references :congregation UUID)
@@ -141,15 +141,15 @@
 
 ;;; Region
 
-(s/defschema CreateRegion
+(s/defschema DefineRegion
   (assoc GisSyncCommand
-         :command/type (s/eq :region.command/create-region)
+         :command/type (s/eq :region.command/define-region)
          :congregation/id (foreign-key/references :congregation UUID)
-         :region/id (foreign-key/references :new UUID)
+         :region/id (foreign-key/references :unsafe UUID)
          :region/name s/Str
          :region/location s/Str))
 
-(s/defschema UpdateRegion
+(s/defschema UpdateRegion ; TODO: remove me
   (assoc GisSyncCommand
          :command/type (s/eq :region.command/update-region)
          :congregation/id (foreign-key/references :congregation UUID)
@@ -165,14 +165,14 @@
 
 ;;; Congregation Boundary
 
-(s/defschema CreateCongregationBoundary
+(s/defschema DefineCongregationBoundary
   (assoc GisSyncCommand
-         :command/type (s/eq :congregation-boundary.command/create-congregation-boundary)
+         :command/type (s/eq :congregation-boundary.command/define-congregation-boundary)
          :congregation/id (foreign-key/references :congregation UUID)
-         :congregation-boundary/id (foreign-key/references :new UUID)
+         :congregation-boundary/id (foreign-key/references :unsafe UUID)
          :congregation-boundary/location s/Str))
 
-(s/defschema UpdateCongregationBoundary
+(s/defschema UpdateCongregationBoundary ; TODO: remove me
   (assoc GisSyncCommand
          :command/type (s/eq :congregation-boundary.command/update-congregation-boundary)
          :congregation/id (foreign-key/references :congregation UUID)
@@ -187,14 +187,14 @@
 
 ;;; Card Minimap Viewport
 
-(s/defschema CreateCardMinimapViewport
+(s/defschema DefineCardMinimapViewport
   (assoc GisSyncCommand
-         :command/type (s/eq :card-minimap-viewport.command/create-card-minimap-viewport)
+         :command/type (s/eq :card-minimap-viewport.command/define-card-minimap-viewport)
          :congregation/id (foreign-key/references :congregation UUID)
-         :card-minimap-viewport/id (foreign-key/references :new UUID)
+         :card-minimap-viewport/id (foreign-key/references :unsafe UUID)
          :card-minimap-viewport/location s/Str))
 
-(s/defschema UpdateCardMinimapViewport
+(s/defschema UpdateCardMinimapViewport ; TODO: remove me
   (assoc GisSyncCommand
          :command/type (s/eq :card-minimap-viewport.command/update-card-minimap-viewport)
          :congregation/id (foreign-key/references :congregation UUID)
@@ -224,10 +224,10 @@
 
 
 (def command-schemas
-  {:card-minimap-viewport.command/create-card-minimap-viewport CreateCardMinimapViewport
+  {:card-minimap-viewport.command/define-card-minimap-viewport DefineCardMinimapViewport
    :card-minimap-viewport.command/delete-card-minimap-viewport DeleteCardMinimapViewport
    :card-minimap-viewport.command/update-card-minimap-viewport UpdateCardMinimapViewport
-   :congregation-boundary.command/create-congregation-boundary CreateCongregationBoundary
+   :congregation-boundary.command/define-congregation-boundary DefineCongregationBoundary
    :congregation-boundary.command/delete-congregation-boundary DeleteCongregationBoundary
    :congregation-boundary.command/update-congregation-boundary UpdateCongregationBoundary
    :congregation.command/add-user AddUser
@@ -239,12 +239,12 @@
    :db-admin.command/migrate-tenant-schema MigrateTenantSchema
    :gis-user.command/create-gis-user CreateGisUser
    :gis-user.command/delete-gis-user DeleteGisUser
-   :region.command/create-region CreateRegion
+   :region.command/define-region DefineRegion
    :region.command/delete-region DeleteRegion
    :region.command/update-region UpdateRegion
    :share.command/record-share-opened RecordShareOpened
    :share.command/share-territory-link ShareTerritoryLink
-   :territory.command/create-territory CreateTerritory
+   :territory.command/define-territory DefineTerritory
    :territory.command/delete-territory DeleteTerritory
    :territory.command/update-territory UpdateTerritory})
 

@@ -1,4 +1,4 @@
-;; Copyright © 2015-2021 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -81,7 +81,7 @@
 
 (deftest change->command-test
   (testing "territory insert"
-    (is (= {:command/type :territory.command/create-territory
+    (is (= {:command/type :territory.command/define-territory
             :command/system "territory-bro.gis.gis-change"
             :command/user user-id
             :command/time test-time
@@ -168,7 +168,7 @@
                (change->command [congregation-created gis-user-created])))))
 
   (testing "region insert"
-    (is (= {:command/type :region.command/create-region
+    (is (= {:command/type :region.command/define-region
             :command/system "territory-bro.gis.gis-change"
             :command/user user-id
             :command/time test-time
@@ -237,7 +237,7 @@
                (change->command [congregation-created gis-user-created])))))
 
   (testing "congregation_boundary insert"
-    (is (= {:command/type :congregation-boundary.command/create-congregation-boundary
+    (is (= {:command/type :congregation-boundary.command/define-congregation-boundary
             :command/system "territory-bro.gis.gis-change"
             :command/user user-id
             :command/time test-time
@@ -300,7 +300,7 @@
                (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport insert"
-    (is (= {:command/type :card-minimap-viewport.command/create-card-minimap-viewport
+    (is (= {:command/type :card-minimap-viewport.command/define-card-minimap-viewport
             :command/system "territory-bro.gis.gis-change"
             :command/user user-id
             :command/time test-time

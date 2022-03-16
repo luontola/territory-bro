@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -58,7 +58,7 @@
    :territory/meta
    :territory/location])
 
-(defmethod command-handler :territory.command/create-territory
+(defmethod command-handler :territory.command/define-territory
   [command territory {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
         territory-id (:territory/id command)]

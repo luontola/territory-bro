@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -58,7 +58,11 @@
                         true)
    :new (fn [stream-id]
           (event-store/check-new-stream conn stream-id)
-          true)})
+          true)
+   ;; XXX: Unsafe should only be used for trusted sources, such as the GIS sync which has other mechanisms
+   ;;      to verify that the ID is only used by that particular congregation and entity type.
+   :unsafe (fn [stream-id]
+             (some? stream-id))})
 
 (defn- validate-command [command conn state]
   (binding [foreign-key/*reference-checkers* (reference-checkers command conn state)]

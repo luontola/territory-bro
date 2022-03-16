@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -52,7 +52,7 @@
   [:region/name
    :region/location])
 
-(defmethod command-handler :region.command/create-region
+(defmethod command-handler :region.command/define-region
   [command region {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
         region-id (:region/id command)]

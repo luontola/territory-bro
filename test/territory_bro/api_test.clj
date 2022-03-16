@@ -1,4 +1,4 @@
-;; Copyright © 2015-2021 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -172,7 +172,7 @@
   (let [territory-id (UUID/randomUUID)]
     (db/with-db [conn {}]
       (dispatcher/command! conn (projections/cached-state)
-                           {:command/type :territory.command/create-territory
+                           {:command/type :territory.command/define-territory
                             :command/time (Instant/now)
                             :command/system "test"
                             :congregation/id cong-id
@@ -841,6 +841,21 @@
         (is (= [{:region/id replacement-id
                  :region/name "Conflicting update"
                  :region/location testdata/wkt-multi-polygon}]
-               (vals (get-in state [::region/regions cong-id]))))))))
+               (vals (get-in state [::region/regions cong-id]))))))
 
-;; TODO: delete territory and then restore it to same congregation
+    (testing "stream ID conflict on insert, delete, insert with same ID"
+      (let [congregation-boundary-id (jdbc/with-db-transaction [conn db-spec]
+                                       (gis-db/create-congregation-boundary! conn testdata/wkt-multi-polygon))]
+        (jdbc/with-db-transaction [conn db-spec]
+          (jdbc/execute! conn ["delete from congregation_boundary"]))
+        (sync-gis-changes!)
+
+        (jdbc/with-db-transaction [conn db-spec]
+          (jdbc/execute! conn ["insert into congregation_boundary (id, location) values (?, ?::public.geography)"
+                               congregation-boundary-id testdata/wkt-multi-polygon2]))
+        (sync-gis-changes!) ; this used to crash with an "event stream already exists" error
+
+        (let [state (projections/cached-state)]
+          (is (= {:congregation-boundary/id congregation-boundary-id
+                  :congregation-boundary/location testdata/wkt-multi-polygon2}
+                 (get-in state [::congregation-boundary/congregation-boundaries cong-id congregation-boundary-id]))))))))

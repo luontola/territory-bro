@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -50,7 +50,7 @@
 (def ^:private data-keys
   [:congregation-boundary/location])
 
-(defmethod command-handler :congregation-boundary.command/create-congregation-boundary
+(defmethod command-handler :congregation-boundary.command/define-congregation-boundary
   [command congregation-boundary {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
         congregation-boundary-id (:congregation-boundary/id command)]

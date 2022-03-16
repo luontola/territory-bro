@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -36,7 +36,8 @@
    :share (constantly true)
    :territory (constantly true)
    :user (constantly true)
-   :user-or-anonymous (constantly true)})
+   :user-or-anonymous (constantly true)
+   :unsafe (constantly true)})
 
 (defn validate-command [command]
   (binding [foreign-key/*reference-checkers* dummy-reference-checkers]

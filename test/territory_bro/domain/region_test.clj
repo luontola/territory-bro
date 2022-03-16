@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -83,9 +83,9 @@
 
 ;;;; Commands
 
-(deftest create-region-test
+(deftest create-region-test ; TODO: create + update -> define
   (let [injections {:check-permit (fn [_permit])}
-        create-command {:command/type :region.command/create-region
+        create-command {:command/type :region.command/define-region
                         :command/time (Instant/now)
                         :command/user user-id
                         :gis-change/id gis-change-id
@@ -108,7 +108,7 @@
         (is (thrown? NoPermitException
                      (handle-command create-command [] injections)))))))
 
-(deftest update-region-test
+(deftest update-region-test ; TODO: create + update -> define
   (let [injections {:check-permit (fn [_permit])}
         update-command {:command/type :region.command/update-region
                         :command/time (Instant/now)
