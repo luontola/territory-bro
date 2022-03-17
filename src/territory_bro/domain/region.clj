@@ -55,22 +55,10 @@
 (defmethod command-handler :region.command/define-region
   [command region {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
-        region-id (:region/id command)]
-    (check-permit [:create-region cong-id])
-    (when (nil? region)
-      [(merge {:event/type :region.event/region-defined
-               :congregation/id cong-id
-               :region/id region-id}
-              (gis-change/event-metadata command)
-              (select-keys command data-keys))])))
-
-(defmethod command-handler :region.command/update-region
-  [command region {:keys [check-permit]}]
-  (let [cong-id (:congregation/id command)
         region-id (:region/id command)
         old-data (select-keys region data-keys)
         new-data (select-keys command data-keys)]
-    (check-permit [:update-region cong-id region-id])
+    (check-permit [:define-region cong-id region-id])
     (when (not= old-data new-data)
       [(merge {:event/type :region.event/region-defined
                :congregation/id cong-id

@@ -90,9 +90,9 @@
 
 ;;;; Commands
 
-(deftest create-territory-test ; TODO: create + update -> define
+(deftest define-territory-test
   (let [injections {:check-permit (fn [_permit])}
-        create-command {:command/type :territory.command/define-territory
+        define-command {:command/type :territory.command/define-territory
                         :command/time (Instant/now)
                         :command/user user-id
                         :gis-change/id gis-change-id
@@ -106,61 +106,37 @@
 
     (testing "created"
       (is (= [territory-defined]
-             (handle-command create-command [] injections))))
-
-    (testing "is idempotent"
-      (is (empty? (handle-command create-command [territory-defined] injections))))
-
-    (testing "checks permits"
-      (let [injections {:check-permit (fn [permit]
-                                        (is (= [:create-territory cong-id] permit))
-                                        (throw (NoPermitException. nil nil)))}]
-        (is (thrown? NoPermitException
-                     (handle-command create-command [] injections)))))))
-
-(deftest update-territory-test ; TODO: create + update -> define
-  (let [injections {:check-permit (fn [_permit])}
-        update-command {:command/type :territory.command/update-territory
-                        :command/time (Instant/now)
-                        :command/user user-id
-                        :gis-change/id gis-change-id
-                        :congregation/id cong-id
-                        :territory/id territory-id
-                        :territory/number "123"
-                        :territory/addresses "the addresses"
-                        :territory/region "the region"
-                        :territory/meta {:foo "bar"}
-                        :territory/location testdata/wkt-multi-polygon}]
+             (handle-command define-command [] injections))))
 
     (testing "number changed"
       (is (= [territory-defined]
-             (handle-command update-command [(assoc territory-defined :territory/number "old number")] injections))))
+             (handle-command define-command [(assoc territory-defined :territory/number "old number")] injections))))
 
     (testing "addresses changed"
       (is (= [territory-defined]
-             (handle-command update-command [(assoc territory-defined :territory/addresses "old addresses")] injections))))
+             (handle-command define-command [(assoc territory-defined :territory/addresses "old addresses")] injections))))
 
     (testing "region changed"
       (is (= [territory-defined]
-             (handle-command update-command [(assoc territory-defined :territory/region "old region")] injections))))
+             (handle-command define-command [(assoc territory-defined :territory/region "old region")] injections))))
 
     (testing "meta changed"
       (is (= [territory-defined]
-             (handle-command update-command [(assoc territory-defined :territory/meta {:stuff "old meta"})] injections))))
+             (handle-command define-command [(assoc territory-defined :territory/meta {:stuff "old meta"})] injections))))
 
     (testing "location changed"
       (is (= [territory-defined]
-             (handle-command update-command [(assoc territory-defined :territory/location "old location")] injections))))
+             (handle-command define-command [(assoc territory-defined :territory/location "old location")] injections))))
 
-    (testing "nothing changed / is idempotent"
-      (is (empty? (handle-command update-command [territory-defined] injections))))
+    (testing "is idempotent"
+      (is (empty? (handle-command define-command [territory-defined] injections))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        (is (= [:update-territory cong-id territory-id] permit))
+                                        (is (= [:define-territory cong-id territory-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
-                     (handle-command update-command [territory-defined] injections)))))))
+                     (handle-command define-command [] injections)))))))
 
 (deftest delete-territory-test
   (let [injections {:check-permit (fn [_permit])}

@@ -53,22 +53,10 @@
 (defmethod command-handler :congregation-boundary.command/define-congregation-boundary
   [command congregation-boundary {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
-        congregation-boundary-id (:congregation-boundary/id command)]
-    (check-permit [:create-congregation-boundary cong-id])
-    (when (nil? congregation-boundary)
-      [(merge {:event/type :congregation-boundary.event/congregation-boundary-defined
-               :congregation/id cong-id
-               :congregation-boundary/id congregation-boundary-id}
-              (gis-change/event-metadata command)
-              (select-keys command data-keys))])))
-
-(defmethod command-handler :congregation-boundary.command/update-congregation-boundary
-  [command congregation-boundary {:keys [check-permit]}]
-  (let [cong-id (:congregation/id command)
         congregation-boundary-id (:congregation-boundary/id command)
         old-data (select-keys congregation-boundary data-keys)
         new-data (select-keys command data-keys)]
-    (check-permit [:update-congregation-boundary cong-id congregation-boundary-id])
+    (check-permit [:define-congregation-boundary cong-id congregation-boundary-id])
     (when (not= old-data new-data)
       [(merge {:event/type :congregation-boundary.event/congregation-boundary-defined
                :congregation/id cong-id

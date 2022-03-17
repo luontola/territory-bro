@@ -61,22 +61,10 @@
 (defmethod command-handler :territory.command/define-territory
   [command territory {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
-        territory-id (:territory/id command)]
-    (check-permit [:create-territory cong-id])
-    (when (nil? territory)
-      [(merge {:event/type :territory.event/territory-defined
-               :congregation/id cong-id
-               :territory/id territory-id}
-              (gis-change/event-metadata command)
-              (select-keys command data-keys))])))
-
-(defmethod command-handler :territory.command/update-territory
-  [command territory {:keys [check-permit]}]
-  (let [cong-id (:congregation/id command)
         territory-id (:territory/id command)
         old-data (select-keys territory data-keys)
         new-data (select-keys command data-keys)]
-    (check-permit [:update-territory cong-id territory-id])
+    (check-permit [:define-territory cong-id territory-id])
     (when (not= old-data new-data)
       [(merge {:event/type :territory.event/territory-defined
                :congregation/id cong-id

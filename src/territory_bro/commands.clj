@@ -122,17 +122,6 @@
          :territory/meta {s/Keyword json/Schema}
          :territory/location s/Str))
 
-(s/defschema UpdateTerritory ; TODO: remove me
-  (assoc GisSyncCommand
-         :command/type (s/eq :territory.command/update-territory)
-         :congregation/id (foreign-key/references :congregation UUID)
-         :territory/id (foreign-key/references :territory UUID)
-         :territory/number s/Str
-         :territory/addresses s/Str
-         :territory/region s/Str
-         :territory/meta {s/Keyword json/Schema}
-         :territory/location s/Str))
-
 (s/defschema DeleteTerritory
   (assoc GisSyncCommand
          :command/type (s/eq :territory.command/delete-territory)
@@ -146,14 +135,6 @@
          :command/type (s/eq :region.command/define-region)
          :congregation/id (foreign-key/references :congregation UUID)
          :region/id (foreign-key/references :unsafe UUID)
-         :region/name s/Str
-         :region/location s/Str))
-
-(s/defschema UpdateRegion ; TODO: remove me
-  (assoc GisSyncCommand
-         :command/type (s/eq :region.command/update-region)
-         :congregation/id (foreign-key/references :congregation UUID)
-         :region/id (foreign-key/references :region UUID)
          :region/name s/Str
          :region/location s/Str))
 
@@ -172,13 +153,6 @@
          :congregation-boundary/id (foreign-key/references :unsafe UUID)
          :congregation-boundary/location s/Str))
 
-(s/defschema UpdateCongregationBoundary ; TODO: remove me
-  (assoc GisSyncCommand
-         :command/type (s/eq :congregation-boundary.command/update-congregation-boundary)
-         :congregation/id (foreign-key/references :congregation UUID)
-         :congregation-boundary/id (foreign-key/references :congregation-boundary UUID)
-         :congregation-boundary/location s/Str))
-
 (s/defschema DeleteCongregationBoundary
   (assoc GisSyncCommand
          :command/type (s/eq :congregation-boundary.command/delete-congregation-boundary)
@@ -192,13 +166,6 @@
          :command/type (s/eq :card-minimap-viewport.command/define-card-minimap-viewport)
          :congregation/id (foreign-key/references :congregation UUID)
          :card-minimap-viewport/id (foreign-key/references :unsafe UUID)
-         :card-minimap-viewport/location s/Str))
-
-(s/defschema UpdateCardMinimapViewport ; TODO: remove me
-  (assoc GisSyncCommand
-         :command/type (s/eq :card-minimap-viewport.command/update-card-minimap-viewport)
-         :congregation/id (foreign-key/references :congregation UUID)
-         :card-minimap-viewport/id (foreign-key/references :card-minimap-viewport UUID)
          :card-minimap-viewport/location s/Str))
 
 (s/defschema DeleteCardMinimapViewport
@@ -226,10 +193,8 @@
 (def command-schemas
   {:card-minimap-viewport.command/define-card-minimap-viewport DefineCardMinimapViewport
    :card-minimap-viewport.command/delete-card-minimap-viewport DeleteCardMinimapViewport
-   :card-minimap-viewport.command/update-card-minimap-viewport UpdateCardMinimapViewport
    :congregation-boundary.command/define-congregation-boundary DefineCongregationBoundary
    :congregation-boundary.command/delete-congregation-boundary DeleteCongregationBoundary
-   :congregation-boundary.command/update-congregation-boundary UpdateCongregationBoundary
    :congregation.command/add-user AddUser
    :congregation.command/create-congregation CreateCongregation
    :congregation.command/rename-congregation RenameCongregation
@@ -241,12 +206,10 @@
    :gis-user.command/delete-gis-user DeleteGisUser
    :region.command/define-region DefineRegion
    :region.command/delete-region DeleteRegion
-   :region.command/update-region UpdateRegion
    :share.command/record-share-opened RecordShareOpened
    :share.command/share-territory-link ShareTerritoryLink
    :territory.command/define-territory DefineTerritory
-   :territory.command/delete-territory DeleteTerritory
-   :territory.command/update-territory UpdateTerritory})
+   :territory.command/delete-territory DeleteTerritory})
 
 (s/defschema Command
   (apply refined/dispatch-on :command/type (flatten (seq command-schemas))))

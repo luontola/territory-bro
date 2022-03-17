@@ -46,7 +46,7 @@
       (-> base-command
           (assoc :command/type (case op
                                  :INSERT :territory.command/define-territory
-                                 :UPDATE :territory.command/update-territory
+                                 :UPDATE :territory.command/define-territory
                                  :DELETE :territory.command/delete-territory))
           (cond->
             (some? old) (assoc :territory/id (:id old))
@@ -61,7 +61,7 @@
       (-> base-command
           (assoc :command/type (case op
                                  :INSERT :region.command/define-region
-                                 :UPDATE :region.command/update-region
+                                 :UPDATE :region.command/define-region
                                  :DELETE :region.command/delete-region))
           (cond->
             (some? old) (assoc :region/id (:id old))
@@ -73,7 +73,7 @@
       (-> base-command
           (assoc :command/type (case op
                                  :INSERT :congregation-boundary.command/define-congregation-boundary
-                                 :UPDATE :congregation-boundary.command/update-congregation-boundary
+                                 :UPDATE :congregation-boundary.command/define-congregation-boundary
                                  :DELETE :congregation-boundary.command/delete-congregation-boundary))
           (cond->
             (some? old) (assoc :congregation-boundary/id (:id old))
@@ -84,7 +84,7 @@
       (-> base-command
           (assoc :command/type (case op
                                  :INSERT :card-minimap-viewport.command/define-card-minimap-viewport
-                                 :UPDATE :card-minimap-viewport.command/update-card-minimap-viewport
+                                 :UPDATE :card-minimap-viewport.command/define-card-minimap-viewport
                                  :DELETE :card-minimap-viewport.command/delete-card-minimap-viewport))
           (cond->
             (some? old) (assoc :card-minimap-viewport/id (:id old))

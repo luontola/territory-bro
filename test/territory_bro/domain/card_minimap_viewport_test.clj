@@ -77,9 +77,9 @@
 
 ;;;; Commands
 
-(deftest create-card-minimap-viewport-test ; TODO: create + update -> define
+(deftest define-card-minimap-viewport-test
   (let [injections {:check-permit (fn [_permit])}
-        create-command {:command/type :card-minimap-viewport.command/define-card-minimap-viewport
+        define-command {:command/type :card-minimap-viewport.command/define-card-minimap-viewport
                         :command/time (Instant/now)
                         :command/user user-id
                         :gis-change/id gis-change-id
@@ -89,41 +89,21 @@
 
     (testing "created"
       (is (= [card-minimap-viewport-defined]
-             (handle-command create-command [] injections))))
-
-    (testing "is idempotent"
-      (is (empty? (handle-command create-command [card-minimap-viewport-defined] injections))))
-
-    (testing "checks permits"
-      (let [injections {:check-permit (fn [permit]
-                                        (is (= [:create-card-minimap-viewport cong-id] permit))
-                                        (throw (NoPermitException. nil nil)))}]
-        (is (thrown? NoPermitException
-                     (handle-command create-command [] injections)))))))
-
-(deftest update-card-minimap-viewport-test ; TODO: create + update -> define
-  (let [injections {:check-permit (fn [_permit])}
-        update-command {:command/type :card-minimap-viewport.command/update-card-minimap-viewport
-                        :command/time (Instant/now)
-                        :command/user user-id
-                        :gis-change/id gis-change-id
-                        :congregation/id cong-id
-                        :card-minimap-viewport/id card-minimap-viewport-id
-                        :card-minimap-viewport/location testdata/wkt-polygon}]
+             (handle-command define-command [] injections))))
 
     (testing "location changed"
       (is (= [card-minimap-viewport-defined]
-             (handle-command update-command [(assoc card-minimap-viewport-defined :card-minimap-viewport/location "old location")] injections))))
+             (handle-command define-command [(assoc card-minimap-viewport-defined :card-minimap-viewport/location "old location")] injections))))
 
-    (testing "nothing changed / is idempotent"
-      (is (empty? (handle-command update-command [card-minimap-viewport-defined] injections))))
+    (testing "is idempotent"
+      (is (empty? (handle-command define-command [card-minimap-viewport-defined] injections))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        (is (= [:update-card-minimap-viewport cong-id card-minimap-viewport-id] permit))
+                                        (is (= [:define-card-minimap-viewport cong-id card-minimap-viewport-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
-                     (handle-command update-command [card-minimap-viewport-defined] injections)))))))
+                     (handle-command define-command [] injections)))))))
 
 (deftest delete-card-minimap-viewport-test
   (let [injections {:check-permit (fn [_permit])}

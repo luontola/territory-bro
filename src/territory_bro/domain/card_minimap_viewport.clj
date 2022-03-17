@@ -53,22 +53,10 @@
 (defmethod command-handler :card-minimap-viewport.command/define-card-minimap-viewport
   [command card-minimap-viewport {:keys [check-permit]}]
   (let [cong-id (:congregation/id command)
-        card-minimap-viewport-id (:card-minimap-viewport/id command)]
-    (check-permit [:create-card-minimap-viewport cong-id])
-    (when (nil? card-minimap-viewport)
-      [(merge {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined
-               :congregation/id cong-id
-               :card-minimap-viewport/id card-minimap-viewport-id}
-              (gis-change/event-metadata command)
-              (select-keys command data-keys))])))
-
-(defmethod command-handler :card-minimap-viewport.command/update-card-minimap-viewport
-  [command card-minimap-viewport {:keys [check-permit]}]
-  (let [cong-id (:congregation/id command)
         card-minimap-viewport-id (:card-minimap-viewport/id command)
         old-data (select-keys card-minimap-viewport data-keys)
         new-data (select-keys command data-keys)]
-    (check-permit [:update-card-minimap-viewport cong-id card-minimap-viewport-id])
+    (check-permit [:define-card-minimap-viewport cong-id card-minimap-viewport-id])
     (when (not= old-data new-data)
       [(merge {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined
                :congregation/id cong-id

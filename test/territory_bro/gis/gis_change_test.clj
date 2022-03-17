@@ -110,7 +110,7 @@
                (change->command [congregation-created gis-user-created])))))
 
   (testing "territory update"
-    (is (= {:command/type :territory.command/update-territory
+    (is (= {:command/type :territory.command/define-territory
             :command/system "territory-bro.gis.gis-change"
             :command/user user-id
             :command/time test-time
@@ -191,7 +191,7 @@
                (change->command [congregation-created gis-user-created])))))
 
   (testing "region update"
-    (is (= {:command/type :region.command/update-region
+    (is (= {:command/type :region.command/define-region
             :command/system "territory-bro.gis.gis-change"
             :command/user user-id
             :command/time test-time
@@ -258,7 +258,7 @@
                (change->command [congregation-created gis-user-created])))))
 
   (testing "congregation_boundary update"
-    (is (= {:command/type :congregation-boundary.command/update-congregation-boundary
+    (is (= {:command/type :congregation-boundary.command/define-congregation-boundary
             :command/system "territory-bro.gis.gis-change"
             :command/user user-id
             :command/time test-time
@@ -321,7 +321,7 @@
                (change->command [congregation-created gis-user-created])))))
 
   (testing "card_minimap_viewport update"
-    (is (= {:command/type :card-minimap-viewport.command/update-card-minimap-viewport
+    (is (= {:command/type :card-minimap-viewport.command/define-card-minimap-viewport
             :command/system "territory-bro.gis.gis-change"
             :command/user user-id
             :command/time test-time

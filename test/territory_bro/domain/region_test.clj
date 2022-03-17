@@ -83,9 +83,9 @@
 
 ;;;; Commands
 
-(deftest create-region-test ; TODO: create + update -> define
+(deftest define-region-test
   (let [injections {:check-permit (fn [_permit])}
-        create-command {:command/type :region.command/define-region
+        define-command {:command/type :region.command/define-region
                         :command/time (Instant/now)
                         :command/user user-id
                         :gis-change/id gis-change-id
@@ -96,46 +96,25 @@
 
     (testing "created"
       (is (= [region-defined]
-             (handle-command create-command [] injections))))
-
-    (testing "is idempotent"
-      (is (empty? (handle-command create-command [region-defined] injections))))
-
-    (testing "checks permits"
-      (let [injections {:check-permit (fn [permit]
-                                        (is (= [:create-region cong-id] permit))
-                                        (throw (NoPermitException. nil nil)))}]
-        (is (thrown? NoPermitException
-                     (handle-command create-command [] injections)))))))
-
-(deftest update-region-test ; TODO: create + update -> define
-  (let [injections {:check-permit (fn [_permit])}
-        update-command {:command/type :region.command/update-region
-                        :command/time (Instant/now)
-                        :command/user user-id
-                        :gis-change/id gis-change-id
-                        :congregation/id cong-id
-                        :region/id region-id
-                        :region/name "the name"
-                        :region/location testdata/wkt-multi-polygon}]
+             (handle-command define-command [] injections))))
 
     (testing "name changed"
       (is (= [region-defined]
-             (handle-command update-command [(assoc region-defined :region/name "old name")] injections))))
+             (handle-command define-command [(assoc region-defined :region/name "old name")] injections))))
 
     (testing "location changed"
       (is (= [region-defined]
-             (handle-command update-command [(assoc region-defined :region/location "old location")] injections))))
+             (handle-command define-command [(assoc region-defined :region/location "old location")] injections))))
 
-    (testing "nothing changed / is idempotent"
-      (is (empty? (handle-command update-command [region-defined] injections))))
+    (testing "is idempotent"
+      (is (empty? (handle-command define-command [region-defined] injections))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        (is (= [:update-region cong-id region-id] permit))
+                                        (is (= [:define-region cong-id region-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
-                     (handle-command update-command [region-defined] injections)))))))
+                     (handle-command define-command [] injections)))))))
 
 (deftest delete-region-test
   (let [injections {:check-permit (fn [_permit])}

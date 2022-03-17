@@ -77,9 +77,9 @@
 
 ;;;; Commands
 
-(deftest create-congregation-boundary-test ; TODO: create + update -> define
+(deftest define-congregation-boundary-test
   (let [injections {:check-permit (fn [_permit])}
-        create-command {:command/type :congregation-boundary.command/define-congregation-boundary
+        define-command {:command/type :congregation-boundary.command/define-congregation-boundary
                         :command/time (Instant/now)
                         :command/user user-id
                         :gis-change/id gis-change-id
@@ -89,41 +89,21 @@
 
     (testing "created"
       (is (= [congregation-boundary-defined]
-             (handle-command create-command [] injections))))
-
-    (testing "is idempotent"
-      (is (empty? (handle-command create-command [congregation-boundary-defined] injections))))
-
-    (testing "checks permits"
-      (let [injections {:check-permit (fn [permit]
-                                        (is (= [:create-congregation-boundary cong-id] permit))
-                                        (throw (NoPermitException. nil nil)))}]
-        (is (thrown? NoPermitException
-                     (handle-command create-command [] injections)))))))
-
-(deftest update-congregation-boundary-test ; TODO: create + update -> define
-  (let [injections {:check-permit (fn [_permit])}
-        update-command {:command/type :congregation-boundary.command/update-congregation-boundary
-                        :command/time (Instant/now)
-                        :command/user user-id
-                        :gis-change/id gis-change-id
-                        :congregation/id cong-id
-                        :congregation-boundary/id congregation-boundary-id
-                        :congregation-boundary/location testdata/wkt-multi-polygon}]
+             (handle-command define-command [] injections))))
 
     (testing "location changed"
       (is (= [congregation-boundary-defined]
-             (handle-command update-command [(assoc congregation-boundary-defined :congregation-boundary/location "old location")] injections))))
+             (handle-command define-command [(assoc congregation-boundary-defined :congregation-boundary/location "old location")] injections))))
 
-    (testing "nothing changed / is idempotent"
-      (is (empty? (handle-command update-command [congregation-boundary-defined] injections))))
+    (testing "is idempotent"
+      (is (empty? (handle-command define-command [congregation-boundary-defined] injections))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
-                                        (is (= [:update-congregation-boundary cong-id congregation-boundary-id] permit))
+                                        (is (= [:define-congregation-boundary cong-id congregation-boundary-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
-                     (handle-command update-command [congregation-boundary-defined] injections)))))))
+                     (handle-command define-command [] injections)))))))
 
 (deftest delete-congregation-boundary-test
   (let [injections {:check-permit (fn [_permit])}
