@@ -1,4 +1,4 @@
-;; Copyright © 2015-2021 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -63,7 +63,7 @@
 
   :source-paths ["src"]
   :java-source-paths ["src-java"]
-  :javac-options ["--release" "11"]
+  :javac-options ["--release" "17"]
   :test-paths ["test"]
   :resource-paths ["resources"]
   :target-path "target/%s/"

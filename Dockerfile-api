@@ -1,4 +1,4 @@
-FROM adoptopenjdk:16-jdk-hotspot-focal AS builder
+FROM eclipse-temurin:17-jdk-focal AS builder
 
 # Leiningen
 RUN curl -SL https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein && \
@@ -49,7 +49,7 @@ RUN service postgresql start && \
 
 # ------------------------------------------------------------
 
-FROM adoptopenjdk:16-jre-hotspot-focal
+FROM eclipse-temurin:17-jre-focal
 
 EXPOSE 8080
 ENV PORT=8080 \
