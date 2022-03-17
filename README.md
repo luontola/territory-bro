@@ -32,12 +32,12 @@ Stop the application and remove all data
 ## Developing
 
 The tools for developing this project are
-[Docker](https://www.docker.com/),
-[Java 11 JDK](http://jdk.java.net/11/),
+[Java JDK](https://www.oracle.com/java/technologies/downloads/),
 [Leiningen](https://github.com/technomancy/leiningen),
-[Node.js](https://nodejs.org/) and
-[Yarn](https://yarnpkg.com/).
-It might also be useful to have the [PostgreSQL](https://www.postgresql.org/) command line tools, even if you run the database with Docker.
+[Node.js](https://nodejs.org/),
+[Yarn](https://yarnpkg.com/) and
+[Docker](https://www.docker.com/). It might also be useful to have the [PostgreSQL](https://www.postgresql.org/) command
+line tools, even if you run the database with Docker.
 
 Start the database
 
@@ -84,6 +84,6 @@ Produce canonical XML for better diffs
 
 ## License
 
-Copyright © 2015-2021, [Esko Luontola](http://www.luontola.fi)
+Copyright © 2015-2022, [Esko Luontola](http://www.luontola.fi)
 
 This software is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
