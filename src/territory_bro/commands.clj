@@ -115,7 +115,7 @@
   (assoc GisSyncCommand
          :command/type (s/eq :territory.command/define-territory)
          :congregation/id (foreign-key/references :congregation UUID)
-         :territory/id (foreign-key/references :new UUID)
+         :territory/id (foreign-key/references :unsafe UUID)
          :territory/number s/Str
          :territory/addresses s/Str
          :territory/region s/Str
