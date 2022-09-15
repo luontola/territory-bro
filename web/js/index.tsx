@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2022 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -25,7 +25,12 @@ import TerritoryListPage from "./pages/TerritoryListPage";
 import TerritoryPage from "./pages/TerritoryPage";
 import OpenSharePage from "./pages/OpenSharePage";
 
+let previousLocation = globalHistory.location;
 globalHistory.listen(({location, action}) => {
+  if (previousLocation.href === location.href) {
+    return; // only page state was updated, but the URL remains the same
+  }
+  previousLocation = location;
   console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
   logPageView();
   document.querySelector('main')

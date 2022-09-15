@@ -3,14 +3,11 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React, {useState} from "react";
-import {Link} from "@reach/router";
+import {globalHistory, Link} from "@reach/router";
 import {getCongregationById, getSettings, Territory} from "../api";
 import styles from "./TerritoryListPage.css";
 import InfoBox from "../maps/InfoBox";
-import {mapRasters} from "../maps/mapOptions";
 import TerritoryListMap from "../maps/TerritoryListMap";
-
-const mapRaster = mapRasters[0];
 
 function LimitedVisibilityHelp() {
   const settings = getSettings();
@@ -64,9 +61,21 @@ function matchesSearch(territory: Territory, search: string): boolean {
     || addresses.toLowerCase().includes(search);
 }
 
+function usePageState(name, initialState) {
+  const [value, setValue] = useState(globalHistory.location.state?.[name] || initialState);
+  return [value, newValue => {
+    setValue(newValue);
+    const newState = {
+      ...globalHistory.location.state,
+      [name]: newValue
+    };
+    globalHistory.navigate("", {state: newState, replace: true})
+  }];
+}
+
 const TerritoryListPage = ({congregationId}) => {
   const congregation = getCongregationById(congregationId);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = usePageState('search', '');
   const visibleTerritories = congregation.territories.filter(territory => matchesSearch(territory, search));
   return <>
     <h1>Territories</h1>
