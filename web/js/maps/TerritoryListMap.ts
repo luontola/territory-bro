@@ -19,6 +19,7 @@ import {
 } from "./mapOptions";
 import {Congregation, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
+import {isEmpty} from "ol/extent";
 
 type Props = {
   congregation: Congregation;
@@ -73,9 +74,13 @@ function initRegionMap(element: HTMLDivElement, congregation: Congregation): any
   const streetsLayer = makeStreetsLayer();
 
   function resetZoom(map, opts) {
-    //console.log("extent", territoryLayer.getSource().getExtent());
-    map.getView().fit(congregationLayer.getSource().getExtent(), {
-      padding: [5, 5, 5, 5],
+    let extent = territoryLayer.getSource().getExtent();
+    if (isEmpty(extent)) {
+      extent = congregationLayer.getSource().getExtent();
+    }
+    const padding = 50;
+    map.getView().fit(extent, {
+      padding: [padding, padding, padding, padding],
       minResolution: 3.0,
       ...opts,
     });
@@ -99,7 +104,7 @@ function initRegionMap(element: HTMLDivElement, congregation: Congregation): any
         return feature;
       });
       territoryLayer.setSource(new VectorSource({features}))
-      resetZoom(map, {});
+      resetZoom(map, {duration: 300});
     }
   };
 }
