@@ -8,25 +8,29 @@
     </option>
     <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="999" />
     <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="999" />
-    <ClojureCodeStyleSettings>{
-  :clojure.core/assoc 1000
-  :clojure.core/comment 0
-  :clojure.core/cond-&gt; 1
-  :clojure.core/defonce 1
-  :conman.core/with-transaction 1
-  :cursive.formatting/align-conditionals false
-  :cursive.formatting/align-maps false
-  :cursive.formatting/comment-align-column 0
-  :cursive.formatting/one-space-lists true
-  :re-frame.core/reg-event-db 1000
-  :re-frame.core/reg-sub 1000
-  :secretary.core/defroute :only-indent
-  :territory-bro.gis.gis-db-test/with-tenant-schema 1
-  :territory-bro.infra.authentication/with-user-from-session 1
-  :territory-bro.infra.db/as-tenant 1
-  :territory-bro.infra.db/auto-explain 2
-  :territory-bro.test.testutil/grab-exception 0
-}</ClojureCodeStyleSettings>
+    <ClojureCodeStyleSettings>
+      <option name="alignMapValues" value="false" />
+      <option name="alignReaderConditionals" value="false" />
+      <option name="oneSpaceLists" value="true" />
+      <option name="commentAlignColumn" value="0" />
+      <option name="indentCustomisations">
+        <map>
+          <entry key="clojure.core/assoc" value="1000" />
+          <entry key="clojure.core/comment" value="0" />
+          <entry key="clojure.core/cond-&gt;" value="1" />
+          <entry key="clojure.core/defonce" value="1" />
+          <entry key="conman.core/with-transaction" value="1" />
+          <entry key="re-frame.core/reg-event-db" value="1000" />
+          <entry key="re-frame.core/reg-sub" value="1000" />
+          <entry key="secretary.core/defroute" value="-1" />
+          <entry key="territory-bro.gis.gis-db-test/with-tenant-schema" value="1" />
+          <entry key="territory-bro.infra.authentication/with-user-from-session" value="1" />
+          <entry key="territory-bro.infra.db/as-tenant" value="1" />
+          <entry key="territory-bro.infra.db/auto-explain" value="2" />
+          <entry key="territory-bro.test.testutil/grab-exception" value="0" />
+        </map>
+      </option>
+    </ClojureCodeStyleSettings>
     <JavaCodeStyleSettings>
       <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="999" />
       <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="999" />
