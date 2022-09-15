@@ -1,4 +1,4 @@
-// Copyright © 2015-2021 Esko Luontola
+// Copyright © 2015-2022 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,6 +7,10 @@ import {Link} from "@reach/router";
 import {getCongregationById, getSettings, Territory} from "../api";
 import styles from "./TerritoryListPage.css";
 import InfoBox from "../maps/InfoBox";
+import {mapRasters} from "../maps/mapOptions";
+import TerritoryListMap from "../maps/TerritoryListMap";
+
+const mapRaster = mapRasters[0];
 
 function LimitedVisibilityHelp() {
   const settings = getSettings();
@@ -36,14 +40,14 @@ function SearchForm({search, setSearch}) {
                setSearch(event.target.value);
              }}/>
       {search !== '' &&
-      <button type="button"
-              className="pure-button"
-              onClick={() => {
-                setSearch('');
-                document.getElementById(id).focus();
-              }}>
-        Clear
-      </button>
+        <button type="button"
+                className="pure-button"
+                onClick={() => {
+                  setSearch('');
+                  document.getElementById(id).focus();
+                }}>
+          Clear
+        </button>
       }
     </form>
   );
@@ -63,11 +67,15 @@ function matchesSearch(territory: Territory, search: string): boolean {
 const TerritoryListPage = ({congregationId}) => {
   const congregation = getCongregationById(congregationId);
   const [search, setSearch] = useState('');
+  const visibleTerritories = congregation.territories.filter(territory => matchesSearch(territory, search));
   return <>
     <h1>Territories</h1>
     {!congregation.permissions.viewCongregation &&
-    <LimitedVisibilityHelp/>
+      <LimitedVisibilityHelp/>
     }
+    <div className={styles.map}>
+      <TerritoryListMap congregation={congregation} territories={visibleTerritories}/>
+    </div>
     <SearchForm search={search} setSearch={setSearch}/>
     <table className="pure-table pure-table-striped">
       <thead>
@@ -78,17 +86,15 @@ const TerritoryListPage = ({congregationId}) => {
       </tr>
       </thead>
       <tbody>
-      {congregation.territories
-        .filter(territory => matchesSearch(territory, search))
-        .map(territory =>
-          <tr key={territory.id}>
-            <td className={styles.number}>
-              <Link to={territory.id}>{territory.number === '' ? '-' : territory.number}</Link>
-            </td>
-            <td>{territory.region}</td>
-            <td>{territory.addresses}</td>
-          </tr>
-        )}
+      {visibleTerritories.map(territory =>
+        <tr key={territory.id}>
+          <td className={styles.number}>
+            <Link to={territory.id}>{territory.number === '' ? '-' : territory.number}</Link>
+          </td>
+          <td>{territory.region}</td>
+          <td>{territory.addresses}</td>
+        </tr>
+      )}
       </tbody>
     </table>
   </>;

@@ -29,3 +29,7 @@ td.number a {
 td.number:hover a {
     font-weight: bold;
 }
+
+.map {
+    height: 600px;
+}
