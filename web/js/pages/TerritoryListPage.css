@@ -31,5 +31,6 @@ td.number:hover a {
 }
 
 .map {
-    height: 600px;
+    width: 100%;
+    height: min(700px, calc(100vh - 8em));
 }
