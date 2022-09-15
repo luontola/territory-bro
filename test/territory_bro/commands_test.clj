@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,7 +8,7 @@
             [territory-bro.commands :as commands]
             [territory-bro.infra.foreign-key :as foreign-key]
             [territory-bro.infra.permissions :as permissions]
-            [territory-bro.test.testutil :as testutil :refer [re-equals re-contains]])
+            [territory-bro.test.testutil :as testutil :refer [re-contains re-equals]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)
@@ -52,6 +52,7 @@
       (is (s/check commands/Command unknown-command)))
 
     (testing "all UUIDs are foreign-key checked"
+      ;; TODO: reuse check-schema, convert it the a visitor pattern
       (letfn [(check-schema [schema path]
                ;; there should not be a schema where the value is a plain UUID
                ;; instead of a (foreign-key/references :stuff UUID)
@@ -69,6 +70,7 @@
         (doseq [[type schema] commands/command-schemas]
           (testing {:command/type type}
             (check-schema schema [])))))))
+;; TODO: test: only trusted commands may use :unsafe foreign-key checks
 
 (deftest validate-command-test
   (binding [foreign-key/*reference-checkers* testutil/dummy-reference-checkers]
