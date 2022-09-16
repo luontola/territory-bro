@@ -1,11 +1,11 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.api
   (:require [camel-snake-kebab.core :as csk]
             [clojure.tools.logging :as log]
-            [compojure.core :refer [defroutes GET POST ANY]]
+            [compojure.core :refer [ANY GET POST defroutes]]
             [liberator.core :refer [defresource]]
             [medley.core :refer [map-keys]]
             [ring.util.http-response :refer :all]
@@ -14,6 +14,7 @@
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.facade :as facade]
+            [territory-bro.domain.loan :as loan]
             [territory-bro.domain.share :as share]
             [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.gis.qgis :as qgis]
@@ -22,7 +23,7 @@
             [territory-bro.infra.db :as db]
             [territory-bro.infra.jwt :as jwt]
             [territory-bro.infra.user :as user]
-            [territory-bro.infra.util :refer [getx conj-set]]
+            [territory-bro.infra.util :refer [conj-set getx]]
             [territory-bro.projections :as projections])
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
            (java.time Duration)
@@ -35,7 +36,9 @@
    :addresses s/Str
    :region s/Str
    :meta {s/Keyword s/Any}
-   :location s/Str})
+   :location s/Str
+   (s/optional-key :loaned?) s/Bool
+   (s/optional-key :staleness) s/Int})
 
 (s/defschema Region
   {:id s/Uuid
@@ -210,6 +213,7 @@
         (forbidden! "No congregation access"))
       (db/with-db [conn {:read-only? true}]
         (ok (-> congregation
+                (loan/enrich-territory-loans!)
                 (enrich-congregation-users conn)
                 (format-for-api)
                 (validate-congregation)))))))
