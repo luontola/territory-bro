@@ -37,19 +37,21 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
       territories,
       onClick,
     } = this.props;
-    this.map = initRegionMap(this.element, congregation, onClick);
-    this.map.setTerritories(territories);
+    this.map = initMap(this.element, congregation, territories, onClick);
   }
 
   componentDidUpdate() {
     const {
       territories
     } = this.props;
-    this.map.setTerritories(territories);
+    this.map.updateTerritories(territories);
   }
 }
 
-function initRegionMap(element: HTMLDivElement, congregation: Congregation, onClick: (string) => void): any {
+function initMap(element: HTMLDivElement,
+                 congregation: Congregation,
+                 territories: Array<Territory>,
+                 onClick: (string) => void): any {
   const congregationLayer = new VectorLayer({
     source: new VectorSource({
       features: wktToFeatures(congregation.location)
@@ -72,6 +74,18 @@ function initRegionMap(element: HTMLDivElement, congregation: Congregation, onCl
       return [style];
     }
   });
+
+  function setTerritories(territories) {
+    const features = territories.map(function (territory) {
+      const feature = wktToFeature(territory.location);
+      feature.set('territoryId', territory.id);
+      feature.set('number', territory.number);
+      return feature;
+    });
+    territoryLayer.setSource(new VectorSource({features}))
+  }
+
+  setTerritories(territories);
 
   const streetsLayer = makeStreetsLayer();
 
@@ -111,14 +125,8 @@ function initRegionMap(element: HTMLDivElement, congregation: Congregation, onCl
   });
 
   return {
-    setTerritories(territories: Array<Territory>): void {
-      const features = territories.map(function (territory) {
-        const feature = wktToFeature(territory.location);
-        feature.set('territoryId', territory.id);
-        feature.set('number', territory.number);
-        return feature;
-      });
-      territoryLayer.setSource(new VectorSource({features}))
+    updateTerritories(territories: Array<Territory>): void {
+      setTerritories(territories);
       resetZoom(map, {duration: 300});
     }
   };
