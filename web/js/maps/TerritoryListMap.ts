@@ -7,6 +7,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
+import Fill from "ol/style/Fill";
 import {
   makeControls,
   makeInteractions,
@@ -48,6 +49,32 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
   }
 }
 
+function loanableTerritoryStroke(loaned) {
+  const stroke = territoryStrokeStyle();
+  if (typeof loaned === 'boolean') {
+    stroke.setColor(loaned ?
+      'rgba(255, 0, 0, 0.6)' :
+      'rgba(0, 0, 255, 0.6)')
+  }
+  return stroke;
+}
+
+function loanableTerritoryFill(loaned, staleness) {
+  const fill = new Fill({
+    color: 'rgba(255, 0, 0, 0.0)',
+  });
+  if (typeof loaned === 'boolean') {
+    fill.setColor(loaned ?
+      (staleness < 3 ? 'rgba(150, 150, 150, 0.2)' :
+        staleness < 6 ? 'rgba(255, 150, 0, 0.2)' :
+          'rgba(255, 0, 0, 0.2)') :
+      (staleness < 3 ? 'rgba(150, 150, 150, 0.2)' :
+        staleness < 6 ? 'rgba(0, 200, 255, 0.2)' :
+          'rgba(0, 0, 255, 0.2)'));
+  }
+  return fill;
+}
+
 function initMap(element: HTMLDivElement,
                  congregation: Congregation,
                  territories: Array<Territory>,
@@ -67,9 +94,14 @@ function initMap(element: HTMLDivElement,
   const territoryLayer = new VectorLayer({
     source: new VectorSource({}),
     style: function (feature, resolution) {
+      const number = feature.get('number');
+      const loaned = feature.get('loaned');
+      const staleness = feature.get('staleness');
+
       const style = new Style({
-        stroke: territoryStrokeStyle(),
-        text: territoryTextStyle(feature.get('number'), '5mm')
+        stroke: loanableTerritoryStroke(loaned),
+        fill: loanableTerritoryFill(loaned, staleness),
+        text: territoryTextStyle(number, '5mm')
       });
       return [style];
     }
@@ -80,6 +112,8 @@ function initMap(element: HTMLDivElement,
       const feature = wktToFeature(territory.location);
       feature.set('territoryId', territory.id);
       feature.set('number', territory.number);
+      feature.set('loaned', territory.loaned);
+      feature.set('staleness', territory.staleness);
       return feature;
     });
     territoryLayer.setSource(new VectorSource({features}))
@@ -113,7 +147,7 @@ function initMap(element: HTMLDivElement,
   resetZoom(map, {});
 
   map.on('click', event => {
-    // XXX: only finds feature if clicking its label or border, but not when clicking inside the borders
+    // the feature needs to have a fill, or else getFeaturesAtPixel finds it only if the click hit its stoke or text
     const features = map.getFeaturesAtPixel(event.pixel, {layerFilter: layer => layer === territoryLayer});
     if (features.length === 1) { // ignore ambiguous clicks when labels overlap; must zoom closer and click only one
       const feature = features[0];

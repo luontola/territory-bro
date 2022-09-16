@@ -4,6 +4,7 @@
 
 (ns territory-bro.api
   (:require [camel-snake-kebab.core :as csk]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [compojure.core :refer [ANY GET POST defroutes]]
             [liberator.core :refer [defresource]]
@@ -37,7 +38,7 @@
    :region s/Str
    :meta {s/Keyword s/Any}
    :location s/Str
-   (s/optional-key :loaned?) s/Bool
+   (s/optional-key :loaned) s/Bool
    (s/optional-key :staleness) s/Int})
 
 (s/defschema Region
@@ -80,7 +81,7 @@
    :name s/Str})
 
 ;; camelCase keys are easier to use from JavaScript than kebab-case
-(def ^:private format-key-for-api (memoize (comp csk/->camelCaseKeyword name)))
+(def ^:private format-key-for-api (memoize (comp csk/->camelCaseKeyword #(str/replace % "?" "") name)))
 
 (defn format-for-api [m]
   (let [f (fn [x]
