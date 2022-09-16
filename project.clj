@@ -27,6 +27,7 @@
                  [org.apache.commons/commons-lang3 "3.11"]
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.10.1"]
+                 [org.clojure/data.csv "1.0.1"]
                  [org.clojure/tools.logging "1.1.0"] ; TODO: consider switching to Timbre
                  [org.flywaydb/flyway-core "7.3.0"]
                  [org.postgresql/postgresql "42.2.18"]
