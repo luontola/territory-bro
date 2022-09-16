@@ -4,7 +4,6 @@
 
 import axios from "axios";
 import {useState} from "react";
-import {globalHistory} from "@reach/router";
 
 const api = axios.create({
   timeout: 15000,
@@ -15,15 +14,15 @@ const api = axios.create({
 export {api};
 
 export function getPageState(key) {
-  return globalHistory.location.state?.[key];
+  return window.history.state?.[key];
 }
 
 export function setPageState(key, value) {
   const newState = {
-    ...globalHistory.location.state,
+    ...window.history.state,
     [key]: value
   };
-  globalHistory.navigate("", {state: newState, replace: true})
+  window.history.replaceState(newState, '')
 }
 
 export function usePageState(key, initialState) {
