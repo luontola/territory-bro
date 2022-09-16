@@ -24,6 +24,7 @@ import {isEmpty} from "ol/extent";
 type Props = {
   congregation: Congregation;
   territories: Array<Territory>;
+  onClick: (string) => void;
 };
 
 export default class TerritoryListMap extends OpenLayersMap<Props> {
@@ -34,8 +35,9 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
     const {
       congregation,
       territories,
+      onClick,
     } = this.props;
-    this.map = initRegionMap(this.element, congregation);
+    this.map = initRegionMap(this.element, congregation, onClick);
     this.map.setTerritories(territories);
   }
 
@@ -47,7 +49,7 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
   }
 }
 
-function initRegionMap(element: HTMLDivElement, congregation: Congregation): any {
+function initRegionMap(element: HTMLDivElement, congregation: Congregation, onClick: (string) => void): any {
   const congregationLayer = new VectorLayer({
     source: new VectorSource({
       features: wktToFeatures(congregation.location)
@@ -96,10 +98,23 @@ function initRegionMap(element: HTMLDivElement, congregation: Congregation): any
   });
   resetZoom(map, {});
 
+  map.on('click', event => {
+    // XXX: only finds feature if clicking its label or border, but not when clicking inside the borders
+    const features = map.getFeaturesAtPixel(event.pixel, {layerFilter: layer => layer === territoryLayer});
+    if (features.length === 1) { // ignore ambiguous clicks when labels overlap; must zoom closer and click only one
+      const feature = features[0];
+      const territoryId = feature.get('territoryId');
+      if (territoryId) {
+        onClick(territoryId);
+      }
+    }
+  });
+
   return {
     setTerritories(territories: Array<Territory>): void {
       const features = territories.map(function (territory) {
         const feature = wktToFeature(territory.location);
+        feature.set('territoryId', territory.id);
         feature.set('number', territory.number);
         return feature;
       });

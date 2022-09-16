@@ -73,7 +73,7 @@ function usePageState(name, initialState) {
   }];
 }
 
-const TerritoryListPage = ({congregationId}) => {
+const TerritoryListPage = ({congregationId, navigate}) => {
   const congregation = getCongregationById(congregationId);
   const [search, setSearch] = usePageState('search', '');
   const visibleTerritories = congregation.territories.filter(territory => matchesSearch(territory, search));
@@ -83,7 +83,11 @@ const TerritoryListPage = ({congregationId}) => {
       <LimitedVisibilityHelp/>
     }
     <div className={styles.map}>
-      <TerritoryListMap congregation={congregation} territories={visibleTerritories}/>
+      <TerritoryListMap congregation={congregation}
+                        territories={visibleTerritories}
+                        onClick={territoryId => {
+                          navigate(territoryId, {});
+                        }}/>
     </div>
     <SearchForm search={search} setSearch={setSearch}/>
     <table className="pure-table pure-table-striped">
