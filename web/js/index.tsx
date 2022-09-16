@@ -24,6 +24,7 @@ import JoinPage from "./pages/JoinPage";
 import TerritoryListPage from "./pages/TerritoryListPage";
 import TerritoryPage from "./pages/TerritoryPage";
 import OpenSharePage from "./pages/OpenSharePage";
+import {getPageState, setPageState} from "./util";
 
 let previousLocation = globalHistory.location;
 globalHistory.listen(({location, action}) => {
@@ -31,11 +32,40 @@ globalHistory.listen(({location, action}) => {
     return; // only page state was updated, but the URL remains the same
   }
   previousLocation = location;
+
   console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
   logPageView();
-  document.querySelector('main')
-    ?.scrollIntoView({block: "start"});
+
+  const scrollY = getPageState("scrollY");
+  if (typeof scrollY === 'number') {
+    // XXX: scrolling immediately does not scroll far enough; maybe we must wait for React to render the whole page
+    setTimeout(() => {
+      window.scrollTo(0, scrollY);
+    }, 100);
+  } else {
+    document.querySelector('main')?.scrollIntoView({block: "start"});
+  }
 });
+
+function listenScrollY(onScroll) {
+  let lastKnownScrollY = 0;
+  let ticking = false;
+  window.addEventListener('scroll', _event => {
+    lastKnownScrollY = window.scrollY;
+    if (!ticking) {
+      // avoiding firing too many events, as advised in https://developer.mozilla.org/en-US/docs/Web/API/Element/scroll_event
+      setTimeout(() => {
+        onScroll(lastKnownScrollY);
+        ticking = false;
+      }, 200);
+      ticking = true;
+    }
+  });
+}
+
+listenScrollY(scrollY => {
+  setPageState('scrollY', scrollY);
+})
 
 document.querySelector('html')
   .setAttribute('lang', language);
