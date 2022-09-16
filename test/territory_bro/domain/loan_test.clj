@@ -36,15 +36,15 @@
     (is (empty? (loan/parse-loans-csv "Number,Loaned,Staleness"))))
 
   (testing "full data"
-    (is (= [{:number "101"
-             :loaned? false
-             :staleness 4}
-            {:number "102"
-             :loaned? true
-             :staleness 1}
-            {:number "103"
-             :loaned? false
-             :staleness 0}]
+    (is (= [{:territory/number "101"
+             :territory/loaned? false
+             :territory/staleness 4}
+            {:territory/number "102"
+             :territory/loaned? true
+             :territory/staleness 1}
+            {:territory/number "103"
+             :territory/loaned? false
+             :territory/staleness 0}]
            (loan/parse-loans-csv
             (str "Number,Loaned,Staleness\n"
                  "101,FALSE,4\n"
@@ -52,20 +52,20 @@
                  "103,FALSE,0")))))
 
   (testing "supports quoted values"
-    (is (= [{:number "101, A"
-             :loaned? true
-             :staleness 4}]
+    (is (= [{:territory/number "101, A"
+             :territory/loaned? true
+             :territory/staleness 4}]
            (loan/parse-loans-csv
             (str "Number,Loaned,Staleness\n"
                  "\"101, A\",TRUE,4\n")))))
 
   (testing "ignores empty rows"
-    (is (= [{:number "101"
-             :loaned? false
-             :staleness 4}
-            {:number "103"
-             :loaned? false
-             :staleness 0}]
+    (is (= [{:territory/number "101"
+             :territory/loaned? false
+             :territory/staleness 4}
+            {:territory/number "103"
+             :territory/loaned? false
+             :territory/staleness 0}]
            (loan/parse-loans-csv
             (str "Number,Loaned,Staleness\n"
                  "101,FALSE,4\n"
@@ -73,9 +73,9 @@
                  "103,FALSE,0\n")))))
 
   (testing "ignores other columns"
-    (is (= [{:number "101"
-             :loaned? false
-             :staleness 4}]
+    (is (= [{:territory/number "101"
+             :territory/loaned? false
+             :territory/staleness 4}]
            (loan/parse-loans-csv
             (str "Number,foo,Loaned,bar,,,Staleness\n"
                  "101,,FALSE,,,,4"))))))

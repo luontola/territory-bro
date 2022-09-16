@@ -28,22 +28,17 @@
 (defn parse-loans-csv [csv-string]
   (when csv-string
     (let [[header & rows] (csv/read-csv csv-string)
-          header (->> header
-                      (map #(keyword (str/lower-case %)))
-                      (map #(case %
-                              :loaned :loaned?
-                              %)))
+          header (map #(keyword (str/lower-case %))
+                      header)
           rows (map zipmap
                     (repeat header)
                     rows)]
       (->> rows
            (remove #(str/blank? (:number %)))
            (map (fn [row]
-                  (-> row
-                      ;; TODO: convert to namespaced keys
-                      (select-keys [:number :loaned? :staleness])
-                      (update :loaned? #(Boolean/parseBoolean %))
-                      (update :staleness #(Long/parseLong %)))))))))
+                  {:territory/number (:number row)
+                   :territory/loaned? (Boolean/parseBoolean (:loaned row))
+                   :territory/staleness (Long/parseLong (:staleness row))}))))))
 
 (defn enrich-territory-loans! [congregation]
   ;; TODO: allow configuring the google sheets url (and invalidate this test url)
@@ -54,15 +49,11 @@
           loans (-> (download! loans-url)
                     (parse-loans-csv))
           number->loan (->> loans
-                            (group-by :number)
+                            (group-by :territory/number)
                             (map-vals first))
-          add-loan (fn [territory]
-                     (if-some [loan (number->loan (:territory/number territory))]
-                       (-> territory
-                           (assoc :territory/loaned? (:loaned? loan))
-                           (assoc :territory/staleness (:staleness loan)))
-                       territory))]
-      (update congregation :congregation/territories #(map add-loan %)))
+          with-loan (fn [territory]
+                      (merge territory (number->loan (:territory/number territory))))]
+      (update congregation :congregation/territories #(map with-loan %)))
     (catch Throwable t
       (log/error t "Failed to enrich congregation with territory loans" (:congregation/id congregation))
       congregation)))
