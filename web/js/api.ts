@@ -79,6 +79,7 @@ export type Congregation = {
   permissions: {
     [permission: string]: boolean;
   };
+  loansCsvUrl?: string;
   location: string;
   congregationBoundaries: Array<Boundary>;
   territories: Array<Territory>;
@@ -183,8 +184,8 @@ export async function setUserPermissions(congregationId: string, userId: string,
   refreshCongregations();
 }
 
-export async function renameCongregation(congregationId: string, name: string) {
-  await api.post(`/api/congregation/${congregationId}/rename`, {name});
+export async function saveCongregationSettings(congregationId: string, congregationName: string, loansCsvUrl) {
+  await api.post(`/api/congregation/${congregationId}/settings`, {congregationName, loansCsvUrl});
   refreshCongregations();
 }
 

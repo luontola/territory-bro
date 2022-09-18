@@ -31,10 +31,10 @@
             [territory-bro.infra.router :as router]
             [territory-bro.infra.user :as user]
             [territory-bro.projections :as projections]
-            [territory-bro.test.fixtures :refer [db-fixture api-fixture]])
-  (:import (java.time Instant Duration)
+            [territory-bro.test.fixtures :refer [api-fixture db-fixture]])
+  (:import (java.time Duration Instant)
            (java.util UUID)
-           (territory_bro ValidationException NoPermitException WriteConflictException)))
+           (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 (use-fixtures :once (join-fixtures [db-fixture api-fixture]))
 
@@ -130,8 +130,8 @@
     cong-id))
 
 (defn try-rename-congregation! [session cong-id name]
-  (-> (request :post (str "/api/congregation/" cong-id "/rename"))
-      (json-body {:name name})
+  (-> (request :post (str "/api/congregation/" cong-id "/settings"))
+      (json-body {:congregationName name})
       (merge session)
       app))
 

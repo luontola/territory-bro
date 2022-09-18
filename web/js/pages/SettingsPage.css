@@ -1,0 +1,8 @@
+table.spreadsheet {
+    margin: 0.5em;
+}
+
+table.spreadsheet td {
+    border: 1px solid gray;
+    padding: 3px;
+}

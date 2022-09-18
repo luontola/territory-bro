@@ -70,6 +70,7 @@
         :else s/Uuid)
    :name s/Str
    :permissions {s/Keyword (s/eq true)}
+   (s/optional-key :loansCsvUrl) s/Str
    :territories [Territory]
    :regions [Region]
    :congregationBoundaries [CongregationBoundary]
@@ -303,11 +304,12 @@
                                   :user/id user-id
                                   :permission/ids permissions})))))
 
-(defn rename-congregation [request]
+(defn save-congregation-settings [request]
   (auth/with-user-from-session request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          name (get-in request [:params :name])
+          name (get-in request [:params :congregationName])
+          loans-csv-url (get-in request [:params :loansCsvUrl]) ; TODO
           state (state-for-request request)]
       (db/with-db [conn {}]
         (api-command! conn state {:command/type :congregation.command/rename-congregation
@@ -388,7 +390,7 @@
   (GET "/api/congregation/:congregation" request (get-congregation request))
   (POST "/api/congregation/:congregation/add-user" request (add-user request))
   (POST "/api/congregation/:congregation/set-user-permissions" request (set-user-permissions request))
-  (POST "/api/congregation/:congregation/rename" request (rename-congregation request))
+  (POST "/api/congregation/:congregation/settings" request (save-congregation-settings request))
   (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request))
   (POST "/api/congregation/:congregation/territory/:territory/share" request (share-territory-link request))
   (GET "/api/share/:share-key" request (open-share request)))
