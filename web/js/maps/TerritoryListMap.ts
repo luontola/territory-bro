@@ -21,6 +21,7 @@ import {
 import {Congregation, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 import {isEmpty} from "ol/extent";
+import {getPageState, setPageState} from "../util";
 
 type Props = {
   congregation: Congregation;
@@ -145,6 +146,20 @@ function initMap(element: HTMLDivElement,
     view: makePrintoutView(),
   });
   resetZoom(map, {});
+
+  const mapState = getPageState('map');
+  if (mapState) {
+    map.getView().setCenter(mapState.center)
+    map.getView().setZoom(mapState.zoom)
+    map.getView().setRotation(mapState.rotation)
+  }
+  map.on('moveend', _event => {
+    setPageState('map', {
+      center: map.getView().getCenter(),
+      zoom: map.getView().getZoom(),
+      rotation: map.getView().getRotation(),
+    });
+  })
 
   map.on('click', event => {
     // the feature needs to have a fill, or else getFeaturesAtPixel finds it only if the click hit its stoke or text
