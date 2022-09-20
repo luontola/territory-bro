@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -93,6 +93,12 @@
          :congregation/id UUID
          :user/id UUID
          :permission/id PermissionId))
+
+(s/defschema SettingsUpdated
+  (assoc BaseEvent
+         :event/type (s/eq :congregation.event/settings-updated)
+         :congregation/id UUID
+         :congregation/loans-csv-url (s/maybe s/Str)))
 
 (s/defschema GisUserCreated
   (assoc BaseEvent
@@ -220,6 +226,7 @@
    :congregation.event/gis-user-deleted GisUserDeleted
    :congregation.event/permission-granted PermissionGranted
    :congregation.event/permission-revoked PermissionRevoked
+   :congregation.event/settings-updated SettingsUpdated
    :db-admin.event/gis-schema-is-present GisSchemaIsPresent
    :db-admin.event/gis-user-is-absent GisUserIsAbsent
    :db-admin.event/gis-user-is-present GisUserIsPresent

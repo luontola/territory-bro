@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -14,6 +14,7 @@
   (let [cong-id (:congregation/id cong)]
     {:congregation/id cong-id
      :congregation/name (:congregation/name cong)
+     :congregation/loans-csv-url (:congregation/loans-csv-url cong)
      :congregation/permissions (->> (permissions/list-permissions state user-id [cong-id])
                                     (map (fn [permission]
                                            [permission true]))
@@ -58,5 +59,6 @@
             (enrich-congregation state user-id)
             (assoc :congregation/id "demo")
             (assoc :congregation/name "Demo Congregation")
+            (assoc :congregation/loans-csv-url nil)
             (assoc :congregation/permissions {:view-congregation true})
             (assoc :congregation/users []))))

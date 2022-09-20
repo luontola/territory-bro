@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -27,6 +27,11 @@
    :congregation/id cong-id
    :congregation/name "Cong1 Name"
    :congregation/schema-name "cong1_schema"})
+
+(def settings-updated
+  {:event/type :congregation.event/settings-updated
+   :congregation/id cong-id
+   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"})
 
 (def view-congregation-granted
   {:event/type :congregation.event/permission-granted
@@ -80,6 +85,7 @@
 
 (def test-events
   [congregation-created
+   settings-updated
    view-congregation-granted
    view-congregation-granted2
    territory-defined
@@ -97,6 +103,7 @@
   (let [state (apply-events test-events)
         expected {:congregation/id cong-id
                   :congregation/name "Cong1 Name"
+                  :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
                   :congregation/permissions {:view-congregation true}
                   :congregation/users [{:user/id user-id}
                                        {:user/id user-id2}]
@@ -148,6 +155,7 @@
         user-id (UUID. 0 0x666)
         expected {:congregation/id "demo" ; changed
                   :congregation/name "Demo Congregation" ; changed
+                  :congregation/loans-csv-url nil ; changed
                   :congregation/permissions {:view-congregation true} ; changed
                   :congregation/users [] ; changed
                   :congregation/territories [{:territory/id territory-id

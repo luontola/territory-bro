@@ -8,8 +8,7 @@
             [clojure.tools.logging :as log]
             [medley.core :refer [map-vals]])
   (:import (java.net URL)
-           (java.time Duration)
-           (java.util UUID)))
+           (java.time Duration)))
 
 (defn ^:dynamic download! [url]
   (when url
@@ -41,12 +40,8 @@
                    :territory/staleness (Long/parseLong (:staleness row))}))))))
 
 (defn enrich-territory-loans! [congregation]
-  ;; TODO: allow configuring the google sheets url (and invalidate this test url)
   (try
-    (let [loans-url (when (= (UUID/fromString "778fdfae-d023-4475-a8ef-9dbb6ae8e350")
-                             (:congregation/id congregation))
-                      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_onetqOuxwTZKOKOioeUtzhz0i_kFHQFDx-Tg2oMBt58Q4TlIfVPKh4zLY57l0Z3Gce-Ja2ePOAqk/pub?gid=1753802949&single=true&output=csv")
-          loans (-> (download! loans-url)
+    (let [loans (-> (download! (:congregation/loans-csv-url congregation))
                     (parse-loans-csv))
           number->loan (->> loans
                             (group-by :territory/number)

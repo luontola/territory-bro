@@ -70,7 +70,7 @@
         :else s/Uuid)
    :name s/Str
    :permissions {s/Keyword (s/eq true)}
-   (s/optional-key :loansCsvUrl) s/Str
+   :loansCsvUrl (s/maybe s/Str)
    :territories [Territory]
    :regions [Region]
    :congregationBoundaries [CongregationBoundary]
@@ -309,12 +309,13 @@
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           name (get-in request [:params :congregationName])
-          loans-csv-url (get-in request [:params :loansCsvUrl]) ; TODO
+          loans-csv-url (get-in request [:params :loansCsvUrl])
           state (state-for-request request)]
       (db/with-db [conn {}]
         (api-command! conn state {:command/type :congregation.command/update-congregation
                                   :congregation/id cong-id
-                                  :congregation/name name})))))
+                                  :congregation/name name
+                                  :congregation/loans-csv-url loans-csv-url})))))
 
 (defn download-qgis-project [request]
   (auth/with-user-from-session request

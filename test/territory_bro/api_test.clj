@@ -131,7 +131,8 @@
 
 (defn try-rename-congregation! [session cong-id name]
   (-> (request :post (str "/api/congregation/" cong-id "/settings"))
-      (json-body {:congregationName name})
+      (json-body {:congregationName name
+                  :loansCsvUrl ""})
       (merge session)
       app))
 

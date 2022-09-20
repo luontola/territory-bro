@@ -42,6 +42,13 @@
                            (-> congregation
                                (assoc :congregation/name (:congregation/name event)))))))
 
+(defmethod projection :congregation.event/settings-updated
+  [state event]
+  (-> state
+      (update-cong event (fn [congregation]
+                           (-> congregation
+                               (assoc :congregation/loans-csv-url (:congregation/loans-csv-url event)))))))
+
 (defmethod projection :congregation.event/permission-granted
   [state event]
   (let [cong-id (:congregation/id event)
@@ -186,18 +193,32 @@
         :user/id user-id
         :permission/id removed-permission}))))
 
+(defn- non-blank [s]
+  (when-not (str/blank? s)
+    s))
+
 (defmethod command-handler :congregation.command/update-congregation
   [command congregation {:keys [check-permit]}]
   (let [cong-id (:congregation/id congregation)
         old-name (:congregation/name congregation)
-        new-name (:congregation/name command)]
+        new-name (:congregation/name command)
+        old-loans-csv-url (non-blank (:congregation/loans-csv-url congregation))
+        new-loans-csv-url (non-blank (:congregation/loans-csv-url command))]
     (check-permit [:configure-congregation cong-id])
     (when (str/blank? new-name)
       (throw (ValidationException. [[:missing-name]])))
-    (when-not (= old-name new-name)
-      [{:event/type :congregation.event/congregation-renamed
-        :congregation/id cong-id
-        :congregation/name new-name}])))
+    (when (some? new-loans-csv-url)
+      (when-not (str/starts-with? new-loans-csv-url "https://docs.google.com/")
+        (throw (ValidationException. [[:disallowed-loans-csv-url]]))))
+    (concat
+     (when-not (= old-name new-name)
+       [{:event/type :congregation.event/congregation-renamed
+         :congregation/id cong-id
+         :congregation/name new-name}])
+     (when-not (= old-loans-csv-url new-loans-csv-url)
+       [{:event/type :congregation.event/settings-updated
+         :congregation/id cong-id
+         :congregation/loans-csv-url new-loans-csv-url}]))))
 
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))
