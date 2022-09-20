@@ -15,7 +15,7 @@
            (territory_bro NoPermitException)
            (territory_bro.infra.foreign_key References)))
 
-(def valid-command {:command/type :congregation.command/rename-congregation
+(def valid-command {:command/type :congregation.command/update-congregation
                     :command/time (Instant/now)
                     :command/user (UUID/randomUUID)
                     :congregation/id (UUID/randomUUID)
@@ -38,7 +38,7 @@
   (binding [foreign-key/*reference-checkers* testutil/dummy-reference-checkers]
 
     (testing "check specific command schema"
-      (is (nil? (s/check commands/RenameCongregation valid-command))))
+      (is (nil? (s/check commands/UpdateCongregation valid-command))))
 
     (testing "check generic command schema"
       (is (nil? (s/check commands/Command valid-command))))

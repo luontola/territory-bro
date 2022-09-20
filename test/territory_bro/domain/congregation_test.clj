@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -226,7 +226,7 @@
                        :congregation/id cong-id
                        :congregation/name "old name"
                        :congregation/schema-name ""}
-        rename-command {:command/type :congregation.command/rename-congregation
+        rename-command {:command/type :congregation.command/update-congregation
                         :command/time (Instant/now)
                         :command/user user-id
                         :congregation/id cong-id

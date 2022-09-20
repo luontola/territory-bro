@@ -64,9 +64,9 @@
          :user/id (foreign-key/references :user UUID)
          :permission/ids [events/PermissionId]))
 
-(s/defschema RenameCongregation
+(s/defschema UpdateCongregation
   (assoc BaseCommand
-         :command/type (s/eq :congregation.command/rename-congregation)
+         :command/type (s/eq :congregation.command/update-congregation)
          :congregation/id (foreign-key/references :congregation UUID)
          :congregation/name s/Str))
 
@@ -197,8 +197,8 @@
    :congregation-boundary.command/delete-congregation-boundary DeleteCongregationBoundary
    :congregation.command/add-user AddUser
    :congregation.command/create-congregation CreateCongregation
-   :congregation.command/rename-congregation RenameCongregation
    :congregation.command/set-user-permissions SetUserPermissions
+   :congregation.command/update-congregation UpdateCongregation
    :db-admin.command/ensure-gis-user-absent EnsureGisUserAbsent
    :db-admin.command/ensure-gis-user-present EnsureGisUserPresent
    :db-admin.command/migrate-tenant-schema MigrateTenantSchema

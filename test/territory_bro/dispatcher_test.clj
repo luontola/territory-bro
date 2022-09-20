@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2022 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,7 +7,7 @@
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.user :as user]
-            [territory-bro.test.testutil :refer [re-equals re-contains]])
+            [territory-bro.test.testutil :refer [re-contains re-equals]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)
@@ -64,7 +64,7 @@
                                                    (throw (WriteConflictException. (str "stream " id)))))]
 
       (testing "dispatches commands"
-        (let [command {:command/type :congregation.command/rename-congregation
+        (let [command {:command/type :congregation.command/update-congregation
                        :command/time (Instant/now)
                        :command/user user-id
                        :congregation/id cong-id
@@ -78,14 +78,14 @@
           (is (= [conn command state] @*spy))))
 
       (testing "validates commands"
-        (let [command {:command/type :congregation.command/rename-congregation}]
+        (let [command {:command/type :congregation.command/update-congregation}]
           (is (thrown-with-msg?
                ExceptionInfo (re-contains "Value does not match schema")
                (dispatcher/command! conn state command)))))
 
       (testing "validates foreign key references:"
         (testing "congregation"
-          (let [command {:command/type :congregation.command/rename-congregation
+          (let [command {:command/type :congregation.command/update-congregation
                          :command/time (Instant/now)
                          :command/user user-id
                          :congregation/id (UUID. 0 0x666)

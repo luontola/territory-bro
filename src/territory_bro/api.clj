@@ -312,7 +312,7 @@
           loans-csv-url (get-in request [:params :loansCsvUrl]) ; TODO
           state (state-for-request request)]
       (db/with-db [conn {}]
-        (api-command! conn state {:command/type :congregation.command/rename-congregation
+        (api-command! conn state {:command/type :congregation.command/update-congregation
                                   :congregation/id cong-id
                                   :congregation/name name})))))
 
