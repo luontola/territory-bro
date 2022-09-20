@@ -1,7 +1,7 @@
 FROM eclipse-temurin:17-jdk-focal AS builder
 
 # Leiningen
-RUN curl -SL https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/local/bin/lein && \
+RUN curl -sSL https://raw.githubusercontent.com/technomancy/leiningen/2.9.10/bin/lein > /usr/local/bin/lein && \
     chmod 755 /usr/local/bin/lein
 
 # avoid tzdata installation starting to ask questions
@@ -44,7 +44,7 @@ RUN lein uberjar
 
 # prepare AppCDS class list
 RUN service postgresql start && \
-    java -XX:DumpLoadedClassList=classes.lst -Dconf=test-config.edn -jar target/uberjar/territory-bro.jar app-cds-setup && \
+    java -XX:DumpLoadedClassList=classes.lst -Dconf=test-config.edn -jar "target/default+uberjar/territory-bro.jar" app-cds-setup && \
     service postgresql stop
 
 # ------------------------------------------------------------
@@ -61,7 +61,7 @@ RUN adduser --no-create-home --home /app app && \
     mkdir /app
 WORKDIR /app
 
-COPY --from=builder /project/target/uberjar/territory-bro.jar /app/
+COPY --from=builder "/project/target/default+uberjar/territory-bro.jar" /app/
 
 # prepare AppCDS shared archive
 COPY --from=builder /project/classes.lst /app/
