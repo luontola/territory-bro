@@ -78,6 +78,7 @@
     "build:langs": "babel-node --presets es2015 scripts/translator.js",
     "autobuild": "webpack --mode=development --progress --colors --watch",
     "start": "webpack-dev-server --mode=development --content-base web/html --host 0.0.0.0 --progress --colors",
+    "ngrok": "ngrok http 8080 --host-header=\"localhost:8080\"",
     "analyze": "source-map-explorer target/webpack/bundle.js",
     "browserslist": "browserslist",
     "storybook": "start-storybook --port 6006 --static-dir web/html",
