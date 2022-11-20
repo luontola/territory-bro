@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2022 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -30,12 +30,6 @@ const ShareButton = ({congregationId, territoryId}) => {
     shareButton?.focus();
     setOpen(false);
   }
-  const autoSelectAll = element => {
-    if (element) {
-      element.focus();
-      element.select?.();
-    }
-  }
 
   return (
     <form className="pure-form" onSubmit={event => event.preventDefault()}>
@@ -63,7 +57,6 @@ const ShareButton = ({congregationId, territoryId}) => {
           <input type="text"
                  id="share-link"
                  value={shareUrl}
-                 ref={autoSelectAll}
             // effectively read-only, but allow selection
             // with keyboard and don't show it grayed out
                  onChange={() => null}
