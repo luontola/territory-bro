@@ -11,8 +11,8 @@ import Fill from "ol/style/Fill";
 import {
   makeControls,
   makeInteractions,
-  makePrintoutView,
   makeStreetsLayer,
+  makeView,
   territoryStrokeStyle,
   territoryTextStyle,
   wktToFeature,
@@ -143,7 +143,7 @@ function initMap(element: HTMLDivElement,
     layers: [streetsLayer, congregationLayer, territoryLayer],
     controls: makeControls({resetZoom}),
     interactions: makeInteractions(),
-    view: makePrintoutView(),
+    view: makeView({}),
   });
   resetZoom(map, {});
 
