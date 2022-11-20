@@ -161,7 +161,7 @@ function initMap(element: HTMLDivElement,
     });
   })
 
-  map.on('click', event => {
+  map.on('singleclick', event => {
     // the feature needs to have a fill, or else getFeaturesAtPixel finds it only if the click hit its stoke or text
     const features = map.getFeaturesAtPixel(event.pixel, {layerFilter: layer => layer === territoryLayer});
     if (features.length === 1) { // ignore ambiguous clicks when labels overlap; must zoom closer and click only one
