@@ -1,4 +1,4 @@
-// Copyright © 2015-2022 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -14,7 +14,7 @@ const mapRaster = mapRasters[0];
 
 new ClipboardJS('#copy-share-link');
 
-const ShareButton = ({congregationId, territoryId}) => {
+const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
   const [open, setOpen] = useState(false);
   const [shareButton, setShareButton] = useState(null);
   const [shareUrl, setShareUrl] = useState(null);
@@ -22,7 +22,7 @@ const ShareButton = ({congregationId, territoryId}) => {
   const togglePopup = async () => {
     if (!shareUrl) {
       const url = await shareTerritory(congregationId, territoryId);
-      setShareUrl(url);
+      setShareUrl(url + '?n=' + encodeURIComponent(territoryNumber).replaceAll(/%../g, "_"));
     }
     setOpen(!open);
   }
@@ -42,34 +42,34 @@ const ShareButton = ({congregationId, territoryId}) => {
       </button>
 
       {open &&
-      <div className={styles.sharePopup}>
-        <button type="button"
-                className={`${styles.closeButton} pure-button`}
-                onClick={closePopup}>
-          <i className="fas fa-times" title="Close"/>
-        </button>
-
-        <label htmlFor="share-link">
-          People with this link will be able to view this territory map without logging in:
-        </label>
-
-        <div className={styles.shareLink}>
-          <input type="text"
-                 id="share-link"
-                 value={shareUrl}
-            // effectively read-only, but allow selection
-            // with keyboard and don't show it grayed out
-                 onChange={() => null}
-                 aria-readonly="true"/>
-
+        <div className={styles.sharePopup}>
           <button type="button"
-                  id="copy-share-link"
-                  className="pure-button"
-                  data-clipboard-target="#share-link">
-            <i className="fas fa-copy" title="Copy to clipboard"/>
+                  className={`${styles.closeButton} pure-button`}
+                  onClick={closePopup}>
+            <i className="fas fa-times" title="Close"/>
           </button>
+
+          <label htmlFor="share-link">
+            People with this link will be able to view this territory map without logging in:
+          </label>
+
+          <div className={styles.shareLink}>
+            <input type="text"
+                   id="share-link"
+                   value={shareUrl}
+              // effectively read-only, but allow selection
+              // with keyboard and don't show it grayed out
+                   onChange={() => null}
+                   aria-readonly="true"/>
+
+            <button type="button"
+                    id="copy-share-link"
+                    className="pure-button"
+                    data-clipboard-target="#share-link">
+              <i className="fas fa-copy" title="Copy to clipboard"/>
+            </button>
+          </div>
         </div>
-      </div>
       }
     </form>
   );
@@ -105,10 +105,11 @@ const TerritoryPage = ({congregationId, territoryId}) => {
         </div>
 
         {congregation.permissions.shareTerritoryLink &&
-        <div className={styles.actions}>
-          <ShareButton congregationId={congregationId}
-                       territoryId={territoryId}/>
-        </div>
+          <div className={styles.actions}>
+            <ShareButton congregationId={congregationId}
+                         territoryId={territoryId}
+                         territoryNumber={territory.number}/>
+          </div>
         }
       </div>
 
