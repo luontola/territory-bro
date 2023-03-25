@@ -28,7 +28,7 @@ permalink: /guide/
 
 2. After registering the congregation, there is a link to download a *QGIS project file* for your congregation. Save the project file on your computer.
 
-3. Download and install [QGIS 3.4 (Long Term Release)](https://qgis.org/). This program will be used to edit the territory maps.
+3. Download and install the latest [QGIS 3.x LTR (Long Term Release)](https://qgis.org/). This program will be used to edit the territory maps.
 
 4. Use QGIS to open your congregation's QGIS project file (which you saved in step 2). You should see a world map and you can zoom to your city.
 
