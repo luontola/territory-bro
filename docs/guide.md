@@ -40,13 +40,13 @@ After opening your congregation's project file in QGIS, you should see a *layers
 
 <img alt="Layers panel" src="layers-panel-1x.png" srcset="layers-panel-2x.png 2x">
 
-On these layers you can draw *features*. A feature is what QGIS calls a shape and any *attributes* which describe shape.
+On these layers you can draw *features*. A feature is what QGIS calls a shape and any *attributes* which describe the shape.
 
 What the features on these layers mean is best understood by looking at a printed territory card:
 
 <img alt="Territory card" src="territory-card-parts-1x.jpg" srcset="territory-card-parts-2x.jpg 2x" style="border: 1px solid #ccc;">
 
-A feature on the **territory layer** is shown in the map as a red border ①, its **number attribute** is shown in the right corner ②, its **addresses attribute** is shown on the right side ③, and its **subregion attribute** is shown in the heading ④.
+The shape of a feature on the **territory layer** is shown in the map as a red border ①, its **number attribute** is shown in the right corner ②, its **addresses attribute** is shown on the right side ③, and its **subregion attribute** is shown in the heading ④.
 
 The minimap ⑤ is composed from multiple layers: The **territory layer**'s feature is shown as a dot. The **congregation_boundary layer**'s feature(s) are shown as a black border. The **subregion layer**'s feature which contains the current territory, is shown as a dark gray area.
 
