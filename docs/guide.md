@@ -9,11 +9,10 @@ permalink: /guide/
 ## Table of Contents
 
 1. [Getting Started](#getting-started)
-2. [Editing Maps with QGIS](#editing-maps-with-qgis)
-    1. [Map Layers](#map-layers)
-    2. [Drawing Features](#drawing-features)
-3. [Printing Territory Cards](#printing-territory-cards)
-4. [Advanced Topics](#advanced-topics)
+2. [Basic Concepts](#basic-concepts)
+3. [Editing the Maps](#editing-the-maps)
+4. [Printing Territory Cards](#printing-territory-cards)
+5. [Advanced Topics](#advanced-topics)
     1. [Importing City Suburb Boundaries](#importing-city-suburb-boundaries)
     2. [Locating Staircase Entrances](#locating-staircase-entrances)
 
@@ -35,9 +34,7 @@ permalink: /guide/
 After this the next steps are to draw your congregation's boundaries on the map and then start drawing individual territories.
 
 
-## Editing Maps with QGIS
-
-### Map Layers
+## Basic Concepts
 
 After opening your congregation's project file in QGIS, you should see a *layers* panel. If it is not visible, select **View \| Panels \| Layers** from the main menu.
 
@@ -60,7 +57,7 @@ The **card_minimap_viewport layer** determines the minimap's ⑤ zoom level. By 
 In the layers panel there are also various map rasters. The default is **OpenStreetMap**, which has street maps for the whole world, but for some countries there are also additional maps. These same maps can be used for printing the territory cards inside Territory Bro.
 
 
-### Drawing Features
+## Editing the Maps
 
 In QGIS, to draw a feature on one of the layers, first select the layer in the Layers panel and choose **Layer \| Toggle Editing** from the main menu.
 
