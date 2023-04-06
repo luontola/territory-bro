@@ -11,6 +11,9 @@ permalink: /guide/
 1. [Getting Started](#getting-started)
 2. [Basic Concepts](#basic-concepts)
 3. [Editing the Maps](#editing-the-maps)
+   1. [Adding Congregation Boundaries](#adding-congregation-boundaries)
+   2. [Adding Territories](#adding-territories)
+   3. [Importing City Suburb Boundaries (optional)](#importing-city-suburb-boundaries-optional)
 4. [Printing Territory Cards](#printing-territory-cards)
 5. [Advanced Topics](#advanced-topics)
     1. [Importing City Suburb Boundaries](#importing-city-suburb-boundaries)
@@ -66,6 +69,27 @@ Now the layer is editable and you can choose the **Edit \| Add Polygon Feature**
 The feature is saved to the database only after you select **Layer \| Save Layer Edits**. To avoid losing work, it's best to save after each new territory you add, in case QGIS crashes and you need to restart QGIS (it is known to happen).
 
 After you are done editing a layer, you can choose **Layer \| Toggle Editing** again to make the layer read-only.
+
+
+### Adding Congregation Boundaries
+
+> *This video is an unedited preview. Hopefully it will be of help. A proper tutorial video with some explanations will be published later.*
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/48aRI8kir9Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+
+### Adding Territories
+
+> *This video is an unedited preview. Hopefully it will be of help. A proper tutorial video with some explanations will be published later.*
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/WdT-uGJJbos" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+
+### Importing City Suburb Boundaries (optional)
+
+> *This video is an unedited preview. Hopefully it will be of help. A proper tutorial video with some explanations will be published later.*
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/a3diEBgYEiw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 
 ## Printing Territory Cards
