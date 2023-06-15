@@ -8,6 +8,7 @@
             [territory-bro.infra.jwt :as jwt])
   (:import (com.auth0.jwk Jwk JwkProvider)
            (com.auth0.jwt.exceptions InvalidClaimException SignatureVerificationException TokenExpiredException)
+           (java.nio.charset StandardCharsets)
            (java.time Instant)
            (java.util Base64 Map)))
 
@@ -40,11 +41,15 @@
 (defn- base64-url-encode ^String [^bytes bs]
   (.encodeToString (Base64/getUrlEncoder) bs))
 
-(defn- mutate-jwt-signature [token]
+(defn- mutate-jwt-payload [token mutation]
   (let [[header payload signature] (str/split token #"\.")
-        sig (base64-url-decode signature)]
-    (aset-byte sig 0 (inc (aget sig 0)))
-    (str header "." payload "." (base64-url-encode sig))))
+        mutated-payload (-> payload
+                            (base64-url-decode)
+                            (String. StandardCharsets/UTF_8)
+                            ^String (mutation)
+                            (.getBytes StandardCharsets/UTF_8)
+                            (base64-url-encode))]
+    (str header "." mutated-payload "." signature)))
 
 (deftest jwt-validate-test
   (binding [jwt/jwk-provider fake-jwk-provider]
@@ -56,8 +61,9 @@
     ;; https://auth0.com/docs/tokens/id-token#validate-an-id-token
 
     (testing "verifies token signature"
-      (is (thrown-with-msg? SignatureVerificationException #"The Token's Signature resulted invalid"
-                            (jwt/validate (mutate-jwt-signature token) env))))
+      (let [mutated-token (mutate-jwt-payload token #(str/replace % "Esko" "Matti"))]
+        (is (thrown-with-msg? SignatureVerificationException #"The Token's Signature resulted invalid"
+                              (jwt/validate mutated-token env)))))
 
     (testing "validates token expiration"
       (is (thrown-with-msg? TokenExpiredException #"The Token has expired"
