@@ -1,16 +1,15 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.jwt-test
-  (:require [clojure.test :refer :all]
-            [clojure.string :as str]
-            [territory-bro.infra.jwt :as jwt]
-            [territory-bro.test.testutil :refer [re-equals]])
-  (:import (com.auth0.jwk JwkProvider Jwk)
-           (com.auth0.jwt.exceptions SignatureVerificationException TokenExpiredException InvalidClaimException)
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
+            [territory-bro.infra.jwt :as jwt])
+  (:import (com.auth0.jwk Jwk JwkProvider)
+           (com.auth0.jwt.exceptions InvalidClaimException SignatureVerificationException TokenExpiredException)
            (java.time Instant)
-           (java.util Map Base64)))
+           (java.util Base64 Map)))
 
 ;; key cached from https://luontola.eu.auth0.com/.well-known/jwks.json
 (def jwk {"alg" "RS256",

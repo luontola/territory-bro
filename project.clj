@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -9,8 +9,8 @@
 
   :dependencies [[camel-snake-kebab "0.4.2"]
                  [com.attendify/schema-refined "0.3.0-alpha4"]
-                 [com.auth0/java-jwt "3.11.0"]
-                 [com.auth0/jwks-rsa "0.15.0"]
+                 [com.auth0/java-jwt "4.4.0"]
+                 [com.auth0/jwks-rsa "0.22.0"]
                  [com.layerware/hugsql "0.5.1"]
                  [compojure "1.6.2"]
                  [conman "0.8.4" :upgrade false] ; TODO: 0.8.5 and higher fail with: java.lang.IllegalArgumentException: No implementation of method: :get-level of protocol: #'clojure.java.jdbc/Connectable found for class: com.zaxxer.hikari.HikariDataSource
