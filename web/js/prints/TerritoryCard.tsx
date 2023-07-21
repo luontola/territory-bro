@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -16,10 +16,7 @@ const TerritoryQrCode = ({value}) => {
   return <QRCode fgColor="#000000"
                  bgColor="#FFFFFF"
                  level="M"
-                 style={{
-                   width: "100%",
-                   height: "100%",
-                 }}
+                 style={{width: "100%"}}
                  value={value}/>
 }
 
@@ -59,13 +56,14 @@ const TerritoryCard = ({
         </PrintDateNotice>
       </div>
 
-      <div className={styles.addresses}>{territory.addresses}</div>
-
-      {settings.dev && // TODO: remove feature flag
-      <div className={styles.qrCode}>
-        <TerritoryQrCode value="https://qr.territorybro.com/lDiMxApRwbY"/>
+      <div className={styles.addresses}>
+        {settings.dev && // TODO: remove feature flag
+          <div className={styles.qrCode}>
+            <TerritoryQrCode value="https://qr.territorybro.com/lDiMxApRwbY"/>
+          </div>
+        }
+        {territory.addresses}
       </div>
-      }
 
       <div className={styles.footer}>
         <FormattedMessage id="TerritoryCard.footer"

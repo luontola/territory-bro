@@ -8,11 +8,10 @@
     --qr-code-size: 15mm;
     display: grid;
     grid-template-columns: var(--minimap-size) calc(var(--map-width) - var(--minimap-size)) auto var(--minimap-size);
-    grid-template-rows: var(--minimap-size) auto var(--qr-code-size) 8mm;
+    grid-template-rows: var(--minimap-size) auto 8mm;
     grid-template-areas:
             "minimap header header number"
             "map map addresses addresses"
-            "map map qr-code qr-code"
             "footer footer footer footer";
 }
 
@@ -56,9 +55,12 @@
 
 .addresses {
     grid-area: addresses;
-    margin-left: 5mm;
-    align-self: center;
     white-space: pre-line;
+    margin-left: 5mm;
+    /* I can't figure out a way to vertically align the text when the QR code is present,
+       so let's just have an empty row at the top to make the text tidier when the address
+       has only one or two lines of text. */
+    padding-top: 1.3em; /* the decimal is fine-tuned to have only a small gap between QR code and the text above it */
 }
 
 .footer {
@@ -71,8 +73,15 @@
 }
 
 .qrCode {
-    grid-area: qr-code;
-    justify-self: end;
+    float: right; /* shape-outside only applies to floating items */
+    height: 100%; /* take all height */
     width: var(--qr-code-size);
-    height: var(--qr-code-size);
+    margin-left: 0.5mm;
+
+    /* push the image to the bottom */
+    display: flex;
+    align-items: flex-end;
+
+    /* make the text flow around the image */
+    shape-outside: inset(calc(100% - var(--qr-code-size)) 0 0 0);
 }
