@@ -4,21 +4,13 @@
 
 import React from "react";
 import {FormattedMessage} from "react-intl";
-import {QRCode} from "react-qr-svg";
 import TerritoryMap from "../maps/TerritoryMap";
 import TerritoryMiniMap from "../maps/TerritoryMiniMap";
 import {getCongregationById, getSettings} from "../api";
 import CropMarks from "./CropMarks";
 import styles from "./TerritoryCard.css";
 import PrintDateNotice from "./PrintDateNotice";
-
-const TerritoryQrCode = ({value}) => {
-  return <QRCode fgColor="#000000"
-                 bgColor="#FFFFFF"
-                 level="M"
-                 style={{width: "100%"}}
-                 value={value}/>
-}
+import TerritoryQrCode from "./TerritoryQrCode";
 
 const TerritoryCard = ({
                          territory,

@@ -38,3 +38,20 @@
 .footer {
     composes: footer from "./TerritoryCard.css";
 }
+
+.qrCode {
+    /* position on top of the map, bottom-right corner */
+    grid-area: map;
+    z-index: 1;
+    justify-self: end;
+    align-self: end;
+    width: var(--qr-code-size);
+    height: var(--qr-code-size);
+
+    /* avoid overlapping the map attribution */
+    --map-attribution-height: 11px;
+    --qr-code-margin: 0.5mm;
+    margin-bottom: calc(var(--map-attribution-height) + var(--qr-code-margin));
+    margin-right: var(--qr-code-margin);
+    border: 2px solid white;
+}

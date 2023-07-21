@@ -5,7 +5,9 @@
     /* print margins */
     margin: 8mm;
     /* layout */
+    /* TODO: deduplicate with TerritoryCard.css */
     --minimap-size: 17mm;
+    --qr-code-size: 15mm;
     display: grid;
     grid-template-columns: var(--minimap-size) auto var(--minimap-size);
     grid-template-rows: var(--minimap-size) auto;
@@ -34,4 +36,8 @@
 
 .map {
     composes: map from "./TerritoryCard.css";
+}
+
+.qrCode {
+    composes: qrCode from "./TerritoryCardMapOnly.css";
 }
