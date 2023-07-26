@@ -1,4 +1,4 @@
-FROM node:12 AS builder
+FROM node:18 AS builder
 
 RUN apt-get update && \
     apt-get install -y zopfli && \
@@ -19,7 +19,9 @@ RUN yarn install --frozen-lockfile --non-interactive --no-progress && \
 COPY --chown=node .babelrc tsconfig.json webpack.config.js /project/
 COPY --chown=node web/html /project/web/html
 COPY --chown=node web/js /project/web/js
-RUN yarn run test && \
+# XXX: workaround for https://stackoverflow.com/questions/69394632/webpack-build-failing-with-err-ossl-evp-unsupported
+RUN export NODE_OPTIONS=--openssl-legacy-provider && \
+    yarn run test && \
     yarn run build --no-progress --no-colors
 
 # offline compress static resources
