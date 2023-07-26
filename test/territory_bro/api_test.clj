@@ -653,25 +653,28 @@
       (let [response (try-rename-congregation! session cong-id "should not be allowed")]
         (is (forbidden? response))))))
 
-(defn- fake-share-key-generator []
+(defn- fake-share-key-generator [unique-prefix]
   (let [*counter (atom 0)]
     (fn []
-      (str "fakeShare" (swap! *counter inc)))))
+      ;; XXX: to avoid conflicts, each deftest requires its own unique-prefix,
+      ;;      because the db-fixture doesn't empty the database between deftests
+      (str unique-prefix (swap! *counter inc)))))
 
 (deftest share-territory-link-test
   (let [*session (atom (login! app))
         cong-id (create-congregation! @*session "Congregation")
-        territory-id (create-territory! cong-id)]
+        territory-id (create-territory! cong-id)
+        share-key "share-territory-link-test1"]
 
     (testing "create a share link"
-      (binding [share/generate-share-key (fake-share-key-generator)]
+      (binding [share/generate-share-key (fake-share-key-generator "share-territory-link-test")]
         (let [response (-> (request :post (str "/api/congregation/" cong-id "/territory/" territory-id "/share"))
                            (json-body {})
                            (merge @*session)
                            app)]
           (is (ok? response))
-          (is (= {:key "fakeShare1"
-                  :url "http://localhost:8080/share/fakeShare1"}
+          (is (= {:key share-key
+                  :url (str "http://localhost:8080/share/" share-key)}
                  (:body response))))))
 
     ;; TODO: cannot link to a territory which doesn't belong to the specified congregation
@@ -680,7 +683,7 @@
     (reset! *session nil)
 
     (testing "open share link"
-      (let [response (-> (request :get "/api/share/fakeShare1")
+      (let [response (-> (request :get (str "/api/share/" share-key))
                          (merge @*session)
                          app)]
         (reset! *session (get-session response)) ; TODO: stateful HTTP client which remembers the cookies automatically
@@ -690,7 +693,7 @@
                (:body response)))))
 
     (testing "records that the share was opened"
-      (is (some? (:share/last-opened (share/find-share-by-key (projections/cached-state) "fakeShare1")))))
+      (is (some? (:share/last-opened (share/find-share-by-key (projections/cached-state) share-key)))))
 
     (testing "can view the shared territory"
       ;; TODO: API to get one territory by ID
@@ -731,30 +734,30 @@
         territory-id (create-territory! cong-id)
         territory-id2 (create-territory! cong-id)]
 
-    #_(testing "error: random number generator creates non-unique share keys"
-        (binding [share/generate-share-key (constantly "constantFakeShare")]
-          (let [response (-> (request :post (str "/api/congregation/" cong-id "/generate-qr-codes"))
-                             (json-body {:territories [territory-id territory-id2]})
-                             (merge @*session)
-                             app)]
-            (is (internal-server-error? response))
-            (refresh-projections!)
-            (is (empty? (:territory-bro.domain.share/share-keys (projections/cached-state)))
-                "transaction should have been aborted and no share created"))))
+    (testing "error: random number generator creates non-unique share keys"
+      (binding [share/generate-share-key (constantly "constantFakeShare")]
+        (let [response (-> (request :post (str "/api/congregation/" cong-id "/generate-qr-codes"))
+                           (json-body {:territories [territory-id territory-id2]})
+                           (merge @*session)
+                           app)]
+          (is (internal-server-error? response))
+          (refresh-projections!)
+          (is (nil? (get-in (projections/cached-state) [:territory-bro.domain.share/share-keys "constantFakeShare"]))
+              "transaction should have been aborted and no shares created"))))
 
     (testing "create QR code links"
-      (binding [share/generate-share-key (fake-share-key-generator)]
+      (binding [share/generate-share-key (fake-share-key-generator "create-qr-code-test")]
         (let [response (-> (request :post (str "/api/congregation/" cong-id "/generate-qr-codes"))
                            (json-body {:territories [territory-id territory-id2]})
                            (merge @*session)
                            app)]
           (is (ok? response))
           (is (= {:qrCodes [{:territory (str territory-id)
-                             :key "fakeShare1"
-                             :url "https://qr.territorybro.com/fakeShare1"}
+                             :key "create-qr-code-test1"
+                             :url "https://qr.territorybro.com/create-qr-code-test1"}
                             {:territory (str territory-id2)
-                             :key "fakeShare2"
-                             :url "https://qr.territorybro.com/fakeShare2"}]}
+                             :key "create-qr-code-test2"
+                             :url "https://qr.territorybro.com/create-qr-code-test2"}]}
                  (:body response))))))
 
     ;; TODO: cannot link to a territory which doesn't belong to the specified congregation

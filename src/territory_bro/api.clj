@@ -169,13 +169,21 @@
     (assert id)
     id))
 
-(defn- state-for-request [request]
-  (let [session (:session request)
-        state (projections/cached-state)]
+(defn- enrich-state-for-request [state request]
+  (let [session (:session request)]
     (cond-> state
       (::sudo? session) (congregation/sudo (current-user-id))
       (some? (::opened-shares session)) (share/grant-opened-shares (::opened-shares session)
                                                                    (current-user-id)))))
+
+(defn- state-for-request [request]
+  (let [state (projections/cached-state)]
+    (enrich-state-for-request state request)))
+
+(defn- current-state-for-request [conn request]
+  (let [state (projections/current-state conn)]
+    (enrich-state-for-request state request)))
+
 
 (def ^:private validate-congregation-list (s/validator [CongregationSummary]))
 
@@ -360,12 +368,11 @@
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           territory-ids (->> (get-in request [:params :territories])
-                             (mapv #(UUID/fromString %)))
-          state (state-for-request request)]
-      ;; TODO: validate that territory IDs and share keys are unique?
+                             (mapv #(UUID/fromString %)))]
       (db/with-db [conn {}]
         (ok {:qrCodes (into [] (for [territory-id territory-ids]
-                                 (let [share-key (share/generate-share-key)]
+                                 (let [share-key (share/generate-share-key)
+                                       state (current-state-for-request conn request)]
                                    (dispatch! conn state {:command/type :share.command/create-share
                                                           :share/id (UUID/randomUUID)
                                                           :share/key share-key
