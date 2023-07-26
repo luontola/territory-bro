@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -724,6 +724,42 @@
         (is (not-found? response))
         (is (= {:message "Share not found"}
                (:body response)))))))
+
+(deftest create-qr-code-test
+  (let [*session (atom (login! app))
+        cong-id (create-congregation! @*session "Congregation")
+        territory-id (create-territory! cong-id)
+        territory-id2 (create-territory! cong-id)]
+
+    #_(testing "error: random number generator creates non-unique share keys"
+        (binding [share/generate-share-key (constantly "constantFakeShare")]
+          (let [response (-> (request :post (str "/api/congregation/" cong-id "/generate-qr-codes"))
+                             (json-body {:territories [territory-id territory-id2]})
+                             (merge @*session)
+                             app)]
+            (is (internal-server-error? response))
+            (refresh-projections!)
+            (is (empty? (:territory-bro.domain.share/share-keys (projections/cached-state)))
+                "transaction should have been aborted and no share created"))))
+
+    (testing "create QR code links"
+      (binding [share/generate-share-key (fake-share-key-generator)]
+        (let [response (-> (request :post (str "/api/congregation/" cong-id "/generate-qr-codes"))
+                           (json-body {:territories [territory-id territory-id2]})
+                           (merge @*session)
+                           app)]
+          (is (ok? response))
+          (is (= {:qrCodes [{:territory (str territory-id)
+                             :key "fakeShare1"
+                             :url "https://qr.territorybro.com/fakeShare1"}
+                            {:territory (str territory-id2)
+                             :key "fakeShare2"
+                             :url "https://qr.territorybro.com/fakeShare2"}]}
+                 (:body response))))))
+
+    ;; TODO: cannot link to a territory which doesn't belong to the specified congregation
+
+    (is true)))
 
 (deftest gis-changes-sync-test
   (let [session (login! app)

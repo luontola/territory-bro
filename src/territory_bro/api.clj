@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -355,6 +355,27 @@
                       {:url (str (:public-url config/env) "/share/" share-key)
                        :key share-key})))))
 
+(defn generate-qr-codes [request]
+  (auth/with-user-from-session request
+    (require-logged-in!)
+    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+          territory-ids (->> (get-in request [:params :territories])
+                             (mapv #(UUID/fromString %)))
+          state (state-for-request request)]
+      ;; TODO: validate that territory IDs and share keys are unique?
+      (db/with-db [conn {}]
+        (ok {:qrCodes (into [] (for [territory-id territory-ids]
+                                 (let [share-key (share/generate-share-key)]
+                                   (dispatch! conn state {:command/type :share.command/create-share
+                                                          :share/id (UUID/randomUUID)
+                                                          :share/key share-key
+                                                          :share/type :qr-code
+                                                          :congregation/id cong-id
+                                                          :territory/id territory-id})
+                                   {:territory territory-id
+                                    :key share-key
+                                    :url (str (:qr-code-base-url config/env) "/" share-key)})))})))))
+
 (defn- refresh-projections! []
   (projections/refresh-async!)
   (projections/await-refreshed (Duration/ofSeconds 10)))
@@ -394,6 +415,7 @@
   (POST "/api/congregation/:congregation/set-user-permissions" request (set-user-permissions request))
   (POST "/api/congregation/:congregation/settings" request (save-congregation-settings request))
   (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request))
+  (POST "/api/congregation/:congregation/generate-qr-codes" request (generate-qr-codes request))
   (POST "/api/congregation/:congregation/territory/:territory/share" request (share-territory-link request))
   (GET "/api/share/:share-key" request (open-share request)))
 

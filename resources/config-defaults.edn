@@ -1,6 +1,7 @@
 {:dev false
  :port 8080
  :public-url "http://localhost:8080"
+ :qr-code-base-url "https://qr.territorybro.com"
  ;; when :nrepl-port is set the application starts the nREPL server on load
  :nrepl-port nil
  :nrepl-bind "127.0.0.1"

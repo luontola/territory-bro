@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -14,12 +14,14 @@
 (s/set-max-value-length! 50)
 
 (def ^:private base-url-pattern #"https?://.+[^/]")
+(def BaseUrl (s/conditional string? (s/pred #(re-matches base-url-pattern %)
+                                            (symbol (str "re-matches \"" base-url-pattern "\"")))))
 
 (s/defschema Env
   {:auth0-client-id s/Str
    :auth0-domain s/Str
-   :public-url (s/conditional string? (s/pred #(re-matches base-url-pattern %)
-                                              (symbol (str "re-matches \"" base-url-pattern "\""))))
+   :public-url BaseUrl
+   :qr-code-base-url BaseUrl
    :database-schema s/Str
    :database-url s/Str
    :demo-congregation (s/maybe s/Uuid)
