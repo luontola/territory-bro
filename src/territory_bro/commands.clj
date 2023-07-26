@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -185,6 +185,14 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)))
 
+(s/defschema GenerateQrCodes
+  (assoc BaseCommand
+         :command/type (s/eq :share.command/generate-qr-codes)
+         :shares [{:share/id (foreign-key/references :new UUID)
+                   :share/key s/Str
+                   :congregation/id (foreign-key/references :congregation UUID)
+                   :territory/id (foreign-key/references :territory UUID)}]))
+
 (s/defschema RecordShareOpened
   (assoc BaseCommand
          :command/type (s/eq :share.command/record-share-opened)
@@ -207,6 +215,7 @@
    :gis-user.command/delete-gis-user DeleteGisUser
    :region.command/define-region DefineRegion
    :region.command/delete-region DeleteRegion
+   :share.command/generate-qr-codes GenerateQrCodes
    :share.command/record-share-opened RecordShareOpened
    :share.command/share-territory-link ShareTerritoryLink
    :territory.command/define-territory DefineTerritory

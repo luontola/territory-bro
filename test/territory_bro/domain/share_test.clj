@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -10,7 +10,7 @@
             [territory-bro.test.testutil :as testutil :refer [re-equals]])
   (:import (java.time Instant)
            (java.util UUID)
-           (territory_bro NoPermitException WriteConflictException ValidationException)))
+           (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
@@ -145,6 +145,42 @@
         (is (thrown-with-msg?
              WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
              (handle-command conflicting-command [link-share-created] injections)))))
+
+    (testing "checks permits"
+      (let [injections {:check-permit (fn [permit]
+                                        (is (= [:share-territory-link cong-id territory-id] permit))
+                                        (throw (NoPermitException. nil nil)))}]
+        (is (thrown? NoPermitException
+                     (handle-command create-command [] injections)))))))
+
+(deftest generate-qr-codes-test
+  (let [injections {:check-permit (fn [_permit])}
+        create-command {:command/type :share.command/generate-qr-codes
+                        :command/time (Instant/now)
+                        :command/user user-id
+                        :shares [{:share/id share-id
+                                  :share/key share-key
+                                  :congregation/id cong-id
+                                  :territory/id territory-id}
+                                 {:share/id share-id2
+                                  :share/key share-key2
+                                  :congregation/id cong-id
+                                  :territory/id territory-id2}]}]
+
+    (testing "created"
+      (is (= [link-share-created ; TODO: share type = qr code
+              link-share-created2]
+             (handle-command create-command [] injections))))
+
+    (testing "is idempotent"
+      (is (empty? (handle-command create-command [link-share-created link-share-created2] injections))))
+
+    (testing "checks share key uniqueness"
+      ;; trying to create a new share (i.e. new share ID) with the same old share key
+      (let [conflicting-command (assoc-in create-command [:shares 0 :share/id] (UUID/randomUUID))]
+        (is (thrown-with-msg?
+             WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
+             (handle-command conflicting-command [link-share-created link-share-created2] injections)))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]

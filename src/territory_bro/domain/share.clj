@@ -91,6 +91,16 @@
         :congregation/id cong-id
         :territory/id territory-id}])))
 
+(defmethod command-handler :share.command/generate-qr-codes
+  [command _ {:keys [state] :as injections}]
+  ;; TODO: share type = qr code
+  (->> (:shares command)
+       (mapcat (fn [new-share]
+                 (let [command (assoc new-share
+                                      :command/type :share.command/share-territory-link)
+                       old-share (get-in state [::shares (:share/id new-share)])]
+                   (command-handler command old-share injections))))))
+
 (defmethod command-handler :share.command/record-share-opened
   [_command share _injections]
   [{:event/type :share.event/share-opened
