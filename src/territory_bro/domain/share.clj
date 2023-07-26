@@ -72,10 +72,11 @@
 (defmulti ^:private command-handler (fn [command _share _injections]
                                       (:command/type command)))
 
-(defmethod command-handler :share.command/share-territory-link
+(defmethod command-handler :share.command/create-share
   [command share {:keys [check-permit state]}]
   (let [share-id (:share/id command)
         share-key (:share/key command)
+        share-type (:share/type command)
         cong-id (:congregation/id command)
         territory-id (:territory/id command)
         key-owner (get-in state [::share-keys share-key])]
@@ -87,17 +88,17 @@
       [{:event/type :share.event/share-created
         :share/id share-id
         :share/key share-key
-        :share/type :link
+        :share/type share-type
         :congregation/id cong-id
         :territory/id territory-id}])))
 
 (defmethod command-handler :share.command/generate-qr-codes
   [command _ {:keys [state] :as injections}]
-  ;; TODO: share type = qr code
   (->> (:shares command)
        (mapcat (fn [new-share]
                  (let [command (assoc new-share
-                                      :command/type :share.command/share-territory-link)
+                                      :command/type :share.command/create-share
+                                      :share/type :qr-code)
                        old-share (get-in state [::shares (:share/id new-share)])]
                    (command-handler command old-share injections))))))
 

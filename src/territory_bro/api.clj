@@ -346,9 +346,10 @@
           state (state-for-request request)
           share-key (share/generate-share-key)]
       (db/with-db [conn {}]
-        (api-command! conn state {:command/type :share.command/share-territory-link
+        (api-command! conn state {:command/type :share.command/create-share
                                   :share/id (UUID/randomUUID)
                                   :share/key share-key
+                                  :share/type :link
                                   :congregation/id cong-id
                                   :territory/id territory-id}
                       {:url (str (:public-url config/env) "/share/" share-key)

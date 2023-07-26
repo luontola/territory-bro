@@ -34,6 +34,10 @@
          :share/id share-id2
          :share/key share-key2
          :territory/id territory-id2))
+(def qr-code-share-created
+  (assoc link-share-created :share/type :qr-code))
+(def qr-code-share-created2
+  (assoc link-share-created2 :share/type :qr-code))
 (def share-opened
   {:event/type :share.event/share-opened
    :event/time test-time
@@ -124,11 +128,12 @@
 
 (deftest share-territory-link-test
   (let [injections {:check-permit (fn [_permit])}
-        create-command {:command/type :share.command/share-territory-link
+        create-command {:command/type :share.command/create-share
                         :command/time (Instant/now)
                         :command/user user-id
                         :share/id share-id
                         :share/key share-key
+                        :share/type :link
                         :congregation/id cong-id
                         :territory/id territory-id}]
 
@@ -168,19 +173,20 @@
                                   :territory/id territory-id2}]}]
 
     (testing "created"
-      (is (= [link-share-created ; TODO: share type = qr code
-              link-share-created2]
+      (is (= [qr-code-share-created qr-code-share-created2]
              (handle-command create-command [] injections))))
 
     (testing "is idempotent"
-      (is (empty? (handle-command create-command [link-share-created link-share-created2] injections))))
+      (is (empty? (handle-command create-command [qr-code-share-created qr-code-share-created2] injections))))
 
     (testing "checks share key uniqueness"
       ;; trying to create a new share (i.e. new share ID) with the same old share key
       (let [conflicting-command (assoc-in create-command [:shares 0 :share/id] (UUID/randomUUID))]
         (is (thrown-with-msg?
              WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
-             (handle-command conflicting-command [link-share-created link-share-created2] injections)))))
+             (handle-command conflicting-command [qr-code-share-created qr-code-share-created2] injections)))))
+
+    ;; TODO: check share key uniqueness between all the new shares, not just compared to old shares
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]

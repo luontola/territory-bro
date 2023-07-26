@@ -177,11 +177,12 @@
 
 ;;; Shares
 
-(s/defschema ShareTerritoryLink
+(s/defschema CreateShare
   (assoc BaseCommand
-         :command/type (s/eq :share.command/share-territory-link)
+         :command/type (s/eq :share.command/create-share)
          :share/id (foreign-key/references :new UUID)
          :share/key s/Str
+         :share/type (s/enum :link :qr-code)
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)))
 
@@ -215,9 +216,9 @@
    :gis-user.command/delete-gis-user DeleteGisUser
    :region.command/define-region DefineRegion
    :region.command/delete-region DeleteRegion
+   :share.command/create-share CreateShare
    :share.command/generate-qr-codes GenerateQrCodes
    :share.command/record-share-opened RecordShareOpened
-   :share.command/share-territory-link ShareTerritoryLink
    :territory.command/define-territory DefineTerritory
    :territory.command/delete-territory DeleteTerritory})
 
