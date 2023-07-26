@@ -186,14 +186,6 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)))
 
-(s/defschema GenerateQrCodes
-  (assoc BaseCommand
-         :command/type (s/eq :share.command/generate-qr-codes)
-         :shares [{:share/id (foreign-key/references :new UUID)
-                   :share/key s/Str
-                   :congregation/id (foreign-key/references :congregation UUID)
-                   :territory/id (foreign-key/references :territory UUID)}]))
-
 (s/defschema RecordShareOpened
   (assoc BaseCommand
          :command/type (s/eq :share.command/record-share-opened)
@@ -217,7 +209,6 @@
    :region.command/define-region DefineRegion
    :region.command/delete-region DeleteRegion
    :share.command/create-share CreateShare
-   :share.command/generate-qr-codes GenerateQrCodes
    :share.command/record-share-opened RecordShareOpened
    :territory.command/define-territory DefineTerritory
    :territory.command/delete-territory DeleteTerritory})

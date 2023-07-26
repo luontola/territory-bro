@@ -22,22 +22,18 @@
 (def share-key2 "def456")
 (def test-time (Instant/ofEpochSecond 42))
 
-(def link-share-created
+(def share-created
   {:event/type :share.event/share-created
    :share/id share-id
    :share/key share-key
    :share/type :link
    :congregation/id cong-id
    :territory/id territory-id})
-(def link-share-created2
-  (assoc link-share-created
+(def share-created2
+  (assoc share-created
          :share/id share-id2
          :share/key share-key2
          :territory/id territory-id2))
-(def qr-code-share-created
-  (assoc link-share-created :share/type :qr-code))
-(def qr-code-share-created2
-  (assoc link-share-created2 :share/type :qr-code))
 (def share-opened
   {:event/type :share.event/share-opened
    :event/time test-time
@@ -57,7 +53,7 @@
 
 (deftest share-projection-test
   (testing "created"
-    (let [events [link-share-created]
+    (let [events [share-created]
           expected {::share/share-keys {share-key share-id}
                     ::share/shares {share-id {:share/id share-id
                                               :congregation/id cong-id
@@ -70,8 +66,8 @@
           (is (= expected (apply-events events))))))))
 
 (deftest grant-opened-shares-test
-  (let [state (apply-events [link-share-created
-                             link-share-created2])
+  (let [state (apply-events [share-created
+                             share-created2])
         permit1 [:view-territory cong-id territory-id]
         permit2 [:view-territory cong-id territory-id2]]
     (testing "no shares opened"
@@ -92,7 +88,7 @@
 ;;;; Queries
 
 (deftest check-share-exists-test
-  (let [state (apply-events [link-share-created])]
+  (let [state (apply-events [share-created])]
 
     (testing "exists"
       (is (nil? (share/check-share-exists state share-id))))
@@ -103,7 +99,7 @@
            (share/check-share-exists state (UUID. 0 0x666)))))))
 
 (deftest find-share-by-key-test
-  (let [state (apply-events [link-share-created])]
+  (let [state (apply-events [share-created])]
     (testing "existing share"
       (is (= {:share/id share-id
               :congregation/id cong-id
@@ -126,7 +122,7 @@
     (let [keys (repeatedly 10 share/generate-share-key)]
       (is (= (distinct keys) keys)))))
 
-(deftest share-territory-link-test
+(deftest create-share-test
   (let [injections {:check-permit (fn [_permit])}
         create-command {:command/type :share.command/create-share
                         :command/time (Instant/now)
@@ -138,62 +134,18 @@
                         :territory/id territory-id}]
 
     (testing "created"
-      (is (= [link-share-created]
+      (is (= [share-created]
              (handle-command create-command [] injections))))
 
     (testing "is idempotent"
-      (is (empty? (handle-command create-command [link-share-created] injections))))
+      (is (empty? (handle-command create-command [share-created] injections))))
 
     (testing "checks share key uniqueness"
       ;; trying to create a new share (i.e. new share ID) with the same old share key
       (let [conflicting-command (assoc create-command :share/id (UUID/randomUUID))]
         (is (thrown-with-msg?
              WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
-             (handle-command conflicting-command [link-share-created] injections)))))
-
-    (testing "checks permits"
-      (let [injections {:check-permit (fn [permit]
-                                        (is (= [:share-territory-link cong-id territory-id] permit))
-                                        (throw (NoPermitException. nil nil)))}]
-        (is (thrown? NoPermitException
-                     (handle-command create-command [] injections)))))))
-
-(deftest generate-qr-codes-test
-  (let [injections {:check-permit (fn [_permit])}
-        create-command {:command/type :share.command/generate-qr-codes
-                        :command/time (Instant/now)
-                        :command/user user-id
-                        :shares [{:share/id share-id
-                                  :share/key share-key
-                                  :congregation/id cong-id
-                                  :territory/id territory-id}
-                                 {:share/id share-id2
-                                  :share/key share-key2
-                                  :congregation/id cong-id
-                                  :territory/id territory-id2}]}]
-
-    (testing "created"
-      (is (= [qr-code-share-created qr-code-share-created2]
-             (handle-command create-command [] injections))))
-
-    (testing "is idempotent"
-      (is (empty? (handle-command create-command [qr-code-share-created qr-code-share-created2] injections))))
-
-    (testing "checks share key uniqueness"
-      ;; trying to create a new share (i.e. new share ID) with the same old share key
-      (let [conflicting-command (assoc-in create-command [:shares 0 :share/id] (UUID/randomUUID))]
-        (is (thrown-with-msg?
-             WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
-             (handle-command conflicting-command [qr-code-share-created qr-code-share-created2] injections)))))
-
-    (testing "checks share key uniqueness within the command"
-      ;; trying to use the same share key for multiple shares within the same command
-      (let [conflicting-command (-> create-command
-                                    (assoc-in [:shares 0 :share/key] share-key)
-                                    (assoc-in [:shares 1 :share/key] share-key))]
-        (is (thrown-with-msg?
-             WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
-             (handle-command conflicting-command [] injections)))))
+             (handle-command conflicting-command [share-created] injections)))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
@@ -210,5 +162,5 @@
         user-command (assoc anonymous-command :command/user user-id)]
     (is (= [{:event/type :share.event/share-opened
              :share/id share-id}]
-           (handle-command anonymous-command [link-share-created] injections)
-           (handle-command user-command [link-share-created] injections)))))
+           (handle-command anonymous-command [share-created] injections)
+           (handle-command user-command [share-created] injections)))))
