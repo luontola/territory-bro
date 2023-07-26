@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -68,10 +68,17 @@
   (binding [foreign-key/*reference-checkers* (reference-checkers command conn state)]
     (commands/validate-command command)))
 
-(defn- write-stream! [conn stream-id f]
+(defn- write-stream!
+  "Appends events to a stream with optimistic concurrency control."
+  [conn stream-id f]
   (let [old-events (event-store/read-stream conn stream-id)
         new-events (f old-events)]
     (event-store/save! conn stream-id (count old-events) new-events)))
+
+(defn- append-stream!
+  "Appends events to a stream unconditionally."
+  [conn stream-id new-events]
+  (event-store/save! conn stream-id nil new-events))
 
 (defn- call! [command-handler command state-or-old-events injections]
   (->> (command-handler command state-or-old-events injections)
@@ -132,10 +139,9 @@
 
 (defn- share-command! [conn command state]
   (let [injections (default-injections command state)]
-    (write-stream! conn
-                   (:share/id command)
-                   (fn [old-events]
-                     (call! share/handle-command command old-events injections)))))
+    (append-stream! conn
+                    (:share/id command)
+                    (call! share/handle-command command state injections))))
 
 (defn- territory-command! [conn command state]
   (let [injections (default-injections command state)]

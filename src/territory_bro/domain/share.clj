@@ -41,21 +41,17 @@
 
 ;;;; Queries
 
+(defn share-exists? [state share-id]
+  (some? (get-in state [::shares share-id])))
+
 (defn check-share-exists [state share-id]
-  (when (nil? (get-in state [::shares share-id]))
+  (when-not (share-exists? state share-id)
     (throw (ValidationException. [[:no-such-share share-id]]))))
 
 (defn find-share-by-key [state share-key]
   (let [share-id (get-in state [::share-keys share-key])
         share (get-in state [::shares share-id])]
     share))
-
-
-;;;; Write model
-
-(defn- write-model [command events]
-  (let [state (reduce projection nil events)]
-    (get-in state [::shares (:share/id command)])))
 
 
 ;;;; Command handlers
@@ -69,11 +65,11 @@
     (-> (.encodeToString (Base64/getUrlEncoder) bs)
         (StringUtils/stripEnd "="))))
 
-(defmulti ^:private command-handler (fn [command _share _injections]
+(defmulti ^:private command-handler (fn [command _state _injections]
                                       (:command/type command)))
 
 (defmethod command-handler :share.command/create-share
-  [command share {:keys [check-permit state]}]
+  [command state {:keys [check-permit]}]
   (let [share-id (:share/id command)
         share-key (:share/key command)
         share-type (:share/type command)
@@ -84,7 +80,7 @@
     (when (and (some? key-owner)
                (not= share-id key-owner))
       (throw (WriteConflictException. (str "share key " share-key " already in use by share " key-owner))))
-    (when (nil? share)
+    (when-not (share-exists? state share-id)
       [{:event/type :share.event/share-created
         :share/id share-id
         :share/key share-key
@@ -93,9 +89,9 @@
         :territory/id territory-id}])))
 
 (defmethod command-handler :share.command/record-share-opened
-  [_command share _injections]
+  [command _state _injections]
   [{:event/type :share.event/share-opened
-    :share/id (:share/id share)}])
+    :share/id (:share/id command)}])
 
-(defn handle-command [command events injections]
-  (command-handler command (write-model command events) injections))
+(defn handle-command [command state injections]
+  (command-handler command state injections))

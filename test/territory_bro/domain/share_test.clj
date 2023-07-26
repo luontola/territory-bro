@@ -44,8 +44,8 @@
 
 (defn- handle-command [command events injections]
   (->> (share/handle-command (testutil/validate-command command)
-                             (events/validate-events events)
-                             (assoc injections :state (apply-events events)))
+                             (apply-events (events/validate-events events))
+                             injections)
        (events/validate-events)))
 
 
