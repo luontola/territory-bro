@@ -186,7 +186,14 @@
              WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
              (handle-command conflicting-command [qr-code-share-created qr-code-share-created2] injections)))))
 
-    ;; TODO: check share key uniqueness between all the new shares, not just compared to old shares
+    (testing "checks share key uniqueness within the command"
+      ;; trying to use the same share key for multiple shares within the same command
+      (let [conflicting-command (-> create-command
+                                    (assoc-in [:shares 0 :share/key] share-key)
+                                    (assoc-in [:shares 1 :share/key] share-key))]
+        (is (thrown-with-msg?
+             WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
+             (handle-command conflicting-command [] injections)))))
 
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
