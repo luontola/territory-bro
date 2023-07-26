@@ -653,31 +653,34 @@
       (let [response (try-rename-congregation! session cong-id "should not be allowed")]
         (is (forbidden? response))))))
 
+(defn- fake-share-key-generator []
+  (let [*counter (atom 0)]
+    (fn []
+      (str "fakeShare" (swap! *counter inc)))))
+
 (deftest share-territory-link-test
   (let [*session (atom (login! app))
         cong-id (create-congregation! @*session "Congregation")
-        territory-id (create-territory! cong-id)
-        territory-id2 (create-territory! cong-id)
-        *share-key (atom nil)]
+        territory-id (create-territory! cong-id)]
 
     (testing "create a share link"
-      (let [response (-> (request :post (str "/api/congregation/" cong-id "/territory/" territory-id "/share"))
-                         (json-body {})
-                         (merge @*session)
-                         app)
-            share-key (:key (:body response))
-            share-url (:url (:body response))]
-        (is (ok? response))
-        (is (not (str/blank? share-key)))
-        (is (= (str "http://localhost:8080/share/" share-key)
-               share-url))
-        (reset! *share-key share-key)))
+      (binding [share/generate-share-key (fake-share-key-generator)]
+        (let [response (-> (request :post (str "/api/congregation/" cong-id "/territory/" territory-id "/share"))
+                           (json-body {})
+                           (merge @*session)
+                           app)]
+          (is (ok? response))
+          (is (= {:key "fakeShare1"
+                  :url "http://localhost:8080/share/fakeShare1"}
+                 (:body response))))))
+
+    ;; TODO: cannot link to a territory which doesn't belong to the specified congregation
 
     ;; The rest of this test is ran as an anonymous user
     (reset! *session nil)
 
     (testing "open share link"
-      (let [response (-> (request :get (str "/api/share/" @*share-key))
+      (let [response (-> (request :get "/api/share/fakeShare1")
                          (merge @*session)
                          app)]
         (reset! *session (get-session response)) ; TODO: stateful HTTP client which remembers the cookies automatically
@@ -687,7 +690,7 @@
                (:body response)))))
 
     (testing "records that the share was opened"
-      (is (some? (:share/last-opened (share/find-share-by-key (projections/cached-state) @*share-key)))))
+      (is (some? (:share/last-opened (share/find-share-by-key (projections/cached-state) "fakeShare1")))))
 
     (testing "can view the shared territory"
       ;; TODO: API to get one territory by ID

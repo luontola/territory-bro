@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,7 +7,7 @@
   (:import (java.security SecureRandom)
            (java.util Base64)
            (org.apache.commons.lang3 StringUtils)
-           (territory_bro WriteConflictException ValidationException)))
+           (territory_bro ValidationException WriteConflictException)))
 
 ;;;; Read model
 
@@ -62,7 +62,7 @@
 
 (def ^:private ^SecureRandom random (SecureRandom.))
 
-(defn generate-share-key []
+(defn ^:dynamic generate-share-key []
   ;; generate a 64-bit key, base64 encoded; same format as YouTube video IDs
   (let [bs (make-array Byte/TYPE 8)]
     (.nextBytes random bs)
