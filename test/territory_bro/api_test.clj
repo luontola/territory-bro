@@ -90,6 +90,10 @@
   (gis-sync/await-refreshed (Duration/ofSeconds 10))
   (projections/await-refreshed (Duration/ofSeconds 10)))
 
+(defn current-state []
+  (refresh-projections!)
+  (projections/cached-state))
+
 
 ;;;; API Helpers
 
@@ -741,9 +745,10 @@
                            (merge @*session)
                            app)]
           (is (internal-server-error? response))
-          (refresh-projections!)
-          (is (nil? (get-in (projections/cached-state) [:territory-bro.domain.share/share-keys "constantFakeShare"]))
-              "transaction should have been aborted and no shares created"))))
+
+          (let [share-keys (:territory-bro.domain.share/share-keys (current-state))]
+            (is (not (contains? share-keys "constantFakeShare"))
+                "transaction should have been aborted and no shares created")))))
 
     (testing "create QR code links"
       (binding [share/generate-share-key (fake-share-key-generator "create-qr-code-test")]
@@ -758,11 +763,17 @@
                             {:territory (str territory-id2)
                              :key "create-qr-code-test2"
                              :url "https://qr.territorybro.com/create-qr-code-test2"}]}
-                 (:body response))))))
+                 (:body response)))
 
+          (let [share-keys (:territory-bro.domain.share/share-keys (current-state))]
+            (is (contains? share-keys "create-qr-code-test1"))
+            (is (contains? share-keys "create-qr-code-test2"))))))
+
+    ;; TODO: test URL shortener: "https://qr.territorybro.com/abc123" should redirect to "https://beta.territorybro.com/share/abc123"
+    ;; TODO: cache shares in session, only generate missing shares for new territories (but do return all shares)
     ;; TODO: cannot link to a territory which doesn't belong to the specified congregation
 
-    (is true)))
+    #__))
 
 (deftest gis-changes-sync-test
   (let [session (login! app)
