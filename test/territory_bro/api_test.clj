@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns ^:slow territory-bro.api-test
-  (:require [clj-xpath.core :as xpath]
+  (:require [clj-http.client :as http]
+            [clj-xpath.core :as xpath]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
@@ -769,7 +770,12 @@
             (is (contains? share-keys "create-qr-code-test1"))
             (is (contains? share-keys "create-qr-code-test2"))))))
 
-    ;; TODO: test URL shortener: "https://qr.territorybro.com/abc123" should redirect to "https://beta.territorybro.com/share/abc123"
+    (testing "QR code links redirect to the same URL as shared links"
+      (let [response (http/get "https://qr.territorybro.com/abc123" {:redirect-strategy :none})]
+        (is (temporary-redirect? response))
+        (is (= "https://beta.territorybro.com/share/abc123"
+               (get-in response [:headers "Location"])))))
+
     ;; TODO: cache shares in session, only generate missing shares for new territories (but do return all shares)
     ;; TODO: cannot link to a territory which doesn't belong to the specified congregation
 

@@ -52,7 +52,7 @@ const TerritoryCardMapOnly = ({
 
       {settings.dev && // TODO: remove feature flag
         <div className={styles.qrCode}>
-          <TerritoryQrCode value="https://qr.territorybro.com/lDiMxApRwbY"/>
+          <TerritoryQrCode value="https://qr.territorybro.com/BNvuFBPOrAE"/>
         </div>
       }
 
