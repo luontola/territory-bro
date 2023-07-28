@@ -34,6 +34,7 @@
                  [org.postgresql/postgresql "42.2.18"]
                  [prismatic/schema "1.1.12"]
                  [ring-logger "1.0.1"]
+                 [ring-ttl-session "0.3.1"]
                  [ring/ring-defaults "0.3.2"]]
   :managed-dependencies [[ch.qos.logback/logback-classic "1.2.3"]
                          [ch.qos.logback/logback-core "1.2.3"]

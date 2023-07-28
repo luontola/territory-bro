@@ -1,16 +1,15 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.middleware
   (:require [clojure.tools.logging :as log]
-            [immutant.web.middleware :refer [wrap-session]]
+            [ring-ttl-session.core :as ttl-session]
             [ring.logger :as logger]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [ring.middleware.format :refer [wrap-restful-format]]
             [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.middleware.reload :refer [wrap-reload]]
-            [ring.middleware.session.memory :as memory-session]
             [ring.util.http-response :refer [internal-server-error]]
             [ring.util.response :as response]
             [territory-bro.infra.config :refer [env]]
@@ -52,8 +51,8 @@
         resp
         (response/content-type resp "text/plain")))))
 
-;; Avoid forgetting sessions every time the code is reloaded in development mode
-(defonce session-store (memory-session/memory-store))
+;; defonce to avoid forgetting sessions every time the code is reloaded in development mode
+(defonce session-store (ttl-session/ttl-memory-store (.toSeconds (Duration/ofHours 4))))
 
 (def ^:private mutative-operation #{:put :post :delete})
 
