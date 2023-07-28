@@ -737,7 +737,8 @@
   (let [*session (atom (login! app))
         cong-id (create-congregation! @*session "Congregation")
         territory-id (create-territory! cong-id)
-        territory-id2 (create-territory! cong-id)]
+        territory-id2 (create-territory! cong-id)
+        territory-id3 (create-territory! cong-id)]
 
     (testing "error: random number generator creates non-unique share keys"
       (binding [share/generate-share-key (constantly "constantFakeShare")]
@@ -751,8 +752,8 @@
             (is (not (contains? share-keys "constantFakeShare"))
                 "transaction should have been aborted and no shares created")))))
 
-    (testing "create QR code links"
-      (binding [share/generate-share-key (fake-share-key-generator "create-qr-code-test")]
+    (binding [share/generate-share-key (fake-share-key-generator "create-qr-code-test")]
+      (testing "create QR code links"
         (let [response (-> (request :post (str "/api/congregation/" cong-id "/generate-qr-codes"))
                            (json-body {:territories [territory-id territory-id2]})
                            (merge @*session)
@@ -768,7 +769,22 @@
 
           (let [share-keys (:territory-bro.domain.share/share-keys (current-state))]
             (is (contains? share-keys "create-qr-code-test1"))
-            (is (contains? share-keys "create-qr-code-test2"))))))
+            (is (contains? share-keys "create-qr-code-test2")))))
+
+      (testing "generated QR codes are cached"
+        (let [response (-> (request :post (str "/api/congregation/" cong-id "/generate-qr-codes"))
+                           (json-body {:territories [territory-id ; the previous test already generated a share for this territory
+                                                     territory-id3]})
+                           (merge @*session)
+                           app)]
+          (is (ok? response))
+          (is (= {:qrCodes [{:territory (str territory-id)
+                             :key "create-qr-code-test1" ; same key as in previous test, instead of #3 here and #4 in the next
+                             :url "https://qr.territorybro.com/create-qr-code-test1"}
+                            {:territory (str territory-id3)
+                             :key "create-qr-code-test3"
+                             :url "https://qr.territorybro.com/create-qr-code-test3"}]}
+                 (:body response))))))
 
     (testing "QR code links redirect to the same URL as shared links"
       (let [response (http/get "https://qr.territorybro.com/abc123" {:redirect-strategy :none})]
@@ -776,7 +792,6 @@
         (is (= "https://beta.territorybro.com/share/abc123"
                (get-in response [:headers "Location"])))))
 
-    ;; TODO: cache shares in session, only generate missing shares for new territories (but do return all shares)
     ;; TODO: cannot link to a territory which doesn't belong to the specified congregation
 
     #__))
