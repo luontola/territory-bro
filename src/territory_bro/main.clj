@@ -1,10 +1,10 @@
-;; Copyright © 2015-2021 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.main
   (:require [clojure.tools.logging :as log]
-            [luminus.http-server :as http]
+            [luminus.http-server :as httpd]
             [luminus.repl-server :as repl]
             [mount.core :as mount]
             [territory-bro.dispatcher :as dispatcher]
@@ -20,11 +20,11 @@
 
 (mount/defstate ^{:on-reload :noop} http-server
   :start
-  (http/start {:handler #'router/app
-               :port (:port config/env)
-               :io-threads (* 2 (.availableProcessors (Runtime/getRuntime)))})
+  (httpd/start {:handler #'router/app
+                :port (:port config/env)
+                :io-threads (* 2 (.availableProcessors (Runtime/getRuntime)))})
   :stop
-  (http/stop http-server))
+  (httpd/stop http-server))
 
 (mount/defstate ^{:on-reload :noop} repl-server
   :start
