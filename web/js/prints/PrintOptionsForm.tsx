@@ -37,6 +37,11 @@ const templates = [{
   name: 'Rural Territory Card',
   type: 'territory'
 }, {
+  id: 'QrCodeOnly',
+  component: QrCodeOnly,
+  name: 'QR code only (for adding them as stickers to old cards)',
+  type: 'territory'
+}, {
   id: 'RegionPrintout',
   component: RegionPrintout,
   name: 'Region Map',
