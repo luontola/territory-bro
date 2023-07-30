@@ -13,6 +13,8 @@ import NeighborhoodCard from "./NeighborhoodCard";
 import RuralTerritoryCard from "./RuralTerritoryCard";
 import RegionPrintout from "./RegionPrintout";
 import TerritoryCardMapOnly from "./TerritoryCardMapOnly";
+import QrCodeOnly from "./QrCodeOnly";
+import {usePageState} from "../util";
 
 const templates = [{
   id: 'TerritoryCard',
@@ -98,21 +100,29 @@ const Printables = ({values, template, congregationId, mapRaster}) => {
 }
 
 const PrintOptionsForm = ({congregationId}) => {
+  const [savedForm, setSavedForm] = usePageState('savedForm', null);
   const availableMapRasters = mapRasters;
   const congregation = getCongregationById(congregationId);
   const availableTerritories = congregation.territories;
   const availableRegions = [{id: congregation.id, name: congregation.name}, ...congregation.regions];
+  let initialValues = {
+    template: templates[0].id,
+    language: defaultLanguage,
+    mapRaster: availableMapRasters[0].id,
+    regions: availableRegions.length > 0 ? [availableRegions[0].id] : [],
+    territories: availableTerritories.length > 0 ? [availableTerritories[0].id] : []
+  } as FormValues;
+  if (savedForm) {
+    initialValues = savedForm;
+  }
   return <Formik
-    initialValues={{
-      template: templates[0].id,
-      language: defaultLanguage,
-      mapRaster: availableMapRasters[0].id,
-      regions: availableRegions.length > 0 ? [availableRegions[0].id] : [],
-      territories: availableTerritories.length > 0 ? [availableTerritories[0].id] : []
-    } as FormValues}
+    initialValues={initialValues}
     onSubmit={() => {
     }}>
     {({values, setFieldValue}) => {
+      useEffect(() => {
+        setSavedForm(values);
+      }, [values]);
       const template = templates.find(t => t.id === values.template);
       const mapRasterId = values.mapRaster;
       const mapRaster = availableMapRasters.find(r => r.id === mapRasterId);
