@@ -22,7 +22,7 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
   const togglePopup = async () => {
     if (!shareUrl) {
       const url = await shareTerritory(congregationId, territoryId);
-      setShareUrl(url + '?n=' + encodeURIComponent(territoryNumber).replaceAll(/%../g, "_"));
+      setShareUrl(url + '/' + encodeURIComponent(territoryNumber).replaceAll(/%../g, "_"));
     }
     setOpen(!open);
   }

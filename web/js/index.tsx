@@ -1,4 +1,4 @@
-// Copyright © 2015-2022 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -83,7 +83,7 @@ ReactDOM.createRoot(document.getElementById('root'))
                 <LoginCallbackPage path="/login-callback"/>
                 <RegistrationPage path="/register"/>
                 <HelpPage path="/help"/>
-                <OpenSharePage path="/share/:shareKey"/>
+                <OpenSharePage path="/share/:shareKey/*"/>
 
                 <CongregationPage path="/congregation/:congregationId"/>
                 <TerritoryListPage path="/congregation/:congregationId/territories"/>
