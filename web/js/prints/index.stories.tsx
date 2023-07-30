@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -21,7 +21,8 @@ const Box = ({children}) => <IntlProvider locale={language} messages={messages}>
 storiesOf('Printouts', module)
   .add('TerritoryCard', () =>
     <Box>
-      <TerritoryCard territory={territory101} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
+      <TerritoryCard territory={territory101} congregation={demoCongregation}
+                     qrCodeUrl="https://qr.territorybro.com/BNvuFBPOrAE" mapRaster={mapRasters[0]}/>
     </Box>)
 
   .add('NeighborhoodCard', () =>
@@ -31,7 +32,8 @@ storiesOf('Printouts', module)
 
   .add('RuralTerritoryCard', () =>
     <Box>
-      <RuralTerritoryCard territory={territory101} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
+      <RuralTerritoryCard territory={territory101} congregation={demoCongregation}
+                          qrCodeUrl="https://qr.territorybro.com/BNvuFBPOrAE" mapRaster={mapRasters[0]}/>
     </Box>)
 
   .add('RegionPrintout', () =>

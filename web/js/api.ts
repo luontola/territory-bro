@@ -1,4 +1,4 @@
-// Copyright © 2015-2022 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -218,6 +218,11 @@ export async function shareTerritory(congregationId: string, territoryId: string
 export async function openShare(shareKey: string) {
   const response = await api.get(`/api/share/${shareKey}`);
   return response.data;
+}
+
+export async function generateQrCodes(congregationId: string, territoryIds: Array<string>) {
+  const response = await api.post(`/api/congregation/${congregationId}/generate-qr-codes`, {territories: territoryIds})
+  return response.data.qrCodes;
 }
 
 // ====== Regions ======

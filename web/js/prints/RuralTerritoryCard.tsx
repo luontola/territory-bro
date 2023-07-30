@@ -6,7 +6,7 @@ import React from "react";
 import {FormattedMessage} from "react-intl";
 import TerritoryMap from "../maps/TerritoryMap";
 import TerritoryMiniMap from "../maps/TerritoryMiniMap";
-import {getCongregationById, getSettings} from "../api";
+import {getCongregationById} from "../api";
 import styles from "./RuralTerritoryCard.css";
 import A5PrintFrame from "./A5PrintFrame";
 import PrintDateNotice from "./PrintDateNotice";
@@ -17,9 +17,9 @@ const RuralTerritoryCard = ({
                               territoryId,
                               congregation,
                               congregationId,
+                              qrCodeUrl,
                               mapRaster
                             }) => {
-  const settings = getSettings();
   congregation = congregation || getCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
   return <A5PrintFrame>
@@ -48,9 +48,9 @@ const RuralTerritoryCard = ({
         </PrintDateNotice>
       </div>
 
-      {settings.dev && // TODO: remove feature flag
+      {qrCodeUrl &&
         <div className={styles.qrCode}>
-          <TerritoryQrCode value="https://qr.territorybro.com/BNvuFBPOrAE"/>
+          <TerritoryQrCode value={qrCodeUrl}/>
         </div>
       }
 

@@ -6,7 +6,7 @@ import React from "react";
 import {FormattedMessage} from "react-intl";
 import TerritoryMap from "../maps/TerritoryMap";
 import TerritoryMiniMap from "../maps/TerritoryMiniMap";
-import {getCongregationById, getSettings} from "../api";
+import {getCongregationById} from "../api";
 import CropMarks from "./CropMarks";
 import styles from "./TerritoryCard.css";
 import PrintDateNotice from "./PrintDateNotice";
@@ -17,9 +17,9 @@ const TerritoryCard = ({
                          territoryId,
                          congregation,
                          congregationId,
+                         qrCodeUrl,
                          mapRaster
                        }) => {
-  const settings = getSettings();
   congregation = congregation || getCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
   return <CropMarks>
@@ -49,9 +49,9 @@ const TerritoryCard = ({
       </div>
 
       <div className={styles.addresses}>
-        {settings.dev && // TODO: remove feature flag
+        {qrCodeUrl &&
           <div className={styles.qrCode}>
-            <TerritoryQrCode value="https://qr.territorybro.com/BNvuFBPOrAE"/>
+            <TerritoryQrCode value={qrCodeUrl}/>
           </div>
         }
         {territory.addresses}

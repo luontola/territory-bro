@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React, {useState} from "react";
-import {getCongregationById, getSettings, shareTerritory} from "../api";
+import {getCongregationById, shareTerritory} from "../api";
 import styles from "./TerritoryPage.css"
 import TerritoryMap from "../maps/TerritoryMap";
 import {mapRasters} from "../maps/mapOptions";
@@ -78,7 +78,6 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
 const TerritoryPage = ({congregationId, territoryId}) => {
   const congregation = getCongregationById(congregationId);
   const territory = congregation.getTerritoryById(territoryId);
-  const settings = getSettings();
   // TODO: consider using a grid layout for responsiveness so that the details area has fixed width
   return <>
     <h1>Territory {territory.number}</h1>

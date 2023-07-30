@@ -1,13 +1,13 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Field, Form, Formik} from "formik";
 import {getMessages, language as defaultLanguage, languages} from "../intl";
 import {IntlProvider} from "react-intl";
 import {mapRasters} from "../maps/mapOptions";
-import {getCongregationById} from "../api";
+import {generateQrCodes, getCongregationById} from "../api";
 import TerritoryCard from "./TerritoryCard";
 import NeighborhoodCard from "./NeighborhoodCard";
 import RuralTerritoryCard from "./RuralTerritoryCard";
@@ -47,6 +47,54 @@ interface FormValues {
   mapRaster: string;
   regions: [string];
   territories: [string];
+}
+
+const Printables = ({values, template, congregationId, mapRaster}) => {
+  const [qrCodeUrls, setQrCodeUrls] = useState({})
+  const [qrCodeError, setQrCodeError] = useState(null)
+
+  useEffect(() => {
+    setQrCodeError(null)
+    generateQrCodes(congregationId, values.territories)
+      .then((qrCodes) => {
+        const m = {}
+        qrCodes.forEach(qrCode => {
+          m[qrCode.territory] = qrCode.url
+        })
+        setQrCodeUrls(m)
+      })
+      .catch(reason => {
+        console.error("Failed to generate QR codes:", reason)
+        setQrCodeError(reason)
+      });
+  }, [values.territories])
+
+  return (
+    <IntlProvider locale={values.language} messages={getMessages(values.language)}>
+      <div lang={values.language}>
+        {qrCodeError &&
+          <div style={{color: "#f00", backgroundColor: "#fee", padding: "1px 1em", border: "1px solid #f00"}}>
+            <p>Failed to generate QR codes: {qrCodeError.message}</p>
+            <p>Refresh the page and try again.</p>
+          </div>
+        }
+        {template.type === 'territory' && values.territories.map(territoryId => {
+          const qrCodeUrl = qrCodeUrls[territoryId]
+          return <template.component key={territoryId}
+                                     territoryId={territoryId}
+                                     congregationId={congregationId}
+                                     qrCodeUrl={qrCodeUrl}
+                                     mapRaster={mapRaster}/>;
+        })}
+        {template.type === 'region' && values.regions.map(regionId => {
+          return <template.component key={regionId}
+                                     regionId={regionId}
+                                     congregationId={congregationId}
+                                     mapRaster={mapRaster}/>;
+        })}
+      </div>
+    </IntlProvider>
+  )
 }
 
 const PrintOptionsForm = ({congregationId}) => {
@@ -132,22 +180,7 @@ const PrintOptionsForm = ({congregationId}) => {
           </Form>
         </div>
 
-        <IntlProvider locale={values.language} messages={getMessages(values.language)}>
-          <div lang={values.language}>
-            {template.type === 'territory' && values.territories.map(territoryId => {
-              return <template.component key={territoryId}
-                                         territoryId={territoryId}
-                                         congregationId={congregationId}
-                                         mapRaster={mapRaster}/>;
-            })}
-            {template.type === 'region' && values.regions.map(regionId => {
-              return <template.component key={regionId}
-                                         regionId={regionId}
-                                         congregationId={congregationId}
-                                         mapRaster={mapRaster}/>;
-            })}
-          </div>
-        </IntlProvider>
+        <Printables values={values} template={template} congregationId={congregationId} mapRaster={mapRaster}/>
       </>;
     }}
   </Formik>;
