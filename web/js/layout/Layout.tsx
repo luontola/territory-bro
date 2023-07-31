@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,18 +7,11 @@ import styles from "./Layout.css";
 import * as React from "react";
 import {useEffect} from "react";
 import AuthenticationPanel from "./AuthenticationPanel";
-import {Link, Router} from "@reach/router";
 import {getCongregationById} from "../api";
+import {NavLink as RouterNavLink, Route, Routes, useParams} from "react-router-dom";
 
 const NavLink = (props) => (
-  <Link {...props}
-        getProps={({href, isCurrent, isPartiallyCurrent}) => {
-          // the object returned here is passed to the anchor element's props
-          const active = (href === '/') ? isCurrent : isPartiallyCurrent;
-          return {
-            className: active ? styles.active : undefined
-          };
-        }}/>
+  <RouterNavLink className={({isActive}) => isActive ? styles.active : ""} {...props}/>
 );
 
 const HomeNav = ({}) => {
@@ -34,7 +27,8 @@ const HomeNav = ({}) => {
   );
 }
 
-const CongregationNav = ({congregationId}) => {
+const CongregationNav = () => {
+  const {congregationId} = useParams()
   const congregation = getCongregationById(congregationId);
   return (
     <ul className={styles.nav}>
@@ -42,7 +36,7 @@ const CongregationNav = ({congregationId}) => {
       <li><NavLink to=".">{congregation.name}</NavLink></li>
       <li><NavLink to="territories">Territories</NavLink></li>
       {congregation.permissions.viewCongregation &&
-      <li><NavLink to="printouts">Printouts</NavLink></li>}
+        <li><NavLink to="printouts">Printouts</NavLink></li>}
       {congregation.permissions.configureCongregation && <>
         <li><NavLink to="users">Users</NavLink></li>
         <li><NavLink to="settings">Settings</NavLink></li>
@@ -50,12 +44,6 @@ const CongregationNav = ({congregationId}) => {
       <li><NavLink to="/help">Help</NavLink></li>
     </ul>
   );
-}
-
-function RouterComponent({children}) {
-  // Workaround for Reach Router to not render in a <div> which messes up flexbox.
-  // See https://github.com/reach/router/issues/63#issuecomment-524297867
-  return <>{children}</>;
 }
 
 type Props = {
@@ -72,10 +60,10 @@ const Layout = ({title, children}: Props) => {
 
   return <>
     <nav className={`${styles.navbar} no-print`}>
-      <Router primary={false} component={RouterComponent}>
-        <HomeNav path="/*"/>
-        <CongregationNav path="/congregation/:congregationId/*"/>
-      </Router>
+      <Routes>
+        <Route path="/*" element={<HomeNav/>}/>
+        <Route path="/congregation/:congregationId/*" element={<CongregationNav/>}/>
+      </Routes>
       <div className={styles.auth}>
         <AuthenticationPanel/>
       </div>

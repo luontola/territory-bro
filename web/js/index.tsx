@@ -2,9 +2,8 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import React from "react";
-import ReactDOM from "react-dom";
-import {globalHistory, Router} from "@reach/router";
+import React, {useEffect} from "react";
+import ReactDOM from "react-dom/client";
 import {IntlProvider} from "react-intl";
 import {language, messages} from "./intl";
 import ErrorBoundary from "react-error-boundary";
@@ -25,18 +24,19 @@ import TerritoryListPage from "./pages/TerritoryListPage";
 import TerritoryPage from "./pages/TerritoryPage";
 import OpenSharePage from "./pages/OpenSharePage";
 import {getPageState, setPageState} from "./util";
+import {BrowserRouter, Route, Routes, useLocation} from "react-router-dom";
 
-let previousLocation = globalHistory.location;
-globalHistory.listen(({location, action}) => {
-  if (previousLocation.href === location.href) {
-    return; // only page state was updated, but the URL remains the same
-  }
-  previousLocation = location;
+function NavigationListener({children}) {
+  const location = useLocation()
+  useEffect(() => {
+    console.info(`Current URL is now ${location.pathname}${location.search}${location.hash}`);
+    logPageView();
+    restoreScrollY(getPageState("scrollY"));
+  }, [location.pathname])
+  return children;
+}
 
-  console.info(`Current URL is now ${location.pathname}${location.search}${location.hash} (${action})`);
-  logPageView();
-
-  const scrollY = getPageState("scrollY");
+function restoreScrollY(scrollY?: number) {
   if (typeof scrollY === 'number') {
     // XXX: scrolling immediately does not scroll far enough; maybe we must wait for React to render the whole page
     setTimeout(() => {
@@ -45,7 +45,7 @@ globalHistory.listen(({location, action}) => {
   } else {
     document.querySelector('main')?.scrollIntoView({block: "start"});
   }
-});
+}
 
 function listenScrollY(onScroll) {
   let lastKnownScrollY = 0;
@@ -75,27 +75,32 @@ ReactDOM.createRoot(document.getElementById('root'))
     <React.StrictMode>
       <ErrorBoundary FallbackComponent={ErrorPage}>
         <IntlProvider locale={language} messages={messages}>
-          <React.Suspense fallback={<p>Loading....</p>}>
-            <Layout>
-              <Router>
-                <HomePage path="/"/>
-                <JoinPage path="/join"/>
-                <LoginCallbackPage path="/login-callback"/>
-                <RegistrationPage path="/register"/>
-                <HelpPage path="/help"/>
-                <OpenSharePage path="/share/:shareKey/*"/>
+          <BrowserRouter>
+            <NavigationListener>
+              <React.Suspense fallback={<p>Loading....</p>}>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<HomePage/>}/>
+                    <Route path="/join" element={<JoinPage/>}/>
+                    <Route path="/login-callback" element={<LoginCallbackPage/>}/>
+                    <Route path="/register" element={<RegistrationPage/>}/>
+                    <Route path="/help" element={<HelpPage/>}/>
+                    <Route path="/share/:shareKey/*" element={<OpenSharePage/>}/>
 
-                <CongregationPage path="/congregation/:congregationId"/>
-                <TerritoryListPage path="/congregation/:congregationId/territories"/>
-                <TerritoryPage path="/congregation/:congregationId/territories/:territoryId"/>
-                <PrintoutPage path="/congregation/:congregationId/printouts"/>
-                <SettingsPage path="/congregation/:congregationId/settings"/>
-                <UsersPage path="/congregation/:congregationId/users"/>
+                    <Route path="/congregation/:congregationId" element={<CongregationPage/>}/>
+                    <Route path="/congregation/:congregationId/territories" element={<TerritoryListPage/>}/>
+                    <Route path="/congregation/:congregationId/territories/:territoryId" element={<TerritoryPage/>}/>
+                    <Route path="/congregation/:congregationId/printouts" element={<PrintoutPage/>}/>
+                    <Route path="/congregation/:congregationId/settings" element={<SettingsPage/>}/>
+                    <Route path="/congregation/:congregationId/users" element={<UsersPage/>}/>
 
-                <NotFoundPage default/>
-              </Router>
-            </Layout>
-          </React.Suspense>
+                    <Route path="*" element={<NotFoundPage/>}/>
+                  </Routes>
+                </Layout>
+              </React.Suspense>
+            </NavigationListener>
+          </BrowserRouter>
         </IntlProvider>
       </ErrorBoundary>
-    </React.StrictMode>);
+    </React.StrictMode>
+  );

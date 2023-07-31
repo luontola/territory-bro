@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,8 +6,10 @@ import React from "react";
 import PrintOptionsForm from "../prints/PrintOptionsForm";
 import {getCongregationById} from "../api";
 import MapInteractionHelp from "../maps/MapInteractionHelp";
+import {useParams} from "react-router-dom";
 
-const PrintoutPage = ({congregationId}) => {
+const PrintoutPage = () => {
+  const {congregationId} = useParams()
   const congregation = getCongregationById(congregationId);
   return <>
     <div className="no-print">

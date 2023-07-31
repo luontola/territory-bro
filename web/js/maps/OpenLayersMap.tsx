@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -12,7 +12,12 @@ type Props = {
 
 export default class OpenLayersMap<P extends Props> extends React.Component<P> {
 
-  element: HTMLDivElement;
+  elementRef: React.RefObject<HTMLDivElement>;
+
+  constructor(props: P) {
+    super(props);
+    this.elementRef = React.createRef()
+  }
 
   render() {
     const {printout} = this.props;
@@ -20,11 +25,6 @@ export default class OpenLayersMap<P extends Props> extends React.Component<P> {
     if (printout) {
       className += " " + styles.printout;
     }
-    const setElement = el => {
-      if (el) {
-        this.element = el;
-      }
-    };
-    return <div className={className} ref={setElement}/>;
+    return <div className={className} ref={this.elementRef}/>;
   }
 }

@@ -1,14 +1,14 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React, {useState} from "react";
 import {addUser, getCongregationById, getSettings, setUserPermissions} from "../api";
-import {Link, navigate} from "@reach/router";
 import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import sortBy from "lodash/sortBy";
 import styles from "./UsersPage.css";
 import {formatApiError} from "../errorMessages";
+import {Link, useNavigate, useParams} from "react-router-dom";
 
 const IdentityProvider = ({user}) => {
   const sub = user.sub || '';
@@ -22,6 +22,7 @@ const IdentityProvider = ({user}) => {
 };
 
 const RemoveUserButton = ({congregation, user, onRemove}) => {
+  const navigate = useNavigate();
   const settings = getSettings();
   const myUserId = settings.user.id;
   return <button type="button" className={`pure-button ${styles.removeUser}`} onClick={async () => {
@@ -58,7 +59,8 @@ interface FormValues {
   userId: string;
 }
 
-const UsersPage = ({congregationId}) => {
+const UsersPage = () => {
+  const {congregationId} = useParams()
   const [newUser, setNewUser] = useState(null);
   const forceUpdate = useForceUpdate(); // to trigger re-rendering with the updated user list
   const congregation = getCongregationById(congregationId);
@@ -118,7 +120,7 @@ const UsersPage = ({congregationId}) => {
               Add User
             </button>
             {' '}
-            <Link to=".." className="pure-button">Cancel</Link>
+            <Link to=".." relative="path" className="pure-button">Cancel</Link>
           </div>
         </fieldset>
       </Form>

@@ -1,20 +1,22 @@
-// Copyright © 2015-2022 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React from "react";
 import {getCongregationById, saveCongregationSettings} from "../api";
-import {Link} from "@reach/router";
 import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import InfoBox from "../maps/InfoBox";
 import style from "./SettingsPage.css";
+import {Link, useNavigate, useParams} from "react-router-dom";
 
 interface FormValues {
   congregationName: string;
   loansCsvUrl: string;
 }
 
-const SettingsPage = ({congregationId, navigate}) => {
+const SettingsPage = ({}) => {
+  const {congregationId} = useParams()
+  const navigate = useNavigate();
   const congregation = getCongregationById(congregationId);
   return <Formik
     initialValues={{
@@ -34,7 +36,7 @@ const SettingsPage = ({congregationId, navigate}) => {
     onSubmit={async (values, {setSubmitting}) => {
       try {
         await saveCongregationSettings(congregation.id, values.congregationName, values.loansCsvUrl);
-        navigate('..');
+        navigate('..', {relative: "path"});
       } catch (e) {
         console.error('Form submit failed:', e);
         alert(e);
@@ -103,7 +105,7 @@ const SettingsPage = ({congregationId, navigate}) => {
               Save
             </button>
             {' '}
-            <Link to=".." className="pure-button">Cancel</Link>
+            <Link to=".." relative="path" className="pure-button">Cancel</Link>
           </div>
         </fieldset>
       </Form>

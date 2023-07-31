@@ -1,12 +1,14 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React, {useEffect, useState} from "react";
 import {openShare} from "../api";
-import {navigate} from "@reach/router";
+import {useNavigate, useParams} from "react-router-dom";
 
-const OpenSharePage = ({shareKey}) => {
+const OpenSharePage = () => {
+  const {shareKey} = useParams()
+  const navigate = useNavigate();
   const [error, setError] = useState(null);
 
   useEffect(() => {

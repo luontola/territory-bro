@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,13 +6,14 @@ import React from "react";
 import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import {createCongregation, getSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
-import {navigate} from "@reach/router";
+import {useNavigate} from "react-router-dom";
 
 interface FormValues {
   congregationName: string;
 }
 
 const RegistrationPage = () => {
+  const navigate = useNavigate();
   const settings = getSettings();
   if (!settings.user) {
     const {
@@ -39,7 +40,6 @@ const RegistrationPage = () => {
       onSubmit={async (values, {setSubmitting}) => {
         try {
           const id = await createCongregation(values.congregationName);
-          // TODO: use short IDs
           await navigate(`/congregation/${id}`);
         } catch (e) {
           console.error('Form submit failed:', e);

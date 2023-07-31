@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -35,7 +35,7 @@ export default class NeighborhoodMap extends OpenLayersMap<Props> {
       territory,
       mapRaster
     } = this.props;
-    this.map = initNeighborhoodMap(this.element, territory);
+    this.map = initNeighborhoodMap(this.elementRef.current, territory);
     this.map.setStreetsLayerRaster(mapRaster);
   }
 
@@ -44,6 +44,10 @@ export default class NeighborhoodMap extends OpenLayersMap<Props> {
       mapRaster
     } = this.props;
     this.map.setStreetsLayerRaster(mapRaster);
+  }
+
+  componentWillUnmount() {
+    this.map.unmount()
   }
 }
 
@@ -85,6 +89,9 @@ function initNeighborhoodMap(element: HTMLDivElement, territory: Territory): any
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {
       streetsLayer.setSource(mapRaster.source);
+    },
+    unmount() {
+      map.setTarget(undefined)
     }
   };
 }

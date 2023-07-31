@@ -9,6 +9,7 @@ import TerritoryMap from "../maps/TerritoryMap";
 import {mapRasters} from "../maps/mapOptions";
 import MapInteractionHelp from "../maps/MapInteractionHelp";
 import ClipboardJS from "clipboard";
+import {useParams} from "react-router-dom";
 
 const mapRaster = mapRasters[0];
 
@@ -76,7 +77,8 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
   );
 }
 
-const TerritoryPage = ({congregationId, territoryId}) => {
+const TerritoryPage = () => {
+  const {congregationId, territoryId} = useParams()
   const congregation = getCongregationById(congregationId);
   const territory = congregation.getTerritoryById(territoryId);
   // TODO: consider using a grid layout for responsiveness so that the details area has fixed width

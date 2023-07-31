@@ -1,14 +1,14 @@
-// Copyright © 2015-2022 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React from "react";
-import {Link} from "@reach/router";
 import {getCongregationById, getSettings, Territory} from "../api";
 import styles from "./TerritoryListPage.css";
 import InfoBox from "../maps/InfoBox";
 import TerritoryListMap from "../maps/TerritoryListMap";
 import {usePageState} from "../util";
+import {Link, useNavigate, useParams} from "react-router-dom";
 
 function LimitedVisibilityHelp() {
   const settings = getSettings();
@@ -62,7 +62,9 @@ function matchesSearch(territory: Territory, search: string): boolean {
     || addresses.toLowerCase().includes(search);
 }
 
-const TerritoryListPage = ({congregationId, navigate}) => {
+const TerritoryListPage = () => {
+  const {congregationId} = useParams()
+  const navigate = useNavigate();
   const congregation = getCongregationById(congregationId);
   const [search, setSearch] = usePageState('search', '');
   const visibleTerritories = congregation.territories.filter(territory => matchesSearch(territory, search));

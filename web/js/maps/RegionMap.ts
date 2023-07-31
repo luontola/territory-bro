@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -38,7 +38,7 @@ export default class RegionMap extends OpenLayersMap<Props> {
       territories,
       mapRaster
     } = this.props;
-    this.map = initRegionMap(this.element, region, territories);
+    this.map = initRegionMap(this.elementRef.current, region, territories);
     this.map.setStreetsLayerRaster(mapRaster);
   }
 
@@ -47,6 +47,10 @@ export default class RegionMap extends OpenLayersMap<Props> {
       mapRaster
     } = this.props;
     this.map.setStreetsLayerRaster(mapRaster);
+  }
+
+  componentWillUnmount() {
+    this.map.unmount()
   }
 }
 
@@ -103,6 +107,9 @@ function initRegionMap(element: HTMLDivElement, region: Region | Congregation, t
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {
       streetsLayer.setSource(mapRaster.source);
+    },
+    unmount() {
+      map.setTarget(undefined)
     }
   };
 }

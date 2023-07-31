@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -23,6 +23,7 @@ type Props = {
 };
 
 export default class TerritoryMiniMap extends OpenLayersMap<Props> {
+  private map;
 
   componentDidMount() {
     const {
@@ -30,11 +31,15 @@ export default class TerritoryMiniMap extends OpenLayersMap<Props> {
       congregation,
     } = this.props;
     if (congregation.location) {
-      initTerritoryMiniMap(this.element, territory, congregation);
+      this.map = initTerritoryMiniMap(this.elementRef.current, territory, congregation);
     } else {
       // TODO: this is never reached because of the default congregation boundary
-      this.element.innerText = "Error: Congregation boundary is not defined";
+      this.elementRef.current.innerText = "Error: Congregation boundary is not defined";
     }
+  }
+
+  componentWillUnmount() {
+    this.map.unmount()
   }
 }
 
@@ -110,4 +115,10 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
     padding: [1, 1, 1, 1], // minimum padding where the congregation lines still show up
     constrainResolution: false
   });
+
+  return {
+    unmount() {
+      map.setTarget(undefined)
+    }
+  };
 }

@@ -1,14 +1,15 @@
-// Copyright © 2015-2021 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React, {useEffect} from "react";
 import {getSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
-import {navigate} from "@reach/router";
 import {sanitizeReturnPath} from "../authenticationUtil";
+import {useNavigate} from "react-router-dom";
 
 const LoginCallbackPage = () => {
+  const navigate = useNavigate();
   const settings = getSettings();
   const {
     domain,

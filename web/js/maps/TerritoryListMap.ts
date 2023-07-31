@@ -1,4 +1,4 @@
-// Copyright © 2015-2022 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -39,7 +39,7 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
       territories,
       onClick,
     } = this.props;
-    this.map = initMap(this.element, congregation, territories, onClick);
+    this.map = initMap(this.elementRef.current, congregation, territories, onClick);
   }
 
   componentDidUpdate() {
@@ -47,6 +47,10 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
       territories
     } = this.props;
     this.map.updateTerritories(territories);
+  }
+
+  componentWillUnmount() {
+    this.map.unmount()
   }
 }
 
@@ -177,6 +181,9 @@ function initMap(element: HTMLDivElement,
     updateTerritories(territories: Array<Territory>): void {
       setTerritories(territories);
       resetZoom(map, {duration: 300});
+    },
+    unmount() {
+      map.setTarget(undefined)
     }
   };
 }
