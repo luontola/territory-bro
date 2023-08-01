@@ -247,7 +247,7 @@
         (assoc :command/time ((:now config/env)))
         (assoc :command/user user-id))))
 
-(defn- dispatch! [conn state command]
+(defn dispatch! [conn state command]
   (let [command (enrich-command command)]
     (try
       (dispatcher/command! conn state command)
@@ -268,12 +268,7 @@
                           (pr-str t)))
         (internal-server-error! {:message "Internal Server Error"})))))
 
-(defn api-command!
-  ([conn state command]
-   (api-command! conn state command {:message "OK"}))
-  ([conn state command ok-response]
-   (dispatch! conn state command)
-   (ok ok-response)))
+(def ok-body {:message "OK"})
 
 (defn create-congregation [request]
   (auth/with-user-from-session request
@@ -282,10 +277,10 @@
           name (get-in request [:params :name])
           state (state-for-request request)]
       (db/with-db [conn {}]
-        (api-command! conn state {:command/type :congregation.command/create-congregation
-                                  :congregation/id cong-id
-                                  :congregation/name name}
-                      {:id cong-id})))))
+        (dispatch! conn state {:command/type :congregation.command/create-congregation
+                               :congregation/id cong-id
+                               :congregation/name name})
+        (ok {:id cong-id})))))
 
 (defn add-user [request]
   (auth/with-user-from-session request
@@ -294,9 +289,10 @@
           user-id (UUID/fromString (get-in request [:params :userId]))
           state (state-for-request request)]
       (db/with-db [conn {}]
-        (api-command! conn state {:command/type :congregation.command/add-user
-                                  :congregation/id cong-id
-                                  :user/id user-id})))))
+        (dispatch! conn state {:command/type :congregation.command/add-user
+                               :congregation/id cong-id
+                               :user/id user-id})
+        (ok ok-body)))))
 
 (defn set-user-permissions [request]
   (auth/with-user-from-session request
@@ -306,10 +302,11 @@
                            (map keyword))
           state (state-for-request request)]
       (db/with-db [conn {}]
-        (api-command! conn state {:command/type :congregation.command/set-user-permissions
-                                  :congregation/id cong-id
-                                  :user/id user-id
-                                  :permission/ids permissions})))))
+        (dispatch! conn state {:command/type :congregation.command/set-user-permissions
+                               :congregation/id cong-id
+                               :user/id user-id
+                               :permission/ids permissions})
+        (ok ok-body)))))
 
 (defn save-congregation-settings [request]
   (auth/with-user-from-session request
@@ -319,10 +316,11 @@
           loans-csv-url (get-in request [:params :loansCsvUrl])
           state (state-for-request request)]
       (db/with-db [conn {}]
-        (api-command! conn state {:command/type :congregation.command/update-congregation
-                                  :congregation/id cong-id
-                                  :congregation/name name
-                                  :congregation/loans-csv-url loans-csv-url})))))
+        (dispatch! conn state {:command/type :congregation.command/update-congregation
+                               :congregation/id cong-id
+                               :congregation/name name
+                               :congregation/loans-csv-url loans-csv-url})
+        (ok ok-body)))))
 
 (defn download-qgis-project [request]
   (auth/with-user-from-session request
@@ -353,14 +351,14 @@
           state (state-for-request request)
           share-key (share/generate-share-key)]
       (db/with-db [conn {}]
-        (api-command! conn state {:command/type :share.command/create-share
-                                  :share/id (UUID/randomUUID)
-                                  :share/key share-key
-                                  :share/type :link
-                                  :congregation/id cong-id
-                                  :territory/id territory-id}
-                      {:url (str (:public-url config/env) "/share/" share-key)
-                       :key share-key})))))
+        (dispatch! conn state {:command/type :share.command/create-share
+                               :share/id (UUID/randomUUID)
+                               :share/key share-key
+                               :share/type :link
+                               :congregation/id cong-id
+                               :territory/id territory-id})
+        (ok {:url (str (:public-url config/env) "/share/" share-key)
+             :key share-key})))))
 
 (defn- generate-qr-code! [conn request cong-id territory-id]
   (let [share-key (share/generate-share-key)

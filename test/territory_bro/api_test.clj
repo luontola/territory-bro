@@ -251,7 +251,7 @@
   (is (= {:bar 1} (api/format-for-api {:foo/bar 1})))
   (is (= [{:fooBar 1} {:bar 2}] (api/format-for-api [{:foo-bar 1} {:foo/bar 2}]))))
 
-(deftest api-command-test
+(deftest dispatch-command-test
   (let [conn :dummy-conn
         state :dummy-state
         command {:command/type :dummy-command}
@@ -265,11 +265,10 @@
                                             (is (= [conn state (assoc command
                                                                       :command/time test-time
                                                                       :command/user test-user)]
-                                                   args)))]
-          (is (= {:body {:message "OK"}
-                  :status 200
-                  :headers {}}
-                 (api/api-command! conn state command)))))
+                                                   args))
+                                            [{:event/type :dummy-event}])]
+          (is (= [{:event/type :dummy-event}]
+                 (api/dispatch! conn state command)))))
 
       (testing "failed command: validation"
         (with-redefs [dispatcher/command! (fn [& _]
@@ -278,7 +277,7 @@
                   :status 400
                   :headers {}}
                  (try
-                   (api/api-command! conn state command)
+                   (api/dispatch! conn state command)
                    (catch ExceptionInfo e
                      (:response (ex-data e))))))))
 
@@ -289,7 +288,7 @@
                   :status 403
                   :headers {}}
                  (try
-                   (api/api-command! conn state command)
+                   (api/dispatch! conn state command)
                    (catch ExceptionInfo e
                      (:response (ex-data e))))))))
 
@@ -300,7 +299,7 @@
                   :status 409
                   :headers {}}
                  (try
-                   (api/api-command! conn state command)
+                   (api/dispatch! conn state command)
                    (catch ExceptionInfo e
                      (:response (ex-data e))))))))
 
@@ -311,7 +310,7 @@
                   :status 500
                   :headers {}}
                  (try
-                   (api/api-command! conn state command)
+                   (api/dispatch! conn state command)
                    (catch ExceptionInfo e
                      (:response (ex-data e)))))))))))
 
