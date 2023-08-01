@@ -32,7 +32,7 @@ blocks:
         - name: Test Web
           commands:
             - cache restore
-            - nvm install 12
+            - nvm install 18
 
             - yarn install
             - yarn run test
