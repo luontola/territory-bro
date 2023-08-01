@@ -4,7 +4,9 @@
 *.sql.gz
 *.tmp
 .DS_Store
+/.clj-kondo/
 /.lein-*
+/.lsp/
 /.nrepl-port
 /node_modules/
 /pom.xml
