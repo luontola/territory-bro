@@ -248,33 +248,32 @@
         (assoc :command/user user-id))))
 
 (defn- dispatch! [conn state command]
-  (dispatcher/command! conn state (enrich-command command)))
+  (let [command (enrich-command command)]
+    (try
+      (dispatcher/command! conn state command)
+      (catch ValidationException e
+        (log/warn e "Invalid command:" command)
+        (bad-request! {:errors (.getErrors e)}))
+      (catch NoPermitException e
+        (log/warn e "Forbidden command:" command)
+        (forbidden! {:message "Forbidden"}))
+      (catch WriteConflictException e
+        (log/warn e "Write conflict:" command)
+        (conflict! {:message "Conflict"}))
+      (catch Throwable t
+        ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
+        (log/error t (str "Command failed: "
+                          (pr-str command)
+                          "\n"
+                          (pr-str t)))
+        (internal-server-error! {:message "Internal Server Error"})))))
 
 (defn api-command!
   ([conn state command]
    (api-command! conn state command {:message "OK"}))
   ([conn state command ok-response]
-   (let [command (enrich-command command)]
-     (try
-       (dispatcher/command! conn state command)
-       (ok ok-response)
-       ;; TODO: move the error handling to router middleware, so that it would cover also other calls to dispatch
-       (catch ValidationException e
-         (log/warn e "Invalid command:" command)
-         (bad-request {:errors (.getErrors e)}))
-       (catch NoPermitException e
-         (log/warn e "Forbidden command:" command)
-         (forbidden {:message "Forbidden"}))
-       (catch WriteConflictException e
-         (log/warn e "Write conflict:" command)
-         (conflict {:message "Conflict"}))
-       (catch Throwable t
-         ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
-         (log/error t (str "Command failed: "
-                           (pr-str command)
-                           "\n"
-                           (pr-str t)))
-         (internal-server-error {:message "Internal Server Error"}))))))
+   (dispatch! conn state command)
+   (ok ok-response)))
 
 (defn create-congregation [request]
   (auth/with-user-from-session request

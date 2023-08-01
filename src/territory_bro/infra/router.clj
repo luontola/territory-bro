@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,13 +6,15 @@
   (:require [compojure.core :refer [routes wrap-routes]]
             [compojure.route :as route]
             [mount.core :as mount]
-            [territory-bro.api :refer [api-routes]]
+            [ring.middleware.http-response :as http-response]
+            [territory-bro.api :as api]
             [territory-bro.infra.middleware :as middleware]))
 
 (mount/defstate app
   :start
   (middleware/wrap-base
    (routes
-    (-> #'api-routes
+    (-> #'api/api-routes
+        (wrap-routes http-response/wrap-http-response)
         (wrap-routes middleware/wrap-formats))
     (route/not-found "Not Found"))))

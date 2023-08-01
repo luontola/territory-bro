@@ -33,7 +33,8 @@
             [territory-bro.infra.user :as user]
             [territory-bro.projections :as projections]
             [territory-bro.test.fixtures :refer [api-fixture db-fixture]])
-  (:import (java.time Duration Instant)
+  (:import (clojure.lang ExceptionInfo)
+           (java.time Duration Instant)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
@@ -276,7 +277,10 @@
           (is (= {:body {:errors [[:dummy-error 123]]}
                   :status 400
                   :headers {}}
-                 (api/api-command! conn state command)))))
+                 (try
+                   (api/api-command! conn state command)
+                   (catch ExceptionInfo e
+                     (:response (ex-data e))))))))
 
       (testing "failed command: permission check"
         (with-redefs [dispatcher/command! (fn [& _]
@@ -284,7 +288,10 @@
           (is (= {:body {:message "Forbidden"}
                   :status 403
                   :headers {}}
-                 (api/api-command! conn state command)))))
+                 (try
+                   (api/api-command! conn state command)
+                   (catch ExceptionInfo e
+                     (:response (ex-data e))))))))
 
       (testing "failed command: write conflict"
         (with-redefs [dispatcher/command! (fn [& _]
@@ -292,7 +299,10 @@
           (is (= {:body {:message "Conflict"}
                   :status 409
                   :headers {}}
-                 (api/api-command! conn state command)))))
+                 (try
+                   (api/api-command! conn state command)
+                   (catch ExceptionInfo e
+                     (:response (ex-data e))))))))
 
       (testing "failed command: internal error"
         (with-redefs [dispatcher/command! (fn [& _]
@@ -300,7 +310,10 @@
           (is (= {:body {:message "Internal Server Error"}
                   :status 500
                   :headers {}}
-                 (api/api-command! conn state command))))))))
+                 (try
+                   (api/api-command! conn state command)
+                   (catch ExceptionInfo e
+                     (:response (ex-data e)))))))))))
 
 (deftest basic-routes-test
   (testing "index"
@@ -746,7 +759,7 @@
                            (json-body {:territories [territory-id territory-id2]})
                            (merge @*session)
                            app)]
-          (is (internal-server-error? response))
+          (is (conflict? response))
 
           (let [share-keys (:territory-bro.domain.share/share-keys (current-state))]
             (is (not (contains? share-keys "constantFakeShare"))
