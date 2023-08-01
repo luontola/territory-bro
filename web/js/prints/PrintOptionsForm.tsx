@@ -59,21 +59,24 @@ interface FormValues {
 const Printables = ({values, template, congregationId, mapRaster}) => {
   const [qrCodeUrls, setQrCodeUrls] = useState({})
   const [qrCodeError, setQrCodeError] = useState(null)
+  const congregation = getCongregationById(congregationId);
 
   useEffect(() => {
     setQrCodeError(null)
-    generateQrCodes(congregationId, values.territories)
-      .then((qrCodes) => {
-        const m = {}
-        qrCodes.forEach(qrCode => {
-          m[qrCode.territory] = qrCode.url
+    if (congregation.permissions.shareTerritoryLink) {
+      generateQrCodes(congregationId, values.territories)
+        .then((qrCodes) => {
+          const m = {}
+          qrCodes.forEach(qrCode => {
+            m[qrCode.territory] = qrCode.url
+          })
+          setQrCodeUrls(m)
         })
-        setQrCodeUrls(m)
-      })
-      .catch(reason => {
-        console.error("Failed to generate QR codes:", reason)
-        setQrCodeError(reason)
-      });
+        .catch(reason => {
+          console.error("Failed to generate QR codes:", reason)
+          setQrCodeError(reason)
+        });
+    }
   }, [values.territories])
 
   return (
