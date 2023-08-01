@@ -5,12 +5,19 @@
 import React from "react";
 import {getCongregationById} from "../api";
 import {Link, useParams} from "react-router-dom";
+import InfoBox from "../maps/InfoBox";
 
 const CongregationPage = () => {
   const {congregationId} = useParams()
   const congregation = getCongregationById(congregationId);
   return <>
     <h1>{congregation.name}</h1>
+    {congregationId === "demo" &&
+      <InfoBox title="Welcome to the demo">
+        <p>This demo is limited to only viewing a congregation. Some features are restricted.</p>
+        <p>For example, you won't be able to edit territories, share links to territories, and the printouts won't have
+          the QR code that links to the territory.</p>
+      </InfoBox>}
     <p><Link to="territories">Territories</Link></p>
     {congregation.permissions.viewCongregation &&
       <p><Link to="printouts">Printouts</Link></p>}
