@@ -29,6 +29,7 @@
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
            (java.time Duration)
            (java.util UUID)
+           (org.postgresql.util PSQLException)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 (s/defschema Territory
@@ -261,6 +262,13 @@
         (log/warn e "Write conflict:" command)
         (conflict! {:message "Conflict"}))
       (catch Throwable t
+        (when (instance? PSQLException t)
+          (let [e (cast PSQLException t)]
+            ;; TODO: find out the error code for a deadlock exception, and change the response to HTTP 409 instead of 500
+            (log/warn "Database error" (str e)
+                      "ErrorCode:" (.getErrorCode e)
+                      "SQLState:" (.getSQLState e)
+                      "ServerErrorMessage:" (.getServerErrorMessage e))))
         ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
         (log/error t (str "Command failed: "
                           (pr-str command)
