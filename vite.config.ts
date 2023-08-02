@@ -1,0 +1,31 @@
+// Copyright © 2015-2023 Esko Luontola
+// This software is released under the Apache License 2.0.
+// The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
+import {defineConfig} from 'vitest/config'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+// https://vitest.dev/config/
+export default defineConfig({
+  root: "web",
+  plugins: [react()],
+  build: {
+    outDir: "../target/web-dist",
+    sourcemap: true,
+  },
+  server: {
+    port: 8080,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+      }
+    }
+  },
+  test: {
+    cache: {
+      dir: "../node_modules/.vitest"
+    }
+  }
+})

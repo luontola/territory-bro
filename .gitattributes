@@ -1,6 +1,11 @@
-*.txt           eol=lf
-*.md            eol=lf
 *.clj           eol=lf
-*.js            eol=lf
 *.html          eol=lf
+*.js            eol=lf
+*.json          eol=lf
+*.jsx           eol=lf
+*.md            eol=lf
+*.sh            eol=lf
+*.ts            eol=lf
+*.tsx           eol=lf
+*.txt           eol=lf
 *.xml           eol=lf

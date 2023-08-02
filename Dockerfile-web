@@ -1,8 +1,6 @@
-FROM node:18 AS builder
+FROM node:18-alpine AS builder
 
-RUN apt-get update && \
-    apt-get install -y zopfli && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk add findutils zopfli
 
 # working directory
 RUN mkdir -p /project && \
@@ -16,16 +14,13 @@ RUN yarn install --frozen-lockfile --non-interactive --no-progress && \
     yarn cache clean
 
 # do the build
-COPY --chown=node .babelrc tsconfig.json webpack.config.js /project/
-COPY --chown=node web/html /project/web/html
-COPY --chown=node web/js /project/web/js
-# XXX: workaround for https://stackoverflow.com/questions/69394632/webpack-build-failing-with-err-ossl-evp-unsupported
-RUN export NODE_OPTIONS=--openssl-legacy-provider && \
-    yarn run test && \
-    yarn run build --no-progress --no-colors
+COPY --chown=node tsconfig.json tsconfig.node.json vite.config.ts /project/
+COPY --chown=node web /project/web
+RUN yarn run test && \
+    yarn run build
 
 # offline compress static resources
-RUN find /project/web/html /project/target/webpack \
+RUN find /project/target/web-dist \
         -type f \
         -regextype posix-extended \
         -iregex '.*\.(html?|js|map|css|svg|otf|ttf|txt|json)' \
@@ -41,5 +36,4 @@ COPY web/docker/docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
 
-COPY --from=builder /project/web/html /usr/share/nginx/html
-COPY --from=builder /project/target/webpack /usr/share/nginx/html
+COPY --from=builder /project/target/web-dist /usr/share/nginx/html
