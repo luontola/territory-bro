@@ -29,7 +29,7 @@
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/data.csv "1.0.1"]
-                 [org.clojure/tools.logging "1.1.0"] ; TODO: consider switching to Timbre
+                 [org.clojure/tools.logging "1.1.0"] ; TODO: find out what logging framework we use, move to SLF4J if necessary, preferably something that logs ex-data by default (avoid Timbre, it has a bad track record of slow updates)
                  [org.flywaydb/flyway-core "7.3.0"]
                  [org.postgresql/postgresql "42.2.18"]
                  [prismatic/schema "1.1.12"]
