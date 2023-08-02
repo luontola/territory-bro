@@ -36,6 +36,7 @@
   (:import (clojure.lang ExceptionInfo)
            (java.time Duration Instant)
            (java.util UUID)
+           (org.postgresql.util PSQLException PSQLState)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 (use-fixtures :once (join-fixtures [db-fixture api-fixture]))
@@ -297,6 +298,28 @@
                                             (throw (WriteConflictException. "dummy error")))]
           (is (= {:body {:message "Conflict"}
                   :status 409
+                  :headers {}}
+                 (try
+                   (api/dispatch! conn state command)
+                   (catch ExceptionInfo e
+                     (:response (ex-data e))))))))
+
+      (testing "failed command: PostgreSQL, deadlock detected"
+        (with-redefs [dispatcher/command! (fn [& _]
+                                            (throw (PSQLException. "dummy error" PSQLState/DEADLOCK_DETECTED)))]
+          (is (= {:body {:message "Conflict"}
+                  :status 409
+                  :headers {}}
+                 (try
+                   (api/dispatch! conn state command)
+                   (catch ExceptionInfo e
+                     (:response (ex-data e))))))))
+
+      (testing "failed command: PostgreSQL, any other error"
+        (with-redefs [dispatcher/command! (fn [& _]
+                                            (throw (PSQLException. "dummy error" PSQLState/UNKNOWN_STATE)))]
+          (is (= {:body {:message "Internal Server Error"}
+                  :status 500
                   :headers {}}
                  (try
                    (api/dispatch! conn state command)

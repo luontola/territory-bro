@@ -261,14 +261,17 @@
       (catch WriteConflictException e
         (log/warn e "Write conflict:" command)
         (conflict! {:message "Conflict"}))
+      (catch PSQLException e
+        ;; TODO: consider converting to WriteConflictException inside the event store
+        (when (= db/psql-deadlock-detected (.getSQLState e))
+          (log/warn e "Deadlock detected:" command)
+          (conflict! {:message "Conflict"}))
+        (log/warn e "Database error:" command
+                  "\nErrorCode:" (.getErrorCode e)
+                  "\nSQLState:" (.getSQLState e)
+                  "\nServerErrorMessage:" (.getServerErrorMessage e))
+        (internal-server-error! {:message "Internal Server Error"}))
       (catch Throwable t
-        (when (instance? PSQLException t)
-          (let [e (cast PSQLException t)]
-            ;; TODO: find out the error code for a deadlock exception, and change the response to HTTP 409 instead of 500
-            (log/warn "Database error" (str e)
-                      "ErrorCode:" (.getErrorCode e)
-                      "SQLState:" (.getSQLState e)
-                      "ServerErrorMessage:" (.getServerErrorMessage e))))
         ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
         (log/error t (str "Command failed: "
                           (pr-str command)

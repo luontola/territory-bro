@@ -1,4 +1,4 @@
-;; Copyright © 2015-2021 Esko Luontola
+;; Copyright © 2015-2023 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -18,10 +18,10 @@
            (com.zaxxer.hikari HikariDataSource)
            (java.net URL)
            (java.nio.file Paths)
-           (java.sql Date Timestamp PreparedStatement Array)
+           (java.sql Array Date PreparedStatement Timestamp)
            (java.time Instant)
-           (org.flywaydb.core.api FlywayException)
            (org.flywaydb.core Flyway)
+           (org.flywaydb.core.api FlywayException)
            (org.postgresql.util PGobject)))
 
 (def expected-postgresql-version 13)
@@ -29,7 +29,9 @@
 
 ;; PostgreSQL error codes
 ;; https://www.postgresql.org/docs/11/errcodes-appendix.html
+;; Some are also in org.postgresql.util.PSQLState but not all, so we list them here explicitly.
 (def psql-serialization-failure "40001")
+(def psql-deadlock-detected "40P01")
 (def psql-undefined-object "42704")
 (def psql-duplicate-object "42710")
 
