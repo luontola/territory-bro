@@ -15,6 +15,7 @@ import WKT from "ol/format/WKT";
 import {makeStreetsLayer, wktToFeatures} from "./mapOptions";
 import {Congregation, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
+import minimapTerritoryUrl from "./minimap-territory.svg";
 
 type Props = {
   territory: Territory;
@@ -56,7 +57,7 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
     }),
     style: new Style({
       image: new Icon({
-        src: '/img/minimap-territory.svg',
+        src: minimapTerritoryUrl,
         imgSize: [10, 10],
         snapToPixel: true
       })

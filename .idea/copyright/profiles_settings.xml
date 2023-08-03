@@ -13,6 +13,9 @@
     <LanguageOptions name="SQL">
       <option name="fileTypeOverride" value="1" />
     </LanguageOptions>
+    <LanguageOptions name="SVG">
+      <option name="fileTypeOverride" value="1" />
+    </LanguageOptions>
     <LanguageOptions name="Shell Script">
       <option name="fileTypeOverride" value="1" />
     </LanguageOptions>
