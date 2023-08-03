@@ -1,25 +1,18 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import Control from "ol/control/Control";
 import {boundingExtent, buffer, containsCoordinate, extend, extendCoordinate, getHeight, getWidth} from "ol/extent";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faLocationArrow} from '@fortawesome/free-solid-svg-icons';
+import {createRoot} from "react-dom/client";
 
 class ShowMyLocation extends Control {
   constructor(startGeolocation: (map: any) => void) {
     super({
       element: document.createElement('div')
     });
-
-    const icon = document.createElement('i');
-    icon.setAttribute('class', 'fas fa-crosshairs');
-    // icon.setAttribute('class', 'fas fa-location-arrow');
-    // icon.setAttribute('class', 'fas fa-street-view');
-
-    const button = document.createElement('button');
-    button.setAttribute('type', 'button');
-    button.title = "Show my location";
-    button.appendChild(icon);
 
     let geolocation = null;
     const onClick = event => {
@@ -69,12 +62,16 @@ class ShowMyLocation extends Control {
         })
       }
     };
-    button.addEventListener('click', onClick, false);
 
     const element = this.element;
     element.className = 'ol-unselectable ol-control';
     element.style = 'top: 7.15em; left: .5em;'
-    element.appendChild(button);
+
+    createRoot(element).render(
+      <button type="button" title="Show my location" onClick={onClick}>
+        <FontAwesomeIcon icon={faLocationArrow}/>
+      </button>
+    );
   }
 }
 

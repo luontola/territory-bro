@@ -1,8 +1,11 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import Control from "ol/control/Control";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faRotateRight} from '@fortawesome/free-solid-svg-icons';
+import {createRoot} from "react-dom/client";
 
 class ResetZoom extends Control {
   constructor(resetZoom: (map: any, opts: {}) => void) {
@@ -10,23 +13,19 @@ class ResetZoom extends Control {
       element: document.createElement('div')
     });
 
-    const icon = document.createElement('i');
-    icon.setAttribute('class', 'fas fa-search-location');
-
-    const button = document.createElement('button');
-    button.setAttribute('type', 'button');
-    button.title = "Reset zoom";
-    button.appendChild(icon);
-
     const onClick = event => {
       event.preventDefault();
       resetZoom(super.getMap(), {duration: 500});
-    };
-    button.addEventListener('click', onClick, false);
+    }
 
     const element = this.element;
     element.className = 'ol-zoom-extent ol-unselectable ol-control';
-    element.appendChild(button);
+
+    createRoot(element).render(
+      <button type="button" title="Reset zoom" onClick={onClick}>
+        <FontAwesomeIcon icon={faRotateRight} rotation={270}/>
+      </button>
+    );
   }
 }
 

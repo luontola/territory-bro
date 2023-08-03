@@ -1,4 +1,4 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -20,8 +20,8 @@ import DragPan from "ol/interaction/DragPan";
 import MouseWheelZoom from "ol/interaction/MouseWheelZoom";
 import {platformModifierKeyOnly} from "ol/events/condition";
 import {fromLonLat} from "ol/proj";
-import ResetZoom from "./ResetZoom";
-import ShowMyLocation from "./ShowMyLocation";
+import ResetZoom from "./ResetZoom.tsx";
+import ShowMyLocation from "./ShowMyLocation.tsx";
 
 export type MapRaster = {
   id: string;
