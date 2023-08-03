@@ -45,7 +45,12 @@ Start the database
 
 Start the API backend
 
-    lein run
+    lein repl
+    (start)
+
+Restart the API backend, reloading code changes
+
+    (reset)
 
 Start the web frontend
 
@@ -57,16 +62,16 @@ The application will run at http://localhost:8080
 Run tests
 
     lein test
-    yarn run test
+    yarn test
 
 Run tests automatically on change
 
     lein autotest
-    yarn run autotest
+    yarn autotest
 
 View storybook visual tests
 
-    yarn run storybook
+    yarn storybook
 
 Upgrade dependencies
 
@@ -84,6 +89,6 @@ Produce canonical XML for better diffs
 
 ## License
 
-Copyright © 2015-2022, [Esko Luontola](http://www.luontola.fi)
+Copyright © 2015-2023, [Esko Luontola](http://www.luontola.fi)
 
 This software is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).

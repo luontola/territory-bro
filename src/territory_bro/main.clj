@@ -48,8 +48,7 @@
     (log/info component "stopped")))
 
 (defn stop-app []
-  (log-mount-states (mount/stop))
-  (shutdown-agents))
+  (log-mount-states (mount/stop)))
 
 (defn start-app []
   ;; start the public API only after the database is ready
