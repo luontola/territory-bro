@@ -53,7 +53,6 @@ FROM eclipse-temurin:17-jre-focal
 
 EXPOSE 8080
 ENV PORT=8080 \
-    NREPL_BIND=0.0.0.0 \
     DATABASE_URL="jdbc:postgresql://localhost/territorybro?user=territorybro&password=territorybro"
 
 # the user should have no write permissions, even to its home

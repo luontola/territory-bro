@@ -32,8 +32,6 @@
    :jwt-audience s/Str
    :jwt-issuer s/Str
    :now (s/pred fn?)
-   :nrepl-bind s/Str
-   :nrepl-port (s/maybe s/Int)
    :port s/Int
    :super-users #{(s/cond-pre s/Str s/Uuid)}
    :support-email s/Str})

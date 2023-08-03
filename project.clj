@@ -18,7 +18,6 @@
                  [cprop "0.1.17"]
                  [liberator "0.15.3"]
                  [luminus-immutant "0.2.5"] ; TODO: replace with ring-jetty
-                 [luminus-nrepl "0.1.7"] ; TODO: remove me, use nREPL directly or don't bundle REPL inside the app
                  [medley "1.3.0"]
                  [metosin/jsonista "0.2.7"]
                  [metosin/ring-http-response "0.9.1"]
@@ -48,7 +47,6 @@
                          [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.12.0"]
                          [commons-codec "1.15"]
                          [hikari-cp "2.13.0"]
-                         [nrepl "0.8.3"]
                          [org.clojure/java.classpath "1.0.0"]
                          [org.clojure/java.jdbc "0.7.11"]
                          [org.clojure/spec.alpha "0.2.187"]

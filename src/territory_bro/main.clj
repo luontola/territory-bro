@@ -5,7 +5,6 @@
 (ns territory-bro.main
   (:require [clojure.tools.logging :as log]
             [luminus.http-server :as httpd]
-            [luminus.repl-server :as repl]
             [mount.core :as mount]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.gis.gis-sync :as gis-sync]
@@ -25,15 +24,6 @@
                 :io-threads (* 2 (.availableProcessors (Runtime/getRuntime)))})
   :stop
   (httpd/stop http-server))
-
-(mount/defstate ^{:on-reload :noop} repl-server
-  :start
-  (when (:nrepl-port config/env)
-    (repl/start {:bind (:nrepl-bind config/env)
-                 :port (:nrepl-port config/env)}))
-  :stop
-  (when repl-server
-    (repl/stop repl-server)))
 
 (defn- migrate-application-state! []
   (let [injections {:now (:now config/env)}
