@@ -3,7 +3,6 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import "../layout/defaultStyles";
-import React from "react";
 import {storiesOf} from "@storybook/react";
 import {demoCongregation, regionKaivopuisto, regionKatajanokka, territory101} from "../testdata";
 import {mapRasters} from "../maps/mapOptions";

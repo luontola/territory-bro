@@ -4,8 +4,7 @@
 
 import "./defaultStyles";
 import styles from "./Layout.module.css";
-import * as React from "react";
-import {useEffect} from "react";
+import React, {useEffect} from "react";
 import AuthenticationPanel from "./AuthenticationPanel";
 import {getCongregationById} from "../api";
 import {NavLink as RouterNavLink, Route, Routes, useParams} from "react-router-dom";
