@@ -9,13 +9,12 @@ import VectorSource from "ol/source/Vector";
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
-import Icon from "ol/style/Icon";
+import Circle from "ol/style/Circle";
 import {fromLonLat} from "ol/proj";
 import WKT from "ol/format/WKT";
 import {makeStreetsLayer, wktToFeatures} from "./mapOptions";
 import {Congregation, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
-import minimapTerritoryUrl from "./minimap-territory.svg";
 
 type Props = {
   territory: Territory;
@@ -56,17 +55,12 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
       features: wktToFeatures(getCenterPoint(territory.location))
     }),
     style: new Style({
-      image: new Icon({
-        src: minimapTerritoryUrl,
-        imgSize: [10, 10]
+      image: new Circle({
+        radius: 3.5,
+        fill: new Fill({
+          color: 'rgba(0, 0, 0, 1.0)'
+        })
       })
-      // XXX: Circle does not yet support HiDPI, so we need to use SVG instead. See https://github.com/openlayers/openlayers/issues/1574
-      // image: new ol.style.Circle({
-      //   radius: 3.5,
-      //   fill: new ol.style.Fill({
-      //     color: 'rgba(0, 0, 0, 1.0)'
-      //   }),
-      // })
     })
   });
 
