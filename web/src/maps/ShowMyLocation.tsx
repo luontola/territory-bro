@@ -65,7 +65,8 @@ class ShowMyLocation extends Control {
 
     const element = this.element;
     element.className = 'ol-unselectable ol-control';
-    element.style = 'top: 7.15em; left: .5em;'
+    element.style.top = '7.15em';
+    element.style.left = '.5em';
 
     createRoot(element).render(
       <button type="button" title="Show my location" onClick={onClick}>
