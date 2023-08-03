@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React, {useEffect} from "react";
-import ReactDOM from "react-dom/client";
+import {createRoot} from "react-dom/client";
 import {IntlProvider} from "react-intl";
 import {language, messages} from "./intl";
 import ErrorBoundary from "react-error-boundary";
@@ -70,7 +70,7 @@ listenScrollY(scrollY => {
 document.querySelector('html')
   .setAttribute('lang', language);
 
-ReactDOM.createRoot(document.getElementById('root'))
+createRoot(document.getElementById('root'))
   .render(
     <React.StrictMode>
       <ErrorBoundary FallbackComponent={ErrorPage}>

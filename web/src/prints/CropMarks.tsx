@@ -2,12 +2,12 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import React from "react";
+import {ReactNode} from "react";
 import styles from "./CropMarks.module.css";
 import cropMarkUrl from "./crop-mark.svg";
 
 type Props = {
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 // TODO: parameterize the printout size?

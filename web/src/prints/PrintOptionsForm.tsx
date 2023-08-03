@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Field, Form, Formik} from "formik";
 import {getMessages, language as defaultLanguage, languages} from "../intl";
 import {IntlProvider} from "react-intl";

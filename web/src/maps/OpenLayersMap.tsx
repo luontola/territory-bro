@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import "ol/ol.css";
-import React from "react";
+import React, {createRef, RefObject} from "react";
 import styles from "./OpenLayersMap.module.css";
 
 type Props = {
@@ -12,11 +12,11 @@ type Props = {
 
 export default class OpenLayersMap<P extends Props> extends React.Component<P> {
 
-  elementRef: React.RefObject<HTMLDivElement>;
+  elementRef: RefObject<HTMLDivElement>;
 
   constructor(props: P) {
     super(props);
-    this.elementRef = React.createRef()
+    this.elementRef = createRef()
   }
 
   render() {

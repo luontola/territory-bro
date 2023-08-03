@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import React, {useState} from "react";
+import {useState} from "react";
 import {addUser, getCongregationById, getSettings, setUserPermissions} from "../api";
 import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import sortBy from "lodash/sortBy";

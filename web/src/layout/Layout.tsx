@@ -4,7 +4,7 @@
 
 import "./defaultStyles";
 import styles from "./Layout.module.css";
-import React, {useEffect} from "react";
+import {ReactNode, useEffect} from "react";
 import AuthenticationPanel from "./AuthenticationPanel";
 import {getCongregationById} from "../api";
 import {NavLink as RouterNavLink, Route, Routes, useParams} from "react-router-dom";
@@ -47,7 +47,7 @@ const CongregationNav = () => {
 
 type Props = {
   title?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 const Layout = ({title, children}: Props) => {
