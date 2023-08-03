@@ -1,12 +1,10 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import Cookies from "js-cookie";
 import translations from "./translations.json";
-import sortBy from "lodash/sortBy";
-import toPairs from "lodash/toPairs";
-import flatMap from "lodash/flatMap";
+import {flatMap, sortBy, toPairs} from "lodash-es";
 
 // TODO: create translations.json at build time, store the english version only in JSX tags to avoid getting out of sync
 // https://medium.freecodecamp.com/internationalization-in-react-7264738274a0

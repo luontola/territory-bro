@@ -4,9 +4,7 @@
 
 import {api} from "./util";
 import alphanumSort from "alphanum-sort";
-import sortBy from "lodash/sortBy";
-import keyBy from "lodash/keyBy";
-import findIndex from "lodash/findIndex";
+import {findIndex, keyBy, sortBy} from "lodash-es";
 import {unstable_createResource} from "@luontola/react-cache";
 import WKT from "ol/format/WKT";
 import MultiPolygon from "ol/geom/MultiPolygon";

@@ -5,7 +5,7 @@
 import {useState} from "react";
 import {addUser, getCongregationById, getSettings, setUserPermissions} from "../api";
 import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
-import sortBy from "lodash/sortBy";
+import {sortBy} from "lodash-es";
 import styles from "./UsersPage.module.css";
 import {formatApiError} from "../errorMessages";
 import {Link, useNavigate, useParams} from "react-router-dom";
