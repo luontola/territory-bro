@@ -106,7 +106,7 @@ function initRegionMap(element: HTMLDivElement, region: Region | Congregation, t
 
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {
-      streetsLayer.setSource(mapRaster.source);
+      streetsLayer.setSource(mapRaster.makeSource());
     },
     unmount() {
       map.setTarget(undefined)

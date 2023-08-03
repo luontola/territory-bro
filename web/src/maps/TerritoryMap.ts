@@ -132,7 +132,7 @@ function initTerritoryMap(element: HTMLDivElement, territory: Territory, printou
 
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {
-      streetsLayer.setSource(mapRaster.source);
+      streetsLayer.setSource(mapRaster.makeSource());
     },
     unmount() {
       map.setTarget(undefined)

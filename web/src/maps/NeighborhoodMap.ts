@@ -88,7 +88,7 @@ function initNeighborhoodMap(element: HTMLDivElement, territory: Territory): any
 
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {
-      streetsLayer.setSource(mapRaster.source);
+      streetsLayer.setSource(mapRaster.makeSource());
     },
     unmount() {
       map.setTarget(undefined)

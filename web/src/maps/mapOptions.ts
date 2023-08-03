@@ -5,7 +5,7 @@
 import Feature from "ol/Feature";
 import {defaults as controlDefaults} from "ol/control";
 import Attribution from "ol/control/Attribution";
-import Source from "ol/source/Source";
+import TileSource from "ol/source/Tile";
 import OSM, {ATTRIBUTION as OSM_ATTRIBUTION} from "ol/source/OSM";
 import View from "ol/View";
 import XYZ from "ol/source/XYZ";
@@ -27,12 +27,12 @@ import {createXYZ} from "ol/tilegrid";
 export type MapRaster = {
   id: string;
   name: string;
-  source: Source;
+  makeSource: () => TileSource;
 };
 export const mapRasters: Array<MapRaster> = [{
   id: 'osmhd',
   name: "World - OpenStreetMap",
-  source: new XYZ({
+  makeSource: () => new XYZ({
     url: 'https://{a-c}.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
     tileSize: [512, 512],
     tileGrid: createXYZ({tileSize: [256, 256]}),
@@ -41,11 +41,11 @@ export const mapRasters: Array<MapRaster> = [{
 }, {
   id: 'osm',
   name: "World - OpenStreetMap (backup server, low DPI)",
-  source: new OSM()
+  makeSource: () => new OSM()
 }, {
   id: 'mmlTaustakartta',
   name: "Finland - Maanmittauslaitoksen taustakarttasarja",
-  source: new XYZ({
+  makeSource: () => new XYZ({
     url: 'https://tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
     tileSize: [256, 256],
     tileGrid: createXYZ({tileSize: [128, 128]}),
@@ -54,7 +54,7 @@ export const mapRasters: Array<MapRaster> = [{
 }, {
   id: 'vantaaKaupunkikartta',
   name: "Finland - Vantaan kaupunkikartta",
-  source: new TileWMS({
+  makeSource: () => new TileWMS({
     url: 'https://gis.vantaa.fi/geoserver/wms',
     params: {'LAYERS': 'taustakartta:kaupunkikartta', 'TILED': true},
     serverType: 'geoserver',
@@ -78,7 +78,7 @@ export function wktToFeatures(wkt: string | null | undefined): Array<Feature> {
 
 export function makeStreetsLayer() {
   return new TileLayer({
-    source: mapRasters[0].source
+    source: mapRasters[0].makeSource()
   });
 }
 
