@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: luminus-nrepl:0.1.7">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/luminus-nrepl/luminus-nrepl/0.1.7/luminus-nrepl-0.1.7.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

@@ -84,7 +84,6 @@
     <orderEntry type="library" name="Leiningen: lambdaisland/tools.namespace:0.0-237" level="project" />
     <orderEntry type="library" name="Leiningen: liberator:0.15.3" level="project" />
     <orderEntry type="library" name="Leiningen: luminus-immutant:0.2.5" level="project" />
-    <orderEntry type="library" name="Leiningen: luminus-nrepl:0.1.7" level="project" />
     <orderEntry type="library" name="Leiningen: medley:1.3.0" level="project" />
     <orderEntry type="library" name="Leiningen: meta-merge:1.0.0" level="project" />
     <orderEntry type="library" name="Leiningen: metosin/jsonista:0.2.7" level="project" />
