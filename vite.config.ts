@@ -12,6 +12,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: "../target/web-dist",
+    emptyOutDir: true,
     sourcemap: true,
   },
   server: {
