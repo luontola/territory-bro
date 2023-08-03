@@ -23,7 +23,7 @@ class ResetZoom extends Control {
 
     createRoot(element).render(
       <button type="button" title="Reset zoom" onClick={onClick}>
-        <FontAwesomeIcon icon={faRotateRight} rotation={270}/>
+        <FontAwesomeIcon icon={faRotateRight} rotation={270} style={{verticalAlign: "text-bottom"}}/>
       </button>
     );
   }
