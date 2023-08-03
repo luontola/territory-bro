@@ -10,7 +10,7 @@ import OSM, {ATTRIBUTION as OSM_ATTRIBUTION} from "ol/source/OSM";
 import View from "ol/View";
 import XYZ from "ol/source/XYZ";
 import WKT from "ol/format/WKT";
-import Tile from "ol/layer/Tile";
+import TileLayer from "ol/layer/Tile";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
 import Text from "ol/style/Text";
@@ -77,7 +77,7 @@ export function wktToFeatures(wkt: string | null | undefined): Array<Feature> {
 }
 
 export function makeStreetsLayer() {
-  return new Tile({
+  return new TileLayer({
     source: mapRasters[0].source
   });
 }
