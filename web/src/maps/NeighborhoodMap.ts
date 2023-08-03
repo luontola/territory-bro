@@ -29,12 +29,14 @@ type Props = {
 export default class NeighborhoodMap extends OpenLayersMap<Props> {
 
   map: any;
+  prevMapRaster: any;
 
   componentDidMount() {
     const {
       territory,
       mapRaster
     } = this.props;
+    this.prevMapRaster = mapRaster;
     this.map = initNeighborhoodMap(this.elementRef.current, territory);
     this.map.setStreetsLayerRaster(mapRaster);
   }
@@ -43,7 +45,10 @@ export default class NeighborhoodMap extends OpenLayersMap<Props> {
     const {
       mapRaster
     } = this.props;
-    this.map.setStreetsLayerRaster(mapRaster);
+    if (this.prevMapRaster !== mapRaster) {
+      this.prevMapRaster = mapRaster;
+      this.map.setStreetsLayerRaster(mapRaster);
+    }
   }
 
   componentWillUnmount() {

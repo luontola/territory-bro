@@ -33,6 +33,7 @@ type Props = {
 export default class TerritoryMap extends OpenLayersMap<Props> {
 
   map: any;
+  prevMapRaster: any;
 
   componentDidMount() {
     const {
@@ -40,6 +41,7 @@ export default class TerritoryMap extends OpenLayersMap<Props> {
       mapRaster,
       printout,
     } = this.props;
+    this.prevMapRaster = mapRaster;
     this.map = initTerritoryMap(this.elementRef.current, territory, printout);
     this.map.setStreetsLayerRaster(mapRaster);
   }
@@ -48,7 +50,10 @@ export default class TerritoryMap extends OpenLayersMap<Props> {
     const {
       mapRaster
     } = this.props;
-    this.map.setStreetsLayerRaster(mapRaster);
+    if (this.prevMapRaster !== mapRaster) {
+      this.prevMapRaster = mapRaster;
+      this.map.setStreetsLayerRaster(mapRaster);
+    }
   }
 
   componentWillUnmount() {
