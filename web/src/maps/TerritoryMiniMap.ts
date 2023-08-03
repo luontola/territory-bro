@@ -58,8 +58,7 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
     style: new Style({
       image: new Icon({
         src: minimapTerritoryUrl,
-        imgSize: [10, 10],
-        snapToPixel: true
+        imgSize: [10, 10]
       })
       // XXX: Circle does not yet support HiDPI, so we need to use SVG instead. See https://github.com/openlayers/openlayers/issues/1574
       // image: new ol.style.Circle({
@@ -67,7 +66,6 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
       //   fill: new ol.style.Fill({
       //     color: 'rgba(0, 0, 0, 1.0)'
       //   }),
-      //   snapToPixel: true,
       // })
     })
   });
