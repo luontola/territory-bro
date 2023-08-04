@@ -10,6 +10,7 @@ import CropMarks from "./CropMarks";
 import styles from "./TerritoryCard.module.css";
 import PrintDateNotice from "./PrintDateNotice";
 import TerritoryQrCode from "./TerritoryQrCode";
+import {memo} from "react";
 
 const TerritoryCard = ({
                          territory,
@@ -65,4 +66,4 @@ const TerritoryCard = ({
   </CropMarks>;
 };
 
-export default TerritoryCard;
+export default memo(TerritoryCard);

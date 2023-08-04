@@ -6,6 +6,7 @@ import {getCongregationById} from "../api";
 import NeighborhoodMap from "../maps/NeighborhoodMap";
 import CropMarks from "./CropMarks";
 import styles from "./NeighborhoodCard.module.css";
+import {memo} from "react";
 
 const NeighborhoodCard = ({
                             territory,
@@ -23,4 +24,4 @@ const NeighborhoodCard = ({
   </CropMarks>;
 };
 
-export default NeighborhoodCard;
+export default memo(NeighborhoodCard);

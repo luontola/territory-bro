@@ -6,6 +6,7 @@ import {getCongregationById} from "../api";
 import RegionMap from "../maps/RegionMap";
 import A4PrintFrame from "./A4PrintFrame";
 import styles from "./RegionPrintout.module.css";
+import {memo} from "react";
 
 const RegionPrintout = ({
                           region,
@@ -26,4 +27,4 @@ const RegionPrintout = ({
   </A4PrintFrame>;
 };
 
-export default RegionPrintout;
+export default memo(RegionPrintout);

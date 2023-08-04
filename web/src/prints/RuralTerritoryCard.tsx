@@ -10,6 +10,7 @@ import styles from "./RuralTerritoryCard.module.css";
 import A5PrintFrame from "./A5PrintFrame";
 import PrintDateNotice from "./PrintDateNotice";
 import TerritoryQrCode from "./TerritoryQrCode";
+import {memo} from "react";
 
 const RuralTerritoryCard = ({
                               territory,
@@ -57,4 +58,4 @@ const RuralTerritoryCard = ({
   </A5PrintFrame>;
 };
 
-export default RuralTerritoryCard;
+export default memo(RuralTerritoryCard);

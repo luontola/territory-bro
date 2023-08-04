@@ -5,6 +5,7 @@
 import {getCongregationById} from "../api";
 import styles from "./QrCodeOnly.module.css";
 import TerritoryQrCode from "./TerritoryQrCode";
+import {memo} from "react";
 
 const QrCodeOnly = ({
                       territory,
@@ -32,4 +33,4 @@ const QrCodeOnly = ({
   </div>;
 };
 
-export default QrCodeOnly;
+export default memo(QrCodeOnly);

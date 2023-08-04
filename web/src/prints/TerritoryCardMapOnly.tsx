@@ -10,6 +10,7 @@ import CropMarks from "./CropMarks";
 import styles from "./TerritoryCardMapOnly.module.css";
 import PrintDateNotice from "./PrintDateNotice";
 import TerritoryQrCode from "./TerritoryQrCode";
+import {memo} from "react";
 
 // TODO: deduplicate with TerritoryCard
 
@@ -63,4 +64,4 @@ const TerritoryCardMapOnly = ({
   </CropMarks>;
 };
 
-export default TerritoryCardMapOnly;
+export default memo(TerritoryCardMapOnly);
