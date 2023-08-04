@@ -7,6 +7,7 @@ import {boundingExtent, buffer, containsCoordinate, extend, extendCoordinate, ge
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faLocationArrow} from '@fortawesome/free-solid-svg-icons';
 import {createRoot} from "react-dom/client";
+import style from "./ShowMyLocation.module.css";
 
 class ShowMyLocation extends Control {
   constructor(startGeolocation: (map: any) => void) {
@@ -64,9 +65,7 @@ class ShowMyLocation extends Control {
     };
 
     const element = this.element;
-    element.className = 'ol-unselectable ol-control';
-    element.style.top = '7.15em';
-    element.style.left = '.5em';
+    element.className = `ol-unselectable ol-control ${style.showMyLocation}`;
 
     createRoot(element).render(
       <button type="button" title="Show my location" onClick={onClick}>

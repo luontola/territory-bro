@@ -1,0 +1,8 @@
+.showMyLocation {
+    top: 7.375em;
+    left: .5em;
+}
+
+:global(.ol-touch) .showMyLocation {
+    top: 8.375em;
+}
