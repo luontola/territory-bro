@@ -10,6 +10,7 @@ import styles from "./RuralTerritoryCard.module.css";
 import A5PrintFrame from "./A5PrintFrame";
 import PrintDateNotice from "./PrintDateNotice";
 import TerritoryQrCode from "./TerritoryQrCode";
+import {findMapRasterById} from "../maps/mapOptions.ts";
 import {memo} from "react";
 
 const RuralTerritoryCard = ({
@@ -18,10 +19,12 @@ const RuralTerritoryCard = ({
                               congregation,
                               congregationId,
                               qrCodeUrl,
-                              mapRaster
+                              mapRaster,
+                              mapRasterId
                             }) => {
   congregation = congregation || getCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
+  mapRaster = mapRaster || findMapRasterById(mapRasterId);
   return <A5PrintFrame>
     <div className={styles.root}>
 

@@ -56,7 +56,7 @@ interface FormValues {
   territories: [string];
 }
 
-const Printables = ({values, template, congregationId, mapRaster}) => {
+const Printables = ({template, language, mapRasterId, congregationId, territoryIds, regionIds}) => {
   const [qrCodeUrls, setQrCodeUrls] = useState({})
   const [qrCodeError, setQrCodeError] = useState(null)
   const congregation = getCongregationById(congregationId);
@@ -64,7 +64,7 @@ const Printables = ({values, template, congregationId, mapRaster}) => {
   useEffect(() => {
     setQrCodeError(null)
     if (congregation.permissions.shareTerritoryLink) {
-      generateQrCodes(congregationId, values.territories)
+      generateQrCodes(congregationId, territoryIds)
         .then((qrCodes) => {
           const m = {}
           qrCodes.forEach(qrCode => {
@@ -77,30 +77,30 @@ const Printables = ({values, template, congregationId, mapRaster}) => {
           setQrCodeError(reason)
         });
     }
-  }, [values.territories])
+  }, [territoryIds])
 
   return (
-    <IntlProvider locale={values.language} messages={getMessages(values.language)}>
-      <div lang={values.language}>
+    <IntlProvider locale={language} messages={getMessages(language)}>
+      <div lang={language}>
         {qrCodeError &&
           <div style={{color: "#f00", backgroundColor: "#fee", padding: "1px 1em", border: "1px solid #f00"}}>
             <p>Failed to generate QR codes: {qrCodeError.message}</p>
             <p>Refresh the page and try again.</p>
           </div>
         }
-        {template.type === 'territory' && values.territories.map(territoryId => {
+        {template.type === 'territory' && territoryIds.map(territoryId => {
           const qrCodeUrl = qrCodeUrls[territoryId]
           return <template.component key={territoryId}
                                      territoryId={territoryId}
                                      congregationId={congregationId}
                                      qrCodeUrl={qrCodeUrl}
-                                     mapRaster={mapRaster}/>;
+                                     mapRasterId={mapRasterId}/>;
         })}
-        {template.type === 'region' && values.regions.map(regionId => {
+        {template.type === 'region' && regionIds.map(regionId => {
           return <template.component key={regionId}
                                      regionId={regionId}
                                      congregationId={congregationId}
-                                     mapRaster={mapRaster}/>;
+                                     mapRasterId={mapRasterId}/>;
         })}
       </div>
     </IntlProvider>
@@ -132,8 +132,6 @@ const PrintOptionsForm = ({congregationId}) => {
         setSavedForm(values);
       }, [values]);
       const template = templates.find(t => t.id === values.template);
-      const mapRasterId = values.mapRaster;
-      const mapRaster = availableMapRasters.find(r => r.id === mapRasterId);
       return <>
         <div className="no-print">
           <Form className="pure-form pure-form-stacked">
@@ -198,7 +196,12 @@ const PrintOptionsForm = ({congregationId}) => {
           </Form>
         </div>
 
-        <Printables values={values} template={template} congregationId={congregationId} mapRaster={mapRaster}/>
+        <Printables template={template}
+                    language={values.language}
+                    mapRasterId={values.mapRaster}
+                    congregationId={congregationId}
+                    territoryIds={values.territories}
+                    regionIds={values.regions}/>
       </>;
     }}
   </Formik>;

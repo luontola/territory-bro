@@ -6,6 +6,7 @@ import {getCongregationById} from "../api";
 import RegionMap from "../maps/RegionMap";
 import A4PrintFrame from "./A4PrintFrame";
 import styles from "./RegionPrintout.module.css";
+import {findMapRasterById} from "../maps/mapOptions.ts";
 import {memo} from "react";
 
 const RegionPrintout = ({
@@ -13,10 +14,12 @@ const RegionPrintout = ({
                           regionId,
                           congregation,
                           congregationId,
-                          mapRaster
+                          mapRaster,
+                          mapRasterId
                         }) => {
   congregation = congregation || getCongregationById(congregationId);
   region = region || (regionId === congregationId ? congregation : congregation.getRegionById(regionId));
+  mapRaster = mapRaster || findMapRasterById(mapRasterId);
   return <A4PrintFrame>
     <div className={styles.root}>
       <div className={styles.name}>{region.name}</div>

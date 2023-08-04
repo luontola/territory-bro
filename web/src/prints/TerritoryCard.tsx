@@ -10,6 +10,7 @@ import CropMarks from "./CropMarks";
 import styles from "./TerritoryCard.module.css";
 import PrintDateNotice from "./PrintDateNotice";
 import TerritoryQrCode from "./TerritoryQrCode";
+import {findMapRasterById} from "../maps/mapOptions.ts";
 import {memo} from "react";
 
 const TerritoryCard = ({
@@ -18,10 +19,12 @@ const TerritoryCard = ({
                          congregation,
                          congregationId,
                          qrCodeUrl,
-                         mapRaster
+                         mapRaster,
+                         mapRasterId
                        }) => {
   congregation = congregation || getCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
+  mapRaster = mapRaster || findMapRasterById(mapRasterId);
   return <CropMarks>
     <div className={styles.root}>
 

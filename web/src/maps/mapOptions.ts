@@ -62,6 +62,15 @@ export const mapRasters: Array<MapRaster> = [{
   })
 }];
 
+export function findMapRasterById(mapRasterId: string) {
+  for (const mapRaster of mapRasters) {
+    if (mapRaster.id === mapRasterId) {
+      return mapRaster;
+    }
+  }
+  return null;
+}
+
 export function wktToFeature(wkt: string): Feature {
   const feature = new WKT().readFeature(wkt);
   feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');

@@ -6,6 +6,7 @@ import {getCongregationById} from "../api";
 import NeighborhoodMap from "../maps/NeighborhoodMap";
 import CropMarks from "./CropMarks";
 import styles from "./NeighborhoodCard.module.css";
+import {findMapRasterById} from "../maps/mapOptions.ts";
 import {memo} from "react";
 
 const NeighborhoodCard = ({
@@ -13,10 +14,12 @@ const NeighborhoodCard = ({
                             territoryId,
                             congregation,
                             congregationId,
-                            mapRaster
+                            mapRaster,
+                            mapRasterId
                           }) => {
   congregation = congregation || getCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
+  mapRaster = mapRaster || findMapRasterById(mapRasterId);
   return <CropMarks>
     <div className={styles.root}>
       <NeighborhoodMap territory={territory} mapRaster={mapRaster} printout={true}/>
