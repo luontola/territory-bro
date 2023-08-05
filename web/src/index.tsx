@@ -6,27 +6,12 @@ import React, {useEffect} from "react";
 import {createRoot} from "react-dom/client";
 import {IntlProvider} from "react-intl";
 import {language, messages} from "./intl";
-import ErrorBoundary from "react-error-boundary";
-import HomePage from "./pages/HomePage";
-import CongregationPage from "./pages/CongregationPage";
-import RegistrationPage from "./pages/RegistrationPage";
-import LoginCallbackPage from "./pages/LoginCallbackPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import Layout from "./layout/Layout";
-import PrintoutPage from "./pages/PrintoutPage";
-import ErrorPage from "./pages/ErrorPage";
-import HelpPage from "./pages/HelpPage";
 import {logPageView} from "./analytics";
-import SettingsPage from "./pages/SettingsPage";
-import UsersPage from "./pages/UsersPage";
-import JoinPage from "./pages/JoinPage";
-import TerritoryListPage from "./pages/TerritoryListPage";
-import TerritoryPage from "./pages/TerritoryPage";
-import OpenSharePage from "./pages/OpenSharePage";
 import {getPageState, setPageState} from "./util";
-import {BrowserRouter, Route, Routes, useLocation} from "react-router-dom";
+import {BrowserRouter, useLocation} from "react-router-dom";
 import {QueryClientProvider} from "@tanstack/react-query";
 import {queryClient} from "./api.ts";
+import App from "./App.tsx";
 
 function NavigationListener({children}) {
   const location = useLocation()
@@ -69,39 +54,17 @@ listenScrollY(scrollY => {
   setPageState('scrollY', scrollY);
 })
 
-document.querySelector('html')
+document.querySelector('html')!
   .setAttribute('lang', language);
 
-createRoot(document.getElementById('root'))
+createRoot(document.getElementById('root')!)
   .render(
     <React.StrictMode>
       <IntlProvider locale={language} messages={messages}>
         <BrowserRouter>
           <NavigationListener>
             <QueryClientProvider client={queryClient}>
-              <ErrorBoundary FallbackComponent={ErrorPage}>
-                <React.Suspense fallback={<p>Loading....</p>}>
-                  <Layout>
-                    <Routes>
-                      <Route path="/" element={<HomePage/>}/>
-                      <Route path="/join" element={<JoinPage/>}/>
-                      <Route path="/login-callback" element={<LoginCallbackPage/>}/>
-                      <Route path="/register" element={<RegistrationPage/>}/>
-                      <Route path="/help" element={<HelpPage/>}/>
-                      <Route path="/share/:shareKey/*" element={<OpenSharePage/>}/>
-
-                      <Route path="/congregation/:congregationId" element={<CongregationPage/>}/>
-                      <Route path="/congregation/:congregationId/territories" element={<TerritoryListPage/>}/>
-                      <Route path="/congregation/:congregationId/territories/:territoryId" element={<TerritoryPage/>}/>
-                      <Route path="/congregation/:congregationId/printouts" element={<PrintoutPage/>}/>
-                      <Route path="/congregation/:congregationId/settings" element={<SettingsPage/>}/>
-                      <Route path="/congregation/:congregationId/users" element={<UsersPage/>}/>
-
-                      <Route path="*" element={<NotFoundPage/>}/>
-                    </Routes>
-                  </Layout>
-                </React.Suspense>
-              </ErrorBoundary>
+              <App/>
             </QueryClientProvider>
           </NavigationListener>
         </BrowserRouter>
