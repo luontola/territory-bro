@@ -190,7 +190,6 @@
 
 (defn list-congregations [request]
   (auth/with-user-from-session request
-    (require-logged-in!)
     (let [state (state-for-request request)]
       (ok (->> (congregation/get-my-congregations state (current-user-id))
                (map (fn [congregation]

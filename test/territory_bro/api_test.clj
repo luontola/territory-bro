@@ -426,22 +426,17 @@
 
 (deftest authorization-test
   (testing "before login"
-    (let [response (-> (request :get "/api/congregations")
-                       app)]
+    (let [response (try-create-congregation! nil "test1")]
       (is (unauthorized? response))))
 
   (let [session (login! app)]
     (testing "after login"
-      (let [response (-> (request :get "/api/congregations")
-                         (merge session)
-                         app)]
+      (let [response (try-create-congregation! session "test2")]
         (is (ok? response))))
 
     (testing "after logout"
       (logout! app session)
-      (let [response (-> (request :get "/api/congregations")
-                         (merge session)
-                         app)]
+      (let [response (try-create-congregation! session "test3")]
         (is (unauthorized? response))))))
 
 (deftest super-user-test
@@ -502,16 +497,20 @@
 
 (deftest list-congregations-test
   (let [session (login! app)
+        cong-id (create-congregation! session "foo")
         response (-> (request :get "/api/congregations")
                      (merge session)
                      app)]
     (is (ok? response))
-    (is (sequential? (:body response))))
+    (is (sequential? (:body response)))
+    (is (contains? (set (:body response))
+                   {:id (str cong-id), :name "foo"})))
 
-  (testing "requires login"
+  (testing "doesn't require login"
     (let [response (-> (request :get "/api/congregations")
                        app)]
-      (is (unauthorized? response)))))
+      (is (ok? response))
+      (is (= [] (:body response))))))
 
 (deftest get-congregation-test
   (let [session (login! app)

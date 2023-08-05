@@ -42,7 +42,7 @@ const JoinButton = () => <Link to="/join" className="pure-button">Join an Existi
 
 const HomePage = () => {
   const settings = getSettings();
-  const congregations = settings.user ? getCongregations() : [];
+  const congregations = getCongregations();
   return <>
     <h1>Territory Bro</h1>
 
