@@ -6,7 +6,7 @@ import "./defaultStyles";
 import styles from "./Layout.module.css";
 import {ReactNode, useEffect} from "react";
 import AuthenticationPanel from "./AuthenticationPanel";
-import {getCongregationById} from "../api";
+import {useCongregationById} from "../api";
 import {NavLink as RouterNavLink, Route, Routes, useParams} from "react-router-dom";
 
 const NavLink = (props) => (
@@ -28,7 +28,7 @@ const HomeNav = ({}) => {
 
 const CongregationNav = () => {
   const {congregationId} = useParams()
-  const congregation = getCongregationById(congregationId);
+  const congregation = useCongregationById(congregationId);
   return (
     <ul className={styles.nav}>
       <li><NavLink to="/">Home</NavLink></li>

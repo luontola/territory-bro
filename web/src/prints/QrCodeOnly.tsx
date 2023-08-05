@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {getCongregationById} from "../api";
+import {useCongregationById} from "../api";
 import styles from "./QrCodeOnly.module.css";
 import TerritoryQrCode from "./TerritoryQrCode";
 import {memo} from "react";
@@ -14,7 +14,7 @@ const QrCodeOnly = ({
                       congregationId,
                       qrCodeUrl,
                     }) => {
-  congregation = congregation || getCongregationById(congregationId);
+  congregation = congregation || useCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
   return <div className={styles.cropArea}>
     <div className={styles.root}>

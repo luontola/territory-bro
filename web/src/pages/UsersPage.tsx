@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {useState} from "react";
-import {addUser, getCongregationById, getSettings, setUserPermissions} from "../api";
+import {addUser, setUserPermissions, useCongregationById, useSettings} from "../api";
 import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import {sortBy} from "lodash-es";
 import styles from "./UsersPage.module.css";
@@ -23,7 +23,7 @@ const IdentityProvider = ({user}) => {
 
 const RemoveUserButton = ({congregation, user}) => {
   const navigate = useNavigate();
-  const settings = getSettings();
+  const settings = useSettings();
   const myUserId = settings.user.id;
   const isCurrentUser = user.id === myUserId;
   return <button type="button" className={`pure-button ${styles.removeUser}`} onClick={async () => {
@@ -55,8 +55,8 @@ interface FormValues {
 const UsersPage = () => {
   const {congregationId} = useParams()
   const [newUser, setNewUser] = useState(null);
-  const congregation = getCongregationById(congregationId);
-  const settings = getSettings();
+  const congregation = useCongregationById(congregationId);
+  const settings = useSettings();
   const myUserId = settings.user.id;
   const joinPageUrl = `${location.protocol}//${location.host}/join`;
   // show the new user first for better visibility

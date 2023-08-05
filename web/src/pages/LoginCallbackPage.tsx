@@ -3,14 +3,14 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {useEffect} from "react";
-import {getSettings} from "../api";
+import {useSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
 import {sanitizeReturnPath} from "../authenticationUtil";
 import {useNavigate} from "react-router-dom";
 
 const LoginCallbackPage = () => {
   const navigate = useNavigate();
-  const settings = getSettings();
+  const settings = useSettings();
   const {
     domain,
     clientId

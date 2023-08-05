@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {getCongregationById, saveCongregationSettings} from "../api";
+import {saveCongregationSettings, useCongregationById} from "../api";
 import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import InfoBox from "../maps/InfoBox";
 import style from "./SettingsPage.module.css";
@@ -16,7 +16,7 @@ interface FormValues {
 const SettingsPage = ({}) => {
   const {congregationId} = useParams()
   const navigate = useNavigate();
-  const congregation = getCongregationById(congregationId);
+  const congregation = useCongregationById(congregationId);
   return <Formik
     initialValues={{
       congregationName: congregation.name,

@@ -5,10 +5,10 @@
 import LoginButton from "./LoginButton";
 import LogoutButton from "./LogoutButton";
 import DevLoginButton from "./DevLoginButton";
-import {getSettings} from "../api";
+import {useSettings} from "../api";
 
 let AuthenticationPanel = () => {
-  const settings = getSettings();
+  const settings = useSettings();
   const dev = settings.dev;
   if (settings.user) {
     const fullName = settings.user.name;

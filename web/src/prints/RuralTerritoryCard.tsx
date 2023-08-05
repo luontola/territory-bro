@@ -5,7 +5,7 @@
 import {FormattedMessage} from "react-intl";
 import TerritoryMap from "../maps/TerritoryMap";
 import TerritoryMiniMap from "../maps/TerritoryMiniMap";
-import {getCongregationById} from "../api";
+import {useCongregationById} from "../api";
 import styles from "./RuralTerritoryCard.module.css";
 import A5PrintFrame from "./A5PrintFrame";
 import PrintDateNotice from "./PrintDateNotice";
@@ -22,7 +22,7 @@ const RuralTerritoryCard = ({
                               mapRaster,
                               mapRasterId
                             }) => {
-  congregation = congregation || getCongregationById(congregationId);
+  congregation = congregation || useCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
   mapRaster = mapRaster || findMapRasterById(mapRasterId);
   return <A5PrintFrame>

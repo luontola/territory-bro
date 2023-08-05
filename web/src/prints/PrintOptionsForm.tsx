@@ -7,7 +7,7 @@ import {Field, Form, Formik} from "formik";
 import {getMessages, language as defaultLanguage, languages} from "../intl";
 import {IntlProvider} from "react-intl";
 import {mapRasters} from "../maps/mapOptions";
-import {generateQrCodes, getCongregationById} from "../api";
+import {useCongregationById, useGeneratedQrCodes} from "../api";
 import TerritoryCard from "./TerritoryCard";
 import NeighborhoodCard from "./NeighborhoodCard";
 import RuralTerritoryCard from "./RuralTerritoryCard";
@@ -56,12 +56,12 @@ interface FormValues {
   territories: [string];
 }
 
-function getQrCodeUrls(congregationId, territoryIds) {
-  const congregation = getCongregationById(congregationId);
-  if (!congregation.permissions.shareTerritoryLink) {
-    return {qrCodeUrls: {}}
-  }
-  const {data: qrCodes, error: qrCodeError} = generateQrCodes(congregationId, territoryIds);
+function useQrCodeUrls(congregationId, territoryIds) {
+  const congregation = useCongregationById(congregationId);
+  const {
+    data: qrCodes,
+    error: qrCodeError
+  } = useGeneratedQrCodes(congregationId, territoryIds, !!congregation.permissions.shareTerritoryLink);
   const qrCodeUrls = {};
   (qrCodes || []).forEach(qrCode => {
     qrCodeUrls[qrCode.territory] = qrCode.url
@@ -70,7 +70,7 @@ function getQrCodeUrls(congregationId, territoryIds) {
 }
 
 const Printables = ({template, language, mapRasterId, congregationId, territoryIds, regionIds}) => {
-  const {qrCodeUrls, qrCodeError} = getQrCodeUrls(congregationId, territoryIds);
+  const {qrCodeUrls, qrCodeError} = useQrCodeUrls(congregationId, territoryIds);
 
   return (
     <IntlProvider locale={language} messages={getMessages(language)}>
@@ -102,8 +102,8 @@ const Printables = ({template, language, mapRasterId, congregationId, territoryI
 
 const PrintOptionsForm = ({congregationId}) => {
   const [savedForm, setSavedForm] = usePageState('savedForm', null);
+  const congregation = useCongregationById(congregationId);
   const availableMapRasters = mapRasters;
-  const congregation = getCongregationById(congregationId);
   const availableTerritories = congregation.territories;
   const availableRegions = [{id: congregation.id, name: congregation.name}, ...congregation.regions];
   let initialValues = {

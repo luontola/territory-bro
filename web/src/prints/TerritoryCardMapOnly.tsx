@@ -5,7 +5,7 @@
 import {FormattedMessage} from "react-intl";
 import TerritoryMap from "../maps/TerritoryMap";
 import TerritoryMiniMap from "../maps/TerritoryMiniMap";
-import {getCongregationById} from "../api";
+import {useCongregationById} from "../api";
 import CropMarks from "./CropMarks";
 import styles from "./TerritoryCardMapOnly.module.css";
 import PrintDateNotice from "./PrintDateNotice";
@@ -24,7 +24,7 @@ const TerritoryCardMapOnly = ({
                                 mapRaster,
                                 mapRasterId
                               }) => {
-  congregation = congregation || getCongregationById(congregationId);
+  congregation = congregation || useCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
   mapRaster = mapRaster || findMapRasterById(mapRasterId);
   return <CropMarks>

@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {getCongregations, getSettings} from "../api";
+import {useCongregations, useSettings} from "../api";
 import LoginButton from "../layout/LoginButton";
 import {Link} from "react-router-dom";
 
@@ -41,8 +41,8 @@ const RegisterButton = () => <Link to="/register" className="pure-button">Regist
 const JoinButton = () => <Link to="/join" className="pure-button">Join an Existing Congregation</Link>;
 
 const HomePage = () => {
-  const settings = getSettings();
-  const congregations = getCongregations();
+  const settings = useSettings();
+  const congregations = useCongregations();
   return <>
     <h1>Territory Bro</h1>
 

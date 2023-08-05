@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {getCongregationById} from "../api";
+import {useCongregationById} from "../api";
 import NeighborhoodMap from "../maps/NeighborhoodMap";
 import CropMarks from "./CropMarks";
 import styles from "./NeighborhoodCard.module.css";
@@ -17,7 +17,7 @@ const NeighborhoodCard = ({
                             mapRaster,
                             mapRasterId
                           }) => {
-  congregation = congregation || getCongregationById(congregationId);
+  congregation = congregation || useCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
   mapRaster = mapRaster || findMapRasterById(mapRasterId);
   return <CropMarks>

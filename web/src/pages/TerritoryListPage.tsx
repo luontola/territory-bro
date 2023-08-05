@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {getCongregationById, getSettings, Territory} from "../api";
+import {Territory, useCongregationById, useSettings} from "../api";
 import styles from "./TerritoryListPage.module.css";
 import InfoBox from "../maps/InfoBox";
 import TerritoryListMap from "../maps/TerritoryListMap";
@@ -10,7 +10,7 @@ import {usePageState} from "../util";
 import {Link, useNavigate, useParams} from "react-router-dom";
 
 function LimitedVisibilityHelp() {
-  const settings = getSettings();
+  const settings = useSettings();
   return (
     <InfoBox title={"Why so few territories?"}>
       <p>Only those territories which have been shared with you are currently shown.
@@ -64,7 +64,7 @@ function matchesSearch(territory: Territory, search: string): boolean {
 const TerritoryListPage = () => {
   const {congregationId} = useParams()
   const navigate = useNavigate();
-  const congregation = getCongregationById(congregationId);
+  const congregation = useCongregationById(congregationId);
   const [search, setSearch] = usePageState('search', '');
   const visibleTerritories = congregation.territories.filter(territory => matchesSearch(territory, search));
   return <>

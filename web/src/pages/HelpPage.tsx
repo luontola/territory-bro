@@ -2,12 +2,10 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {getSettings} from "../api";
+import {useSettings} from "../api";
 
 const HelpPage = () => {
-  const {
-    supportEmail
-  } = getSettings();
+  const {supportEmail} = useSettings();
   return <>
     <h1>Help</h1>
     <p>Territory Bro is an open source project developed by Esko Luontola.</p>

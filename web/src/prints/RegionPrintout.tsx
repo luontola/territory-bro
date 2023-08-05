@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {getCongregationById} from "../api";
+import {useCongregationById} from "../api";
 import RegionMap from "../maps/RegionMap";
 import A4PrintFrame from "./A4PrintFrame";
 import styles from "./RegionPrintout.module.css";
@@ -17,7 +17,7 @@ const RegionPrintout = ({
                           mapRaster,
                           mapRasterId
                         }) => {
-  congregation = congregation || getCongregationById(congregationId);
+  congregation = congregation || useCongregationById(congregationId);
   region = region || (regionId === congregationId ? congregation : congregation.getRegionById(regionId));
   mapRaster = mapRaster || findMapRasterById(mapRasterId);
   return <A4PrintFrame>

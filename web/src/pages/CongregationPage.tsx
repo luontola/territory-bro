@@ -2,13 +2,13 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {getCongregationById} from "../api";
+import {useCongregationById} from "../api";
 import {Link, useParams} from "react-router-dom";
 import InfoBox from "../maps/InfoBox";
 
 const CongregationPage = () => {
   const {congregationId} = useParams()
-  const congregation = getCongregationById(congregationId);
+  const congregation = useCongregationById(congregationId);
   return <>
     <h1>{congregation.name}</h1>
     {congregationId === "demo" &&

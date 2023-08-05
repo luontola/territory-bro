@@ -2,19 +2,9 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {getSettings} from "../api";
+import {useSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
 import {formatError, logFatalException} from "../analytics";
-
-function login() {
-  const settings = getSettings();
-  const {
-    domain,
-    clientId
-  } = settings.auth0;
-  const auth = buildAuthenticator(domain, clientId);
-  auth.login();
-}
 
 export function axiosHttpStatus(error) {
   if (error.isAxiosError) {
@@ -23,14 +13,20 @@ export function axiosHttpStatus(error) {
 }
 
 const ErrorPage = ({componentStack, error}) => {
+  const settings = useSettings();
   const httpStatus = axiosHttpStatus(error);
   if (httpStatus === 401) {
     console.log("Logging in the user in response to HTTP 401 Unauthorized")
-    login();
+    const {
+      domain,
+      clientId
+    } = settings.auth0;
+    const auth = buildAuthenticator(domain, clientId);
+    auth.login();
     return <p>Logging in...</p>;
   }
+  const description = `${formatError(error)}\n\nThe error is located at:${componentStack}`;
   let title;
-  let description = `${formatError(error)}\n\nThe error is located at:${componentStack}`;
   if (httpStatus === 403) {
     title = "Not authorized 🛑";
   } else {

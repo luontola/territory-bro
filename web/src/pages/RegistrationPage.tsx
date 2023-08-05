@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
-import {createCongregation, getSettings} from "../api";
+import {createCongregation, useSettings} from "../api";
 import {buildAuthenticator} from "../authentication";
 import {useNavigate} from "react-router-dom";
 
@@ -13,7 +13,7 @@ interface FormValues {
 
 const RegistrationPage = () => {
   const navigate = useNavigate();
-  const settings = getSettings();
+  const settings = useSettings();
   if (!settings.user) {
     const {
       domain,

@@ -50,7 +50,7 @@ export type Settings = {
   user?: User;
 };
 
-export function getSettings(): Settings {
+export function useSettings(): Settings {
   const {data} = useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
@@ -154,7 +154,7 @@ function mergeMultiPolygons(multiPolygons: Array<string>): string | null {
   return wkt.writeGeometry(merged);
 }
 
-export function getCongregations(): Array<Congregation> {
+export function useCongregations(): Array<Congregation> {
   const {data} = useQuery({
     queryKey: ['congregations'],
     queryFn: async () => {
@@ -165,7 +165,7 @@ export function getCongregations(): Array<Congregation> {
   return data as Array<Congregation>;
 }
 
-export function getCongregationById(congregationId: string): Congregation {
+export function useCongregationById(congregationId: string): Congregation {
   const {data} = useQuery({
     queryKey: ['congregation', congregationId],
     queryFn: async () => {
@@ -244,7 +244,7 @@ export type QrCodeShare = {
   url: string;
 };
 
-export function generateQrCodes(congregationId: string, territoryIds: Array<string>): UseQueryResult<Array<QrCodeShare>, unknown> {
+export function useGeneratedQrCodes(congregationId: string, territoryIds: Array<string>, enabled = true): UseQueryResult<Array<QrCodeShare>, unknown> {
   return useQuery({
     queryKey: ['congregation', congregationId, territoryIds],
     queryFn: async () => {
@@ -252,6 +252,7 @@ export function generateQrCodes(congregationId: string, territoryIds: Array<stri
       return response.data.qrCodes;
     },
     suspense: false,
+    enabled,
   })
 }
 

@@ -3,10 +3,10 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {buildAuthenticator} from "../authentication";
-import {getSettings} from "../api";
+import {useSettings} from "../api";
 
-let LoginButton = () => {
-  const settings = getSettings();
+const LoginButton = () => {
+  const settings = useSettings();
   const {
     domain,
     clientId
