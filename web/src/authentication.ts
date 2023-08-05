@@ -18,6 +18,8 @@ export function auth0Authenticator(settings: Settings) {
     return new Promise((resolve, reject) => {
       webAuth.parseHash(function (err, authResult) {
         if (err) {
+          // XXX: with React StrictMode, this function is called twice and the second time the err is
+          //      {error: 'invalid_token', errorDescription: '`state` does not match.'}
           console.warn("Authentication failed", err);
           reject(new Error("Authentication failed"));
         } else {
