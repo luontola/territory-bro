@@ -4,11 +4,6 @@
 
 import {devLogin} from "../api";
 
-async function handleClick() {
-  await devLogin();
-  document.location.reload();
-}
-
-const DevLoginButton = () => <button type="button" className="pure-button" onClick={handleClick}>Dev Login</button>;
+const DevLoginButton = () => <button type="button" className="pure-button" onClick={devLogin}>Dev Login</button>;
 
 export default DevLoginButton;

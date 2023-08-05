@@ -63,14 +63,20 @@ export function getSettings(): Settings {
 
 export async function loginWithIdToken(idToken: string) {
   await api.post('/api/login', {idToken});
+  await queryClient.invalidateQueries();
 }
 
 export async function devLogin() {
   await api.post('/api/dev-login', {sub: "developer", name: "Developer", email: "developer@example.com"});
+  await queryClient.invalidateQueries();
 }
 
 export async function logout() {
   await api.post('/api/logout');
+  // Full page reload instead of invalidateQueries() to avoid HTTP 401 responses,
+  // if React Query decides to re-fetch the currently shown congregation, which
+  // could trigger a new login right after logging out.
+  window.location.href = '/';
 }
 
 function sortUsers(users: Array<User>): Array<User> {

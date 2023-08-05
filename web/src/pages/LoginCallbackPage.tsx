@@ -19,14 +19,10 @@ const LoginCallbackPage = () => {
 
   useEffect(() => {
     (async () => {
+      await auth.handleAuthentication();
       const params = new URLSearchParams(document.location.search.substring(1));
       const returnPath = sanitizeReturnPath(params.get('return') || '/');
-      if (settings.user) {
-        await navigate(returnPath);
-      } else {
-        await auth.handleAuthentication();
-        window.location.href = returnPath;
-      }
+      navigate(returnPath);
     })();
   });
 

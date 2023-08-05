@@ -4,11 +4,6 @@
 
 import {logout} from "../api";
 
-const LogoutButton = () => <button type="button" className="pure-button" onClick={handleClick}>Logout</button>;
-
-async function handleClick() {
-  await logout();
-  window.location.href = '/';
-}
+const LogoutButton = () => <button type="button" className="pure-button" onClick={logout}>Logout</button>;
 
 export default LogoutButton;
