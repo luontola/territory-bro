@@ -7,21 +7,37 @@ import {useSettings} from "../api";
 import {auth0Authenticator} from "../authentication";
 import {sanitizeReturnPath} from "../authenticationUtil";
 import {useNavigate} from "react-router-dom";
+import {useMutation} from "@tanstack/react-query";
 
 const LoginCallbackPage = () => {
   const navigate = useNavigate();
   const settings = useSettings();
 
-  useEffect(() => {
-    (async () => {
+  const auth = useMutation({
+    mutationFn: async () => {
       await auth0Authenticator(settings).handleAuthentication();
       const params = new URLSearchParams(document.location.search.substring(1));
-      const returnPath = sanitizeReturnPath(params.get('return') || '/');
+      return sanitizeReturnPath(params.get('return') || '/');
+    },
+    onSuccess: returnPath => {
       navigate(returnPath);
-    })();
-  });
+    }
+  })
 
-  return <p>Logging you in...</p>;
+  useEffect(auth.mutate, []);
+
+  if (auth.error) {
+    const {error, errorDescription} = auth.error;
+    if (error && errorDescription) {
+      return <p>Login failed: {error}, {errorDescription}</p>;
+    } else {
+      return <p>Login failed: {JSON.stringify(auth.error)}</p>;
+    }
+  }
+  if (auth.isLoading) {
+    return <p>Logging you in...</p>;
+  }
+  return <p>Login OK.</p>;
 };
 
 export default LoginCallbackPage;

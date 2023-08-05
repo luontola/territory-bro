@@ -21,7 +21,7 @@ export function auth0Authenticator(settings: Settings) {
           // XXX: with React StrictMode, this function is called twice and the second time the err is
           //      {error: 'invalid_token', errorDescription: '`state` does not match.'}
           console.warn("Authentication failed", err);
-          reject(new Error("Authentication failed"));
+          reject(err);
         } else {
           console.info("Authentication succeeded", authResult);
           resolve(authResult);
