@@ -8,12 +8,21 @@ import {findIndex, keyBy, sortBy} from "lodash-es";
 import WKT from "ol/format/WKT";
 import MultiPolygon from "ol/geom/MultiPolygon";
 import {QueryClient, useQuery, UseQueryResult} from '@tanstack/react-query'
+import {axiosHttpStatus} from "./pages/ErrorPage.tsx";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       suspense: true,
       staleTime: Infinity,
+      retry: (failureCount, error) => {
+        const httpStatus = axiosHttpStatus(error);
+        if (httpStatus === 401 || httpStatus === 403) {
+          // let ErrorPage handle authentication issues - retrying won't help
+          return false;
+        }
+        return failureCount < 3;
+      }
     },
   },
 });

@@ -16,9 +16,16 @@ function login() {
   auth.login();
 }
 
+export function axiosHttpStatus(error) {
+  if (error.isAxiosError) {
+    return error.response?.status
+  }
+}
+
 const ErrorPage = ({componentStack, error}) => {
-  const httpStatus = error.isAxiosError && error.response && error.response.status;
+  const httpStatus = axiosHttpStatus(error);
   if (httpStatus === 401) {
+    console.log("Logging in the user in response to HTTP 401 Unauthorized")
     login();
     return <p>Logging in...</p>;
   }
