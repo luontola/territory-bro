@@ -4,22 +4,17 @@
 
 import {useEffect} from "react";
 import {useSettings} from "../api";
-import {buildAuthenticator} from "../authentication";
+import {auth0Authenticator} from "../authentication";
 import {sanitizeReturnPath} from "../authenticationUtil";
 import {useNavigate} from "react-router-dom";
 
 const LoginCallbackPage = () => {
   const navigate = useNavigate();
   const settings = useSettings();
-  const {
-    domain,
-    clientId
-  } = settings.auth0;
-  const auth = buildAuthenticator(domain, clientId);
 
   useEffect(() => {
     (async () => {
-      await auth.handleAuthentication();
+      await auth0Authenticator(settings).handleAuthentication();
       const params = new URLSearchParams(document.location.search.substring(1));
       const returnPath = sanitizeReturnPath(params.get('return') || '/');
       navigate(returnPath);

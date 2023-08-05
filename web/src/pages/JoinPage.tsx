@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {useSettings} from "../api";
-import {buildAuthenticator} from "../authentication";
+import {auth0Authenticator} from "../authentication";
 import ClipboardJS from "clipboard";
 
 new ClipboardJS('#copy-your-user-id');
@@ -12,12 +12,7 @@ const JoinPage = () => {
   const settings = useSettings();
   // TODO: deduplicate with registration page
   if (!settings.user) {
-    const {
-      domain,
-      clientId
-    } = settings.auth0;
-    const auth = buildAuthenticator(domain, clientId);
-    auth.login();
+    auth0Authenticator(settings).login();
     return <p>Please wait, you will be redirected...</p>;
   }
   const userId = settings.user.id;

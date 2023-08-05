@@ -2,18 +2,13 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {buildAuthenticator} from "../authentication";
+import {auth0Authenticator} from "../authentication";
 import {useSettings} from "../api";
 
 const LoginButton = () => {
   const settings = useSettings();
-  const {
-    domain,
-    clientId
-  } = settings.auth0;
   return <button type="button" className="pure-button" onClick={() => {
-    const auth = buildAuthenticator(domain, clientId);
-    auth.login();
+    auth0Authenticator(settings).login();
   }}>Login</button>;
 };
 

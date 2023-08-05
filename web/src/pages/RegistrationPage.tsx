@@ -4,7 +4,7 @@
 
 import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import {createCongregation, useSettings} from "../api";
-import {buildAuthenticator} from "../authentication";
+import {auth0Authenticator} from "../authentication";
 import {useNavigate} from "react-router-dom";
 
 interface FormValues {
@@ -15,12 +15,7 @@ const RegistrationPage = () => {
   const navigate = useNavigate();
   const settings = useSettings();
   if (!settings.user) {
-    const {
-      domain,
-      clientId
-    } = settings.auth0;
-    const auth = buildAuthenticator(domain, clientId);
-    auth.login();
+    auth0Authenticator(settings).login();
     return <p>Please wait, you will be redirected...</p>;
   }
 

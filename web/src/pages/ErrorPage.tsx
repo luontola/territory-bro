@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {useSettings} from "../api";
-import {buildAuthenticator} from "../authentication";
+import {auth0Authenticator} from "../authentication";
 import {formatError, logFatalException} from "../analytics";
 
 export function axiosHttpStatus(error) {
@@ -17,12 +17,7 @@ const ErrorPage = ({componentStack, error}) => {
   const httpStatus = axiosHttpStatus(error);
   if (httpStatus === 401) {
     console.log("Logging in the user in response to HTTP 401 Unauthorized")
-    const {
-      domain,
-      clientId
-    } = settings.auth0;
-    const auth = buildAuthenticator(domain, clientId);
-    auth.login();
+    auth0Authenticator(settings).login();
     return <p>Logging in...</p>;
   }
   const description = `${formatError(error)}\n\nThe error is located at:${componentStack}`;
