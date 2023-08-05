@@ -21,7 +21,7 @@ const IdentityProvider = ({user}) => {
   return sub;
 };
 
-const RemoveUserButton = ({congregation, user, onRemove}) => {
+const RemoveUserButton = ({congregation, user}) => {
   const navigate = useNavigate();
   const settings = getSettings();
   const myUserId = settings.user.id;
@@ -38,7 +38,6 @@ const RemoveUserButton = ({congregation, user, onRemove}) => {
         // cannot view this congregation anymore, so redirect to front page
         navigate('/');
       }
-      onRemove?.();
     } catch (error) {
       alert(formatApiError(error));
     }
@@ -46,13 +45,6 @@ const RemoveUserButton = ({congregation, user, onRemove}) => {
     Remove User
   </button>;
 };
-
-function useForceUpdate() {
-  const [version, setVersion] = useState(1);
-  return () => {
-    setVersion(version + 1);
-  };
-}
 
 const UUID_PATTERN = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
@@ -63,7 +55,6 @@ interface FormValues {
 const UsersPage = () => {
   const {congregationId} = useParams()
   const [newUser, setNewUser] = useState(null);
-  const forceUpdate = useForceUpdate(); // to trigger re-rendering with the updated user list
   const congregation = getCongregationById(congregationId);
   const settings = getSettings();
   const myUserId = settings.user.id;
@@ -144,7 +135,7 @@ const UsersPage = () => {
           <td>{user.name || user.id} {user.id === myUserId && <em>(You)</em>}</td>
           <td>{user.email} {(user.email && !user.emailVerified) && <em>(Unverified)</em>}</td>
           <td><IdentityProvider user={user}/></td>
-          <td><RemoveUserButton congregation={congregation} user={user} onRemove={forceUpdate}/></td>
+          <td><RemoveUserButton congregation={congregation} user={user}/></td>
         </tr>)}
         </tbody>
       </table>
