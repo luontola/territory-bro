@@ -172,9 +172,18 @@ export async function addUser(congregationId: string, userId: string) {
   await queryClient.invalidateQueries({queryKey: ['congregation', congregationId]});
 }
 
-export async function setUserPermissions(congregationId: string, userId: string, permissions: Array<string>) {
+export async function setUserPermissions(congregationId: string, userId: string, permissions: Array<string>, isCurrentUser: boolean) {
   await api.post(`/api/congregation/${congregationId}/set-user-permissions`, {userId, permissions});
-  await queryClient.invalidateQueries({queryKey: ['congregation', congregationId]});
+  const congregationRefreshed = queryClient.invalidateQueries({queryKey: ['congregation', congregationId]});
+  if (isCurrentUser) {
+    // The user may have removed themselves from the congregation. This affects the list of all congregations.
+    // More importantly, they will no longer be able to read the current congregation, so refreshing it will fail.
+    // We must not await for the congregation to be refreshed, because React Query would only retry it multiple times
+    // before giving up, which is slow.
+    await queryClient.invalidateQueries({queryKey: ['congregations']});
+  } else {
+    await congregationRefreshed;
+  }
 }
 
 export async function saveCongregationSettings(congregationId: string, congregationName: string, loansCsvUrl) {

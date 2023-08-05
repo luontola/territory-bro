@@ -25,15 +25,16 @@ const RemoveUserButton = ({congregation, user, onRemove}) => {
   const navigate = useNavigate();
   const settings = getSettings();
   const myUserId = settings.user.id;
+  const isCurrentUser = user.id === myUserId;
   return <button type="button" className={`pure-button ${styles.removeUser}`} onClick={async () => {
     try {
-      if (user.id === myUserId) {
+      if (isCurrentUser) {
         if (!confirm(`Are you sure you want to REMOVE YOURSELF from ${congregation.name}? You will not be able to access this congregation anymore.`)) {
           return;
         }
       }
-      await setUserPermissions(congregation.id, user.id, []);
-      if (user.id === myUserId) {
+      await setUserPermissions(congregation.id, user.id, [], isCurrentUser);
+      if (isCurrentUser) {
         // cannot view this congregation anymore, so redirect to front page
         await navigate('/');
       }
