@@ -25,7 +25,6 @@ const LoginCallbackPage = () => {
         await navigate(returnPath);
       } else {
         await auth.handleAuthentication();
-        // XXX: full page reload because clearing the cache doesn't re-render navbar
         window.location.href = returnPath;
       }
     })();

@@ -51,17 +51,14 @@ export function getSettings(): Settings {
 
 export async function loginWithIdToken(idToken: string) {
   await api.post('/api/login', {idToken});
-  refreshSettings();
 }
 
 export async function devLogin() {
   await api.post('/api/dev-login', {sub: "developer", name: "Developer", email: "developer@example.com"});
-  refreshSettings();
 }
 
 export async function logout() {
   await api.post('/api/logout');
-  refreshSettings();
 }
 
 function sortUsers(users: Array<User>): Array<User> {
