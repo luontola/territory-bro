@@ -75,11 +75,11 @@ document.querySelector('html')
 createRoot(document.getElementById('root'))
   .render(
     <React.StrictMode>
-      <ErrorBoundary FallbackComponent={ErrorPage}>
-        <IntlProvider locale={language} messages={messages}>
-          <BrowserRouter>
-            <NavigationListener>
-              <QueryClientProvider client={queryClient}>
+      <IntlProvider locale={language} messages={messages}>
+        <BrowserRouter>
+          <NavigationListener>
+            <QueryClientProvider client={queryClient}>
+              <ErrorBoundary FallbackComponent={ErrorPage}>
                 <React.Suspense fallback={<p>Loading....</p>}>
                   <Layout>
                     <Routes>
@@ -101,10 +101,10 @@ createRoot(document.getElementById('root'))
                     </Routes>
                   </Layout>
                 </React.Suspense>
-              </QueryClientProvider>
-            </NavigationListener>
-          </BrowserRouter>
-        </IntlProvider>
-      </ErrorBoundary>
+              </ErrorBoundary>
+            </QueryClientProvider>
+          </NavigationListener>
+        </BrowserRouter>
+      </IntlProvider>
     </React.StrictMode>
   );
