@@ -29,7 +29,7 @@ export type MapRaster = {
   name: string;
   makeSource: () => TileSource;
 };
-export const mapRasters: Array<MapRaster> = [{
+export const mapRasters: MapRaster[] = [{
   id: 'osmhd',
   name: "World - OpenStreetMap",
   makeSource: () => new XYZ({
@@ -77,7 +77,7 @@ export function wktToFeature(wkt: string): Feature {
   return feature;
 }
 
-export function wktToFeatures(wkt: string | null | undefined): Array<Feature> {
+export function wktToFeatures(wkt: string | null | undefined): Feature[] {
   if (wkt) {
     return [wktToFeature(wkt)];
   } else {

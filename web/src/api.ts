@@ -79,7 +79,7 @@ export async function logout() {
   window.location.href = '/';
 }
 
-function sortUsers(users: Array<User>): Array<User> {
+function sortUsers(users: User[]): User[] {
   return sortBy(users, [u => (u.name || '').toLowerCase(), 'id']);
 }
 
@@ -94,16 +94,16 @@ export type Congregation = {
   };
   loansCsvUrl?: string;
   location: string;
-  congregationBoundaries: Array<Boundary>;
-  territories: Array<Territory>;
+  congregationBoundaries: Boundary[];
+  territories: Territory[];
   getTerritoryById: (id: string) => Territory;
-  regions: Array<Region>;
+  regions: Region[];
   getRegionById: (id: string) => Region;
-  cardMinimapViewports: Array<Viewport>;
-  users: Array<User>;
+  cardMinimapViewports: Viewport[];
+  users: User[];
 };
 
-function sortCongregations(congregations: Array<Congregation>): Array<Congregation> {
+function sortCongregations(congregations: Congregation[]): Congregation[] {
   return sortBy(congregations, c => c.name.toLowerCase());
 }
 
@@ -130,7 +130,7 @@ export function enrichCongregation(congregation): Congregation {
   return congregation;
 }
 
-function getEnclosing(innerWkt: string, enclosingCandidateWkts: Array<string>): string | null {
+function getEnclosing(innerWkt: string, enclosingCandidateWkts: string[]): string | null {
   const wkt = new WKT();
   // TODO: sort by overlapping area instead of center point
   const centerPoint = wkt.readFeature(innerWkt).getGeometry().getInteriorPoints().getPoint(0);
@@ -145,7 +145,7 @@ function getEnclosing(innerWkt: string, enclosingCandidateWkts: Array<string>): 
   return result;
 }
 
-function mergeMultiPolygons(multiPolygons: Array<string>): string | null {
+function mergeMultiPolygons(multiPolygons: string[]): string | null {
   if (multiPolygons.length === 0) {
     return null;
   }
@@ -154,7 +154,7 @@ function mergeMultiPolygons(multiPolygons: Array<string>): string | null {
   return wkt.writeGeometry(merged);
 }
 
-export function useCongregations(): Array<Congregation> {
+export function useCongregations(): Congregation[] {
   const {data} = useQuery({
     queryKey: ['congregations'],
     queryFn: async () => {
@@ -162,7 +162,7 @@ export function useCongregations(): Array<Congregation> {
       return sortCongregations(response.data);
     }
   })
-  return data as Array<Congregation>;
+  return data as Congregation[];
 }
 
 export function useCongregationById(congregationId: string): Congregation {
@@ -187,7 +187,7 @@ export async function addUser(congregationId: string, userId: string) {
   await queryClient.invalidateQueries({queryKey: ['congregation', congregationId]});
 }
 
-export async function setUserPermissions(congregationId: string, userId: string, permissions: Array<string>, isCurrentUser: boolean) {
+export async function setUserPermissions(congregationId: string, userId: string, permissions: string[], isCurrentUser: boolean) {
   await api.post(`/api/congregation/${congregationId}/set-user-permissions`, {userId, permissions});
   const congregationRefreshed = queryClient.invalidateQueries({queryKey: ['congregation', congregationId]});
   if (isCurrentUser) {
@@ -223,8 +223,8 @@ export type Territory = {
   enclosingMinimapViewport?: string;
 };
 
-function sortTerritories(territories: Array<Territory>): Array<Territory> {
-  const numbers: Array<string> = alphanumSort(territories.map(t => t.number));
+function sortTerritories(territories: Territory[]): Territory[] {
+  const numbers: string[] = alphanumSort(territories.map(t => t.number));
   return sortBy(territories, t => findIndex(numbers, n => n === t.number));
 }
 
@@ -244,7 +244,7 @@ export type QrCodeShare = {
   url: string;
 };
 
-export function useGeneratedQrCodes(congregationId: string, territoryIds: Array<string>, enabled = true): UseQueryResult<Array<QrCodeShare>, unknown> {
+export function useGeneratedQrCodes(congregationId: string, territoryIds: string[], enabled = true): UseQueryResult<QrCodeShare[], Error> {
   return useQuery({
     queryKey: ['congregation', congregationId, territoryIds],
     queryFn: async () => {
@@ -264,7 +264,7 @@ export type Region = {
   location: string;
 };
 
-function sortRegions(regions: Array<Region>): Array<Region> {
+function sortRegions(regions: Region[]): Region[] {
   return sortBy(regions, (r: Region) => r.name.toLowerCase());
 }
 

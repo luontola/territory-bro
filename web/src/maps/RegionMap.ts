@@ -23,7 +23,7 @@ import OpenLayersMap from "./OpenLayersMap";
 
 type Props = {
   region: Region | Congregation;
-  territories: Array<Territory>;
+  territories: Territory[];
   mapRaster: MapRaster;
   printout: boolean; // TODO: this should be always true and not needed here
 };
@@ -59,7 +59,7 @@ export default class RegionMap extends OpenLayersMap<Props> {
   }
 }
 
-function initRegionMap(element: HTMLDivElement, region: Region | Congregation, territories: Array<Territory>): any {
+function initRegionMap(element: HTMLDivElement, region: Region | Congregation, territories: Territory[]): any {
   const regionLayer = new VectorLayer({
     source: new VectorSource({
       features: wktToFeatures(region.location)

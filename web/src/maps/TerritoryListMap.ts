@@ -25,7 +25,7 @@ import {getPageState, setPageState} from "../util";
 
 type Props = {
   congregation: Congregation;
-  territories: Array<Territory>;
+  territories: Territory[];
   onClick: (string) => void;
 };
 
@@ -82,7 +82,7 @@ function loanableTerritoryFill(loaned, staleness) {
 
 function initMap(element: HTMLDivElement,
                  congregation: Congregation,
-                 territories: Array<Territory>,
+                 territories: Territory[],
                  onClick: (string) => void): any {
   const congregationLayer = new VectorLayer({
     source: new VectorSource({
@@ -178,7 +178,7 @@ function initMap(element: HTMLDivElement,
   });
 
   return {
-    updateTerritories(territories: Array<Territory>): void {
+    updateTerritories(territories: Territory[]): void {
       setTerritories(territories);
       resetZoom(map, {duration: 300});
     },
