@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import {Field, Form, Formik} from "formik";
 import {getMessages, language as defaultLanguage, languages} from "../intl";
 import {IntlProvider} from "react-intl";
@@ -56,28 +56,21 @@ interface FormValues {
   territories: [string];
 }
 
-const Printables = ({template, language, mapRasterId, congregationId, territoryIds, regionIds}) => {
-  const [qrCodeUrls, setQrCodeUrls] = useState({})
-  const [qrCodeError, setQrCodeError] = useState(null)
+function getQrCodeUrls(congregationId, territoryIds) {
   const congregation = getCongregationById(congregationId);
+  if (!congregation.permissions.shareTerritoryLink) {
+    return {qrCodeUrls: {}}
+  }
+  const {data: qrCodes, error: qrCodeError} = generateQrCodes(congregationId, territoryIds);
+  const qrCodeUrls = {};
+  (qrCodes || []).forEach(qrCode => {
+    qrCodeUrls[qrCode.territory] = qrCode.url
+  });
+  return {qrCodeUrls, qrCodeError};
+}
 
-  useEffect(() => {
-    setQrCodeError(null)
-    if (congregation.permissions.shareTerritoryLink) {
-      generateQrCodes(congregationId, territoryIds)
-        .then((qrCodes) => {
-          const m = {}
-          qrCodes.forEach(qrCode => {
-            m[qrCode.territory] = qrCode.url
-          })
-          setQrCodeUrls(m)
-        })
-        .catch(reason => {
-          console.error("Failed to generate QR codes:", reason)
-          setQrCodeError(reason)
-        });
-    }
-  }, [territoryIds])
+const Printables = ({template, language, mapRasterId, congregationId, territoryIds, regionIds}) => {
+  const {qrCodeUrls, qrCodeError} = getQrCodeUrls(congregationId, territoryIds);
 
   return (
     <IntlProvider locale={language} messages={getMessages(language)}>

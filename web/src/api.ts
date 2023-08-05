@@ -5,9 +5,18 @@
 import {api} from "./util";
 import alphanumSort from "alphanum-sort";
 import {findIndex, keyBy, sortBy} from "lodash-es";
-import {unstable_createResource} from "@luontola/react-cache";
 import WKT from "ol/format/WKT";
 import MultiPolygon from "ol/geom/MultiPolygon";
+import {QueryClient, useQuery, UseQueryResult} from '@tanstack/react-query'
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      suspense: true,
+      staleTime: Infinity,
+    },
+  },
+});
 
 // ====== Settings & Authentication ======
 
@@ -32,21 +41,15 @@ export type Settings = {
   user?: User;
 };
 
-let SettingsCache;
-
-export function refreshSettings() {
-  console.info("Reset settings cache");
-  SettingsCache = unstable_createResource(async () => {
-    console.info("Fetch settings");
-    const response = await api.get('/api/settings');
-    return response.data;
-  });
-}
-
-refreshSettings();
-
 export function getSettings(): Settings {
-  return SettingsCache.read();
+  const {data} = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const response = await api.get('/api/settings');
+      return response.data;
+    }
+  });
+  return data;
 }
 
 export async function loginWithIdToken(idToken: string) {
@@ -84,23 +87,6 @@ export type Congregation = {
   cardMinimapViewports: Array<Viewport>;
   users: Array<User>;
 };
-
-let CongregationsCache;
-let CongregationsByIdCache;
-
-function refreshCongregations() {
-  console.info("Reset congregations cache");
-  CongregationsCache = unstable_createResource(async () => {
-    console.info("Fetch congregations");
-    const response = await api.get('/api/congregations');
-    return sortCongregations(response.data);
-  });
-  CongregationsByIdCache = unstable_createResource(async congregationId => {
-    console.info(`Fetch congregation ${congregationId}`);
-    const response = await api.get(`/api/congregation/${congregationId}`);
-    return enrichCongregation(response.data);
-  });
-}
 
 function sortCongregations(congregations: Array<Congregation>): Array<Congregation> {
   return sortBy(congregations, c => c.name.toLowerCase());
@@ -153,35 +139,48 @@ function mergeMultiPolygons(multiPolygons: Array<string>): string | null {
   return wkt.writeGeometry(merged);
 }
 
-refreshCongregations();
-
 export function getCongregations(): Array<Congregation> {
-  return CongregationsCache.read();
+  const {data} = useQuery({
+    queryKey: ['congregations'],
+    queryFn: async () => {
+      const response = await api.get('/api/congregations');
+      return sortCongregations(response.data);
+    }
+  })
+  return data as Array<Congregation>;
 }
 
 export function getCongregationById(congregationId: string): Congregation {
-  return CongregationsByIdCache.read(congregationId);
+  const {data} = useQuery({
+    queryKey: ['congregation', congregationId],
+    queryFn: async () => {
+      const response = await api.get(`/api/congregation/${congregationId}`);
+      return enrichCongregation(response.data);
+    }
+  })
+  return data as Congregation;
 }
 
 export async function createCongregation(name: string) {
   const response = await api.post('/api/congregations', {name});
-  refreshCongregations();
+  await queryClient.invalidateQueries({queryKey: ['congregations']});
   return response.data.id;
 }
 
 export async function addUser(congregationId: string, userId: string) {
   await api.post(`/api/congregation/${congregationId}/add-user`, {userId});
-  refreshCongregations();
+  await queryClient.invalidateQueries({queryKey: ['congregation', congregationId]});
 }
 
 export async function setUserPermissions(congregationId: string, userId: string, permissions: Array<string>) {
   await api.post(`/api/congregation/${congregationId}/set-user-permissions`, {userId, permissions});
-  refreshCongregations();
+  await queryClient.invalidateQueries({queryKey: ['congregation', congregationId]});
 }
 
 export async function saveCongregationSettings(congregationId: string, congregationName: string, loansCsvUrl) {
   await api.post(`/api/congregation/${congregationId}/settings`, {congregationName, loansCsvUrl});
-  refreshCongregations();
+  await queryClient.invalidateQueries({queryKey: ['congregation', congregationId]});
+  await queryClient.invalidateQueries({queryKey: ['congregations']}); // in case congregation name changed
 }
 
 
@@ -215,9 +214,21 @@ export async function openShare(shareKey: string) {
   return response.data;
 }
 
-export async function generateQrCodes(congregationId: string, territoryIds: Array<string>) {
-  const response = await api.post(`/api/congregation/${congregationId}/generate-qr-codes`, {territories: territoryIds})
-  return response.data.qrCodes;
+export type QrCodeShare = {
+  territory: string;
+  key: string;
+  url: string;
+};
+
+export function generateQrCodes(congregationId: string, territoryIds: Array<string>): UseQueryResult<Array<QrCodeShare>, unknown> {
+  return useQuery({
+    queryKey: ['congregation', congregationId, territoryIds],
+    queryFn: async () => {
+      const response = await api.post(`/api/congregation/${congregationId}/generate-qr-codes`, {territories: territoryIds})
+      return response.data.qrCodes;
+    },
+    suspense: false,
+  })
 }
 
 // ====== Regions ======

@@ -25,6 +25,8 @@ import TerritoryPage from "./pages/TerritoryPage";
 import OpenSharePage from "./pages/OpenSharePage";
 import {getPageState, setPageState} from "./util";
 import {BrowserRouter, Route, Routes, useLocation} from "react-router-dom";
+import {QueryClientProvider} from "@tanstack/react-query";
+import {queryClient} from "./api.ts";
 
 function NavigationListener({children}) {
   const location = useLocation()
@@ -77,27 +79,29 @@ createRoot(document.getElementById('root'))
         <IntlProvider locale={language} messages={messages}>
           <BrowserRouter>
             <NavigationListener>
-              <React.Suspense fallback={<p>Loading....</p>}>
-                <Layout>
-                  <Routes>
-                    <Route path="/" element={<HomePage/>}/>
-                    <Route path="/join" element={<JoinPage/>}/>
-                    <Route path="/login-callback" element={<LoginCallbackPage/>}/>
-                    <Route path="/register" element={<RegistrationPage/>}/>
-                    <Route path="/help" element={<HelpPage/>}/>
-                    <Route path="/share/:shareKey/*" element={<OpenSharePage/>}/>
+              <QueryClientProvider client={queryClient}>
+                <React.Suspense fallback={<p>Loading....</p>}>
+                  <Layout>
+                    <Routes>
+                      <Route path="/" element={<HomePage/>}/>
+                      <Route path="/join" element={<JoinPage/>}/>
+                      <Route path="/login-callback" element={<LoginCallbackPage/>}/>
+                      <Route path="/register" element={<RegistrationPage/>}/>
+                      <Route path="/help" element={<HelpPage/>}/>
+                      <Route path="/share/:shareKey/*" element={<OpenSharePage/>}/>
 
-                    <Route path="/congregation/:congregationId" element={<CongregationPage/>}/>
-                    <Route path="/congregation/:congregationId/territories" element={<TerritoryListPage/>}/>
-                    <Route path="/congregation/:congregationId/territories/:territoryId" element={<TerritoryPage/>}/>
-                    <Route path="/congregation/:congregationId/printouts" element={<PrintoutPage/>}/>
-                    <Route path="/congregation/:congregationId/settings" element={<SettingsPage/>}/>
-                    <Route path="/congregation/:congregationId/users" element={<UsersPage/>}/>
+                      <Route path="/congregation/:congregationId" element={<CongregationPage/>}/>
+                      <Route path="/congregation/:congregationId/territories" element={<TerritoryListPage/>}/>
+                      <Route path="/congregation/:congregationId/territories/:territoryId" element={<TerritoryPage/>}/>
+                      <Route path="/congregation/:congregationId/printouts" element={<PrintoutPage/>}/>
+                      <Route path="/congregation/:congregationId/settings" element={<SettingsPage/>}/>
+                      <Route path="/congregation/:congregationId/users" element={<UsersPage/>}/>
 
-                    <Route path="*" element={<NotFoundPage/>}/>
-                  </Routes>
-                </Layout>
-              </React.Suspense>
+                      <Route path="*" element={<NotFoundPage/>}/>
+                    </Routes>
+                  </Layout>
+                </React.Suspense>
+              </QueryClientProvider>
             </NavigationListener>
           </BrowserRouter>
         </IntlProvider>
