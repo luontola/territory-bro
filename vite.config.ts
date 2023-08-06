@@ -4,12 +4,19 @@
 
 import {defineConfig} from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import i18nextLoader from 'vite-plugin-i18next-loader'
 
 // https://vitejs.dev/config/
 // https://vitest.dev/config/
 export default defineConfig({
   root: "web",
-  plugins: [react()],
+  plugins: [
+    react(),
+    i18nextLoader({
+      paths: ['./web/src/locales'],
+      namespaceResolution: 'basename',
+    })
+  ],
   build: {
     outDir: "../target/web-dist",
     emptyOutDir: true,
