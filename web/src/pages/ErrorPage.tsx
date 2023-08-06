@@ -5,6 +5,7 @@
 import {useSettings} from "../api";
 import {auth0Authenticator} from "../authentication";
 import {formatError, logFatalException} from "../analytics";
+import Layout from "../layout/Layout.tsx";
 
 export function axiosHttpStatus(error) {
   if (error.isAxiosError) {
@@ -12,7 +13,7 @@ export function axiosHttpStatus(error) {
   }
 }
 
-const ErrorPage = ({componentStack, error}) => {
+const ErrorPage = ({error}) => {
   const settings = useSettings();
   const httpStatus = axiosHttpStatus(error);
   if (httpStatus === 401) {
@@ -20,7 +21,7 @@ const ErrorPage = ({componentStack, error}) => {
     auth0Authenticator(settings).login();
     return <p>Logging in...</p>;
   }
-  const description = `${formatError(error)}\n\nThe error is located at:${componentStack}`;
+  const description = formatError(error);
   let title;
   if (httpStatus === 403) {
     title = "Not authorized 🛑";

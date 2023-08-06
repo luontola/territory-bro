@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import React from "react";
-import ErrorBoundary from "react-error-boundary";
+import {ErrorBoundary} from "react-error-boundary";
 import HomePage from "./pages/HomePage";
 import CongregationPage from "./pages/CongregationPage";
 import RegistrationPage from "./pages/RegistrationPage";
