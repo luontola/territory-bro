@@ -2,7 +2,7 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {useSettings} from "../api";
+import {useSettingsSafe} from "../api";
 import {auth0Authenticator} from "../authentication";
 import {formatError, logFatalException} from "../analytics";
 import {FailSafeLayout} from "../layout/Layout.tsx";
@@ -14,11 +14,13 @@ export function axiosHttpStatus(error) {
 }
 
 const ErrorPage = ({error}) => {
-  const settings = useSettings();
+  const settings = useSettingsSafe();
   const httpStatus = axiosHttpStatus(error);
-  if (httpStatus === 401) {
-    console.log("Logging in the user in response to HTTP 401 Unauthorized")
-    auth0Authenticator(settings).login();
+  if (httpStatus === 401 && !settings.error) {
+    if (settings.data) {
+      console.log("Logging in the user in response to HTTP 401 Unauthorized")
+      auth0Authenticator(settings.data).login();
+    }
     return (
       <FailSafeLayout>
         <p>Logging in...</p>

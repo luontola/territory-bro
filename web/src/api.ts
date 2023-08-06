@@ -61,6 +61,17 @@ export function useSettings(): Settings {
   return data;
 }
 
+export function useSettingsSafe() {
+  return useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const response = await api.get('/api/settings');
+      return response.data as Settings;
+    },
+    suspense: false
+  });
+}
+
 export async function loginWithIdToken(idToken: string) {
   await api.post('/api/login', {idToken});
   await queryClient.invalidateQueries();
