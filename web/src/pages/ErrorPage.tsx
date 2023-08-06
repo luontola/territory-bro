@@ -5,7 +5,7 @@
 import {useSettings} from "../api";
 import {auth0Authenticator} from "../authentication";
 import {formatError, logFatalException} from "../analytics";
-import Layout from "../layout/Layout.tsx";
+import {FailSafeLayout} from "../layout/Layout.tsx";
 
 export function axiosHttpStatus(error) {
   if (error.isAxiosError) {
@@ -19,7 +19,11 @@ const ErrorPage = ({error}) => {
   if (httpStatus === 401) {
     console.log("Logging in the user in response to HTTP 401 Unauthorized")
     auth0Authenticator(settings).login();
-    return <p>Logging in...</p>;
+    return (
+      <FailSafeLayout>
+        <p>Logging in...</p>
+      </FailSafeLayout>
+    );
   }
   const description = formatError(error);
   let title;
@@ -29,11 +33,13 @@ const ErrorPage = ({error}) => {
     title = "Sorry, something went wrong 🥺";
     logFatalException(description);
   }
-  return <>
-    <h1>{title}</h1>
-    <p><a href="/">Return to the front page and try again</a></p>
-    <pre>{description}</pre>
-  </>;
+  return (
+    <FailSafeLayout>
+      <h1>{title}</h1>
+      <p><a href="/">Return to the front page and try again</a></p>
+      <pre>{description}</pre>
+    </FailSafeLayout>
+  );
 };
 
 export default ErrorPage;

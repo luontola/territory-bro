@@ -20,10 +20,11 @@ import TerritoryListPage from "./pages/TerritoryListPage";
 import TerritoryPage from "./pages/TerritoryPage";
 import OpenSharePage from "./pages/OpenSharePage";
 import {Route, Routes} from "react-router-dom";
+import LoadingPage from "./pages/LoadingPage.tsx";
 
 const App = () => (
   <ErrorBoundary FallbackComponent={ErrorPage}>
-    <React.Suspense fallback={<p>Loading....</p>}>
+    <React.Suspense fallback={<LoadingPage/>}>
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage/>}/>

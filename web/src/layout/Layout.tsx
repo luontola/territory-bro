@@ -45,18 +45,34 @@ const CongregationNav = () => {
   );
 }
 
-type Props = {
-  title?: string;
-  children?: ReactNode;
-};
-
-const Layout = ({title, children}: Props) => {
+function useAppTitle(title: string | undefined) {
   useEffect(() => {
     // TODO: get title from H1
     const site = "Territory Bro";
     document.title = title ? `${title} - ${site}` : site;
   }, []);
+}
 
+type Props = {
+  title?: string;
+  children?: ReactNode;
+};
+
+export const FailSafeLayout = ({title, children}: Props) => {
+  useAppTitle(title);
+  return <>
+    <nav className={`${styles.navbar} no-print`}>
+      <HomeNav/>
+    </nav>
+
+    <main className={styles.content}>
+      {children}
+    </main>
+  </>;
+}
+
+const Layout = ({title, children}: Props) => {
+  useAppTitle(title);
   return <>
     <nav className={`${styles.navbar} no-print`}>
       <Routes>
