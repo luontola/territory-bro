@@ -4,8 +4,6 @@
 
 import {useEffect} from "react";
 import {Field, Form, Formik} from "formik";
-import {getMessages, language as defaultLanguage, languages} from "../intl";
-import {IntlProvider} from "react-intl";
 import {mapRasters} from "../maps/mapOptions";
 import {useCongregationById, useGeneratedQrCodes} from "../api";
 import TerritoryCard from "./TerritoryCard";
@@ -15,6 +13,8 @@ import RegionPrintout from "./RegionPrintout";
 import TerritoryCardMapOnly from "./TerritoryCardMapOnly";
 import QrCodeOnly from "./QrCodeOnly";
 import {usePageState} from "../util";
+import {useTranslation} from "react-i18next";
+import {changeLanguage, languages} from "../i18n.ts";
 
 const templates = [{
   id: 'TerritoryCard',
@@ -69,38 +69,38 @@ function useQrCodeUrls(congregationId, territoryIds) {
   return {qrCodeUrls, qrCodeError};
 }
 
-const Printables = ({template, language, mapRasterId, congregationId, territoryIds, regionIds}) => {
+const Printables = ({template, mapRasterId, congregationId, territoryIds, regionIds}) => {
+  const {i18n} = useTranslation();
   const {qrCodeUrls, qrCodeError} = useQrCodeUrls(congregationId, territoryIds);
 
   return (
-    <IntlProvider locale={language} messages={getMessages(language)}>
-      <div lang={language}>
-        {qrCodeError &&
-          <div style={{color: "#f00", backgroundColor: "#fee", padding: "1px 1em", border: "1px solid #f00"}}>
-            <p>Failed to generate QR codes: {qrCodeError.message}</p>
-            <p>Refresh the page and try again.</p>
-          </div>
-        }
-        {template.type === 'territory' && territoryIds.map(territoryId => {
-          const qrCodeUrl = qrCodeUrls[territoryId]
-          return <template.component key={territoryId}
-                                     territoryId={territoryId}
-                                     congregationId={congregationId}
-                                     qrCodeUrl={qrCodeUrl}
-                                     mapRasterId={mapRasterId}/>;
-        })}
-        {template.type === 'region' && regionIds.map(regionId => {
-          return <template.component key={regionId}
-                                     regionId={regionId}
-                                     congregationId={congregationId}
-                                     mapRasterId={mapRasterId}/>;
-        })}
-      </div>
-    </IntlProvider>
+    <div lang={i18n.language}>
+      {qrCodeError &&
+        <div style={{color: "#f00", backgroundColor: "#fee", padding: "1px 1em", border: "1px solid #f00"}}>
+          <p>Failed to generate QR codes: {qrCodeError.message}</p>
+          <p>Refresh the page and try again.</p>
+        </div>
+      }
+      {template.type === 'territory' && territoryIds.map(territoryId => {
+        const qrCodeUrl = qrCodeUrls[territoryId]
+        return <template.component key={territoryId}
+                                   territoryId={territoryId}
+                                   congregationId={congregationId}
+                                   qrCodeUrl={qrCodeUrl}
+                                   mapRasterId={mapRasterId}/>;
+      })}
+      {template.type === 'region' && regionIds.map(regionId => {
+        return <template.component key={regionId}
+                                   regionId={regionId}
+                                   congregationId={congregationId}
+                                   mapRasterId={mapRasterId}/>;
+      })}
+    </div>
   )
 }
 
 const PrintOptionsForm = ({congregationId}) => {
+  const {i18n} = useTranslation();
   const [savedForm, setSavedForm] = usePageState('savedForm', null);
   const congregation = useCongregationById(congregationId);
   const availableMapRasters = mapRasters;
@@ -108,7 +108,7 @@ const PrintOptionsForm = ({congregationId}) => {
   const availableRegions = [{id: congregation.id, name: congregation.name}, ...congregation.regions];
   let initialValues = {
     template: templates[0].id,
-    language: defaultLanguage,
+    language: i18n.language,
     mapRaster: availableMapRasters[0].id,
     regions: availableRegions.length > 0 ? [availableRegions[0].id] : [],
     territories: availableTerritories.length > 0 ? [availableTerritories[0].id] : []
@@ -123,6 +123,7 @@ const PrintOptionsForm = ({congregationId}) => {
     {({values, setFieldValue}) => {
       useEffect(() => {
         setSavedForm(values);
+        changeLanguage(values.language);
       }, [values]);
       const template = templates.find(t => t.id === values.template);
       return <>
@@ -145,7 +146,11 @@ const PrintOptionsForm = ({congregationId}) => {
                 <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
                   <label htmlFor="language">Language</label>
                   <Field name="language" id="language" component="select" className="pure-input-1">
-                    {languages.map(({code, name}) => <option key={code} value={code}>{name}</option>)}
+                    {languages.map(({code, englishName, nativeName}) =>
+                      <option key={code} value={code}>
+                        {nativeName}
+                        {englishName === nativeName ? '' : ` - ${englishName}`}
+                      </option>)}
                   </Field>
                 </div>
               </div>
@@ -190,7 +195,6 @@ const PrintOptionsForm = ({congregationId}) => {
         </div>
 
         <Printables template={template}
-                    language={values.language}
                     mapRasterId={values.mapRaster}
                     congregationId={congregationId}
                     territoryIds={values.territories}

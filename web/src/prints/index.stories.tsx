@@ -9,43 +9,26 @@ import {mapRasters} from "../maps/mapOptions";
 import TerritoryCard from "./TerritoryCard";
 import NeighborhoodCard from "./NeighborhoodCard";
 import RuralTerritoryCard from "./RuralTerritoryCard";
-import {language, messages} from "../intl";
-import {IntlProvider} from "react-intl";
 import RegionPrintout from "./RegionPrintout";
-
-const Box = ({children}) => <IntlProvider locale={language} messages={messages}>
-  {children}
-</IntlProvider>;
+import "../i18n.ts";
 
 storiesOf('Printouts', module)
   .add('TerritoryCard', () =>
-    <Box>
-      <TerritoryCard territory={territory101} congregation={demoCongregation}
-                     qrCodeUrl="https://qr.territorybro.com/BNvuFBPOrAE" mapRaster={mapRasters[0]}/>
-    </Box>)
+    <TerritoryCard territory={territory101} congregation={demoCongregation}
+                   qrCodeUrl="https://qr.territorybro.com/BNvuFBPOrAE" mapRaster={mapRasters[0]}/>)
 
   .add('NeighborhoodCard', () =>
-    <Box>
-      <NeighborhoodCard territory={territory101} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
-    </Box>)
+    <NeighborhoodCard territory={territory101} congregation={demoCongregation} mapRaster={mapRasters[0]}/>)
 
   .add('RuralTerritoryCard', () =>
-    <Box>
-      <RuralTerritoryCard territory={territory101} congregation={demoCongregation}
-                          qrCodeUrl="https://qr.territorybro.com/BNvuFBPOrAE" mapRaster={mapRasters[0]}/>
-    </Box>)
+    <RuralTerritoryCard territory={territory101} congregation={demoCongregation}
+                        qrCodeUrl="https://qr.territorybro.com/BNvuFBPOrAE" mapRaster={mapRasters[0]}/>)
 
   .add('RegionPrintout', () =>
-    <Box>
-      <RegionPrintout region={regionKatajanokka} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
-    </Box>)
+    <RegionPrintout region={regionKatajanokka} congregation={demoCongregation} mapRaster={mapRasters[0]}/>)
 
   .add('RegionPrintout, multi-polygon', () =>
-    <Box>
-      <RegionPrintout region={regionKaivopuisto} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
-    </Box>)
+    <RegionPrintout region={regionKaivopuisto} congregation={demoCongregation} mapRaster={mapRasters[0]}/>)
 
   .add('RegionPrintout, congregation', () =>
-    <Box>
-      <RegionPrintout region={demoCongregation} congregation={demoCongregation} mapRaster={mapRasters[0]}/>
-    </Box>);
+    <RegionPrintout region={demoCongregation} congregation={demoCongregation} mapRaster={mapRasters[0]}/>);

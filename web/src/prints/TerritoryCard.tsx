@@ -2,7 +2,6 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {FormattedMessage} from "react-intl";
 import TerritoryMap from "../maps/TerritoryMap";
 import TerritoryMiniMap from "../maps/TerritoryMiniMap";
 import {useCongregationById} from "../api";
@@ -12,6 +11,7 @@ import PrintDateNotice from "./PrintDateNotice";
 import TerritoryQrCode from "./TerritoryQrCode";
 import {findMapRasterById} from "../maps/mapOptions.ts";
 import {memo} from "react";
+import {useTranslation} from "react-i18next";
 
 const TerritoryCard = ({
                          territory,
@@ -22,6 +22,7 @@ const TerritoryCard = ({
                          mapRaster,
                          mapRasterId
                        }) => {
+  const {t} = useTranslation();
   congregation = congregation || useCongregationById(congregationId);
   territory = territory || congregation.getTerritoryById(territoryId);
   mapRaster = mapRaster || findMapRasterById(mapRasterId);
@@ -34,7 +35,7 @@ const TerritoryCard = ({
 
       <div className={styles.header}>
         <div className={styles.title}>
-          <FormattedMessage id="TerritoryCard.title" defaultMessage="Territory Map Card"/>
+          {t('TerritoryCard.title')}
         </div>
         <div className={styles.region}>
           {territory.region}
@@ -61,8 +62,7 @@ const TerritoryCard = ({
       </div>
 
       <div className={styles.footer}>
-        <FormattedMessage id="TerritoryCard.footer"
-                          defaultMessage={"Please keep this card in the envelope. Do not soil, mark or bend it. \n Each time the territory is covered, please inform the brother who cares for the territory files."}/>
+        {t('TerritoryCard.footer')}
       </div>
 
     </div>
