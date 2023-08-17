@@ -42,8 +42,8 @@ blocks:
         - name: Build API
           commands:
             - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
-            - docker pull luontola/territory-bro-api:ci-builder || true
-            - docker pull luontola/territory-bro-api:ci || true
+            - docker pull luontola/territory-bro-api:ci-builder || true
+            - docker pull luontola/territory-bro-api:ci || true
 
             - docker build --pull --progress=plain
               --tag        luontola/territory-bro-api:ci-builder
@@ -62,8 +62,8 @@ blocks:
         - name: Build Web
           commands:
             - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
-            - docker pull luontola/territory-bro-web:ci-builder || true
-            - docker pull luontola/territory-bro-web:ci || true
+            - docker pull luontola/territory-bro-web:ci-builder || true
+            - docker pull luontola/territory-bro-web:ci || true
 
             - docker build --pull --progress=plain
               --tag        luontola/territory-bro-web:ci-builder
