@@ -34,8 +34,7 @@ Stop the application and remove all data
 The tools for developing this project are
 [Java JDK](https://www.oracle.com/java/technologies/downloads/),
 [Leiningen](https://github.com/technomancy/leiningen),
-[Node.js](https://nodejs.org/),
-[Yarn](https://yarnpkg.com/) and
+[Node.js](https://nodejs.org/) and
 [Docker](https://www.docker.com/). It might also be useful to have the [PostgreSQL](https://www.postgresql.org/) command
 line tools, even if you run the database with Docker.
 
@@ -54,29 +53,29 @@ Restart the API backend, reloading code changes
 
 Start the web frontend
 
-    yarn install
-    yarn start
+    npm install
+    npm run start
 
 The application will run at http://localhost:8080
 
 Run tests
 
     lein test
-    yarn test
+    npm run test
 
 Run tests automatically on change
 
     lein autotest
-    yarn autotest
+    npm run autotest
 
 View storybook visual tests
 
-    yarn storybook
+    npm run storybook
 
 Upgrade dependencies
 
     lein ancient upgrade :all :check-clojure :no-tests
-    yarn upgrade --latest
+    npm run upgrade
 
 Download dependency sources
 

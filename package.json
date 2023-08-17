@@ -56,6 +56,7 @@
     "eslint-plugin-storybook": "^0.6.13",
     "i18next": "^23.4.2",
     "i18next-browser-languagedetector": "^7.1.0",
+    "npm-check-updates": "^16.12.2",
     "react-i18next": "^13.0.3",
     "storybook": "^7.2.1",
     "typescript": "^5.1.6",
@@ -67,7 +68,7 @@
   "type": "module",
   "engines": {
     "node": ">= 18.0.0",
-    "yarn": ">= 1.0.0"
+    "npm": ">= 9.0.0"
   },
   "browserslist": [
     "defaults"
@@ -83,6 +84,7 @@
     "browserslist": "browserslist",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "build-react-cache": "git clone git@github.com:facebook/react.git --depth=1 && cd react && yarn install --frozen-lockfile && npm run build react-cache && cd .. && npm pack ./react/build/node_modules/react-cache && rm -rf react"
+    "outdated": "npm-check-updates",
+    "upgrade": "npm-check-updates --interactive"
   }
 }

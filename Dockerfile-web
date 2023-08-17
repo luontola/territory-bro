@@ -9,15 +9,14 @@ WORKDIR /project
 USER node
 
 # cache node_modules
-COPY --chown=node package.json yarn.lock /project/
-RUN yarn install --frozen-lockfile --non-interactive --no-progress && \
-    yarn cache clean
+COPY --chown=node package.json package-lock.json /project/
+RUN npm ci
 
 # do the build
 COPY --chown=node tsconfig.json tsconfig.node.json vite.config.ts /project/
 COPY --chown=node web /project/web
-RUN yarn run test && \
-    yarn run build
+RUN npm run test && \
+    npm run build
 
 # offline compress static resources
 RUN find /project/target/web-dist \

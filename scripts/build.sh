@@ -7,6 +7,6 @@ lein clean
 lein test
 lein uberjar
 
-yarn install
-yarn run test
-yarn run build
+npm install
+npm run test
+npm run build

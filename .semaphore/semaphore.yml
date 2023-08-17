@@ -34,8 +34,8 @@ blocks:
             - cache restore
             - nvm install 18
 
-            - yarn install
-            - yarn run test
+            - npm ci
+            - npm run test
 
             - cache store
 
