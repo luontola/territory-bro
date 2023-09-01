@@ -19,22 +19,30 @@ export const languages = [
   {code: "pt", englishName: "Portuguese", nativeName: "Português"},
 ].sort((a, b) => a.nativeName.localeCompare(b.nativeName, undefined, {sensitivity: 'base'}))
 
+const options = {
+  resources,
+  fallbackLng: 'en',
+  // debug: import.meta.env.DEV,
+  interpolation: {
+    escapeValue: false // React already escapes by default
+  }
+};
+
 i18n.use(LanguageDetector)
   .use(initReactI18next)
   // https://www.i18next.com/overview/configuration-options
-  .init({
-    resources,
-    fallbackLng: 'en',
-    debug: import.meta.env.DEV,
-    interpolation: {
-      escapeValue: false // React already escapes by default
-    }
-  });
+  .init(options);
 
 export async function changeLanguage(language: string) {
   await i18n.changeLanguage(language);
   // TODO: set the lang for document element after the whole application has been translated
   //document.documentElement.setAttribute('lang', i18n.language);
+}
+
+export function isolatedI18nInstance(language: string) {
+  const inst = i18n.createInstance({...options, lng: language});
+  inst.init();
+  return inst;
 }
 
 export default i18n;

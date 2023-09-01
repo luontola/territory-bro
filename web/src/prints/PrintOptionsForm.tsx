@@ -13,8 +13,8 @@ import RegionPrintout from "./RegionPrintout";
 import TerritoryCardMapOnly from "./TerritoryCardMapOnly";
 import QrCodeOnly from "./QrCodeOnly";
 import {usePageState} from "../util";
-import {useTranslation} from "react-i18next";
-import {changeLanguage, languages} from "../i18n.ts";
+import {I18nextProvider, useTranslation} from "react-i18next";
+import {isolatedI18nInstance, languages} from "../i18n.ts";
 
 const templates = [{
   id: 'TerritoryCard',
@@ -69,33 +69,36 @@ function useQrCodeUrls(congregationId, territoryIds) {
   return {qrCodeUrls, qrCodeError};
 }
 
-const Printables = ({template, mapRasterId, congregationId, territoryIds, regionIds}) => {
-  const {i18n} = useTranslation();
+const Printables = ({template, language, mapRasterId, congregationId, territoryIds, regionIds}) => {
   const {qrCodeUrls, qrCodeError} = useQrCodeUrls(congregationId, territoryIds);
-
+  const i18n = isolatedI18nInstance(language)
   return (
-    <div lang={i18n.language}>
+    <>
       {qrCodeError &&
         <div style={{color: "#f00", backgroundColor: "#fee", padding: "1px 1em", border: "1px solid #f00"}}>
           <p>Failed to generate QR codes: {qrCodeError.message}</p>
           <p>Refresh the page and try again.</p>
         </div>
       }
-      {template.type === 'territory' && territoryIds.map(territoryId => {
-        const qrCodeUrl = qrCodeUrls[territoryId]
-        return <template.component key={territoryId}
-                                   territoryId={territoryId}
-                                   congregationId={congregationId}
-                                   qrCodeUrl={qrCodeUrl}
-                                   mapRasterId={mapRasterId}/>;
-      })}
-      {template.type === 'region' && regionIds.map(regionId => {
-        return <template.component key={regionId}
-                                   regionId={regionId}
-                                   congregationId={congregationId}
-                                   mapRasterId={mapRasterId}/>;
-      })}
-    </div>
+      <I18nextProvider i18n={i18n}>
+        <div lang={i18n.language}>
+          {template.type === 'territory' && territoryIds.map(territoryId => {
+            const qrCodeUrl = qrCodeUrls[territoryId]
+            return <template.component key={territoryId}
+                                       territoryId={territoryId}
+                                       congregationId={congregationId}
+                                       qrCodeUrl={qrCodeUrl}
+                                       mapRasterId={mapRasterId}/>;
+          })}
+          {template.type === 'region' && regionIds.map(regionId => {
+            return <template.component key={regionId}
+                                       regionId={regionId}
+                                       congregationId={congregationId}
+                                       mapRasterId={mapRasterId}/>;
+          })}
+        </div>
+      </I18nextProvider>
+    </>
   )
 }
 
@@ -123,7 +126,6 @@ const PrintOptionsForm = ({congregationId}) => {
     {({values, setFieldValue}) => {
       useEffect(() => {
         setSavedForm(values);
-        changeLanguage(values.language);
       }, [values]);
       const template = templates.find(t => t.id === values.template);
       return <>
@@ -195,6 +197,7 @@ const PrintOptionsForm = ({congregationId}) => {
         </div>
 
         <Printables template={template}
+                    language={values.language}
                     mapRasterId={values.mapRaster}
                     congregationId={congregationId}
                     territoryIds={values.territories}
