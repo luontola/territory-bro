@@ -2,7 +2,6 @@ Navigation:
   externalLink: External link
   home: Home
   languageSelection: Language selection
-  loggedInAs: Logged in as {{name}}
   login: Login
   logout: Logout
   news: News

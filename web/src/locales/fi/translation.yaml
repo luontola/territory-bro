@@ -2,7 +2,6 @@ Navigation:
   externalLink: Ulkoinen linkki
   home: Etusivu
   languageSelection: Kielen valinta
-  loggedInAs: Kirjautuneena nimellä {{name}}
   login: Kirjaudu sisään
   logout: Kirjaudu ulos
   news: Uutiset

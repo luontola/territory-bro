@@ -7,6 +7,8 @@ import LogoutButton from "./LogoutButton";
 import DevLoginButton from "./DevLoginButton";
 import {useSettings} from "../api";
 import {useTranslation} from "react-i18next";
+import {faUserLarge} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 let AuthenticationPanel = () => {
   const {t} = useTranslation();
@@ -15,7 +17,7 @@ let AuthenticationPanel = () => {
   if (settings.user) {
     const fullName = settings.user.name;
     return <>
-      {t('Navigation.loggedInAs', {name: fullName})} <LogoutButton/>
+      <FontAwesomeIcon icon={faUserLarge}/> {fullName} <LogoutButton/>
     </>;
   } else {
     return <>
