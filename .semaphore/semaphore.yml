@@ -34,7 +34,7 @@ blocks:
             - cache restore
             - nvm install 18
 
-            - npm install --force
+            - npm install
             - npm run test
 
             - cache store

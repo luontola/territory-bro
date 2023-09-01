@@ -10,7 +10,7 @@ USER node
 
 # cache node_modules
 COPY --chown=node package.json package-lock.json /project/
-RUN npm ci --force
+RUN npm ci
 
 # do the build
 COPY --chown=node tsconfig.json tsconfig.node.json vite.config.ts /project/

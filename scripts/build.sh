@@ -7,6 +7,6 @@ lein clean
 lein test
 lein uberjar
 
-npm install --force
+npm install
 npm run test
 npm run build
