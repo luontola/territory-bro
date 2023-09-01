@@ -17,7 +17,9 @@ let AuthenticationPanel = () => {
   if (settings.user) {
     const fullName = settings.user.name;
     return <>
-      <FontAwesomeIcon icon={faUserLarge}/> {fullName} <LogoutButton/>
+      <FontAwesomeIcon icon={faUserLarge} style={{fontSize: "1.25em", verticalAlign: "middle"}}/>
+      {` ${fullName} `}
+      <LogoutButton/>
     </>;
   } else {
     return <>

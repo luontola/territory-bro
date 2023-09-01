@@ -51,6 +51,34 @@ a:active {
     font-size: 16px;
 }
 
+select.languageSelection:not(:focus) {
+    /* make the dropdown look like a link when it has no focus */
+    color: #3455db;
+    appearance: none;
+    border: none;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+    padding-left: 2px;
+}
+
+select.languageSelection:not(:focus):hover {
+    color: #9932cc;
+    cursor: pointer;
+}
+
+.languageSelectionIcon {
+    font-size: 2em;
+    vertical-align: middle;
+}
+
+.languageSelectionIcon:has(+ select.languageSelection:not(:focus)) {
+    /* clicking the icon will toggle the dropdown's focus,
+       so show the pointer cursor only when clicking the icon
+       would focus the dropdown */
+    cursor: pointer;
+}
+
 .content {
     position: relative;
     padding: 1em 1.5em;

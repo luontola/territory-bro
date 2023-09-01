@@ -7,10 +7,20 @@ import {faLanguage} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {changeLanguage, languages} from "../i18n.ts";
 import {Field, Form, Formik} from "formik";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
+import styles from "./Layout.module.css";
+
+function formatName(englishName: string, nativeName: string) {
+  if (englishName === nativeName) {
+    return nativeName
+  } else {
+    return nativeName + ' - ' + englishName
+  }
+}
 
 let LanguageSelection = () => {
   const {t, i18n} = useTranslation();
+  const [focus, setFocus] = useState(false)
   const initialValues = {language: i18n.language}
   return (
     <Formik
@@ -25,14 +35,23 @@ let LanguageSelection = () => {
           <Form className="pure-form">
             <label>
               <FontAwesomeIcon icon={faLanguage}
-                               style={{fontSize: "2em", verticalAlign: "middle"}}
-                               title={t('Navigation.languageSelection')}/>
+                               title={t('Navigation.languageSelection')}
+                               className={styles.languageSelectionIcon}/>
               {' '}
-              <Field name="language" component="select" aria-label={t('Navigation.languageSelection')}>
+              <Field name="language"
+                     component="select"
+                     aria-label={t('Navigation.languageSelection')}
+                     title={t('Navigation.languageSelection')}
+                     className={styles.languageSelection}
+                     onFocus={() => setFocus(true)}
+                     onBlur={() => setFocus(false)}>
                 {languages.map(({code, englishName, nativeName}) =>
                   <option key={code} value={code}>
-                    {nativeName}
-                    {englishName === nativeName ? '' : ` - ${englishName}`}
+                    {focus && formatName(englishName, nativeName)}
+                    {/* when this field doesn't have focus, hide all options except
+                        the selected option, in order to fit the element's width
+                        to the selected option */
+                      !focus && values.language === code && nativeName}
                   </option>)}
               </Field>
             </label>
