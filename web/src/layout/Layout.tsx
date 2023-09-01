@@ -11,6 +11,7 @@ import {NavLink as RouterNavLink, Route, Routes, useParams} from "react-router-d
 import {useTranslation} from "react-i18next";
 import {faExternalLinkAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import LanguageSelection from "./LanguageSelection.tsx";
 
 const NavLink = (props) => (
   <RouterNavLink className={({isActive}) => isActive ? styles.active : ""} {...props}/>
@@ -86,6 +87,9 @@ const Layout = ({title, children}: Props) => {
         <Route path="/*" element={<HomeNav/>}/>
         <Route path="/congregation/:congregationId/*" element={<CongregationNav/>}/>
       </Routes>
+      <div className={styles.lang}>
+        <LanguageSelection/>
+      </div>
       <div className={styles.auth}>
         <AuthenticationPanel/>
       </div>

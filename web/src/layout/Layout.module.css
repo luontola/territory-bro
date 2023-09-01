@@ -44,7 +44,7 @@ a:active {
     font-weight: bold;
 }
 
-.auth {
+.lang, .auth {
     text-align: center;
     margin: 4px auto;
     padding: 0 1em;
@@ -81,7 +81,7 @@ h1 {
         border-right: none;
     }
 
-    .auth {
+    .lang, .auth {
         flex: none;
     }
 }
