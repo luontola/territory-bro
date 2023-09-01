@@ -9,6 +9,8 @@ import AuthenticationPanel from "./AuthenticationPanel";
 import {useCongregationById} from "../api";
 import {NavLink as RouterNavLink, Route, Routes, useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
+import {faExternalLinkAlt} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const NavLink = (props) => (
   <RouterNavLink className={({isActive}) => isActive ? styles.active : ""} {...props}/>
@@ -20,10 +22,10 @@ const HomeNav = ({}) => {
     <ul className={styles.nav}>
       <li><NavLink to="/">{t('Navigation.home')}</NavLink></li>
       <li><a href="https://territorybro.com/guide/">
-        {t('Navigation.userGuide')} <i className="fas fa-external-link-alt" title={t('Navigation.externalLink')}/>
+        {t('Navigation.userGuide')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.externalLink')}/>
       </a></li>
       <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">
-        {t('Navigation.news')} <i className="fas fa-external-link-alt" title={t('Navigation.externalLink')}/>
+        {t('Navigation.news')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.externalLink')}/>
       </a></li>
       <li><NavLink to="/support">{t('Navigation.support')}</NavLink></li>
     </ul>

@@ -10,6 +10,8 @@ import {mapRasters} from "../maps/mapOptions";
 import MapInteractionHelp from "../maps/MapInteractionHelp";
 import ClipboardJS from "clipboard";
 import {useParams} from "react-router-dom";
+import {faCopy, faShareNodes, faXmark} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const mapRaster = mapRasters[0];
 
@@ -40,7 +42,7 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
               aria-expanded={open ? 'true' : 'false'}
               onClick={togglePopup}
               ref={setShareButton}>
-        <i className="fas fa-share-alt"/> Share a link
+        <FontAwesomeIcon icon={faShareNodes}/> Share a link
       </button>
 
       {open &&
@@ -48,7 +50,7 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
           <button type="button"
                   className={`${styles.closeButton} pure-button`}
                   onClick={closePopup}>
-            <i className="fas fa-times" title="Close"/>
+            <FontAwesomeIcon icon={faXmark} title="Close"/>
           </button>
 
           <label htmlFor="share-link">
@@ -68,7 +70,7 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
                     id="copy-share-link"
                     className="pure-button"
                     data-clipboard-target="#share-link">
-              <i className="fas fa-copy" title="Copy to clipboard"/>
+              <FontAwesomeIcon icon={faCopy} title="Copy to clipboard"/>
             </button>
           </div>
         </div>
