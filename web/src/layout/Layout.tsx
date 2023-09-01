@@ -25,7 +25,7 @@ const HomeNav = ({}) => {
       <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">
         {t('Navigation.news')} <i className="fas fa-external-link-alt" title={t('Navigation.externalLink')}/>
       </a></li>
-      <li><NavLink to="/help">{t('Navigation.help')}</NavLink></li>
+      <li><NavLink to="/support">{t('Navigation.support')}</NavLink></li>
     </ul>
   );
 }
@@ -45,7 +45,7 @@ const CongregationNav = () => {
         <li><NavLink to="users">{t('Navigation.users')}</NavLink></li>
         <li><NavLink to="settings">{t('Navigation.settings')}</NavLink></li>
       </>}
-      <li><NavLink to="/help">{t('Navigation.help')}</NavLink></li>
+      <li><NavLink to="/support">{t('Navigation.support')}</NavLink></li>
     </ul>
   );
 }

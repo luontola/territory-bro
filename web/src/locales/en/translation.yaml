@@ -1,6 +1,5 @@
 Navigation:
   externalLink: External link
-  help: Help
   home: Home
   loggedInAs: Logged in as {{name}}
   login: Login
@@ -8,6 +7,7 @@ Navigation:
   news: News
   printouts: Printouts
   settings: Settings
+  support: Support
   territories: Territories
   userGuide: User Guide
   users: Users

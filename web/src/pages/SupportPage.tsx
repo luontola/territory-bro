@@ -4,10 +4,10 @@
 
 import {useSettings} from "../api";
 
-const HelpPage = () => {
+const SupportPage = () => {
   const {supportEmail} = useSettings();
   return <>
-    <h1>Help</h1>
+    <h1>Support</h1>
     <p>Territory Bro is an open source project developed by Esko Luontola.</p>
     <p>The <a href="https://territorybro.com/guide/">User Guide</a> should answer the most common questions.</p>
     {supportEmail && <p>You may also email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>{" "}
@@ -17,4 +17,4 @@ const HelpPage = () => {
   </>;
 };
 
-export default HelpPage;
+export default SupportPage;

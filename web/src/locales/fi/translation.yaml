@@ -1,6 +1,5 @@
 Navigation:
   externalLink: Ulkoinen linkki
-  help: Tuki
   home: Etusivu
   loggedInAs: Kirjautuneena nimellä {{name}}
   login: Kirjaudu sisään
@@ -8,6 +7,7 @@ Navigation:
   news: Uutiset
   printouts: Tulosteet
   settings: Asetukset
+  support: Tuki ja ohjeet
   territories: Alueet
   userGuide: Käyttöopas
   users: Käyttäjät

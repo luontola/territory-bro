@@ -12,7 +12,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import Layout from "./layout/Layout";
 import PrintoutPage from "./pages/PrintoutPage";
 import ErrorPage from "./pages/ErrorPage";
-import HelpPage from "./pages/HelpPage";
+import SupportPage from "./pages/SupportPage.tsx";
 import SettingsPage from "./pages/SettingsPage";
 import UsersPage from "./pages/UsersPage";
 import JoinPage from "./pages/JoinPage";
@@ -31,7 +31,7 @@ const App = () => (
           <Route path="/join" element={<JoinPage/>}/>
           <Route path="/login-callback" element={<LoginCallbackPage/>}/>
           <Route path="/register" element={<RegistrationPage/>}/>
-          <Route path="/help" element={<HelpPage/>}/>
+          <Route path="/support" element={<SupportPage/>}/>
           <Route path="/share/:shareKey/*" element={<OpenSharePage/>}/>
 
           <Route path="/congregation/:congregationId" element={<CongregationPage/>}/>
