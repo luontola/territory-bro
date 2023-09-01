@@ -1,3 +1,16 @@
+Navigation:
+  externalLink: Ulkoinen linkki
+  help: Tuki
+  home: Etusivu
+  loggedInAs: Kirjautuneena nimellä {{name}}
+  login: Kirjaudu sisään
+  logout: Kirjaudu ulos
+  news: Uutiset
+  printouts: Tulosteet
+  settings: Asetukset
+  territories: Alueet
+  userGuide: Käyttöopas
+  users: Käyttäjät
 TerritoryCard:
   title: Aluekortti
   footer: "Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä. \n Joka kerta kun alue on käyty läpi, ilmoita siitä veljelle, joka hoitaa aluekarttoja."

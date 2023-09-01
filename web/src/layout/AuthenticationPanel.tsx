@@ -6,14 +6,16 @@ import LoginButton from "./LoginButton";
 import LogoutButton from "./LogoutButton";
 import DevLoginButton from "./DevLoginButton";
 import {useSettings} from "../api";
+import {useTranslation} from "react-i18next";
 
 let AuthenticationPanel = () => {
+  const {t} = useTranslation();
   const settings = useSettings();
   const dev = settings.dev;
   if (settings.user) {
     const fullName = settings.user.name;
     return <>
-      Logged in as {fullName} <LogoutButton/>
+      {t('Navigation.loggedInAs', {name: fullName})} <LogoutButton/>
     </>;
   } else {
     return <>

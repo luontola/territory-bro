@@ -4,12 +4,14 @@
 
 import {auth0Authenticator} from "../authentication";
 import {useSettings} from "../api";
+import {useTranslation} from "react-i18next";
 
 const LoginButton = () => {
+  const {t} = useTranslation();
   const settings = useSettings();
   return <button type="button" className="pure-button" onClick={() => {
     auth0Authenticator(settings).login();
-  }}>Login</button>;
+  }}>{t('Navigation.login')}</button>;
 };
 
 export default LoginButton;

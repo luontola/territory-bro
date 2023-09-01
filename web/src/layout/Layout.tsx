@@ -8,20 +8,24 @@ import {ReactNode, useEffect} from "react";
 import AuthenticationPanel from "./AuthenticationPanel";
 import {useCongregationById} from "../api";
 import {NavLink as RouterNavLink, Route, Routes, useParams} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 const NavLink = (props) => (
   <RouterNavLink className={({isActive}) => isActive ? styles.active : ""} {...props}/>
 );
 
 const HomeNav = ({}) => {
+  const {t} = useTranslation();
   return (
     <ul className={styles.nav}>
-      <li><NavLink to="/">Home</NavLink></li>
+      <li><NavLink to="/">{t('Navigation.home')}</NavLink></li>
       <li><a href="https://territorybro.com/guide/">
-        User Guide <i className="fas fa-external-link-alt" title="External link"/></a></li>
+        {t('Navigation.userGuide')} <i className="fas fa-external-link-alt" title={t('Navigation.externalLink')}/>
+      </a></li>
       <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">
-        News <i className="fas fa-external-link-alt" title="External link"/></a></li>
-      <li><NavLink to="/help">Help</NavLink></li>
+        {t('Navigation.news')} <i className="fas fa-external-link-alt" title={t('Navigation.externalLink')}/>
+      </a></li>
+      <li><NavLink to="/help">{t('Navigation.help')}</NavLink></li>
     </ul>
   );
 }
@@ -29,18 +33,19 @@ const HomeNav = ({}) => {
 const CongregationNav = () => {
   const {congregationId} = useParams()
   const congregation = useCongregationById(congregationId);
+  const {t} = useTranslation();
   return (
     <ul className={styles.nav}>
-      <li><NavLink to="/">Home</NavLink></li>
+      <li><NavLink to="/">{t('Navigation.home')}</NavLink></li>
       <li><NavLink to=".">{congregation.name}</NavLink></li>
-      <li><NavLink to="territories">Territories</NavLink></li>
+      <li><NavLink to="territories">{t('Navigation.territories')}</NavLink></li>
       {congregation.permissions.viewCongregation &&
-        <li><NavLink to="printouts">Printouts</NavLink></li>}
+        <li><NavLink to="printouts">{t('Navigation.printouts')}</NavLink></li>}
       {congregation.permissions.configureCongregation && <>
-        <li><NavLink to="users">Users</NavLink></li>
-        <li><NavLink to="settings">Settings</NavLink></li>
+        <li><NavLink to="users">{t('Navigation.users')}</NavLink></li>
+        <li><NavLink to="settings">{t('Navigation.settings')}</NavLink></li>
       </>}
-      <li><NavLink to="/help">Help</NavLink></li>
+      <li><NavLink to="/help">{t('Navigation.help')}</NavLink></li>
     </ul>
   );
 }
