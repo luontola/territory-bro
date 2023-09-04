@@ -13,6 +13,12 @@ Navigation:
   territories: Alueet
   userGuide: Käyttöopas
   users: Käyttäjät
+HomePage:
+  introduction: Territory Bro on työkalu Jehovan todistajien seurakuntien aluekorttien hallintaan. Katso lisätietoja osoitteesta <1>territorybro.com</1>.
+  joinCongregation: Liity olemassa olevaan seurakuntaan
+  registerCongregation: Rekisteröi uusi seurakunta
+  viewDemo: Katso demo
+  yourCongregations: Sinun seurakuntasi
 TerritoryCard:
   title: Aluekortti
   footer: "Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä. \n Joka kerta kun alue on käyty läpi, ilmoita siitä veljelle, joka hoitaa aluekarttoja."

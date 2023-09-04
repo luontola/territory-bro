@@ -13,6 +13,12 @@ Navigation:
   territories: Territories
   userGuide: User Guide
   users: Users
+HomePage:
+  introduction: Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses. See <1>territorybro.com</1> for more information.
+  joinCongregation: Join an Existing Congregation
+  registerCongregation: Register a New Congregation
+  viewDemo: View a Demo
+  yourCongregations: Your Congregations
 TerritoryCard:
   title: Territory Map Card
   footer: "Please keep this card in the envelope. Do not soil, mark or bend it. \n Each time the territory is covered, please inform the brother who cares for the territory files."

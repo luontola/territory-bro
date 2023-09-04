@@ -5,6 +5,7 @@
 import {useCongregations, useSettings} from "../api";
 import LoginButton from "../layout/LoginButton";
 import {Link} from "react-router-dom";
+import {Trans, useTranslation} from "react-i18next";
 
 // TODO: move QGIS project download to congregation page
 function QgisProjectSection({
@@ -36,21 +37,33 @@ function QgisProjectSection({
   </>;
 }
 
-const ViewDemoButton = () => <Link to="/congregation/demo" className="pure-button">View a Demo</Link>;
-const RegisterButton = () => <Link to="/register" className="pure-button">Register a New Congregation</Link>;
-const JoinButton = () => <Link to="/join" className="pure-button">Join an Existing Congregation</Link>;
+const ViewDemoButton = () => {
+  const {t} = useTranslation();
+  return <Link to="/congregation/demo" className="pure-button">{t('HomePage.viewDemo')}</Link>;
+};
+const RegisterButton = () => {
+  const {t} = useTranslation();
+  return <Link to="/register" className="pure-button">{t('HomePage.registerCongregation')}</Link>;
+};
+const JoinButton = () => {
+  const {t} = useTranslation();
+  return <Link to="/join" className="pure-button">{t('HomePage.joinCongregation')}</Link>;
+};
 
 const HomePage = () => {
+  const {t} = useTranslation();
   const settings = useSettings();
   const congregations = useCongregations();
   return <>
     <h1>Territory Bro</h1>
 
-    <p>Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.
-      See <a href="https://territorybro.com">territorybro.com</a> for more information.</p>
+    <p><Trans i18nKey="HomePage.introduction">
+      Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.
+      See <a href="https://territorybro.com">territorybro.com</a> for more information.
+    </Trans></p>
 
     {congregations.length > 0 && <>
-      <h2>Your Congregations</h2>
+      <h2>{t('HomePage.yourCongregations')}</h2>
       <ul>
         {congregations.map(cong => <li key={cong.id} style={{fontSize: '150%'}}><Link
           to={`/congregation/${cong.id}`}>{cong.name}</Link></li>)}

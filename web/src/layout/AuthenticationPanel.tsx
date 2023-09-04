@@ -6,12 +6,10 @@ import LoginButton from "./LoginButton";
 import LogoutButton from "./LogoutButton";
 import DevLoginButton from "./DevLoginButton";
 import {useSettings} from "../api";
-import {useTranslation} from "react-i18next";
 import {faUserLarge} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 let AuthenticationPanel = () => {
-  const {t} = useTranslation();
   const settings = useSettings();
   const dev = settings.dev;
   if (settings.user) {
