@@ -8,26 +8,38 @@ import InfoBox from "../maps/InfoBox";
 import TerritoryListMap from "../maps/TerritoryListMap";
 import {usePageState} from "../util";
 import {Link, useNavigate, useParams} from "react-router-dom";
+import {Trans, useTranslation} from "react-i18next";
+import {auth0Authenticator} from "../authentication.ts";
 
 function LimitedVisibilityHelp() {
+  const {t} = useTranslation();
   const settings = useSettings();
+
+  function login() {
+    auth0Authenticator(settings).login();
+  }
+
   return (
-    <InfoBox title={"Why so few territories?"}>
-      <p>Only those territories which have been shared with you are currently shown.
+    <InfoBox title={t('TerritoryListPage.limitedVisibility.title')}>
+      <p>{t('TerritoryListPage.limitedVisibility.explanation')}
+        {' '}
         {settings.user ?
-          <> You will need to <Link to="/join">request access</Link> to see the rest.</> :
-          <> You will need to login to see the rest.</>}
+          <Trans i18nKey="TerritoryListPage.limitedVisibility.needToRequestAccess">
+            You will need to <Link to="/join">request access</Link> to see the rest.</Trans> :
+          <Trans i18nKey="TerritoryListPage.limitedVisibility.needToLogin">
+            You will need to <Link to="#" onClick={login}>login</Link> to see the rest.</Trans>}
       </p>
     </InfoBox>
   );
 }
 
 function SearchForm({search, setSearch}) {
+  const {t} = useTranslation();
   const id = 'territory-search';
   return (
     <form className={styles.search + " pure-form"}
           onSubmit={event => event.preventDefault()}>
-      <label htmlFor={id}>Search</label>
+      <label htmlFor={id}>{t('TerritoryListPage.search')}</label>
       <input id={id}
              type="text"
              className="pure-input-rounded"
@@ -43,7 +55,7 @@ function SearchForm({search, setSearch}) {
                   setSearch('');
                   document.getElementById(id).focus();
                 }}>
-          Clear
+          {t('TerritoryListPage.clear')}
         </button>
       }
     </form>
@@ -62,13 +74,14 @@ function matchesSearch(territory: Territory, search: string): boolean {
 }
 
 const TerritoryListPage = () => {
+  const {t} = useTranslation();
   const {congregationId} = useParams()
   const navigate = useNavigate();
   const congregation = useCongregationById(congregationId);
   const [search, setSearch] = usePageState('search', '');
   const visibleTerritories = congregation.territories.filter(territory => matchesSearch(territory, search));
   return <>
-    <h1>Territories</h1>
+    <h1>{t('Navigation.territories')}</h1>
     {!congregation.permissions.viewCongregation &&
       <LimitedVisibilityHelp/>
     }
@@ -83,9 +96,9 @@ const TerritoryListPage = () => {
     <table className="pure-table pure-table-striped">
       <thead>
       <tr>
-        <th>Number</th>
-        <th>Region</th>
-        <th>Addresses</th>
+        <th>{t('Territory.number')}</th>
+        <th>{t('Territory.region')}</th>
+        <th>{t('Territory.addresses')}</th>
       </tr>
       </thead>
       <tbody>
