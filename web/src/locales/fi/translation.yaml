@@ -1,9 +1,9 @@
 englishName: Finnish
 nativeName: suomi
 Navigation:
+  changeLanguage: Vaihda kieltä
   externalLink: Ulkoinen linkki
   home: Etusivu
-  languageSelection: Kielen valinta
   login: Kirjaudu sisään
   logout: Kirjaudu ulos
   news: Uutiset

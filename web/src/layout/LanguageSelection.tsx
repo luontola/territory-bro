@@ -35,13 +35,13 @@ let LanguageSelection = () => {
           <Form className="pure-form">
             <label>
               <FontAwesomeIcon icon={faLanguage}
-                               title={t('Navigation.languageSelection')}
+                               title={t('Navigation.changeLanguage')}
                                className={styles.languageSelectionIcon}/>
               {' '}
               <Field name="language"
                      component="select"
-                     aria-label={t('Navigation.languageSelection')}
-                     title={t('Navigation.languageSelection')}
+                     aria-label={t('Navigation.changeLanguage')}
+                     title={t('Navigation.changeLanguage')}
                      className={styles.languageSelection}
                      onFocus={() => setFocus(true)}
                      onBlur={() => setFocus(false)}>

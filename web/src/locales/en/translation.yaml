@@ -1,9 +1,9 @@
 englishName: English
 nativeName: English
 Navigation:
+  changeLanguage: Change language
   externalLink: External link
   home: Home
-  languageSelection: Language selection
   login: Login
   logout: Logout
   news: News
