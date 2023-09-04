@@ -9,15 +9,13 @@ import resources from 'virtual:i18next-loader';
 
 export {resources};
 
-export const languages = [
-  {code: "en", englishName: "English", nativeName: "English"},
-  {code: "es", englishName: "Spanish", nativeName: "español"},
-  {code: "fi", englishName: "Finnish", nativeName: "suomi"},
-  {code: "id", englishName: "Indonesian", nativeName: "Indonesia"},
-  {code: "it", englishName: "Italian", nativeName: "Italiano"},
-  {code: "nl", englishName: "Dutch", nativeName: "Nederlands"},
-  {code: "pt", englishName: "Portuguese", nativeName: "Português"},
-].sort((a, b) => a.nativeName.localeCompare(b.nativeName, undefined, {sensitivity: 'base'}))
+export const languages = Object.entries(resources)
+  .map(([code, resource]) => ({
+    code: code,
+    englishName: resource.translation.englishName as string,
+    nativeName: resource.translation.nativeName as string,
+  }))
+  .sort((a, b) => a.nativeName.localeCompare(b.nativeName, undefined, {sensitivity: 'base'}))
 
 const options = {
   resources,
