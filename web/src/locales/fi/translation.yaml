@@ -19,6 +19,12 @@ HomePage:
   registerCongregation: Rekisteröi uusi seurakunta
   viewDemo: Katso demo
   yourCongregations: Sinun seurakuntasi
+CongregationPage:
+  demo:
+    welcome: Tervetuloa demoon
+    introduction1: Tämä demo rajoittuu vain seurakunnan tarkasteluun. Joitain ominaisuuksia on rajoitettu.
+    introduction2: Esimerkiksi et voi muokata alueita, jakaa linkkejä alueisiin, eikä tulosteissa ole QR-koodia, joka linkittyy alueeseen.
+  downloadQgisProject: Lataa QGIS-projekti
 TerritoryCard:
   title: Aluekortti
   footer: "Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä. \n Joka kerta kun alue on käyty läpi, ilmoita siitä veljelle, joka hoitaa aluekarttoja."

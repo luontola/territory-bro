@@ -19,6 +19,12 @@ HomePage:
   registerCongregation: Register a New Congregation
   viewDemo: View a Demo
   yourCongregations: Your Congregations
+CongregationPage:
+  demo:
+    welcome: Welcome to the demo
+    introduction1: This demo is limited to only viewing a congregation. Some features are restricted.
+    introduction2: For example, you won't be able to edit territories, share links to territories, and the printouts won't have the QR code that links to the territory.
+  downloadQgisProject: Download QGIS project
 TerritoryCard:
   title: Territory Map Card
   footer: "Please keep this card in the envelope. Do not soil, mark or bend it. \n Each time the territory is covered, please inform the brother who cares for the territory files."

@@ -5,26 +5,28 @@
 import {useCongregationById} from "../api";
 import {Link, useParams} from "react-router-dom";
 import InfoBox from "../maps/InfoBox";
+import {useTranslation} from "react-i18next";
 
 const CongregationPage = () => {
+  const {t} = useTranslation();
   const {congregationId} = useParams()
   const congregation = useCongregationById(congregationId);
   return <>
     <h1>{congregation.name}</h1>
     {congregationId === "demo" &&
-      <InfoBox title="Welcome to the demo">
-        <p>This demo is limited to only viewing a congregation. Some features are restricted.</p>
-        <p>For example, you won't be able to edit territories, share links to territories, and the printouts won't have
-          the QR code that links to the territory.</p>
+      <InfoBox title={t('CongregationPage.demo.welcome')}>
+        <p>{t('CongregationPage.demo.introduction1')}</p>
+        <p>{t('CongregationPage.demo.introduction2')}</p>
       </InfoBox>}
-    <p><Link to="territories">Territories</Link></p>
+    <p><Link to="territories">{t('Navigation.territories')}</Link></p>
     {congregation.permissions.viewCongregation &&
-      <p><Link to="printouts">Printouts</Link></p>}
+      <p><Link to="printouts">{t('Navigation.printouts')}</Link></p>}
     {congregation.permissions.gisAccess &&
-      <p><a href={`/api/congregation/${congregationId}/qgis-project`}>Download QGIS project</a></p>}
+      <p><a href={`/api/congregation/${congregationId}/qgis-project`}>
+        {t('CongregationPage.downloadQgisProject')}</a></p>}
     {congregation.permissions.configureCongregation && <>
-      <p><Link to="users">Users</Link></p>
-      <p><Link to="settings">Settings</Link></p>
+      <p><Link to="users">{t('Navigation.users')}</Link></p>
+      <p><Link to="settings">{t('Navigation.settings')}</Link></p>
     </>}
   </>;
 };
