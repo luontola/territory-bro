@@ -21,7 +21,7 @@ function formatName(englishName: string, nativeName: string) {
 let LanguageSelection = () => {
   const {t, i18n} = useTranslation();
   const [focus, setFocus] = useState(false)
-  const initialValues = {language: i18n.language}
+  const initialValues = {language: i18n.resolvedLanguage as string}
   return (
     <Formik
       initialValues={initialValues}
