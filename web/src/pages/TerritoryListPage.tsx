@@ -81,7 +81,7 @@ const TerritoryListPage = () => {
   const [search, setSearch] = usePageState('search', '');
   const visibleTerritories = congregation.territories.filter(territory => matchesSearch(territory, search));
   return <>
-    <h1>{t('Navigation.territories')}</h1>
+    <h1>{t('TerritoryListPage.title')}</h1>
     {!congregation.permissions.viewCongregation &&
       <LimitedVisibilityHelp/>
     }

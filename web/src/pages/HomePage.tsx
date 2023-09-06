@@ -43,11 +43,11 @@ const ViewDemoButton = () => {
 };
 const RegisterButton = () => {
   const {t} = useTranslation();
-  return <Link to="/register" className="pure-button">{t('HomePage.registerCongregation')}</Link>;
+  return <Link to="/register" className="pure-button">{t('RegistrationPage.title')}</Link>;
 };
 const JoinButton = () => {
   const {t} = useTranslation();
-  return <Link to="/join" className="pure-button">{t('HomePage.joinCongregation')}</Link>;
+  return <Link to="/join" className="pure-button">{t('JoinPage.title')}</Link>;
 };
 
 const HomePage = () => {

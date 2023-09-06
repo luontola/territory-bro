@@ -3,22 +3,19 @@ nativeName: suomi
 Navigation:
   changeLanguage: Vaihda kieltä
   externalLink: Ulkoinen linkki
-  home: Etusivu
   login: Kirjaudu sisään
   logout: Kirjaudu ulos
   news: Uutiset
-  printouts: Tulosteet
-  settings: Asetukset
-  support: Tuki ja ohjeet
-  territories: Alueet
   userGuide: Käyttöopas
-  users: Käyttäjät
 HomePage:
+  title: Etusivu
   introduction: Territory Bro on työkalu Jehovan todistajien seurakuntien aluekorttien hallintaan. Katso lisätietoja osoitteesta <1>territorybro.com</1>.
-  joinCongregation: Liity olemassa olevaan seurakuntaan
-  registerCongregation: Rekisteröi uusi seurakunta
-  viewDemo: Katso demo
   yourCongregations: Sinun seurakuntasi
+  viewDemo: Katso demo
+RegistrationPage:
+  title: Rekisteröi uusi seurakunta
+JoinPage:
+  title: Liity olemassa olevaan seurakuntaan
 CongregationPage:
   demo:
     welcome: Tervetuloa demoon
@@ -26,6 +23,7 @@ CongregationPage:
     introduction2: Esimerkiksi et voi muokata alueita, jakaa linkkejä alueisiin, eikä tulosteissa ole QR-koodia, joka linkittyy alueeseen.
   downloadQgisProject: Lataa QGIS-projekti
 TerritoryListPage:
+  title: Alueet
   search: Hae
   clear: Tyhjennä
   limitedVisibility:
@@ -40,6 +38,14 @@ TerritoryPage:
     closePopup: Sulje
     description: "Tämän linkin avulla ihmiset voivat tarkastella tätä aluekarttaa kirjautumatta sisään:"
     copy: Kopioi leikepöydälle
+PrintoutPage:
+  title: Tulosteet
+UsersPage:
+  title: Käyttäjät
+SettingsPage:
+  title: Asetukset
+SupportPage:
+  title: Tuki ja ohjeet
 Map:
   zoomIn: Suurenna
   zoomOut: Pienennä

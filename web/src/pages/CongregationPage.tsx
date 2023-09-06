@@ -18,15 +18,15 @@ const CongregationPage = () => {
         <p>{t('CongregationPage.demo.introduction1')}</p>
         <p>{t('CongregationPage.demo.introduction2')}</p>
       </InfoBox>}
-    <p><Link to="territories">{t('Navigation.territories')}</Link></p>
+    <p><Link to="territories">{t('TerritoryListPage.title')}</Link></p>
     {congregation.permissions.viewCongregation &&
-      <p><Link to="printouts">{t('Navigation.printouts')}</Link></p>}
+      <p><Link to="printouts">{t('PrintoutPage.title')}</Link></p>}
     {congregation.permissions.gisAccess &&
       <p><a href={`/api/congregation/${congregationId}/qgis-project`}>
         {t('CongregationPage.downloadQgisProject')}</a></p>}
     {congregation.permissions.configureCongregation && <>
-      <p><Link to="users">{t('Navigation.users')}</Link></p>
-      <p><Link to="settings">{t('Navigation.settings')}</Link></p>
+      <p><Link to="users">{t('UsersPage.title')}</Link></p>
+      <p><Link to="settings">{t('SettingsPage.title')}</Link></p>
     </>}
   </>;
 };

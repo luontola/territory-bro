@@ -21,14 +21,14 @@ const HomeNav = ({}) => {
   const {t} = useTranslation();
   return (
     <ul className={styles.nav}>
-      <li><NavLink to="/">{t('Navigation.home')}</NavLink></li>
+      <li><NavLink to="/">{t('HomePage.title')}</NavLink></li>
       <li><a href="https://territorybro.com/guide/">
         {t('Navigation.userGuide')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.externalLink')}/>
       </a></li>
       <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">
         {t('Navigation.news')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.externalLink')}/>
       </a></li>
-      <li><NavLink to="/support">{t('Navigation.support')}</NavLink></li>
+      <li><NavLink to="/support">{t('SupportPage.title')}</NavLink></li>
     </ul>
   );
 }
@@ -39,16 +39,16 @@ const CongregationNav = () => {
   const {t} = useTranslation();
   return (
     <ul className={styles.nav}>
-      <li><NavLink to="/">{t('Navigation.home')}</NavLink></li>
+      <li><NavLink to="/">{t('HomePage.title')}</NavLink></li>
       <li><NavLink to=".">{congregation.name}</NavLink></li>
-      <li><NavLink to="territories">{t('Navigation.territories')}</NavLink></li>
+      <li><NavLink to="territories">{t('TerritoryListPage.title')}</NavLink></li>
       {congregation.permissions.viewCongregation &&
-        <li><NavLink to="printouts">{t('Navigation.printouts')}</NavLink></li>}
+        <li><NavLink to="printouts">{t('PrintoutPage.title')}</NavLink></li>}
       {congregation.permissions.configureCongregation && <>
-        <li><NavLink to="users">{t('Navigation.users')}</NavLink></li>
-        <li><NavLink to="settings">{t('Navigation.settings')}</NavLink></li>
+        <li><NavLink to="users">{t('UsersPage.title')}</NavLink></li>
+        <li><NavLink to="settings">{t('SettingsPage.title')}</NavLink></li>
       </>}
-      <li><NavLink to="/support">{t('Navigation.support')}</NavLink></li>
+      <li><NavLink to="/support">{t('SupportPage.title')}</NavLink></li>
     </ul>
   );
 }

@@ -3,22 +3,19 @@ nativeName: English
 Navigation:
   changeLanguage: Change language
   externalLink: External link
-  home: Home
   login: Login
   logout: Logout
   news: News
-  printouts: Printouts
-  settings: Settings
-  support: Support
-  territories: Territories
   userGuide: User Guide
-  users: Users
 HomePage:
+  title: Home
   introduction: Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses. See <1>territorybro.com</1> for more information.
-  joinCongregation: Join an Existing Congregation
-  registerCongregation: Register a New Congregation
-  viewDemo: View a Demo
   yourCongregations: Your Congregations
+  viewDemo: View a Demo
+RegistrationPage:
+  title: Register a New Congregation
+JoinPage:
+  title: Join an Existing Congregation
 CongregationPage:
   demo:
     welcome: Welcome to the demo
@@ -26,6 +23,7 @@ CongregationPage:
     introduction2: For example, you won't be able to edit territories, share links to territories, and the printouts won't have the QR code that links to the territory.
   downloadQgisProject: Download QGIS project
 TerritoryListPage:
+  title: Territories
   search: Search
   clear: Clear
   limitedVisibility:
@@ -40,6 +38,14 @@ TerritoryPage:
     closePopup: Close
     description: "People with this link will be able to view this territory map without logging in:"
     copy: Copy to clipboard
+PrintoutPage:
+  title: Printouts
+UsersPage:
+  title: Users
+SettingsPage:
+  title: Settings
+SupportPage:
+  title: Support
 Map:
   zoomIn: Zoom in
   zoomOut: Zoom out
