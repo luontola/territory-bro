@@ -47,7 +47,7 @@ Map:
   showMyLocation: Show my location
 MapInteractionHelp:
   title: How to interact with the maps?
-  pan: <b>Pan:</b> drag with two fingers / drag with the left mouse button
+  move: <b>Move:</b> drag with two fingers / drag with the left mouse button
   zoom: <b>Zoom:</b> pinch or spread with two fingers / hold <kbd>{{ctrl}}</kbd> and scroll with the mouse wheel
   rotate: <b>Rotate:</b> rotate with two fingers / hold <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> and drag with the left mouse button
 Territory:

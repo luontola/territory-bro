@@ -11,7 +11,7 @@ const MapInteractionHelp = () => {
   const ctrl = mac ? 'Cmd' : 'Ctrl';
   const alt = mac ? 'Option' : 'Alt';
   return <InfoBox title={t('MapInteractionHelp.title')}>
-    <p><Trans i18nKey="MapInteractionHelp.pan"/></p>
+    <p><Trans i18nKey="MapInteractionHelp.move"/></p>
     <p><Trans i18nKey="MapInteractionHelp.zoom" values={{ctrl}}/></p>
     <p><Trans i18nKey="MapInteractionHelp.rotate" values={{alt}}/></p>
   </InfoBox>
