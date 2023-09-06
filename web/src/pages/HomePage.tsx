@@ -58,8 +58,7 @@ const HomePage = () => {
     <h1>Territory Bro</h1>
 
     <p><Trans i18nKey="HomePage.introduction">
-      Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.
-      See <a href="https://territorybro.com">territorybro.com</a> for more information.
+      <a href="https://territorybro.com"></a>
     </Trans></p>
 
     {congregations.length > 0 && <>

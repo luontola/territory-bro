@@ -24,10 +24,8 @@ function LimitedVisibilityHelp() {
       <p>{t('TerritoryListPage.limitedVisibility.explanation')}
         {' '}
         {settings.user ?
-          <Trans i18nKey="TerritoryListPage.limitedVisibility.needToRequestAccess">
-            You will need to <Link to="/join">request access</Link> to see the rest.</Trans> :
-          <Trans i18nKey="TerritoryListPage.limitedVisibility.needToLogin">
-            You will need to <Link to="#" onClick={login}>login</Link> to see the rest.</Trans>}
+          <Trans i18nKey="TerritoryListPage.limitedVisibility.needToRequestAccess"><Link to="/join"/></Trans> :
+          <Trans i18nKey="TerritoryListPage.limitedVisibility.needToLogin"><Link to="#" onClick={login}/></Trans>}
       </p>
     </InfoBox>
   );

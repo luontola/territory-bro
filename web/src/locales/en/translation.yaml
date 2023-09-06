@@ -9,7 +9,7 @@ Navigation:
   userGuide: User Guide
 HomePage:
   title: Home
-  introduction: Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses. See <1>territorybro.com</1> for more information.
+  introduction: Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses. See <0>territorybro.com</0> for more information.
   yourCongregations: Your Congregations
   viewDemo: View a Demo
 RegistrationPage:
@@ -31,8 +31,8 @@ TerritoryListPage:
   limitedVisibility:
     title: Why so few territories?
     explanation: Only those territories which have been shared with you are currently shown.
-    needToRequestAccess: You will need to <1>request access</1> to see the rest.
-    needToLogin: You will need to <1>login</1> to see the rest.
+    needToRequestAccess: You will need to <0>request access</0> to see the rest.
+    needToLogin: You will need to <0>login</0> to see the rest.
 TerritoryPage:
   title: Territory {{number}}
   shareLink:

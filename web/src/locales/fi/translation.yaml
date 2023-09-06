@@ -9,7 +9,7 @@ Navigation:
   userGuide: Käyttöopas
 HomePage:
   title: Etusivu
-  introduction: Territory Bro on työkalu Jehovan todistajien seurakuntien aluekorttien hallintaan. Katso lisätietoja osoitteesta <1>territorybro.com</1>.
+  introduction: Territory Bro on työkalu Jehovan todistajien seurakuntien aluekorttien hallintaan. Katso lisätietoja osoitteesta <0>territorybro.com</0>.
   yourCongregations: Sinun seurakuntasi
   viewDemo: Katso demo
 RegistrationPage:
@@ -31,8 +31,8 @@ TerritoryListPage:
   limitedVisibility:
     title: Miksi niin vähän alueita?
     explanation: Vain ne alueet, jotka on jaettu kanssasi, näytetään tällä hetkellä.
-    needToRequestAccess: Sinun tulee <1>pyytää pääsyä</1> nähdäksesi loput.
-    needToLogin: Sinun tulee <1>kirjautua sisään</1> nähdäksesi loput.
+    needToRequestAccess: Sinun tulee <0>pyytää pääsyä</0> nähdäksesi loput.
+    needToLogin: Sinun tulee <0>kirjautua sisään</0> nähdäksesi loput.
 TerritoryPage:
   title: Alue {{number}}
   shareLink:
