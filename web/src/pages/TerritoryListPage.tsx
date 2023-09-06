@@ -74,7 +74,7 @@ function matchesSearch(territory: Territory, search: string): boolean {
 }
 
 const TerritoryListPage = () => {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {congregationId} = useParams()
   const navigate = useNavigate();
   const congregation = useCongregationById(congregationId);
@@ -90,7 +90,8 @@ const TerritoryListPage = () => {
                         territories={visibleTerritories}
                         onClick={territoryId => {
                           navigate(territoryId, {});
-                        }}/>
+                        }}
+                        key={i18n.resolvedLanguage}/>
     </div>
     <SearchForm search={search} setSearch={setSearch}/>
     <table className="pure-table pure-table-striped">

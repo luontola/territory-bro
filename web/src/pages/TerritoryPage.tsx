@@ -82,7 +82,7 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
 }
 
 const TerritoryPage = () => {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {congregationId, territoryId} = useParams()
   const congregation = useCongregationById(congregationId);
   const territory = congregation.getTerritoryById(territoryId);
@@ -122,7 +122,7 @@ const TerritoryPage = () => {
 
       <div className="pure-u-1 pure-u-lg-2-3 pure-u-xl-3-4">
         <div className={styles.map}>
-          <TerritoryMap territory={territory} mapRaster={mapRaster} printout={false}/>
+          <TerritoryMap territory={territory} mapRaster={mapRaster} printout={false} key={i18n.resolvedLanguage}/>
         </div>
         <div className="no-print">
           <MapInteractionHelp/>
