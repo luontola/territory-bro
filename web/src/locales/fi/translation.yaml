@@ -2,10 +2,10 @@ englishName: Finnish
 nativeName: suomi
 Navigation:
   changeLanguage: Vaihda kieltä
-  externalLink: Ulkoinen linkki
   login: Kirjaudu sisään
   logout: Kirjaudu ulos
   news: Uutiset
+  opensInNewWindow: Aukeaa uudessa ikkunassa
   userGuide: Käyttöopas
 HomePage:
   title: Etusivu

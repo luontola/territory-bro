@@ -2,10 +2,10 @@ englishName: English
 nativeName: English
 Navigation:
   changeLanguage: Change language
-  externalLink: External link
   login: Login
   logout: Logout
   news: News
+  opensInNewWindow: Opens in new window
   userGuide: User Guide
 HomePage:
   title: Home

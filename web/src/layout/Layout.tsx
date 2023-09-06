@@ -22,11 +22,11 @@ const HomeNav = ({}) => {
   return (
     <ul className={styles.nav}>
       <li><NavLink to="/">{t('HomePage.title')}</NavLink></li>
-      <li><a href="https://territorybro.com/guide/">
-        {t('Navigation.userGuide')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.externalLink')}/>
+      <li><a href="https://territorybro.com/guide/" target="_blank">
+        {t('Navigation.userGuide')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.opensInNewWindow')}/>
       </a></li>
-      <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements">
-        {t('Navigation.news')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.externalLink')}/>
+      <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements" target="_blank">
+        {t('Navigation.news')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.opensInNewWindow')}/>
       </a></li>
       <li><NavLink to="/support">{t('SupportPage.title')}</NavLink></li>
     </ul>
