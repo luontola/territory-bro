@@ -19,8 +19,8 @@ new ClipboardJS('#copy-share-link');
 
 const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
   const [open, setOpen] = useState(false);
-  const [shareButton, setShareButton] = useState(null);
-  const [shareUrl, setShareUrl] = useState(null);
+  const [shareButton, setShareButton] = useState<HTMLButtonElement | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   const togglePopup = async () => {
     if (!shareUrl) {
