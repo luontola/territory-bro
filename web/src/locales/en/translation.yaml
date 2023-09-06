@@ -14,6 +14,8 @@ HomePage:
   viewDemo: View a Demo
 RegistrationPage:
   title: Register a New Congregation
+  register: Register
+  mailingListAd: It is recommended to <0>subscribe to the announcements mailing list</0> to be notified about important updates to Territory Bro.
 JoinPage:
   title: Join an Existing Congregation
 CongregationPage:
@@ -44,6 +46,8 @@ UsersPage:
   title: Users
 SettingsPage:
   title: Settings
+  congregationName: Congregation Name
+  congregationNameRequired: Congregation name is required.
 SupportPage:
   title: Support
 Map:

@@ -14,6 +14,8 @@ HomePage:
   viewDemo: Katso demo
 RegistrationPage:
   title: Rekisteröi uusi seurakunta
+  register: Rekisteröi
+  mailingListAd: Suosittelemme <0>liittymään postituslistalle</0> saadaksesi tiedon tärkeistä Territory Bro -päivityksistä.
 JoinPage:
   title: Liity olemassa olevaan seurakuntaan
 CongregationPage:
@@ -44,6 +46,8 @@ UsersPage:
   title: Käyttäjät
 SettingsPage:
   title: Asetukset
+  congregationName: Seurakunnan nimi
+  congregationNameRequired: Seurakunnan nimi on pakollinen tieto.
 SupportPage:
   title: Tuki ja ohjeet
 Map:

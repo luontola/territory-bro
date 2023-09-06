@@ -6,12 +6,14 @@ import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import {createCongregation, useSettings} from "../api";
 import {auth0Authenticator} from "../authentication";
 import {useNavigate} from "react-router-dom";
+import {Trans, useTranslation} from "react-i18next";
 
 interface FormValues {
   congregationName: string;
 }
 
 const RegistrationPage = () => {
+  const {t} = useTranslation();
   const navigate = useNavigate();
   const settings = useSettings();
   if (!settings.user) {
@@ -20,21 +22,21 @@ const RegistrationPage = () => {
   }
 
   return <>
-    <h1>Register a New Congregation</h1>
+    <h1>{t('RegistrationPage.title')}</h1>
 
     <Formik
       initialValues={{congregationName: ""} as FormValues}
       validate={values => {
         let errors: FormikErrors<FormValues> = {};
         if (!values.congregationName) {
-          errors.congregationName = "Congregation name is required.";
+          errors.congregationName = t('SettingsPage.congregationNameRequired');
         }
         return errors;
       }}
       onSubmit={async (values, {setSubmitting}) => {
         try {
           const id = await createCongregation(values.congregationName);
-          await navigate(`/congregation/${id}`);
+          navigate(`/congregation/${id}`);
         } catch (e) {
           console.error('Form submit failed:', e);
           alert(e);
@@ -46,21 +48,22 @@ const RegistrationPage = () => {
       {({isSubmitting}) => <Form className="pure-form pure-form-aligned">
         <fieldset>
           <div className="pure-control-group">
-            <label htmlFor="congregationName">Congregation Name</label>
+            <label htmlFor="congregationName">{t('SettingsPage.congregationName')}</label>
             <Field type="text" name="congregationName" id="congregationName" autoComplete="off"/>
             <ErrorMessage name="congregationName" component="div" className="pure-form-message-inline"/>
           </div>
           <div className="pure-controls">
             <button type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">
-              Register
+              {t('RegistrationPage.register')}
             </button>
           </div>
         </fieldset>
       </Form>}
     </Formik>
 
-    <p>It is recommended to <a href="https://groups.google.com/forum/#!forum/territory-bro-announcements/join">subscribe
-      to the announcements mailing list</a> to be notified about important updates to Territory Bro.</p>
+    <p><Trans i18nKey="RegistrationPage.mailingListAd">
+      <a href="https://groups.google.com/forum/#!forum/territory-bro-announcements/join"></a>
+    </Trans></p>
   </>;
 };
 
