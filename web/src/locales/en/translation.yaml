@@ -33,6 +33,23 @@ TerritoryListPage:
     explanation: Only those territories which have been shared with you are currently shown.
     needToRequestAccess: You will need to <1>request access</1> to see the rest.
     needToLogin: You will need to <1>login</1> to see the rest.
+TerritoryPage:
+  title: Territory {{number}}
+  shareLink:
+    button: Share a link
+    closePopup: Close
+    description: "People with this link will be able to view this territory map without logging in:"
+    copy: Copy to clipboard
+Map:
+  zoomIn: Zoom in
+  zoomOut: Zoom out
+  resetZoom: Reset zoom
+  showMyLocation: Show my location
+MapInteractionHelp:
+  title: How to interact with the maps?
+  pan: <b>Pan:</b> drag with two fingers / drag with the left mouse button
+  zoom: <b>Zoom:</b> pinch or spread with two fingers / hold <kbd>{{ctrl}}</kbd> and scroll with the mouse wheel
+  rotate: <b>Rotate:</b> rotate with two fingers / hold <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> and drag with the left mouse button
 Territory:
   number: Number
   region: Region

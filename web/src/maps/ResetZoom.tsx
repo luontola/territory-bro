@@ -6,6 +6,7 @@ import Control from "ol/control/Control";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faRotateRight} from '@fortawesome/free-solid-svg-icons';
 import {createRoot} from "react-dom/client";
+import i18n from "../i18n";
 
 class ResetZoom extends Control {
   constructor(resetZoom: (map: any, opts: {}) => void) {
@@ -22,7 +23,7 @@ class ResetZoom extends Control {
     element.className = 'ol-zoom-extent ol-unselectable ol-control';
 
     createRoot(element).render(
-      <button type="button" title="Reset zoom" onClick={onClick}>
+      <button type="button" title={i18n.t('Map.resetZoom')} onClick={onClick}>
         <FontAwesomeIcon icon={faRotateRight} rotation={270} style={{verticalAlign: "text-bottom"}}/>
       </button>
     );

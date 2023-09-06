@@ -23,6 +23,9 @@ const options = {
   // debug: import.meta.env.DEV,
   interpolation: {
     escapeValue: false // React already escapes by default
+  },
+  react: {
+    transKeepBasicHtmlNodesFor: ['p', 'br', 'strong', 'em', 'i', 'u', 'b', 'kbd']
   }
 };
 

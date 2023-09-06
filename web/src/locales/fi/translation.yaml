@@ -33,6 +33,23 @@ TerritoryListPage:
     explanation: Vain ne alueet, jotka on jaettu kanssasi, näytetään tällä hetkellä.
     needToRequestAccess: Sinun tulee <1>pyytää pääsyä</1> nähdäksesi loput.
     needToLogin: Sinun tulee <1>kirjautua sisään</1> nähdäksesi loput.
+TerritoryPage:
+  title: Alue {{number}}
+  shareLink:
+    button: Jaa linkki
+    closePopup: Sulje
+    description: "Tämän linkin avulla ihmiset voivat tarkastella tätä aluekarttaa kirjautumatta sisään:"
+    copy: Kopioi leikepöydälle
+Map:
+  zoomIn: Suurenna
+  zoomOut: Pienennä
+  resetZoom: Palaa alkutilaan
+  showMyLocation: Näytä sijaintini
+MapInteractionHelp:
+  title: Kuinka käyttää karttaa?
+  pan: <b>Liiku:</b> raahaa kahta sormea / raahaa hiiren vasemmalla painikkeella
+  zoom: <b>Suurenna/pienennä:</b> nipistä tai levitä kahta sormea / pidä <kbd>{{ctrl}}</kbd> pohjassa ja vieritä hiiren pyörällä
+  rotate: <b>Kierrä:</b> kierrä kahta sormea / pidä <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> pohjassa ja raahaa hiiren vasemmalla painikkeella
 Territory:
   number: Numero
   region: Seutu

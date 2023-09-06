@@ -8,6 +8,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faLocationArrow} from '@fortawesome/free-solid-svg-icons';
 import {createRoot} from "react-dom/client";
 import style from "./ShowMyLocation.module.css";
+import i18n from "../i18n";
 
 class ShowMyLocation extends Control {
   constructor(startGeolocation: (map: any) => void) {
@@ -68,7 +69,7 @@ class ShowMyLocation extends Control {
     element.className = `ol-unselectable ol-control ${style.showMyLocation}`;
 
     createRoot(element).render(
-      <button type="button" title="Show my location" onClick={onClick}>
+      <button type="button" title={i18n.t('Map.showMyLocation')} onClick={onClick}>
         <FontAwesomeIcon icon={faLocationArrow}/>
       </button>
     );

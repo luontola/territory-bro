@@ -23,6 +23,7 @@ import {fromLonLat} from "ol/proj";
 import ResetZoom from "./ResetZoom.tsx";
 import ShowMyLocation from "./ShowMyLocation.tsx";
 import {createXYZ} from "ol/tilegrid";
+import i18n from "../i18n";
 
 export type MapRaster = {
   id: string;
@@ -92,7 +93,13 @@ export function makeStreetsLayer() {
 }
 
 export function makeControls({resetZoom, startGeolocation}) {
-  const controls = controlDefaults({attribution: false});
+  const controls = controlDefaults({
+    attribution: false,
+    zoomOptions: {
+      zoomInTipLabel: i18n.t('Map.zoomIn'),
+      zoomOutTipLabel: i18n.t('Map.zoomOut'),
+    }
+  });
   if (startGeolocation) {
     controls.push(new ShowMyLocation(startGeolocation))
   }

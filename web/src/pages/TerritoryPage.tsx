@@ -12,12 +12,14 @@ import ClipboardJS from "clipboard";
 import {useParams} from "react-router-dom";
 import {faCopy, faShareNodes, faXmark} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {useTranslation} from "react-i18next";
 
 const mapRaster = mapRasters[0];
 
 new ClipboardJS('#copy-share-link');
 
 const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
+  const {t} = useTranslation();
   const [open, setOpen] = useState(false);
   const [shareButton, setShareButton] = useState<HTMLButtonElement | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -42,7 +44,7 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
               aria-expanded={open ? 'true' : 'false'}
               onClick={togglePopup}
               ref={setShareButton}>
-        <FontAwesomeIcon icon={faShareNodes}/> Share a link
+        <FontAwesomeIcon icon={faShareNodes}/> {t('TerritoryPage.shareLink.button')}
       </button>
 
       {open &&
@@ -50,11 +52,11 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
           <button type="button"
                   className={`${styles.closeButton} pure-button`}
                   onClick={closePopup}>
-            <FontAwesomeIcon icon={faXmark} title="Close"/>
+            <FontAwesomeIcon icon={faXmark} title={t('TerritoryPage.shareLink.closePopup')}/>
           </button>
 
           <label htmlFor="share-link">
-            People with this link will be able to view this territory map without logging in:
+            {t('TerritoryPage.shareLink.description')}
           </label>
 
           <div className={styles.shareLink}>
@@ -70,7 +72,7 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
                     id="copy-share-link"
                     className="pure-button"
                     data-clipboard-target="#share-link">
-              <FontAwesomeIcon icon={faCopy} title="Copy to clipboard"/>
+              <FontAwesomeIcon icon={faCopy} title={t('TerritoryPage.shareLink.copy')}/>
             </button>
           </div>
         </div>
@@ -80,12 +82,13 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
 }
 
 const TerritoryPage = () => {
+  const {t} = useTranslation();
   const {congregationId, territoryId} = useParams()
   const congregation = useCongregationById(congregationId);
   const territory = congregation.getTerritoryById(territoryId);
   // TODO: consider using a grid layout for responsiveness so that the details area has fixed width
   return <>
-    <h1>Territory {territory.number}</h1>
+    <h1>{t('TerritoryPage.title', {number: territory.number})}</h1>
 
     <div className="pure-g">
       <div className="pure-u-1 pure-u-sm-2-3 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4">
@@ -93,15 +96,15 @@ const TerritoryPage = () => {
           <table className="pure-table pure-table-horizontal">
             <tbody>
             <tr>
-              <th>Number</th>
+              <th>{t('Territory.number')}</th>
               <td>{territory.number}</td>
             </tr>
             <tr>
-              <th>Region</th>
+              <th>{t('Territory.region')}</th>
               <td>{territory.region}</td>
             </tr>
             <tr>
-              <th>Addresses</th>
+              <th>{t('Territory.addresses')}</th>
               <td>{territory.addresses}</td>
             </tr>
             </tbody>

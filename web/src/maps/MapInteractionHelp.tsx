@@ -3,16 +3,17 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import InfoBox from "./InfoBox";
+import {Trans, useTranslation} from "react-i18next";
 
 const MapInteractionHelp = () => {
-  const ctrl = navigator.platform.startsWith('Mac') ? 'Cmd' : 'Ctrl';
-  return <InfoBox title={"How to interact with the maps?"}>
-    <p><b>Pan:</b> drag with the left mouse button
-      / drag with two fingers<br/></p>
-    <p><b>Zoom:</b> hold <kbd>{ctrl}</kbd> and scroll with the mouse wheel
-      / pinch or spread with two fingers<br/></p>
-    <p><b>Rotate:</b> hold <kbd>Alt</kbd>+<kbd>Shift</kbd> and drag with the left mouse button
-      / rotate with two fingers</p>
+  const {t} = useTranslation();
+  const mac = navigator.platform.startsWith('Mac');
+  const ctrl = mac ? 'Cmd' : 'Ctrl';
+  const alt = mac ? 'Option' : 'Alt';
+  return <InfoBox title={t('MapInteractionHelp.title')}>
+    <p><Trans i18nKey="MapInteractionHelp.pan"/></p>
+    <p><Trans i18nKey="MapInteractionHelp.zoom" values={{ctrl}}/></p>
+    <p><Trans i18nKey="MapInteractionHelp.rotate" values={{alt}}/></p>
   </InfoBox>
 };
 
