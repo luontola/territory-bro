@@ -1,11 +1,13 @@
-// Copyright © 2015-2020 Esko Luontola
+// Copyright © 2015-2023 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
+
+import i18n from "./i18n";
 
 function formatErrorMessage(error) {
   const key = error[0];
   if (key === 'no-such-user') {
-    return `User does not exist: ${error[1]}`;
+    return i18n.t('UsersPage.userIdNotExist', {userId: error[1]});
   }
   return JSON.stringify(error);
 }

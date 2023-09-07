@@ -60,6 +60,20 @@ PrintoutPage:
     RegionPrintout: Region Map
 UsersPage:
   title: Users
+  userId: User ID
+  userIdRequired: User ID is required.
+  userIdWrongFormat: "That doesn't look like a User ID. It should look something like: 01234567-89ab-cdef-0123-456789abcdef"
+  userIdNotExist: "User does not exist: {{userId}}"
+  userIdHint: To find out somebody's <em>User ID</em>, ask them to visit <0>{{joinPageUrl}}</0> and copy their User ID from that page and send it to you.
+  addUser: Add User
+  name: Name
+  email: Email
+  loginMethod: Login Method
+  actions: Actions
+  you: You
+  unverified: Unverified
+  removeUser: Remove User
+  removeYourselfWarning: Are you sure you want to REMOVE YOURSELF from {{congregation}}? You will not be able to add yourself back.
 SettingsPage:
   title: Settings
   congregationName: Congregation Name

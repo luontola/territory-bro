@@ -9,6 +9,7 @@ import {sortBy} from "lodash-es";
 import styles from "./UsersPage.module.css";
 import {formatApiError} from "../errorMessages";
 import {Link, useNavigate, useParams} from "react-router-dom";
+import {Trans, useTranslation} from "react-i18next";
 
 const IdentityProvider = ({user}) => {
   const sub = user.sub || '';
@@ -22,6 +23,7 @@ const IdentityProvider = ({user}) => {
 };
 
 const RemoveUserButton = ({congregation, user}) => {
+  const {t} = useTranslation();
   const navigate = useNavigate();
   const settings = useSettings();
   const myUserId = settings.user.id;
@@ -29,7 +31,7 @@ const RemoveUserButton = ({congregation, user}) => {
   return <button type="button" className={`pure-button ${styles.removeUser}`} onClick={async () => {
     try {
       if (isCurrentUser) {
-        if (!confirm(`Are you sure you want to REMOVE YOURSELF from ${congregation.name}? You will not be able to access this congregation anymore.`)) {
+        if (!confirm(t('UsersPage.removeYourselfWarning', {congregation: congregation.name}))) {
           return;
         }
       }
@@ -42,7 +44,7 @@ const RemoveUserButton = ({congregation, user}) => {
       alert(formatApiError(error));
     }
   }}>
-    Remove User
+    {t('UsersPage.removeUser')}
   </button>;
 };
 
@@ -53,8 +55,9 @@ interface FormValues {
 }
 
 const UsersPage = () => {
+  const {t} = useTranslation();
   const {congregationId} = useParams()
-  const [newUser, setNewUser] = useState(null);
+  const [newUser, setNewUser] = useState<string | null>(null);
   const congregation = useCongregationById(congregationId);
   const settings = useSettings();
   const myUserId = settings.user.id;
@@ -69,9 +72,9 @@ const UsersPage = () => {
       let errors: FormikErrors<FormValues> = {};
       const userId = values.userId.trim();
       if (!userId) {
-        errors.userId = 'User ID is required.';
+        errors.userId = t('UsersPage.userIdRequired');
       } else if (!userId.match(`^${UUID_PATTERN}$`)) {
-        errors.userId = "That doesn't look like a User ID. It should look something like: 01234567-89ab-cdef-0123-456789abcdef";
+        errors.userId = t('UsersPage.userIdWrongFormat');
       }
       return errors;
     }}
@@ -92,27 +95,25 @@ const UsersPage = () => {
       }
     }}>
     {({isSubmitting}) => <>
-      <h1>Users</h1>
+      <h1>{t('UsersPage.title')}</h1>
 
       <Form className="pure-form pure-form-aligned">
         <fieldset>
           <div className="pure-control-group">
-            <label htmlFor="userId">User ID *</label>
+            <label htmlFor="userId">{t('UsersPage.userId')} *</label>
             <Field name="userId" id="userId" type="text" autoComplete="off" required={true}
                    pattern={`\\s*${UUID_PATTERN}\\s*`}/>
             <ErrorMessage name="userId" component="span" className="pure-form-message-inline"/>
           </div>
 
-          <p>* To find out somebody's <em>User ID</em>, ask them to visit <Link
-            to="/join">{joinPageUrl}</Link> and
-            copy their User ID from that page and send it to you.</p>
+          <p>* <Trans i18nKey="UsersPage.userIdHint" values={{joinPageUrl}}>
+            <Link to="/join"></Link>
+          </Trans></p>
 
           <div className="pure-controls">
             <button type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">
-              Add User
+              {t('UsersPage.addUser')}
             </button>
-            {' '}
-            <Link to=".." relative="path" className="pure-button">Cancel</Link>
           </div>
         </fieldset>
       </Form>
@@ -121,10 +122,10 @@ const UsersPage = () => {
         <thead>
         <tr>
           <th/>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Login Method</th>
-          <th>Actions</th>
+          <th>{t('UsersPage.name')}</th>
+          <th>{t('UsersPage.email')}</th>
+          <th>{t('UsersPage.loginMethod')}</th>
+          <th>{t('UsersPage.actions')}</th>
         </tr>
         </thead>
         <tbody>
@@ -132,8 +133,8 @@ const UsersPage = () => {
           <td className={styles.profilePicture}>
             {user.picture && <img src={user.picture} alt=""/>}
           </td>
-          <td>{user.name || user.id} {user.id === myUserId && <em>(You)</em>}</td>
-          <td>{user.email} {(user.email && !user.emailVerified) && <em>(Unverified)</em>}</td>
+          <td>{user.name || user.id} {user.id === myUserId && <em>({t('UsersPage.you')})</em>}</td>
+          <td>{user.email} {(user.email && !user.emailVerified) && <em>({t('UsersPage.unverified')})</em>}</td>
           <td><IdentityProvider user={user}/></td>
           <td><RemoveUserButton congregation={congregation} user={user}/></td>
         </tr>)}

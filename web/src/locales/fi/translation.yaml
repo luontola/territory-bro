@@ -60,6 +60,20 @@ PrintoutPage:
     RegionPrintout: Seutukartta
 UsersPage:
   title: Käyttäjät
+  userId: Käyttäjätunnus
+  userIdRequired: Käyttäjätunnus vaaditaan.
+  userIdWrongFormat: "Tämä ei näytä käyttäjätunnukselta. Sen tulisi näyttää joltakin tällaiselta: 01234567-89ab-cdef-0123-456789abcdef"
+  userIdNotExist: "Käyttäjää ei ole olemassa: {{userId}}"
+  userIdHint: Selvittääksesi jonkun <em>käyttäjätunnuksen</em>, pyydä heitä käymään osoitteessa <0>{{joinPageUrl}}</0> ja kopioimaan käyttäjätunnus sivulta ja lähettämään se sinulle.
+  addUser: Lisää käyttäjä
+  name: Nimi
+  email: Sähköposti
+  loginMethod: Kirjautumistapa
+  actions: Toiminnot
+  you: Sinä
+  unverified: Vahvistamaton
+  removeUser: Poista käyttäjä
+  removeYourselfWarning: Oletko varma, että haluat POISTAA ITSESI {{congregation}}:sta? Et voi lisätä itseäsi takaisin.
 SettingsPage:
   title: Asetukset
   congregationName: Seurakunnan nimi
