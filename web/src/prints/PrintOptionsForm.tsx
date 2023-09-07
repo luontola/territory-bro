@@ -19,32 +19,26 @@ import {isolatedI18nInstance, languages} from "../i18n.ts";
 const templates = [{
   id: 'TerritoryCard',
   component: TerritoryCard,
-  name: 'Territory Card',
   type: 'territory'
 }, {
   id: 'TerritoryCardMapOnly',
   component: TerritoryCardMapOnly,
-  name: 'Territory Card, map only',
   type: 'territory'
 }, {
   id: 'NeighborhoodCard',
   component: NeighborhoodCard,
-  name: 'Neighborhood Map',
   type: 'territory'
 }, {
   id: 'RuralTerritoryCard',
   component: RuralTerritoryCard,
-  name: 'Rural Territory Card',
   type: 'territory'
 }, {
   id: 'QrCodeOnly',
   component: QrCodeOnly,
-  name: 'QR code only (for adding them as stickers to old cards)',
   type: 'territory'
 }, {
   id: 'RegionPrintout',
   component: RegionPrintout,
-  name: 'Region Map',
   type: 'region'
 }];
 
@@ -103,7 +97,7 @@ const Printables = ({template, language, mapRasterId, congregationId, territoryI
 }
 
 const PrintOptionsForm = ({congregationId}) => {
-  const {i18n} = useTranslation();
+  const {t, i18n} = useTranslation();
   const [savedForm, setSavedForm] = usePageState('savedForm', null);
   const congregation = useCongregationById(congregationId);
   const availableMapRasters = mapRasters;
@@ -132,21 +126,22 @@ const PrintOptionsForm = ({congregationId}) => {
         <div className="no-print">
           <Form className="pure-form pure-form-stacked">
             <fieldset>
-              <legend>Print Options</legend>
+              <legend>{t('PrintoutPage.printOptions')}</legend>
 
               <div className="pure-g">
                 <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
-                  <label htmlFor="template">Template</label>
+                  <label htmlFor="template">{t('PrintoutPage.template')}</label>
                   <Field name="template" id="template" component="select" className="pure-input-1">
-                    {templates.map(template => <option key={template.id}
-                                                       value={template.id}>{template.name}</option>)}
+                    {templates.map(template => <option key={template.id} value={template.id}>
+                      {t(`PrintoutPage.templates.${template.id}`)}
+                    </option>)}
                   </Field>
                 </div>
               </div>
 
               <div className="pure-g">
                 <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
-                  <label htmlFor="language">Language</label>
+                  <label htmlFor="language">{t('PrintoutPage.language')}</label>
                   <Field name="language" id="language" component="select" className="pure-input-1">
                     {languages.map(({code, englishName, nativeName}) =>
                       <option key={code} value={code}>
@@ -159,7 +154,7 @@ const PrintOptionsForm = ({congregationId}) => {
 
               <div className="pure-g">
                 <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
-                  <label htmlFor="mapRaster">Map Raster</label>
+                  <label htmlFor="mapRaster">{t('PrintoutPage.mapRaster')}</label>
                   <Field name="mapRaster" id="mapRaster" component="select" className="pure-input-1">
                     {availableMapRasters.map(mapRaster => <option key={mapRaster.id}
                                                                   value={mapRaster.id}>{mapRaster.name}</option>)}
@@ -169,7 +164,7 @@ const PrintOptionsForm = ({congregationId}) => {
 
               {template.type === 'region' && <div className="pure-g">
                 <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
-                  <label htmlFor="regions">Regions</label>
+                  <label htmlFor="regions">{t('PrintoutPage.regions')}</label>
                   <Field name="regions" id="regions" component="select" multiple size={7}
                          className="pure-input-1"
                          onChange={event => setFieldValue("regions", [].slice.call(event.target.selectedOptions).map(option => option.value))}>
@@ -181,7 +176,7 @@ const PrintOptionsForm = ({congregationId}) => {
 
               {template.type === 'territory' && <div className="pure-g">
                 <div className="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
-                  <label htmlFor="territories">Territories</label>
+                  <label htmlFor="territories">{t('PrintoutPage.territories')}</label>
                   <Field name="territories" id="territories" component="select" multiple size={7}
                          className="pure-input-1"
                          onChange={event => setFieldValue("territories", [].slice.call(event.target.selectedOptions).map(option => option.value))}>

@@ -45,6 +45,19 @@ TerritoryPage:
     copy: Kopioi leikepöydälle
 PrintoutPage:
   title: Tulosteet
+  printOptions: Tulostusasetukset
+  template: Pohja
+  language: Kieli
+  mapRaster: Taustakartta
+  regions: Seudut
+  territories: Alueet
+  templates:
+    TerritoryCard: Aluekortti
+    TerritoryCardMapOnly: Aluekortti, vain kartta
+    NeighborhoodCard: Alueen lähiseutu
+    RuralTerritoryCard: Maaseutualueen kortti
+    QrCodeOnly: Vain QR-koodi (tulosta tarroina ja lisää vanhoille korteille)
+    RegionPrintout: Seutukartta
 UsersPage:
   title: Käyttäjät
 SettingsPage:

@@ -5,12 +5,14 @@
 import PrintOptionsForm from "../prints/PrintOptionsForm";
 import MapInteractionHelp from "../maps/MapInteractionHelp";
 import {useParams} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 const PrintoutPage = () => {
+  const {t} = useTranslation();
   const {congregationId} = useParams()
   return <>
     <div className="no-print">
-      <h1>Printouts</h1>
+      <h1>{t('PrintoutPage.title')}</h1>
     </div>
     <PrintOptionsForm congregationId={congregationId}/>
     <div className="no-print">

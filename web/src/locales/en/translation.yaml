@@ -45,6 +45,19 @@ TerritoryPage:
     copy: Copy to clipboard
 PrintoutPage:
   title: Printouts
+  printOptions: Print Options
+  template: Template
+  language: Language
+  mapRaster: Background Map
+  regions: Regions
+  territories: Territories
+  templates:
+    TerritoryCard: Territory Card
+    TerritoryCardMapOnly: Territory Card, map only
+    NeighborhoodCard: Neighborhood Map
+    RuralTerritoryCard: Rural Territory Card
+    QrCodeOnly: QR code only (for adding them as stickers to old cards)
+    RegionPrintout: Region Map
 UsersPage:
   title: Users
 SettingsPage:

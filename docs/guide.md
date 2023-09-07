@@ -57,7 +57,7 @@ The **card_minimap_viewport layer** determines the minimap's ⑤ zoom level. By 
 
 > Only the **congregation_boundary** and **territory** layers are mandatory. The other layers can be left empty.
 
-In the layers panel there are also various map rasters. The default is **OpenStreetMap**, which has street maps for the whole world, but for some countries there are also additional maps. These same maps can be used for printing the territory cards inside Territory Bro.
+In the layers panel there are also various background maps. The default is **OpenStreetMap**, which has street maps for the whole world, but for some countries there are also additional maps. These same maps can be used for printing the territory cards inside Territory Bro.
 
 
 ## Editing the Maps
@@ -100,7 +100,7 @@ After you are done editing a layer, you can choose **Layer \| Toggle Editing** a
 
 Log in to <https://beta.territorybro.com>, choose your congregation and to go printouts. You should see your territories ready to be printed using various card templates. You can print multiple territories by holding down `Ctrl` or `Shift` to select them from the territories list. 
 
-By default, the map rasters from OpenStreetMap are used, but Territory Bro can support also other freely available maps. [Create an issue](https://github.com/luontola/territory-bro/issues) if you know about a map you wish to use.
+By default, the background maps from OpenStreetMap are used, but Territory Bro can support also other freely available maps. [Create an issue](https://github.com/luontola/territory-bro/issues) if you know about a map you wish to use.
 
 You can do minor adjustments to the maps: drag with mouse to move, scroll mouse wheel to zoom, hold `Alt+Shift` while dragging to rotate. These adjustments are not saved after you leave the page, so do them right before printing the cards. 
 
