@@ -15,9 +15,12 @@ HomePage:
 RegistrationPage:
   title: Register a New Congregation
   register: Register
-  mailingListAd: It is recommended to <0>subscribe to the announcements mailing list</0> to be notified about important updates to Territory Bro.
+  mailingListAd: We recommend <0>subscribing to our mailing list</0> to be notified about important Territory Bro updates.
 JoinPage:
   title: Join an Existing Congregation
+  introduction: To access a congregation in Territory Bro, you will need to tell your <em>User ID</em> to your congregation's territory servant, so that he can give you access.
+  yourUserId: "Your User ID is:"
+  copy: Copy to clipboard
 CongregationPage:
   demo:
     welcome: Welcome to the demo

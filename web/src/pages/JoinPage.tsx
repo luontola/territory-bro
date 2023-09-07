@@ -5,10 +5,12 @@
 import {useSettings} from "../api";
 import {auth0Authenticator} from "../authentication";
 import ClipboardJS from "clipboard";
+import {Trans, useTranslation} from "react-i18next";
 
 new ClipboardJS('#copy-your-user-id');
 
 const JoinPage = () => {
+  const {t} = useTranslation();
   const settings = useSettings();
   // TODO: deduplicate with registration page
   if (!settings.user) {
@@ -18,18 +20,17 @@ const JoinPage = () => {
   const userId = settings.user.id;
 
   return <>
-    <h1>Join an Existing Congregation</h1>
+    <h1>{t('JoinPage.title')}</h1>
 
-    <p>To access a congregation in Territory Bro, you will need to tell your <em>User ID</em> to the brother who is
-      taking care of the territories in your congregation, so that he can give you access.</p>
+    <p><Trans i18nKey="JoinPage.introduction"/></p>
 
-    <p>Your User ID is:</p>
+    <p>{t('JoinPage.yourUserId')}</p>
 
     <p id="your-user-id" style={{fontSize: '150%', margin: '15px'}}>{userId}</p>
 
     <p>
       <button id="copy-your-user-id" type="button" className="pure-button" data-clipboard-target="#your-user-id">
-        Copy to clipboard
+        {t('JoinPage.copy')}
       </button>
     </p>
   </>;

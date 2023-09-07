@@ -15,9 +15,12 @@ HomePage:
 RegistrationPage:
   title: Rekisteröi uusi seurakunta
   register: Rekisteröi
-  mailingListAd: Suosittelemme <0>liittymään postituslistalle</0> saadaksesi tiedon tärkeistä Territory Bro -päivityksistä.
+  mailingListAd: Suosittelemme <0>liittymään postituslistallemme</0> saadaksesi tiedon tärkeistä Territory Bro -päivityksistä.
 JoinPage:
   title: Liity olemassa olevaan seurakuntaan
+  introduction: Jotta pääsisit käsiksi seurakuntaan Territory Brossa, sinun tulee kertoa <em>käyttäjätunnuksesi</em> seurakuntasi aluepalvelijalle, jotta hän voi antaa sinulle pääsyn.
+  yourUserId: "Käyttäjätunnuksesi on:"
+  copy: Kopioi leikepöydälle
 CongregationPage:
   demo:
     welcome: Tervetuloa demoon
