@@ -17,6 +17,8 @@ function NavigationListener({children}) {
   useEffect(() => {
     console.info(`Current URL is now ${location.pathname}${location.search}${location.hash}`);
     logPageView();
+    // TODO: should also restore the focused element - or just switch to server-side rendering for things to work out of the box
+    // TODO: investigate React Router's ScrollRestoration component https://reactrouter.com/en/main/components/scroll-restoration
     restoreScrollY(getPageState("scrollY"));
   }, [location.pathname])
   return children;
@@ -29,7 +31,7 @@ function restoreScrollY(scrollY?: number) {
       window.scrollTo(0, scrollY);
     }, 100);
   } else {
-    document.querySelector('main')?.scrollIntoView({block: "start"});
+    window.scrollTo(0, 0);
   }
 }
 
