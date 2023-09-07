@@ -32,12 +32,18 @@ const options = {
 i18n.use(LanguageDetector)
   .use(initReactI18next)
   // https://www.i18next.com/overview/configuration-options
-  .init(options);
+  .init(options)
+  .then(() => {
+    setDocumentLanguage();
+  });
 
 export async function changeLanguage(language: string) {
   await i18n.changeLanguage(language);
-  // TODO: set the lang for document element after the whole application has been translated
-  //document.documentElement.setAttribute('lang', i18n.language);
+  setDocumentLanguage();
+}
+
+function setDocumentLanguage() {
+  document.documentElement.setAttribute('lang', i18n.resolvedLanguage);
 }
 
 export function isolatedI18nInstance(language: string) {
