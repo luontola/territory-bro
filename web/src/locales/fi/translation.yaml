@@ -77,7 +77,10 @@ UsersPage:
 SettingsPage:
   title: Asetukset
   congregationName: Seurakunnan nimi
-  congregationNameRequired: Seurakunnan nimi on pakollinen tieto.
+  congregationNameRequired: Seurakunnan nimi on pakollinen.
+  experimentalFeatures: Kokeelliset ominaisuudet
+  save: Tallenna
+  cancel: Peruuta
 SupportPage:
   title: Tuki ja ohjeet
   introduction: Territory Bro on avoimen lähdekoodin projekti, jota kehittää Esko Luontola.

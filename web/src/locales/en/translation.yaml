@@ -78,6 +78,9 @@ SettingsPage:
   title: Settings
   congregationName: Congregation Name
   congregationNameRequired: Congregation name is required.
+  experimentalFeatures: Experimental Features
+  save: Save
+  cancel: Cancel
 SupportPage:
   title: Support
   introduction: Territory Bro is an open source project developed by Esko Luontola.

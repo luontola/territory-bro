@@ -7,6 +7,7 @@ import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import InfoBox from "../maps/InfoBox";
 import style from "./SettingsPage.module.css";
 import {Link, useNavigate, useParams} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 interface FormValues {
   congregationName: string;
@@ -14,6 +15,7 @@ interface FormValues {
 }
 
 const SettingsPage = ({}) => {
+  const {t} = useTranslation();
   const {congregationId} = useParams()
   const navigate = useNavigate();
   const congregation = useCongregationById(congregationId);
@@ -25,7 +27,7 @@ const SettingsPage = ({}) => {
     validate={values => {
       let errors: FormikErrors<FormValues> = {};
       if (!values.congregationName) {
-        errors.congregationName = 'Congregation name is required.';
+        errors.congregationName = t('SettingsPage.congregationNameRequired');
       }
       if (values.loansCsvUrl && !values.loansCsvUrl.startsWith("https://docs.google.com/")) {
         errors.loansCsvUrl = 'If present, must point to a Google Sheets share';
@@ -44,14 +46,16 @@ const SettingsPage = ({}) => {
       }
     }}>
     {({isSubmitting}) => <>
-      <h1>Settings</h1>
+      <h1>{t('SettingsPage.title')}</h1>
       <Form className="pure-form pure-form-aligned">
         <fieldset>
           <div className="pure-control-group">
-            <label htmlFor="congregationName">Congregation Name</label>
+            <label htmlFor="congregationName">{t('SettingsPage.congregationName')}</label>
             <Field name="congregationName" id="congregationName" type="text"/>
             <ErrorMessage name="congregationName" component="span" className="pure-form-message-inline"/>
           </div>
+
+          <h3>{t('SettingsPage.experimentalFeatures')}</h3>
 
           <div className="pure-control-group">
             <label htmlFor="loansCsvUrl">Territory loans CSV URL (optional)</label>
@@ -111,10 +115,12 @@ const SettingsPage = ({}) => {
 
           <div className="pure-controls">
             <button type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">
-              Save
+              {t('SettingsPage.save')}
             </button>
             {' '}
-            <Link to=".." relative="path" className="pure-button">Cancel</Link>
+            <Link to=".." relative="path" className="pure-button">
+              {t('SettingsPage.cancel')}
+            </Link>
           </div>
         </fieldset>
       </Form>
