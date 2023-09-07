@@ -13,7 +13,8 @@ declare global {
 window.dataLayer = window.dataLayer || [];
 
 function gtag(...args) {
-  window.dataLayer.push(arguments);
+  // TODO: new analytics platform
+  // window.dataLayer.push(arguments);
 }
 
 export function logPageView() {
