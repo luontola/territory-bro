@@ -65,7 +65,14 @@ const SettingsPage = ({}) => {
               handle the territory loans accounting all by itself, but in the meanwhile this workaround gives some of
               the benefits.</p>
 
-            <p>At first, you'll need to create a sheet with the following structure:</p>
+            <p>Here is an <a
+              href="https://docs.google.com/spreadsheets/d/1pa_EIyuCpWGbEOXFOqjc7P0XfDWbZNRKIKXKLpnKkx4/edit?usp=sharing">
+              example spreadsheet</a> that you can use as a starting point. Also please <Link to="/support">contact
+              me</Link> for assistance and so that I will know to help you later with migration to full accounting
+              support.
+            </p>
+
+            <p>You'll need to create a sheet with the following structure:</p>
 
             <table className={style.spreadsheet}>
               <tbody>
@@ -97,6 +104,9 @@ const SettingsPage = ({}) => {
             <p>The first row of the sheet must contain the column names, but otherwise the sheet's structure is
               flexible: The columns can be in any order. Columns with other names are ignored. Empty rows are
               ignored.</p>
+
+            <p>After you have such a sheet, you can expose it to the Internet through <tt>File | Share | Publish to
+              web</tt>. Publish that sheet as a CSV file and enter its URL to the above field on this settings page.</p>
           </InfoBox>
 
           <div className="pure-controls">
