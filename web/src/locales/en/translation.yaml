@@ -53,6 +53,10 @@ SettingsPage:
   congregationNameRequired: Congregation name is required.
 SupportPage:
   title: Support
+  introduction: Territory Bro is an open source project developed by Esko Luontola.
+  userGuideAd: The <0>User Guide</0> should answer the most common questions related to creating territory maps.
+  emailAd: If that is not enough, you may email <0>{{email}}</0> to ask for help with using Territory Bro.
+  issueTrackerAd: Bugs and feature requests may also be reported to <0>this project's issue tracker</0>.
 Map:
   zoomIn: Zoom in
   zoomOut: Zoom out

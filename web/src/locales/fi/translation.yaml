@@ -53,6 +53,10 @@ SettingsPage:
   congregationNameRequired: Seurakunnan nimi on pakollinen tieto.
 SupportPage:
   title: Tuki ja ohjeet
+  introduction: Territory Bro on avoimen lähdekoodin projekti, jota kehittää Esko Luontola.
+  userGuideAd: <0>Käyttöoppaan</0> pitäisi vastata yleisimpiin kysymyksiin, jotka liittyvät aluekarttojen luomiseen.
+  emailAd: Jos se ei riitä, niin voit lähettää sähköpostia osoitteeseen <0>{{email}}</0> saadaksesi apua Territory Bron käyttöön.
+  issueTrackerAd: Virheitä ja ominaisuuspyyntöjä voi myös raportoida <0>tämän projektin virheenseurantatyökaluun</0>.
 Map:
   zoomIn: Suurenna
   zoomOut: Pienennä

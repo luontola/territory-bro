@@ -3,17 +3,24 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {useSettings} from "../api";
+import {Trans, useTranslation} from "react-i18next";
 
 const SupportPage = () => {
+  const {t} = useTranslation();
   const {supportEmail} = useSettings();
   return <>
-    <h1>Support</h1>
-    <p>Territory Bro is an open source project developed by Esko Luontola.</p>
-    <p>The <a href="https://territorybro.com/guide/">User Guide</a> should answer the most common questions.</p>
-    {supportEmail && <p>You may also email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>{" "}
-      to ask for help with using Territory Bro.</p>}
-    <p>Bugs and feature requests may also be reported to{" "}
-      <a href="https://github.com/luontola/territory-bro/issues">this project's issue tracker</a>.</p>
+    <h1>{t('SupportPage.title')}</h1>
+    <p>{t('SupportPage.introduction')}</p>
+    <p><Trans i18nKey="SupportPage.userGuideAd">
+      <a href="https://territorybro.com/guide/"></a>
+    </Trans></p>
+    {supportEmail &&
+      <p><Trans i18nKey="SupportPage.emailAd" values={{email: supportEmail}}>
+        <a href={`mailto:${supportEmail}`}></a>
+      </Trans></p>}
+    <p><Trans i18nKey="SupportPage.issueTrackerAd">
+      <a href="https://github.com/luontola/territory-bro/issues"></a>
+    </Trans></p>
   </>;
 };
 
