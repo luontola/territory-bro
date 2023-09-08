@@ -6,18 +6,18 @@ Navigation:
   logout: Logout
   news: News
   opensInNewWindow: Opens in new window
-  userGuide: User Guide
+  userGuide: User guide
 HomePage:
   title: Home
   introduction: Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses. See <0>territorybro.com</0> for more information.
-  yourCongregations: Your Congregations
-  viewDemo: View a Demo
+  yourCongregations: Your congregations
+  viewDemo: View a demo
 RegistrationPage:
-  title: Register a New Congregation
+  title: Register a new congregation
   register: Register
   mailingListAd: We recommend <0>subscribing to our mailing list</0> to be notified about important Territory Bro updates.
 JoinPage:
-  title: Join an Existing Congregation
+  title: Join an existing congregation
   introduction: To access a congregation in Territory Bro, you will need to tell your <em>User ID</em> to your congregation's territory servant, so that he can give you access.
   yourUserId: "Your User ID is:"
   copy: Copy to clipboard
@@ -44,28 +44,28 @@ TerritoryPage:
     copy: Copy to clipboard
 PrintoutPage:
   title: Printouts
-  printOptions: Print Options
+  printOptions: Print options
   template: Template
   language: Language
-  mapRaster: Background Map
+  mapRaster: Background map
   regions: Regions
   territories: Territories
   templates:
-    TerritoryCard: Territory Card
-    TerritoryCardMapOnly: Territory Card, map only
-    NeighborhoodCard: Neighborhood Map
-    RuralTerritoryCard: Rural Territory Card
+    TerritoryCard: Territory card
+    TerritoryCardMapOnly: Territory card, map only
+    NeighborhoodCard: Neighborhood map
+    RuralTerritoryCard: Rural territory card
     QrCodeOnly: QR code only (for adding them as stickers to old cards)
-    RegionPrintout: Region Map
+    RegionPrintout: Region map
 SettingsPage:
   title: Settings
 CongregationSettings:
-  congregationName: Congregation Name
+  congregationName: Congregation name
   congregationNameRequired: Congregation name is required.
-  experimentalFeatures: Experimental Features
+  experimentalFeatures: Experimental features
   save: Save changes
 EditingMaps:
-  title: Editing Maps
+  title: Editing maps
   introduction: The instructions for editing maps are in the <0>user guide</0>. You can edit the maps using the <1>QGIS application</1>, for which you will need the following QGIS project file.
   downloadQgisProject: Download QGIS project file
 UserManagement:
@@ -75,19 +75,19 @@ UserManagement:
   userIdWrongFormat: "That doesn't look like a User ID. It should look something like: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "User does not exist: {{userId}}"
   userIdHint: To find out somebody's <em>User ID</em>, ask them to visit <0>{{joinPageUrl}}</0> and copy their User ID from that page and send it to you.
-  addUser: Add User
+  addUser: Add user
   name: Name
   email: Email
-  loginMethod: Login Method
+  loginMethod: Login method
   actions: Actions
   you: You
   unverified: Unverified
-  removeUser: Remove User
+  removeUser: Remove user
   removeYourselfWarning: Are you sure you want to REMOVE YOURSELF from {{congregation}}? You will not be able to add yourself back.
 SupportPage:
   title: Support
   introduction: Territory Bro is an open source project developed by <0>Esko Luontola</0>.
-  userGuideAd: The <0>User Guide</0> should answer the most common questions related to creating territory maps.
+  userGuideAd: The <0>user guide</0> should answer the most common questions related to creating territory maps.
   emailAd: If that is not enough, you may email <0>{{email}}</0> to ask for help with using Territory Bro.
   issueTrackerAd: Bugs and feature requests may also be reported to <0>this project's issue tracker</0>.
 Errors:
