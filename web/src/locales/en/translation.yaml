@@ -86,7 +86,7 @@ UserManagement:
   removeYourselfWarning: Are you sure you want to REMOVE YOURSELF from {{congregation}}? You will not be able to add yourself back.
 SupportPage:
   title: Support
-  introduction: Territory Bro is an open source project developed by Esko Luontola.
+  introduction: Territory Bro is an open source project developed by <0>Esko Luontola</0>.
   userGuideAd: The <0>User Guide</0> should answer the most common questions related to creating territory maps.
   emailAd: If that is not enough, you may email <0>{{email}}</0> to ask for help with using Territory Bro.
   issueTrackerAd: Bugs and feature requests may also be reported to <0>this project's issue tracker</0>.

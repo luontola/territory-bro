@@ -10,7 +10,9 @@ const SupportPage = () => {
   const {supportEmail} = useSettings();
   return <>
     <h1>{t('SupportPage.title')}</h1>
-    <p>{t('SupportPage.introduction')}</p>
+    <p><Trans i18nKey="SupportPage.introduction">
+      <a href="https://www.luontola.fi/about"></a>
+    </Trans></p>
     <p><Trans i18nKey="SupportPage.userGuideAd">
       <a href="https://territorybro.com/guide/"></a>
     </Trans></p>
