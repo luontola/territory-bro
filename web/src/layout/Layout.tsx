@@ -43,11 +43,11 @@ const CongregationNav = () => {
       <li><NavLink to=".">{congregation.name}</NavLink></li>
       <li><NavLink to="territories">{t('TerritoryListPage.title')}</NavLink></li>
       {congregation.permissions.viewCongregation &&
-        <li><NavLink to="printouts">{t('PrintoutPage.title')}</NavLink></li>}
-      {congregation.permissions.configureCongregation && <>
-        <li><NavLink to="users">{t('UsersPage.title')}</NavLink></li>
+        <li><NavLink to="printouts">{t('PrintoutPage.title')}</NavLink></li>
+      }
+      {congregation.permissions.configureCongregation &&
         <li><NavLink to="settings">{t('SettingsPage.title')}</NavLink></li>
-      </>}
+      }
       <li><NavLink to="/support">{t('SupportPage.title')}</NavLink></li>
     </ul>
   );

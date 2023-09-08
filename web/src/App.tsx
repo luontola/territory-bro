@@ -14,7 +14,6 @@ import PrintoutPage from "./pages/PrintoutPage";
 import ErrorPage from "./pages/ErrorPage";
 import SupportPage from "./pages/SupportPage.tsx";
 import SettingsPage from "./pages/SettingsPage";
-import UsersPage from "./pages/UsersPage";
 import JoinPage from "./pages/JoinPage";
 import TerritoryListPage from "./pages/TerritoryListPage";
 import TerritoryPage from "./pages/TerritoryPage";
@@ -39,7 +38,6 @@ const App = () => (
           <Route path="/congregation/:congregationId/territories/:territoryId" element={<TerritoryPage/>}/>
           <Route path="/congregation/:congregationId/printouts" element={<PrintoutPage/>}/>
           <Route path="/congregation/:congregationId/settings" element={<SettingsPage/>}/>
-          <Route path="/congregation/:congregationId/users" element={<UsersPage/>}/>
 
           <Route path="*" element={<NotFoundPage/>}/>
         </Routes>

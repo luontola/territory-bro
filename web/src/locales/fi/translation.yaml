@@ -58,7 +58,15 @@ PrintoutPage:
     RuralTerritoryCard: Maaseutualueen kortti
     QrCodeOnly: Vain QR-koodi (tulosta tarroina ja lisää vanhoille korteille)
     RegionPrintout: Seutukartta
-UsersPage:
+SettingsPage:
+  title: Asetukset
+CongregationSettings:
+  congregationName: Seurakunnan nimi
+  congregationNameRequired: Seurakunnan nimi on pakollinen.
+  experimentalFeatures: Kokeelliset ominaisuudet
+  save: Tallenna
+  cancel: Peruuta
+UserManagement:
   title: Käyttäjät
   userId: Käyttäjätunnus
   userIdRequired: Käyttäjätunnus vaaditaan.
@@ -74,13 +82,6 @@ UsersPage:
   unverified: Vahvistamaton
   removeUser: Poista käyttäjä
   removeYourselfWarning: Oletko varma, että haluat POISTAA ITSESI {{congregation}}:sta? Et voi lisätä itseäsi takaisin.
-SettingsPage:
-  title: Asetukset
-  congregationName: Seurakunnan nimi
-  congregationNameRequired: Seurakunnan nimi on pakollinen.
-  experimentalFeatures: Kokeelliset ominaisuudet
-  save: Tallenna
-  cancel: Peruuta
 SupportPage:
   title: Tuki ja ohjeet
   introduction: Territory Bro on avoimen lähdekoodin projekti, jota kehittää Esko Luontola.

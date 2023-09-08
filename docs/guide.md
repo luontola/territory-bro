@@ -26,7 +26,7 @@ permalink: /guide/
    * If somebody has already registered your congregation to Territory Bro, they can give you access to it if you: 
      1. Visit <https://beta.territorybro.com/join> to find out your User ID code (it's made of 36 random numbers, letters and dashes).
      2. Send the User ID to the person who already can access your congregation in Territory Bro.
-     3. They will need to visit the congregation's Users page in Territory Bro, and add you there using your User ID.
+     3. They will need to visit the congregation's settings page in Territory Bro, and add you there using your User ID.
 
 2. After registering the congregation, there is a link to download a *QGIS project file* for your congregation. Save the project file on your computer.
 

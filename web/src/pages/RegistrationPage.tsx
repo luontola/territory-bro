@@ -29,7 +29,7 @@ const RegistrationPage = () => {
       validate={values => {
         let errors: FormikErrors<FormValues> = {};
         if (!values.congregationName) {
-          errors.congregationName = t('SettingsPage.congregationNameRequired');
+          errors.congregationName = t('CongregationSettings.congregationNameRequired');
         }
         return errors;
       }}
@@ -48,7 +48,7 @@ const RegistrationPage = () => {
       {({isSubmitting}) => <Form className="pure-form pure-form-aligned">
         <fieldset>
           <div className="pure-control-group">
-            <label htmlFor="congregationName">{t('SettingsPage.congregationName')}</label>
+            <label htmlFor="congregationName">{t('CongregationSettings.congregationName')}</label>
             <Field type="text" name="congregationName" id="congregationName" autoComplete="off"/>
             <ErrorMessage name="congregationName" component="div" className="pure-form-message-inline"/>
           </div>

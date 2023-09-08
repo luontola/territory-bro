@@ -7,7 +7,7 @@ import i18n from "./i18n";
 function formatErrorMessage(error) {
   const key = error[0];
   if (key === 'no-such-user') {
-    return i18n.t('UsersPage.userIdNotExist', {userId: error[1]});
+    return i18n.t('UserManagement.userIdNotExist', {userId: error[1]});
   }
   return JSON.stringify(error);
 }

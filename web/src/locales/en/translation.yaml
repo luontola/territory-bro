@@ -58,7 +58,15 @@ PrintoutPage:
     RuralTerritoryCard: Rural Territory Card
     QrCodeOnly: QR code only (for adding them as stickers to old cards)
     RegionPrintout: Region Map
-UsersPage:
+SettingsPage:
+  title: Settings
+CongregationSettings:
+  congregationName: Congregation Name
+  congregationNameRequired: Congregation name is required.
+  experimentalFeatures: Experimental Features
+  save: Save
+  cancel: Cancel
+UserManagement:
   title: Users
   userId: User ID
   userIdRequired: User ID is required.
@@ -74,13 +82,6 @@ UsersPage:
   unverified: Unverified
   removeUser: Remove User
   removeYourselfWarning: Are you sure you want to REMOVE YOURSELF from {{congregation}}? You will not be able to add yourself back.
-SettingsPage:
-  title: Settings
-  congregationName: Congregation Name
-  congregationNameRequired: Congregation name is required.
-  experimentalFeatures: Experimental Features
-  save: Save
-  cancel: Cancel
 SupportPage:
   title: Support
   introduction: Territory Bro is an open source project developed by Esko Luontola.

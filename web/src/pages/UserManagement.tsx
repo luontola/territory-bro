@@ -6,7 +6,7 @@ import {useState} from "react";
 import {addUser, setUserPermissions, useCongregationById, useSettings} from "../api";
 import {ErrorMessage, Field, Form, Formik, FormikErrors} from "formik";
 import {sortBy} from "lodash-es";
-import styles from "./UsersPage.module.css";
+import styles from "./UserManagement.module.css";
 import {formatApiError} from "../errorMessages";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
@@ -31,7 +31,7 @@ const RemoveUserButton = ({congregation, user}) => {
   return <button type="button" className={`pure-button ${styles.removeUser}`} onClick={async () => {
     try {
       if (isCurrentUser) {
-        if (!confirm(t('UsersPage.removeYourselfWarning', {congregation: congregation.name}))) {
+        if (!confirm(t('UserManagement.removeYourselfWarning', {congregation: congregation.name}))) {
           return;
         }
       }
@@ -44,7 +44,7 @@ const RemoveUserButton = ({congregation, user}) => {
       alert(formatApiError(error));
     }
   }}>
-    {t('UsersPage.removeUser')}
+    {t('UserManagement.removeUser')}
   </button>;
 };
 
@@ -54,7 +54,7 @@ interface FormValues {
   userId: string;
 }
 
-const UsersPage = () => {
+const UserManagement = () => {
   const {t} = useTranslation();
   const {congregationId} = useParams()
   const [newUser, setNewUser] = useState<string | null>(null);
@@ -72,9 +72,9 @@ const UsersPage = () => {
       let errors: FormikErrors<FormValues> = {};
       const userId = values.userId.trim();
       if (!userId) {
-        errors.userId = t('UsersPage.userIdRequired');
+        errors.userId = t('UserManagement.userIdRequired');
       } else if (!userId.match(`^${UUID_PATTERN}$`)) {
-        errors.userId = t('UsersPage.userIdWrongFormat');
+        errors.userId = t('UserManagement.userIdWrongFormat');
       }
       return errors;
     }}
@@ -95,24 +95,24 @@ const UsersPage = () => {
       }
     }}>
     {({isSubmitting}) => <>
-      <h1>{t('UsersPage.title')}</h1>
+      <h2>{t('UserManagement.title')}</h2>
 
       <Form className="pure-form pure-form-aligned">
         <fieldset>
           <div className="pure-control-group">
-            <label htmlFor="userId">{t('UsersPage.userId')} *</label>
+            <label htmlFor="userId">{t('UserManagement.userId')} *</label>
             <Field name="userId" id="userId" type="text" autoComplete="off" required={true}
                    pattern={`\\s*${UUID_PATTERN}\\s*`}/>
             <ErrorMessage name="userId" component="span" className="pure-form-message-inline"/>
           </div>
 
-          <p>* <Trans i18nKey="UsersPage.userIdHint" values={{joinPageUrl}}>
+          <p>* <Trans i18nKey="UserManagement.userIdHint" values={{joinPageUrl}}>
             <Link to="/join"></Link>
           </Trans></p>
 
           <div className="pure-controls">
             <button type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">
-              {t('UsersPage.addUser')}
+              {t('UserManagement.addUser')}
             </button>
           </div>
         </fieldset>
@@ -122,10 +122,10 @@ const UsersPage = () => {
         <thead>
         <tr>
           <th/>
-          <th>{t('UsersPage.name')}</th>
-          <th>{t('UsersPage.email')}</th>
-          <th>{t('UsersPage.loginMethod')}</th>
-          <th>{t('UsersPage.actions')}</th>
+          <th>{t('UserManagement.name')}</th>
+          <th>{t('UserManagement.email')}</th>
+          <th>{t('UserManagement.loginMethod')}</th>
+          <th>{t('UserManagement.actions')}</th>
         </tr>
         </thead>
         <tbody>
@@ -133,8 +133,8 @@ const UsersPage = () => {
           <td className={styles.profilePicture}>
             {user.picture && <img src={user.picture} alt=""/>}
           </td>
-          <td>{user.name || user.id} {user.id === myUserId && <em>({t('UsersPage.you')})</em>}</td>
-          <td>{user.email} {(user.email && !user.emailVerified) && <em>({t('UsersPage.unverified')})</em>}</td>
+          <td>{user.name || user.id} {user.id === myUserId && <em>({t('UserManagement.you')})</em>}</td>
+          <td>{user.email} {(user.email && !user.emailVerified) && <em>({t('UserManagement.unverified')})</em>}</td>
           <td><IdentityProvider user={user}/></td>
           <td><RemoveUserButton congregation={congregation} user={user}/></td>
         </tr>)}
@@ -144,4 +144,4 @@ const UsersPage = () => {
   </Formik>;
 };
 
-export default UsersPage;
+export default UserManagement;
