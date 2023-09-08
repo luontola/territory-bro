@@ -7,7 +7,7 @@ import {faLanguage} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {changeLanguage, languages} from "../i18n.ts";
 import {Field, Form, Formik} from "formik";
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import styles from "./Layout.module.css";
 
 function formatName(englishName: string, nativeName: string) {
@@ -20,7 +20,6 @@ function formatName(englishName: string, nativeName: string) {
 
 let LanguageSelection = () => {
   const {t, i18n} = useTranslation();
-  const [focus, setFocus] = useState(false)
   const initialValues = {language: i18n.resolvedLanguage as string}
   return (
     <Formik
@@ -42,16 +41,10 @@ let LanguageSelection = () => {
                      component="select"
                      aria-label={t('Navigation.changeLanguage')}
                      title={t('Navigation.changeLanguage')}
-                     className={styles.languageSelection}
-                     onFocus={() => setFocus(true)}
-                     onBlur={() => setFocus(false)}>
+                     className={styles.languageSelection}>
                 {languages.map(({code, englishName, nativeName}) =>
                   <option key={code} value={code}>
-                    {focus && formatName(englishName, nativeName)}
-                    {/* when this field doesn't have focus, hide all options except
-                        the selected option, in order to fit the element's width
-                        to the selected option */
-                      !focus && values.language === code && nativeName}
+                    {formatName(englishName, nativeName)}
                   </option>)}
               </Field>
             </label>
