@@ -38,6 +38,7 @@ const App = () => (
           <Route path="/congregation/:congregationId/territories/:territoryId" element={<TerritoryPage/>}/>
           <Route path="/congregation/:congregationId/printouts" element={<PrintoutPage/>}/>
           <Route path="/congregation/:congregationId/settings" element={<SettingsPage/>}/>
+          <Route path="/congregation/:congregationId/support" element={<SupportPage/>}/>
 
           <Route path="*" element={<NotFoundPage/>}/>
         </Routes>

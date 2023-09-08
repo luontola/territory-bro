@@ -48,7 +48,7 @@ const CongregationNav = () => {
       {(congregation.permissions.configureCongregation || congregation.permissions.gisAccess) &&
         <li><NavLink to="settings">{t('SettingsPage.title')}</NavLink></li>
       }
-      <li><NavLink to="/support">{t('SupportPage.title')}</NavLink></li>
+      <li><NavLink to="support">{t('SupportPage.title')}</NavLink></li>
     </ul>
   );
 }
