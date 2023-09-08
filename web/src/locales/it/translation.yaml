@@ -1,5 +1,118 @@
 englishName: Italian
 nativeName: Italiano
+Navigation:
+  changeLanguage: Cambia lingua
+  login: Accedi
+  logout: Esci
+  news: Notizie
+  opensInNewWindow: Si apre in una nuova finestra
+  userGuide: Guida dell'utente
+HomePage:
+  title: Home
+  introduction: Territory Bro è uno strumento per gestire le schede di territorio nelle congregazioni dei Testimoni di Geova. Per ulteriori informazioni, visita <0>territorybro.com</0>.
+  yourCongregations: Le tue congregazioni
+  viewDemo: Guarda una demo
+RegistrationPage:
+  title: Registra una nuova congregazione
+  register: Registrati
+  mailingListAd: Ti consigliamo di <0>iscriverti alla nostra mailing list</0> per ricevere notifiche sugli importanti aggiornamenti di Territory Bro.
+JoinPage:
+  title: Unisciti a una congregazione esistente
+  introduction: Per accedere a una congregazione su Territory Bro, dovrai comunicare il tuo <em>ID utente</em> al responsabile del territorio della tua congregazione, in modo che possa darti l'accesso.
+  yourUserId: "Il tuo ID utente è:"
+  copy: Copia negli appunti
+CongregationPage:
+  demo:
+    welcome: Benvenuti nella demo
+    introduction1: Questa demo è limitata solo alla visualizzazione di una congregazione. Alcune funzioni sono limitate.
+    introduction2: Ad esempio, non sarai in grado di modificare i territori, condividere link ai territori e le stampe non avranno il codice QR che collega al territorio.
+TerritoryListPage:
+  title: Territori
+  search: Cerca
+  clear: Cancella
+  limitedVisibility:
+    title: Perché così pochi territori?
+    explanation: Vengono mostrati solo i territori che ti sono stati condivisi.
+    needToRequestAccess: Dovrai <0>richiedere l'accesso</0> per vedere il resto.
+    needToLogin: Dovrai <0>effettuare l'accesso</0> per vedere il resto.
+TerritoryPage:
+  title: Territorio {{number}}
+  shareLink:
+    button: Condividi un link
+    closePopup: Chiudi
+    description: "Le persone con questo link potranno visualizzare questa mappa del territorio senza effettuare l'accesso:"
+    copy: Copia negli appunti
+PrintoutPage:
+  title: Stampe
+  printOptions: Opzioni di stampa
+  template: Modello
+  language: Lingua
+  mapRaster: Mappa di sfondo
+  regions: Regioni
+  territories: Territori
+  templates:
+    TerritoryCard: Scheda territorio
+    TerritoryCardMapOnly: Scheda territorio, solo mappa
+    NeighborhoodCard: Mappa del quartiere
+    RuralTerritoryCard: Scheda territorio rurale
+    QrCodeOnly: Solo codice QR (per aggiungerli come adesivi alle vecchie schede)
+    RegionPrintout: Mappa della regione
+SettingsPage:
+  title: Impostazioni
+CongregationSettings:
+  congregationName: Nome della congregazione
+  congregationNameRequired: Il nome della congregazione è obbligatorio.
+  experimentalFeatures: Funzioni sperimentali
+  save: Salva le impostazioni
+EditingMaps:
+  title: Modifica delle mappe
+  introduction: Le istruzioni per la modifica delle mappe si trovano nella <0>guida dell'utente</0>. Puoi modificare le mappe usando l'applicazione <1>QGIS</1>, per la quale avrai bisogno del file di progetto QGIS seguente.
+  downloadQgisProject: Scarica il file di progetto QGIS
+UserManagement:
+  title: Utenti
+  userId: ID utente
+  userIdRequired: L'ID utente è obbligatorio.
+  userIdWrongFormat: "Non sembra un ID utente. Dovrebbe assomigliare a qualcosa del genere: 01234567-89ab-cdef-0123-456789abcdef"
+  userIdNotExist: "L'utente non esiste: {{userId}}"
+  userIdHint: Per scoprire l'<em>ID utente</em> di qualcuno, chiedi loro di visitare <0>{{joinPageUrl}}</0> e di copiare il loro ID utente da quella pagina per poi inviartelo.
+  addUser: Aggiungi utente
+  name: Nome
+  email: Email
+  loginMethod: Metodo di accesso
+  actions: Azioni
+  you: Tu
+  unverified: Non verificato
+  removeUser: Rimuovi utente
+  removeYourselfWarning: Sei sicuro di voler RIMUOVERTI da {{congregation}}? Non sarai in grado di aggiungerti di nuovo.
+SupportPage:
+  title: Supporto
+  introduction: Territory Bro è un progetto open source sviluppato da <0>Esko Luontola</0>.
+  userGuideAd: La <0>guida dell'utente</0> dovrebbe rispondere alle domande più comuni relative alla creazione di mappe del territorio.
+  emailAd: Se ciò non fosse sufficiente, puoi inviare un'email a <0>{{email}}</0> per chiedere assistenza nell'uso di Territory Bro.
+  issueTrackerAd: Bug e richieste di nuove funzioni possono essere segnalati anche su <0>questo tracker dei problemi del progetto</0>.
+Errors:
+  pleaseWait: Attendere prego...
+  pageNotFound: Pagina non trovata 😵
+  linkNotFound:
+    title: Link non trovato 😵
+    description: Il link che hai aperto potrebbe essere errato o scaduto.
+  notAuthorized: Non autorizzato 🛑
+  unknownError: Spiacenti, qualcosa è andato storto 🥺
+  returnToFrontPage: Torna alla pagina principale e riprova
+Map:
+  zoomIn: Ingrandisci
+  zoomOut: Riduci
+  resetZoom: Reimposta zoom
+  showMyLocation: Mostra la mia posizione
+MapInteractionHelp:
+  title: Come interagire con le mappe?
+  move: <b>Movimento:</b> trascina con due dita / trascina con il pulsante sinistro del mouse
+  zoom: <b>Zoom:</b> pizzica o allontana con due dita / tieni premuto <kbd>{{ctrl}}</kbd> e scorri con la rotella del mouse
+  rotate: <b>Ruota:</b> ruota con due dita / tieni premuti <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> e trascina con il pulsante sinistro del mouse
+Territory:
+  number: Numero
+  region: Regione
+  addresses: Indirizzi
 TerritoryCard:
   title: Piantina del territorio
   footer: "Tenete questa cartolina nella busta. Non la sciupate, non vi fate segni e non la piegate. Ogni volta che \n il territorio è stato percorso interamente, informate il fratello che si occupa dello schedario dei territori."

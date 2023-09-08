@@ -1,5 +1,118 @@
 englishName: Indonesian
 nativeName: Indonesia
+Navigation:
+  changeLanguage: Ubah bahasa
+  login: Masuk
+  logout: Keluar
+  news: Berita
+  opensInNewWindow: Dibuka di jendela baru
+  userGuide: Panduan pengguna
+HomePage:
+  title: Beranda
+  introduction: Territory Bro adalah alat untuk mengelola kartu wilayah di kongregasi Saksi-Saksi Yehuwa. Lihat <0>territorybro.com</0> untuk informasi lebih lanjut.
+  yourCongregations: Kongregasi Anda
+  viewDemo: Lihat demo
+RegistrationPage:
+  title: Daftar kongregasi baru
+  register: Daftar
+  mailingListAd: Kami merekomendasikan <0>berlangganan milis kami</0> untuk mendapatkan pemberitahuan tentang pembaruan penting dari Territory Bro.
+JoinPage:
+  title: Bergabung dengan kongregasi yang ada
+  introduction: Untuk mengakses kongregasi di Territory Bro, Anda perlu memberitahu <em>ID Pengguna</em> Anda kepada penyelenggara wilayah kongregasi Anda, sehingga dia bisa memberikan akses kepada Anda.
+  yourUserId: "ID Pengguna Anda adalah:"
+  copy: Salin ke clipboard
+CongregationPage:
+  demo:
+    welcome: Selamat datang di demo
+    introduction1: Demo ini terbatas hanya untuk melihat kongregasi. Beberapa fitur dibatasi.
+    introduction2: Misalnya, Anda tidak akan bisa mengedit wilayah, berbagi tautan ke wilayah, dan cetakan tidak akan memiliki kode QR yang menghubungkan ke wilayah.
+TerritoryListPage:
+  title: Wilayah
+  search: Cari
+  clear: Bersihkan
+  limitedVisibility:
+    title: Mengapa sedikit wilayah?
+    explanation: Hanya wilayah-wilayah yang telah dibagikan dengan Anda yang saat ini ditampilkan.
+    needToRequestAccess: Anda perlu <0>meminta akses</0> untuk melihat yang lainnya.
+    needToLogin: Anda perlu <0>masuk</0> untuk melihat yang lainnya.
+TerritoryPage:
+  title: Wilayah {{number}}
+  shareLink:
+    button: Bagikan tautan
+    closePopup: Tutup
+    description: "Orang dengan tautan ini akan dapat melihat peta wilayah ini tanpa masuk:"
+    copy: Salin ke clipboard
+PrintoutPage:
+  title: Cetakan
+  printOptions: Opsi cetak
+  template: Templat
+  language: Bahasa
+  mapRaster: Peta latar belakang
+  regions: Wilayah
+  territories: Wilayah
+  templates:
+    TerritoryCard: Kartu wilayah
+    TerritoryCardMapOnly: Kartu wilayah, hanya peta
+    NeighborhoodCard: Peta lingkungan
+    RuralTerritoryCard: Kartu wilayah pedesaan
+    QrCodeOnly: Hanya kode QR (untuk menambahkannya sebagai stiker ke kartu lama)
+    RegionPrintout: Peta wilayah
+SettingsPage:
+  title: Pengaturan
+CongregationSettings:
+  congregationName: Nama kongregasi
+  congregationNameRequired: Nama kongregasi wajib diisi.
+  experimentalFeatures: Fitur eksperimental
+  save: Simpan pengaturan
+EditingMaps:
+  title: Mengedit peta
+  introduction: Instruksi untuk mengedit peta ada di <0>panduan pengguna</0>. Anda dapat mengedit peta menggunakan aplikasi <1>QGIS</1>, yang memerlukan file proyek QGIS berikut.
+  downloadQgisProject: Unduh file proyek QGIS
+UserManagement:
+  title: Pengguna
+  userId: ID Pengguna
+  userIdRequired: ID Pengguna wajib diisi.
+  userIdWrongFormat: "Sepertinya bukan ID Pengguna. Seharusnya terlihat seperti: 01234567-89ab-cdef-0123-456789abcdef"
+  userIdNotExist: "Pengguna tidak ditemukan: {{userId}}"
+  userIdHint: Untuk mengetahui <em>ID Pengguna</em> seseorang, mintalah mereka mengunjungi <0>{{joinPageUrl}}</0> dan menyalin ID Pengguna mereka dari halaman tersebut untuk dikirimkan kepada Anda.
+  addUser: Tambah pengguna
+  name: Nama
+  email: Email
+  loginMethod: Metode masuk
+  actions: Tindakan
+  you: Anda
+  unverified: Belum diverifikasi
+  removeUser: Hapus pengguna
+  removeYourselfWarning: Apakah Anda yakin ingin MENGHAPUS DIRI dari {{congregation}}? Anda tidak akan dapat menambahkan diri Anda kembali.
+SupportPage:
+  title: Dukungan
+  introduction: Territory Bro adalah proyek sumber terbuka yang dikembangkan oleh <0>Esko Luontola</0>.
+  userGuideAd: <0>Panduan pengguna</0> seharusnya menjawab pertanyaan-pertanyaan umum terkait pembuatan peta wilayah.
+  emailAd: Jika itu tidak cukup, Anda dapat mengirim email ke <0>{{email}}</0> untuk meminta bantuan dalam menggunakan Territory Bro.
+  issueTrackerAd: Bug dan permintaan fitur juga dapat dilaporkan ke <0>pelacak isu proyek ini</0>.
+Errors:
+  pleaseWait: Harap tunggu...
+  pageNotFound: Halaman tidak ditemukan 😵
+  linkNotFound:
+    title: Tautan tidak ditemukan 😵
+    description: Tautan yang Anda buka mungkin salah atau telah kadaluarsa.
+  notAuthorized: Tidak diizinkan 🛑
+  unknownError: Maaf, terjadi kesalahan 🥺
+  returnToFrontPage: Kembali ke halaman depan dan coba lagi
+Map:
+  zoomIn: Perbesar
+  zoomOut: Perkecil
+  resetZoom: Atur ulang perbesaran
+  showMyLocation: Tampilkan lokasi saya
+MapInteractionHelp:
+  title: Cara berinteraksi dengan peta?
+  move: <b>Pindah:</b> tarik dengan dua jari / tarik dengan tombol kiri mouse
+  zoom: <b>Perbesar:</b> cubit atau lebarkan dengan dua jari / tekan <kbd>{{ctrl}}</kbd> dan gulirkan dengan scroll mouse
+  rotate: <b>Putar:</b> putar dengan dua jari / tahan <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> dan tarik dengan tombol kiri mouse
+Territory:
+  number: Nomor
+  region: Wilayah
+  addresses: Alamat
 TerritoryCard:
   title: Kartu Peta Daerah
   footer: "Mohon simpan kartu ini di dalam amplop. Jangan sampai kotor, tercoret atau terlipat. \n Jika daerah selesai dikerjakan, mohon beritahu saudara yang bertanggung jawab atas arsip daerah."

@@ -1,5 +1,118 @@
 englishName: Dutch
 nativeName: Nederlands
+Navigatie:
+  changeLanguage: Taal wijzigen
+  login: Inloggen
+  logout: Uitloggen
+  news: Nieuws
+  opensInNewWindow: Opent in nieuw venster
+  userGuide: Gebruikershandleiding
+HomePage:
+  title: Home
+  introduction: Territory Bro is een tool voor het beheren van territoriumkaarten in de gemeenschappen van Jehovah's Getuigen. Zie <0>territorybro.com</0> voor meer informatie.
+  yourCongregations: Uw gemeenschappen
+  viewDemo: Bekijk een demo
+RegistrationPage:
+  title: Registreer een nieuwe gemeenschap
+  register: Registreren
+  mailingListAd: We raden aan om <0>je aan te melden voor onze mailinglijst</0> om op de hoogte te blijven van belangrijke updates van Territory Bro.
+JoinPage:
+  title: Sluit je aan bij een bestaande gemeenschap
+  introduction: Om toegang te krijgen tot een gemeenschap in Territory Bro, moet je je <em>Gebruikers-ID</em> aan de territoriumdienaar van je gemeenschap vertellen, zodat hij je toegang kan geven.
+  yourUserId: "Je Gebruikers-ID is:"
+  copy: Kopiëren naar klembord
+CongregationPage:
+  demo:
+    welcome: Welkom bij de demo
+    introduction1: Deze demo is beperkt tot het bekijken van een gemeenschap. Sommige functies zijn beperkt.
+    introduction2: Zo kun je bijvoorbeeld territoria niet bewerken, geen links naar territoria delen en de afdrukken hebben geen QR-code die naar het territorium leidt.
+TerritoryListPage:
+  title: Territoria
+  search: Zoeken
+  clear: Wissen
+  limitedVisibility:
+    title: Waarom zo weinig territoria?
+    explanation: Alleen de territoria die met jou zijn gedeeld, worden momenteel weergegeven.
+    needToRequestAccess: Je moet <0>toegang aanvragen</0> om de rest te zien.
+    needToLogin: Je moet <0>inloggen</0> om de rest te zien.
+TerritoryPage:
+  title: Territorium {{number}}
+  shareLink:
+    button: Deel een link
+    closePopup: Sluiten
+    description: "Mensen met deze link kunnen de territoriumkaart bekijken zonder in te loggen:"
+    copy: Kopiëren naar klembord
+PrintoutPage:
+  title: Afdrukken
+  printOptions: Afdrukopties
+  template: Sjabloon
+  language: Taal
+  mapRaster: Achtergrondkaart
+  regions: Regio's
+  territories: Territoria
+  templates:
+    TerritoryCard: Territoriumkaart
+    TerritoryCardMapOnly: Territoriumkaart, alleen kaart
+    NeighborhoodCard: Buurtkaart
+    RuralTerritoryCard: Territoriumkaart voor landelijk gebied
+    QrCodeOnly: Alleen QR-code (om deze als stickers toe te voegen aan oude kaarten)
+    RegionPrintout: Regiokaart
+SettingsPage:
+  title: Instellingen
+CongregationSettings:
+  congregationName: Gemeentenaam
+  congregationNameRequired: Gemeentenaam is verplicht.
+  experimentalFeatures: Experimentele functies
+  save: Instellingen opslaan
+EditingMaps:
+  title: Kaarten bewerken
+  introduction: De instructies voor het bewerken van kaarten staan in de <0>gebruikershandleiding</0>. Je kunt de kaarten bewerken met behulp van de <1>QGIS-toepassing</1>, waarvoor je het volgende QGIS-projectbestand nodig hebt.
+  downloadQgisProject: QGIS-projectbestand downloaden
+UserManagement:
+  title: Gebruikers
+  userId: Gebruikers-ID
+  userIdRequired: Gebruikers-ID is verplicht.
+  userIdWrongFormat: "Dat lijkt niet op een Gebruikers-ID. Het zou er ongeveer zo uit moeten zien: 01234567-89ab-cdef-0123-456789abcdef"
+  userIdNotExist: "Gebruiker bestaat niet: {{userId}}"
+  userIdHint: Om iemands <em>Gebruikers-ID</em> te achterhalen, vraag je hen om <0>{{joinPageUrl}}</0> te bezoeken en hun Gebruikers-ID van die pagina te kopiëren en naar jou te sturen.
+  addUser: Gebruiker toevoegen
+  name: Naam
+  email: E-mail
+  loginMethod: Inlogmethode
+  actions: Acties
+  you: Jij
+  unverified: Niet geverifieerd
+  removeUser: Gebruiker verwijderen
+  removeYourselfWarning: Weet je zeker dat je JEZELF wilt VERWIJDEREN uit {{congregation}}? Je kunt jezelf dan niet meer toevoegen.
+SupportPage:
+  title: Ondersteuning
+  introduction: Territory Bro is een open source project ontwikkeld door <0>Esko Luontola</0>.
+  userGuideAd: De <0>gebruikershandleiding</0> bevat antwoorden op de meest gestelde vragen met betrekking tot het maken van territoriumkaarten.
+  emailAd: Als dat niet voldoende is, kun je een e-mail sturen naar <0>{{email}}</0> om hulp te vragen bij het gebruik van Territory Bro.
+  issueTrackerAd: Bugs en functieverzoeken kunnen ook worden gemeld bij <0>het issue tracker</0> van dit project.
+Errors:
+  pleaseWait: Even geduld a.u.b....
+  pageNotFound: Pagina niet gevonden 😵
+  linkNotFound:
+    title: Link niet gevonden 😵
+    description: De link die je hebt geopend, is mogelijk onjuist of verlopen.
+  notAuthorized: Niet gemachtigd 🛑
+  unknownError: Sorry, er is iets misgegaan 🥺
+  returnToFrontPage: Ga terug naar de startpagina en probeer het opnieuw
+Map:
+  zoomIn: Inzoomen
+  zoomOut: Uitzoomen
+  resetZoom: Zoom resetten
+  showMyLocation: Mijn locatie tonen
+MapInteractionHelp:
+  title: Hoe te interageren met de kaarten?
+  move: <b>Verplaatsen:</b> slepen met twee vingers / slepen met de linker muisknop
+  zoom: <b>Inzoomen:</b> knijpen of uitspreiden met twee vingers / <kbd>{{ctrl}}</kbd> ingedrukt houden en scrollen met het muiswiel
+  rotate: <b>Roteren:</b> roteren met twee vingers / <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> ingedrukt houden en slepen met de linker muisknop
+Territory:
+  number: Nummer
+  region: Regio
+  addresses: Adressen
 TerritoryCard:
   title: Gebiedskaart
   footer: "Gelieve deze kaart in het plastic etui te bewaren. Bevlek, beschrijf of vouw deze kaart niet. \n Gelieve iedere keer dat het gebied bewerkt is, de broeder die voor het gebiedssysteem zorgt, hierover in te lichten."
