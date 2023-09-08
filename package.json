@@ -3,7 +3,7 @@
   "version": "1.0.0-SNAPSHOT",
   "description": "Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.",
   "homepage": "https://territorybro.com",
-  "author": "Esko Luontola (http://luontola.fi)",
+  "author": "Esko Luontola (https://www.luontola.fi)",
   "license": "Apache-2.0",
   "bugs": "https://github.com/luontola/territory-bro/issues",
   "repository": {
