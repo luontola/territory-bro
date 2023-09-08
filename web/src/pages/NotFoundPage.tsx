@@ -3,9 +3,14 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import PageTitle from "../layout/PageTitle.tsx";
+import {useTranslation} from "react-i18next";
 
-const NotFoundPage = () => <>
-  <PageTitle title="Page not found"/>
-</>;
+const NotFoundPage = () => {
+  const {t} = useTranslation();
+  return <>
+    <PageTitle title={t('Errors.pageNotFound')}/>
+    <p><a href="/">{t('Errors.returnToFrontPage')}</a></p>
+  </>;
+};
 
 export default NotFoundPage;

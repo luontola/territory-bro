@@ -7,6 +7,8 @@ import {auth0Authenticator} from "../authentication";
 import {formatError, logFatalException} from "../analytics";
 import {FailSafeLayout} from "../layout/Layout.tsx";
 import PageTitle from "../layout/PageTitle.tsx";
+import {useTranslation} from "react-i18next";
+import LoadingPage from "./LoadingPage.tsx";
 
 export function axiosHttpStatus(error) {
   if (error.isAxiosError) {
@@ -15,6 +17,7 @@ export function axiosHttpStatus(error) {
 }
 
 const ErrorPage = ({error}) => {
+  const {t} = useTranslation();
   const settings = useSettingsSafe();
   const httpStatus = axiosHttpStatus(error);
   if (httpStatus === 401 && !settings.error) {
@@ -23,24 +26,22 @@ const ErrorPage = ({error}) => {
       auth0Authenticator(settings.data).login();
     }
     return (
-      <FailSafeLayout>
-        <p>Logging in...</p>
-      </FailSafeLayout>
+      <LoadingPage/>
     );
   }
   const description = formatError(error);
   let title;
   if (httpStatus === 403) {
-    title = "Not authorized 🛑";
+    title = t('Errors.notAuthorized');
   } else {
-    title = "Sorry, something went wrong 🥺";
+    title = t('Errors.unknownError');
     logFatalException(description);
   }
   return (
     <FailSafeLayout>
       <PageTitle title={title}/>
-      <p><a href="/">Return to the front page and try again</a></p>
-      <pre>{description}</pre>
+      <p><a href="/">{t('Errors.returnToFrontPage')}</a></p>
+      <pre lang="en">{description}</pre>
     </FailSafeLayout>
   );
 };

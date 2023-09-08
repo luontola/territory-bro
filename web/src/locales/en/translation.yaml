@@ -90,6 +90,15 @@ SupportPage:
   userGuideAd: The <0>User Guide</0> should answer the most common questions related to creating territory maps.
   emailAd: If that is not enough, you may email <0>{{email}}</0> to ask for help with using Territory Bro.
   issueTrackerAd: Bugs and feature requests may also be reported to <0>this project's issue tracker</0>.
+Errors:
+  pleaseWait: Please wait...
+  pageNotFound: Page not found 😵
+  linkNotFound:
+    title: Link not found 😵
+    description: The link you opened may be incorrect or it has expired.
+  notAuthorized: Not authorized 🛑
+  unknownError: Sorry, something went wrong 🥺
+  returnToFrontPage: Return to the front page and try again
 Map:
   zoomIn: Zoom in
   zoomOut: Zoom out

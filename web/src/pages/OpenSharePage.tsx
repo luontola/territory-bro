@@ -6,8 +6,10 @@ import {useEffect, useState} from "react";
 import {openShare} from "../api";
 import {useNavigate, useParams} from "react-router-dom";
 import PageTitle from "../layout/PageTitle.tsx";
+import {useTranslation} from "react-i18next";
 
 const OpenSharePage = () => {
+  const {t} = useTranslation();
   const {shareKey} = useParams()
   const navigate = useNavigate();
   const [error, setError] = useState(null);
@@ -26,11 +28,11 @@ const OpenSharePage = () => {
 
   if (error) {
     return <>
-      <PageTitle title="Link not found"/>
-      <p>The link you opened may be incorrect or it has expired.</p>
+      <PageTitle title={t('Errors.linkNotFound.title')}/>
+      <p>{t('Errors.linkNotFound.description')}</p>
     </>;
   } else {
-    return <p>Please wait...</p>;
+    return <p>{t('Errors.pleaseWait')}</p>;
   }
 };
 

@@ -90,6 +90,15 @@ SupportPage:
   userGuideAd: <0>Käyttöoppaan</0> pitäisi vastata yleisimpiin kysymyksiin, jotka liittyvät aluekarttojen luomiseen.
   emailAd: Jos se ei riitä, niin voit lähettää sähköpostia osoitteeseen <0>{{email}}</0> saadaksesi apua Territory Bron käyttöön.
   issueTrackerAd: Virheitä ja ominaisuuspyyntöjä voi myös raportoida <0>tämän projektin virheenseurantatyökaluun</0>.
+Errors:
+  pleaseWait: Odota hetki...
+  pageNotFound: Sivua ei löytynyt 😵
+  linkNotFound:
+    title: Linkkiä ei löytynyt 😵
+    description: Avaamasi linkki saattaa olla virheellinen tai se on vanhentunut.
+  notAuthorized: Pääsy kielletty 🛑
+  unknownError: Pahoittelut, jotain meni pieleen 🥺
+  returnToFrontPage: Palaa etusivulle ja yritä uudelleen
 Map:
   zoomIn: Suurenna
   zoomOut: Pienennä

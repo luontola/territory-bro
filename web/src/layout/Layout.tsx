@@ -66,6 +66,9 @@ export const FailSafeLayout = ({children}: Props) =>
   <>
     <nav className={`${styles.navbar} no-print`}>
       <HomeNav/>
+      <div className={styles.lang}>
+        <LanguageSelection/>
+      </div>
     </nav>
 
     <main className={styles.content}>
