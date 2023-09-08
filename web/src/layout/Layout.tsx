@@ -25,7 +25,7 @@ const HomeNav = ({}) => {
       <li><a href="https://territorybro.com/guide/" target="_blank">
         {t('Navigation.userGuide')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.opensInNewWindow')}/>
       </a></li>
-      <li><a href="https://groups.google.com/forum/#!forum/territory-bro-announcements" target="_blank">
+      <li><a href="https://groups.google.com/g/territory-bro-announcements" target="_blank">
         {t('Navigation.news')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.opensInNewWindow')}/>
       </a></li>
       <li><NavLink to="/support">{t('SupportPage.title')}</NavLink></li>

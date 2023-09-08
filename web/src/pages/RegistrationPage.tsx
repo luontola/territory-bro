@@ -62,7 +62,7 @@ const RegistrationPage = () => {
     </Formik>
 
     <p><Trans i18nKey="RegistrationPage.mailingListAd">
-      <a href="https://groups.google.com/forum/#!forum/territory-bro-announcements/join"></a>
+      <a href="https://groups.google.com/g/territory-bro-announcements" target="_blank"></a>
     </Trans></p>
   </>;
 };
