@@ -4,12 +4,13 @@
 
 import {useSettings} from "../api";
 import {Trans, useTranslation} from "react-i18next";
+import PageTitle from "../layout/PageTitle.tsx";
 
 const SupportPage = () => {
   const {t} = useTranslation();
   const {supportEmail} = useSettings();
   return <>
-    <h1>{t('SupportPage.title')}</h1>
+    <PageTitle title={t('SupportPage.title')}/>
     <p><Trans i18nKey="SupportPage.introduction">
       <a href="https://www.luontola.fi/about"></a>
     </Trans></p>

@@ -13,6 +13,7 @@ import {useParams} from "react-router-dom";
 import {faCopy, faShareNodes, faXmark} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useTranslation} from "react-i18next";
+import PageTitle from "../layout/PageTitle.tsx";
 
 const mapRaster = mapRasters[0];
 
@@ -88,7 +89,7 @@ const TerritoryPage = () => {
   const territory = congregation.getTerritoryById(territoryId);
   // TODO: consider using a grid layout for responsiveness so that the details area has fixed width
   return <>
-    <h1>{t('TerritoryPage.title', {number: territory.number})}</h1>
+    <PageTitle title={t('TerritoryPage.title', {number: territory.number})}/>
 
     <div className="pure-g">
       <div className="pure-u-1 pure-u-sm-2-3 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4">

@@ -6,6 +6,7 @@ import {useSettings} from "../api";
 import {auth0Authenticator} from "../authentication";
 import ClipboardJS from "clipboard";
 import {Trans, useTranslation} from "react-i18next";
+import PageTitle from "../layout/PageTitle.tsx";
 
 new ClipboardJS('#copy-your-user-id');
 
@@ -20,7 +21,7 @@ const JoinPage = () => {
   const userId = settings.user.id;
 
   return <>
-    <h1>{t('JoinPage.title')}</h1>
+    <PageTitle title={t('JoinPage.title')}/>
 
     <p><Trans i18nKey="JoinPage.introduction"/></p>
 

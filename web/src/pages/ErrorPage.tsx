@@ -6,6 +6,7 @@ import {useSettingsSafe} from "../api";
 import {auth0Authenticator} from "../authentication";
 import {formatError, logFatalException} from "../analytics";
 import {FailSafeLayout} from "../layout/Layout.tsx";
+import PageTitle from "../layout/PageTitle.tsx";
 
 export function axiosHttpStatus(error) {
   if (error.isAxiosError) {
@@ -37,7 +38,7 @@ const ErrorPage = ({error}) => {
   }
   return (
     <FailSafeLayout>
-      <h1>{title}</h1>
+      <PageTitle title={title}/>
       <p><a href="/">Return to the front page and try again</a></p>
       <pre>{description}</pre>
     </FailSafeLayout>

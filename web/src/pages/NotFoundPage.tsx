@@ -2,8 +2,10 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
+import PageTitle from "../layout/PageTitle.tsx";
+
 const NotFoundPage = () => <>
-  <h1>Page not found</h1>
+  <PageTitle title="Page not found"/>
 </>;
 
 export default NotFoundPage;

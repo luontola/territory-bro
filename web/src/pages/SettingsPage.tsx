@@ -9,13 +9,14 @@ import EditingMaps from "./EditingMaps.tsx";
 import {useParams} from "react-router-dom";
 import {useCongregationById} from "../api.ts";
 import styles from "./SettingsPage.module.css";
+import PageTitle from "../layout/PageTitle.tsx";
 
 const SettingsPage = ({}) => {
   const {t} = useTranslation();
   const {congregationId} = useParams()
   const congregation = useCongregationById(congregationId);
   return <>
-    <h1>{t('SettingsPage.title')}</h1>
+    <PageTitle title={t('SettingsPage.title')}/>
     <div className={styles.sections}>
       {congregation.permissions.configureCongregation && <CongregationSettings/>}
       {congregation.permissions.gisAccess && <EditingMaps/>}

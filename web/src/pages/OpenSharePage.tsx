@@ -5,6 +5,7 @@
 import {useEffect, useState} from "react";
 import {openShare} from "../api";
 import {useNavigate, useParams} from "react-router-dom";
+import PageTitle from "../layout/PageTitle.tsx";
 
 const OpenSharePage = () => {
   const {shareKey} = useParams()
@@ -25,7 +26,7 @@ const OpenSharePage = () => {
 
   if (error) {
     return <>
-      <h1>Link not found</h1>
+      <PageTitle title="Link not found"/>
       <p>The link you opened may be incorrect or it has expired.</p>
     </>;
   } else {

@@ -7,6 +7,7 @@ import {createCongregation, useSettings} from "../api";
 import {auth0Authenticator} from "../authentication";
 import {useNavigate} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
+import PageTitle from "../layout/PageTitle.tsx";
 
 interface FormValues {
   congregationName: string;
@@ -22,7 +23,7 @@ const RegistrationPage = () => {
   }
 
   return <>
-    <h1>{t('RegistrationPage.title')}</h1>
+    <PageTitle title={t('RegistrationPage.title')}/>
 
     <Formik
       initialValues={{congregationName: ""} as FormValues}

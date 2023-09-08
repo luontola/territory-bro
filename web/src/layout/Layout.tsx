@@ -4,7 +4,7 @@
 
 import "./defaultStyles";
 import styles from "./Layout.module.css";
-import {ReactNode, useEffect} from "react";
+import {ReactNode} from "react";
 import AuthenticationPanel from "./AuthenticationPanel";
 import {useCongregationById} from "../api";
 import {NavLink as RouterNavLink, Route, Routes, useParams} from "react-router-dom";
@@ -53,22 +53,13 @@ const CongregationNav = () => {
   );
 }
 
-function useAppTitle(title: string | undefined) {
-  useEffect(() => {
-    // TODO: get title from H1
-    const site = "Territory Bro";
-    document.title = title ? `${title} - ${site}` : site;
-  }, []);
-}
-
 type Props = {
   title?: string;
   children?: ReactNode;
 };
 
-export const FailSafeLayout = ({title, children}: Props) => {
-  useAppTitle(title);
-  return <>
+export const FailSafeLayout = ({children}: Props) =>
+  <>
     <nav className={`${styles.navbar} no-print`}>
       <HomeNav/>
     </nav>
@@ -76,12 +67,10 @@ export const FailSafeLayout = ({title, children}: Props) => {
     <main className={styles.content}>
       {children}
     </main>
-  </>;
-}
+  </>
 
-const Layout = ({title, children}: Props) => {
-  useAppTitle(title);
-  return <>
+const Layout = ({children}: Props) =>
+  <>
     <nav className={`${styles.navbar} no-print`}>
       <Routes>
         <Route path="/*" element={<HomeNav/>}/>
@@ -98,7 +87,6 @@ const Layout = ({title, children}: Props) => {
     <main className={styles.content}>
       {children}
     </main>
-  </>;
-}
+  </>
 
 export default Layout;

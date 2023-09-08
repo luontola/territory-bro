@@ -6,13 +6,14 @@ import {useCongregationById} from "../api";
 import {Link, useParams} from "react-router-dom";
 import InfoBox from "../maps/InfoBox";
 import {useTranslation} from "react-i18next";
+import PageTitle from "../layout/PageTitle.tsx";
 
 const CongregationPage = () => {
   const {t} = useTranslation();
   const {congregationId} = useParams()
   const congregation = useCongregationById(congregationId);
   return <>
-    <h1>{congregation.name}</h1>
+    <PageTitle title={congregation.name}/>
     {congregationId === "demo" &&
       <InfoBox title={t('CongregationPage.demo.welcome')}>
         <p>{t('CongregationPage.demo.introduction1')}</p>

@@ -6,6 +6,7 @@ import {useCongregations, useSettings} from "../api";
 import LoginButton from "../layout/LoginButton";
 import {Link} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
+import PageTitle, {siteTitle} from "../layout/PageTitle.tsx";
 
 const ViewDemoButton = () => {
   const {t} = useTranslation();
@@ -25,7 +26,7 @@ const HomePage = () => {
   const settings = useSettings();
   const congregations = useCongregations();
   return <>
-    <h1>Territory Bro</h1>
+    <PageTitle title={siteTitle}/>
 
     <p><Trans i18nKey="HomePage.introduction">
       <a href="https://territorybro.com"></a>
