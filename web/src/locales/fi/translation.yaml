@@ -64,8 +64,7 @@ CongregationSettings:
   congregationName: Seurakunnan nimi
   congregationNameRequired: Seurakunnan nimi on pakollinen.
   experimentalFeatures: Kokeelliset ominaisuudet
-  save: Tallenna
-  cancel: Peruuta
+  save: Tallenna muutokset
 UserManagement:
   title: Käyttäjät
   userId: Käyttäjätunnus

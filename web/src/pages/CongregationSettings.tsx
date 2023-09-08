@@ -120,10 +120,6 @@ const CongregationSettings = ({}) => {
             <button type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">
               {t('CongregationSettings.save')}
             </button>
-            {' '}
-            <Link to=".." relative="path" className="pure-button">
-              {t('CongregationSettings.cancel')}
-            </Link>
           </div>
         </fieldset>
       </Form>

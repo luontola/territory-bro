@@ -64,8 +64,7 @@ CongregationSettings:
   congregationName: Congregation Name
   congregationNameRequired: Congregation name is required.
   experimentalFeatures: Experimental Features
-  save: Save
-  cancel: Cancel
+  save: Save changes
 UserManagement:
   title: Users
   userId: User ID
