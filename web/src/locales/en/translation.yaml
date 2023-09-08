@@ -26,7 +26,6 @@ CongregationPage:
     welcome: Welcome to the demo
     introduction1: This demo is limited to only viewing a congregation. Some features are restricted.
     introduction2: For example, you won't be able to edit territories, share links to territories, and the printouts won't have the QR code that links to the territory.
-  downloadQgisProject: Download QGIS project
 TerritoryListPage:
   title: Territories
   search: Search
@@ -65,6 +64,10 @@ CongregationSettings:
   congregationNameRequired: Congregation name is required.
   experimentalFeatures: Experimental Features
   save: Save changes
+EditingMaps:
+  title: Editing Maps
+  introduction: The instructions for editing maps are in the <0>user guide</0>. You can edit the maps using the <1>QGIS application</1>, for which you will need the following QGIS project file.
+  downloadQgisProject: Download QGIS project file
 UserManagement:
   title: Users
   userId: User ID

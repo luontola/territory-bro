@@ -23,11 +23,7 @@ const CongregationPage = () => {
     {congregation.permissions.viewCongregation &&
       <p><Link to="printouts">{t('PrintoutPage.title')}</Link></p>
     }
-    {congregation.permissions.gisAccess &&
-      <p><a href={`/api/congregation/${congregationId}/qgis-project`}>
-        {t('CongregationPage.downloadQgisProject')}</a></p>
-    }
-    {congregation.permissions.configureCongregation &&
+    {(congregation.permissions.configureCongregation || congregation.permissions.gisAccess) &&
       <p><Link to="settings">{t('SettingsPage.title')}</Link></p>
     }
   </>;

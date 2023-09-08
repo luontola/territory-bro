@@ -45,8 +45,7 @@ const CongregationSettings = ({}) => {
         setSubmitting(false);
       }
     }}>
-    {({isSubmitting}) => <>
-
+    {({isSubmitting}) => <section>
       <Form className="pure-form pure-form-aligned">
         <fieldset>
           <div className="pure-control-group">
@@ -123,7 +122,7 @@ const CongregationSettings = ({}) => {
           </div>
         </fieldset>
       </Form>
-    </>}
+    </section>}
   </Formik>;
 };
 

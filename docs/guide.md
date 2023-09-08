@@ -28,18 +28,18 @@ permalink: /guide/
      2. Send the User ID to the person who already can access your congregation in Territory Bro.
      3. They will need to visit the congregation's settings page in Territory Bro, and add you there using your User ID.
 
-2. After registering the congregation, there is a link to download a *QGIS project file* for your congregation. Save the project file on your computer.
+2. After registering the congregation, in the congregation's settings page there is a button to download a *QGIS project file*. Save the project file on your computer.
 
-3. Download and install the latest [QGIS 3.x LTR (Long Term Release)](https://qgis.org/). This program will be used to edit the territory maps.
+3. Download and install the latest [QGIS 3.x LTR (Long Term Release)](https://www.qgis.org/). This program will be used to edit the territory maps.
 
-4. Use QGIS to open your congregation's QGIS project file (which you saved in step 2). You should see a world map and you can zoom to your city.
+4. Use QGIS to open your congregation's QGIS project file (from step 2). You should see a world map, and you can zoom to your city. If you can't see the map, zoom all the way out using the **View \| Zoom Full** action from the application menus.
 
 After this the next steps are to draw your congregation's boundaries on the map and then start drawing individual territories.
 
 
 ## Basic Concepts
 
-After opening your congregation's project file in QGIS, you should see a *layers* panel. If it is not visible, select **View \| Panels \| Layers** from the main menu.
+After opening your congregation's project file in QGIS, you should see a *layers* panel. If it is not visible, select **View \| Panels \| Layers** from the application menus.
 
 <img alt="Layers panel" src="layers-panel-1x.png" srcset="layers-panel-2x.png 2x">
 
@@ -62,7 +62,7 @@ In the layers panel there are also various background maps. The default is **Ope
 
 ## Editing the Maps
 
-In QGIS, to draw a feature on one of the layers, first select the layer in the Layers panel and choose **Layer \| Toggle Editing** from the main menu.
+In QGIS, to draw a feature on one of the layers, first select the layer in the Layers panel and choose **Layer \| Toggle Editing** from the application menus.
 
 Now the layer is editable and you can choose the **Edit \| Add Polygon Feature** tool. Left-click on the map to draw the polygon's corners. Right-click when you're finished, after which you can type the feature's attributes.
 

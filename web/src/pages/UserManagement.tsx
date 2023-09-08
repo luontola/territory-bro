@@ -94,7 +94,7 @@ const UserManagement = () => {
         setSubmitting(false);
       }
     }}>
-    {({isSubmitting}) => <>
+    {({isSubmitting}) => <section>
       <h2>{t('UserManagement.title')}</h2>
 
       <Form className="pure-form pure-form-aligned">
@@ -140,7 +140,7 @@ const UserManagement = () => {
         </tr>)}
         </tbody>
       </table>
-    </>}
+    </section>}
   </Formik>;
 };
 

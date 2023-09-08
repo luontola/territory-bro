@@ -5,13 +5,22 @@
 import {useTranslation} from "react-i18next";
 import CongregationSettings from "./CongregationSettings.tsx";
 import UserManagement from "./UserManagement.tsx";
+import EditingMaps from "./EditingMaps.tsx";
+import {useParams} from "react-router-dom";
+import {useCongregationById} from "../api.ts";
+import styles from "./SettingsPage.module.css";
 
 const SettingsPage = ({}) => {
   const {t} = useTranslation();
+  const {congregationId} = useParams()
+  const congregation = useCongregationById(congregationId);
   return <>
     <h1>{t('SettingsPage.title')}</h1>
-    <CongregationSettings/>
-    <UserManagement/>
+    <div className={styles.sections}>
+      {congregation.permissions.configureCongregation && <CongregationSettings/>}
+      {congregation.permissions.gisAccess && <EditingMaps/>}
+      {congregation.permissions.configureCongregation && <UserManagement/>}
+    </div>
   </>;
 }
 

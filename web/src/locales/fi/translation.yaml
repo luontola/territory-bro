@@ -26,7 +26,6 @@ CongregationPage:
     welcome: Tervetuloa demoon
     introduction1: Tämä demo rajoittuu vain seurakunnan tarkasteluun. Joitain ominaisuuksia on rajoitettu.
     introduction2: Esimerkiksi et voi muokata alueita, jakaa linkkejä alueisiin, eikä tulosteissa ole QR-koodia, joka linkittyy alueeseen.
-  downloadQgisProject: Lataa QGIS-projekti
 TerritoryListPage:
   title: Alueet
   search: Hae
@@ -65,6 +64,10 @@ CongregationSettings:
   congregationNameRequired: Seurakunnan nimi on pakollinen.
   experimentalFeatures: Kokeelliset ominaisuudet
   save: Tallenna muutokset
+EditingMaps:
+  title: Karttojen muokkaus
+  introduction: Ohjeet karttojen muokkaamiseen löytyvät <0>käyttöoppaasta</0>. Voit muokata karttoja käyttämällä <1>QGIS-sovellusta</1>, jota varten tarvitset seuraavan QGIS-projektitiedoston.
+  downloadQgisProject: Lataa QGIS-projektitiedosto
 UserManagement:
   title: Käyttäjät
   userId: Käyttäjätunnus

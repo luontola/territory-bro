@@ -14,7 +14,7 @@ Currently it can be used to print new territory cards with up-to-date street map
 
 ### 1. Draw the Territories on a Map
 
-This is done using the free [QGIS](http://www.qgis.org/) application and saved into a database. Multiple people can edit the same database online, so the work of drawing the territories can be delegated easily.
+This is done using the free [QGIS](https://www.qgis.org/) application and saved into a database. Multiple people can edit the same database online, so the work of drawing the territories can be delegated easily.
 
 If you have already drawn the territories as polygons or lines with a map editor (e.g. Google Earth), it's possible to copy the geographic data from there and save many hours of work.
 
