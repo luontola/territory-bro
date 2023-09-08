@@ -21,6 +21,9 @@ const SupportPage = () => {
       <p><Trans i18nKey="SupportPage.emailAd" values={{email: supportEmail}}>
         <a href={`mailto:${supportEmail}`}></a>
       </Trans></p>}
+    <p><Trans i18nKey="SupportPage.translationAd">
+      <a href="https://github.com/luontola/territory-bro/tree/master/web/src/locales#readme"></a>
+    </Trans></p>
     <p><Trans i18nKey="SupportPage.issueTrackerAd">
       <a href="https://github.com/luontola/territory-bro/issues"></a>
     </Trans></p>

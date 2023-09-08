@@ -89,6 +89,7 @@ SupportPage:
   introduction: Territory Bro adalah proyek sumber terbuka yang dikembangkan oleh <0>Esko Luontola</0>.
   userGuideAd: <0>Panduan pengguna</0> seharusnya menjawab pertanyaan-pertanyaan umum terkait pembuatan peta wilayah.
   emailAd: Jika itu tidak cukup, Anda dapat mengirim email ke <0>{{email}}</0> untuk meminta bantuan dalam menggunakan Territory Bro.
+  translationAd: Lihat <0>petunjuk terjemahan</0> jika Anda ingin membantu meningkatkan terjemahan saat ini atau menambahkan bahasa baru.
   issueTrackerAd: Bug dan permintaan fitur juga dapat dilaporkan ke <0>pelacak isu proyek ini</0>.
 Errors:
   pleaseWait: Harap tunggu...
