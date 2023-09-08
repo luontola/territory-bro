@@ -8,8 +8,10 @@ import {auth0Authenticator} from "../authentication";
 import {sanitizeReturnPath} from "../authenticationUtil";
 import {useNavigate} from "react-router-dom";
 import {useMutation} from "@tanstack/react-query";
+import {useTranslation} from "react-i18next";
 
 const LoginCallbackPage = () => {
+  const {t} = useTranslation();
   const navigate = useNavigate();
   const settings = useSettings();
 
@@ -34,10 +36,7 @@ const LoginCallbackPage = () => {
       return <p>Login failed: {JSON.stringify(auth.error)}</p>;
     }
   }
-  if (auth.isLoading) {
-    return <p>Logging you in...</p>;
-  }
-  return <p>Login OK.</p>;
+  return <p>{t('Errors.pleaseWait')} {auth.isLoading ? "⏳" : "⌛️"}</p>;
 };
 
 export default LoginCallbackPage;
