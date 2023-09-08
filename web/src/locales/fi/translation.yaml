@@ -63,7 +63,7 @@ CongregationSettings:
   congregationName: Seurakunnan nimi
   congregationNameRequired: Seurakunnan nimi on pakollinen.
   experimentalFeatures: Kokeelliset ominaisuudet
-  save: Tallenna muutokset
+  save: Tallenna asetukset
 EditingMaps:
   title: Karttojen muokkaus
   introduction: Ohjeet karttojen muokkaamiseen löytyvät <0>käyttöoppaasta</0>. Voit muokata karttoja käyttämällä <1>QGIS-sovellusta</1>, jota varten tarvitset seuraavan QGIS-projektitiedoston.
