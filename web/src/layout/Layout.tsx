@@ -17,18 +17,22 @@ const NavLink = (props) => (
   <RouterNavLink className={({isActive}) => isActive ? styles.active : ""} {...props}/>
 );
 
+const Icon = ({children}) => (
+  <span aria-hidden={true}>{children}</span>
+)
+
 const HomeNav = ({}) => {
   const {t} = useTranslation();
   return (
     <ul className={styles.nav}>
-      <li><NavLink to="/">{t('HomePage.title')}</NavLink></li>
+      <li><NavLink to="/"><Icon>🏠</Icon> {t('HomePage.title')}</NavLink></li>
       <li><a href="https://territorybro.com/guide/" target="_blank">
         {t('Navigation.userGuide')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.opensInNewWindow')}/>
       </a></li>
       <li><a href="https://groups.google.com/g/territory-bro-announcements" target="_blank">
         {t('Navigation.news')} <FontAwesomeIcon icon={faExternalLinkAlt} title={t('Navigation.opensInNewWindow')}/>
       </a></li>
-      <li><NavLink to="/support">{t('SupportPage.title')}</NavLink></li>
+      <li><NavLink to="/support"><Icon>🛟</Icon> {t('SupportPage.title')}</NavLink></li>
     </ul>
   );
 }
@@ -39,16 +43,16 @@ const CongregationNav = () => {
   const {t} = useTranslation();
   return (
     <ul className={styles.nav}>
-      <li><NavLink to="/">{t('HomePage.title')}</NavLink></li>
+      <li><NavLink to="/"><Icon>🏠</Icon> {t('HomePage.title')}</NavLink></li>
       <li><NavLink to=".">{congregation.name}</NavLink></li>
-      <li><NavLink to="territories">{t('TerritoryListPage.title')}</NavLink></li>
+      <li><NavLink to="territories"><Icon>📍</Icon> {t('TerritoryListPage.title')}</NavLink></li>
       {congregation.permissions.viewCongregation &&
-        <li><NavLink to="printouts">{t('PrintoutPage.title')}</NavLink></li>
+        <li><NavLink to="printouts"><Icon>🖨️</Icon> {t('PrintoutPage.title')}</NavLink></li>
       }
       {(congregation.permissions.configureCongregation || congregation.permissions.gisAccess) &&
-        <li><NavLink to="settings">{t('SettingsPage.title')}</NavLink></li>
+        <li><NavLink to="settings"><Icon>⚙️</Icon> {t('SettingsPage.title')}</NavLink></li>
       }
-      <li><NavLink to="support">{t('SupportPage.title')}</NavLink></li>
+      <li><NavLink to="support"><Icon>🛟</Icon> {t('SupportPage.title')}</NavLink></li>
     </ul>
   );
 }
