@@ -22,6 +22,7 @@ import {Congregation, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 import {isEmpty} from "ol/extent";
 import {getPageState, setPageState} from "../util";
+import {isEqual} from "lodash-es";
 
 type Props = {
   congregation: Congregation;
@@ -42,11 +43,13 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
     this.map = initMap(this.elementRef.current, congregation, territories, onClick);
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, _prevState) {
     const {
       territories
     } = this.props;
-    this.map.updateTerritories(territories);
+    if (!isEqual(territories, prevProps.territories)) {
+      this.map.updateTerritories(territories);
+    }
   }
 
   componentWillUnmount() {
