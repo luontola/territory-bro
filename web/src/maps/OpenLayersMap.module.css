@@ -5,6 +5,12 @@
     touch-action: pan-x pan-y;
 }
 
+/* Fix scrolling the page on mobile when touching a map https://github.com/openlayers/openlayers/issues/6767#issuecomment-378929233 */
+
+:global .ol-viewport {
+    touch-action: auto !important;
+}
+
 /* Map Attribution; customize OpenLayers defaults to be printing friendly */
 
 .root :global .map-attribution {
