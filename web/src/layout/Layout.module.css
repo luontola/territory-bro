@@ -59,7 +59,7 @@ select.languageSelection:not(:focus) {
     background: none;
     box-shadow: none;
     padding: 0;
-    padding-left: 2px;
+    margin-left: 2px;
 }
 
 select.languageSelection:not(:focus):hover {
