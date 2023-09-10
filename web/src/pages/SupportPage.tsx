@@ -12,23 +12,23 @@ const SupportPage = () => {
   return <>
     <PageTitle title={t('SupportPage.title')}/>
     <p><Trans i18nKey="SupportPage.introduction">
-      <a href="https://www.luontola.fi/about"></a>
+      <a href="https://www.luontola.fi/about" target="_blank"></a>
     </Trans></p>
     <p><Trans i18nKey="SupportPage.mailingListAd">
       <a href="https://groups.google.com/g/territory-bro-announcements" target="_blank"></a>
     </Trans></p>
     <p><Trans i18nKey="SupportPage.userGuideAd">
-      <a href="https://territorybro.com/guide/"></a>
+      <a href="https://territorybro.com/guide/" target="_blank"></a>
     </Trans></p>
     {supportEmail &&
       <p><Trans i18nKey="SupportPage.emailAd" values={{email: supportEmail}}>
         <a href={`mailto:${supportEmail}`}></a>
       </Trans></p>}
     <p><Trans i18nKey="SupportPage.translationAd">
-      <a href="https://github.com/luontola/territory-bro/tree/master/web/src/locales#readme"></a>
+      <a href="https://github.com/luontola/territory-bro/tree/master/web/src/locales#readme" target="_blank"></a>
     </Trans></p>
     <p><Trans i18nKey="SupportPage.issueTrackerAd">
-      <a href="https://github.com/luontola/territory-bro/issues"></a>
+      <a href="https://github.com/luontola/territory-bro/issues" target="_blank"></a>
     </Trans></p>
   </>;
 };

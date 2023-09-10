@@ -23,11 +23,10 @@ const LoansCsvUrlInfo = ({}) => (
       of the benefits.</p>
 
     <p>Here is an <a
-      href="https://docs.google.com/spreadsheets/d/1pa_EIyuCpWGbEOXFOqjc7P0XfDWbZNRKIKXKLpnKkx4/edit?usp=sharing">
-      example spreadsheet</a> that you can use as a starting point. Also please <Link
+      href="https://docs.google.com/spreadsheets/d/1pa_EIyuCpWGbEOXFOqjc7P0XfDWbZNRKIKXKLpnKkx4/edit?usp=sharing"
+      target="_blank">example spreadsheet</a> that you can use as a starting point. Also please <Link
       to="../support" relative="path">contact me</Link> for assistance and so that I will know to help you
-      later with migration to full accounting support.
-    </p>
+      later with migration to full accounting support.</p>
 
     <p>You'll need to create a sheet with the following structure:</p>
 

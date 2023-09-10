@@ -11,8 +11,8 @@ const EditingMaps = ({}) => {
   return <section>
     <h2>{t('EditingMaps.title')}</h2>
     <p><Trans i18nKey="EditingMaps.introduction">
-      <a href="https://territorybro.com/guide/"></a>
-      <a href="https://www.qgis.org/"></a>
+      <a href="https://territorybro.com/guide/" target="_blank"></a>
+      <a href="https://www.qgis.org/" target="_blank"></a>
     </Trans></p>
     <p><a href={`/api/congregation/${congregationId}/qgis-project`} className="pure-button">
       {t('EditingMaps.downloadQgisProject')}
