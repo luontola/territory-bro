@@ -15,7 +15,6 @@ HomePage:
 RegistrationPage:
   title: Daftar kongregasi baru
   register: Daftar
-  mailingListAd: Kami merekomendasikan <0>berlangganan milis kami</0> untuk mendapatkan pemberitahuan tentang pembaruan penting dari Territory Bro.
 JoinPage:
   title: Bergabung dengan kongregasi yang ada
   introduction: Untuk mengakses kongregasi di Territory Bro, Anda perlu memberitahu <em>ID Pengguna</em> Anda kepada penyelenggara wilayah kongregasi Anda, sehingga dia bisa memberikan akses kepada Anda.
@@ -86,6 +85,7 @@ UserManagement:
 SupportPage:
   title: Dukungan
   introduction: Territory Bro adalah proyek sumber terbuka yang dikembangkan oleh <0>Esko Luontola</0>.
+  mailingListAd: Kami merekomendasikan <0>berlangganan milis kami</0> untuk mendapatkan pemberitahuan tentang pembaruan penting dari Territory Bro.
   userGuideAd: <0>Panduan pengguna</0> seharusnya menjawab pertanyaan-pertanyaan umum terkait pembuatan peta wilayah.
   emailAd: Jika itu tidak cukup, Anda dapat mengirim email ke <0>{{email}}</0> untuk meminta bantuan dalam menggunakan Territory Bro.
   translationAd: Lihat <0>petunjuk terjemahan</0> jika Anda ingin membantu meningkatkan terjemahan saat ini atau menambahkan bahasa baru.

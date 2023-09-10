@@ -15,7 +15,6 @@ HomePage:
 RegistrationPage:
   title: Registra una nuova congregazione
   register: Registrati
-  mailingListAd: Ti consigliamo di <0>iscriverti alla nostra mailing list</0> per ricevere notifiche sugli importanti aggiornamenti di Territory Bro.
 JoinPage:
   title: Unisciti a una congregazione esistente
   introduction: Per accedere a una congregazione su Territory Bro, dovrai comunicare il tuo <em>ID utente</em> al responsabile del territorio della tua congregazione, in modo che possa darti l'accesso.
@@ -86,6 +85,7 @@ UserManagement:
 SupportPage:
   title: Supporto
   introduction: Territory Bro è un progetto open source sviluppato da <0>Esko Luontola</0>.
+  mailingListAd: Ti consigliamo di <0>iscriverti alla nostra mailing list</0> per ricevere notifiche sugli importanti aggiornamenti di Territory Bro.
   userGuideAd: La <0>guida dell'utente</0> dovrebbe rispondere alle domande più comuni relative alla creazione di mappe del territorio.
   emailAd: Se ciò non fosse sufficiente, puoi inviare un'email a <0>{{email}}</0> per chiedere assistenza nell'uso di Territory Bro.
   translationAd: Consulta le <0>istruzioni di traduzione</0> se desideri contribuire a migliorare le traduzioni attuali o aggiungere nuove lingue.

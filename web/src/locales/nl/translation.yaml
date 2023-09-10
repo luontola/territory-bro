@@ -15,7 +15,6 @@ HomePage:
 RegistrationPage:
   title: Registreer een nieuwe gemeenschap
   register: Registreren
-  mailingListAd: We raden aan om <0>je aan te melden voor onze mailinglijst</0> om op de hoogte te blijven van belangrijke updates van Territory Bro.
 JoinPage:
   title: Sluit je aan bij een bestaande gemeenschap
   introduction: Om toegang te krijgen tot een gemeenschap in Territory Bro, moet je je <em>Gebruikers-ID</em> aan de territoriumdienaar van je gemeenschap vertellen, zodat hij je toegang kan geven.
@@ -86,6 +85,7 @@ UserManagement:
 SupportPage:
   title: Ondersteuning
   introduction: Territory Bro is een open source project ontwikkeld door <0>Esko Luontola</0>.
+  mailingListAd: We raden aan om <0>je aan te melden voor onze mailinglijst</0> om op de hoogte te blijven van belangrijke updates van Territory Bro.
   userGuideAd: De <0>gebruikershandleiding</0> bevat antwoorden op de meest gestelde vragen met betrekking tot het maken van territoriumkaarten.
   emailAd: Als dat niet voldoende is, kun je een e-mail sturen naar <0>{{email}}</0> om hulp te vragen bij het gebruik van Territory Bro.
   translationAd: Zie de <0>vertalinstructies</0> als je wilt helpen bij het verbeteren van de huidige vertalingen of het toevoegen van nieuwe talen.

@@ -14,6 +14,9 @@ const SupportPage = () => {
     <p><Trans i18nKey="SupportPage.introduction">
       <a href="https://www.luontola.fi/about"></a>
     </Trans></p>
+    <p><Trans i18nKey="SupportPage.mailingListAd">
+      <a href="https://groups.google.com/g/territory-bro-announcements" target="_blank"></a>
+    </Trans></p>
     <p><Trans i18nKey="SupportPage.userGuideAd">
       <a href="https://territorybro.com/guide/"></a>
     </Trans></p>
