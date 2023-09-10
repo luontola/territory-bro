@@ -74,7 +74,7 @@ UserManagement:
   userIdRequired: User ID is required.
   userIdWrongFormat: "That doesn't look like a User ID. It should look something like: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "User does not exist: {{userId}}"
-  userIdHint: To find out somebody's <em>User ID</em>, ask them to visit <0>{{joinPageUrl}}</0> and copy their User ID from that page and send it to you.
+  addUserInstructions: To add users to this congregation, ask them to visit <0>{{joinPageUrl}}</0> and copy their <em>User ID</em> from that page and send it to you.
   addUser: Add user
   name: Name
   email: Email

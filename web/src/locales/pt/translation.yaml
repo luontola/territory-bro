@@ -74,7 +74,7 @@ UserManagement:
   userIdRequired: O ID de usuário é obrigatório.
   userIdWrongFormat: "Isso não parece um ID de usuário. Deve se parecer com: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "Usuário não existe: {{userId}}"
-  userIdHint: Para descobrir o <em>ID de usuário</em> de alguém, peça a eles para visitar <0>{{joinPageUrl}}</0> e copiar o ID de usuário dessa página e enviá-lo para você.
+  addUserInstructions: Para adicionar usuários a esta congregação, peça a eles que visitem <0>{{joinPageUrl}}</0> e copiem seu <em>ID de usuário</em> dessa página e enviem para você.
   addUser: Adicionar usuário
   name: Nome
   email: Email

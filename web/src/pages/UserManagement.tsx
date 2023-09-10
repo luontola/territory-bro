@@ -97,18 +97,18 @@ const UserManagement = () => {
     {({isSubmitting}) => <section>
       <h2>{t('UserManagement.title')}</h2>
 
+      <p><Trans i18nKey="UserManagement.addUserInstructions" values={{joinPageUrl}}>
+        <Link to="/join"></Link>
+      </Trans></p>
+
       <Form className="pure-form pure-form-aligned">
         <fieldset>
           <div className="pure-control-group">
-            <label htmlFor="userId">{t('UserManagement.userId')} *</label>
+            <label htmlFor="userId">{t('UserManagement.userId')}</label>
             <Field name="userId" id="userId" type="text" autoComplete="off" required={true}
                    pattern={`\\s*${UUID_PATTERN}\\s*`}/>
             <ErrorMessage name="userId" component="span" className="pure-form-message-inline"/>
           </div>
-
-          <p>* <Trans i18nKey="UserManagement.userIdHint" values={{joinPageUrl}}>
-            <Link to="/join"></Link>
-          </Trans></p>
 
           <div className="pure-controls">
             <button type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">

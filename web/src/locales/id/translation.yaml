@@ -74,7 +74,7 @@ UserManagement:
   userIdRequired: ID Pengguna wajib diisi.
   userIdWrongFormat: "Sepertinya bukan ID Pengguna. Seharusnya terlihat seperti: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "Pengguna tidak ditemukan: {{userId}}"
-  userIdHint: Untuk mengetahui <em>ID Pengguna</em> seseorang, mintalah mereka mengunjungi <0>{{joinPageUrl}}</0> dan menyalin ID Pengguna mereka dari halaman tersebut untuk dikirimkan kepada Anda.
+  addUserInstructions: Untuk menambahkan pengguna ke kongregasi ini, minta mereka mengunjungi <0>{{joinPageUrl}}</0> dan menyalin <em>ID Pengguna</em> mereka dari halaman tersebut dan mengirimkannya kepada Anda.
   addUser: Tambah pengguna
   name: Nama
   email: Email
