@@ -21,11 +21,10 @@ JoinPage:
   introduction: Om toegang te krijgen tot een gemeenschap in Territory Bro, moet je je <em>Gebruikers-ID</em> aan de territoriumdienaar van je gemeenschap vertellen, zodat hij je toegang kan geven.
   yourUserId: "Je Gebruikers-ID is:"
   copy: Kopiëren naar klembord
-CongregationPage:
-  demo:
-    welcome: Welkom bij de demo
-    introduction1: Deze demo is beperkt tot het bekijken van een gemeenschap. Sommige functies zijn beperkt.
-    introduction2: Zo kun je bijvoorbeeld territoria niet bewerken, geen links naar territoria delen en de afdrukken hebben geen QR-code die naar het territorium leidt.
+DemoDisclaimer:
+  welcome: Welkom bij de demo
+  introduction1: Deze demo is beperkt tot het bekijken van een gemeenschap. Sommige functies zijn beperkt.
+  introduction2: Zo kun je bijvoorbeeld territoria niet bewerken, geen links naar territoria delen en de afdrukken hebben geen QR-code die naar het territorium leidt.
 TerritoryListPage:
   title: Territoria
   search: Zoeken

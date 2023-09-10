@@ -21,11 +21,10 @@ JoinPage:
   introduction: To access a congregation in Territory Bro, you will need to tell your <em>User ID</em> to your congregation's territory servant, so that he can give you access.
   yourUserId: "Your User ID is:"
   copy: Copy to clipboard
-CongregationPage:
-  demo:
-    welcome: Welcome to the demo
-    introduction1: This demo is limited to only viewing a congregation. Some features are restricted.
-    introduction2: For example, you won't be able to edit territories, share links to territories, and the printouts won't have the QR code that links to the territory.
+DemoDisclaimer:
+  welcome: Welcome to the demo
+  introduction1: This demo is limited to only viewing a congregation. Some features are restricted.
+  introduction2: For example, you won't be able to edit territories, share links to territories, and the printouts won't have the QR code that links to the territory.
 TerritoryListPage:
   title: Territories
   search: Search

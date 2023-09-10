@@ -21,11 +21,10 @@ JoinPage:
   introduction: Jotta pääsisit käsiksi seurakuntaan Territory Brossa, sinun tulee kertoa <em>käyttäjätunnuksesi</em> seurakuntasi aluepalvelijalle, jotta hän voi antaa sinulle pääsyn.
   yourUserId: "Käyttäjätunnuksesi on:"
   copy: Kopioi leikepöydälle
-CongregationPage:
-  demo:
-    welcome: Tervetuloa demoon
-    introduction1: Tämä demo rajoittuu vain seurakunnan tarkasteluun. Joitain ominaisuuksia on rajoitettu.
-    introduction2: Esimerkiksi et voi muokata alueita, jakaa linkkejä alueisiin, eikä tulosteissa ole QR-koodia, joka linkittyy alueeseen.
+DemoDisclaimer:
+  welcome: Tervetuloa demoon
+  introduction1: Tämä demo rajoittuu vain seurakunnan tarkasteluun. Joitain ominaisuuksia on rajoitettu.
+  introduction2: Esimerkiksi et voi muokata alueita, jakaa linkkejä alueisiin, eikä tulosteissa ole QR-koodia, joka linkittyy alueeseen.
 TerritoryListPage:
   title: Alueet
   search: Hae

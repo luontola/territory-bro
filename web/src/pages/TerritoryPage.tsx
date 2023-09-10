@@ -14,6 +14,7 @@ import {faCopy, faShareNodes, faXmark} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useTranslation} from "react-i18next";
 import PageTitle from "../layout/PageTitle.tsx";
+import DemoDisclaimer from "./DemoDisclaimer.tsx";
 
 const mapRaster = mapRasters[0];
 
@@ -89,6 +90,7 @@ const TerritoryPage = () => {
   const territory = congregation.getTerritoryById(territoryId);
   // TODO: consider using a grid layout for responsiveness so that the details area has fixed width
   return <>
+    <DemoDisclaimer/>
     <PageTitle title={t('TerritoryPage.title', {number: territory.number})}/>
 
     <div className="pure-g">

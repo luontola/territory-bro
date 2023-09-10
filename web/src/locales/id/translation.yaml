@@ -21,11 +21,10 @@ JoinPage:
   introduction: Untuk mengakses kongregasi di Territory Bro, Anda perlu memberitahu <em>ID Pengguna</em> Anda kepada penyelenggara wilayah kongregasi Anda, sehingga dia bisa memberikan akses kepada Anda.
   yourUserId: "ID Pengguna Anda adalah:"
   copy: Salin ke clipboard
-CongregationPage:
-  demo:
-    welcome: Selamat datang di demo
-    introduction1: Demo ini terbatas hanya untuk melihat kongregasi. Beberapa fitur dibatasi.
-    introduction2: Misalnya, Anda tidak akan bisa mengedit wilayah, berbagi tautan ke wilayah, dan cetakan tidak akan memiliki kode QR yang menghubungkan ke wilayah.
+DemoDisclaimer:
+  welcome: Selamat datang di demo
+  introduction1: Demo ini terbatas hanya untuk melihat kongregasi. Beberapa fitur dibatasi.
+  introduction2: Misalnya, Anda tidak akan bisa mengedit wilayah, berbagi tautan ke wilayah, dan cetakan tidak akan memiliki kode QR yang menghubungkan ke wilayah.
 TerritoryListPage:
   title: Wilayah
   search: Cari

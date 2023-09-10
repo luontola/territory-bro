@@ -4,22 +4,17 @@
 
 import {useCongregationById} from "../api";
 import {Link, useParams} from "react-router-dom";
-import InfoBox from "../maps/InfoBox";
 import {useTranslation} from "react-i18next";
 import PageTitle from "../layout/PageTitle.tsx";
+import DemoDisclaimer from "./DemoDisclaimer.tsx";
 
 const CongregationPage = () => {
   const {t} = useTranslation();
   const {congregationId} = useParams()
   const congregation = useCongregationById(congregationId);
   return <>
+    <DemoDisclaimer/>
     <PageTitle title={congregation.name}/>
-    {congregationId === "demo" &&
-      <InfoBox title={t('CongregationPage.demo.welcome')}>
-        <p>{t('CongregationPage.demo.introduction1')}</p>
-        <p>{t('CongregationPage.demo.introduction2')}</p>
-      </InfoBox>
-    }
     <p><Link to="territories">{t('TerritoryListPage.title')}</Link></p>
     {congregation.permissions.viewCongregation &&
       <p><Link to="printouts">{t('PrintoutPage.title')}</Link></p>

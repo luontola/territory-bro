@@ -21,11 +21,10 @@ JoinPage:
   introduction: Para acceder a una congregación en Territory Bro, deberás proporcionar tu <em>ID de usuario</em> al encargado del territorio de tu congregación, para que pueda darte acceso.
   yourUserId: "Tu ID de usuario es:"
   copy: Copiar al portapapeles
-CongregationPage:
-  demo:
-    welcome: Bienvenido a la demostración
-    introduction1: Esta demostración está limitada a la visualización de una congregación. Algunas funciones están restringidas.
-    introduction2: Por ejemplo, no podrás editar territorios, compartir enlaces a territorios y las impresiones no incluirán el código QR que enlaza con el territorio.
+DemoDisclaimer:
+  welcome: Bienvenido a la demostración
+  introduction1: Esta demostración está limitada a la visualización de una congregación. Algunas funciones están restringidas.
+  introduction2: Por ejemplo, no podrás editar territorios, compartir enlaces a territorios y las impresiones no incluirán el código QR que enlaza con el territorio.
 TerritoryListPage:
   title: Territorios
   search: Buscar

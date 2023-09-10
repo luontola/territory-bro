@@ -11,6 +11,7 @@ import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
 import {auth0Authenticator} from "../authentication.ts";
 import PageTitle from "../layout/PageTitle.tsx";
+import DemoDisclaimer from "./DemoDisclaimer.tsx";
 
 function LimitedVisibilityHelp() {
   const {t} = useTranslation();
@@ -80,6 +81,7 @@ const TerritoryListPage = () => {
   const [search, setSearch] = usePageState('search', '');
   const visibleTerritories = congregation.territories.filter(territory => matchesSearch(territory, search));
   return <>
+    <DemoDisclaimer/>
     <PageTitle title={t('TerritoryListPage.title')}/>
     {!congregation.permissions.viewCongregation &&
       <LimitedVisibilityHelp/>
