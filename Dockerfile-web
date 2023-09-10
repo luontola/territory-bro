@@ -15,6 +15,7 @@ RUN npm ci
 # do the build
 COPY --chown=node tsconfig.json tsconfig.node.json vite.config.ts /project/
 COPY --chown=node web /project/web
+ARG VITE_GIT_COMMIT
 RUN npm run test && \
     npm run build
 

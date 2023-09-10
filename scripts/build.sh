@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eux
 
+export VITE_GIT_COMMIT=$(git rev-parse --short HEAD)
+
 docker compose up -d db
 
 lein clean

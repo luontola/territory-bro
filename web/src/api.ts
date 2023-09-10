@@ -50,11 +50,14 @@ export type Settings = {
   user?: User;
 };
 
+const gitCommit = import.meta.env.VITE_GIT_COMMIT || 'dev';
+const settingsUrl = `/api/settings?v=${gitCommit}`;
+
 export function useSettings(): Settings {
   const {data} = useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
-      const response = await api.get('/api/settings');
+      const response = await api.get(settingsUrl);
       return response.data;
     }
   });
@@ -65,7 +68,7 @@ export function useSettingsSafe() {
   return useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
-      const response = await api.get('/api/settings');
+      const response = await api.get(settingsUrl);
       return response.data as Settings;
     },
     suspense: false

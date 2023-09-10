@@ -68,12 +68,14 @@ blocks:
             - docker build --pull --progress=plain
               --tag        luontola/territory-bro-web:ci-builder
               --cache-from luontola/territory-bro-web:ci-builder
+              --build-arg  VITE_GIT_COMMIT=$(git rev-parse --short HEAD)
               --file Dockerfile-web --target builder .
 
             - docker build --pull --progress=plain
               --tag        luontola/territory-bro-web:ci
               --cache-from luontola/territory-bro-web:ci
               --cache-from luontola/territory-bro-web:ci-builder
+              --build-arg  VITE_GIT_COMMIT=$(git rev-parse --short HEAD)
               --file Dockerfile-web .
 
             - docker push luontola/territory-bro-web:ci-builder
