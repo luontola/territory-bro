@@ -561,10 +561,10 @@
                  (select-keys (:body response) [:id :name :users :permissions]))
               "returns an anonymized read-only congregation")))
 
-      (testing "requires login"
+      (testing "anonymous access is allowed"
         (let [response (-> (request :get (str "/api/congregation/demo"))
                            app)]
-          (is (unauthorized? response)))))
+          (is (ok? response)))))
 
     (binding [config/env (assoc config/env :demo-congregation nil)]
       (testing "no demo congregation"

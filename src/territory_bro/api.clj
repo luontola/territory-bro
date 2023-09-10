@@ -229,8 +229,8 @@
                 (validate-congregation)))))))
 
 (defn get-demo-congregation [request]
+  ;; anonymous access is allowed
   (auth/with-user-from-session request
-    (require-logged-in!) ; TODO: allow demo for anonymous users?
     (let [cong-id (:demo-congregation config/env)
           user-id (current-user-id)
           state (state-for-request request)
