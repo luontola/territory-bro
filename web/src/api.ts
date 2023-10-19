@@ -7,13 +7,12 @@ import alphanumSort from "alphanum-sort";
 import {findIndex, keyBy, sortBy} from "lodash-es";
 import WKT from "ol/format/WKT";
 import MultiPolygon from "ol/geom/MultiPolygon";
-import {QueryClient, useQuery, UseQueryResult} from '@tanstack/react-query'
+import {QueryClient, useQuery, useSuspenseQuery} from '@tanstack/react-query'
 import {axiosHttpStatus} from "./pages/ErrorPage.tsx";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      suspense: true,
       staleTime: Infinity,
       retry: (failureCount, error) => {
         const httpStatus = axiosHttpStatus(error);
@@ -54,11 +53,11 @@ const gitCommit = import.meta.env.VITE_GIT_COMMIT || 'dev';
 const settingsUrl = `/api/settings?v=${gitCommit}`;
 
 export function useSettings(): Settings {
-  const {data} = useQuery({
+  const {data} = useSuspenseQuery({
     queryKey: ['settings'],
     queryFn: async () => {
       const response = await api.get(settingsUrl);
-      return response.data;
+      return response.data as Settings;
     }
   });
   return data;
@@ -70,8 +69,7 @@ export function useSettingsSafe() {
     queryFn: async () => {
       const response = await api.get(settingsUrl);
       return response.data as Settings;
-    },
-    suspense: false
+    }
   });
 }
 
@@ -169,25 +167,25 @@ function mergeMultiPolygons(multiPolygons: string[]): string | null {
 }
 
 export function useCongregations(): Congregation[] {
-  const {data} = useQuery({
+  const {data} = useSuspenseQuery({
     queryKey: ['congregations'],
     queryFn: async () => {
       const response = await api.get('/api/congregations');
       return sortCongregations(response.data);
     }
   })
-  return data as Congregation[];
+  return data;
 }
 
 export function useCongregationById(congregationId: string): Congregation {
-  const {data} = useQuery({
+  const {data} = useSuspenseQuery({
     queryKey: ['congregation', congregationId],
     queryFn: async () => {
       const response = await api.get(`/api/congregation/${congregationId}`);
       return enrichCongregation(response.data);
     }
   })
-  return data as Congregation;
+  return data;
 }
 
 export async function createCongregation(name: string) {
@@ -258,14 +256,13 @@ export type QrCodeShare = {
   url: string;
 };
 
-export function useGeneratedQrCodes(congregationId: string, territoryIds: string[], enabled = true): UseQueryResult<QrCodeShare[], Error> {
+export function useGeneratedQrCodes(congregationId: string, territoryIds: string[], enabled = true) {
   return useQuery({
     queryKey: ['congregation', congregationId, territoryIds],
     queryFn: async () => {
       const response = await api.post(`/api/congregation/${congregationId}/generate-qr-codes`, {territories: territoryIds})
-      return response.data.qrCodes;
+      return response.data.qrCodes as QrCodeShare[];
     },
-    suspense: false,
     enabled,
   })
 }
