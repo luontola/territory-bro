@@ -122,6 +122,28 @@
     (let [keys (repeatedly 10 share/generate-share-key)]
       (is (= (distinct keys) keys)))))
 
+(deftest demo-share-key-test
+  (testing "key format"
+    (is (= "demo-aOiskx9fR0G6smZfLDOOVg"
+           (share/demo-share-key #uuid "68e8ac93-1f5f-4741-bab2-665f2c338e56"))))
+
+  (testing "keys can be converted back to UUIDs"
+    (let [uuid (UUID/randomUUID)
+          key (share/demo-share-key uuid)]
+      (is (= uuid (share/parse-demo-share-key key)))))
+
+  (testing "cannot parse invalid demo share keys"
+    (is (nil? (share/parse-demo-share-key nil))
+        "nil")
+    (is (nil? (share/parse-demo-share-key ""))
+        "empty string")
+    (is (nil? (share/parse-demo-share-key "xxxx-aOiskx9fR0G6smZfLDOOVg"))
+        "wrong prefix")
+    (is (nil? (share/parse-demo-share-key "demo-aOiskx9fR0G6smZfLDOOVg!"))
+        "wrong suffix - invalid base64 string")
+    (is (nil? (share/parse-demo-share-key "demo-aOiskx9fR0G6smZfLDOO"))
+        "wrong suffix - wrong number of decoded bytes")))
+
 (deftest create-share-test
   (let [injections {:check-permit (fn [_permit])}
         create-command {:command/type :share.command/create-share

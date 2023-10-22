@@ -3,9 +3,11 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.domain.share
-  (:require [territory-bro.infra.permissions :as permissions])
-  (:import (java.security SecureRandom)
-           (java.util Base64)
+  (:require [clojure.string :as str]
+            [territory-bro.infra.permissions :as permissions])
+  (:import (java.nio ByteBuffer)
+           (java.security SecureRandom)
+           (java.util Base64 UUID)
            (org.apache.commons.lang3 StringUtils)
            (territory_bro ValidationException WriteConflictException)))
 
@@ -58,12 +60,50 @@
 
 (def ^:private ^SecureRandom random (SecureRandom.))
 
+(defn- random-bytes ^bytes [len]
+  (let [bs (make-array Byte/TYPE len)]
+    (.nextBytes random bs)
+    bs))
+
+(defn- bytes->share-key [^bytes bs]
+  (-> (.encodeToString (Base64/getUrlEncoder) bs)
+      (StringUtils/stripEnd "=")))
+
 (defn ^:dynamic generate-share-key []
   ;; generate a 64-bit key, base64 encoded; same format as YouTube video IDs
-  (let [bs (make-array Byte/TYPE 8)]
-    (.nextBytes random bs)
-    (-> (.encodeToString (Base64/getUrlEncoder) bs)
-        (StringUtils/stripEnd "="))))
+  (-> (random-bytes 8)
+      (bytes->share-key)))
+
+
+(defn- uuid->bytes ^bytes [^UUID uuid]
+  (let [bs (ByteBuffer/allocate 16)]
+    (.putLong bs (.getMostSignificantBits uuid))
+    (.putLong bs (.getLeastSignificantBits uuid))
+    (.array bs)))
+
+(defn- bytes->uuid ^UUID [^bytes bs]
+  (when (= 16 (count bs))
+    (let [bs (ByteBuffer/wrap bs)]
+      (UUID. (.getLong bs) (.getLong bs)))))
+
+(def demo-share-key-prefix "demo-")
+
+(defn demo-share-key [^UUID uuid]
+  (str demo-share-key-prefix
+       (-> uuid
+           (uuid->bytes)
+           (bytes->share-key))))
+
+(defn parse-demo-share-key [key]
+  (when (and (string? key)
+             (str/starts-with? key demo-share-key-prefix))
+    (let [base64 (subs key (count demo-share-key-prefix))]
+      (try
+        (-> (.decode (Base64/getUrlDecoder) base64)
+            (bytes->uuid))
+        (catch IllegalArgumentException _ ; base64 decoding failed
+          nil)))))
+
 
 (defmulti ^:private command-handler (fn [command _state _injections]
                                       (:command/type command)))
