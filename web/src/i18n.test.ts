@@ -5,6 +5,8 @@
 import {describe, it} from "vitest";
 import {expect} from "chai";
 import i18n, {languages} from "./i18n.ts";
+import readme from "./locales/README.md?raw";
+import {sortBy} from "lodash-es";
 
 describe("i18n", () => {
   describe("all languages contain the same translation keys", () => {
@@ -17,6 +19,13 @@ describe("i18n", () => {
         expect(keys).to.eql(englishKeys)
       });
     })
+  });
+
+  it("the supported languages are listed in README for easy copying to GPT prompts", () => {
+    const languageList = sortBy(languages, ['code'])
+      .map(lang => `${lang.englishName} (${lang.code})`)
+      .join(", ");
+    expect(readme).to.contain(languageList, languageList);
   });
 
   it("getAllKeyPaths helper", () => {
