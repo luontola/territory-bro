@@ -22,8 +22,7 @@ JoinPage:
   copy: Kopioi leikepöydälle
 DemoDisclaimer:
   welcome: Tervetuloa demoon
-  introduction1: Tämä demo rajoittuu vain seurakunnan tarkasteluun. Joitain ominaisuuksia on rajoitettu.
-  introduction2: Esimerkiksi et voi muokata alueita, jakaa linkkejä alueisiin, eikä tulosteissa ole QR-koodia, joka linkittyy alueeseen.
+  introduction: Tämä demo rajoittuu vain seurakunnan tarkasteluun. Joitain ominaisuuksia on rajoitettu.
 TerritoryListPage:
   title: Alueet
   search: Hae

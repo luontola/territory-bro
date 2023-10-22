@@ -22,8 +22,7 @@ JoinPage:
   copy: Copia negli appunti
 DemoDisclaimer:
   welcome: Benvenuti nella demo
-  introduction1: Questa demo è limitata solo alla visualizzazione di una congregazione. Alcune funzioni sono limitate.
-  introduction2: Ad esempio, non sarai in grado di modificare i territori, condividere link ai territori e le stampe non avranno il codice QR che collega al territorio.
+  introduction: Questa demo è limitata solo alla visualizzazione di una congregazione. Alcune funzioni sono limitate.
 TerritoryListPage:
   title: Territori
   search: Cerca

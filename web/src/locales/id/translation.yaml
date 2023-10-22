@@ -22,8 +22,7 @@ JoinPage:
   copy: Salin ke clipboard
 DemoDisclaimer:
   welcome: Selamat datang di demo
-  introduction1: Demo ini terbatas hanya untuk melihat kongregasi. Beberapa fitur dibatasi.
-  introduction2: Misalnya, Anda tidak akan bisa mengedit wilayah, berbagi tautan ke wilayah, dan cetakan tidak akan memiliki kode QR yang menghubungkan ke wilayah.
+  introduction: Demo ini terbatas hanya untuk melihat kongregasi. Beberapa fitur dibatasi.
 TerritoryListPage:
   title: Wilayah
   search: Cari

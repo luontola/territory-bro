@@ -22,8 +22,7 @@ JoinPage:
   copy: Copiar para a área de transferência
 DemoDisclaimer:
   welcome: Bem-vindo à demonstração
-  introduction1: Esta demonstração está limitada apenas à visualização de uma congregação. Algumas funcionalidades estão restritas.
-  introduction2: Por exemplo, você não poderá editar territórios, compartilhar links para territórios e as impressões não terão o código QR que se conecta ao território.
+  introduction: Esta demonstração está limitada apenas à visualização de uma congregação. Algumas funcionalidades estão restritas.
 TerritoryListPage:
   title: Territórios
   search: Pesquisar

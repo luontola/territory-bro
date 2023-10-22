@@ -12,8 +12,7 @@ const DemoDisclaimer = () => {
   return <>
     {congregationId === "demo" &&
       <InfoBox title={t('DemoDisclaimer.welcome')}>
-        <p>{t('DemoDisclaimer.introduction1')}</p>
-        <p>{t('DemoDisclaimer.introduction2')}</p>
+        <p>{t('DemoDisclaimer.introduction')}</p>
       </InfoBox>
     }
   </>;

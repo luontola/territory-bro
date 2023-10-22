@@ -22,8 +22,7 @@ JoinPage:
   copy: Kopiëren naar klembord
 DemoDisclaimer:
   welcome: Welkom bij de demo
-  introduction1: Deze demo is beperkt tot het bekijken van een gemeenschap. Sommige functies zijn beperkt.
-  introduction2: Zo kun je bijvoorbeeld territoria niet bewerken, geen links naar territoria delen en de afdrukken hebben geen QR-code die naar het territorium leidt.
+  introduction: Deze demo is beperkt tot het bekijken van een gemeenschap. Sommige functies zijn beperkt.
 TerritoryListPage:
   title: Territoria
   search: Zoeken

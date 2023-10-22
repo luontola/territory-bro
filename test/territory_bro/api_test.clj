@@ -557,7 +557,8 @@
           (is (= {:id "demo"
                   :name "Demo Congregation"
                   :users []
-                  :permissions {:viewCongregation true}}
+                  :permissions {:viewCongregation true
+                                :shareTerritoryLink true}}
                  (select-keys (:body response) [:id :name :users :permissions]))
               "returns an anonymized read-only congregation")))
 
