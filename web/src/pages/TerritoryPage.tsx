@@ -29,8 +29,7 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
   const togglePopup = async () => {
     if (!shareUrl) {
       const url = await shareTerritory(congregationId, territoryId);
-      // TODO: change "#/" to a "/" after nobody has a cached page older than 2023-07-31, to avoid incompatibility with the old router
-      setShareUrl(url + '#/' + encodeURIComponent(territoryNumber).replaceAll(/%../g, "_"));
+      setShareUrl(url + '/' + encodeURIComponent(territoryNumber).replaceAll(/%../g, "_"));
     }
     setOpen(!open);
   }
