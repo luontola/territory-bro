@@ -38,6 +38,7 @@ services:
       POSTGRES_USER: territorybro
       POSTGRES_PASSWORD: territorybro
     volumes:
+      - postgres-storage:/var/lib/postgresql/data
       - ./postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql
     mem_reservation: 100m
     mem_limit: 200m
@@ -52,3 +53,6 @@ services:
     mem_limit: 500m
     ports:
       - "127.0.0.1:8082:80"
+
+volumes:
+  postgres-storage:
