@@ -767,6 +767,35 @@
         (is (= {:message "Share not found"}
                (:body response)))))))
 
+(deftest share-demo-territory-link-test
+  ;; all of this is can be done anonymously, because the demo doesn't require logging in
+  (let [territory-id (UUID/randomUUID)
+        share-key (share/demo-share-key territory-id)
+        state-before (projections/cached-state)]
+
+    (testing "create a demo share link"
+      (binding [share/generate-share-key (fake-share-key-generator "share-territory-link-test")]
+        (let [response (-> (request :post (str "/api/congregation/demo/territory/" territory-id "/share"))
+                           (json-body {})
+                           app)]
+          (is (ok? response))
+          (is (= {:key share-key
+                  :url (str "http://localhost:8080/share/" share-key)}
+                 (:body response))))))
+
+
+    (testing "open share link"
+      (let [response (-> (request :get (str "/api/share/" share-key))
+                         app)]
+        (is (ok? response))
+        (is (= {:congregation "demo"
+                :territory (str territory-id)}
+               (:body response)))))
+
+    (testing "does NOT create a share, nor record that a share was opened"
+      (let [state-after (projections/cached-state)]
+        (is (= state-before state-after))))))
+
 (deftest create-qr-code-test
   (let [*session (atom (login! app))
         cong-id (create-congregation! @*session "Congregation")
@@ -825,6 +854,28 @@
         (is (temporary-redirect? response))
         (is (= "https://beta.territorybro.com/share/abc123"
                (get-in response [:headers "Location"])))))
+
+    (testing "create QR code links for demo congregation"
+      (let [demo-territory1 (UUID/randomUUID)
+            demo-territory2 (UUID/randomUUID)
+            demo-key1 (share/demo-share-key demo-territory1)
+            demo-key2 (share/demo-share-key demo-territory2)
+            state-before (current-state)
+            ;; does not require logging in
+            response (-> (request :post (str "/api/congregation/demo/generate-qr-codes"))
+                         (json-body {:territories [demo-territory1 demo-territory2]})
+                         app)
+            state-after (current-state)]
+        (is (ok? response))
+        (is (= {:qrCodes [{:territory (str demo-territory1)
+                           :key demo-key1
+                           :url (str "https://qr.territorybro.com/" demo-key1)}
+                          {:territory (str demo-territory2)
+                           :key demo-key2
+                           :url (str "https://qr.territorybro.com/" demo-key2)}]}
+               (:body response)))
+        (is (= state-before state-after)
+            "does not write anything to application state")))
 
     ;; TODO: cannot link to a territory which doesn't belong to the specified congregation
 

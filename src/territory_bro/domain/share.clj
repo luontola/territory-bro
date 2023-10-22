@@ -88,13 +88,13 @@
 
 (def demo-share-key-prefix "demo-")
 
-(defn demo-share-key [^UUID uuid]
+(defn demo-share-key [^UUID territory-id]
   (str demo-share-key-prefix
-       (-> uuid
+       (-> territory-id
            (uuid->bytes)
            (bytes->share-key))))
 
-(defn parse-demo-share-key [key]
+(defn demo-share-key->territory-id [key]
   (when (and (string? key)
              (str/starts-with? key demo-share-key-prefix))
     (let [base64 (subs key (count demo-share-key-prefix))]

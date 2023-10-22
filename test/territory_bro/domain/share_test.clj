@@ -130,18 +130,18 @@
   (testing "keys can be converted back to UUIDs"
     (let [uuid (UUID/randomUUID)
           key (share/demo-share-key uuid)]
-      (is (= uuid (share/parse-demo-share-key key)))))
+      (is (= uuid (share/demo-share-key->territory-id key)))))
 
   (testing "cannot parse invalid demo share keys"
-    (is (nil? (share/parse-demo-share-key nil))
+    (is (nil? (share/demo-share-key->territory-id nil))
         "nil")
-    (is (nil? (share/parse-demo-share-key ""))
+    (is (nil? (share/demo-share-key->territory-id ""))
         "empty string")
-    (is (nil? (share/parse-demo-share-key "xxxx-aOiskx9fR0G6smZfLDOOVg"))
+    (is (nil? (share/demo-share-key->territory-id "xxxx-aOiskx9fR0G6smZfLDOOVg"))
         "wrong prefix")
-    (is (nil? (share/parse-demo-share-key "demo-aOiskx9fR0G6smZfLDOOVg!"))
+    (is (nil? (share/demo-share-key->territory-id "demo-aOiskx9fR0G6smZfLDOOVg!"))
         "wrong suffix - invalid base64 string")
-    (is (nil? (share/parse-demo-share-key "demo-aOiskx9fR0G6smZfLDOO"))
+    (is (nil? (share/demo-share-key->territory-id "demo-aOiskx9fR0G6smZfLDOO"))
         "wrong suffix - wrong number of decoded bytes")))
 
 (deftest create-share-test

@@ -354,21 +354,27 @@
             (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\"")))))))
 
 (defn share-territory-link [request]
-  (auth/with-user-from-session request
-    (require-logged-in!)
-    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          territory-id (UUID/fromString (get-in request [:params :territory]))
-          state (state-for-request request)
-          share-key (share/generate-share-key)]
-      (db/with-db [conn {}]
-        (dispatch! conn state {:command/type :share.command/create-share
-                               :share/id (UUID/randomUUID)
-                               :share/key share-key
-                               :share/type :link
-                               :congregation/id cong-id
-                               :territory/id territory-id})
-        (ok {:url (str (:public-url config/env) "/share/" share-key)
-             :key share-key})))))
+  (if (= "demo" (get-in request [:params :congregation]))
+    (let [territory-id (UUID/fromString (get-in request [:params :territory]))
+          share-key (share/demo-share-key territory-id)]
+      (ok {:url (str (:public-url config/env) "/share/" share-key)
+           :key share-key}))
+
+    (auth/with-user-from-session request
+      (require-logged-in!)
+      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+            territory-id (UUID/fromString (get-in request [:params :territory]))
+            state (state-for-request request)
+            share-key (share/generate-share-key)]
+        (db/with-db [conn {}]
+          (dispatch! conn state {:command/type :share.command/create-share
+                                 :share/id (UUID/randomUUID)
+                                 :share/key share-key
+                                 :share/type :link
+                                 :congregation/id cong-id
+                                 :territory/id territory-id})
+          (ok {:url (str (:public-url config/env) "/share/" share-key)
+               :key share-key}))))))
 
 (defn- generate-qr-code! [conn request cong-id territory-id]
   (let [share-key (share/generate-share-key)
@@ -382,26 +388,36 @@
     share-key))
 
 (defn generate-qr-codes [request]
-  (auth/with-user-from-session request
-    (require-logged-in!)
-    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          territory-ids (->> (get-in request [:params :territories])
-                             (mapv #(UUID/fromString %)))]
-      (db/with-db [conn {}]
-        (let [share-cache (or (-> request :session ::share-cache)
-                              {})
-              shares (into [] (for [territory-id territory-ids]
-                                (let [share-key (or (get share-cache territory-id)
-                                                    (generate-qr-code! conn request cong-id territory-id))]
-                                  {:territory territory-id
-                                   :key share-key
-                                   :url (str (:qr-code-base-url config/env) "/" share-key)})))
-              share-cache (->> shares
-                               (map (juxt :territory :key))
-                               (into share-cache))]
-          (-> (ok {:qrCodes shares})
-              (assoc :session (-> (:session request)
-                                  (assoc ::share-cache share-cache)))))))))
+  (if (= "demo" (get-in request [:params :congregation]))
+    (let [territory-ids (->> (get-in request [:params :territories])
+                             (mapv #(UUID/fromString %)))
+          shares (into [] (for [territory-id territory-ids]
+                            (let [share-key (share/demo-share-key territory-id)]
+                              {:territory territory-id
+                               :key share-key
+                               :url (str (:qr-code-base-url config/env) "/" share-key)})))]
+      (ok {:qrCodes shares}))
+
+    (auth/with-user-from-session request
+      (require-logged-in!)
+      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+            territory-ids (->> (get-in request [:params :territories])
+                               (mapv #(UUID/fromString %)))]
+        (db/with-db [conn {}]
+          (let [share-cache (or (-> request :session ::share-cache)
+                                {})
+                shares (into [] (for [territory-id territory-ids]
+                                  (let [share-key (or (get share-cache territory-id)
+                                                      (generate-qr-code! conn request cong-id territory-id))]
+                                    {:territory territory-id
+                                     :key share-key
+                                     :url (str (:qr-code-base-url config/env) "/" share-key)})))
+                share-cache (->> shares
+                                 (map (juxt :territory :key))
+                                 (into share-cache))]
+            (-> (ok {:qrCodes shares})
+                (assoc :session (-> (:session request)
+                                    (assoc ::share-cache share-cache))))))))))
 
 (defn- refresh-projections! []
   (projections/refresh-async!)
@@ -417,14 +433,22 @@
   (auth/with-user-from-session request
     (let [share-key (get-in request [:params :share-key])
           state (state-for-request request)
-          share (share/find-share-by-key state share-key)]
-      (if share
+          share (share/find-share-by-key state share-key)
+          demo-territory (share/demo-share-key->territory-id share-key)]
+      (cond
+        (some? share)
         (let [session (-> (:session request)
                           (update ::opened-shares conj-set (:share/id share)))]
           (record-share-opened! share state)
           (-> (ok {:congregation (:congregation/id share)
                    :territory (:territory/id share)})
               (assoc :session session)))
+
+        (some? demo-territory)
+        (ok {:congregation "demo"
+             :territory demo-territory})
+
+        :else
         (not-found {:message "Share not found"})))))
 
 (defroutes api-routes
