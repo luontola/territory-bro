@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -129,6 +129,13 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)))
 
+(s/defschema SaveDoNotCalls
+  (assoc BaseCommand
+         :command/type (s/eq :territory.command/save-do-not-calls)
+         :congregation/id (foreign-key/references :congregation UUID)
+         :territory/id (foreign-key/references :territory UUID)
+         :territory/do-not-calls s/Str))
+
 ;;; Region
 
 (s/defschema DefineRegion
@@ -211,7 +218,8 @@
    :share.command/create-share CreateShare
    :share.command/record-share-opened RecordShareOpened
    :territory.command/define-territory DefineTerritory
-   :territory.command/delete-territory DeleteTerritory})
+   :territory.command/delete-territory DeleteTerritory
+   :territory.command/save-do-not-calls SaveDoNotCalls})
 
 (s/defschema Command
   (apply refined/dispatch-on :command/type (flatten (seq command-schemas))))
