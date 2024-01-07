@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -27,12 +27,12 @@
      :congregation/regions (sequence (vals (get-in state [::region/regions cong-id])))
      :congregation/card-minimap-viewports (sequence (vals (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id])))}))
 
-;; TODO: deduplicate with congregation/apply-user-permissions
-(defn- apply-user-permissions [cong state user-id]
+(defn- apply-user-permissions-for-congregation [cong state user-id]
   (let [cong-id (:congregation/id cong)
         territory-ids (lazy-seq (for [[_ _ territory-id] (permissions/match state user-id [:view-territory cong-id '*])]
                                   territory-id))]
     (cond
+      ;; TODO: deduplicate with congregation/apply-user-permissions
       (permissions/allowed? state user-id [:view-congregation cong-id])
       cong
 
@@ -51,7 +51,7 @@
 (defn get-congregation [state cong-id user-id]
   (some-> (congregation/get-unrestricted-congregation state cong-id)
           (enrich-congregation state user-id)
-          (apply-user-permissions state user-id)))
+          (apply-user-permissions-for-congregation state user-id)))
 
 (defn get-demo-congregation [state cong-id user-id]
   (when cong-id
@@ -63,3 +63,15 @@
             (assoc :congregation/permissions {:view-congregation true
                                               :share-territory-link true})
             (assoc :congregation/users []))))
+
+
+(defn- apply-user-permissions-for-territory [territory state user-id]
+  (let [cong-id (:congregation/id territory)
+        territory-id (:territory/id territory)]
+    (when (or (permissions/allowed? state user-id [:view-congregation cong-id])
+              (permissions/allowed? state user-id [:view-territory cong-id territory-id]))
+      territory)))
+
+(defn get-territory [state cong-id territory-id user-id]
+  (some-> (territory/get-unrestricted-territory state cong-id territory-id)
+          (apply-user-permissions-for-territory state user-id)))

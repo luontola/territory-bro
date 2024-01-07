@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -187,3 +187,24 @@
 
     (testing "cannot see the demo congregation as own congregation"
       (is (nil? (facade/get-congregation state cong-id user-id))))))
+
+(deftest test-get-territory
+  (let [state (apply-events test-events)
+        expected {:congregation/id cong-id
+                  :territory/id territory-id
+                  :territory/number "123"
+                  :territory/addresses "the addresses"
+                  :territory/region "the region"
+                  :territory/meta {:foo "bar"}
+                  :territory/location testdata/wkt-multi-polygon}]
+
+    (testing "has view permissions"
+      (is (= expected (facade/get-territory state cong-id territory-id user-id))))
+
+    (let [user-id (UUID. 0 0x666)]
+      (testing "no permissions"
+        (is (nil? (facade/get-territory state cong-id territory-id user-id))))
+
+      (testing "opened a share"
+        (let [state (share/grant-opened-shares state [share-id] user-id)]
+          (is (= expected (facade/get-territory state cong-id territory-id user-id))))))))

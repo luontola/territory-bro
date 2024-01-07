@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -37,6 +37,10 @@
 (defn check-territory-exists [state cong-id territory-id]
   (when (nil? (get-in state [::territories cong-id territory-id]))
     (throw (ValidationException. [[:no-such-territory cong-id territory-id]]))))
+
+(defn get-unrestricted-territory [state cong-id territory-id]
+  (when-some [territory (get-in state [::territories cong-id territory-id])]
+    (assoc territory :congregation/id cong-id)))
 
 
 ;;;; Write model
