@@ -1,9 +1,9 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {useState} from "react";
-import {shareTerritory, useCongregationById} from "../api";
+import {shareTerritory, useCongregationById, useTerritoryById} from "../api";
 import styles from "./TerritoryPage.module.css"
 import TerritoryMap from "../maps/TerritoryMap";
 import {mapRasters} from "../maps/mapOptions";
@@ -86,7 +86,7 @@ const TerritoryPage = () => {
   const {t, i18n} = useTranslation();
   const {congregationId, territoryId} = useParams()
   const congregation = useCongregationById(congregationId);
-  const territory = congregation.getTerritoryById(territoryId);
+  const territory = useTerritoryById(congregationId, territoryId);
   // TODO: consider using a grid layout for responsiveness so that the details area has fixed width
   return <>
     <DemoDisclaimer/>

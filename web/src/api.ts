@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -183,6 +183,17 @@ export function useCongregationById(congregationId: string): Congregation {
     queryFn: async () => {
       const response = await api.get(`/api/congregation/${congregationId}`);
       return enrichCongregation(response.data);
+    }
+  })
+  return data;
+}
+
+export function useTerritoryById(congregationId: string, territoryId: string): Territory {
+  const {data} = useSuspenseQuery({
+    queryKey: ['territory', congregationId, territoryId],
+    queryFn: async () => {
+      const response = await api.get(`/api/congregation/${congregationId}/territory/${territoryId}`);
+      return response.data as Territory;
     }
   })
   return data;
