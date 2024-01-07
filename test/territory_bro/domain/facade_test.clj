@@ -208,3 +208,26 @@
       (testing "opened a share"
         (let [state (share/grant-opened-shares state [share-id] user-id)]
           (is (= expected (facade/get-territory state cong-id territory-id user-id))))))))
+
+(deftest test-get-demo-territory
+  (let [state (apply-events test-events)
+        user-id (UUID. 0 0x666)
+        expected {:congregation/id "demo" ; changed
+                  :territory/id territory-id
+                  :territory/number "123"
+                  :territory/addresses "the addresses"
+                  :territory/region "the region"
+                  :territory/meta {:foo "bar"}
+                  :territory/location testdata/wkt-multi-polygon}]
+
+    (testing "no demo congregation"
+      (is (nil? (facade/get-demo-territory state nil territory-id))))
+
+    (testing "can see the demo congregation"
+      (is (= expected (facade/get-demo-territory state cong-id territory-id))))
+
+    (testing "wrong territory ID"
+      (is (nil? (facade/get-demo-territory state cong-id (UUID. 0 0x666)))))
+
+    (testing "cannot see the demo congregation as own congregation"
+      (is (nil? (facade/get-territory state cong-id territory-id user-id))))))

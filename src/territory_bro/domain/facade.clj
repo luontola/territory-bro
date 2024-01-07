@@ -75,3 +75,8 @@
 (defn get-territory [state cong-id territory-id user-id]
   (some-> (territory/get-unrestricted-territory state cong-id territory-id)
           (apply-user-permissions-for-territory state user-id)))
+
+(defn get-demo-territory [state cong-id territory-id]
+  (when cong-id
+    (some-> (territory/get-unrestricted-territory state cong-id territory-id)
+            (assoc :congregation/id "demo"))))
