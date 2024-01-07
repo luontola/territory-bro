@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -575,6 +575,67 @@
           (is (forbidden? response))
           (is (= "No demo congregation" (:body response))))))))
 
+(deftest get-territory-test
+  (let [session (login! app)
+        cong-id (create-congregation! session "foo")
+        territory-id (create-territory! cong-id)]
+
+    (testing "get territory"
+      (let [response (-> (request :get (str "/api/congregation/" cong-id "/territory/" territory-id))
+                         (merge session)
+                         app)]
+        (is (ok? response))
+        (is (= (str territory-id) (:id (:body response))))))
+
+    (testing "requires login"
+      (let [response (-> (request :get (str "/api/congregation/" cong-id "/territory/" territory-id))
+                         app)]
+        (is (unauthorized? response))))
+
+    (testing "wrong ID"
+      (let [response (-> (request :get (str "/api/congregation/" cong-id "/territory/" (UUID/randomUUID)))
+                         (merge session)
+                         app)]
+        ;; same as when ID exists but user has no access
+        (is (forbidden? response))
+        (is (= "No territory access" (:body response)))))
+
+    (testing "no access"
+      (revoke-access-from-all! cong-id)
+      (let [response (-> (request :get (str "/api/congregation/" cong-id "/territory/" territory-id))
+                         (merge session)
+                         app)]
+        (is (forbidden? response))
+        (is (= "No territory access" (:body response)))))))
+
+(deftest get-demo-territory-test
+  (let [session (login! app)
+        cong-id (create-congregation-without-user! "foo")
+        territory-id (create-territory! cong-id)]
+    (binding [config/env (assoc config/env :demo-congregation cong-id)]
+
+      (testing "get demo territory"
+        (let [response (-> (request :get (str "/api/congregation/demo/territory/" territory-id))
+                           (merge session)
+                           app)]
+          (is (ok? response))
+          (is (= {:id (str territory-id)}
+                 (select-keys (:body response) [:id :doNotCalls]))
+              "returns an anonymized read-only territory")))
+
+      (testing "anonymous access is allowed"
+        (let [response (-> (request :get (str "/api/congregation/demo"))
+                           app)]
+          (is (ok? response)))))
+
+    (binding [config/env (assoc config/env :demo-congregation nil)]
+      (testing "no demo congregation"
+        (let [response (-> (request :get (str "/api/congregation/demo/territory/" territory-id))
+                           (merge session)
+                           app)]
+          (is (forbidden? response))
+          (is (= "No demo congregation" (:body response))))))))
+
 (deftest download-qgis-project-test
   (let [session (login! app)
         user-id (get-user-id session)
@@ -746,6 +807,7 @@
                             (map :id)
                             (set))
                        (str territory-id)))
+        ;; TODO: can view do-not-calls
 
         (testing "- but cannot view other territories"
           (is (= 1 (count (:territories (:body response))))))

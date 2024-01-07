@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -241,6 +241,39 @@
               (format-for-api)
               (validate-congregation))))))
 
+(def ^:private validate-territory (s/validator Territory))
+
+(defn get-territory [request]
+  (auth/with-user-from-session request
+    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+          territory-id (UUID/fromString (get-in request [:params :territory]))
+          user-id (current-user-id)
+          state (state-for-request request)
+          territory (facade/get-territory state cong-id territory-id user-id)]
+      (when-not territory
+        ;; This function must support anonymous access for opened shares.
+        ;; If anonymous user cannot see the congregation, first prompt them
+        ;; to login before giving the forbidden error.
+        (require-logged-in!)
+        (forbidden! "No territory access"))
+      (ok (-> territory
+              (dissoc :congregation/id)
+              (format-for-api)
+              (validate-territory))))))
+
+(defn get-demo-territory [request]
+  ;; anonymous access is allowed
+  (let [cong-id (:demo-congregation config/env)
+        territory-id (UUID/fromString (get-in request [:params :territory]))
+        state (state-for-request request)
+        territory (facade/get-demo-territory state cong-id territory-id)]
+    (when-not territory
+      (forbidden! "No demo congregation"))
+    (ok (-> territory
+            (dissoc :congregation/id)
+            (format-for-api)
+            (validate-territory)))))
+
 (defn- enrich-command [command]
   (let [user-id (current-user-id)]
     (-> command
@@ -461,12 +494,14 @@
   (POST "/api/congregations" request (create-congregation request))
   (GET "/api/congregations" request (list-congregations request))
   (GET "/api/congregation/demo" request (get-demo-congregation request))
+  (GET "/api/congregation/demo/territory/:territory" request (get-demo-territory request))
   (GET "/api/congregation/:congregation" request (get-congregation request))
   (POST "/api/congregation/:congregation/add-user" request (add-user request))
   (POST "/api/congregation/:congregation/set-user-permissions" request (set-user-permissions request))
   (POST "/api/congregation/:congregation/settings" request (save-congregation-settings request))
   (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request))
   (POST "/api/congregation/:congregation/generate-qr-codes" request (generate-qr-codes request))
+  (GET "/api/congregation/:congregation/territory/:territory" request (get-territory request))
   (POST "/api/congregation/:congregation/territory/:territory/share" request (share-territory-link request))
   (GET "/api/share/:share-key" request (open-share request)))
 
