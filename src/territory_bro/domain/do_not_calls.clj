@@ -30,10 +30,11 @@
                                       (:command/type command)))
 
 (defmethod command-handler :do-not-calls.command/save-do-not-calls
-  [command _state {:keys [conn]}]
+  [command _state {:keys [conn check-permit]}]
   (let [cong-id (:congregation/id command)
         territory-id (:territory/id command)
         do-not-calls (:territory/do-not-calls command)]
+    (check-permit [:edit-do-not-calls cong-id territory-id])
     (if (str/blank? do-not-calls)
       (query! conn :delete-do-not-calls {:congregation cong-id
                                          :territory territory-id})

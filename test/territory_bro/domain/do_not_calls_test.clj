@@ -9,7 +9,8 @@
             [territory-bro.infra.db :as db]
             [territory-bro.test.fixtures :refer [db-fixture]])
   (:import (java.time Instant)
-           (java.util UUID)))
+           (java.util UUID)
+           (territory_bro NoPermitException)))
 
 (use-fixtures :once db-fixture)
 
@@ -81,4 +82,11 @@
                 :territory/id (UUID. 0 0x666)
                 :territory/do-not-calls "unrelated 2"
                 :do-not-calls/last-modified (Instant/ofEpochSecond 666)}
-               (do-not-calls/get-do-not-calls conn cong-id (UUID. 0 0x666))))))))
+               (do-not-calls/get-do-not-calls conn cong-id (UUID. 0 0x666)))))
+
+      (testing "checks write permits"
+        (let [injections (assoc injections :check-permit (fn [permit]
+                                                           (is (= [:edit-do-not-calls cong-id territory-id] permit))
+                                                           (throw (NoPermitException. nil nil))))]
+          (is (thrown? NoPermitException
+                       (do-not-calls/handle-command create-command state injections))))))))
