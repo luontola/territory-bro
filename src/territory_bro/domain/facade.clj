@@ -6,6 +6,7 @@
   (:require [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
+            [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.territory :as territory]
             [territory-bro.infra.permissions :as permissions]))
@@ -65,6 +66,11 @@
             (assoc :congregation/users []))))
 
 
+(defn- enrich-do-not-calls [territory conn cong-id territory-id]
+  (merge territory
+         (-> (do-not-calls/get-do-not-calls conn cong-id territory-id)
+             (select-keys [:territory/do-not-calls]))))
+
 (defn- apply-user-permissions-for-territory [territory state user-id]
   (let [cong-id (:congregation/id territory)
         territory-id (:territory/id territory)]
@@ -72,8 +78,9 @@
               (permissions/allowed? state user-id [:view-territory cong-id territory-id]))
       territory)))
 
-(defn get-territory [state cong-id territory-id user-id]
+(defn get-territory [conn state cong-id territory-id user-id]
   (some-> (territory/get-unrestricted-territory state cong-id territory-id)
+          (enrich-do-not-calls conn cong-id territory-id)
           (apply-user-permissions-for-territory state user-id)))
 
 (defn get-demo-territory [state cong-id territory-id]

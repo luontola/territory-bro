@@ -15,7 +15,7 @@
      :territory/do-not-calls (:do_not_calls row)
      :do-not-calls/last-modified (:last_modified row)}))
 
-(defn get-do-not-calls [conn cong-id territory-id]
+(defn ^:dynamic get-do-not-calls [conn cong-id territory-id]
   (-> (query! conn :get-do-not-calls {:congregation cong-id
                                       :territory territory-id})
       (parse-db-row)))

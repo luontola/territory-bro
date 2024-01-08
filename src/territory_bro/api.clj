@@ -39,6 +39,7 @@
    :region s/Str
    :meta {s/Keyword s/Any}
    :location s/Str
+   (s/optional-key :doNotCalls) s/Str
    (s/optional-key :loaned) s/Bool
    (s/optional-key :staleness) s/Int})
 
@@ -245,21 +246,22 @@
 
 (defn get-territory [request]
   (auth/with-user-from-session request
-    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          territory-id (UUID/fromString (get-in request [:params :territory]))
-          user-id (current-user-id)
-          state (state-for-request request)
-          territory (facade/get-territory state cong-id territory-id user-id)]
-      (when-not territory
-        ;; This function must support anonymous access for opened shares.
-        ;; If anonymous user cannot see the congregation, first prompt them
-        ;; to login before giving the forbidden error.
-        (require-logged-in!)
-        (forbidden! "No territory access"))
-      (ok (-> territory
-              (dissoc :congregation/id)
-              (format-for-api)
-              (validate-territory))))))
+    (db/with-db [conn {}]
+      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+            territory-id (UUID/fromString (get-in request [:params :territory]))
+            user-id (current-user-id)
+            state (state-for-request request)
+            territory (facade/get-territory conn state cong-id territory-id user-id)]
+        (when-not territory
+          ;; This function must support anonymous access for opened shares.
+          ;; If anonymous user cannot see the congregation, first prompt them
+          ;; to login before giving the forbidden error.
+          (require-logged-in!)
+          (forbidden! "No territory access"))
+        (ok (-> territory
+                (dissoc :congregation/id)
+                (format-for-api)
+                (validate-territory)))))))
 
 (defn get-demo-territory [request]
   ;; anonymous access is allowed

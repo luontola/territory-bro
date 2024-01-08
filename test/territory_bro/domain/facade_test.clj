@@ -4,12 +4,14 @@
 
 (ns territory-bro.domain.facade-test
   (:require [clojure.test :refer :all]
+            [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.facade :as facade]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.projections :as projections]
             [territory-bro.test.testutil :as testutil])
-  (:import (java.util UUID)))
+  (:import (java.time Instant)
+           (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
@@ -97,6 +99,20 @@
 
 (defn- apply-events [events]
   (testutil/apply-events projections/projection events))
+
+(def fake-conn ::fake-conn)
+
+(defn fake-get-do-not-calls [conn -cong-id -territory-id]
+  (is (some? conn)
+      "get-do-not-calls conn")
+  (is (= cong-id -cong-id)
+      "get-do-not-calls cong-id")
+  (is (= territory-id -territory-id)
+      "get-do-not-calls territory-id")
+  {:congregation/id -cong-id
+   :territory/id -territory-id
+   :territory/do-not-calls "the do-not-calls"
+   :do-not-calls/last-modified (Instant/now)})
 
 
 (deftest test-get-congregation
@@ -195,19 +211,21 @@
                   :territory/number "123"
                   :territory/addresses "the addresses"
                   :territory/region "the region"
+                  :territory/do-not-calls "the do-not-calls"
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-multi-polygon}]
+    (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
 
-    (testing "has view permissions"
-      (is (= expected (facade/get-territory state cong-id territory-id user-id))))
+      (testing "has view permissions"
+        (is (= expected (facade/get-territory fake-conn state cong-id territory-id user-id))))
 
-    (let [user-id (UUID. 0 0x666)]
-      (testing "no permissions"
-        (is (nil? (facade/get-territory state cong-id territory-id user-id))))
+      (let [user-id (UUID. 0 0x666)]
+        (testing "no permissions"
+          (is (nil? (facade/get-territory fake-conn state cong-id territory-id user-id))))
 
-      (testing "opened a share"
-        (let [state (share/grant-opened-shares state [share-id] user-id)]
-          (is (= expected (facade/get-territory state cong-id territory-id user-id))))))))
+        (testing "opened a share"
+          (let [state (share/grant-opened-shares state [share-id] user-id)]
+            (is (= expected (facade/get-territory fake-conn state cong-id territory-id user-id)))))))))
 
 (deftest test-get-demo-territory
   (let [state (apply-events test-events)
@@ -217,17 +235,20 @@
                   :territory/number "123"
                   :territory/addresses "the addresses"
                   :territory/region "the region"
+                  ;; no do-not-calls
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-multi-polygon}]
+    (binding [do-not-calls/get-do-not-calls (fn [& _]
+                                              (assert false "should not have been called"))]
+      (testing "no demo congregation"
+        (is (nil? (facade/get-demo-territory state nil territory-id))))
 
-    (testing "no demo congregation"
-      (is (nil? (facade/get-demo-territory state nil territory-id))))
+      (testing "can see the demo congregation"
+        (is (= expected (facade/get-demo-territory state cong-id territory-id))))
 
-    (testing "can see the demo congregation"
-      (is (= expected (facade/get-demo-territory state cong-id territory-id))))
+      (testing "wrong territory ID"
+        (is (nil? (facade/get-demo-territory state cong-id (UUID. 0 0x666))))))
 
-    (testing "wrong territory ID"
-      (is (nil? (facade/get-demo-territory state cong-id (UUID. 0 0x666)))))
-
-    (testing "cannot see the demo congregation as own congregation"
-      (is (nil? (facade/get-territory state cong-id territory-id user-id))))))
+    (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
+      (testing "cannot see the demo congregation as own congregation"
+        (is (nil? (facade/get-territory fake-conn state cong-id territory-id user-id)))))))
