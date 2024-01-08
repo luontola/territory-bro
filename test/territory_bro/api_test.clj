@@ -16,7 +16,6 @@
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
-            [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
@@ -190,12 +189,16 @@
                             :territory/addresses "the addresses"
                             :territory/region "the region"
                             :territory/meta {:foo "bar"}
-                            :territory/location testdata/wkt-multi-polygon})
-      (do-not-calls/save-do-not-calls! conn {:command/time (Instant/now)
-                                             :congregation/id cong-id
-                                             :territory/id territory-id
-                                             :territory/do-not-calls "the do-not-calls"}))
+                            :territory/location testdata/wkt-multi-polygon}))
     (refresh-projections!)
+    (db/with-db [conn {}]
+      (dispatcher/command! conn (projections/cached-state)
+                           {:command/type :do-not-calls.command/save-do-not-calls
+                            :command/time (Instant/now)
+                            :command/system "test"
+                            :congregation/id cong-id
+                            :territory/id territory-id
+                            :territory/do-not-calls "the do-not-calls"}))
     territory-id))
 
 (defn- parse-qgis-datasource [datasource]

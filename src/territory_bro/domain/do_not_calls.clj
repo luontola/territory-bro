@@ -8,6 +8,9 @@
 
 (def ^:private query! (db/compile-queries "db/hugsql/do-not-calls.sql"))
 
+
+;;;; Queries
+
 (defn- parse-db-row [row]
   (when (some? row)
     {:congregation/id (:congregation row)
@@ -20,12 +23,25 @@
                                       :territory territory-id})
       (parse-db-row)))
 
-(defn save-do-not-calls! [conn command]
-  (let [do-not-calls (:territory/do-not-calls command)]
+
+;;;; Command handlers
+
+(defmulti ^:private command-handler (fn [command _state _injections]
+                                      (:command/type command)))
+
+(defmethod command-handler :do-not-calls.command/save-do-not-calls
+  [command _state {:keys [conn]}]
+  (let [cong-id (:congregation/id command)
+        territory-id (:territory/id command)
+        do-not-calls (:territory/do-not-calls command)]
     (if (str/blank? do-not-calls)
-      (query! conn :delete-do-not-calls {:congregation (:congregation/id command)
-                                         :territory (:territory/id command)})
-      (query! conn :save-do-not-calls {:congregation (:congregation/id command)
-                                       :territory (:territory/id command)
+      (query! conn :delete-do-not-calls {:congregation cong-id
+                                         :territory territory-id})
+      (query! conn :save-do-not-calls {:congregation cong-id
+                                       :territory territory-id
                                        :do_not_calls do-not-calls
-                                       :last_modified (:command/time command)}))))
+                                       :last_modified (:command/time command)})))
+  nil)
+
+(defn handle-command [command state injections]
+  (command-handler command state injections))

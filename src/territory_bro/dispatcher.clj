@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -10,6 +10,7 @@
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
+            [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
@@ -121,6 +122,11 @@
                                                      (gis-db/ensure-user-absent! conn args)))]
     (call! db-admin/handle-command command state injections)))
 
+(defn- do-not-calls-command! [conn command state]
+  (let [injections (assoc (default-injections command state)
+                          :conn conn)]
+    (call! do-not-calls/handle-command command state injections)))
+
 (defn- gis-user-command! [conn command state]
   (let [injections (assoc (default-injections command state)
                           :generate-password #(gis-user/generate-password 50)
@@ -155,6 +161,7 @@
    "congregation-boundary.command" congregation-boundary-command!
    "congregation.command" congregation-command!
    "db-admin.command" db-admin-command!
+   "do-not-calls.command" do-not-calls-command!
    "gis-user.command" gis-user-command!
    "region.command" region-command!
    "share.command" share-command!
