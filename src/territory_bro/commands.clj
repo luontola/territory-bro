@@ -129,13 +129,6 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)))
 
-(s/defschema SaveDoNotCalls
-  (assoc BaseCommand
-         :command/type (s/eq :territory.command/save-do-not-calls)
-         :congregation/id (foreign-key/references :congregation UUID)
-         :territory/id (foreign-key/references :territory UUID)
-         :territory/do-not-calls s/Str))
-
 ;;; Region
 
 (s/defschema DefineRegion
@@ -198,6 +191,15 @@
          :command/type (s/eq :share.command/record-share-opened)
          :share/id (foreign-key/references :share UUID)))
 
+;;; Do-Not-Calls
+
+(s/defschema SaveDoNotCalls
+  (assoc BaseCommand
+         :command/type (s/eq :do-not-calls.command/save-do-not-calls)
+         :congregation/id (foreign-key/references :congregation UUID)
+         :territory/id (foreign-key/references :territory UUID)
+         :territory/do-not-calls s/Str))
+
 
 (def command-schemas
   {:card-minimap-viewport.command/define-card-minimap-viewport DefineCardMinimapViewport
@@ -211,6 +213,7 @@
    :db-admin.command/ensure-gis-user-absent EnsureGisUserAbsent
    :db-admin.command/ensure-gis-user-present EnsureGisUserPresent
    :db-admin.command/migrate-tenant-schema MigrateTenantSchema
+   :do-not-calls.command/save-do-not-calls SaveDoNotCalls
    :gis-user.command/create-gis-user CreateGisUser
    :gis-user.command/delete-gis-user DeleteGisUser
    :region.command/define-region DefineRegion
@@ -218,8 +221,7 @@
    :share.command/create-share CreateShare
    :share.command/record-share-opened RecordShareOpened
    :territory.command/define-territory DefineTerritory
-   :territory.command/delete-territory DeleteTerritory
-   :territory.command/save-do-not-calls SaveDoNotCalls})
+   :territory.command/delete-territory DeleteTerritory})
 
 (s/defschema Command
   (apply refined/dispatch-on :command/type (flatten (seq command-schemas))))
