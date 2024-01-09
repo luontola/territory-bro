@@ -149,6 +149,12 @@
       (merge session)
       app))
 
+(defn try-edit-do-not-calls! [session cong-id territory-id]
+  (-> (request :post (str "/api/congregation/" cong-id "/territory/" territory-id "/do-not-calls"))
+      (json-body {:do-not-calls "edited"})
+      (merge session)
+      app))
+
 (defn create-congregation-without-user! [name]
   (let [cong-id (UUID/randomUUID)
         state (projections/cached-state)]
@@ -647,6 +653,26 @@
           (is (forbidden? response))
           (is (= "No demo congregation" (:body response))))))))
 
+(deftest edit-do-not-calls-test
+  (let [session (login! app)
+        cong-id (create-congregation! session "foo")
+        territory-id (create-territory! cong-id)]
+
+    (testing "edit do-not-calls"
+      (let [response (try-edit-do-not-calls! session cong-id territory-id)]
+        (is (ok? response)))
+
+      (let [response (-> (request :get (str "/api/congregation/" cong-id "/territory/" territory-id))
+                         (merge session)
+                         app)]
+        (is (ok? response))
+        (is (= "edited" (:doNotCalls (:body response))))))
+
+    (testing "no access"
+      (revoke-access-from-all! cong-id)
+      (let [response (try-edit-do-not-calls! session cong-id territory-id)]
+        (is (forbidden? response))))))
+
 (deftest download-qgis-project-test
   (let [session (login! app)
         user-id (get-user-id session)
@@ -818,7 +844,6 @@
                             (map :id)
                             (set))
                        (str territory-id)))
-        ;; TODO: can view do-not-calls
 
         (testing "- but cannot view other territories"
           (is (= 1 (count (:territories (:body response))))))
@@ -831,7 +856,20 @@
           (is (= [] (:cardMinimapViewports (:body response)))
               "card minimap viewports")
           (is (= [] (:users (:body response)))
-              "users"))))
+              "users"))
+
+        (testing "- can view do-not-calls"
+          (let [response (-> (request :get (str "/api/congregation/" cong-id "/territory/" territory-id))
+                             (merge @*session)
+                             app)]
+            (is (ok? response))
+            (is (= {:id (str territory-id)
+                    :doNotCalls "the do-not-calls"}
+                   (select-keys (:body response) [:id :doNotCalls])))))
+
+        (testing "- but cannot edit do-not-calls"
+          (let [response (try-edit-do-not-calls! @*session cong-id territory-id)]
+            (is (unauthorized? response))))))
 
     (testing "non-existing share link"
       (let [response (-> (request :get "/api/share/foo")

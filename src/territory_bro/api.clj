@@ -388,6 +388,20 @@
             (response/content-type "application/octet-stream")
             (response/header "Content-Disposition" (str "attachment; filename=\"" file-name "\"")))))))
 
+(defn edit-do-not-calls [request]
+  (auth/with-user-from-session request
+    (require-logged-in!)
+    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+          territory-id (UUID/fromString (get-in request [:params :territory]))
+          do-not-calls (get-in request [:params :do-not-calls])
+          state (state-for-request request)]
+      (db/with-db [conn {}]
+        (dispatch! conn state {:command/type :do-not-calls.command/save-do-not-calls
+                               :congregation/id cong-id
+                               :territory/id territory-id
+                               :territory/do-not-calls do-not-calls})
+        (ok {})))))
+
 (defn share-territory-link [request]
   (if (= "demo" (get-in request [:params :congregation]))
     (let [territory-id (UUID/fromString (get-in request [:params :territory]))
@@ -504,6 +518,7 @@
   (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request))
   (POST "/api/congregation/:congregation/generate-qr-codes" request (generate-qr-codes request))
   (GET "/api/congregation/:congregation/territory/:territory" request (get-territory request))
+  (POST "/api/congregation/:congregation/territory/:territory/do-not-calls" request (edit-do-not-calls request))
   (POST "/api/congregation/:congregation/territory/:territory/share" request (share-territory-link request))
   (GET "/api/share/:share-key" request (open-share request)))
 
