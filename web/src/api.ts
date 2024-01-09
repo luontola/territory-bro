@@ -239,6 +239,7 @@ export type Territory = {
   addresses: string;
   region: string;
   location: string;
+  doNotCalls?: string;
   loaned?: boolean;
   staleness?: number;
   meta: { [key: string]: any };
@@ -249,6 +250,13 @@ export type Territory = {
 function sortTerritories(territories: Territory[]): Territory[] {
   const numbers: string[] = alphanumSort(territories.map(t => t.number));
   return sortBy(territories, t => findIndex(numbers, n => n === t.number));
+}
+
+export async function editDoNotCalls(congregationId: string, territoryId: string, doNotCalls: string) {
+  await api.post(`/api/congregation/${congregationId}/territory/${territoryId}/do-not-calls`, {
+    "do-not-calls": doNotCalls
+  });
+  await queryClient.invalidateQueries({queryKey: ['territory', congregationId, territoryId]});
 }
 
 export async function shareTerritory(congregationId: string, territoryId: string) {

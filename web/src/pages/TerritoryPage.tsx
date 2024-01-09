@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {useState} from "react";
-import {shareTerritory, useCongregationById, useTerritoryById} from "../api";
+import {editDoNotCalls, shareTerritory, useCongregationById, useTerritoryById} from "../api";
 import styles from "./TerritoryPage.module.css"
 import TerritoryMap from "../maps/TerritoryMap";
 import {mapRasters} from "../maps/mapOptions";
@@ -85,6 +85,9 @@ const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
 const TerritoryPage = () => {
   const {t, i18n} = useTranslation();
   const {congregationId, territoryId} = useParams()
+  const [editingDoNotCalls, setEditingDoNotCalls] = useState(false)
+  const [submittingDoNotCalls, setSubmittingDoNotCalls] = useState(false)
+  const [draftDoNotCalls, setDraftDoNotCalls] = useState("")
   const congregation = useCongregationById(congregationId);
   const territory = useTerritoryById(congregationId, territoryId);
   // TODO: consider using a grid layout for responsiveness so that the details area has fixed width
@@ -108,6 +111,51 @@ const TerritoryPage = () => {
             <tr>
               <th>{t('Territory.addresses')}</th>
               <td>{territory.addresses}</td>
+            </tr>
+            <tr>
+              <th>Do-not-calls</th>
+              <td>
+                {editingDoNotCalls ? (
+                  <form className="pure-form"
+                        onSubmit={async event => {
+                          event.preventDefault();
+                          setSubmittingDoNotCalls(true);
+                          try {
+                            await editDoNotCalls(congregation.id, territory.id, draftDoNotCalls);
+                          } finally {
+                            setEditingDoNotCalls(false);
+                            setSubmittingDoNotCalls(false);
+                          }
+                        }}>
+                    <textarea className="pure-input-1"
+                              autoFocus={true}
+                              value={draftDoNotCalls}
+                              onChange={event => {
+                                setDraftDoNotCalls(event.target.value)
+                              }}
+                              disabled={submittingDoNotCalls}/>
+                    <button type="submit"
+                            disabled={submittingDoNotCalls}
+                            className="pure-button pure-button-primary">
+                      Save
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    {congregation.permissions.editDoNotCalls &&
+                      <button type="button"
+                              onClick={_event => {
+                                setDraftDoNotCalls(territory.doNotCalls ?? "");
+                                setEditingDoNotCalls(true);
+                              }}
+                              className="pure-button"
+                              style={{float: "right", fontSize: "70%"}}>
+                        Edit
+                      </button>}
+                    {territory.doNotCalls}
+                  </>
+                )}
+              </td>
             </tr>
             </tbody>
           </table>
