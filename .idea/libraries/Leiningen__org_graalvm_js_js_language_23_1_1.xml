@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.graalvm.js/js-language:23.1.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/graalvm/js/js-language/23.1.1/js-language-23.1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

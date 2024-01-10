@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.graalvm.regex/regex:23.1.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/graalvm/regex/regex/23.1.1/regex-23.1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

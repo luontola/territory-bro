@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -30,6 +30,8 @@
                  [org.clojure/data.csv "1.0.1"]
                  [org.clojure/tools.logging "1.1.0"] ; TODO: find out what logging framework we use, move to SLF4J if necessary, preferably something that logs ex-data by default (avoid Timbre, it has a bad track record of slow updates)
                  [org.flywaydb/flyway-core "7.3.0"]
+                 [org.graalvm.polyglot/js "23.1.1" :extension "pom"]
+                 [org.graalvm.polyglot/polyglot "23.1.1"]
                  [org.postgresql/postgresql "42.2.18"]
                  [prismatic/schema "1.1.12"]
                  [ring-logger "1.0.1"]

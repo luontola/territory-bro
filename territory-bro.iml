@@ -131,6 +131,21 @@
     <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-server:9.4.31.v20200723" level="project" />
     <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-util:9.4.31.v20200723" level="project" />
     <orderEntry type="library" name="Leiningen: org.flywaydb/flyway-core:7.3.0" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.js/js-language:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.polyglot/js-community:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.polyglot/js:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.polyglot/polyglot:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.regex/regex:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.sdk/collections:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.sdk/jniutils:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.sdk/nativebridge:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.sdk/nativeimage:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.sdk/word:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.shadowed/icu4j:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.truffle/truffle-api:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.truffle/truffle-compiler:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.truffle/truffle-enterprise:23.1.1" level="project" />
+    <orderEntry type="library" name="Leiningen: org.graalvm.truffle/truffle-runtime:23.1.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.immutant/core:2.1.10" level="project" />
     <orderEntry type="library" name="Leiningen: org.immutant/web:2.1.10" level="project" />
     <orderEntry type="library" name="Leiningen: org.javassist/javassist:3.18.1-GA" level="project" />
