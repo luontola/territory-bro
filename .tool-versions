@@ -1,2 +1,2 @@
-java temurin-17.0.9+9
+java graalvm-community-21.0.1
 nodejs 21.2.0
