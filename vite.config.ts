@@ -11,7 +11,12 @@ import i18nextLoader from 'vite-plugin-i18next-loader'
 export default defineConfig({
   root: "web",
   plugins: [
-    react(),
+    react({
+      // Fix to "org.graalvm.polyglot.PolyglotException: Error: Error reading: react/jsx-runtime"
+      // https://github.com/vitejs/vite/issues/6215
+      jsxRuntime: 'classic',
+    }),
+    //vike(),
     i18nextLoader({
       paths: ['./web/src/locales'],
       namespaceResolution: 'basename',
@@ -23,7 +28,19 @@ export default defineConfig({
     sourcemap: true,
   },
   ssr: {
-    noExternal: true
+    external: ["http"],
+    //noExternal: true
+    //noExternal: ["i18next"]
+    noExternal: /.*/
+  },
+  optimizeDeps: {
+    //include: ['react/jsx-runtime']
+  },
+  resolve: {
+    alias: {
+      // Fix to "org.graalvm.polyglot.PolyglotException: Error: Error reading: react/jsx-runtime"
+      //  'react/jsx-runtime': 'react/jsx-runtime.js'
+    }
   },
   server: {
     port: 8080,

@@ -4,7 +4,6 @@
 
 (ns territory-bro.api
   (:require [camel-snake-kebab.core :as csk]
-            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [compojure.core :refer [ANY GET POST defroutes]]
@@ -505,13 +504,25 @@
 
 (defn territory-page [request]
   (with-open [context (-> (Context/newBuilder (into-array ["js"]))
+                          #_(.allowAllAccess true)
                           (.allowIO IOAccess/ALL)
                           (.allowExperimentalOptions true)
-                          (.option "js.esm-eval-returns-exports", "true")
+                          #_(.option "js.commonjs-require" "true")
+                          #_(.option "js.commonjs-require-cwd" "node_modules")
+                          (.option "js.esm-eval-returns-exports" "true")
                           (.build))]
-    (let [source (-> (Source/newBuilder "js" (io/file "target/server-dist/server.js"))
+    (prn 'xxx)
+    (let [source (-> (Source/newBuilder "js" (slurp "target/server-dist/server.js") "server.js")
                      (.mimeType "application/javascript+module")
                      (.build))
+          tmp (-> (Source/newBuilder "js" "
+                  import alphanumSort from \"alphanum-sort\";
+                  console.log(alphanumSort);
+                  "
+                                     "file.js")
+                  (.mimeType "application/javascript+module")
+                  (.build))
+          #_#__ (.eval context tmp)
           exports (.eval context source)
           my-fun (.getMember exports "myFun")
           result (.execute my-fun (into-array ["world"]))]
