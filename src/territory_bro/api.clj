@@ -500,6 +500,10 @@
         :else
         (not-found {:message "Share not found"})))))
 
+(defn territory-page [request]
+  (-> (ok "Hello from server")
+      (response/content-type "text/html")))
+
 (defroutes api-routes
   (GET "/" [] (ok "Territory Bro"))
   (POST "/api/login" request (login request))
@@ -520,7 +524,11 @@
   (GET "/api/congregation/:congregation/territory/:territory" request (get-territory request))
   (POST "/api/congregation/:congregation/territory/:territory/do-not-calls" request (edit-do-not-calls request))
   (POST "/api/congregation/:congregation/territory/:territory/share" request (share-territory-link request))
-  (GET "/api/share/:share-key" request (open-share request)))
+  (GET "/api/share/:share-key" request (open-share request))
+
+  ;;; Server-Side Rendered UI
+  ;; TODO: move out of API, maybe one file per page
+  (GET "/congregation/:congregation/territories/:territory" request (territory-page request)))
 
 (comment
   (db/with-db [conn {:read-only? true}]
