@@ -393,7 +393,7 @@
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           territory-id (UUID/fromString (get-in request [:params :territory]))
-          do-not-calls (get-in request [:params :do-not-calls])
+          do-not-calls (str/trim (str (get-in request [:params :do-not-calls])))
           state (state-for-request request)]
       (db/with-db [conn {}]
         (dispatch! conn state {:command/type :do-not-calls.command/save-do-not-calls
