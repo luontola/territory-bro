@@ -113,7 +113,7 @@ const TerritoryPage = () => {
               <td>{territory.addresses}</td>
             </tr>
             <tr>
-              <th>Do-not-calls</th>
+              <th>{t('TerritoryPage.doNotCalls')}</th>
               <td>
                 {editingDoNotCalls ? (
                   <form className="pure-form"
@@ -128,6 +128,7 @@ const TerritoryPage = () => {
                           }
                         }}>
                     <textarea className="pure-input-1"
+                              rows={5}
                               autoFocus={true}
                               value={draftDoNotCalls}
                               onChange={event => {
@@ -137,7 +138,7 @@ const TerritoryPage = () => {
                     <button type="submit"
                             disabled={submittingDoNotCalls}
                             className="pure-button pure-button-primary">
-                      Save
+                      {t('TerritoryPage.save')}
                     </button>
                   </form>
                 ) : (
@@ -150,7 +151,7 @@ const TerritoryPage = () => {
                               }}
                               className="pure-button"
                               style={{float: "right", fontSize: "70%"}}>
-                        Edit
+                        {t('TerritoryPage.edit')}
                       </button>}
                     {territory.doNotCalls}
                   </>

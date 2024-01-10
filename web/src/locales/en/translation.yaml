@@ -34,6 +34,9 @@ TerritoryListPage:
     needToLogin: You will need to <0>login</0> to see the rest.
 TerritoryPage:
   title: Territory {{number}}
+  doNotCalls: Do not contact
+  edit: Edit
+  save: Save
   shareLink:
     button: Share a link
     closePopup: Close

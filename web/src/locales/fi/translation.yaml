@@ -34,6 +34,9 @@ TerritoryListPage:
     needToLogin: Sinun tulee <0>kirjautua sisään</0> nähdäksesi loput.
 TerritoryPage:
   title: Alue {{number}}
+  doNotCalls: Kieltopaikat
+  edit: Muokkaa
+  save: Tallenna
   shareLink:
     button: Jaa linkki
     closePopup: Sulje

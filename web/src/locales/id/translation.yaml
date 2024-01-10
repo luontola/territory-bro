@@ -34,6 +34,9 @@ TerritoryListPage:
     needToLogin: Anda perlu <0>masuk</0> untuk melihat yang lainnya.
 TerritoryPage:
   title: Wilayah {{number}}
+  doNotCalls: Jangan menghubungi
+  edit: Edit
+  save: Simpan
   shareLink:
     button: Bagikan tautan
     closePopup: Tutup

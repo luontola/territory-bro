@@ -34,6 +34,9 @@ TerritoryListPage:
     needToLogin: Je moet <0>inloggen</0> om de rest te zien.
 TerritoryPage:
   title: Territorium {{number}}
+  doNotCalls: Niet contacteren
+  edit: Bewerken
+  save: Opslaan
   shareLink:
     button: Deel een link
     closePopup: Sluiten
