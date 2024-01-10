@@ -4,6 +4,7 @@
 
 (ns territory-bro.api
   (:require [camel-snake-kebab.core :as csk]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [compojure.core :refer [ANY GET POST defroutes]]
@@ -29,6 +30,8 @@
   (:import (com.auth0.jwt.exceptions JWTVerificationException)
            (java.time Duration)
            (java.util UUID)
+           (org.graalvm.polyglot Context Source)
+           (org.graalvm.polyglot.io IOAccess)
            (org.postgresql.util PSQLException)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
@@ -501,8 +504,19 @@
         (not-found {:message "Share not found"})))))
 
 (defn territory-page [request]
-  (-> (ok "Hello from server")
-      (response/content-type "text/html")))
+  (with-open [context (-> (Context/newBuilder (into-array ["js"]))
+                          (.allowIO IOAccess/ALL)
+                          (.allowExperimentalOptions true)
+                          (.option "js.esm-eval-returns-exports", "true")
+                          (.build))]
+    (let [source (-> (Source/newBuilder "js" (io/file "target/server-dist/server.js"))
+                     (.mimeType "application/javascript+module")
+                     (.build))
+          exports (.eval context source)
+          my-fun (.getMember exports "myFun")
+          result (.execute my-fun (into-array ["world"]))]
+      (-> (ok (.asString result))
+          (response/content-type "text/html")))))
 
 (defroutes api-routes
   (GET "/" [] (ok "Territory Bro"))
