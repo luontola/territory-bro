@@ -72,7 +72,7 @@
     <orderEntry type="library" name="Leiningen: expound:0.8.5" level="project" />
     <orderEntry type="library" name="Leiningen: fipp:0.6.17" level="project" />
     <orderEntry type="library" name="Leiningen: hawk:0.2.11" level="project" />
-    <orderEntry type="library" name="Leiningen: hiccup:1.0.5" level="project" />
+    <orderEntry type="library" name="Leiningen: hiccup:2.0.0-RC2" level="project" />
     <orderEntry type="library" name="Leiningen: hikari-cp:2.13.0" level="project" />
     <orderEntry type="library" name="Leiningen: instaparse:1.4.8" level="project" />
     <orderEntry type="library" name="Leiningen: io.undertow/undertow-core:1.4.14.Final" level="project" />

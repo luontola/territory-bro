@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -16,6 +16,7 @@
                  [compojure "1.6.2"]
                  [conman "0.8.4" :upgrade false] ; TODO: 0.8.5 and higher fail with: java.lang.IllegalArgumentException: No implementation of method: :get-level of protocol: #'clojure.java.jdbc/Connectable found for class: com.zaxxer.hikari.HikariDataSource
                  [cprop "0.1.17"]
+                 [hiccup "2.0.0-RC2"]
                  [liberator "0.15.3"]
                  [luminus-immutant "0.2.5"] ; TODO: replace with ring-jetty
                  [medley "1.3.0"]
