@@ -22,6 +22,9 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
   },
+  ssr: {
+    noExternal: true
+  },
   server: {
     port: 8080,
     proxy: {
