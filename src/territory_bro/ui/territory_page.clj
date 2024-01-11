@@ -11,6 +11,8 @@
             [territory-bro.ui.layout :as layout])
   (:import (java.util UUID)))
 
+(def do-not-calls-was-updated "do-not-calls-was-updated")
+
 (defn view-do-not-calls [request]
   (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
         territory-id (UUID/fromString (get-in request [:params :territory]))
@@ -43,6 +45,18 @@
 (defn save-do-not-calls [request]
   (api/edit-do-not-calls request)
   (h/html (view-do-not-calls request)))
+
+(defn another-field [request]
+  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+        territory-id (UUID/fromString (get-in request [:params :territory]))
+        territory (:body (api/get-territory request))]
+    (h/html
+     [:div {:hx-target "this"
+            :hx-swap "outerHTML"
+            :hx-trigger (str do-not-calls-was-updated " from:body")
+            :hx-get (str "/congregation/" cong-id "/territories/" territory-id "/another-field")}
+      "Another field: "
+      (:doNotCalls territory)])))
 
 (defn share-button [{:keys [open?]}]
   (let [styles (:TerritoryPage (css/modules))]
@@ -83,6 +97,7 @@
             "{faCopy}"]]]])])))
 
 
+
 (defn page [request]
   (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
         territory-id (UUID/fromString (get-in request [:params :territory]))
@@ -115,6 +130,8 @@
          ;; TODO: check if has share permission
          [:div {:class (:actions styles)}
           (share-button {:open? false})]]
+
+        (another-field request)
 
         [:div {:class "pure-u-1 pure-u-lg-2-3 pure-u-xl-3-4"}
          [:div {:class (:map styles)}

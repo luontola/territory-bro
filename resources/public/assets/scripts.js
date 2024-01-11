@@ -23,3 +23,7 @@ document.body.addEventListener('htmx:afterRequest', function (evt) {
     errorTarget.removeAttribute("hidden");
   }
 });
+
+document.body.addEventListener("do-not-calls-was-updated", function (event) {
+  console.log("event", event);
+})
