@@ -79,6 +79,7 @@
     "autotest": "vitest watch",
     "start": "vite dev",
     "build": "vite build",
+    "server-export": "vite-node web/src/server-export.tsx",
     "preview": "vite preview",
     "analyze": "vite-bundle-visualizer",
     "lint": "tsc && eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
