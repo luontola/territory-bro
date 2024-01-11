@@ -8,18 +8,17 @@
             [territory-bro.api :as api]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.i18n :as i18n]
-            [territory-bro.ui.layout :as layout])
-  (:import (java.util UUID)))
+            [territory-bro.ui.layout :as layout]))
+
+(def ^:dynamic *page-path*)
 
 (defn view-do-not-calls [request]
-  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-        territory-id (UUID/fromString (get-in request [:params :territory]))
-        territory (:body (api/get-territory request))]
+  (let [territory (:body (api/get-territory request))]
     (h/html
      [:div {:hx-target "this"
             :hx-swap "outerHTML"}
       ;; TODO: check if has edit permission
-      [:button.pure-button {:hx-post (str "/congregation/" cong-id "/territories/" territory-id "/edit-do-not-calls")
+      [:button.pure-button {:hx-post (str *page-path* "/edit-do-not-calls")
                             :hx-disabled-elt "this"
                             :type "button"
                             :style "float: right; font-size: 70%;"}
@@ -28,13 +27,11 @@
           "-")])))
 
 (defn edit-do-not-calls [request]
-  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-        territory-id (UUID/fromString (get-in request [:params :territory]))
-        territory (:body (api/get-territory request))]
+  (let [territory (:body (api/get-territory request))]
     (h/html
      [:form.do-not-calls.pure-form {:hx-target "this"
                                     :hx-swap "outerHTML"
-                                    :hx-post (str "/congregation/" cong-id "/territories/" territory-id "/save-do-not-calls")
+                                    :hx-post (str *page-path* "/save-do-not-calls")
                                     :hx-disabled-elt ".do-not-calls :is(textarea, button)"}
       [:textarea.pure-input-1 {:name "do-not-calls"
                                :rows 5
@@ -86,9 +83,7 @@
 
 
 (defn page [request]
-  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-        territory-id (UUID/fromString (get-in request [:params :territory]))
-        styles (:TerritoryPage (css/modules))
+  (let [styles (:TerritoryPage (css/modules))
         territory (:body (api/get-territory request))]
     (layout/page {:title "Territory Page"}
       (h/html
