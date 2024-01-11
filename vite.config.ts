@@ -5,6 +5,10 @@
 import {defineConfig} from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import i18nextLoader from 'vite-plugin-i18next-loader'
+import fs from "fs";
+import * as path from "path";
+
+const cssModulesJson = {}
 
 // https://vitejs.dev/config/
 // https://vitest.dev/config/
@@ -24,7 +28,17 @@ export default defineConfig({
   },
   css: {
     modules: {
-      generateScopedName: "[name]__[local]___[hash:base64:5]"
+      getJSON: (cssFileName: string,
+                json: Record<string, string>,
+                _outputFileName: string) => {
+        const match = cssFileName.match(/\/(\w+)\.module\.css/)
+        const key = match ? match[1] : cssFileName
+        cssModulesJson[key] = json;
+        const file = "target/web-dist/css-modules.json";
+        fs.mkdirSync(path.dirname(file), {recursive: true})
+        fs.writeFileSync(file, JSON.stringify(cssModulesJson, null, 2))
+      },
+      generateScopedName: "[name]__[local]--[hash:base64:5]"
     }
   },
   server: {
