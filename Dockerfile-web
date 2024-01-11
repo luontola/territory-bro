@@ -20,7 +20,7 @@ RUN npm run test && \
     npm run build
 
 # offline compress static resources
-RUN find /project/target/web-dist \
+RUN find /project/target/web-dist/public \
         -type f \
         -regextype posix-extended \
         -iregex '.*\.(html?|js|map|css|svg|otf|ttf|txt|json)' \
@@ -36,4 +36,4 @@ COPY web/docker/docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
 
-COPY --from=builder /project/target/web-dist /usr/share/nginx/html
+COPY --from=builder /project/target/web-dist/public /usr/share/nginx/html

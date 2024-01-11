@@ -18,14 +18,23 @@ export default defineConfig({
     })
   ],
   build: {
-    outDir: "../target/web-dist",
+    outDir: "../target/web-dist/public",
     emptyOutDir: true,
     sourcemap: true,
+  },
+  css: {
+    modules: {
+      generateScopedName: "[name]__[local]___[hash:base64:5]"
+    }
   },
   server: {
     port: 8080,
     proxy: {
       '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+      },
+      '/assets': {
         target: 'http://localhost:8081',
         changeOrigin: true,
       },

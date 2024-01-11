@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <option name="DEFAULT_COMPILER" value="Javac" />
-    <resourceExtensions />
     <wildcardResourcePatterns>
       <entry name="!dev-resources:*" />
       <entry name="!resources:*" />
+      <entry name="!web-dist:*" />
       <entry name="!?*.java" />
       <entry name="!?*.form" />
       <entry name="!?*.class" />
@@ -16,10 +15,5 @@
       <entry name="!?*.clj" />
       <entry name="!?*.aj" />
     </wildcardResourcePatterns>
-    <annotationProcessing>
-      <profile default="true" name="Default" enabled="false">
-        <processorPath useClasspath="true" />
-      </profile>
-    </annotationProcessing>
   </component>
 </project>

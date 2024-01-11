@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -13,6 +13,7 @@
             [mount.core :as mount]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.json :as json]
+            [territory-bro.infra.resources :as resources]
             [territory-bro.infra.util :refer [getx]])
   (:import (clojure.lang IPersistentMap IPersistentVector)
            (com.zaxxer.hikari HikariDataSource)
@@ -220,18 +221,11 @@
   `(auto-explain* ~conn ~min-duration (fn [] ~@body)))
 
 (defn- load-queries [*queries]
-  ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
-  (let [{resource :resource, old-last-modified :last-modified, :as queries} @*queries
-        new-last-modified (-> ^URL resource
-                              (.openConnection)
-                              (.getLastModified))]
-    (if (= old-last-modified new-last-modified)
-      queries
-      (reset! *queries {:resource resource
-                        :db-fns (hugsql/map-of-db-fns resource {:quoting :ansi})
-                        :sqlvec-fns (hugsql/map-of-sqlvec-fns resource {:quoting :ansi
-                                                                        :fn-suffix ""})
-                        :last-modified new-last-modified}))))
+  (resources/auto-refresh *queries
+                          (fn [resource]
+                            {:db-fns (hugsql/map-of-db-fns resource {:quoting :ansi})
+                             :sqlvec-fns (hugsql/map-of-sqlvec-fns resource {:quoting :ansi
+                                                                             :fn-suffix ""})})))
 
 (defn- explain-query [conn sql params]
   (jdbc/execute! conn ["SAVEPOINT explain_analyze"])
@@ -266,8 +260,6 @@
     (apply query-fn conn params)))
 
 (defn compile-queries [path]
-  (let [resource (io/resource path)
-        _ (assert resource (str "Resource not found: " path))
-        *queries (atom {:resource resource})]
+  (let [*queries (atom {:resource (io/resource path)})]
     (fn [conn name & params]
       (query! conn *queries name params))))
