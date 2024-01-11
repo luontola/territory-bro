@@ -3,7 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui
-  (:require [compojure.core :refer [GET defroutes]]
+  (:require [compojure.core :refer [GET POST defroutes]]
             [ring.util.http-response :refer :all]
             [ring.util.response :as response]
             [territory-bro.ui.territory-page :as territory-page]))
@@ -15,4 +15,6 @@
 
 (defroutes ui-routes
   (GET "/" [] (ok "Territory Bro"))
-  (GET "/congregation/:congregation/territories/:territory" request (html-response (territory-page/page request))))
+  (GET "/congregation/:congregation/territories/:territory" request (html-response (territory-page/page request)))
+  (POST "/congregation/:congregation/territories/:territory/edit-do-not-calls" request (html-response (territory-page/edit-do-not-calls request)))
+  (POST "/congregation/:congregation/territories/:territory/save-do-not-calls" request (html-response (territory-page/save-do-not-calls request))))

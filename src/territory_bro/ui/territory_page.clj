@@ -8,7 +8,41 @@
             [territory-bro.api :as api]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.i18n :as i18n]
-            [territory-bro.ui.layout :as layout]))
+            [territory-bro.ui.layout :as layout])
+  (:import (java.util UUID)))
+
+(defn view-do-not-calls [request]
+  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+        territory-id (UUID/fromString (get-in request [:params :territory]))
+        territory (:body (api/get-territory request))]
+    (h/html
+     [:div {:hx-target "this"
+            :hx-swap "outerHTML"}
+      ;; TODO: check if has edit permission
+      [:button {:hx-post (str "/congregation/" cong-id "/territories/" territory-id "/edit-do-not-calls")
+                :type "button"
+                :class "pure-button"
+                :style "float: right; font-size: 70%;"}
+       (i18n/t "TerritoryPage.edit")]
+      (or (:doNotCalls territory)
+          "-")])))
+
+(defn edit-do-not-calls [request]
+  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+        territory-id (UUID/fromString (get-in request [:params :territory]))
+        territory (:body (api/get-territory request))]
+    (h/html
+     [:form {:hx-post (str "/congregation/" cong-id "/territories/" territory-id "/save-do-not-calls")
+             :hx-target "this"
+             :hx-swap "outerHTML"}
+      [:textarea {:name "do-not-calls"}
+       (:doNotCalls territory)]
+      [:button {:type "submit"}
+       "Save"]])))
+
+(defn save-do-not-calls [request]
+  (api/edit-do-not-calls request)
+  (h/html (view-do-not-calls request)))
 
 (defn share-button [{:keys [open?]}]
   (let [styles (:TerritoryPage (css/modules))]
@@ -50,7 +84,9 @@
 
 
 (defn page [request]
-  (let [styles (:TerritoryPage (css/modules))
+  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+        territory-id (UUID/fromString (get-in request [:params :territory]))
+        styles (:TerritoryPage (css/modules))
         territory (:body (api/get-territory request))]
     (layout/page {:title "Territory Page"}
       (h/html
@@ -74,15 +110,7 @@
              [:td (:addresses territory)]]
             [:tr
              [:th (i18n/t "TerritoryPage.doNotCalls")]
-             [:td
-              ;; TODO: check if has edit permission
-              ;; TODO: toggle edit mode
-              [:button {:type "button"
-                        :class "pure-button"
-                        :style "float: right; font-size: 70%;"}
-               (i18n/t "TerritoryPage.edit")]
-              (or (:doNotCalls territory)
-                  "-")]]]]]
+             [:td (view-do-not-calls request)]]]]]
 
          ;; TODO: check if has share permission
          [:div {:class (:actions styles)}
