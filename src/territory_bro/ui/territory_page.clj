@@ -12,13 +12,13 @@
 
 (def ^:dynamic *page-path*)
 
-(defn view-do-not-calls [request]
+(defn do-not-calls--view [request]
   (let [territory (:body (api/get-territory request))]
     (h/html
      [:div {:hx-target "this"
             :hx-swap "outerHTML"}
       ;; TODO: check if has edit permission
-      [:button.pure-button {:hx-post (str *page-path* "/edit-do-not-calls")
+      [:button.pure-button {:hx-post (str *page-path* "/do-not-calls/edit")
                             :hx-disabled-elt "this"
                             :type "button"
                             :style "float: right; font-size: 70%;"}
@@ -26,12 +26,12 @@
       (or (:doNotCalls territory)
           "-")])))
 
-(defn edit-do-not-calls [request]
+(defn do-not-calls--edit [request]
   (let [territory (:body (api/get-territory request))]
     (h/html
      [:form.do-not-calls.pure-form {:hx-target "this"
                                     :hx-swap "outerHTML"
-                                    :hx-post (str *page-path* "/save-do-not-calls")
+                                    :hx-post (str *page-path* "/do-not-calls/save")
                                     :hx-disabled-elt ".do-not-calls :is(textarea, button)"}
       [:textarea.pure-input-1 {:name "do-not-calls"
                                :rows 5
@@ -40,17 +40,18 @@
       [:button.pure-button.pure-button-primary {:type "submit"}
        (i18n/t "TerritoryPage.save")]])))
 
-(defn save-do-not-calls [request]
+(defn do-not-calls--save [request]
   (api/edit-do-not-calls request)
-  (h/html (view-do-not-calls request)))
+  (do-not-calls--view request))
 
 
-(defn share-button [{:keys [open?]}]
+(defn share-link [{:keys [open? link]}]
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
-     [:form.pure-form
-      ;; TODO: should toggle popup
-      [:button.pure-button {:type "button"
+     [:form.pure-form {:hx-target "this"
+                       :hx-swap "outerHTML"}
+      [:button.pure-button {:hx-post (str *page-path* "/share-link/" (if open? "close" "open"))
+                            :type "button"
                             :class (when open?
                                      "pure-button-active")
                             :aria-expanded (if open? "true" "false")}
@@ -59,10 +60,9 @@
 
       (when open?
         [:div {:class (:sharePopup styles)}
-         ;; TODO: should close popup
-         [:button.pure-button {:type "button"
-                               :class (:closeButton styles)
-                               :onClick "{closePopup}"}
+         [:button.pure-button {:hx-post (str *page-path* "/share-link/close")
+                               :type "button"
+                               :class (:closeButton styles)}
           [:FontAwesomeIcon {:icon "{faXmark}"
                              :title (i18n/t "TerritoryPage.shareLink.closePopup")}
            "{faXmark}"]]
@@ -71,15 +71,25 @@
           (i18n/t "TerritoryPage.shareLink.description")]
 
          [:div {:class (:shareLink styles)}
-          ;; TODO: should copy link to clipboard
           [:input#share-link {:type "text"
-                              :value "{shareUrl}"
-                              :aria-readonly "true"}]
+                              :value link
+                              :readonly true
+                              :style "color: unset; background-color: unset;"}]
+          ;; TODO: should copy link to clipboard
           [:button#copy-share-link.pure-button {:type "button"
                                                 :data-clipboard-target "#share-link"}
            [:FontAwesomeIcon {:icon "{faCopy}"
                               :title (i18n/t "TerritoryPage.shareLink.copy")}
             "{faCopy}"]]]])])))
+
+(defn share-link--open [request]
+  ;; TODO: should cache the share, to avoid creating new ones when clicking the share button repeatedly
+  (let [share (:body (api/share-territory-link request))]
+    (share-link {:open? true
+                 :link (:url share)})))
+
+(defn share-link--close [_request]
+  (share-link {:open? false}))
 
 
 (defn page [request]
@@ -107,11 +117,11 @@
              [:td (:addresses territory)]]
             [:tr
              [:th (i18n/t "TerritoryPage.doNotCalls")]
-             [:td (view-do-not-calls request)]]]]]
+             [:td (do-not-calls--view request)]]]]]
 
          ;; TODO: check if has share permission
          [:div {:class (:actions styles)}
-          (share-button {:open? false})]]
+          (share-link--close request)]]
 
         [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
          [:div {:class (:map styles)}

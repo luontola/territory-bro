@@ -22,12 +22,22 @@
     (binding [territory-page/*page-path* (:uri request)]
       (html-response (territory-page/page request))))
 
-  (POST "/congregation/:congregation/territories/:territory/edit-do-not-calls" request
+  (POST "/congregation/:congregation/territories/:territory/do-not-calls/edit" request
     (binding [territory-page/*page-path* (-> (:uri request)
-                                             (str/replace #"/edit-do-not-calls$" ""))]
-      (html-response (territory-page/edit-do-not-calls request))))
+                                             (str/replace #"/do-not-calls/edit$" ""))]
+      (html-response (territory-page/do-not-calls--edit request))))
 
-  (POST "/congregation/:congregation/territories/:territory/save-do-not-calls" request
+  (POST "/congregation/:congregation/territories/:territory/do-not-calls/save" request
     (binding [territory-page/*page-path* (-> (:uri request)
-                                             (str/replace #"/save-do-not-calls$" ""))]
-      (html-response (territory-page/save-do-not-calls request)))))
+                                             (str/replace #"/do-not-calls/save$" ""))]
+      (html-response (territory-page/do-not-calls--save request))))
+
+  (POST "/congregation/:congregation/territories/:territory/share-link/open" request
+    (binding [territory-page/*page-path* (-> (:uri request)
+                                             (str/replace #"/share-link/open$" ""))]
+      (html-response (territory-page/share-link--open request))))
+
+  (POST "/congregation/:congregation/territories/:territory/share-link/close" request
+    (binding [territory-page/*page-path* (-> (:uri request)
+                                             (str/replace #"/share-link/close$" ""))]
+      (html-response (territory-page/share-link--close request)))))
