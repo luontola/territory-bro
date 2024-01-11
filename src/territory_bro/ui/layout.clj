@@ -19,7 +19,8 @@
         "Territory Bro"]
        [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
        [:link {:rel "stylesheet" :href (css/stylesheet-path)}]
-       [:script {:src "https://unpkg.com/htmx.org@1.9.10"}]]
+       [:script {:src "https://unpkg.com/htmx.org@1.9.10"}]
+       [:script {:src "/assets/scripts.js" :defer true}]]
       [:body
        [:nav {:class (css/classes (:navbar styles) "no-print")}
         [:HomeNav]
@@ -30,4 +31,5 @@
          [:AuthenticationPanel]]]
 
        [:main {:class (:content styles)}
+        [:div#htmx-alert]
         content]]])))
