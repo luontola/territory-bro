@@ -22,6 +22,7 @@
             :hx-swap "outerHTML"}
       ;; TODO: check if has edit permission
       [:button {:hx-post (str "/congregation/" cong-id "/territories/" territory-id "/edit-do-not-calls")
+                :hx-disabled-elt "this"
                 :type "button"
                 :class "pure-button"
                 :style "float: right; font-size: 70%;"}
@@ -34,9 +35,10 @@
         territory-id (UUID/fromString (get-in request [:params :territory]))
         territory (:body (api/get-territory request))]
     (h/html
-     [:form {:hx-post (str "/congregation/" cong-id "/territories/" territory-id "/save-do-not-calls")
-             :hx-target "this"
-             :hx-swap "outerHTML"}
+     [:form.do-not-calls {:hx-post (str "/congregation/" cong-id "/territories/" territory-id "/save-do-not-calls")
+                          :hx-disabled-elt ".do-not-calls :is(textarea, button)"
+                          :hx-target "this"
+                          :hx-swap "outerHTML"}
       [:textarea {:name "do-not-calls"}
        (:doNotCalls territory)]
       [:button {:type "submit"}
