@@ -18,6 +18,4 @@
   (GET "/congregation/:congregation/territories/:territory" request (html-response (territory-page/page request)))
   (POST "/congregation/:congregation/territories/:territory/edit-do-not-calls" request (html-response (territory-page/edit-do-not-calls request)))
   (POST "/congregation/:congregation/territories/:territory/save-do-not-calls" request
-    (-> (html-response (territory-page/save-do-not-calls request))
-        (response/header "hx-trigger" territory-page/do-not-calls-was-updated)))
-  (GET "/congregation/:congregation/territories/:territory/another-field" request (html-response (territory-page/another-field request))))
+    (html-response (territory-page/save-do-not-calls request))))

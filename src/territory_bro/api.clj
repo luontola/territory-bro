@@ -395,7 +395,6 @@
           territory-id (UUID/fromString (get-in request [:params :territory]))
           do-not-calls (str/trim (str (get-in request [:params :do-not-calls])))
           state (state-for-request request)]
-      (assert (not= "fail" do-not-calls))
       (db/with-db [conn {}]
         (dispatch! conn state {:command/type :do-not-calls.command/save-do-not-calls
                                :congregation/id cong-id
