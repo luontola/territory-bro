@@ -19,11 +19,10 @@
      [:div {:hx-target "this"
             :hx-swap "outerHTML"}
       ;; TODO: check if has edit permission
-      [:button {:hx-post (str "/congregation/" cong-id "/territories/" territory-id "/edit-do-not-calls")
-                :hx-disabled-elt "this"
-                :type "button"
-                :class "pure-button"
-                :style "float: right; font-size: 70%;"}
+      [:button.pure-button {:hx-post (str "/congregation/" cong-id "/territories/" territory-id "/edit-do-not-calls")
+                            :hx-disabled-elt "this"
+                            :type "button"
+                            :style "float: right; font-size: 70%;"}
        (i18n/t "TerritoryPage.edit")]
       (or (:doNotCalls territory)
           "-")])))
@@ -33,14 +32,16 @@
         territory-id (UUID/fromString (get-in request [:params :territory]))
         territory (:body (api/get-territory request))]
     (h/html
-     [:form.do-not-calls {:hx-target "this"
-                          :hx-swap "outerHTML"
-                          :hx-post (str "/congregation/" cong-id "/territories/" territory-id "/save-do-not-calls")
-                          :hx-disabled-elt ".do-not-calls :is(textarea, button)"}
-      [:textarea {:name "do-not-calls"}
+     [:form.do-not-calls.pure-form {:hx-target "this"
+                                    :hx-swap "outerHTML"
+                                    :hx-post (str "/congregation/" cong-id "/territories/" territory-id "/save-do-not-calls")
+                                    :hx-disabled-elt ".do-not-calls :is(textarea, button)"}
+      [:textarea.pure-input-1 {:name "do-not-calls"
+                               :rows 5
+                               :autofocus true}
        (:doNotCalls territory)]
-      [:button {:type "submit"}
-       "Save"]])))
+      [:button.pure-button.pure-button-primary {:type "submit"}
+       (i18n/t "TerritoryPage.save")]])))
 
 (defn save-do-not-calls [request]
   (api/edit-do-not-calls request)
@@ -50,22 +51,21 @@
 (defn share-button [{:keys [open?]}]
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
-     [:form {:class "pure-form"}
+     [:form.pure-form
       ;; TODO: should toggle popup
-      [:button {:type "button"
-                :class (css/classes "pure-button"
-                                    (when open?
-                                      "pure-button-active"))
-                :aria-expanded (if open? "true" "false")}
+      [:button.pure-button {:type "button"
+                            :class (when open?
+                                     "pure-button-active")
+                            :aria-expanded (if open? "true" "false")}
        [:FontAwesomeIcon {:icon "{faShareNodes}"}
         (i18n/t "TerritoryPage.shareLink.button")]]
 
       (when open?
         [:div {:class (:sharePopup styles)}
          ;; TODO: should close popup
-         [:button {:type "button"
-                   :class (css/classes (:closeButton styles) "pure-button")
-                   :onClick "{closePopup}"}
+         [:button.pure-button {:type "button"
+                               :class (:closeButton styles)
+                               :onClick "{closePopup}"}
           [:FontAwesomeIcon {:icon "{faXmark}"
                              :title (i18n/t "TerritoryPage.shareLink.closePopup")}
            "{faXmark}"]]
@@ -78,13 +78,11 @@
           [:input#share-link {:type "text"
                               :value "{shareUrl}"
                               :aria-readonly "true"}]
-          [:button#copy-share-link {:type "button"
-                                    :class "pure-button"
-                                    :data-clipboard-target "#share-link"}
+          [:button#copy-share-link.pure-button {:type "button"
+                                                :data-clipboard-target "#share-link"}
            [:FontAwesomeIcon {:icon "{faCopy}"
                               :title (i18n/t "TerritoryPage.shareLink.copy")}
             "{faCopy}"]]]])])))
-
 
 
 (defn page [request]
@@ -98,10 +96,10 @@
        [:PageTitle
         [:h1 (-> (i18n/t "TerritoryPage.title")
                  (str/replace "{{number}}" (:number territory)))]]
-       [:div {:class "pure-g"}
-        [:div {:class "pure-u-1 pure-u-sm-2-3 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4"}
+       [:div.pure-g
+        [:div.pure-u-1.pure-u-sm-2-3.pure-u-md-1-2.pure-u-lg-1-3.pure-u-xl-1-4
          [:div {:class (:details styles)}
-          [:table {:class "pure-table pure-table-horizontal"}
+          [:table.pure-table.pure-table-horizontal
            [:tbody
             [:tr
              [:th (i18n/t "Territory.number")]
@@ -120,11 +118,11 @@
          [:div {:class (:actions styles)}
           (share-button {:open? false})]]
 
-        [:div {:class "pure-u-1 pure-u-lg-2-3 pure-u-xl-3-4"}
+        [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
          [:div {:class (:map styles)}
           [:TerritoryMap {:territory "{territory}"
                           :mapRaster "{mapRaster}"
                           :printout "{false}"
                           :key "{i18n.resolvedLanguage}"}]]
-         [:div {:class "no-print"}
+         [:div.no-print
           [:MapInteractionHelp]]]]))))
