@@ -265,16 +265,17 @@
 
 (defn get-demo-territory [request]
   ;; anonymous access is allowed
-  (let [cong-id (:demo-congregation config/env)
-        territory-id (UUID/fromString (get-in request [:params :territory]))
-        state (state-for-request request)
-        territory (facade/get-demo-territory state cong-id territory-id)]
-    (when-not territory
-      (forbidden! "No demo congregation"))
-    (ok (-> territory
-            (dissoc :congregation/id)
-            (format-for-api)
-            (validate-territory)))))
+  (auth/with-user-from-session request
+    (let [cong-id (:demo-congregation config/env)
+          territory-id (UUID/fromString (get-in request [:params :territory]))
+          state (state-for-request request)
+          territory (facade/get-demo-territory state cong-id territory-id)]
+      (when-not territory
+        (forbidden! "No demo congregation"))
+      (ok (-> territory
+              (dissoc :congregation/id)
+              (format-for-api)
+              (validate-territory))))))
 
 (defn- enrich-command [command]
   (let [user-id (current-user-id)]

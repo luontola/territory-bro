@@ -207,6 +207,19 @@
                             :territory/do-not-calls "the do-not-calls"}))
     territory-id))
 
+(defn- create-share! [cong-id territory-id share-key]
+  (db/with-db [conn {}]
+    (dispatcher/command! conn (projections/cached-state)
+                         {:command/type :share.command/create-share
+                          :command/time (Instant/now)
+                          :command/system "test"
+                          :share/id (UUID/randomUUID)
+                          :share/key share-key
+                          :share/type :link
+                          :congregation/id cong-id
+                          :territory/id territory-id}))
+  (refresh-projections!))
+
 (defn- parse-qgis-datasource [datasource]
   (let [required (fn [v]
                    (if (nil? v)
@@ -626,14 +639,14 @@
         (is (= "No territory access" (:body response)))))))
 
 (deftest get-demo-territory-test
-  (let [session (login! app)
+  (let [session-logged-in (login! app)
         cong-id (create-congregation-without-user! "foo")
         territory-id (create-territory! cong-id)]
     (binding [config/env (assoc config/env :demo-congregation cong-id)]
 
       (testing "get demo territory"
         (let [response (-> (request :get (str "/api/congregation/demo/territory/" territory-id))
-                           (merge session)
+                           (merge session-logged-in)
                            app)]
           (is (ok? response))
           (is (= {:id (str territory-id)}
@@ -643,12 +656,33 @@
       (testing "anonymous access is allowed"
         (let [response (-> (request :get (str "/api/congregation/demo"))
                            app)]
-          (is (ok? response)))))
+          (is (ok? response))))
+
+      (testing "get demo territory after opening a share"
+        (let [*session-anonymous (atom nil)
+              share-key "get-demo-territory-test1"]
+          (create-share! cong-id territory-id share-key)
+
+          (testing "- open share"
+            (let [response (-> (request :get (str "/api/share/" share-key))
+                               (merge @*session-anonymous)
+                               app)]
+              (reset! *session-anonymous (get-session response)) ; TODO: stateful HTTP client which remembers the cookies automatically
+              (is (ok? response))))
+
+          ;; this used to crash in territory-bro.api/current-user-id because territory-bro.infra.authentication/*user* was unbound
+          (testing "- view demo territory"
+            (let [response (-> (request :get (str "/api/congregation/demo/territory/" territory-id))
+                               (merge @*session-anonymous)
+                               app)]
+              (is (ok? response))
+              (is (= (str territory-id)
+                     (:id (:body response)))))))))
 
     (binding [config/env (assoc config/env :demo-congregation nil)]
       (testing "no demo congregation"
         (let [response (-> (request :get (str "/api/congregation/demo/territory/" territory-id))
-                           (merge session)
+                           (merge session-logged-in)
                            app)]
           (is (forbidden? response))
           (is (= "No demo congregation" (:body response))))))))
