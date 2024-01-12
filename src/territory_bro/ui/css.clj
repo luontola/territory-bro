@@ -8,13 +8,6 @@
             [territory-bro.infra.json :as json]
             [territory-bro.infra.resources :as resources]))
 
-(def ^:private *stylesheet-path (atom {:resource (io/resource "public/index.html")}))
-
-(defn stylesheet-path []
-  ;; XXX: make auto-refresh work for non-map values
-  (:path (resources/auto-refresh *stylesheet-path #(identity {:path (re-find #"/assets/index-\w+\.css" (slurp %))}))))
-
-
 (def ^:private *css-modules (atom {:resource (io/resource "css-modules.json")}))
 
 (defn modules []
