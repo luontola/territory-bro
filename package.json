@@ -80,6 +80,7 @@
     "autotest": "vitest watch",
     "start": "vite dev",
     "build": "vite build",
+    "autobuild": "vite build --watch",
     "server-export": "vite-node web/src/server-export.tsx",
     "preview": "vite preview",
     "analyze": "vite-bundle-visualizer",
