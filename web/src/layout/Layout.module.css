@@ -82,6 +82,20 @@ select.languageSelection:not(:focus):hover {
     cursor: pointer;
 }
 
+:global #htmx-error-dialog {
+    color: red;
+
+    & button {
+        float: right;
+        background-color: red;
+    }
+
+    &::backdrop {
+        background-color: #ccc;
+        opacity: 0.75;
+    }
+}
+
 .content {
     position: relative;
     padding: 1em 1.5em;

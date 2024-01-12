@@ -101,6 +101,8 @@ Errors:
   notAuthorized: Non autorizzato 🛑
   unknownError: Spiacenti, qualcosa è andato storto 🥺
   returnToFrontPage: Torna alla pagina principale e riprova
+  reloadAndTryAgain: Controlla la tua connessione internet. Ricarica la pagina e riprova.
+  closeDialog: Chiudi
 Map:
   zoomIn: Ingrandisci
   zoomOut: Riduci

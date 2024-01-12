@@ -101,6 +101,8 @@ Errors:
   notAuthorized: No autorizado 🛑
   unknownError: Lo siento, algo salió mal 🥺
   returnToFrontPage: Vuelve a la página de inicio e inténtalo de nuevo
+  reloadAndTryAgain: Verifica tu conexión a internet. Recarga la página e intenta nuevamente.
+  closeDialog: Cerrar
 Map:
   zoomIn: Acercar
   zoomOut: Alejar

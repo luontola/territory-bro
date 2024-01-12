@@ -73,3 +73,33 @@ if (root) {
       </React.StrictMode>
     );
 }
+
+function formatXhrError({status, statusText, responseText}) {
+  let message = `${status} ${statusText}`;
+  if (responseText && responseText !== statusText) {
+    message += ` - ${responseText}`;
+  }
+  return message;
+}
+
+// Source: https://xvello.net/blog/htmx-error-handling/
+document.body.addEventListener('htmx:afterRequest', (event: Event) => {
+  const dialog = document.getElementById("htmx-error-dialog") as HTMLDialogElement | null;
+  const message = document.getElementById("htmx-error-message");
+  if (event instanceof CustomEvent && dialog && message) {
+    if (event.detail.successful) {
+      dialog.close();
+      message.innerText = "";
+
+    } else if (event.detail.failed && event.detail.xhr) {
+      console.warn("Server error", event.detail);
+      message.innerText = formatXhrError(event.detail.xhr);
+      dialog.showModal();
+
+    } else {
+      console.error("Unspecified error", event.detail); // usually network error
+      message.innerText = "" + message.getAttribute("data-default-message");
+      dialog.showModal();
+    }
+  }
+});

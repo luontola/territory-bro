@@ -7,7 +7,8 @@
             [clojure.string :as str]
             [hiccup2.core :as h]
             [territory-bro.infra.resources :as resources]
-            [territory-bro.ui.css :as css]))
+            [territory-bro.ui.css :as css]
+            [territory-bro.ui.i18n :as i18n]))
 
 (defn- minify-html [html]
   (-> html
@@ -44,6 +45,13 @@
          [:LanguageSelection]]
         [:div {:class (:auth styles)}
          [:AuthenticationPanel]]]
+
+       [:dialog#htmx-error-dialog
+        [:h2 (i18n/t "Errors.unknownError")]
+        [:p#htmx-error-message {:data-default-message (i18n/t "Errors.reloadAndTryAgain")}]
+        [:form {:method "dialog"}
+         [:button.pure-button.pure-button-primary {:type "submit"}
+          (i18n/t "Errors.closeDialog")]]]
 
        [:main {:class (:content styles)}
         content]]])))

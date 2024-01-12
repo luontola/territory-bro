@@ -101,6 +101,8 @@ Errors:
   notAuthorized: Not authorized 🛑
   unknownError: Sorry, something went wrong 🥺
   returnToFrontPage: Return to the front page and try again
+  reloadAndTryAgain: Check your internet connection. Reload the page and try again.
+  closeDialog: Close
 Map:
   zoomIn: Zoom in
   zoomOut: Zoom out
