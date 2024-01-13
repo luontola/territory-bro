@@ -7,42 +7,40 @@
             [hiccup2.core :as h]
             [territory-bro.api :as api]
             [territory-bro.ui.css :as css]
-            [territory-bro.ui.i18n :as i18n]
-            [territory-bro.ui.layout :as layout]))
+            [territory-bro.ui.i18n :as i18n]))
 
 (def ^:dynamic *page-path*)
 
-(defn do-not-calls--view [request]
-  (let [territory (:body (api/get-territory request))]
-    (h/html
-     [:div {:hx-target "this"
-            :hx-swap "outerHTML"}
-      ;; TODO: check if has edit permission
-      [:button.pure-button {:hx-post (str *page-path* "/do-not-calls/edit")
-                            :hx-disabled-elt "this"
-                            :type "button"
-                            :style "float: right; font-size: 70%;"}
-       (i18n/t "TerritoryPage.edit")]
-      (or (:doNotCalls territory)
-          "-")])))
+(defn do-not-calls--view [territory]
+  (h/html
+   [:div {:hx-target "this"
+          :hx-swap "outerHTML"}
+    ;; TODO: check if has edit permission
+    [:button.pure-button {:hx-post (str *page-path* "/do-not-calls/edit")
+                          :hx-disabled-elt "this"
+                          :type "button"
+                          :style "float: right; font-size: 70%;"}
+     (i18n/t "TerritoryPage.edit")]
+    (or (:doNotCalls territory)
+        "-")]))
 
-(defn do-not-calls--edit [request]
-  (let [territory (:body (api/get-territory request))]
-    (h/html
-     [:form.do-not-calls.pure-form {:hx-target "this"
-                                    :hx-swap "outerHTML"
-                                    :hx-post (str *page-path* "/do-not-calls/save")
-                                    :hx-disabled-elt ".do-not-calls :is(textarea, button)"}
-      [:textarea.pure-input-1 {:name "do-not-calls"
-                               :rows 5
-                               :autofocus true}
-       (:doNotCalls territory)]
-      [:button.pure-button.pure-button-primary {:type "submit"}
-       (i18n/t "TerritoryPage.save")]])))
+(defn do-not-calls--edit [territory]
+  (h/html
+   [:form.do-not-calls.pure-form {:hx-target "this"
+                                  :hx-swap "outerHTML"
+                                  :hx-post (str *page-path* "/do-not-calls/save")
+                                  :hx-disabled-elt ".do-not-calls :is(textarea, button)"}
+    [:textarea.pure-input-1 {:name "do-not-calls"
+                             :rows 5
+                             :autofocus true}
+     (:doNotCalls territory)]
+    [:button.pure-button.pure-button-primary {:type "submit"}
+     (i18n/t "TerritoryPage.save")]]))
 
-(defn do-not-calls--save [request]
+(defn do-not-calls--save! [request]
   (api/edit-do-not-calls request)
-  (do-not-calls--view request))
+  (let [territory (:body (api/get-territory request))]
+    (do-not-calls--view territory)))
 
 
 (defn share-link [{:keys [open? link]}]
@@ -82,52 +80,50 @@
                               :title (i18n/t "TerritoryPage.shareLink.copy")}
             "{faCopy}"]]]])])))
 
-(defn share-link--open [request]
+(defn share-link--open! [request]
   ;; TODO: should cache the share, to avoid creating new ones when clicking the share button repeatedly
   (let [share (:body (api/share-territory-link request))]
     (share-link {:open? true
                  :link (:url share)})))
 
-(defn share-link--close [_request]
+(defn share-link--close []
   (share-link {:open? false}))
 
 
-(defn page [request]
-  (let [styles (:TerritoryPage (css/modules))
-        territory (:body (api/get-territory request))]
-    (layout/page {:title "Territory Page"}
-      (h/html
-       [:DemoDisclaimer]
-       [:PageTitle
-        [:h1 (-> (i18n/t "TerritoryPage.title")
-                 (str/replace "{{number}}" (:number territory)))]]
-       [:div.pure-g
-        [:div.pure-u-1.pure-u-sm-2-3.pure-u-md-1-2.pure-u-lg-1-3.pure-u-xl-1-4
-         [:div {:class (:details styles)}
-          [:table.pure-table.pure-table-horizontal
-           [:tbody
-            [:tr
-             [:th (i18n/t "Territory.number")]
-             [:td (:number territory)]]
-            [:tr
-             [:th (i18n/t "Territory.region")]
-             [:td (:region territory)]]
-            [:tr
-             [:th (i18n/t "Territory.addresses")]
-             [:td (:addresses territory)]]
-            [:tr
-             [:th (i18n/t "TerritoryPage.doNotCalls")]
-             [:td (do-not-calls--view request)]]]]]
+(defn page [territory]
+  (let [styles (:TerritoryPage (css/modules))]
+    (h/html
+     [:DemoDisclaimer]
+     [:PageTitle
+      [:h1 (-> (i18n/t "TerritoryPage.title")
+               (str/replace "{{number}}" (:number territory)))]]
+     [:div.pure-g
+      [:div.pure-u-1.pure-u-sm-2-3.pure-u-md-1-2.pure-u-lg-1-3.pure-u-xl-1-4
+       [:div {:class (:details styles)}
+        [:table.pure-table.pure-table-horizontal
+         [:tbody
+          [:tr
+           [:th (i18n/t "Territory.number")]
+           [:td (:number territory)]]
+          [:tr
+           [:th (i18n/t "Territory.region")]
+           [:td (:region territory)]]
+          [:tr
+           [:th (i18n/t "Territory.addresses")]
+           [:td (:addresses territory)]]
+          [:tr
+           [:th (i18n/t "TerritoryPage.doNotCalls")]
+           [:td (do-not-calls--view territory)]]]]]
 
-         ;; TODO: check if has share permission
-         [:div {:class (:actions styles)}
-          (share-link--close request)]]
+       ;; TODO: check if has share permission
+       [:div {:class (:actions styles)}
+        (share-link--close)]]
 
-        [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
-         [:div {:class (:map styles)}
-          [:TerritoryMap {:territory "{territory}"
-                          :mapRaster "{mapRaster}"
-                          :printout "{false}"
-                          :key "{i18n.resolvedLanguage}"}]]
-         [:div.no-print
-          [:MapInteractionHelp]]]]))))
+      [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
+       [:div {:class (:map styles)}
+        [:TerritoryMap {:territory "{territory}"
+                        :mapRaster "{mapRaster}"
+                        :printout "{false}"
+                        :key "{i18n.resolvedLanguage}"}]]
+       [:div.no-print
+        [:MapInteractionHelp]]]])))

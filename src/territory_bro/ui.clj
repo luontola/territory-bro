@@ -7,6 +7,8 @@
             [compojure.core :refer [GET POST defroutes]]
             [ring.util.http-response :refer :all]
             [ring.util.response :as response]
+            [territory-bro.api :as api]
+            [territory-bro.ui.layout :as layout]
             [territory-bro.ui.territory-page :as territory-page]))
 
 (defn html-response [html]
@@ -20,24 +22,27 @@
   ;; TODO: switch to reitit and remove the duplication of setting *page-path* using a middleware
   (GET "/congregation/:congregation/territories/:territory" request
     (binding [territory-page/*page-path* (:uri request)]
-      (html-response (territory-page/page request))))
+      (let [territory (:body (api/get-territory request))]
+        (html-response (layout/page {:title "Territory Page"}
+                         (territory-page/page territory))))))
 
   (POST "/congregation/:congregation/territories/:territory/do-not-calls/edit" request
     (binding [territory-page/*page-path* (-> (:uri request)
                                              (str/replace #"/do-not-calls/edit$" ""))]
-      (html-response (territory-page/do-not-calls--edit request))))
+      (let [territory (:body (api/get-territory request))]
+        (html-response (territory-page/do-not-calls--edit territory)))))
 
   (POST "/congregation/:congregation/territories/:territory/do-not-calls/save" request
     (binding [territory-page/*page-path* (-> (:uri request)
                                              (str/replace #"/do-not-calls/save$" ""))]
-      (html-response (territory-page/do-not-calls--save request))))
+      (html-response (territory-page/do-not-calls--save! request))))
 
   (POST "/congregation/:congregation/territories/:territory/share-link/open" request
     (binding [territory-page/*page-path* (-> (:uri request)
                                              (str/replace #"/share-link/open$" ""))]
-      (html-response (territory-page/share-link--open request))))
+      (html-response (territory-page/share-link--open! request))))
 
   (POST "/congregation/:congregation/territories/:territory/share-link/close" request
     (binding [territory-page/*page-path* (-> (:uri request)
                                              (str/replace #"/share-link/close$" ""))]
-      (html-response (territory-page/share-link--close request)))))
+      (html-response (territory-page/share-link--close)))))

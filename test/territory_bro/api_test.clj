@@ -182,7 +182,7 @@
                               :permission/ids []})))
     (refresh-projections!)))
 
-(defn- create-territory! [cong-id]
+(defn create-territory! [cong-id]
   (let [territory-id (UUID/randomUUID)]
     (db/with-db [conn {}]
       (dispatcher/command! conn (projections/cached-state)
