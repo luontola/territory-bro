@@ -16,7 +16,7 @@
    [:div {:hx-target "this"
           :hx-swap "outerHTML"}
     ;; TODO: check if has edit permission
-    [:button.pure-button {:hx-post (str *page-path* "/do-not-calls/edit")
+    [:button.pure-button {:hx-get (str *page-path* "/do-not-calls/edit")
                           :hx-disabled-elt "this"
                           :type "button"
                           :style "float: right; font-size: 70%;"}
@@ -48,7 +48,7 @@
     (h/html
      [:form.pure-form {:hx-target "this"
                        :hx-swap "outerHTML"}
-      [:button.pure-button {:hx-post (str *page-path* "/share-link/" (if open? "close" "open"))
+      [:button.pure-button {:hx-get (str *page-path* "/share-link/" (if open? "close" "open"))
                             :type "button"
                             :class (when open?
                                      "pure-button-active")
@@ -58,7 +58,7 @@
 
       (when open?
         [:div {:class (:sharePopup styles)}
-         [:button.pure-button {:hx-post (str *page-path* "/share-link/close")
+         [:button.pure-button {:hx-get (str *page-path* "/share-link/close")
                                :type "button"
                                :class (:closeButton styles)}
           [:FontAwesomeIcon {:icon "{faXmark}"
