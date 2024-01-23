@@ -1,0 +1,60 @@
+
+.superRoot {
+    /* full page printout */
+    flex: 1;
+    /* print margins */
+    margin: 8mm;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    /* Finland 2024 Special Convention style guide font */
+    font-family: 'Montserrat', sans-serif;
+}
+
+.root {
+    /* full page printout */
+    flex: 1;
+    /* layout */
+    /* TODO: deduplicate with TerritoryCard.css */
+    --minimap-size: 17mm;
+    --qr-code-size: 15mm;
+    display: grid;
+    grid-template-columns: var(--minimap-size) auto var(--minimap-size);
+    grid-template-rows: var(--minimap-size) auto;
+    grid-template-areas: "minimap header number" "map map map";
+}
+
+.logo {
+    grid-area: header;
+    height: 16mm;
+    margin-left: 2mm;
+    align-self: start;
+}
+
+.header {
+    composes: header from "TerritoryCard.module.css";
+}
+
+.title {
+    composes: title from "TerritoryCard.module.css";
+}
+
+.region {
+    composes: region from "TerritoryCard.module.css";
+}
+
+.number {
+    composes: number from "TerritoryCard.module.css";
+}
+
+.minimap {
+    composes: minimap from "TerritoryCard.module.css";
+}
+
+.map {
+    composes: map from "TerritoryCard.module.css";
+}
+
+.qrCode {
+    composes: qrCode from "TerritoryCardMapOnly.module.css";
+}

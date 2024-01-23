@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,12 +8,17 @@ import i18n, {languages} from "./i18n.ts";
 import readme from "./locales/README.md?raw";
 import {sortBy} from "lodash-es";
 
+const notTranslatedKeys = new Set(["translation.PrintoutPage.templates.Finland2024TerritoryCard"]);
+
 describe("i18n", () => {
   describe("all languages contain the same translation keys", () => {
     const englishData = i18n.getDataByLanguage("en");
-    const englishKeys = getAllKeyPaths(englishData).sort();
+    const englishKeys = getAllKeyPaths(englishData).sort().filter(k => !notTranslatedKeys.has(k));
     languages.forEach(language => {
       it(`${language.code} ${language.englishName}`, () => {
+        if (language.code === 'en') {
+          return; // don't compare the reference language to itself; it contains notTranslatedKeys
+        }
         const data = i18n.getDataByLanguage(language.code);
         const keys = getAllKeyPaths(data).sort();
         expect(keys).to.eql(englishKeys)
@@ -54,7 +59,7 @@ describe("i18n", () => {
 });
 
 function getAllKeyPaths(obj, prefix = "") {
-  const keyPaths = [];
+  const keyPaths: string[] = [];
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
       const currentKeyPath = prefix ? `${prefix}.${key}` : key;
