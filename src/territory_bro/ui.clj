@@ -24,7 +24,8 @@
   (GET "/congregation/:congregation/territories/:territory" request
     (binding [html/*page-path* (:uri request)]
       (let [territory (:body (api/get-territory request))]
-        (html-response (layout/page {:title "Territory Page"}
+        (html-response (layout/page {:title "Territory Page"
+                                     :request request}
                          (territory-page/page territory))))))
 
   (GET "/congregation/:congregation/territories/:territory/do-not-calls/edit" request

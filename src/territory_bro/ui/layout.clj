@@ -29,7 +29,7 @@
   (let [styles (:Layout (css/modules))]
     (h/html
      [:a {:href href
-          :class (when (= html/*page-path* href)
+          :class (when (= html/*page-path* href) ; FIXME: active when on subpage (excluding home page)
                    (:active styles))}
       [:span {:aria-hidden true} icon]
       " "
@@ -59,8 +59,33 @@
                       :icon "🛟"
                       :title (i18n/t "SupportPage.title")})]])))
 
-(defn page [{:keys [title]} content]
+(defn congregation-navigation [{:keys [cong-id]}]
   (let [styles (:Layout (css/modules))]
+    (h/html
+     [:ul {:class (:nav styles)}
+      [:li (nav-link {:href "/"
+                      :icon "🏠"
+                      :title (i18n/t "HomePage.title")})]
+      [:li (nav-link {:href (str "/congregation/" cong-id)
+                      :title "\"{congregation.name}\""})] ; TODO
+      [:li (nav-link {:href (str "/congregation/" cong-id "/territories")
+                      :icon "📍"
+                      :title (i18n/t "TerritoryListPage.title")})]
+      (when true ; TODO: congregation.permissions.viewCongregation
+        [:li (nav-link {:href (str "/congregation/" cong-id "/printouts")
+                        :icon "🖨️"
+                        :title (i18n/t "PrintoutPage.title")})])
+      (when true ; TODO: (congregation.permissions.configureCongregation || congregation.permissions.gisAccess)
+        [:li (nav-link {:href (str "/congregation/" cong-id "/settings")
+                        :icon "⚙️"
+                        :title (i18n/t "SettingsPage.title")})])
+      [:li (nav-link {:href "/support"
+                      :icon "🛟"
+                      :title (i18n/t "SupportPage.title")})]])))
+
+(defn page [{:keys [title request]} content]
+  (let [styles (:Layout (css/modules))
+        cong-id (-> request :params :congregation)]
     (h/html
      (hiccup.page/doctype :html5)
      [:html {:lang "en"}
@@ -91,8 +116,9 @@
        (head-injections)]
       [:body
        [:nav.no-print {:class (:navbar styles)}
-        (home-navigation)
-        [:CongregationNav] ; TODO
+        (if (some? cong-id)
+          (congregation-navigation {:cong-id cong-id})
+          (home-navigation))
         [:div {:class (:lang styles)}
          [:LanguageSelection]] ; TODO
         [:div {:class (:auth styles)}
