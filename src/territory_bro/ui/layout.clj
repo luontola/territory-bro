@@ -24,12 +24,17 @@
                                                     (let [[_ html] (re-find #"(?s)</title>(.*)</head>" (slurp resource))]
                                                       {:html (h/raw (minify-html html))})))))
 
+(defn active-link? [href current-page]
+  (if (= "/" current-page)
+    (= "/" href)
+    (and (str/starts-with? current-page href)
+         (not= "/" href))))
 
 (defn nav-link [{:keys [href icon title]}]
   (let [styles (:Layout (css/modules))]
     (h/html
      [:a {:href href
-          :class (when (= html/*page-path* href) ; FIXME: active when on subpage (excluding home page)
+          :class (when (active-link? href html/*page-path*)
                    (:active styles))}
       [:span {:aria-hidden true} icon]
       " "
@@ -59,15 +64,16 @@
                       :icon "🛟"
                       :title (i18n/t "SupportPage.title")})]])))
 
-(defn congregation-navigation [{:keys [cong-id]}]
-  (let [styles (:Layout (css/modules))]
+(defn congregation-navigation [{:keys [congregation]}]
+  (let [cong-id (:id congregation)
+        styles (:Layout (css/modules))]
     (h/html
      [:ul {:class (:nav styles)}
       [:li (nav-link {:href "/"
                       :icon "🏠"
                       :title (i18n/t "HomePage.title")})]
       [:li (nav-link {:href (str "/congregation/" cong-id)
-                      :title "\"{congregation.name}\""})] ; TODO
+                      :title (:name congregation)})]
       [:li (nav-link {:href (str "/congregation/" cong-id "/territories")
                       :icon "📍"
                       :title (i18n/t "TerritoryListPage.title")})]
@@ -83,9 +89,8 @@
                       :icon "🛟"
                       :title (i18n/t "SupportPage.title")})]])))
 
-(defn page [{:keys [title request]} content]
-  (let [styles (:Layout (css/modules))
-        cong-id (-> request :params :congregation)]
+(defn page [{:keys [title congregation]} content]
+  (let [styles (:Layout (css/modules))]
     (h/html
      (hiccup.page/doctype :html5)
      [:html {:lang "en"}
@@ -116,8 +121,8 @@
        (head-injections)]
       [:body
        [:nav.no-print {:class (:navbar styles)}
-        (if (some? cong-id)
-          (congregation-navigation {:cong-id cong-id})
+        (if (some? congregation)
+          (congregation-navigation {:congregation congregation})
           (home-navigation))
         [:div {:class (:lang styles)}
          [:LanguageSelection]] ; TODO

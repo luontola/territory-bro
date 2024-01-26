@@ -23,9 +23,10 @@
   ;; TODO: switch to reitit and remove the duplication of setting *page-path* using a middleware
   (GET "/congregation/:congregation/territories/:territory" request
     (binding [html/*page-path* (:uri request)]
-      (let [territory (:body (api/get-territory request))]
+      (let [congregation (:body (api/get-congregation request))
+            territory (:body (api/get-territory request))]
         (html-response (layout/page {:title "Territory Page"
-                                     :request request}
+                                     :congregation congregation}
                          (territory-page/page territory))))))
 
   (GET "/congregation/:congregation/territories/:territory/do-not-calls/edit" request
