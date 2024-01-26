@@ -7,16 +7,16 @@
             [hiccup2.core :as h]
             [territory-bro.api :as api]
             [territory-bro.ui.css :as css]
+            [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]))
 
-(def ^:dynamic *page-path*)
 
 (defn do-not-calls--view [territory]
   (h/html
    [:div {:hx-target "this"
           :hx-swap "outerHTML"}
     ;; TODO: check if has edit permission
-    [:button.pure-button {:hx-get (str *page-path* "/do-not-calls/edit")
+    [:button.pure-button {:hx-get (str html/*page-path* "/do-not-calls/edit")
                           :hx-disabled-elt "this"
                           :type "button"
                           :style "float: right; font-size: 70%;"}
@@ -28,7 +28,7 @@
   (h/html
    [:form.do-not-calls.pure-form {:hx-target "this"
                                   :hx-swap "outerHTML"
-                                  :hx-post (str *page-path* "/do-not-calls/save")
+                                  :hx-post (str html/*page-path* "/do-not-calls/save")
                                   :hx-disabled-elt ".do-not-calls :is(textarea, button)"}
     [:textarea.pure-input-1 {:name "do-not-calls"
                              :rows 5
@@ -48,7 +48,7 @@
     (h/html
      [:form.pure-form {:hx-target "this"
                        :hx-swap "outerHTML"}
-      [:button.pure-button {:hx-get (str *page-path* "/share-link/" (if open? "close" "open"))
+      [:button.pure-button {:hx-get (str html/*page-path* "/share-link/" (if open? "close" "open"))
                             :type "button"
                             :class (when open?
                                      "pure-button-active")
@@ -58,7 +58,7 @@
 
       (when open?
         [:div {:class (:sharePopup styles)}
-         [:button.pure-button {:hx-get (str *page-path* "/share-link/close")
+         [:button.pure-button {:hx-get (str html/*page-path* "/share-link/close")
                                :type "button"
                                :class (:closeButton styles)}
           [:FontAwesomeIcon {:icon "{faXmark}"

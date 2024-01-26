@@ -5,6 +5,8 @@
 (ns territory-bro.ui.html
   (:require [clojure.string :as str]))
 
+(def ^:dynamic *page-path*)
+
 (defn normalize-whitespace [s]
   (-> s
       (str/replace #"\s+" " ")
