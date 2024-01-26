@@ -53,17 +53,18 @@
                             :class (when open?
                                      "pure-button-active")
                             :aria-expanded (if open? "true" "false")}
-       [:FontAwesomeIcon {:icon "{faShareNodes}"}
-        (i18n/t "TerritoryPage.shareLink.button")]]
+       [:i.fa-solid.fa-share-nodes]
+       " "
+       (i18n/t "TerritoryPage.shareLink.button")]
 
       (when open?
         [:div {:class (:sharePopup styles)}
          [:button.pure-button {:hx-get (str html/*page-path* "/share-link/close")
                                :type "button"
-                               :class (:closeButton styles)}
-          [:FontAwesomeIcon {:icon "{faXmark}"
-                             :title (i18n/t "TerritoryPage.shareLink.closePopup")}
-           "{faXmark}"]]
+                               :class (:closeButton styles)
+                               :aria-label (i18n/t "TerritoryPage.shareLink.closePopup")
+                               :title (i18n/t "TerritoryPage.shareLink.closePopup")}
+          [:i.fa-solid.fa-xmark]]
 
          [:label {:htmlFor "share-link"}
           (i18n/t "TerritoryPage.shareLink.description")]
@@ -75,10 +76,10 @@
                               :style "color: unset; background-color: unset;"}]
           ;; TODO: should copy link to clipboard
           [:button#copy-share-link.pure-button {:type "button"
-                                                :data-clipboard-target "#share-link"}
-           [:FontAwesomeIcon {:icon "{faCopy}"
-                              :title (i18n/t "TerritoryPage.shareLink.copy")}
-            "{faCopy}"]]]])])))
+                                                :data-clipboard-target "#share-link"
+                                                :aria-label (i18n/t "TerritoryPage.shareLink.copy")
+                                                :title (i18n/t "TerritoryPage.shareLink.copy")}
+           [:i.fa-solid.fa-copy]]]])])))
 
 (defn share-link--open! [request]
   ;; TODO: should cache the share, to avoid creating new ones when clicking the share button repeatedly

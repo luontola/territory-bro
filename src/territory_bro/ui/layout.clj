@@ -36,6 +36,23 @@
           (str title " - "))
         "Territory Bro"]
        [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+       ;; https://fontawesome.com/v5/docs/web/use-with/wordpress/install-manually#set-up-svg-with-cdn
+       ;; https://cdnjs.com/libraries/font-awesome
+       [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/solid.min.js"
+                 :integrity "sha512-+fI924YJzeYFv7M0R29zJvRThPinSUOAmo5rpR9v6G4eWIbva/prHdZGSPN440vuf781/sOd/Fr+5ey0pqdW9w=="
+                 :defer true
+                 :crossorigin "anonymous"
+                 :referrerpolicy "no-referrer"}]
+       [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/regular.min.js"
+                 :integrity "sha512-T4H/jsKWzCRypzaFpVpYyWyBUhjKfp5e/hSD234qFO/h45wKAXba+0wG/iFRq1RhybT7dXxjPYYBYCLAwPfE0Q=="
+                 :defer true
+                 :crossorigin "anonymous"
+                 :referrerpolicy "no-referrer"}]
+       [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/fontawesome.min.js"
+                 :integrity "sha512-C8qHv0HOaf4yoA7ISuuCTrsPX8qjolYTZyoFRKNA9dFKnxgzIHnYTOJhXQIt6zwpIFzCrRzUBuVgtC4e5K1nhA=="
+                 :defer true
+                 :crossorigin "anonymous"
+                 :referrerpolicy "no-referrer"}]
        (head-injections)]
       [:body
        [:nav.no-print {:class (:navbar styles)}
