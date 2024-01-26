@@ -48,14 +48,6 @@ export default defineConfig({
         target: 'http://localhost:8081',
         changeOrigin: true,
       },
-      '/assets': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-      },
-      '^/congregation/[^\/]+/territories/[^\/]+': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-      }
     }
   },
   test: {

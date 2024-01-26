@@ -21,6 +21,8 @@ Start the application
 
 The application will run at http://localhost:8080
 
+The new server-side rendered UI will run at http://localhost:8081, and it shares session cookies with the SPA UI
+
 Stop the application
 
     docker compose stop
