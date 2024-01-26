@@ -8,6 +8,7 @@
             [hiccup2.core :as h]
             [territory-bro.infra.resources :as resources]
             [territory-bro.ui.css :as css]
+            [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]))
 
 (defn- minify-html [html]
@@ -23,6 +24,40 @@
                                                     (let [[_ html] (re-find #"(?s)</title>(.*)</head>" (slurp resource))]
                                                       {:html (h/raw (minify-html html))})))))
 
+
+(defn nav-link [{:keys [href icon title]}]
+  (let [styles (:Layout (css/modules))]
+    (h/html
+     [:a {:href href
+          :class (when (= html/*page-path* href)
+                   (:active styles))}
+      [:span {:aria-hidden true} icon]
+      " "
+      title])))
+
+(defn external-link [{:keys [href title]}]
+  (h/html
+   [:a {:href href
+        :target "_blank"
+        :title (i18n/t "Navigation.opensInNewWindow")}
+    title
+    " "
+    [:i.fa-solid.fa-external-link-alt]]))
+
+(defn home-navigation []
+  (let [styles (:Layout (css/modules))]
+    (h/html
+     [:ul {:class (:nav styles)}
+      [:li (nav-link {:href "/"
+                      :icon "🏠"
+                      :title (i18n/t "HomePage.title")})]
+      [:li (external-link {:href "https://territorybro.com/guide/"
+                           :title (i18n/t "Navigation.userGuide")})]
+      [:li (external-link {:href "https://groups.google.com/g/territory-bro-announcements"
+                           :title (i18n/t "Navigation.news")})]
+      [:li (nav-link {:href "/support"
+                      :icon "🛟"
+                      :title (i18n/t "SupportPage.title")})]])))
 
 (defn page [{:keys [title]} content]
   (let [styles (:Layout (css/modules))]
@@ -56,12 +91,12 @@
        (head-injections)]
       [:body
        [:nav.no-print {:class (:navbar styles)}
-        [:HomeNav]
-        [:CongregationNav]
+        (home-navigation)
+        [:CongregationNav] ; TODO
         [:div {:class (:lang styles)}
-         [:LanguageSelection]]
+         [:LanguageSelection]] ; TODO
         [:div {:class (:auth styles)}
-         [:AuthenticationPanel]]]
+         [:AuthenticationPanel]]] ; TODO
 
        [:dialog#htmx-error-dialog
         [:h2 (i18n/t "Errors.unknownError")]
