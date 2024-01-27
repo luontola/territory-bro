@@ -91,7 +91,7 @@
   (share-link {:open? false}))
 
 
-(defn page [territory]
+(defn view [{:keys [territory]}]
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
      [:DemoDisclaimer]
@@ -128,3 +128,9 @@
                         :key "{i18n.resolvedLanguage}"}]]
        [:div.no-print
         [:MapInteractionHelp]]]])))
+
+(defn model [request]
+  (let [territory (:body (api/get-territory request))]
+    {:territory territory}))
+
+(def page (comp view model))

@@ -4,9 +4,9 @@
 
 (ns ^:slow territory-bro.ui.territory-page-test
   (:require [clojure.test :refer :all]
-            [ring.mock.request :refer [request]]
             [territory-bro.api-test :as at]
-            [territory-bro.domain.facade-test :as ft]
+            [territory-bro.domain.testdata :as testdata]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer [api-fixture db-fixture]]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.territory-page :as territory-page]))
@@ -15,15 +15,26 @@
 (use-fixtures :once (join-fixtures [db-fixture api-fixture]))
 
 (deftest page-test
+  #_(let [state (ft/apply-events [ft/congregation-created]
+                                 ft/territory-defined)])
   (let [session (at/login! at/app)
+        user-id (at/get-user-id session)
         cong-id (at/create-congregation! session "foo")
         territory-id (at/create-territory! cong-id)
-        territory (-> (request :get (str "/api/congregation/" cong-id "/territory/" territory-id))
-                      (merge session)
-                      at/app
-                      :body)]
-    #_(let [state (ft/apply-events [ft/congregation-created
-                                    ft/territory-defined])])
+        request {:params {:congregation (str cong-id)
+                          :territory (str territory-id)}
+                 :session {::auth/user {:user/id user-id}}}
+
+        model (territory-page/model request)]
+    (is (= {:territory {:id territory-id
+                        :number "123"
+                        :addresses "the addresses"
+                        :region "the region"
+                        :meta {:foo "bar"}
+                        :location testdata/wkt-multi-polygon
+                        :doNotCalls "the do-not-calls"}}
+           model))
+
     (is (= (html/normalize-whitespace
             "Territory 123
 
@@ -38,7 +49,7 @@
                the do-not-calls
 
              {fa-share-nodes} Share a link")
-           (-> (territory-page/page territory)
+           (-> (territory-page/view model)
                html/visible-text)))))
 
 
