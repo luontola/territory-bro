@@ -26,13 +26,12 @@
       (let [congregation (:body (api/get-congregation request))]
         (html-response (layout/page {:title "Territory Page"
                                      :congregation congregation}
-                         (territory-page/page request))))))
+                         (territory-page/page! request))))))
 
   (GET "/congregation/:congregation/territories/:territory/do-not-calls/edit" request
     (binding [html/*page-path* (-> (:uri request)
                                    (str/replace #"/do-not-calls/edit$" ""))]
-      (let [territory (:body (api/get-territory request))]
-        (html-response (territory-page/do-not-calls--edit territory)))))
+      (html-response (territory-page/do-not-calls--edit! request))))
 
   (POST "/congregation/:congregation/territories/:territory/do-not-calls/save" request
     (binding [html/*page-path* (-> (:uri request)
@@ -43,9 +42,10 @@
     (binding [html/*page-path* (-> (:uri request)
                                    (str/replace #"/share-link/open$" ""))]
       (-> (html-response (territory-page/share-link--open! request))
+          ;; avoid creating lots of new shares if the user clicks the share button repeatedly
           (response/header "Cache-Control" "max-age=300, must-revalidate"))))
 
   (GET "/congregation/:congregation/territories/:territory/share-link/close" request
     (binding [html/*page-path* (-> (:uri request)
                                    (str/replace #"/share-link/close$" ""))]
-      (html-response (territory-page/share-link--close)))))
+      (html-response (territory-page/share-link--closed)))))

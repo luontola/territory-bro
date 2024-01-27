@@ -10,8 +10,12 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]))
 
+(defn model! [request]
+  (let [territory (:body (api/get-territory request))]
+    {:territory territory}))
 
-(defn do-not-calls--view [territory]
+
+(defn do-not-calls--viewing [{:keys [territory]}]
   (h/html
    [:div {:hx-target "this"
           :hx-swap "outerHTML"}
@@ -24,7 +28,7 @@
     (or (:doNotCalls territory)
         "-")]))
 
-(defn do-not-calls--edit [territory]
+(defn do-not-calls--editing [{:keys [territory]}]
   (h/html
    [:form.do-not-calls.pure-form {:hx-target "this"
                                   :hx-swap "outerHTML"
@@ -37,10 +41,11 @@
     [:button.pure-button.pure-button-primary {:type "submit"}
      (i18n/t "TerritoryPage.save")]]))
 
+(def do-not-calls--edit! (comp do-not-calls--editing model!))
+
 (defn do-not-calls--save! [request]
   (api/edit-do-not-calls request)
-  (let [territory (:body (api/get-territory request))]
-    (do-not-calls--view territory)))
+  (do-not-calls--viewing (model! request)))
 
 
 (defn share-link [{:keys [open? link]}]
@@ -82,16 +87,15 @@
            [:i.fa-solid.fa-copy]]]])])))
 
 (defn share-link--open! [request]
-  ;; TODO: should cache the share, to avoid creating new ones when clicking the share button repeatedly
   (let [share (:body (api/share-territory-link request))]
     (share-link {:open? true
                  :link (:url share)})))
 
-(defn share-link--close []
+(defn share-link--closed []
   (share-link {:open? false}))
 
 
-(defn view [{:keys [territory]}]
+(defn page [{:keys [territory] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
      [:DemoDisclaimer]
@@ -114,11 +118,11 @@
            [:td (:addresses territory)]]
           [:tr
            [:th (i18n/t "TerritoryPage.doNotCalls")]
-           [:td (do-not-calls--view territory)]]]]]
+           [:td (do-not-calls--viewing model)]]]]]
 
        ;; TODO: check if has share permission
        [:div {:class (:actions styles)}
-        (share-link--close)]]
+        (share-link--closed)]]
 
       [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
        [:div {:class (:map styles)}
@@ -129,8 +133,4 @@
        [:div.no-print
         [:MapInteractionHelp]]]])))
 
-(defn model [request]
-  (let [territory (:body (api/get-territory request))]
-    {:territory territory}))
-
-(def page (comp view model))
+(def page! (comp page model!))

@@ -25,7 +25,7 @@
                           :territory (str territory-id)}
                  :session {::auth/user {:user/id user-id}}}
 
-        model (territory-page/model request)]
+        model (territory-page/model! request)]
     (is (= {:territory {:id territory-id
                         :number "123"
                         :addresses "the addresses"
@@ -49,24 +49,25 @@
                the do-not-calls
 
              {fa-share-nodes} Share a link")
-           (-> (territory-page/view model)
+           (-> (territory-page/page model)
                html/visible-text)))))
 
 
 (deftest do-not-calls-test
-  (testing "viewing"
-    (is (= (html/normalize-whitespace
-            "Edit
-             the do-not-calls")
-           (-> (territory-page/do-not-calls--view {:doNotCalls "the do-not-calls"})
-               html/visible-text))))
+  (let [model {:territory {:doNotCalls "the do-not-calls"}}]
+    (testing "viewing"
+      (is (= (html/normalize-whitespace
+              "Edit
+               the do-not-calls")
+             (-> (territory-page/do-not-calls--viewing model)
+                 html/visible-text))))
 
-  (testing "editing"
-    (is (= (html/normalize-whitespace
-            "the do-not-calls
-             Save")
-           (-> (territory-page/do-not-calls--edit {:doNotCalls "the do-not-calls"})
-               html/visible-text)))))
+    (testing "editing"
+      (is (= (html/normalize-whitespace
+              "the do-not-calls
+               Save")
+             (-> (territory-page/do-not-calls--editing model)
+                 html/visible-text))))))
 
 (deftest share-link-test
   (testing "closed"
