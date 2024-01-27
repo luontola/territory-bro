@@ -18,6 +18,14 @@
   (testing "input tags are replaced with their visible text"
     (is (= "the text" (html/visible-text "<input type=\"text\" value=\"the text\" required>"))))
 
+  (testing "Font Awesome icons are replaced with the icon name"
+    (is (= "{fa-share-nodes}" (html/visible-text "<i class=\"fa-solid fa-share-nodes\"></i>")))
+    (is (= "{fa-share-nodes}" (html/visible-text "<i class=\"fa-regular fa-share-nodes\"></i>")))
+    (is (= "{fa-bell}" (html/visible-text "<i class=\"fa-bell\"></i>"))
+        "icon style missing")
+    (is (= "" (html/visible-text "<i class=\"whatever\"></i>"))
+        "not an icon"))
+
   (testing "normalizes whitespace"
     (is (= "one two" (html/visible-text "  <p>one</p>\n<br><p>two</p>\n  "))))
 

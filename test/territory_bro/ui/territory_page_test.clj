@@ -37,7 +37,7 @@
                Edit
                the do-not-calls
 
-             Share a link")
+             {fa-share-nodes} Share a link")
            (-> (territory-page/page territory)
                html/visible-text)))))
 
@@ -59,17 +59,16 @@
 
 (deftest share-link-test
   (testing "closed"
-    (is (= "Share a link"
+    (is (= "{fa-share-nodes} Share a link"
            (-> (territory-page/share-link {:open? false})
                html/visible-text))))
 
   (testing "open"
     (is (= (html/normalize-whitespace
-            "Share a link
-            {faXmark}
-            People with this link will be able to view this territory map without logging in:
-            https://territorybro.com/link
-            {faCopy}")
+            "{fa-share-nodes} Share a link
+             {fa-xmark}
+             People with this link will be able to view this territory map without logging in:
+             https://territorybro.com/link {fa-copy}")
            (-> (territory-page/share-link {:open? true
                                            :link "https://territorybro.com/link"})
                html/visible-text)))))
