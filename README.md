@@ -21,8 +21,6 @@ Start the application
 
 The application will run at http://localhost:8080
 
-The new server-side rendered UI will run at http://localhost:8081, and it shares session cookies with the SPA UI
-
 Stop the application
 
     docker compose stop
@@ -87,6 +85,20 @@ Download dependency sources
 Produce canonical XML for better diffs
 
     xmllint --c14n11 example.qgs > resources/template-territories.qgs
+
+### SSR UI
+
+The new server-side rendered UI will run at http://localhost:8081, and it shares session cookies
+with the SPA UI at http://localhost:8080
+
+Build the frontend assets for the backend
+
+    npm run build
+    npm run server-export
+
+Build the CSS assets automatically during development
+
+    npm run autobuild
 
 ## License
 

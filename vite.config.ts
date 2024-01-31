@@ -12,7 +12,7 @@ const cssModulesJson = {}
 
 // https://vitejs.dev/config/
 // https://vitest.dev/config/
-export default defineConfig({
+export default defineConfig(({command}) => ({
   root: "web",
   plugins: [
     react(),
@@ -31,12 +31,18 @@ export default defineConfig({
       getJSON: (cssFileName: string,
                 json: Record<string, string>,
                 _outputFileName: string) => {
-        const match = cssFileName.match(/\/(\w+)\.module\.css/)
-        const key = match ? match[1] : cssFileName
-        cssModulesJson[key] = json;
-        const file = "target/web-dist/css-modules.json";
-        fs.mkdirSync(path.dirname(file), {recursive: true})
-        fs.writeFileSync(file, JSON.stringify(cssModulesJson, null, 2))
+        // The generated CSS class names differ between production and development mode.
+        // We should write css-modules.json only when building the static CSS assets.
+        // If "vite dev" would update css-modules.json, some of the CSS class names would
+        // get out of sync with the previously built CSS file.
+        if (command === 'build') {
+          const match = cssFileName.match(/\/(\w+)\.module\.css/)
+          const key = match ? match[1] : cssFileName
+          cssModulesJson[key] = json;
+          const file = "target/web-dist/css-modules.json";
+          fs.mkdirSync(path.dirname(file), {recursive: true})
+          fs.writeFileSync(file, JSON.stringify(cssModulesJson, null, 2))
+        }
       },
       generateScopedName: "[name]__[local]--[hash:base64:5]"
     }
@@ -57,4 +63,4 @@ export default defineConfig({
       dir: "../node_modules/.vitest"
     }
   }
-})
+}))
