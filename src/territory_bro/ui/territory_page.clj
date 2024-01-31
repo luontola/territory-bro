@@ -41,7 +41,8 @@
     [:button.pure-button.pure-button-primary {:type "submit"}
      (i18n/t "TerritoryPage.save")]]))
 
-(def do-not-calls--edit! (comp do-not-calls--editing model!))
+(defn do-not-calls--edit! [request]
+  (do-not-calls--editing (model! request)))
 
 (defn do-not-calls--save! [request]
   (api/edit-do-not-calls request)
@@ -133,4 +134,5 @@
        [:div.no-print
         [:MapInteractionHelp]]]])))
 
-(def page! (comp page model!))
+(defn page! [request]
+  (page (model! request)))
