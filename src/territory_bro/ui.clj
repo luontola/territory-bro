@@ -8,6 +8,7 @@
             [ring.util.http-response :refer :all]
             [ring.util.response :as response]
             [territory-bro.api :as api]
+            [territory-bro.infra.middleware :as middleware]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.territory-page :as territory-page]))
@@ -61,7 +62,8 @@
                           (html-response (territory-page/do-not-calls--save! request)))}}]
 
       ["/share-link/open"
-       {:get {:handler (fn [request]
+       {:get {:middleware [middleware/wrap-always-refresh-projections]
+              :handler (fn [request]
                          (-> (html-response (territory-page/share-link--open! request))
                              ;; avoid creating lots of new shares if the user clicks the share button repeatedly
                              (response/header "Cache-Control" "max-age=300, must-revalidate")))}}]
