@@ -1,11 +1,11 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.main
   (:require [clojure.tools.logging :as log]
-            [luminus.http-server :as httpd]
             [mount.core :as mount]
+            [ring.adapter.jetty :as httpd]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.gis.gis-sync :as gis-sync]
             [territory-bro.infra.config :as config]
@@ -14,16 +14,17 @@
             [territory-bro.migration :as migration]
             [territory-bro.projections :as projections])
   (:import (java.net URI)
-           (java.net.http HttpClient HttpRequest HttpResponse$BodyHandlers))
+           (java.net.http HttpClient HttpRequest HttpResponse$BodyHandlers)
+           (org.eclipse.jetty.server Server))
   (:gen-class))
 
-(mount/defstate ^{:on-reload :noop} http-server
+(mount/defstate ^{:on-reload :noop} ^Server http-server
   :start
-  (httpd/start {:handler #'router/app
-                :port (:port config/env)
-                :io-threads (* 2 (.availableProcessors (Runtime/getRuntime)))})
+  (httpd/run-jetty #'router/app
+                   {:port (:port config/env)
+                    :join? false})
   :stop
-  (httpd/stop http-server))
+  (.stop http-server))
 
 (defn- migrate-application-state! []
   (let [injections {:now (:now config/env)}

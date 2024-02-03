@@ -115,6 +115,8 @@
 
 ;;;; Database schemas
 
+(def ^:dynamic *clean-disabled* true)
+
 (defn- ^"[Ljava.lang.String;" strings [& ss]
   (into-array String ss))
 
@@ -124,6 +126,7 @@
       (.schemas (strings schema))
       (.locations (strings "classpath:db/flyway/master"))
       (.placeholders {"masterSchema" schema})
+      (.cleanDisabled *clean-disabled*)
       (.load)))
 
 (defn ^Flyway tenant-schema [schema master-schema]
@@ -132,6 +135,7 @@
       (.schemas (strings schema))
       (.locations (strings "classpath:db/flyway/tenant"))
       (.placeholders {"masterSchema" master-schema})
+      (.cleanDisabled *clean-disabled*)
       (.load)))
 
 (defn migrate-master-schema! []

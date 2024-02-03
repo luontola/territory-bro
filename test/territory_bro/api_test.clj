@@ -471,7 +471,7 @@
                            (merge session)
                            app)]
           (is (see-other? response))
-          (is (= "http://localhost/" (get-in response [:headers "Location"]))))))
+          (is (= "/" (get-in response [:headers "Location"]))))))
 
     (testing "super user can view all congregations"
       (let [response (-> (request :get "/api/congregations")

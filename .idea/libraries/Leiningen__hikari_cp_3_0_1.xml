@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: hikari-cp:3.0.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/hikari-cp/hikari-cp/3.0.1/hikari-cp-3.0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
