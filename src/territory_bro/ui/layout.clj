@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.layout
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [territory-bro.infra.resources :as resources]
             [territory-bro.ui.css :as css]
@@ -16,7 +15,7 @@
       (str/trim)
       (str/replace #"(?s)(>)[^<>]*(<)" "$1$2")))
 
-(def ^:private *head-injections (atom {:resource (io/resource "public/index.html")}))
+(def ^:private *head-injections (atom {:resource-path "public/index.html"}))
 
 (defn head-injections []
   (resources/auto-refresh *head-injections (fn [resource]
