@@ -15,17 +15,18 @@
         *call-count-spy (atom 0)
         loader-fn (fn [x]
                     (swap! *call-count-spy inc)
-                    {:data (str "loaded " (not (str/blank? (slurp x)))
-                                " " @*call-count-spy)})]
+                    (str "loaded " (not (str/blank? (slurp x)))
+                         " " @*call-count-spy))]
+
     (testing "loads the resource on first call"
       (let [result (resources/auto-refresh *state loader-fn)]
-        (is (= "loaded true 1" (:data result)))))
+        (is (= "loaded true 1" result))))
 
-    (testing "reuses the output on the resource has not changed"
+    (testing "reuses the value if the resource has not changed"
       (let [result (resources/auto-refresh *state loader-fn)]
-        (is (= "loaded true 1" (:data result)))))
+        (is (= "loaded true 1" result))))
 
-    (testing "refreshes the output if the resource has changed"
-      (swap! *state update :last-modified dec)
+    (testing "refreshes the value if the resource has changed"
+      (swap! *state update ::resources/last-modified dec)
       (let [result (resources/auto-refresh *state loader-fn)]
-        (is (= "loaded true 2" (:data result)))))))
+        (is (= "loaded true 2" result))))))

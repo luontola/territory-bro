@@ -19,10 +19,9 @@
 (def ^:private *head-injections (atom {:resource (io/resource "public/index.html")}))
 
 (defn head-injections []
-  ;; XXX: make auto-refresh work for non-map values
-  (:html (resources/auto-refresh *head-injections (fn [resource]
-                                                    (let [[_ html] (re-find #"(?s)</title>(.*)</head>" (slurp resource))]
-                                                      {:html (h/raw (minify-html html))})))))
+  (resources/auto-refresh *head-injections (fn [resource]
+                                             (let [[_ html] (re-find #"(?s)</title>(.*)</head>" (slurp resource))]
+                                               (h/raw (minify-html html))))))
 
 (defn active-link? [href current-page]
   (if (= "/" current-page)

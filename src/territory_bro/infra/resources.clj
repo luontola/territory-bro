@@ -7,13 +7,13 @@
 
 (defn auto-refresh [*state load-resource]
   ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
-  (let [{resource :resource, old-last-modified :last-modified, :as state} @*state
+  (let [{resource :resource, old-last-modified ::last-modified, :as state} @*state
         _ (assert (some? resource))
         new-last-modified (-> ^URL resource
                               (.openConnection)
                               (.getLastModified))]
-    (if (= old-last-modified new-last-modified)
-      state
-      (reset! *state (assoc (load-resource resource)
-                            :resource resource
-                            :last-modified new-last-modified)))))
+    (::value (if (= old-last-modified new-last-modified)
+               state
+               (reset! *state {:resource resource
+                               ::value (load-resource resource)
+                               ::last-modified new-last-modified})))))
