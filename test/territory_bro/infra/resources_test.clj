@@ -6,7 +6,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer :all]
-            [territory-bro.infra.resources :as resources]))
+            [territory-bro.infra.resources :as resources])
+  (:import (java.net URL)))
 
 (def test-resource "db/flyway/master/R__functions.sql")
 
@@ -22,11 +23,17 @@
       (let [result (resources/auto-refresh *state loader-fn)]
         (is (= "loaded true 1" result))))
 
-    (testing "reuses the value if the resource has not changed"
+    (testing "reuses the old value if the resource has not changed"
       (let [result (resources/auto-refresh *state loader-fn)]
         (is (= "loaded true 1" result))))
 
     (testing "refreshes the value if the resource has changed"
       (swap! *state update ::resources/last-modified dec)
+      (let [result (resources/auto-refresh *state loader-fn)]
+        (is (= "loaded true 2" result))))
+
+    (testing "reuses the old value if the resource temporarily disappears"
+      (swap! *state update :resource (fn [^URL resource]
+                                       (URL. (str resource ".no-such-file"))))
       (let [result (resources/auto-refresh *state loader-fn)]
         (is (= "loaded true 2" result))))))

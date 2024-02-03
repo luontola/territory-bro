@@ -12,7 +12,9 @@
         new-last-modified (-> ^URL resource
                               (.openConnection)
                               (.getLastModified))]
-    (::value (if (= old-last-modified new-last-modified)
+    (::value (if (or (= old-last-modified new-last-modified)
+                     ;; file was deleted temporarily
+                     (zero? new-last-modified))
                state
                (reset! *state {:resource resource
                                ::value (load-resource resource)
