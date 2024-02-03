@@ -1,4 +1,4 @@
-;; Copyright © 2015-2021 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -15,7 +15,7 @@
             [territory-bro.projections :as projections])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
-           (java.util.concurrent Executors ExecutorService TimeUnit)
+           (java.util.concurrent ExecutorService Executors TimeUnit)
            (org.postgresql PGConnection)
            (org.postgresql.util PSQLException)))
 
@@ -65,7 +65,7 @@
 
 
 (defn listen-for-gis-changes [notify]
-  (jdbc/with-db-connection [conn db/database {}]
+  (jdbc/with-db-connection [conn {:datasource db/datasource} {}]
     (db/use-master-schema conn)
     (jdbc/execute! conn ["LISTEN gis_change"])
     (let [timeout (Duration/ofSeconds 30)

@@ -54,7 +54,7 @@
 (defn start-app []
   ;; start the public API only after the database is ready
   (log-mount-states (mount/start #'config/env
-                                 #'db/database
+                                 #'db/datasource
                                  #'projections/*cache
                                  #'projections/refresher))
   (migrate-database!)

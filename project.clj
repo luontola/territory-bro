@@ -16,9 +16,9 @@
                  [com.auth0/jwks-rsa "0.22.1"]
                  [com.layerware/hugsql "0.5.3"]
                  [compojure "1.7.1"]
-                 [conman "0.8.4" :upgrade false] ; TODO: 0.8.5 and higher fail with: java.lang.IllegalArgumentException: No implementation of method: :get-level of protocol: #'clojure.java.jdbc/Connectable found for class: com.zaxxer.hikari.HikariDataSource
                  [cprop "0.1.19"]
                  [hiccup "2.0.0-RC2"]
+                 [hikari-cp "3.0.1"]
                  [liberator "0.15.3"]
                  [medley "1.4.0"]
                  [metosin/jsonista "0.3.8"]
@@ -49,7 +49,6 @@
                          [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.16.1"]
                          [commons-codec "1.16.0"]
                          [commons-io "2.15.1"]
-                         [hikari-cp "3.0.1"]
                          [org.clojure/java.classpath "1.0.0"]
                          [org.clojure/java.jdbc "0.7.12"]
                          [org.clojure/spec.alpha "0.3.218"]

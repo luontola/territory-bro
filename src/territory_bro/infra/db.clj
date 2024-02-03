@@ -7,7 +7,7 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [conman.core :as conman]
+            [hikari-cp.core :as hikari-cp]
             [hugsql.adapter.clojure-java-jdbc] ; for hugsql.core/get-adapter to not crash on first usage
             [hugsql.core :as hugsql]
             [mount.core :as mount]
@@ -36,18 +36,17 @@
 (def psql-undefined-object "42704")
 (def psql-duplicate-object "42710")
 
-(defn connect! [database-url]
+(defn connect! ^HikariDataSource [database-url]
   (log/info "Connect" database-url)
-  (conman/connect! {:jdbc-url database-url}))
+  (hikari-cp/make-datasource {:jdbc-url database-url}))
 
-(defn disconnect! [connection]
-  (log/info "Disconnect" (if-let [ds (:datasource connection)]
-                           (.getJdbcUrl ^HikariDataSource ds)))
-  (conman/disconnect! connection))
+(defn disconnect! [^HikariDataSource datasource]
+  (log/info "Disconnect" (.getJdbcUrl datasource))
+  (.close datasource))
 
-(mount/defstate database
+(mount/defstate ^HikariDataSource datasource
   :start (connect! (getx config/env :database-url))
-  :stop (disconnect! database))
+  :stop (disconnect! datasource))
 
 
 ;;;; SQL type conversions
@@ -122,7 +121,7 @@
 
 (defn ^Flyway master-schema [schema]
   (-> (Flyway/configure)
-      (.dataSource (:datasource database))
+      (.dataSource datasource)
       (.schemas (strings schema))
       (.locations (strings "classpath:db/flyway/master"))
       (.placeholders {"masterSchema" schema})
@@ -131,7 +130,7 @@
 
 (defn ^Flyway tenant-schema [schema master-schema]
   (-> (Flyway/configure)
-      (.dataSource (:datasource database))
+      (.dataSource datasource)
       (.schemas (strings schema))
       (.locations (strings "classpath:db/flyway/tenant"))
       (.placeholders {"masterSchema" master-schema})
@@ -196,7 +195,7 @@
   (let [conn (first binding)
         options (merge {:isolation :serializable}
                        (second binding))]
-    `(jdbc/with-db-transaction [~conn database ~options]
+    `(jdbc/with-db-transaction [~conn {:datasource datasource} ~options]
        (use-master-schema ~conn)
        ~@body)))
 
