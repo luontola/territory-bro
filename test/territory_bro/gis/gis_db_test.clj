@@ -22,15 +22,15 @@
 (def test-username2 "test_gis_user2")
 
 (defn- with-tenant-schema [schema-name f]
-  (let [schema (binding [db/*clean-disabled* false]
-                 (db/tenant-schema schema-name (:database-schema config/env)))]
-    (try
-      (.migrate schema)
-      (f)
-      (finally
-        (db/with-db [conn {}]
-          (jdbc/execute! conn ["DELETE FROM gis_change_log"]))
-        (.clean schema)))))
+  (binding [db/*clean-disabled* false]
+    (let [schema (db/tenant-schema schema-name (:database-schema config/env))]
+      (try
+        (.migrate schema)
+        (f)
+        (finally
+          (db/with-db [conn {}]
+            (jdbc/execute! conn ["DELETE FROM gis_change_log"]))
+          (.clean schema))))))
 
 (defn test-schema-fixture [f]
   (with-tenant-schema test-schema f))

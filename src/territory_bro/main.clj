@@ -18,13 +18,13 @@
            (org.eclipse.jetty.server Server))
   (:gen-class))
 
-(mount/defstate ^{:on-reload :noop} ^Server http-server
+(mount/defstate ^{:tag Server, :on-reload :noop} http-server
   :start
   (httpd/run-jetty #'router/app
                    {:port (:port config/env)
                     :join? false})
   :stop
-  (.stop http-server))
+  (.stop ^Server http-server))
 
 (defn- migrate-application-state! []
   (let [injections {:now (:now config/env)}
