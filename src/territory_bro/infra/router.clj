@@ -16,7 +16,7 @@
   (middleware/wrap-base
    (-> (routes
         #'api/api-routes
-        #'ui/ui-routes
+        #'ui/ring-handler
         (route/not-found "Not Found"))
        (wrap-routes http-response/wrap-http-response)
        (wrap-routes middleware/wrap-formats))))
