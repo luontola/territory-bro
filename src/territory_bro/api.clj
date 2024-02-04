@@ -404,9 +404,12 @@
 
 (defn share-territory-link [request]
   (if (= "demo" (get-in request [:params :congregation]))
-    (let [territory-id (UUID/fromString (get-in request [:params :territory]))
-          share-key (share/demo-share-key territory-id)]
-      (ok {:url (str (:public-url config/env) "/share/" share-key)
+    (let [cong-id (:demo-congregation config/env)
+          territory-id (UUID/fromString (get-in request [:params :territory]))
+          state (state-for-request request)
+          share-key (share/demo-share-key territory-id)
+          territory (facade/get-demo-territory state cong-id territory-id)]
+      (ok {:url (share/build-share-url share-key (:territory/number territory))
            :key share-key}))
 
     (auth/with-user-from-session request
@@ -414,7 +417,8 @@
       (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
             territory-id (UUID/fromString (get-in request [:params :territory]))
             state (state-for-request request)
-            share-key (share/generate-share-key)]
+            share-key (share/generate-share-key)
+            territory (facade/get-demo-territory state cong-id territory-id)]
         (db/with-db [conn {}]
           (dispatch! conn state {:command/type :share.command/create-share
                                  :share/id (UUID/randomUUID)
@@ -422,7 +426,7 @@
                                  :share/type :link
                                  :congregation/id cong-id
                                  :territory/id territory-id})
-          (ok {:url (str (:public-url config/env) "/share/" share-key)
+          (ok {:url (share/build-share-url share-key (:territory/number territory))
                :key share-key}))))))
 
 (defn- generate-qr-code! [conn request cong-id territory-id]

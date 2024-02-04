@@ -1,11 +1,14 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.domain.share
   (:require [clojure.string :as str]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions])
-  (:import (java.nio ByteBuffer)
+  (:import (java.net URLEncoder)
+           (java.nio ByteBuffer)
+           (java.nio.charset StandardCharsets)
            (java.security SecureRandom)
            (java.util Base64 UUID)
            (org.apache.commons.lang3 StringUtils)
@@ -73,6 +76,14 @@
   ;; generate a 64-bit key, base64 encoded; same format as YouTube video IDs
   (-> (random-bytes 8)
       (bytes->share-key)))
+
+(defn build-share-url [share-key territory-number]
+  (let [safe-number (-> (str territory-number)
+                        (URLEncoder/encode StandardCharsets/UTF_8)
+                        (str/replace #"%.." "_")
+                        (str/replace "+" "_")
+                        (str/replace #"_+" "_"))]
+    (str (:public-url config/env) "/share/" share-key "/" safe-number)))
 
 
 (defn- uuid->bytes ^bytes [^UUID uuid]

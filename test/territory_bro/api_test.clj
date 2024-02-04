@@ -812,7 +812,7 @@
                            app)]
           (is (ok? response))
           (is (= {:key share-key
-                  :url (str "http://localhost:8080/share/" share-key)}
+                  :url (str "http://localhost:8080/share/" share-key "/123")}
                  (:body response))))))
 
     ;; TODO: cannot link to a territory which doesn't belong to the specified congregation
@@ -881,32 +881,33 @@
 
 (deftest share-demo-territory-link-test
   ;; all of this is can be done anonymously, because the demo doesn't require logging in
-  (let [territory-id (UUID/randomUUID)
+  (let [cong-id (create-congregation-without-user! "foo")
+        territory-id (create-territory! cong-id)
         share-key (share/demo-share-key territory-id)
         state-before (projections/cached-state)]
+    (binding [config/env (assoc config/env :demo-congregation cong-id)]
 
-    (testing "create a demo share link"
-      (binding [share/generate-share-key (fake-share-key-generator "share-territory-link-test")]
-        (let [response (-> (request :post (str "/api/congregation/demo/territory/" territory-id "/share"))
-                           (json-body {})
+      (testing "create a demo share link"
+        (binding [share/generate-share-key (fake-share-key-generator "share-territory-link-test")]
+          (let [response (-> (request :post (str "/api/congregation/demo/territory/" territory-id "/share"))
+                             (json-body {})
+                             app)]
+            (is (ok? response))
+            (is (= {:key share-key
+                    :url (str "http://localhost:8080/share/" share-key "/123")}
+                   (:body response))))))
+
+      (testing "open share link"
+        (let [response (-> (request :get (str "/api/share/" share-key))
                            app)]
           (is (ok? response))
-          (is (= {:key share-key
-                  :url (str "http://localhost:8080/share/" share-key)}
-                 (:body response))))))
+          (is (= {:congregation "demo"
+                  :territory (str territory-id)}
+                 (:body response)))))
 
-
-    (testing "open share link"
-      (let [response (-> (request :get (str "/api/share/" share-key))
-                         app)]
-        (is (ok? response))
-        (is (= {:congregation "demo"
-                :territory (str territory-id)}
-               (:body response)))))
-
-    (testing "does NOT create a share, nor record that a share was opened"
-      (let [state-after (projections/cached-state)]
-        (is (= state-before state-after))))))
+      (testing "does NOT create a share, nor record that a share was opened"
+        (let [state-after (projections/cached-state)]
+          (is (= state-before state-after)))))))
 
 (deftest create-qr-code-test
   (let [*session (atom (login! app))
