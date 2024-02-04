@@ -27,9 +27,9 @@
                               (.openConnection)
                               (.getLastModified))]
     (if (or (= old-last-modified new-last-modified)
-            ;; file was deleted (temporarily)
+            ;; file was deleted (temporarily), reuse the old value
             (and (zero? new-last-modified)
-                 (some? value)))
+                 (some? old-last-modified)))
       value
       (::value (reset! *state {::resource resource
                                ::value (load-resource resource)
