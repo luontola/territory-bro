@@ -7,6 +7,16 @@ import react from '@vitejs/plugin-react'
 import i18nextLoader from 'vite-plugin-i18next-loader'
 import fs from "fs";
 import * as path from "path";
+import * as child_process from "child_process";
+
+function serverExport() {
+  return {
+    name: 'server-export',
+    writeBundle(options, bundle) {
+      console.log(child_process.execSync("npm run server-export").toString());
+    },
+  };
+}
 
 const cssModulesJson = {}
 
@@ -19,7 +29,8 @@ export default defineConfig(({command}) => ({
     i18nextLoader({
       paths: ['./web/src/locales'],
       namespaceResolution: 'basename',
-    })
+    }),
+    serverExport(),
   ],
   build: {
     outDir: "../target/web-dist/public",

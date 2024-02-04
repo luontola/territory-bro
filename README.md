@@ -94,7 +94,6 @@ with the SPA UI at http://localhost:8080
 Build the frontend assets for the backend
 
     npm run build
-    npm run server-export
 
 Build the CSS assets automatically during development
 
