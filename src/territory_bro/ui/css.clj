@@ -7,11 +7,8 @@
             [territory-bro.infra.json :as json]
             [territory-bro.infra.resources :as resources]))
 
-(def ^:private *css-modules (atom {:resource-path "css-modules.json"}))
-
-(defn modules []
-  (resources/auto-refresh *css-modules #(json/read-value (slurp %))))
-
+(def modules
+  (resources/auto-refresher "css-modules.json" #(json/read-value (slurp %))))
 
 (defn classes [& names]
   (str/join " " names))

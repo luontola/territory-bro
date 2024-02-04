@@ -223,13 +223,6 @@
 (defmacro auto-explain [conn min-duration & body]
   `(auto-explain* ~conn ~min-duration (fn [] ~@body)))
 
-(defn- load-queries [*queries]
-  (resources/auto-refresh *queries
-                          (fn [resource]
-                            {:db-fns (hugsql/map-of-db-fns resource {:quoting :ansi})
-                             :sqlvec-fns (hugsql/map-of-sqlvec-fns resource {:quoting :ansi
-                                                                             :fn-suffix ""})})))
-
 (defn- explain-query [conn sql params]
   (jdbc/execute! conn ["SAVEPOINT explain_analyze"])
   (try
@@ -244,8 +237,8 @@
 (defn- prefix-join [prefix ss]
   (str prefix (str/join prefix ss)))
 
-(defn- query! [conn *queries query-name params]
-  (let [queries (load-queries *queries)
+(defn- query! [conn queries-cache query-name params]
+  (let [queries (queries-cache)
         query-fn (get-in queries [:db-fns query-name :fn])]
     (assert query-fn (str "Query not found: " query-name))
     (when *explain*
@@ -262,7 +255,12 @@
                         (prefix-join "\n--\t" query-plan)))))
     (apply query-fn conn params)))
 
+(defn- load-queries [resource]
+  {:db-fns (hugsql/map-of-db-fns resource {:quoting :ansi})
+   :sqlvec-fns (hugsql/map-of-sqlvec-fns resource {:quoting :ansi
+                                                   :fn-suffix ""})})
+
 (defn compile-queries [path]
-  (let [*queries (atom {:resource (io/resource path)})]
+  (let [queries-cache (resources/auto-refresher (io/resource path) load-queries)]
     (fn [conn name & params]
-      (query! conn *queries name params))))
+      (query! conn queries-cache name params))))

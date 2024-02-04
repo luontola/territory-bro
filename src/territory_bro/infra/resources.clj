@@ -6,23 +6,36 @@
   (:require [clojure.java.io :as io])
   (:import (java.net URL)))
 
-(defn auto-refresh [*state load-resource]
+(defn- invalid-resource [resource]
+  (IllegalArgumentException. (str "Resource must be an URL or string: " (pr-str resource))))
+
+(defn init-state [resource]
+  (when (nil? resource)
+    (throw (invalid-resource resource)))
+  (atom {::resource resource}))
+
+(defn auto-refresh! [*state load-resource]
   ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
-  (let [{resource :resource, resource-path :resource-path, old-last-modified ::last-modified, :as state} @*state
+  (let [{::keys [resource value], old-last-modified ::last-modified} @*state
         resource (cond
-                   (some? resource) resource
-                   (some? resource-path) (if-some [resource (io/resource resource-path)]
-                                           resource
-                                           (throw (IllegalStateException. (str "Resource not found: " resource-path))))
-                   :else (throw (IllegalArgumentException. "Missing :resource and :resource-path")))
+                   (instance? URL resource) resource
+                   (string? resource) (if-some [resource (io/resource resource)]
+                                        resource
+                                        (throw (IllegalStateException. (str "Resource not found: " resource))))
+                   :else (throw (invalid-resource resource)))
         new-last-modified (-> ^URL resource
                               (.openConnection)
                               (.getLastModified))]
-    (::value (if (or (= old-last-modified new-last-modified)
-                     ;; file was deleted temporarily
-                     (and (zero? new-last-modified)
-                          (some? (::value state))))
-               state
-               (reset! *state (assoc state
-                                     ::value (load-resource resource)
-                                     ::last-modified new-last-modified))))))
+    (if (or (= old-last-modified new-last-modified)
+            ;; file was deleted (temporarily)
+            (and (zero? new-last-modified)
+                 (some? value)))
+      value
+      (::value (reset! *state {::resource resource
+                               ::value (load-resource resource)
+                               ::last-modified new-last-modified})))))
+
+(defn auto-refresher [resource load-resource]
+  (let [*state (init-state resource)]
+    (fn []
+      (auto-refresh! *state load-resource))))

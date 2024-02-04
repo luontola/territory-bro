@@ -9,10 +9,8 @@
 
 (def ^:dynamic *lang* :en)
 
-(def ^:private *i18n (atom {:resource-path "i18n.json"}))
-
-(defn i18n []
-  (resources/auto-refresh *i18n #(json/read-value (slurp %))))
+(def i18n
+  (resources/auto-refresher "i18n.json" #(json/read-value (slurp %))))
 
 (defn t [key]
   (let [path (->> (str/split key #"\.")

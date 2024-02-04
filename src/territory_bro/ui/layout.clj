@@ -15,12 +15,11 @@
       (str/trim)
       (str/replace #"(?s)(>)[^<>]*(<)" "$1$2")))
 
-(def ^:private *head-injections (atom {:resource-path "public/index.html"}))
-
-(defn head-injections []
-  (resources/auto-refresh *head-injections (fn [resource]
-                                             (let [[_ html] (re-find #"(?s)</title>(.*)</head>" (slurp resource))]
-                                               (h/raw (minify-html html))))))
+(def head-injections
+  (resources/auto-refresher "public/index.html"
+                            (fn [resource]
+                              (let [[_ html] (re-find #"(?s)</title>(.*)</head>" (slurp resource))]
+                                (h/raw (minify-html html))))))
 
 (defn active-link? [href current-page]
   (if (= "/" current-page)
