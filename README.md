@@ -4,7 +4,7 @@ Territory Bro is a tool for managing territory cards in the congregations of Jeh
 
 For more information, see <https://territorybro.com>
 
-[![Build Status](https://luontola.semaphoreci.com/badges/territory-bro/branches/master.svg?style=shields)](https://luontola.semaphoreci.com/projects/territory-bro)
+[![Build Status](https://luontola.semaphoreci.com/badges/territory-bro/branches/main.svg?style=shields)](https://luontola.semaphoreci.com/projects/territory-bro)
 
 ## Running
 

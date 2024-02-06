@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -25,7 +25,7 @@ const SupportPage = () => {
         <a href={`mailto:${supportEmail}`}></a>
       </Trans></p>}
     <p><Trans i18nKey="SupportPage.translationAd">
-      <a href="https://github.com/luontola/territory-bro/tree/master/web/src/locales#readme" target="_blank"></a>
+      <a href="https://github.com/luontola/territory-bro/tree/main/web/src/locales#readme" target="_blank"></a>
     </Trans></p>
     <p><Trans i18nKey="SupportPage.issueTrackerAd">
       <a href="https://github.com/luontola/territory-bro/issues" target="_blank"></a>
