@@ -26,8 +26,8 @@ services:
       SUPPORT_EMAIL: support@example.com
       DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro
       GIS_DATABASE_HOST: localhost
-    mem_reservation: 150m
-    mem_limit: 200m
+    mem_reservation: 300m
+    mem_limit: 500m
     ports:
       - "127.0.0.1:8081:8080"
       - "127.0.0.1:7000:7000"
