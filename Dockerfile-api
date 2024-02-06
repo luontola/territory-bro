@@ -16,6 +16,11 @@ RUN apt-get update && \
     apt-get install -y postgresql-13 postgresql-13-postgis-3 sudo && \
     rm -rf /var/lib/apt/lists/*
 
+# Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_21.x | sudo -E bash - &&\
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
 # working directory
 RUN mkdir -p /project
 WORKDIR /project
@@ -24,11 +29,20 @@ WORKDIR /project
 COPY project.clj /project/
 RUN lein deps
 
+# cache NPM dependencies
+COPY package.json package-lock.json /project/
+RUN npm ci
+
 # source code
 COPY resources /project/resources
 COPY test /project/test
 COPY src /project/src
 COPY src-java /project/src-java
+COPY tsconfig.json tsconfig.node.json vite.config.ts /project/
+COPY web /project/web
+
+# build frontend assets
+RUN npm run build
 
 # run tests
 COPY test-config.edn tests.edn postgres-init.sql /project/

@@ -19,20 +19,25 @@ blocks:
       jobs:
         - name: Test API
           commands:
+            - cache restore
             - cache restore m2-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
             - cache restore lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
             - sem-version java 17
+            - nvm install 21
 
+            - npm install
+            - npm run build
             - docker-compose up -d db
             - lein test
 
+            - cache store
             - cache store m2-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.m2
             - cache store lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.lein/self-installs
 
         - name: Test Web
           commands:
             - cache restore
-            - nvm install 18
+            - nvm install 21
 
             - npm install
             - npm run test
