@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -56,18 +56,27 @@
 
 (def ^:private mutative-operation #{:put :post :delete})
 
-(defn wrap-projections-refresh [handler]
+(defn- refresh-projections! []
+  (projections/refresh-async!)
+  ;; TODO: store the observed revision in session and await before the next read if the cache is out of date
+  (projections/await-refreshed (Duration/ofSeconds 10)))
+
+(defn wrap-always-refresh-projections [handler]
+  (fn [req]
+    (let [resp (handler req)]
+      (refresh-projections!)
+      resp)))
+
+(defn wrap-auto-refresh-projections [handler]
   (fn [req]
     (let [resp (handler req)]
       (when (contains? mutative-operation (:request-method req))
-        (projections/refresh-async!)
-        ;; TODO: store the observed revision in session and await before the next read if the cache is out of date
-        (projections/await-refreshed (Duration/ofSeconds 10)))
+        (refresh-projections!))
       resp)))
 
 (defn wrap-base [handler]
   (-> handler
-      wrap-projections-refresh
+      wrap-auto-refresh-projections
       (cond->
         (:dev env) (wrap-reload {:dirs ["src" "resources"]}))
       wrap-sqlexception-chain

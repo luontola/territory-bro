@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -25,7 +25,7 @@
 
 (defn db-fixture [f]
   (mount/start #'config/env
-               #'db/database
+               #'db/datasource
                #'projections/*cache)
   (let [schema (:database-schema config/env)]
     (assert (= "test_territorybro" schema)

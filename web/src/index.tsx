@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -11,6 +11,9 @@ import {QueryClientProvider} from "@tanstack/react-query";
 import {queryClient} from "./api.ts";
 import App from "./App.tsx";
 import './i18n.ts';
+import htmx from 'htmx.org';
+
+window.htmx = htmx;
 
 function NavigationListener({children}) {
   const location = useLocation()
@@ -55,15 +58,48 @@ listenScrollY(scrollY => {
   setPageState('scrollY', scrollY);
 })
 
-createRoot(document.getElementById('root')!)
-  .render(
-    <React.StrictMode>
-      <BrowserRouter>
-        <NavigationListener>
-          <QueryClientProvider client={queryClient}>
-            <App/>
-          </QueryClientProvider>
-        </NavigationListener>
-      </BrowserRouter>
-    </React.StrictMode>
-  );
+const root = document.getElementById('root');
+if (root) {
+  createRoot(root)
+    .render(
+      <React.StrictMode>
+        <BrowserRouter>
+          <NavigationListener>
+            <QueryClientProvider client={queryClient}>
+              <App/>
+            </QueryClientProvider>
+          </NavigationListener>
+        </BrowserRouter>
+      </React.StrictMode>
+    );
+}
+
+function formatXhrError({status, statusText, responseText}) {
+  let message = `${status} ${statusText}`;
+  if (responseText && responseText !== statusText) {
+    message += ` - ${responseText}`;
+  }
+  return message;
+}
+
+// Source: https://xvello.net/blog/htmx-error-handling/
+document.body.addEventListener('htmx:afterRequest', (event: Event) => {
+  const dialog = document.getElementById("htmx-error-dialog") as HTMLDialogElement | null;
+  const message = document.getElementById("htmx-error-message");
+  if (event instanceof CustomEvent && dialog && message) {
+    if (event.detail.successful) {
+      dialog.close();
+      message.innerText = "";
+
+    } else if (event.detail.failed && event.detail.xhr) {
+      console.warn("Server error", event.detail);
+      message.innerText = formatXhrError(event.detail.xhr);
+      dialog.showModal();
+
+    } else {
+      console.error("Unspecified error", event.detail); // usually network error
+      message.innerText = "" + message.getAttribute("data-default-message");
+      dialog.showModal();
+    }
+  }
+});

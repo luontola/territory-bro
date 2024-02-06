@@ -101,6 +101,8 @@ Errors:
   notAuthorized: Não autorizado 🛑
   unknownError: Desculpe, algo deu errado 🥺
   returnToFrontPage: Voltar para a página inicial e tentar novamente
+  reloadAndTryAgain: Verifique sua conexão com a internet. Recarregue a página e tente novamente.
+  closeDialog: Fechar
 Map:
   zoomIn: Ampliar
   zoomOut: Reduzir

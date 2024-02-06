@@ -101,6 +101,8 @@ Errors:
   notAuthorized: Tidak diizinkan 🛑
   unknownError: Maaf, terjadi kesalahan 🥺
   returnToFrontPage: Kembali ke halaman depan dan coba lagi
+  reloadAndTryAgain: Periksa koneksi internet Anda. Muat ulang halaman dan coba lagi.
+  closeDialog: Tutup
 Map:
   zoomIn: Perbesar
   zoomOut: Perkecil

@@ -101,6 +101,8 @@ Errors:
   notAuthorized: Pääsy kielletty 🛑
   unknownError: Pahoittelut, jotain meni pieleen 🥺
   returnToFrontPage: Palaa etusivulle ja yritä uudelleen
+  reloadAndTryAgain: Tarkista internet-yhteytesi. Lataa sivu uudelleen ja yritä uudelleen.
+  closeDialog: Sulje
 Map:
   zoomIn: Suurenna
   zoomOut: Pienennä

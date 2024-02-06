@@ -97,7 +97,7 @@
    card-minimap-viewport-defined
    share-created])
 
-(defn- apply-events [events]
+(defn apply-events [events]
   (testutil/apply-events projections/projection events))
 
 (def fake-conn ::fake-conn)

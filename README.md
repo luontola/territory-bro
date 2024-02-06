@@ -86,6 +86,19 @@ Produce canonical XML for better diffs
 
     xmllint --c14n11 example.qgs > resources/template-territories.qgs
 
+### SSR UI
+
+The new server-side rendered UI will run at http://localhost:8081, and it shares session cookies
+with the SPA UI at http://localhost:8080
+
+Build the frontend assets for the backend
+
+    npm run build
+
+Build the CSS assets automatically during development
+
+    npm run autobuild
+
 ## License
 
 Copyright © 2015-2023, [Esko Luontola](https://www.luontola.fi)

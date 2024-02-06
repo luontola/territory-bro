@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: com.fasterxml.jackson.dataformat/jackson-dataformat-toml:2.15.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/dataformat/jackson-dataformat-toml/2.15.2/jackson-dataformat-toml-2.15.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

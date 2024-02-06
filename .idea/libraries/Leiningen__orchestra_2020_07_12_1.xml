@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: orchestra:2020.07.12-1">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/orchestra/orchestra/2020.07.12-1/orchestra-2020.07.12-1.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

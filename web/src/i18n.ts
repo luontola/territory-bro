@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -43,7 +43,9 @@ export async function changeLanguage(language: string) {
 }
 
 function setDocumentLanguage() {
-  document.documentElement.setAttribute('lang', i18n.resolvedLanguage);
+  if (typeof document !== 'undefined') { // avoid crash when running in Node.js
+    document.documentElement.setAttribute('lang', i18n.resolvedLanguage);
+  }
 }
 
 export function isolatedI18nInstance(language: string) {

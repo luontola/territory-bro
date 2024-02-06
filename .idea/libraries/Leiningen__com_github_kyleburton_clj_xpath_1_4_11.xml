@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: com.github.kyleburton/clj-xpath:1.4.11">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/com/github/kyleburton/clj-xpath/1.4.11/clj-xpath-1.4.11.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

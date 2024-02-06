@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,6 +6,7 @@
   (:require [clojure.test :refer :all]
             [territory-bro.domain.share :as share]
             [territory-bro.events :as events]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.test.testutil :as testutil :refer [re-equals]])
   (:import (java.time Instant)
@@ -121,6 +122,21 @@
   (testing "generates unique keys"
     (let [keys (repeatedly 10 share/generate-share-key)]
       (is (= (distinct keys) keys)))))
+
+(deftest build-share-url-test
+  (binding [config/env {:public-url "https://example.com"}]
+    (testing "contains public URL, share key and territory number"
+      (is (= "https://example.com/share/key/123" (share/build-share-url "key" "123"))))
+
+    (testing "territory number is sanitized"
+      (is (= "https://example.com/share/key/1-2" (share/build-share-url "key" "1-2"))
+          "dash is an URL safe character")
+      (is (= "https://example.com/share/key/1_2" (share/build-share-url "key" "1/2"))
+          "sanitize special character")
+      (is (= "https://example.com/share/key/1_2" (share/build-share-url "key" "1 2"))
+          "sanitize space (URL encodes as '+')")
+      (is (= "https://example.com/share/key/1_2" (share/build-share-url "key" "1, 2"))
+          "join multiple consecutive sanitized characters "))))
 
 (deftest demo-share-key-test
   (testing "key format"

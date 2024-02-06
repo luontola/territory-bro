@@ -1,4 +1,4 @@
-;; Copyright © 2015-2021 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -12,9 +12,8 @@
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
             [territory-bro.test.fixtures :refer [db-fixture]])
-  (:import (java.sql Connection SQLException)
+  (:import (java.sql Connection)
            (java.util UUID)
-           (java.util.regex Pattern)
            (org.postgresql.util PSQLException)))
 
 (def test-schema "test_gis_schema")
@@ -23,14 +22,15 @@
 (def test-username2 "test_gis_user2")
 
 (defn- with-tenant-schema [schema-name f]
-  (let [schema (db/tenant-schema schema-name (:database-schema config/env))]
-    (try
-      (.migrate schema)
-      (f)
-      (finally
-        (db/with-db [conn {}]
-          (jdbc/execute! conn ["DELETE FROM gis_change_log"]))
-        (.clean schema)))))
+  (binding [db/*clean-disabled* false]
+    (let [schema (db/tenant-schema schema-name (:database-schema config/env))]
+      (try
+        (.migrate schema)
+        (f)
+        (finally
+          (db/with-db [conn {}]
+            (jdbc/execute! conn ["DELETE FROM gis_change_log"]))
+          (.clean schema))))))
 
 (defn test-schema-fixture [f]
   (with-tenant-schema test-schema f))

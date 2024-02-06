@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,12 +7,13 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [conman.core :as conman]
+            [hikari-cp.core :as hikari-cp]
             [hugsql.adapter.clojure-java-jdbc] ; for hugsql.core/get-adapter to not crash on first usage
             [hugsql.core :as hugsql]
             [mount.core :as mount]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.json :as json]
+            [territory-bro.infra.resources :as resources]
             [territory-bro.infra.util :refer [getx]])
   (:import (clojure.lang IPersistentMap IPersistentVector)
            (com.zaxxer.hikari HikariDataSource)
@@ -35,18 +36,17 @@
 (def psql-undefined-object "42704")
 (def psql-duplicate-object "42710")
 
-(defn connect! [database-url]
+(defn connect! ^HikariDataSource [database-url]
   (log/info "Connect" database-url)
-  (conman/connect! {:jdbc-url database-url}))
+  (hikari-cp/make-datasource {:jdbc-url database-url}))
 
-(defn disconnect! [connection]
-  (log/info "Disconnect" (if-let [ds (:datasource connection)]
-                           (.getJdbcUrl ^HikariDataSource ds)))
-  (conman/disconnect! connection))
+(defn disconnect! [^HikariDataSource datasource]
+  (log/info "Disconnect" (.getJdbcUrl datasource))
+  (.close datasource))
 
-(mount/defstate database
+(mount/defstate ^HikariDataSource datasource
   :start (connect! (getx config/env :database-url))
-  :stop (disconnect! database))
+  :stop (disconnect! datasource))
 
 
 ;;;; SQL type conversions
@@ -114,23 +114,27 @@
 
 ;;;; Database schemas
 
+(def ^:dynamic *clean-disabled* true)
+
 (defn- ^"[Ljava.lang.String;" strings [& ss]
   (into-array String ss))
 
 (defn ^Flyway master-schema [schema]
   (-> (Flyway/configure)
-      (.dataSource (:datasource database))
+      (.dataSource datasource)
       (.schemas (strings schema))
       (.locations (strings "classpath:db/flyway/master"))
       (.placeholders {"masterSchema" schema})
+      (.cleanDisabled *clean-disabled*)
       (.load)))
 
 (defn ^Flyway tenant-schema [schema master-schema]
   (-> (Flyway/configure)
-      (.dataSource (:datasource database))
+      (.dataSource datasource)
       (.schemas (strings schema))
       (.locations (strings "classpath:db/flyway/tenant"))
       (.placeholders {"masterSchema" master-schema})
+      (.cleanDisabled *clean-disabled*)
       (.load)))
 
 (defn migrate-master-schema! []
@@ -191,7 +195,7 @@
   (let [conn (first binding)
         options (merge {:isolation :serializable}
                        (second binding))]
-    `(jdbc/with-db-transaction [~conn database ~options]
+    `(jdbc/with-db-transaction [~conn {:datasource datasource} ~options]
        (use-master-schema ~conn)
        ~@body)))
 
@@ -219,20 +223,6 @@
 (defmacro auto-explain [conn min-duration & body]
   `(auto-explain* ~conn ~min-duration (fn [] ~@body)))
 
-(defn- load-queries [*queries]
-  ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
-  (let [{resource :resource, old-last-modified :last-modified, :as queries} @*queries
-        new-last-modified (-> ^URL resource
-                              (.openConnection)
-                              (.getLastModified))]
-    (if (= old-last-modified new-last-modified)
-      queries
-      (reset! *queries {:resource resource
-                        :db-fns (hugsql/map-of-db-fns resource {:quoting :ansi})
-                        :sqlvec-fns (hugsql/map-of-sqlvec-fns resource {:quoting :ansi
-                                                                        :fn-suffix ""})
-                        :last-modified new-last-modified}))))
-
 (defn- explain-query [conn sql params]
   (jdbc/execute! conn ["SAVEPOINT explain_analyze"])
   (try
@@ -247,8 +237,8 @@
 (defn- prefix-join [prefix ss]
   (str prefix (str/join prefix ss)))
 
-(defn- query! [conn *queries query-name params]
-  (let [queries (load-queries *queries)
+(defn- query! [conn queries-cache query-name params]
+  (let [queries (queries-cache)
         query-fn (get-in queries [:db-fns query-name :fn])]
     (assert query-fn (str "Query not found: " query-name))
     (when *explain*
@@ -265,9 +255,12 @@
                         (prefix-join "\n--\t" query-plan)))))
     (apply query-fn conn params)))
 
+(defn- load-queries [resource]
+  {:db-fns (hugsql/map-of-db-fns resource {:quoting :ansi})
+   :sqlvec-fns (hugsql/map-of-sqlvec-fns resource {:quoting :ansi
+                                                   :fn-suffix ""})})
+
 (defn compile-queries [path]
-  (let [resource (io/resource path)
-        _ (assert resource (str "Resource not found: " path))
-        *queries (atom {:resource resource})]
+  (let [queries-cache (resources/auto-refresher (io/resource path) load-queries)]
     (fn [conn name & params]
-      (query! conn *queries name params))))
+      (query! conn queries-cache name params))))
