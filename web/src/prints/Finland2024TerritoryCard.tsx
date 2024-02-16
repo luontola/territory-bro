@@ -69,7 +69,7 @@ const Finland2024TerritoryCard = ({
 
       <div>
         {territory.doNotCalls &&
-          <h3 style={{color: "red"}}>Älä käy: {territory.doNotCalls}</h3>
+          <h3 style={{color: "red", whiteSpace: "pre-line"}}>Älä käy: {territory.doNotCalls}</h3>
         }
         <h3>Palauta käytynä palautuslaatikkoon</h3>
         <p style={{marginBottom: "5cm"}}>Huomioita:</p>
