@@ -9,7 +9,7 @@
             [etaoin.api2 :as b2])
   (:import (org.apache.commons.io FileUtils)))
 
-(def ^:dynamic *base-url* "http://localhost:8080") ; TODO: parameterize the url to run against any deployment
+(def ^:dynamic *base-url* (or (System/getenv "BASE_URL") "http://localhost:8080"))
 (def ^:dynamic *driver*)
 
 (def auth0-username "browser-test@example.com")
