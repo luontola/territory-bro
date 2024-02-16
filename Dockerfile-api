@@ -50,7 +50,7 @@ RUN service postgresql start && \
     sudo -u postgres psql -c "CREATE USER territorybro WITH CREATEROLE PASSWORD 'territorybro';" && \
     sudo -u postgres psql -c "CREATE DATABASE territorybro OWNER territorybro;" && \
     sudo -u postgres psql -d territorybro -f postgres-init.sql && \
-    lein kaocha && \
+    lein kaocha fast slow && \
     service postgresql stop
 
 # build the binary

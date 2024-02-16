@@ -1,15 +1,20 @@
 #kaocha/v1
-    {:tests [{:id :fast
-              :skip-meta [:slow]
-              :source-paths ["src" "resources"]
-              :test-paths ["test"]
-              :ns-patterns ["^territory-bro"]}
-             {:id :slow
-              :focus-meta [:slow]
-              :source-paths ["src" "resources"]
-              :test-paths ["test"]
-              :ns-patterns ["^territory-bro"]}]
-     :kaocha/reporter [kaocha.report.progress/report]
-     :plugins [:kaocha.plugin/profiling]
-     :kaocha.plugin.profiling/count 3
-     :capture-output? true}
+{:tests [{:id :fast
+          :skip-meta [:slow :e2e]
+          :source-paths ["src" "resources"]
+          :test-paths ["test"]
+          :ns-patterns ["^territory-bro"]}
+         {:id :slow
+          :focus-meta [:slow]
+          :source-paths ["src" "resources"]
+          :test-paths ["test"]
+          :ns-patterns ["^territory-bro"]}
+         {:id :e2e
+          :focus-meta [:e2e]
+          :source-paths ["src" "resources"]
+          :test-paths ["test"]
+          :ns-patterns ["^territory-bro"]}]
+ :kaocha/reporter [kaocha.report.progress/report]
+ :plugins [:kaocha.plugin/profiling]
+ :kaocha.plugin.profiling/count 3
+ :capture-output? true}

@@ -55,6 +55,7 @@
                          [org.clojure/java.classpath "1.0.0"]
                          [org.clojure/java.jdbc "0.7.12"]
                          [org.clojure/spec.alpha "0.3.218"]
+                         [org.clojure/tools.cli "1.0.219"]
                          [org.clojure/tools.reader "1.3.7"]
                          [org.slf4j/slf4j-api "2.0.11"]
                          [ring/ring-codec "1.2.0"]
@@ -78,12 +79,15 @@
 
   :aliases {"autotest" ["kaocha" "--watch"]
             "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]}
+  :test-selectors {:default (fn [m] (not (:e2e m)))
+                   :e2e :e2e}
 
   :profiles {:uberjar {:omit-source true
                        :aot :all
                        :uberjar-name "territory-bro.jar"}
 
              :dev {:dependencies [[com.github.kyleburton/clj-xpath "1.4.13"]
+                                  [etaoin "1.0.40"]
                                   [lambdaisland/kaocha "1.87.1366"]
                                   [org.clojure/test.check "1.1.1"]
                                   [prismatic/schema-generators "0.1.5"]
