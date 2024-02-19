@@ -22,6 +22,7 @@ services:
       PUBLIC_URL: http://localhost:8080
       AUTH0_DOMAIN: luontola.eu.auth0.com
       AUTH0_CLIENT_ID: 8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi
+      AUTH0_CLIENT_SECRET: nS2e4VPlaXyKuYwbsZ75NFXP6TMQ075HZ6cVu_bEasR8rXF8ggMrU5hCP3x7zmgE
       SUPER_USERS:
       SUPPORT_EMAIL: support@example.com
       DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro

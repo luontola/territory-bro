@@ -4,4 +4,5 @@
  :gis-database-host "localhost"
  :auth0-domain "luontola.eu.auth0.com"
  :auth0-client-id "8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"
+ :auth0-client-secret "nS2e4VPlaXyKuYwbsZ75NFXP6TMQ075HZ6cVu_bEasR8rXF8ggMrU5hCP3x7zmgE"
  :support-email "support@example.com"}

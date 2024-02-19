@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -19,6 +19,7 @@
 
 (s/defschema Env
   {:auth0-client-id s/Str
+   :auth0-client-secret s/Str
    :auth0-domain s/Str
    :public-url BaseUrl
    :qr-code-base-url BaseUrl

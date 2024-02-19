@@ -37,8 +37,10 @@
     <orderEntry type="library" name="Leiningen: clj-yaml:0.4.0" level="project" />
     <orderEntry type="library" name="Leiningen: clout:2.2.1" level="project" />
     <orderEntry type="library" name="Leiningen: com.attendify/schema-refined:0.3.0-alpha4" level="project" />
+    <orderEntry type="library" name="Leiningen: com.auth0/auth0:1.45.1" level="project" />
     <orderEntry type="library" name="Leiningen: com.auth0/java-jwt:4.4.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.auth0/jwks-rsa:0.22.1" level="project" />
+    <orderEntry type="library" name="Leiningen: com.auth0/mvc-auth-commons:1.11.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.bhauman/spell-spec:0.1.2" level="project" />
     <orderEntry type="library" name="Leiningen: com.cognitect/transit-clj:1.0.324" level="project" />
     <orderEntry type="library" name="Leiningen: com.cognitect/transit-java:1.0.343" level="project" />
@@ -54,6 +56,7 @@
     <orderEntry type="library" name="Leiningen: com.google.code.gson/gson:2.10.1" level="project" />
     <orderEntry type="library" name="Leiningen: com.google.errorprone/error_prone_annotations:2.18.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.google.guava/failureaccess:1.0.1" level="project" />
+    <orderEntry type="library" name="Leiningen: com.google.guava/guava-annotations:r03" level="project" />
     <orderEntry type="library" name="Leiningen: com.google.guava/guava:32.1.1-jre" level="project" />
     <orderEntry type="library" name="Leiningen: com.google.guava/listenablefuture:9999.0-empty-to-avoid-conflict-with-guava" level="project" />
     <orderEntry type="library" name="Leiningen: com.google.j2objc/j2objc-annotations:2.8" level="project" />
@@ -64,6 +67,10 @@
     <orderEntry type="library" name="Leiningen: com.layerware/hugsql-core:0.5.3" level="project" />
     <orderEntry type="library" name="Leiningen: com.layerware/hugsql:0.5.3" level="project" />
     <orderEntry type="library" name="Leiningen: com.nextjournal/beholder:1.0.2" level="project" />
+    <orderEntry type="library" name="Leiningen: com.squareup.okhttp3/logging-interceptor:4.11.0" level="project" />
+    <orderEntry type="library" name="Leiningen: com.squareup.okhttp3/okhttp:4.11.0" level="project" />
+    <orderEntry type="library" name="Leiningen: com.squareup.okio/okio-jvm:3.5.0" level="project" />
+    <orderEntry type="library" name="Leiningen: com.squareup.okio/okio:3.5.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.zaxxer/HikariCP:5.0.1" level="project" />
     <orderEntry type="library" name="Leiningen: commons-codec:1.16.0" level="project" />
     <orderEntry type="library" name="Leiningen: commons-io:2.15.1" level="project" />
@@ -121,6 +128,7 @@
     <orderEntry type="library" name="Leiningen: net.incongru.watchservice/barbary-watchservice:1.0" level="project" />
     <orderEntry type="library" name="Leiningen: net.java.dev.jna/jna:5.12.1" level="project" />
     <orderEntry type="library" name="Leiningen: net.jodah/expiringmap:0.5.8" level="project" />
+    <orderEntry type="library" name="Leiningen: net.jodah/failsafe:2.4.1" level="project" />
     <orderEntry type="library" name="Leiningen: nrepl:1.0.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.apache.commons/commons-fileupload2-core:2.0.0-M1" level="project" />
     <orderEntry type="library" name="Leiningen: org.apache.commons/commons-lang3:3.14.0" level="project" />
@@ -168,6 +176,11 @@
     <orderEntry type="library" name="Leiningen: org.flywaydb/flyway-core:10.7.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.flywaydb/flyway-database-postgresql:10.7.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.javassist/javassist:3.18.1-GA" level="project" />
+    <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-common:1.9.0" level="project" />
+    <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-jdk7:1.9.22" level="project" />
+    <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-jdk8:1.9.22" level="project" />
+    <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib:1.9.22" level="project" />
+    <orderEntry type="library" name="Leiningen: org.jetbrains/annotations:13.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.msgpack/msgpack:0.6.12" level="project" />
     <orderEntry type="library" name="Leiningen: org.nrepl/incomplete:0.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.postgresql/postgresql:42.7.1" level="project" />

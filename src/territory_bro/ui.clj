@@ -8,6 +8,7 @@
             [ring.util.http-response :refer :all]
             [ring.util.response :as response]
             [territory-bro.api :as api]
+            [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.layout :as layout]
@@ -40,6 +41,13 @@
     [["/"
       {:get {:handler (fn [_request]
                         (ok "Territory Bro"))}}]
+
+     ["/login"
+      {:get {:handler auth0/login-handler}}]
+     ["/login-callback"
+      {:get {:handler (constantly (ok "TODO"))}}]
+     ["/logout"
+      {:get {:handler (constantly (ok "TODO"))}}]
 
      ["/congregation/:congregation/territories/:territory"
       {:middleware [[wrap-page-path ::territory-page]

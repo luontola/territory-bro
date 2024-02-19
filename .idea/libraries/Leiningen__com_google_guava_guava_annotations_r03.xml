@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: com.google.guava/guava-annotations:r03">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava-annotations/r03/guava-annotations-r03.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
