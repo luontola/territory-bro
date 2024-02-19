@@ -6,7 +6,8 @@
   (:require [clojure.test :refer :all]
             [mount.core :as mount]
             [territory-bro.infra.auth0 :as auth0]
-            [territory-bro.infra.config :as config]))
+            [territory-bro.infra.config :as config])
+  (:import (javax.servlet.http HttpServletRequest HttpServletResponse)))
 
 (defn config-fixture [f]
   (mount/start #'config/env
@@ -23,3 +24,18 @@
                  :headers {}
                  :session {}}]
     (is (auth0/login-handler request))))
+
+(deftest ring->servlet-test
+  (let [ring-request {:request-method :get
+                      :uri "/login"
+                      :query-string nil
+                      :headers {}
+                      :session {}}
+        [^HttpServletRequest request
+         ^HttpServletResponse response
+         *ring-response] (auth0/ring->servlet ring-request)]
+
+    (testing "response header"
+      (.addHeader response "foo" "bar")
+      (is (= "bar" (.getHeader response "foo")))
+      (is (= {"foo" "bar"} (:headers @*ring-response))))))

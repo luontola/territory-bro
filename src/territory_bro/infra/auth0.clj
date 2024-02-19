@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.auth0
-  (:require [clojure.pprint :as pp]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [mount.core :as mount]
             [ring.util.response :as response]
             [territory-bro.infra.config :as config]
@@ -24,20 +23,24 @@
         (.withJwkProvider jwk-provider)
         (.build))))
 
-(defn servlet-adapter [ring-request]
-  (let [request (reify HttpServletRequest)
-        response (reify HttpServletResponse)]
-    [request response]))
+(defn ring->servlet [ring-request]
+  (let [*response (atom (response/response ""))
+        servlet-request (reify HttpServletRequest)
+        servlet-response (reify HttpServletResponse
+                           (getHeader [_ name]
+                             (response/get-header @*response name))
+                           (addHeader [_ name value]
+                             (swap! *response response/header name value)))]
+    [servlet-request servlet-response *response]))
 
-(defn login-handler [request]
-  (pp/pprint config/env)
+(defn login-handler [ring-request]
   (let [public-url (-> (getx config/env :public-url)
                        (str/replace "8080" "8081")) ; TODO: remove me
         callback-url (str public-url "/login-callback")
-        [request response] (servlet-adapter request)
-        authorize-url (-> (.buildAuthorizeUrl auth-controller request response callback-url)
+        [servlet-request servlet-response] (ring->servlet ring-request)
+        authorize-url (-> (.buildAuthorizeUrl auth-controller servlet-request servlet-response callback-url)
                           (.build))]
-    (prn 'xxx request response authorize-url)
+    #_(prn 'xxx servlet-request servlet-response authorize-url)
     (response/redirect authorize-url)))
 
 ;; TODO: adapter for Ring request -> HttpServletRequest
