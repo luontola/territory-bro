@@ -26,16 +26,33 @@
     (is (auth0/login-handler request))))
 
 (deftest ring->servlet-test
-  (let [ring-request {:request-method :get
-                      :uri "/login"
-                      :query-string nil
-                      :headers {}
-                      :session {}}
-        [^HttpServletRequest request
-         ^HttpServletResponse response
-         *ring-response] (auth0/ring->servlet ring-request)]
-
-    (testing "response header"
+  (testing "response headers"
+    (let [[_ ^HttpServletResponse response *ring-response] (auth0/ring->servlet {})]
       (.addHeader response "foo" "bar")
       (is (= "bar" (.getHeader response "foo")))
-      (is (= {"foo" "bar"} (:headers @*ring-response))))))
+      (is (= {"foo" "bar"} (:headers @*ring-response)))))
+
+  (testing "sessions:"
+    (testing "getSession(create=false) when session doesn't exist"
+      (let [[^HttpServletRequest request _ *ring-response] (auth0/ring->servlet {})]
+        (is (nil? (.getSession request false)))
+        (is (= {}
+               (select-keys @*ring-response [:session])))))
+
+    (testing "getSession(create=false) when session exists"
+      (let [[^HttpServletRequest request _ *ring-response] (auth0/ring->servlet {:session {}})]
+        (is (some? (.getSession request false)))
+        (is (= {:session {}}
+               (select-keys @*ring-response [:session])))))
+
+    (testing "getSession(create=true) when session doesn't exist"
+      (let [[^HttpServletRequest request _ *ring-response] (auth0/ring->servlet {})]
+        (is (some? (.getSession request true)))
+        (is (= {:session {}}
+               (select-keys @*ring-response [:session])))))
+
+    (testing "getSession(create=true) when session exists"
+      (let [[^HttpServletRequest request _ *ring-response] (auth0/ring->servlet {:session {}})]
+        (is (some? (.getSession request true)))
+        (is (= {:session {}}
+               (select-keys @*ring-response [:session])))))))

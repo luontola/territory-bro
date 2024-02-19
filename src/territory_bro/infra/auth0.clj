@@ -10,7 +10,7 @@
             [territory-bro.infra.util :refer [getx]])
   (:import (com.auth0 AuthenticationController)
            (com.auth0.jwk JwkProviderBuilder)
-           (javax.servlet.http HttpServletRequest HttpServletResponse)))
+           (javax.servlet.http HttpServletRequest HttpServletResponse HttpSession)))
 
 (mount/defstate auth-controller
   :start
@@ -24,8 +24,15 @@
         (.build))))
 
 (defn ring->servlet [ring-request]
-  (let [*response (atom (response/response ""))
-        servlet-request (reify HttpServletRequest)
+  (let [*response (atom (-> (response/response "")
+                            (merge (select-keys ring-request [:session]))))
+        servlet-session (reify HttpSession)
+        servlet-request (reify HttpServletRequest
+                          (getSession [_ create]
+                            (when (and create (not (:session @*response)))
+                              (swap! *response assoc :session {}))
+                            (when (:session @*response)
+                              servlet-session)))
         servlet-response (reify HttpServletResponse
                            (getHeader [_ name]
                              (response/get-header @*response name))
