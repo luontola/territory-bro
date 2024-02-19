@@ -43,7 +43,7 @@
     (testing "saves OIDC state in session"
       (let [state (:state query-params)]
         (is (not (str/blank? state)))
-        (is (= (str "com.auth0.state=" state "; HttpOnly; Max-Age=600; SameSite=Lax")
+        (is (= [(str "com.auth0.state=" state "; HttpOnly; Max-Age=600; SameSite=Lax")]
                (response/get-header response "Set-Cookie")))
         (is (= {:territory-bro.infra.auth0/servlet {"com.auth0.state" state
                                                     "com.auth0.nonce" nil}} ; nonce is not needed in authorization code flow, see https://community.auth0.com/t/is-nonce-requried-for-the-authoziation-code-flow/111419

@@ -52,8 +52,10 @@
         [servlet-request servlet-response *ring-response] (ring->servlet ring-request)
         authorize-url (-> (.buildAuthorizeUrl auth-controller servlet-request servlet-response callback-url)
                           (.build))]
-    (meta-merge @*ring-response
-                (response/redirect authorize-url :see-other))))
+    (-> (meta-merge @*ring-response
+                    (response/redirect authorize-url :see-other))
+        ;; XXX: workaround to ring.middleware.cookies/set-cookies assuming that Set-Cookie is a coll instead of string
+        (response/update-header "Set-Cookie" #(list %)))))
 
 ;; TODO: adapter for Ring request -> HttpServletRequest
 ;; TODO: adapter for HttpServletResponse -> Ring response
