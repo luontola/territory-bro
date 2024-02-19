@@ -4,6 +4,7 @@
 
 (ns territory-bro.infra.auth0
   (:require [clojure.string :as str]
+            [meta-merge.core :refer [meta-merge]]
             [mount.core :as mount]
             [ring.util.response :as response]
             [territory-bro.infra.config :as config]
@@ -12,7 +13,7 @@
            (com.auth0.jwk JwkProviderBuilder)
            (javax.servlet.http HttpServletRequest HttpServletResponse HttpSession)))
 
-(mount/defstate auth-controller
+(mount/defstate ^AuthenticationController auth-controller
   :start
   (let [domain (getx config/env :auth0-domain)
         client-id (getx config/env :auth0-client-id)
@@ -26,7 +27,11 @@
 (defn ring->servlet [ring-request]
   (let [*response (atom (-> (response/response "")
                             (merge (select-keys ring-request [:session]))))
-        servlet-session (reify HttpSession)
+        servlet-session (reify HttpSession
+                          (getAttribute [_ name]
+                            (get-in @*response [:session ::servlet name]))
+                          (setAttribute [_ name value]
+                            (swap! *response assoc-in [:session ::servlet name] value)))
         servlet-request (reify HttpServletRequest
                           (getSession [_ create]
                             (when (and create (not (:session @*response)))
@@ -44,11 +49,11 @@
   (let [public-url (-> (getx config/env :public-url)
                        (str/replace "8080" "8081")) ; TODO: remove me
         callback-url (str public-url "/login-callback")
-        [servlet-request servlet-response] (ring->servlet ring-request)
+        [servlet-request servlet-response *ring-response] (ring->servlet ring-request)
         authorize-url (-> (.buildAuthorizeUrl auth-controller servlet-request servlet-response callback-url)
                           (.build))]
-    #_(prn 'xxx servlet-request servlet-response authorize-url)
-    (response/redirect authorize-url)))
+    (meta-merge @*ring-response
+                (response/redirect authorize-url :see-other))))
 
 ;; TODO: adapter for Ring request -> HttpServletRequest
 ;; TODO: adapter for HttpServletResponse -> Ring response
