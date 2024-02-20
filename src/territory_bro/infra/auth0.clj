@@ -40,9 +40,11 @@
                               servlet-session)))
         servlet-response (reify HttpServletResponse
                            (getHeader [_ name]
-                             (response/get-header @*response name))
+                             (first (response/get-header @*response name)))
+                           (getHeaders [_ name]
+                             (sequence (response/get-header @*response name)))
                            (addHeader [_ name value]
-                             (swap! *response response/header name value)))]
+                             (swap! *response response/update-header name concat (list value))))]
     [servlet-request servlet-response *response]))
 
 (defn login-handler [ring-request]
@@ -52,10 +54,8 @@
         [servlet-request servlet-response *ring-response] (ring->servlet ring-request)
         authorize-url (-> (.buildAuthorizeUrl auth-controller servlet-request servlet-response callback-url)
                           (.build))]
-    (-> (meta-merge @*ring-response
-                    (response/redirect authorize-url :see-other))
-        ;; XXX: workaround to ring.middleware.cookies/set-cookies assuming that Set-Cookie is a coll instead of string
-        (response/update-header "Set-Cookie" #(list %)))))
+    (meta-merge @*ring-response
+                (response/redirect authorize-url :see-other))))
 
 ;; TODO: adapter for Ring request -> HttpServletRequest
 ;; TODO: adapter for HttpServletResponse -> Ring response

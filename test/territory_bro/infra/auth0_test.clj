@@ -52,9 +52,20 @@
 (deftest ring->servlet-test
   (testing "response headers"
     (let [[_ ^HttpServletResponse response *ring-response] (auth0/ring->servlet {})]
-      (.addHeader response "foo" "bar")
-      (is (= "bar" (.getHeader response "foo")))
-      (is (= {"foo" "bar"} (:headers @*ring-response)))))
+      (testing "no value"
+        (is (nil? (.getHeader response "foo")))
+        (is (= [] (.getHeaders response "foo")))
+        (is (= {} (:headers @*ring-response))))
+      (testing "add first value"
+        (.addHeader response "foo" "bar")
+        (is (= "bar" (.getHeader response "foo")))
+        (is (= ["bar"] (.getHeaders response "foo")))
+        (is (= {"foo" ["bar"]} (:headers @*ring-response))))
+      (testing "add second value"
+        (.addHeader response "foo" "gazonk")
+        (is (= "bar" (.getHeader response "foo")))
+        (is (= ["bar" "gazonk"] (.getHeaders response "foo")))
+        (is (= {"foo" ["bar" "gazonk"]} (:headers @*ring-response))))))
 
   (testing "sessions:"
     (testing "getSession(create=false) when session doesn't exist"
