@@ -50,6 +50,14 @@
                (:session response)))))))
 
 (deftest ring->servlet-test
+  (testing "request parameters"
+    (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:params {:foo "bar"}})]
+      (testing "no value"
+        (is (nil? (.getParameter request "nope"))))
+
+      (testing "some value"
+        (is (= "bar" (.getParameter request "foo"))))))
+
   (testing "response headers"
     (let [[_ ^HttpServletResponse response *ring-response] (auth0/ring->servlet {})]
       (testing "no value"

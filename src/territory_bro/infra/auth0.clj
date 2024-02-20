@@ -35,12 +35,14 @@
                           (setAttribute [_ name value]
                             (swap! *response assoc-in [:session ::servlet name] value)))
         servlet-request (reify HttpServletRequest
-                          ;; TODO: getParameter, getCookies, getRequestURL
+                          ;; TODO: getCookies, getRequestURL
                           (getSession [_ create]
                             (when (and create (not (:session @*response)))
                               (swap! *response assoc :session {}))
                             (when (:session @*response)
-                              servlet-session)))
+                              servlet-session))
+                          (getParameter [_ name]
+                            (get-in ring-request [:params (keyword name)])))
         servlet-response (reify HttpServletResponse
                            ;; TODO: addCookie
                            (getHeader [_ name]
