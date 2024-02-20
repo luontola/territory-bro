@@ -177,6 +177,16 @@
         (.setAttribute session "foo" "gazonk")
         (is (= "gazonk" (.getAttribute session "foo")))
         (is (= {:session {::auth0/servlet {"foo" "gazonk"}}}
+               (select-keys @*ring-response [:session]))))
+
+      (testing "remove attribute"
+        (.setAttribute session "unrelated" "should not be removed")
+        (is (some? (.getAttribute session "foo")))
+
+        (.removeAttribute session "foo")
+
+        (is (nil? (.getAttribute session "foo")))
+        (is (= {:session {::auth0/servlet {"unrelated" "should not be removed"}}}
                (select-keys @*ring-response [:session])))))
 
     (let [[^HttpServletRequest request _ *ring-response] (auth0/ring->servlet {:session {::auth0/servlet {"foo" "bar"}}})

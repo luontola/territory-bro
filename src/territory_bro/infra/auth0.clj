@@ -29,11 +29,12 @@
   (let [*response (atom (-> (response/response "")
                             (merge (select-keys request [:session]))))
         servlet-session (reify HttpSession
-                          ;; TODO: removeAttribute
                           (getAttribute [_ name]
                             (get-in @*response [:session ::servlet name]))
                           (setAttribute [_ name value]
-                            (swap! *response assoc-in [:session ::servlet name] value)))
+                            (swap! *response assoc-in [:session ::servlet name] value))
+                          (removeAttribute [_ name]
+                            (swap! *response update-in [:session ::servlet] dissoc name)))
         servlet-request (reify HttpServletRequest
                           ;; TODO: getRequestURL
                           (getSession [_ create]
