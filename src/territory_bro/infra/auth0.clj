@@ -12,7 +12,7 @@
             [territory-bro.infra.util :refer [getx]])
   (:import (com.auth0 AuthenticationController)
            (com.auth0.jwk JwkProviderBuilder)
-           (javax.servlet.http HttpServletRequest HttpServletResponse HttpSession)))
+           (javax.servlet.http Cookie HttpServletRequest HttpServletResponse HttpSession)))
 
 (mount/defstate ^AuthenticationController auth-controller
   :start
@@ -25,9 +25,9 @@
         (.withJwkProvider jwk-provider)
         (.build))))
 
-(defn ring->servlet [ring-request]
+(defn ring->servlet [request]
   (let [*response (atom (-> (response/response "")
-                            (merge (select-keys ring-request [:session]))))
+                            (merge (select-keys request [:session]))))
         servlet-session (reify HttpSession
                           ;; TODO: removeAttribute
                           (getAttribute [_ name]
@@ -35,14 +35,20 @@
                           (setAttribute [_ name value]
                             (swap! *response assoc-in [:session ::servlet name] value)))
         servlet-request (reify HttpServletRequest
-                          ;; TODO: getCookies, getRequestURL
+                          ;; TODO: getRequestURL
                           (getSession [_ create]
                             (when (and create (not (:session @*response)))
                               (swap! *response assoc :session {}))
                             (when (:session @*response)
                               servlet-session))
                           (getParameter [_ name]
-                            (get-in ring-request [:params (keyword name)])))
+                            (get-in request [:params (keyword name)]))
+                          (getCookies [_]
+                            (when-not (empty? (:cookies request))
+                              (->> (:cookies request)
+                                   (map (fn [[k {v :value}]]
+                                          (Cookie. k v)))
+                                   (into-array Cookie)))))
         servlet-response (reify HttpServletResponse
                            ;; TODO: addCookie
                            (getHeader [_ name]

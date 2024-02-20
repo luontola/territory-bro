@@ -58,6 +58,17 @@
       (testing "some value"
         (is (= "bar" (.getParameter request "foo"))))))
 
+  (testing "request cookies"
+    (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {})]
+      (testing "no cookies"
+        (is (nil? (.getCookies request)))))
+
+    (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:cookies {"foo" {:value "bar"}}})]
+      (testing "some cookies"
+        (is (= [["foo" "bar"]]
+               (->> (.getCookies request)
+                    (map (juxt #(.getName %) #(.getValue %)))))))))
+
   (testing "response headers"
     (let [[_ ^HttpServletResponse response *ring-response] (auth0/ring->servlet {})]
       (testing "no value"
