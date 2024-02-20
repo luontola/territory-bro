@@ -56,11 +56,13 @@
         (is (nil? (.getHeader response "foo")))
         (is (= [] (.getHeaders response "foo")))
         (is (= {} (:headers @*ring-response))))
+
       (testing "add first value"
         (.addHeader response "foo" "bar")
         (is (= "bar" (.getHeader response "foo")))
         (is (= ["bar"] (.getHeaders response "foo")))
         (is (= {"foo" ["bar"]} (:headers @*ring-response))))
+
       (testing "add second value"
         (.addHeader response "foo" "gazonk")
         (is (= "bar" (.getHeader response "foo")))
@@ -95,8 +97,26 @@
   (testing "session attributes"
     (let [[^HttpServletRequest request _ *ring-response] (auth0/ring->servlet {})
           session (.getSession request true)]
-      (is (nil? (.getAttribute session "foo")))
-      (.setAttribute session "foo" "bar")
-      (is (nil? (.getAttribute session "bar")))
-      (is (= {:session {::auth0/servlet {"foo" "bar"}}}
-             (select-keys @*ring-response [:session]))))))
+      (testing "no attribute"
+        (is (nil? (.getAttribute session "foo")))
+        (is (= {:session {}}
+               (select-keys @*ring-response [:session]))))
+
+      (testing "set attribute"
+        (.setAttribute session "foo" "bar")
+        (is (= "bar" (.getAttribute session "foo")))
+        (is (= {:session {::auth0/servlet {"foo" "bar"}}}
+               (select-keys @*ring-response [:session]))))
+
+      (testing "set attribute again"
+        (.setAttribute session "foo" "gazonk")
+        (is (= "gazonk" (.getAttribute session "foo")))
+        (is (= {:session {::auth0/servlet {"foo" "gazonk"}}}
+               (select-keys @*ring-response [:session])))))
+
+    (let [[^HttpServletRequest request _ *ring-response] (auth0/ring->servlet {:session {::auth0/servlet {"foo" "bar"}}})
+          session (.getSession request true)]
+      (testing "read attribute from existing session"
+        (is (= "bar" (.getAttribute session "foo")))
+        (is (= {:session {::auth0/servlet {"foo" "bar"}}}
+               (select-keys @*ring-response [:session])))))))
