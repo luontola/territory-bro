@@ -50,7 +50,19 @@
                                           (Cookie. k v)))
                                    (into-array Cookie)))))
         servlet-response (reify HttpServletResponse
-                           ;; TODO: addCookie
+                           (addCookie [_ cookie]
+                             (swap! *response response/set-cookie (.getName cookie) (.getValue cookie)
+                                    (merge (when-some [path (.getPath cookie)]
+                                             {:path path})
+                                           (when-some [domain (.getDomain cookie)]
+                                             {:domain domain})
+                                           (let [max-age (.getMaxAge cookie)]
+                                             (when (<= 0 max-age)
+                                               {:max-age max-age}))
+                                           (when-let [secure (.getSecure cookie)]
+                                             {:secure secure})
+                                           (when-let [http-only (.isHttpOnly cookie)]
+                                             {:http-only http-only}))))
                            (getHeader [_ name]
                              (first (response/get-header @*response name)))
                            (getHeaders [_ name]

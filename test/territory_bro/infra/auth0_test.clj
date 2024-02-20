@@ -6,13 +6,14 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [mount.core :as mount]
+            [ring.middleware.cookies :as cookies]
             [ring.util.codec :as codec]
             [ring.util.http-predicates :as http-predicates]
             [ring.util.response :as response]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.config :as config])
   (:import (java.net URL)
-           (javax.servlet.http HttpServletRequest HttpServletResponse)))
+           (javax.servlet.http Cookie HttpServletRequest HttpServletResponse)))
 
 (defn config-fixture [f]
   (mount/start #'config/env
@@ -68,6 +69,51 @@
         (is (= [["foo" "bar"]]
                (->> (.getCookies request)
                     (map (juxt #(.getName %) #(.getValue %)))))))))
+
+  (testing "response cookies"
+    (let [[_ ^HttpServletResponse response *ring-response] (auth0/ring->servlet {})]
+      (testing "set cookie"
+        (.addCookie response (Cookie. "foo" "bar"))
+        (is (= {"foo" {:value "bar"}}
+               (:cookies @*ring-response))))
+
+      (testing "delete cookie"
+        (.addCookie response (doto (Cookie. "foo" "")
+                               (.setMaxAge 0)))
+        (is (= {"Set-Cookie" ["foo=; Max-Age=0"]}
+               (:headers (cookies/cookies-response @*ring-response)))))
+
+      (testing "set cookie with all options (supported by both Servlet and Ring APIs)"
+        (.addCookie response (doto (Cookie. "foo" "bar")
+                               (.setPath "/the/path")
+                               (.setDomain "example.com")
+                               (.setMaxAge 3600)
+                               (.setSecure true)
+                               (.setHttpOnly true)))
+        (is (= {"Set-Cookie" ["foo=bar; Path=/the/path; Domain=example.com; Max-Age=3600; Secure; HttpOnly"]}
+               (:headers (cookies/cookies-response @*ring-response)))))
+
+      (testing "max age = -1"
+        ;; Servlet spec: A negative value means that the cookie is not stored persistently and will be deleted when the Web browser exits.
+        ;; HTTP spec: A zero or negative number will expire the cookie immediately.
+        (.addCookie response (doto (Cookie. "foo" "bar")
+                               (.setMaxAge -1)))
+        (is (= {"Set-Cookie" ["foo=bar"]}
+               (:headers (cookies/cookies-response @*ring-response)))))
+
+      (testing "max age = 0"
+        ;; Servlet spec: A zero value causes the cookie to be deleted.
+        ;; HTTP spec: A zero or negative number will expire the cookie immediately.
+        (.addCookie response (doto (Cookie. "foo" "bar")
+                               (.setMaxAge 0)))
+        (is (= {"Set-Cookie" ["foo=bar; Max-Age=0"]}
+               (:headers (cookies/cookies-response @*ring-response)))))
+
+      (testing "max age = 1"
+        (.addCookie response (doto (Cookie. "foo" "bar")
+                               (.setMaxAge 1)))
+        (is (= {"Set-Cookie" ["foo=bar; Max-Age=1"]}
+               (:headers (cookies/cookies-response @*ring-response)))))))
 
   (testing "response headers"
     (let [[_ ^HttpServletResponse response *ring-response] (auth0/ring->servlet {})]
