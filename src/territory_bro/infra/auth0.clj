@@ -12,6 +12,7 @@
             [territory-bro.infra.util :refer [getx]])
   (:import (com.auth0 AuthenticationController)
            (com.auth0.jwk JwkProviderBuilder)
+           (java.net URL)
            (javax.servlet.http Cookie HttpServletRequest HttpServletResponse HttpSession)))
 
 (mount/defstate ^AuthenticationController auth-controller
@@ -25,6 +26,15 @@
         (.withJwkProvider jwk-provider)
         (.build))))
 
+(defn- request-url [request]
+  (let [url (URL. (name (:scheme request))
+                  (:server-name request)
+                  (:server-port request)
+                  (:uri request))]
+    (if (= (.getDefaultPort url) (.getPort url))
+      (request-url (assoc request :server-port -1))
+      url)))
+
 (defn ring->servlet [request]
   (let [*response (atom (-> (response/response "")
                             (merge (select-keys request [:session]))))
@@ -36,7 +46,8 @@
                           (removeAttribute [_ name]
                             (swap! *response update-in [:session ::servlet] dissoc name)))
         servlet-request (reify HttpServletRequest
-                          ;; TODO: getRequestURL
+                          (getRequestURL [_]
+                            (StringBuffer. (str (request-url request))))
                           (getSession [_ create]
                             (when (and create (not (:session @*response)))
                               (swap! *response assoc :session {}))

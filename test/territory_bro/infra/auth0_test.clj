@@ -51,6 +51,23 @@
                (:session response)))))))
 
 (deftest ring->servlet-test
+  (testing "request URL"
+    ;; Servlet spec: The returned URL contains a protocol, server name, port number,
+    ;; and server path, but it does not include query string parameters.
+    (testing "http, custom port"
+      (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:scheme :http
+                                                                    :server-name "localhost"
+                                                                    :server-port 8081
+                                                                    :uri "/the/path"})]
+        (is (= "http://localhost:8081/the/path" (str (.getRequestURL request))))))
+
+    (testing "https, default port"
+      (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:scheme :https
+                                                                    :server-name "example.com"
+                                                                    :server-port 443
+                                                                    :uri "/"})]
+        (is (= "https://example.com/" (str (.getRequestURL request)))))))
+
   (testing "request parameters"
     (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:params {:foo "bar"}})]
       (testing "no value"
