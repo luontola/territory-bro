@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.auth0
-  (:require [clojure.string :as str]
+  (:require [clojure.pprint :as pp]
+            [clojure.string :as str]
             [meta-merge.core :refer [meta-merge]]
             [mount.core :as mount]
             [ring.util.response :as response]
@@ -28,17 +29,20 @@
   (let [*response (atom (-> (response/response "")
                             (merge (select-keys ring-request [:session]))))
         servlet-session (reify HttpSession
+                          ;; TODO: removeAttribute
                           (getAttribute [_ name]
                             (get-in @*response [:session ::servlet name]))
                           (setAttribute [_ name value]
                             (swap! *response assoc-in [:session ::servlet name] value)))
         servlet-request (reify HttpServletRequest
+                          ;; TODO: getParameter, getCookies, getRequestURL
                           (getSession [_ create]
                             (when (and create (not (:session @*response)))
                               (swap! *response assoc :session {}))
                             (when (:session @*response)
                               servlet-session)))
         servlet-response (reify HttpServletResponse
+                           ;; TODO: addCookie
                            (getHeader [_ name]
                              (first (response/get-header @*response name)))
                            (getHeaders [_ name]
@@ -56,6 +60,16 @@
                           (.build))]
     (meta-merge @*ring-response
                 (response/redirect authorize-url :see-other))))
+
+(defn login-callback-handler [ring-request]
+  (prn '----------)
+  (pp/pprint ring-request)
+  ;; TODO
+  (response/response "TODO"))
+
+(defn logout-handler [ring-request]
+  ;; TODO
+  (response/response "TODO"))
 
 ;; TODO: adapter for Ring request -> HttpServletRequest
 ;; TODO: adapter for HttpServletResponse -> Ring response

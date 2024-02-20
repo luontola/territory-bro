@@ -45,9 +45,9 @@
      ["/login"
       {:get {:handler auth0/login-handler}}]
      ["/login-callback"
-      {:get {:handler (constantly (ok "TODO"))}}]
+      {:get {:handler auth0/login-callback-handler}}]
      ["/logout"
-      {:get {:handler (constantly (ok "TODO"))}}]
+      {:get {:handler auth0/logout-handler}}]
 
      ["/congregation/:congregation/territories/:territory"
       {:middleware [[wrap-page-path ::territory-page]
