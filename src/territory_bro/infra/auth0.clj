@@ -16,6 +16,7 @@
             [territory-bro.infra.util :as util]
             [territory-bro.infra.util :refer [getx]])
   (:import (com.auth0 AuthenticationController IdentityVerificationException)
+           (com.auth0.client.auth AuthAPI)
            (com.auth0.jwk JwkProviderBuilder)
            (com.auth0.jwt JWT)
            (java.net URL)
@@ -89,10 +90,12 @@
                              (swap! *response response/update-header name concat (list value))))]
     [servlet-request servlet-response *response]))
 
+(defn public-url []
+  (-> (getx config/env :public-url)
+      (str/replace "8080" "8081"))) ; TODO: remove me
+
 (defn login-handler [ring-request]
-  (let [public-url (-> (getx config/env :public-url)
-                       (str/replace "8080" "8081")) ; TODO: remove me
-        callback-url (str public-url "/login-callback")
+  (let [callback-url (str (public-url) "/login-callback")
         [servlet-request servlet-response *ring-response] (ring->servlet ring-request)
         authorize-url (-> (.buildAuthorizeUrl auth-controller servlet-request servlet-response callback-url)
                           (.withScope "openid email profile")
@@ -122,6 +125,13 @@
       ;; TODO: html error page
       (http-response/forbidden "Login failed"))))
 
-(defn logout-handler [ring-request]
-  ;; TODO
-  (response/response "TODO"))
+(defn logout-handler [_ring-request]
+  (let [domain (getx config/env :auth0-domain)
+        client-id (getx config/env :auth0-client-id)
+        client-secret (getx config/env :auth0-client-secret)
+        api (AuthAPI. domain client-id client-secret)
+        return-to-url (str (public-url) "/")
+        logout-url (-> (.logoutUrl api return-to-url true)
+                       (.build))]
+    (-> (response/redirect logout-url :see-other)
+        (assoc :session nil))))

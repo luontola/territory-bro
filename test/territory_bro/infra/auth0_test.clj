@@ -101,6 +101,27 @@
                   :body "Login failed"}
                  response)))))))
 
+
+(deftest logout-handler-test
+  (let [request {:request-method :get
+                 :uri "/logout"
+                 :headers {}
+                 :session {::auth/user {:user/id (UUID. 0 1)}}}
+        response (auth0/logout-handler request)]
+
+    (testing "clears the application session"
+      (is (= {:session nil}
+             (select-keys response [:session]))))
+
+    (testing "redirects to the OIDC logout endpoint, to log out of Auth0, and then return to application home page"
+      ;; See https://auth0.com/docs/authenticate/login/logout
+      ;;     https://auth0.com/docs/authenticate/login/logout/log-users-out-of-auth0
+      ;;     https://auth0.com/docs/api/authentication#oidc-logout
+      (is (= {:status 303
+              :headers {"Location" "https://luontola.eu.auth0.com/v2/logout?returnTo=http://localhost:8081/&client_id=8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"}}
+             (select-keys response [:status :headers]))))))
+
+
 (deftest ring->servlet-test
   (testing "request URL"
     ;; Servlet spec: The returned URL contains a protocol, server name, port number,
