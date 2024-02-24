@@ -83,12 +83,8 @@ export async function devLogin() {
   await queryClient.invalidateQueries();
 }
 
-export async function logout() {
+export async function appLogout() {
   await api.post('/api/logout');
-  // Full page reload instead of invalidateQueries() to avoid HTTP 401 responses,
-  // if React Query decides to re-fetch the currently shown congregation, which
-  // could trigger a new login right after logging out.
-  window.location.href = '/';
 }
 
 function sortUsers(users: User[]): User[] {
