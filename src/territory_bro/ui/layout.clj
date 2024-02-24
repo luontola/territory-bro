@@ -82,7 +82,7 @@
         [:li (nav-link {:href (str "/congregation/" cong-id "/settings")
                         :icon "⚙️"
                         :title (i18n/t "SettingsPage.title")})])
-      [:li (nav-link {:href "/support"
+      [:li (nav-link {:href (str "/congregation/" cong-id "/support")
                       :icon "🛟"
                       :title (i18n/t "SupportPage.title")})]])))
 
