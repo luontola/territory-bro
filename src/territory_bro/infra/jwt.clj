@@ -1,4 +1,4 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,13 +6,12 @@
   (:require [mount.core :as mount]
             [territory-bro.infra.config :refer [env]]
             [territory-bro.infra.json :as json]
+            [territory-bro.infra.util :as util]
             [territory-bro.infra.util :refer [getx]])
   (:import (com.auth0.jwk JwkProvider JwkProviderBuilder)
            (com.auth0.jwt JWT JWTVerifier$BaseVerification)
            (com.auth0.jwt.algorithms Algorithm)
-           (java.nio.charset StandardCharsets)
-           (java.time Clock Instant ZoneOffset)
-           (java.util Base64)))
+           (java.time Clock Instant ZoneOffset)))
 
 (mount/defstate ^:dynamic ^JwkProvider jwk-provider
   :start (-> (JwkProviderBuilder. ^String (getx env :auth0-domain))
@@ -21,11 +20,6 @@
 (defn- fetch-public-key [^String jwt]
   (let [key-id (.getKeyId (JWT/decode jwt))]
     (.getPublicKey (.get jwk-provider key-id))))
-
-(defn- decode-base64url [^String base64-str]
-  (-> (Base64/getUrlDecoder)
-      (.decode base64-str)
-      (String. StandardCharsets/UTF_8)))
 
 (defn- ^"[Ljava.lang.String;" strings [& ss]
   (into-array String ss))
@@ -41,7 +35,7 @@
                      (.build clock))]
     (-> (.verify verifier jwt)
         (.getPayload)
-        (decode-base64url)
+        (util/decode-base64url)
         (json/read-value))))
 
 (defn expired?

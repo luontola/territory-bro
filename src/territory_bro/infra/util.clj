@@ -1,9 +1,11 @@
-;; Copyright © 2015-2019 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.util
-  (:import (java.sql SQLException)))
+  (:import (java.nio.charset StandardCharsets)
+           (java.sql SQLException)
+           (java.util Base64)))
 
 (defn fix-sqlexception-chain [^Throwable e]
   (when (instance? SQLException e)
@@ -24,3 +26,8 @@
       value)))
 
 (def conj-set (fnil conj #{}))
+
+(defn decode-base64url [^String base64-str]
+  (-> (Base64/getUrlDecoder)
+      (.decode base64-str)
+      (String. StandardCharsets/UTF_8)))

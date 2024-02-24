@@ -93,6 +93,7 @@
                                   [etaoin "1.0.40"]
                                   [lambdaisland/kaocha "1.87.1366"]
                                   [org.clojure/test.check "1.1.1"]
+                                  [org.mockito/mockito-core "5.10.0"]
                                   [prismatic/schema-generators "0.1.5"]
                                   [ring/ring-devel "1.11.0"]
                                   [ring/ring-mock "0.4.0"]]

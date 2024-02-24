@@ -10,10 +10,16 @@
             [ring.util.codec :as codec]
             [ring.util.http-predicates :as http-predicates]
             [ring.util.response :as response]
+            [territory-bro.api :as api]
             [territory-bro.infra.auth0 :as auth0]
-            [territory-bro.infra.config :as config])
-  (:import (java.net URL)
-           (javax.servlet.http Cookie HttpServletRequest HttpServletResponse)))
+            [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
+            [territory-bro.infra.jwt-test :as jwt-test])
+  (:import (com.auth0 AuthenticationController IdentityVerificationException Tokens)
+           (java.net URL)
+           (java.util UUID)
+           (javax.servlet.http Cookie HttpServletRequest HttpServletResponse)
+           (org.mockito Mockito)))
 
 (defn config-fixture [f]
   (mount/start #'config/env
@@ -37,7 +43,7 @@
       (is (= "luontola.eu.auth0.com" (.getHost location)))
       (is (= {:redirect_uri "http://localhost:8081/login-callback"
               :client_id "8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"
-              :scope "openid"
+              :scope "openid email profile"
               :response_type "code"}
              (dissoc query-params :state))))
 
@@ -46,9 +52,54 @@
         (is (not (str/blank? state)))
         (is (= [(str "com.auth0.state=" state "; HttpOnly; Max-Age=600; SameSite=Lax")]
                (response/get-header response "Set-Cookie")))
-        (is (= {:territory-bro.infra.auth0/servlet {"com.auth0.state" state
-                                                    "com.auth0.nonce" nil}} ; nonce is not needed in authorization code flow, see https://community.auth0.com/t/is-nonce-requried-for-the-authoziation-code-flow/111419
+        (is (= {::auth0/servlet {"com.auth0.state" state
+                                 "com.auth0.nonce" nil}} ; nonce is not needed in authorization code flow, see https://community.auth0.com/t/is-nonce-requried-for-the-authoziation-code-flow/111419
                (:session response)))))))
+
+
+(deftest login-callback-handler-test
+  (binding [auth0/auth-controller (Mockito/mock ^Class AuthenticationController)
+            api/save-user-from-jwt! (fn [jwt]
+                                      (is (= {:name "Esko Luontola"}
+                                             (select-keys jwt [:name])))
+                                      (UUID. 0 1))]
+    (let [request {:request-method :get
+                   :scheme :http
+                   :server-name "localhost"
+                   :server-port 8081
+                   :uri "/login-callback"
+                   :params {:code "mjuZmU8Tw3WO9U4n6No3PJ1g3kTJzYoEYX2nfK8_0U8wY"
+                            :state "XJ3KBCcGcXmLnH09gb2AVsQp9bpjiVxLXvo5N4SKEqw"}
+                   :cookies {"com.auth0.state" {:value "XJ3KBCcGcXmLnH09gb2AVsQp9bpjiVxLXvo5N4SKEqw"}}
+                   :session {::auth0/servlet {"com.auth0.state" "XJ3KBCcGcXmLnH09gb2AVsQp9bpjiVxLXvo5N4SKEqw",
+                                              "com.auth0.nonce" nil}}}
+          tokens (Tokens. "the-access-token" jwt-test/token nil nil nil)]
+
+      (testing "successful login"
+        (-> (Mockito/when (.handle auth0/auth-controller (Mockito/any) (Mockito/any)))
+            (.thenReturn tokens))
+        (let [response (auth0/login-callback-handler request)]
+          (is (= {:status 303,
+                  :headers {"Location" "/"},
+                  :body "",
+                  :session {::auth0/servlet {"com.auth0.state" "XJ3KBCcGcXmLnH09gb2AVsQp9bpjiVxLXvo5N4SKEqw",
+                                             "com.auth0.nonce" nil}
+                            ::auth0/tokens tokens
+                            ::auth/user {:user/id (UUID. 0 1)
+                                         :sub "google-oauth2|102883237794451111459"
+                                         :name "Esko Luontola"
+                                         :nickname "esko.luontola"
+                                         :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"}}}
+                 response))))
+
+      (testing "failed login"
+        (-> (Mockito/when (.handle auth0/auth-controller (Mockito/any) (Mockito/any)))
+            (.thenThrow ^Class IdentityVerificationException))
+        (let [response (auth0/login-callback-handler request)]
+          (is (= {:status 403
+                  :headers {}
+                  :body "Login failed"}
+                 response)))))))
 
 (deftest ring->servlet-test
   (testing "request URL"

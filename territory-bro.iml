@@ -125,6 +125,8 @@
     <orderEntry type="library" name="Leiningen: mount:0.1.17" level="project" />
     <orderEntry type="library" name="Leiningen: mvxcvi/arrangement:2.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: mvxcvi/puget:1.1.2" level="project" />
+    <orderEntry type="library" name="Leiningen: net.bytebuddy/byte-buddy-agent:1.14.11" level="project" />
+    <orderEntry type="library" name="Leiningen: net.bytebuddy/byte-buddy:1.14.11" level="project" />
     <orderEntry type="library" name="Leiningen: net.incongru.watchservice/barbary-watchservice:1.0" level="project" />
     <orderEntry type="library" name="Leiningen: net.java.dev.jna/jna:5.12.1" level="project" />
     <orderEntry type="library" name="Leiningen: net.jodah/expiringmap:0.5.8" level="project" />
@@ -181,8 +183,10 @@
     <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-jdk8:1.9.22" level="project" />
     <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib:1.9.22" level="project" />
     <orderEntry type="library" name="Leiningen: org.jetbrains/annotations:13.0" level="project" />
+    <orderEntry type="library" name="Leiningen: org.mockito/mockito-core:5.10.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.msgpack/msgpack:0.6.12" level="project" />
     <orderEntry type="library" name="Leiningen: org.nrepl/incomplete:0.1.0" level="project" />
+    <orderEntry type="library" name="Leiningen: org.objenesis/objenesis:3.3" level="project" />
     <orderEntry type="library" name="Leiningen: org.postgresql/postgresql:42.7.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.ring-clojure/ring-jakarta-servlet:1.11.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.ring-clojure/ring-websocket-protocols:1.11.0" level="project" />

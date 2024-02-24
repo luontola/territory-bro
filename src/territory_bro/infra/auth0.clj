@@ -3,19 +3,25 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.auth0
-  (:require [clojure.pprint :as pp]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [meta-merge.core :refer [meta-merge]]
             [mount.core :as mount]
+            [ring.util.http-response :as http-response]
             [ring.util.response :as response]
+            [territory-bro.api :as api]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.infra.json :as json]
+            [territory-bro.infra.util :as util]
             [territory-bro.infra.util :refer [getx]])
-  (:import (com.auth0 AuthenticationController)
+  (:import (com.auth0 AuthenticationController IdentityVerificationException)
            (com.auth0.jwk JwkProviderBuilder)
+           (com.auth0.jwt JWT)
            (java.net URL)
            (javax.servlet.http Cookie HttpServletRequest HttpServletResponse HttpSession)))
 
-(mount/defstate ^AuthenticationController auth-controller
+(mount/defstate ^:dynamic ^AuthenticationController auth-controller
   :start
   (let [domain (getx config/env :auth0-domain)
         client-id (getx config/env :auth0-client-id)
@@ -89,21 +95,33 @@
         callback-url (str public-url "/login-callback")
         [servlet-request servlet-response *ring-response] (ring->servlet ring-request)
         authorize-url (-> (.buildAuthorizeUrl auth-controller servlet-request servlet-response callback-url)
+                          (.withScope "openid email profile")
                           (.build))]
     (meta-merge @*ring-response
                 (response/redirect authorize-url :see-other))))
 
 (defn login-callback-handler [ring-request]
-  (prn '----------)
-  (pp/pprint ring-request)
-  ;; TODO
-  (response/response "TODO"))
+  (try
+    (let [[servlet-request servlet-response *ring-response] (ring->servlet ring-request)
+          tokens (.handle auth-controller servlet-request servlet-response)
+          id-token (-> (.getIdToken tokens)
+                       (JWT/decode)
+                       (.getPayload)
+                       (util/decode-base64url)
+                       (json/read-value))
+          user-id (api/save-user-from-jwt! id-token)
+          session (-> (:session @*ring-response)
+                      (assoc ::tokens tokens)
+                      (merge (auth/user-session id-token user-id)))]
+      (log/info "Logged in using OIDC. ID token was" id-token)
+      ;; TODO: redirect to original page
+      (-> (response/redirect "/" :see-other)
+          (assoc :session session)))
+    (catch IdentityVerificationException e
+      (log/warn e "Login failed")
+      ;; TODO: html error page
+      (http-response/forbidden "Login failed"))))
 
 (defn logout-handler [ring-request]
   ;; TODO
   (response/response "TODO"))
-
-;; TODO: adapter for Ring request -> HttpServletRequest
-;; TODO: adapter for HttpServletResponse -> Ring response
-;; TODO: adapter for Ring session -> HttpSession -> Ring session
-;; TODO: adapter for com.auth0.AuthenticationController
