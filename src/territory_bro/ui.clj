@@ -17,9 +17,11 @@
 
 (defn wrap-page-path [handler route-name]
   (fn [request]
-    (let [page-path (-> (::reitit/router request)
-                        (reitit/match-by-name route-name (:path-params request))
-                        (reitit/match->path))]
+    (let [page-path (if (some? route-name)
+                      (-> (::reitit/router request)
+                          (reitit/match-by-name route-name (:path-params request))
+                          (reitit/match->path))
+                      (:uri request))]
       (assert (some? page-path))
       (binding [html/*page-path* page-path]
         (handler request)))))
@@ -40,7 +42,8 @@
   (ring/ring-handler
    (ring/router
     [[""
-      {:middleware [wrap-json-api-compat]}
+      {:middleware [[wrap-page-path nil]
+                    wrap-json-api-compat]}
 
       ["/"
        {:get {:handler (fn [_request]
