@@ -146,10 +146,8 @@
    [""
     {:name ::territory-page
      :get {:handler (fn [request]
-                      (let [congregation (:body (api/get-congregation request))]
-                        (html/response (layout/page {:title "Territory Page"
-                                                     :congregation congregation}
-                                         (page! request)))))}}]
+                      (html/response (layout/page! request {:title "Territory Page"}
+                                       (page! request))))}}]
 
    ["/do-not-calls/edit"
     {:get {:handler (fn [request]

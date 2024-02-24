@@ -5,10 +5,18 @@
 (ns territory-bro.ui.layout
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
+            [territory-bro.api :as api]
             [territory-bro.infra.resources :as resources]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]))
+
+(defn model! [request {:keys [title]}]
+  (let [congregation (when (some? (get-in request [:params :congregation]))
+                       (:body (api/get-congregation request)))]
+    {:title title
+     :congregation congregation}))
+
 
 (defn- minify-html [html]
   (-> html
@@ -135,3 +143,8 @@
 
        [:main {:class (:content styles)}
         content]]])))
+
+(defn page! [request opts content]
+  ;; TODO: read title from the content, so we can remove the opts parameter
+  (page (model! request opts)
+    content))
