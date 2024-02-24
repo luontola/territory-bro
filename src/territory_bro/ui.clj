@@ -22,84 +22,84 @@
 (def ring-handler
   (ring/ring-handler
    (ring/router
-    [[""
-      {:middleware [[html/wrap-page-path nil]
-                    wrap-json-api-compat]}
+    [""
+     {:middleware [[html/wrap-page-path nil]
+                   wrap-json-api-compat]}
 
-      ["/"
-       {:get {:handler (fn [_request]
-                         (let [title "home page placeholder"]
-                           (html/response (layout/page {:title title}
-                                            (h/html [:h1 title])))))}}]
-      ["/join"
-       {:get {:handler (fn [_request]
-                         (let [title "join page placeholder"]
-                           (html/response (layout/page {:title title}
-                                            (h/html [:h1 title])))))}}]
-      ["/register"
-       {:get {:handler (fn [_request]
-                         (let [title "register page placeholder"]
-                           (html/response (layout/page {:title title}
-                                            (h/html [:h1 title])))))}}]
-      ["/support"
-       {:get {:handler (fn [_request]
-                         (let [title "support page placeholder"]
-                           (html/response (layout/page {:title title}
-                                            (h/html [:h1 title])))))}}]
-      ["/share/:share-key"
-       {:get {:handler (fn [request]
-                         (let [title "share page placeholder"]
-                           (html/response (layout/page {:title title}
-                                            (h/html [:h1 title]
-                                                    [:p (-> request :path-params :share-key)])))))}}]
-      ["/share/:share-key/*number"
-       {:get {:handler (fn [request]
-                         (let [title "share page placeholder"]
-                           (html/response (layout/page {:title title}
-                                            (h/html [:h1 title]
-                                                    [:p (-> request :path-params :share-key)]
-                                                    [:p (-> request :path-params :number)])))))}}]
+     ["/"
+      {:get {:handler (fn [_request]
+                        (let [title "home page placeholder"]
+                          (html/response (layout/page {:title title}
+                                           (h/html [:h1 title])))))}}]
+     ["/join"
+      {:get {:handler (fn [_request]
+                        (let [title "join page placeholder"]
+                          (html/response (layout/page {:title title}
+                                           (h/html [:h1 title])))))}}]
+     ["/register"
+      {:get {:handler (fn [_request]
+                        (let [title "register page placeholder"]
+                          (html/response (layout/page {:title title}
+                                           (h/html [:h1 title])))))}}]
+     ["/support"
+      {:get {:handler (fn [_request]
+                        (let [title "support page placeholder"]
+                          (html/response (layout/page {:title title}
+                                           (h/html [:h1 title])))))}}]
+     ["/share/:share-key"
+      {:get {:handler (fn [request]
+                        (let [title "share page placeholder"]
+                          (html/response (layout/page {:title title}
+                                           (h/html [:h1 title]
+                                                   [:p (-> request :path-params :share-key)])))))}}]
+     ["/share/:share-key/*number"
+      {:get {:handler (fn [request]
+                        (let [title "share page placeholder"]
+                          (html/response (layout/page {:title title}
+                                           (h/html [:h1 title]
+                                                   [:p (-> request :path-params :share-key)]
+                                                   [:p (-> request :path-params :number)])))))}}]
 
-      auth0/routes
+     auth0/routes
 
-      ["/congregation/:congregation"
-       {:get {:handler (fn [request]
-                         (let [title "congregation page placeholder"
-                               congregation (:body (api/get-congregation request))]
-                           (html/response (layout/page {:title title
-                                                        :congregation congregation}
-                                            (h/html [:h1 title])))))}}]
+     ["/congregation/:congregation"
+      {:get {:handler (fn [request]
+                        (let [title "congregation page placeholder"
+                              congregation (:body (api/get-congregation request))]
+                          (html/response (layout/page {:title title
+                                                       :congregation congregation}
+                                           (h/html [:h1 title])))))}}]
 
-      ["/congregation/:congregation/territories"
-       {:get {:handler (fn [request]
-                         (let [title "territories list page placeholder"
-                               congregation (:body (api/get-congregation request))]
-                           (html/response (layout/page {:title title
-                                                        :congregation congregation}
-                                            (h/html [:h1 title])))))}}]
+     ["/congregation/:congregation/territories"
+      {:get {:handler (fn [request]
+                        (let [title "territories list page placeholder"
+                              congregation (:body (api/get-congregation request))]
+                          (html/response (layout/page {:title title
+                                                       :congregation congregation}
+                                           (h/html [:h1 title])))))}}]
 
-      territory-page/routes
+     territory-page/routes
 
-      ["/congregation/:congregation/printouts"
-       {:get {:handler (fn [request]
-                         (let [title "printouts page placeholder"
-                               congregation (:body (api/get-congregation request))]
-                           (html/response (layout/page {:title title
-                                                        :congregation congregation}
-                                            (h/html [:h1 title])))))}}]
+     ["/congregation/:congregation/printouts"
+      {:get {:handler (fn [request]
+                        (let [title "printouts page placeholder"
+                              congregation (:body (api/get-congregation request))]
+                          (html/response (layout/page {:title title
+                                                       :congregation congregation}
+                                           (h/html [:h1 title])))))}}]
 
-      ["/congregation/:congregation/settings"
-       {:get {:handler (fn [request]
-                         (let [title "settings page placeholder"
-                               congregation (:body (api/get-congregation request))]
-                           (html/response (layout/page {:title title
-                                                        :congregation congregation}
-                                            (h/html [:h1 title])))))}}]
+     ["/congregation/:congregation/settings"
+      {:get {:handler (fn [request]
+                        (let [title "settings page placeholder"
+                              congregation (:body (api/get-congregation request))]
+                          (html/response (layout/page {:title title
+                                                       :congregation congregation}
+                                           (h/html [:h1 title])))))}}]
 
-      ["/congregation/:congregation/support"
-       {:get {:handler (fn [request]
-                         (let [title "support page placeholder"
-                               congregation (:body (api/get-congregation request))]
-                           (html/response (layout/page {:title title
-                                                        :congregation congregation}
-                                            (h/html [:h1 title])))))}}]]])))
+     ["/congregation/:congregation/support"
+      {:get {:handler (fn [request]
+                        (let [title "support page placeholder"
+                              congregation (:body (api/get-congregation request))]
+                          (html/response (layout/page {:title title
+                                                       :congregation congregation}
+                                           (h/html [:h1 title])))))}}]])))
