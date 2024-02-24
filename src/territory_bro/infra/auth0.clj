@@ -135,3 +135,11 @@
                        (.build))]
     (-> (response/redirect logout-url :see-other)
         (assoc :session nil))))
+
+(def routes
+  [["/login"
+    {:get {:handler login-handler}}]
+   ["/login-callback"
+    {:get {:handler login-callback-handler}}]
+   ["/logout"
+    {:get {:handler logout-handler}}]])

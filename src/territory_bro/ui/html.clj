@@ -3,7 +3,10 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.html
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [reitit.core :as reitit]
+            [ring.util.http-response :as http-response]
+            [ring.util.response :as response]))
 
 (def ^:dynamic *page-path*)
 
@@ -33,3 +36,19 @@
       ;; strip all HTML tags
       (str/replace #"<[^>]*>" " ")
       (normalize-whitespace)))
+
+(defn response [html]
+  (when (some? html)
+    (-> (http-response/ok (str html))
+        (response/content-type "text/html"))))
+
+(defn wrap-page-path [handler route-name]
+  (fn [request]
+    (let [page-path (if (some? route-name)
+                      (-> (::reitit/router request)
+                          (reitit/match-by-name route-name (:path-params request))
+                          (reitit/match->path))
+                      (:uri request))]
+      (assert (some? page-path))
+      (binding [*page-path* page-path]
+        (handler request)))))

@@ -5,10 +5,13 @@
 (ns territory-bro.ui.territory-page
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
+            [ring.util.response :as response]
             [territory-bro.api :as api]
+            [territory-bro.infra.middleware :as middleware]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.i18n :as i18n]))
+            [territory-bro.ui.i18n :as i18n]
+            [territory-bro.ui.layout :as layout]))
 
 (defn model! [request]
   (let [territory (:body (api/get-territory request))]
@@ -136,3 +139,33 @@
 
 (defn page! [request]
   (page (model! request)))
+
+(def routes
+  ["/congregation/:congregation/territories/:territory"
+   {:middleware [[html/wrap-page-path ::territory-page]]}
+   [""
+    {:name ::territory-page
+     :get {:handler (fn [request]
+                      (let [congregation (:body (api/get-congregation request))]
+                        (html/response (layout/page {:title "Territory Page"
+                                                     :congregation congregation}
+                                         (page! request)))))}}]
+
+   ["/do-not-calls/edit"
+    {:get {:handler (fn [request]
+                      (html/response (do-not-calls--edit! request)))}}]
+
+   ["/do-not-calls/save"
+    {:post {:handler (fn [request]
+                       (html/response (do-not-calls--save! request)))}}]
+
+   ["/share-link/open"
+    {:get {:middleware [middleware/wrap-always-refresh-projections]
+           :handler (fn [request]
+                      (-> (html/response (share-link--open! request))
+                          ;; avoid creating lots of new shares if the user clicks the share button repeatedly
+                          (response/header "Cache-Control" "max-age=300, must-revalidate")))}}]
+
+   ["/share-link/close"
+    {:get {:handler (fn [_request]
+                      (html/response (share-link--closed)))}}]])
