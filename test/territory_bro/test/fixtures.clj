@@ -47,3 +47,14 @@
     (mount/start #'router/app)
     (f))
   (mount/stop))
+
+(defmacro with-fixtures [fixtures & body]
+  `(let [fixture# (clojure.test/join-fixtures ~fixtures)]
+     (fixture# (fn []
+                 (try
+                   ~@body
+                   (catch Throwable e#
+                     (clojure.test/do-report {:type :error
+                                              :message "Uncaught exception, not in assertion."
+                                              :expected nil
+                                              :actual e#})))))))

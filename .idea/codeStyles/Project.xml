@@ -28,6 +28,7 @@
           <entry key="territory-bro.infra.authentication/with-user-from-session" value="1" />
           <entry key="territory-bro.infra.db/as-tenant" value="1" />
           <entry key="territory-bro.infra.db/auto-explain" value="2" />
+          <entry key="territory-bro.test.fixtures/with-fixtures" value="1" />
           <entry key="territory-bro.test.testutil/grab-exception" value="0" />
           <entry key="territory-bro.ui.layout/page" value="1" />
           <entry key="territory-bro.ui.layout/page!" value="2" />
