@@ -5,8 +5,38 @@
 (ns territory-bro.ui.layout-test
   (:require [clojure.test :refer :all]
             [hiccup2.core :as h]
+            [territory-bro.api-test :as at]
+            [territory-bro.infra.authentication :as auth]
+            [territory-bro.test.fixtures :refer [api-fixture db-fixture]]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.layout :as layout]))
+
+(use-fixtures :once (join-fixtures [db-fixture api-fixture]))
+
+(deftest model!-test
+  (let [session (at/login! at/app)
+        user-id (at/get-user-id session)
+        cong-id (at/create-congregation! session "foo")]
+
+    (testing "top level, anonymous"
+      (let [request {}]
+        (is (= {:title "the title"
+                :congregation nil}
+               (layout/model! request {:title "the title"})))))
+
+    (testing "top level, logged in"
+      (let [request {:session {::auth/user {:user/id user-id}}}]
+        (is (= {:title "the title"
+                :congregation nil}
+               (layout/model! request {:title "the title"})))))
+
+    (testing "congregation level"
+      (let [request {:params {:congregation (str cong-id)}
+                     :session {::auth/user {:user/id user-id}}}]
+        (is (= {:title "the title"
+                :congregation {:id cong-id
+                               :name "foo"}}
+               (layout/model! request {:title "the title"})))))))
 
 (deftest active-link?-test
   (testing "on home page"

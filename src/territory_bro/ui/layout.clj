@@ -13,7 +13,8 @@
 
 (defn model! [request {:keys [title]}]
   (let [congregation (when (some? (get-in request [:params :congregation]))
-                       (:body (api/get-congregation request)))]
+                       (-> (:body (api/get-congregation request))
+                           (select-keys [:id :name])))]
     {:title title
      :congregation congregation}))
 
