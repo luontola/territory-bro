@@ -7,21 +7,36 @@
             [hiccup2.core :as h]
             [territory-bro.api-test :as at]
             [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.layout :as layout])
   (:import (java.util UUID)))
 
 (def anonymous-model
   {:title "the title"
-   :congregation nil})
+   :congregation nil
+   :user nil
+   :dev? false})
+(def developer-model
+  {:title "the title"
+   :congregation nil
+   :user nil
+   :dev? true})
 (def logged-in-model
   {:title "the title"
-   :congregation nil})
+   :congregation nil
+   :user {:user/id (UUID. 0 2)
+          :name "John Doe"}
+   :dev? false})
 (def congregation-model
   {:title "the title"
    :congregation {:id (UUID. 0 1)
-                  :name "the congregation"}})
+                  :name "the congregation"}
+   :user {:user/id (UUID. 0 2)
+          :name "John Doe"}
+   :dev? false})
 
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
@@ -34,15 +49,24 @@
           (is (= anonymous-model
                  (layout/model! request {:title "the title"})))))
 
+      (testing "top level, developer"
+        (binding [config/env (replace-in config/env [:dev] false true)]
+          (let [request {}]
+            (is (= developer-model
+                   (layout/model! request {:title "the title"}))))))
+
       (testing "top level, logged in"
-        (let [request {:session {::auth/user {:user/id user-id}}}]
-          (is (= logged-in-model
+        (let [request {:session (auth/user-session {:name "John Doe"} user-id)}]
+          (is (= (-> logged-in-model
+                     (replace-in [:user :user/id] (UUID. 0 2) user-id))
                  (layout/model! request {:title "the title"})))))
 
       (testing "congregation level"
         (let [request {:params {:congregation (str cong-id)}
-                       :session {::auth/user {:user/id user-id}}}]
-          (is (= (assoc-in congregation-model [:congregation :id] cong-id)
+                       :session (auth/user-session {:name "John Doe"} user-id)}]
+          (is (= (-> congregation-model
+                     (replace-in [:congregation :id] (UUID. 0 1) cong-id)
+                     (replace-in [:user :user/id] (UUID. 0 2) user-id))
                  (layout/model! request {:title "the title"}))))))))
 
 (deftest page-test
@@ -55,14 +79,14 @@
              News {fa-external-link-alt}
              🛟 Support
 
+             Login
+
              Sorry, something went wrong 🥺
              Close")
            (html/visible-text
-            (layout/page {:title nil
-                          :congregation nil}
-              "")))))
+            (layout/page nil nil)))))
 
-  (testing "top-level navigation"
+  (testing "top-level navigation, anonymous"
     (is (= (html/normalize-whitespace
             "the title - Territory Bro
 
@@ -71,12 +95,54 @@
              News {fa-external-link-alt}
              🛟 Support
 
+             Login
+
              Sorry, something went wrong 🥺
              Close
 
              the content")
            (html/visible-text
             (layout/page anonymous-model
+              (h/html [:p "the content"]))))))
+
+  (testing "top-level navigation, developer"
+    (is (= (html/normalize-whitespace
+            "the title - Territory Bro
+
+             🏠 Home
+             User guide {fa-external-link-alt}
+             News {fa-external-link-alt}
+             🛟 Support
+
+             Login
+             Dev Login
+
+             Sorry, something went wrong 🥺
+             Close
+
+             the content")
+           (html/visible-text
+            (layout/page developer-model
+              (h/html [:p "the content"]))))))
+
+  (testing "top-level navigation, logged in"
+    (is (= (html/normalize-whitespace
+            "the title - Territory Bro
+
+             🏠 Home
+             User guide {fa-external-link-alt}
+             News {fa-external-link-alt}
+             🛟 Support
+
+             {fa-user-large} John Doe
+             Logout
+
+             Sorry, something went wrong 🥺
+             Close
+
+             the content")
+           (html/visible-text
+            (layout/page logged-in-model
               (h/html [:p "the content"]))))))
 
   ;; TODO: logged in vs anonymous
@@ -91,6 +157,9 @@
              🖨️ Printouts
              ⚙️ Settings
              🛟 Support
+
+             {fa-user-large} John Doe
+             Logout
 
              Sorry, something went wrong 🥺
              Close

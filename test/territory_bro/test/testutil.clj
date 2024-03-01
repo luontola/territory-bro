@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -14,6 +14,14 @@
 
 (defn re-contains [^String s]
   (re-pattern (Pattern/quote s)))
+
+(defn replace-in [m ks old-value new-value]
+  (update-in m ks (fn [value]
+                    (assert (= old-value value)
+                            (str "expected " ks
+                                 " to be " (pr-str old-value)
+                                 " but it was " (pr-str value)))
+                    new-value)))
 
 (defmacro grab-exception [& body]
   `(try

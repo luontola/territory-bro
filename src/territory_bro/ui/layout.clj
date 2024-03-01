@@ -6,17 +6,24 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [territory-bro.api :as api]
+            [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.resources :as resources]
+            [territory-bro.infra.util :refer [getx]]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]))
 
 (defn model! [request {:keys [title]}]
-  (let [congregation (when (some? (get-in request [:params :congregation]))
-                       (-> (:body (api/get-congregation request))
-                           (select-keys [:id :name])))]
-    {:title title
-     :congregation congregation}))
+  (auth/with-user-from-session request
+    (let [congregation (when (some? (get-in request [:params :congregation]))
+                         (-> (:body (api/get-congregation request))
+                             (select-keys [:id :name])))]
+      {:title title
+       :congregation congregation
+       :user (when (auth/logged-in?)
+               auth/*user*)
+       :dev? (getx config/env :dev)})))
 
 
 (defn- minify-html [html]
@@ -95,7 +102,20 @@
                       :icon "🛟"
                       :title (i18n/t "SupportPage.title")})]])))
 
-(defn page [{:keys [title congregation]} content]
+(defn authentication-panel [{:keys [user dev?]}]
+  (if (some? user)
+    (h/html [:i.fa-solid.fa-user-large {:style {:font-size "1.25em"
+                                                :vertical-align "middle"}}]
+            " " (:name user) " "
+            [:a#logout-button.pure-button {:href "/logout"}
+             (i18n/t "Navigation.logout")])
+    (h/html [:a#login-button.pure-button {:href "/login"}
+             (i18n/t "Navigation.login")]
+            (when dev?
+              (h/html " " [:a#dev-login-button.pure-button {:href "/dev-login"}
+                           "Dev Login"])))))
+
+(defn page [{:keys [title congregation] :as model} content]
   (let [styles (:Layout (css/modules))]
     (h/html
      (hiccup.page/doctype :html5)
@@ -128,12 +148,12 @@
       [:body
        [:nav.no-print {:class (:navbar styles)}
         (if (some? congregation)
-          (congregation-navigation {:congregation congregation})
+          (congregation-navigation model)
           (home-navigation))
         [:div {:class (:lang styles)}
          [:LanguageSelection]] ; TODO
         [:div {:class (:auth styles)}
-         [:AuthenticationPanel]]] ; TODO
+         (authentication-panel model)]]
 
        [:dialog#htmx-error-dialog
         [:h2 (i18n/t "Errors.unknownError")]

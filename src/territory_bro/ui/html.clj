@@ -33,7 +33,7 @@
                      (let [class (->> (str/split class #" ")
                                       (remove font-awesome-icon-styles)
                                       (str/join " "))]
-                       (str "{" class "}"))))
+                       (str " {" class "} "))))
       ;; strip all HTML tags
       (str/replace #"<[^>]*>" " ")
       (normalize-whitespace)))
