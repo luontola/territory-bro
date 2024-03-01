@@ -96,16 +96,19 @@
   (-> (getx config/env :public-url)
       (str/replace "8080" "8081"))) ; TODO: remove me
 
+(defn return-to-url [{:keys [uri query-string]}]
+  (if (some? query-string)
+    (str uri "?" query-string)
+    uri))
+
+(defn login-url [request]
+  (str "/login?return-to-url=" (codec/url-encode (return-to-url request))))
+
 (defn wrap-redirect-to-login [handler]
   (fn [request]
     (let [response (handler request)]
       (if (= 401 (:status response))
-        (let [{:keys [uri query-string]} request
-              return-to-url (str uri
-                                 (when (some? query-string)
-                                   (str "?" query-string)))
-              login-url (str "/login?return-to-url=" (codec/url-encode return-to-url))]
-          (response/redirect login-url :see-other))
+        (response/redirect (login-url request) :see-other)
         response))))
 
 (defn login-handler [ring-request]

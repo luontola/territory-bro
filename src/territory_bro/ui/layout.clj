@@ -6,6 +6,7 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [territory-bro.api :as api]
+            [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.resources :as resources]
@@ -23,6 +24,8 @@
        :congregation congregation
        :user (when (auth/logged-in?)
                auth/*user*)
+       :login-url (when-not (auth/logged-in?)
+                    (auth0/login-url request))
        :dev? (getx config/env :dev)})))
 
 
@@ -102,14 +105,14 @@
                       :icon "🛟"
                       :title (i18n/t "SupportPage.title")})]])))
 
-(defn authentication-panel [{:keys [user dev?]}]
+(defn authentication-panel [{:keys [user login-url dev?]}]
   (if (some? user)
     (h/html [:i.fa-solid.fa-user-large {:style {:font-size "1.25em"
                                                 :vertical-align "middle"}}]
             " " (:name user) " "
             [:a#logout-button.pure-button {:href "/logout"}
              (i18n/t "Navigation.logout")])
-    (h/html [:a#login-button.pure-button {:href "/login"}
+    (h/html [:a#login-button.pure-button {:href login-url}
              (i18n/t "Navigation.login")]
             (when dev?
               (h/html " " [:a#dev-login-button.pure-button {:href "/dev-login?sub=developer&name=Developer&email=developer@example.com"}

@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.layout-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [hiccup2.core :as h]
             [territory-bro.api-test :as at]
             [territory-bro.infra.authentication :as auth]
@@ -18,17 +19,21 @@
   {:title "the title"
    :congregation nil
    :user nil
+   ;; the page path and query string should both be included in the return-to-url
+   :login-url "/login?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk"
    :dev? false})
 (def developer-model
   {:title "the title"
    :congregation nil
    :user nil
+   :login-url "/login?return-to-url=%2F"
    :dev? true})
 (def logged-in-model
   {:title "the title"
    :congregation nil
    :user {:user/id (UUID. 0 2)
           :name "John Doe"}
+   :login-url nil
    :dev? false})
 (def congregation-model
   {:title "the title"
@@ -36,6 +41,7 @@
                   :name "the congregation"}
    :user {:user/id (UUID. 0 2)
           :name "John Doe"}
+   :login-url nil
    :dev? false})
 
 (deftest ^:slow model!-test
@@ -45,24 +51,30 @@
           cong-id (at/create-congregation! session "the congregation")]
 
       (testing "top level, anonymous"
-        (let [request {}]
+        (let [request {:uri "/some/page"
+                       :query-string "foo=bar&gazonk"}]
           (is (= anonymous-model
                  (layout/model! request {:title "the title"})))))
 
       (testing "top level, developer"
         (binding [config/env (replace-in config/env [:dev] false true)]
-          (let [request {}]
+          (let [request {:uri "/"
+                         :query-string nil}]
             (is (= developer-model
                    (layout/model! request {:title "the title"}))))))
 
       (testing "top level, logged in"
-        (let [request {:session (auth/user-session {:name "John Doe"} user-id)}]
+        (let [request {:uri "/"
+                       :query-string nil
+                       :session (auth/user-session {:name "John Doe"} user-id)}]
           (is (= (-> logged-in-model
                      (replace-in [:user :user/id] (UUID. 0 2) user-id))
                  (layout/model! request {:title "the title"})))))
 
       (testing "congregation level"
-        (let [request {:params {:congregation (str cong-id)}
+        (let [request {:uri "/"
+                       :query-string nil
+                       :params {:congregation (str cong-id)}
                        :session (auth/user-session {:name "John Doe"} user-id)}]
           (is (= (-> congregation-model
                      (replace-in [:congregation :id] (UUID. 0 1) cong-id)
@@ -162,9 +174,11 @@
 
 (deftest authentication-panel-test
   (testing "anonymous"
-    (is (= "Login"
-           (html/visible-text
-            (layout/authentication-panel anonymous-model)))))
+    (let [html (layout/authentication-panel anonymous-model)]
+      (is (= "Login"
+             (html/visible-text html)))
+      (is (str/includes? (str html) "href=\"/login?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk\"")
+          "the login link will redirect back to the current page after login")))
 
   (testing "developer"
     (is (= (html/normalize-whitespace

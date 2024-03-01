@@ -53,29 +53,35 @@
 
 (deftest login-and-logout-test
   (with-per-test-postmortem
-    (testing "login with username and password"
-      (doto *driver*
-        (b/go *base-url*)
-        (b/wait-visible :login-button)
-        (b/click :login-button)
-        (submit-auth0-login-form)
-        (b/wait-visible :logout-button)))
+    (let [original-page-url (str *base-url* "/support?foo=bar&gazonk")] ; also query string should be restored
 
-    (testing "shows user is logged in"
-      (is (b/has-text? *driver* {:css "nav"} "Logout"))
-      (is (b/has-text? *driver* {:css "nav"} auth0-username)))
+      (testing "login with Auth0"
+        (doto *driver*
+          (b/go original-page-url)
+          (b/wait-visible :login-button)
+          (b/click :login-button)
+          (submit-auth0-login-form)
+          (b/wait-visible :logout-button)))
 
-    (testing "logout"
-      (doto *driver*
-        (b/click :logout-button)
-        (b/wait-visible :login-button)))
+      (testing "shows user is logged in"
+        (is (b/has-text? *driver* {:css "nav"} "Logout"))
+        (is (b/has-text? *driver* {:css "nav"} auth0-username)))
 
-    (testing "shows the user is logged out"
-      (is (b/has-text? *driver* {:css "nav"} "Login")))))
+      (testing "after login, redirects to the page where the user came from"
+        (is (= original-page-url (b/get-url *driver*))))
+
+      (testing "logout"
+        (doto *driver*
+          (b/click :logout-button)
+          (b/wait-visible :login-button)))
+
+      (testing "shows the user is logged out"
+        (is (b/has-text? *driver* {:css "nav"} "Login"))))))
 
 (deftest login-via-entering-restricted-page-test
   (with-per-test-postmortem
-    (let [restricted-page-url (str *base-url* "/congregation/" (UUID/randomUUID) "?foo=bar&gazonk")]
+    (let [restricted-page-url (str *base-url* "/congregation/" (UUID/randomUUID) "?foo=bar&gazonk")] ; also query string should be restored
+
       (testing "enter restricted page, redirects to login"
         (doto *driver*
           (b/go restricted-page-url)
