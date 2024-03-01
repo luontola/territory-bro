@@ -7,7 +7,8 @@
             [clojure.test :refer :all]
             [etaoin.api :as b]
             [etaoin.api2 :as b2])
-  (:import (org.apache.commons.io FileUtils)))
+  (:import (java.util UUID)
+           (org.apache.commons.io FileUtils)))
 
 (def ^:dynamic *base-url* (or (System/getenv "BASE_URL") "http://localhost:8080"))
 (def ^:dynamic *driver*)
@@ -18,41 +19,69 @@
 (def browser-config {:size [1920 1080]})
 (def postmortem-dir (io/file "target/etaoin-postmortem"))
 
-(defn screenshot! []
-  (let [var (first *testing-vars*)
-        dir (if var
-              (io/file postmortem-dir (name (symbol var)))
-              postmortem-dir)]
-    (b/postmortem-handler *driver* {:dir dir})))
+(defn per-test-subdir [parent-dir]
+  (let [var (first *testing-vars*)]
+    (if var
+      (io/file parent-dir (name (symbol var)))
+      parent-dir)))
+
+(defmacro with-per-test-postmortem [& body]
+  `(let [opts# {:dir (per-test-subdir postmortem-dir)}]
+     (b/with-postmortem *driver* opts#
+       ~@body
+       ;; take a screenshot at the end, even when the test succeeds
+       (b/postmortem-handler *driver* opts#))))
 
 (defn with-browser [f]
-  (FileUtils/deleteDirectory postmortem-dir)
   (b2/with-chrome-headless [driver browser-config]
     (binding [*driver* driver]
       (f))))
 
+(use-fixtures :once (fn [f]
+                      (FileUtils/deleteDirectory postmortem-dir)
+                      (f)))
+
 (use-fixtures :each with-browser)
 
 
-(defn click-login [driver username password]
+(defn submit-auth0-login-form [driver]
   (doto driver
-    (b/wait-visible :login-button)
-    (b/click :login-button)
-
     (b/wait-visible :1-email)
-    (b/fill :1-email username)
-    (b/fill :1-password password)
-    (b/click :1-submit)
+    (b/fill :1-email auth0-username)
+    (b/fill :1-password auth0-password)
+    (b/click :1-submit)))
 
-    (b/wait-visible :logout-button)))
+(deftest login-and-logout-test
+  (with-per-test-postmortem
+    (testing "login with username and password"
+      (doto *driver*
+        (b/go *base-url*)
+        (b/wait-visible :login-button)
+        (b/click :login-button)
+        (submit-auth0-login-form)
+        (b/wait-visible :logout-button)))
 
-(deftest login-test
-  (testing "login with username and password"
-    (doto *driver*
-      (b/go *base-url*)
-      (click-login auth0-username auth0-password)))
+    (testing "shows user is logged in"
+      (is (b/has-text? *driver* {:css "nav"} "Logout"))
+      (is (b/has-text? *driver* {:css "nav"} auth0-username)))
 
-  (testing "shows user is logged in"
-    (is (b/has-text? *driver* {:css "nav"} "Logout"))
-    (is (b/has-text? *driver* {:css "nav"} auth0-username))
-    (screenshot!)))
+    (testing "logout"
+      (doto *driver*
+        (b/click :logout-button)
+        (b/wait-visible :login-button)))
+
+    (testing "shows the user is logged out"
+      (is (b/has-text? *driver* {:css "nav"} "Login")))))
+
+(deftest login-via-entering-restricted-page-test
+  (with-per-test-postmortem
+    (let [restricted-page-url (str *base-url* "/congregation/" (UUID/randomUUID))]
+      (testing "enter restricted page, redirects to login"
+        (doto *driver*
+          (b/go restricted-page-url)
+          (submit-auth0-login-form)))
+
+      (testing "after login, redirects to the page which the user originally entered"
+        ;; TODO: don't use a random congregation ID, but open an existing congregation for a more common use case
+        (b/wait-has-text *driver* {:css "h1"} "Not authorized")
+        (is (= restricted-page-url (b/get-url *driver*)))))))

@@ -24,6 +24,7 @@
           <entry key="re-frame.core/reg-event-db" value="1000" />
           <entry key="re-frame.core/reg-sub" value="1000" />
           <entry key="secretary.core/defroute" value="-1" />
+          <entry key="territory-bro.browser-test/with-per-test-postmortem" value="0" />
           <entry key="territory-bro.gis.gis-db-test/with-tenant-schema" value="1" />
           <entry key="territory-bro.infra.authentication/with-user-from-session" value="1" />
           <entry key="territory-bro.infra.db/as-tenant" value="1" />
