@@ -86,46 +86,7 @@
            (html/visible-text
             (layout/page nil nil)))))
 
-  (testing "top-level navigation, anonymous"
-    (is (= (html/normalize-whitespace
-            "the title - Territory Bro
-
-             🏠 Home
-             User guide {fa-external-link-alt}
-             News {fa-external-link-alt}
-             🛟 Support
-
-             Login
-
-             Sorry, something went wrong 🥺
-             Close
-
-             the content")
-           (html/visible-text
-            (layout/page anonymous-model
-              (h/html [:p "the content"]))))))
-
-  (testing "top-level navigation, developer"
-    (is (= (html/normalize-whitespace
-            "the title - Territory Bro
-
-             🏠 Home
-             User guide {fa-external-link-alt}
-             News {fa-external-link-alt}
-             🛟 Support
-
-             Login
-             Dev Login
-
-             Sorry, something went wrong 🥺
-             Close
-
-             the content")
-           (html/visible-text
-            (layout/page developer-model
-              (h/html [:p "the content"]))))))
-
-  (testing "top-level navigation, logged in"
+  (testing "top-level navigation"
     (is (= (html/normalize-whitespace
             "the title - Territory Bro
 
@@ -144,8 +105,6 @@
            (html/visible-text
             (layout/page logged-in-model
               (h/html [:p "the content"]))))))
-
-  ;; TODO: logged in vs anonymous
 
   (testing "congregation-level navigation"
     (is (= (html/normalize-whitespace
@@ -200,3 +159,23 @@
       (is (false? (layout/active-link? "/support" current-page)))
       (is (true? (layout/active-link? "/congregation/123" current-page)))
       (is (true? (layout/active-link? "/congregation/123/territories" current-page))))))
+
+(deftest authentication-panel-test
+  (testing "anonymous"
+    (is (= "Login"
+           (html/visible-text
+            (layout/authentication-panel anonymous-model)))))
+
+  (testing "developer"
+    (is (= (html/normalize-whitespace
+            "Login
+             Dev Login")
+           (html/visible-text
+            (layout/authentication-panel developer-model)))))
+
+  (testing "logged in"
+    (is (= (html/normalize-whitespace
+            "{fa-user-large} John Doe
+             Logout")
+           (html/visible-text
+            (layout/authentication-panel logged-in-model))))))
