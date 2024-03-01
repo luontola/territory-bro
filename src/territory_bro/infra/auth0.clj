@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.auth0
-  (:require [clojure.string :as str]
+  (:require [clojure.set :as set]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [meta-merge.core :refer [meta-merge]]
             [mount.core :as mount]
@@ -116,7 +117,7 @@
           session (-> (:session @*ring-response)
                       (assoc ::tokens tokens)
                       (merge (auth/user-session id-token user-id)))]
-      (log/info "Logged in using OIDC. ID token was" id-token)
+      (log/info "Logged in using OIDC. ID token was" (pr-str id-token))
       ;; TODO: redirect to original page
       (-> (response/redirect "/" :see-other)
           (assoc :session session)))
@@ -125,7 +126,30 @@
       ;; TODO: html error page
       (http-response/forbidden "Login failed"))))
 
-(defn logout-handler [_ring-request]
+(defn- build-fake-id-token [params]
+  (let [id-token (select-keys params auth/user-profile-keys)
+        required-params #{:sub :name :email}
+        missing-params (set/difference required-params (set (keys id-token)))]
+    (when-not (empty? missing-params)
+      (http-response/bad-request! (str "Missing parameters: "
+                                       (->> missing-params
+                                            (sort)
+                                            (map name)
+                                            (str/join ", ")))))
+    id-token))
+
+(defn dev-login-handler [request]
+  (if (getx config/env :dev)
+    (let [id-token (build-fake-id-token (:params request))
+          user-id (api/save-user-from-jwt! id-token)
+          session (-> (:session request)
+                      (merge (auth/user-session id-token user-id)))]
+      (log/info "Logged in using dev login. ID token was" (pr-str id-token))
+      (-> (response/redirect "/" :see-other)
+          (assoc :session session)))
+    (http-response/forbidden "Dev mode disabled")))
+
+(defn logout-handler [_request]
   (let [domain (getx config/env :auth0-domain)
         client-id (getx config/env :auth0-client-id)
         client-secret (getx config/env :auth0-client-secret)
@@ -141,5 +165,7 @@
     {:get {:handler login-handler}}]
    ["/login-callback"
     {:get {:handler login-callback-handler}}]
+   ["/dev-login"
+    {:get {:handler dev-login-handler}}]
    ["/logout"
     {:get {:handler logout-handler}}]])

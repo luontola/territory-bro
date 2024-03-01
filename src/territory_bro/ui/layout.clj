@@ -112,7 +112,7 @@
     (h/html [:a#login-button.pure-button {:href "/login"}
              (i18n/t "Navigation.login")]
             (when dev?
-              (h/html " " [:a#dev-login-button.pure-button {:href "/dev-login"}
+              (h/html " " [:a#dev-login-button.pure-button {:href "/dev-login?sub=developer&name=Developer&email=developer@example.com"}
                            "Dev Login"])))))
 
 (defn page [{:keys [title congregation] :as model} content]

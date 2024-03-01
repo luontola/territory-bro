@@ -7,6 +7,7 @@
             [clojure.test :refer :all]
             [mount.core :as mount]
             [ring.middleware.cookies :as cookies]
+            [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.util.codec :as codec]
             [ring.util.http-predicates :as http-predicates]
             [ring.util.response :as response]
@@ -14,7 +15,8 @@
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
-            [territory-bro.infra.jwt-test :as jwt-test])
+            [territory-bro.infra.jwt-test :as jwt-test]
+            [territory-bro.test.testutil :refer [replace-in]])
   (:import (com.auth0 AuthenticationController IdentityVerificationException Tokens)
            (java.net URL)
            (java.util UUID)
@@ -100,6 +102,50 @@
                   :headers {}
                   :body "Login failed"}
                  response)))))))
+
+
+(deftest dev-login-handler-test
+  (binding [api/save-user-from-jwt! (fn [jwt]
+                                      (is (= {:sub "developer"
+                                              :name "Developer"
+                                              :email "dev@example.com"}
+                                             jwt))
+                                      (UUID. 0 1))]
+    (let [request {:params {:sub "developer"
+                            :name "Developer"
+                            :email "dev@example.com"}
+                   :session {::existing-session-state true}}
+          handler (-> auth0/dev-login-handler
+                      wrap-http-response)]
+
+      (testing "cannot login in prod mode"
+        (let [response (handler request)]
+          (is (= {:status 403,
+                  :headers {}
+                  :body "Dev mode disabled"}
+                 response))))
+
+      (testing "can login in dev mode"
+        (binding [config/env (replace-in config/env [:dev] false true)]
+          (let [response (handler request)]
+            (is (= {:status 303
+                    :headers {"Location" "/"}
+                    :body ""
+                    :session {::existing-session-state true
+                              ::auth/user {:user/id (UUID. 0 1)
+                                           :sub "developer"
+                                           :name "Developer"
+                                           :email "dev@example.com"}}}
+                   response)))))
+
+      (testing "reports mandatory parameters"
+        (binding [config/env (replace-in config/env [:dev] false true)]
+          (let [request (assoc request :params {})
+                response (handler request)]
+            (is (= {:status 400
+                    :headers {}
+                    :body "Missing parameters: email, name, sub"}
+                   response))))))))
 
 
 (deftest logout-handler-test
