@@ -19,10 +19,14 @@
     (is (= "the text" (html/visible-text "<input type=\"text\" value=\"the text\" required>"))))
 
   (testing "Font Awesome icons are replaced with the icon name"
-    (is (= "{fa-share-nodes}" (html/visible-text "<i class=\"fa-solid fa-share-nodes\"></i>")))
-    (is (= "{fa-share-nodes}" (html/visible-text "<i class=\"fa-regular fa-share-nodes\"></i>")))
+    (is (= "{fa-share-nodes}" (html/visible-text "<i class=\"fa-solid fa-share-nodes\"></i>"))
+        "icon style solid")
+    (is (= "{fa-share-nodes}" (html/visible-text "<i class=\"fa-regular fa-share-nodes\"></i>"))
+        "icon style regular")
     (is (= "{fa-bell}" (html/visible-text "<i class=\"fa-bell\"></i>"))
         "icon style missing")
+    (is (= "{fa-share-nodes}" (html/visible-text "<i attr1=\"\" class=\"fa-solid fa-share-nodes\" attr2=\"\"></i>"))
+        "more attributes")
     (is (= "" (html/visible-text "<i class=\"whatever\"></i>"))
         "not an icon"))
 

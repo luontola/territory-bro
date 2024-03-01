@@ -26,13 +26,14 @@
 (defn visible-text [html]
   (-> (str html)
       ;; visualize input field's text
-      (str/replace #"<input.+?value=\"(.*?)\".*?>" "$1")
+      (str/replace #"<input\b[^>]*\bvalue=\"(.*?)\".*?>" "$1")
       ;; visualize Font Awesome icons
-      (str/replace #"<i class=\"(fa-.*?)\"></i>" (fn [[_ class]]
-                                                   (let [class (->> (str/split class #" ")
-                                                                    (remove font-awesome-icon-styles)
-                                                                    (str/join " "))]
-                                                     (str "{" class "}"))))
+      (str/replace #"<i\b[^>]*\bclass=\"(fa-.*?)\".*?></i>"
+                   (fn [[_ class]]
+                     (let [class (->> (str/split class #" ")
+                                      (remove font-awesome-icon-styles)
+                                      (str/join " "))]
+                       (str "{" class "}"))))
       ;; strip all HTML tags
       (str/replace #"<[^>]*>" " ")
       (normalize-whitespace)))
