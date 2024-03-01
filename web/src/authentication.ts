@@ -6,12 +6,13 @@ import auth0, {Auth0DecodedHash} from "auth0-js";
 import {loginWithIdToken, Settings} from "./api";
 
 export function auth0Authenticator(settings: Settings) {
+  const returnToUrl = `${window.location.pathname}${window.location.search}`
   const webAuth = new auth0.WebAuth({
     domain: settings.auth0.domain,
     clientID: settings.auth0.clientId,
     responseType: 'id_token',
     scope: 'openid email profile',
-    redirectUri: `${window.location.origin}/login-callback?return=${window.location.pathname}`
+    redirectUri: `${window.location.origin}/login-callback?return=${encodeURIComponent(returnToUrl)}`
   });
 
   function findAuthResult(): Promise<Auth0DecodedHash> {

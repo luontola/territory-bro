@@ -31,6 +31,27 @@
 
 (use-fixtures :once config-fixture)
 
+(deftest wrap-redirect-to-login-test
+  (let [handler (-> (fn [_]
+                      (ring.util.http-response/unauthorized))
+                    auth0/wrap-redirect-to-login)]
+
+    (testing "sets the return-to-url"
+      (is (= {:status 303
+              :headers {"Location" "/login?return-to-url=%2Fsome%2Fpage"}
+              :body ""}
+             (handler {:request-method :get
+                       :uri "/some/page"
+                       :query-string nil}))))
+
+    (testing "supports query parameters in the return-to-url"
+      (is (= {:status 303
+              :headers {"Location" "/login?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk"}
+              :body ""}
+             (handler {:request-method :get
+                       :uri "/some/page"
+                       :query-string "foo=bar&gazonk"}))))))
+
 (deftest login-handler-test
   (let [request {:request-method :get
                  :uri "/login"
@@ -56,7 +77,20 @@
                (response/get-header response "Set-Cookie")))
         (is (= {::auth0/servlet {"com.auth0.state" state
                                  "com.auth0.nonce" nil}} ; nonce is not needed in authorization code flow, see https://community.auth0.com/t/is-nonce-requried-for-the-authoziation-code-flow/111419
-               (:session response)))))))
+               (:session response)))))
+
+    (testing "forwards return-to-url to the login callback"
+      (let [request {:request-method :get
+                     :uri "/login"
+                     :params {:return-to-url "/some/page?foo=bar&gazonk"}
+                     :headers {}}
+            response (auth0/login-handler request)
+            location (URL. (response/get-header response "Location"))
+            query-params (-> (codec/form-decode (.getQuery location))
+                             (update-keys keyword))
+            callback-url (:redirect_uri query-params)]
+        (is (= "http://localhost:8081/login-callback?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk"
+               callback-url))))))
 
 
 (deftest login-callback-handler-test
@@ -93,6 +127,13 @@
                                          :nickname "esko.luontola"
                                          :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"}}}
                  response))))
+
+      (testing "redirects to return-to-url instead of home page if provided"
+        (let [request (assoc-in request [:params :return-to-url] "/some/page?foo=bar&gazonk")
+              response (auth0/login-callback-handler request)]
+          (is (= {:status 303
+                  :headers {"Location" "/some/page?foo=bar&gazonk"}}
+                 (select-keys response [:status :headers])))))
 
       (testing "failed login"
         (-> (Mockito/when (.handle auth0/auth-controller (Mockito/any) (Mockito/any)))

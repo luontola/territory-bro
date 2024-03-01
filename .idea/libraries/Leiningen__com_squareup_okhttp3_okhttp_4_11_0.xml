@@ -4,6 +4,8 @@
       <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okhttp3/okhttp/4.11.0/okhttp-4.11.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okhttp3/okhttp/4.11.0/okhttp-4.11.0-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

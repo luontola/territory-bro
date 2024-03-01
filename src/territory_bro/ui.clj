@@ -5,6 +5,7 @@
 (ns territory-bro.ui
   (:require [hiccup2.core :as h]
             [reitit.ring :as ring]
+            [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.util.http-response :refer :all]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.ui.html :as html]
@@ -23,6 +24,8 @@
    (ring/router
     [""
      {:middleware [[html/wrap-page-path nil]
+                   auth0/wrap-redirect-to-login
+                   wrap-http-response
                    wrap-json-api-compat]}
 
      ["/"

@@ -8,6 +8,7 @@
             [clojure.tools.logging :as log]
             [meta-merge.core :refer [meta-merge]]
             [mount.core :as mount]
+            [ring.util.codec :as codec]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
             [territory-bro.api :as api]
@@ -95,8 +96,30 @@
   (-> (getx config/env :public-url)
       (str/replace "8080" "8081"))) ; TODO: remove me
 
+(defn wrap-redirect-to-login [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (if (= 401 (:status response))
+        (let [{:keys [uri query-string]} request
+              return-to-url (str uri
+                                 (when (some? query-string)
+                                   (str "?" query-string)))
+              login-url (str "/login?return-to-url=" (codec/url-encode return-to-url))]
+          (response/redirect login-url :see-other))
+        response))))
+
 (defn login-handler [ring-request]
-  (let [callback-url (str (public-url) "/login-callback")
+  (let [{:keys [return-to-url]} (:params ring-request)
+        callback-url (str (public-url)
+                          "/login-callback"
+                          (when (some? return-to-url)
+                            ;; Double URL-encoding is needed, or "/path?foo=bar&gazonk"
+                            ;; would be truncated to "/path?foo=bar" after returning from Auth0.
+                            ;; Likely this is because com.auth0.client.auth.AuthorizeUrlBuilder constructor
+                            ;; uses addEncodedQueryParameter instead of addQueryParameter for redirect_uri.
+                            ;; However, if we try to URL-encode the whole URL instead of just the query string,
+                            ;; AuthorizeUrl wouldn't accept it as a valid URL.
+                            (codec/url-encode (str "?return-to-url=" (codec/url-encode return-to-url)))))
         [servlet-request servlet-response *ring-response] (ring->servlet ring-request)
         authorize-url (-> (.buildAuthorizeUrl auth-controller servlet-request servlet-response callback-url)
                           (.withScope "openid email profile")
@@ -106,7 +129,8 @@
 
 (defn login-callback-handler [ring-request]
   (try
-    (let [[servlet-request servlet-response *ring-response] (ring->servlet ring-request)
+    (let [{:keys [return-to-url]} (:params ring-request)
+          [servlet-request servlet-response *ring-response] (ring->servlet ring-request)
           tokens (.handle auth-controller servlet-request servlet-response)
           id-token (-> (.getIdToken tokens)
                        (JWT/decode)
@@ -118,8 +142,7 @@
                       (assoc ::tokens tokens)
                       (merge (auth/user-session id-token user-id)))]
       (log/info "Logged in using OIDC. ID token was" (pr-str id-token))
-      ;; TODO: redirect to original page
-      (-> (response/redirect "/" :see-other)
+      (-> (response/redirect (or return-to-url "/") :see-other)
           (assoc :session session)))
     (catch IdentityVerificationException e
       (log/warn e "Login failed")
