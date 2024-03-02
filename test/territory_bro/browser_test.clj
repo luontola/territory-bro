@@ -44,6 +44,8 @@
 (use-fixtures :each with-browser)
 
 
+(def h1 {:css "h1"})
+
 (defn submit-auth0-login-form [driver]
   (doto driver
     (b/wait-visible :1-email)
@@ -88,7 +90,7 @@
           (submit-auth0-login-form)))
 
       ;; TODO: don't use a random congregation ID, but open an existing congregation for a more common use case
-      (b/wait-has-text *driver* {:css "h1"} "Access denied")
+      (b/wait-has-text *driver* h1 "Access denied")
 
       (testing "after login, redirects to the page which the user originally entered"
         (is (= restricted-page-url (b/get-url *driver*)))))))
@@ -99,14 +101,19 @@
       (b/go *base-url*)
       ;; login to avoid 401 Unauthorized when testing for 403 Forbidden
       (b/wait-visible :dev-login-button)
-      (b/click :dev-login-button))
+      (b/click :dev-login-button)
+      (b/wait-visible :logout-button))
 
     (testing "404 Not Found"
-      (b/go *driver* (str *base-url* "/foo"))
+      (doto *driver*
+        (b/go (str *base-url* "/foo"))
+        (b/wait-visible h1))
       (is (= "Page not found 😵"
-             (b/get-element-text *driver* {:css "h1"}))))
+             (b/get-element-text *driver* h1))))
 
     (testing "403 Forbidden"
-      (b/go *driver* (str *base-url* "/congregation/" (UUID/randomUUID)))
+      (doto *driver*
+        (b/go (str *base-url* "/congregation/" (UUID/randomUUID)))
+        (b/wait-visible h1))
       (is (= "Access denied 🛑"
-             (b/get-element-text *driver* {:css "h1"}))))))
+             (b/get-element-text *driver* h1))))))
