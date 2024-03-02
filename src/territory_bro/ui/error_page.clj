@@ -17,7 +17,7 @@
                 (catch Throwable t
                   (log/error t "Error in building the layout model")
                   nil))]
-    (str (layout/page model view))))
+    (layout/page model view)))
 
 (defn view [{:keys [status]}]
   (h/html
