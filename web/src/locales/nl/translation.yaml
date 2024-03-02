@@ -98,7 +98,7 @@ Errors:
   linkNotFound:
     title: Link niet gevonden 😵
     description: De link die je hebt geopend, is mogelijk onjuist of verlopen.
-  notAuthorized: Niet gemachtigd 🛑
+  accessDenied: Toegang geweigerd 🛑
   unknownError: Sorry, er is iets misgegaan 🥺
   returnToFrontPage: Ga terug naar de startpagina en probeer het opnieuw
   reloadAndTryAgain: Controleer je internetverbinding. Herlaad de pagina en probeer opnieuw.

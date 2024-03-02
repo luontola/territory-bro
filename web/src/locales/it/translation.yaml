@@ -98,7 +98,7 @@ Errors:
   linkNotFound:
     title: Link non trovato 😵
     description: Il link che hai aperto potrebbe essere errato o scaduto.
-  notAuthorized: Non autorizzato 🛑
+  accessDenied: Accesso negato 🛑
   unknownError: Spiacenti, qualcosa è andato storto 🥺
   returnToFrontPage: Torna alla pagina principale e riprova
   reloadAndTryAgain: Controlla la tua connessione internet. Ricarica la pagina e riprova.

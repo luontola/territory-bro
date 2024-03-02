@@ -98,7 +98,7 @@ Errors:
   linkNotFound:
     title: Linkkiä ei löytynyt 😵
     description: Avaamasi linkki saattaa olla virheellinen tai se on vanhentunut.
-  notAuthorized: Pääsy kielletty 🛑
+  accessDenied: Pääsy kielletty 🛑
   unknownError: Pahoittelut, jotain meni pieleen 🥺
   returnToFrontPage: Palaa etusivulle ja yritä uudelleen
   reloadAndTryAgain: Tarkista internet-yhteytesi. Lataa sivu uudelleen ja yritä uudelleen.

@@ -99,7 +99,7 @@ Errors:
   linkNotFound:
     title: Link not found 😵
     description: The link you opened may be incorrect or it has expired.
-  notAuthorized: Not authorized 🛑
+  accessDenied: Access denied 🛑
   unknownError: Sorry, something went wrong 🥺
   returnToFrontPage: Return to the front page and try again
   reloadAndTryAgain: Check your internet connection. Reload the page and try again.

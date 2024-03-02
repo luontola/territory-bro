@@ -89,7 +89,7 @@
 
       ;; TODO: don't use a random congregation ID, but open an existing congregation for a more common use case
       (try
-        (b/wait-has-text *driver* {:css "h1"} "Not authorized")
+        (b/wait-has-text *driver* {:css "h1"} "Access denied")
         ;; XXX: the SSR page doesn't yet have the same content as the SPA page, so this will timeout,
         ;;      but we can safely ignore it, because then we have waited long enough for the correct page to load
         (catch Exception _))

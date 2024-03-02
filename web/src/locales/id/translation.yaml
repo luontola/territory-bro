@@ -98,7 +98,7 @@ Errors:
   linkNotFound:
     title: Tautan tidak ditemukan 😵
     description: Tautan yang Anda buka mungkin salah atau telah kadaluarsa.
-  notAuthorized: Tidak diizinkan 🛑
+  accessDenied: Akses ditolak 🛑
   unknownError: Maaf, terjadi kesalahan 🥺
   returnToFrontPage: Kembali ke halaman depan dan coba lagi
   reloadAndTryAgain: Periksa koneksi internet Anda. Muat ulang halaman dan coba lagi.
