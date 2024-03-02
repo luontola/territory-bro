@@ -98,6 +98,7 @@
     (doto *driver*
       (b/go *base-url*)
       ;; login to avoid 401 Unauthorized when testing for 403 Forbidden
+      (b/wait-visible :dev-login-button)
       (b/click :dev-login-button))
 
     (testing "404 Not Found"
