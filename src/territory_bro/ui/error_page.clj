@@ -11,15 +11,15 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]))
 
-(defn safe-layout [request content]
+(defn safe-page [request view]
   (let [model (try
                 (layout/model! request {})
                 (catch Throwable t
                   (log/error t "Error in building the layout model")
                   nil))]
-    (str (layout/page model content))))
+    (str (layout/page model view))))
 
-(defn page [{:keys [status]}]
+(defn view [{:keys [status]}]
   (h/html
    [:h1 (condp = status
           403 (i18n/t "Errors.accessDenied")
@@ -29,7 +29,7 @@
         (i18n/t "Errors.returnToFrontPage")]]))
 
 (defn page! [request response]
-  (safe-layout request (page response)))
+  (safe-page request (view response)))
 
 (def handled-status-codes #{500 403 404})
 

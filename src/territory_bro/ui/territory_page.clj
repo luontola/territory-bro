@@ -99,7 +99,7 @@
   (share-link {:open? false}))
 
 
-(defn page [{:keys [territory] :as model}]
+(defn view [{:keys [territory] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
      [:DemoDisclaimer]
@@ -137,8 +137,8 @@
        [:div.no-print
         [:MapInteractionHelp]]]])))
 
-(defn page! [request]
-  (page (model! request)))
+(defn view! [request]
+  (view (model! request)))
 
 (def routes
   ["/congregation/:congregation/territories/:territory"
@@ -147,7 +147,7 @@
     {:name ::territory-page
      :get {:handler (fn [request]
                       (html/response (layout/page! request {:title "Territory Page"}
-                                       (page! request))))}}]
+                                       (view! request))))}}]
 
    ["/do-not-calls/edit"
     {:get {:handler (fn [request]

@@ -36,7 +36,7 @@
       (is (= (assoc-in base-model [:territory :id] territory-id)
              (territory-page/model! request))))))
 
-(deftest page-test
+(deftest view-test
   (is (= (html/normalize-whitespace
           "Territory 123
 
@@ -51,7 +51,7 @@
              the do-not-calls
 
            {fa-share-nodes} Share a link")
-         (-> (territory-page/page base-model)
+         (-> (territory-page/view base-model)
              html/visible-text))))
 
 
