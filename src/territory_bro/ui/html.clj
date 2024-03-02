@@ -40,7 +40,7 @@
 
 (defn response [html]
   (when (some? html)
-    (-> (http-response/ok html)
+    (-> (http-response/ok (str html))
         (response/content-type "text/html"))))
 
 (defn wrap-page-path [handler route-name]
