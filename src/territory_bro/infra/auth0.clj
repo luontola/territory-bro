@@ -149,7 +149,6 @@
           (assoc :session session)))
     (catch IdentityVerificationException e
       (log/warn e "Login failed")
-      ;; TODO: html error page
       (http-response/forbidden "Login failed"))))
 
 (defn- build-fake-id-token [params]

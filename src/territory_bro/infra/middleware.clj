@@ -14,7 +14,8 @@
             [ring.util.response :as response]
             [territory-bro.infra.config :refer [env]]
             [territory-bro.infra.util :as util]
-            [territory-bro.projections :as projections])
+            [territory-bro.projections :as projections]
+            [territory-bro.ui.error-page :as error-page])
   (:import (java.time Duration)))
 
 (defn wrap-internal-error [handler]
@@ -82,10 +83,11 @@
       wrap-sqlexception-chain
       wrap-http-response
       wrap-default-content-type
+      error-page/wrap-error-pages
       (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
       (wrap-defaults (-> site-defaults
                          (assoc :proxy true)
-                         (assoc-in [:security :anti-forgery] false) ; TODO: enable CSRF
+                         (assoc-in [:security :anti-forgery] false) ; TODO: enable CSRF, create a custom error page for it
                          (assoc-in [:session :store] session-store)
                          (assoc-in [:session :flash] false)))
       wrap-internal-error))

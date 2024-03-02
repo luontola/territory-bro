@@ -8,6 +8,7 @@
             [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.util.http-response :refer :all]
             [territory-bro.infra.auth0 :as auth0]
+            [territory-bro.ui.error-page :as error-page]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.territory-page :as territory-page]))
@@ -94,4 +95,6 @@
       {:get {:handler (fn [request]
                         (let [title "support page placeholder"]
                           (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title])))))}}]])))
+                                           (h/html [:h1 title])))))}}]
+
+     error-page/routes])))

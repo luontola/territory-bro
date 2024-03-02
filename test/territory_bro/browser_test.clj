@@ -88,11 +88,24 @@
           (submit-auth0-login-form)))
 
       ;; TODO: don't use a random congregation ID, but open an existing congregation for a more common use case
-      (try
-        (b/wait-has-text *driver* {:css "h1"} "Access denied")
-        ;; XXX: the SSR page doesn't yet have the same content as the SPA page, so this will timeout,
-        ;;      but we can safely ignore it, because then we have waited long enough for the correct page to load
-        (catch Exception _))
+      (b/wait-has-text *driver* {:css "h1"} "Access denied")
 
       (testing "after login, redirects to the page which the user originally entered"
         (is (= restricted-page-url (b/get-url *driver*)))))))
+
+(deftest error-pages-test
+  (with-per-test-postmortem
+    (doto *driver*
+      (b/go *base-url*)
+      ;; login to avoid 401 Unauthorized when testing for 403 Forbidden
+      (b/click :dev-login-button))
+
+    (testing "404 Not Found"
+      (b/go *driver* (str *base-url* "/foo"))
+      (is (= "Page not found 😵"
+             (b/get-element-text *driver* {:css "h1"}))))
+
+    (testing "403 Forbidden"
+      (b/go *driver* (str *base-url* "/congregation/" (UUID/randomUUID)))
+      (is (= "Access denied 🛑"
+             (b/get-element-text *driver* {:css "h1"}))))))
