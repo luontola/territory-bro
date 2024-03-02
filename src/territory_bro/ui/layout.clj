@@ -14,13 +14,12 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]))
 
-(defn model! [request {:keys [title]}]
+(defn model! [request]
   (auth/with-user-from-session request
     (let [congregation (when (some? (get-in request [:params :congregation]))
                          (-> (:body (api/get-congregation request))
                              (select-keys [:id :name])))]
-      {:title title
-       :congregation congregation
+      {:congregation congregation
        :user (when (auth/logged-in?)
                auth/*user*)
        :login-url (when-not (auth/logged-in?)
@@ -117,15 +116,20 @@
               (h/html " " [:a#dev-login-button.pure-button {:href "/dev-login?sub=developer&name=Developer&email=developer@example.com"}
                            "Dev Login"])))))
 
-(defn page [{:keys [title congregation] :as model} view]
-  (let [styles (:Layout (css/modules))]
+(defn- parse-title [view]
+  (second (re-find #"<h1>(.*?)</h1>" (str view))))
+
+(defn page [view model]
+  (let [styles (:Layout (css/modules))
+        title (parse-title view)]
     (str (h/html
           (hiccup.page/doctype :html5)
           [:html {:lang "en"}
            [:head
             [:meta {:charset "utf-8"}]
             [:title
-             (when (some? title)
+             (when (and (some? title)
+                        (not= "Territory Bro" title))
                (str title " - "))
              "Territory Bro"]
             [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
@@ -149,7 +153,7 @@
             (head-injections)]
            [:body
             [:nav.no-print {:class (:navbar styles)}
-             (if (some? congregation)
+             (if (some? (:congregation model))
                (congregation-navigation model)
                (home-navigation))
              [:div {:class (:lang styles)}
@@ -167,7 +171,5 @@
             [:main {:class (:content styles)}
              view]]]))))
 
-(defn page! [request opts view]
-  ;; TODO: read title from the content, so we can remove the opts parameter
-  (page (model! request opts)
-    view))
+(defn page! [view request]
+  (page view (model! request)))

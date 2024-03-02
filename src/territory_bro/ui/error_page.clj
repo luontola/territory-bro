@@ -13,11 +13,11 @@
 
 (defn safe-page [request view]
   (let [model (try
-                (layout/model! request {})
+                (layout/model! request)
                 (catch Throwable t
                   (log/error t "Error in building the layout model")
                   nil))]
-    (layout/page model view)))
+    (layout/page view model)))
 
 (defn view [{:keys [status]}]
   (h/html

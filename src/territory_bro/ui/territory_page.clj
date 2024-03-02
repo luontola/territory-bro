@@ -102,10 +102,9 @@
 (defn view [{:keys [territory] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
-     [:DemoDisclaimer]
-     [:PageTitle
-      [:h1 (-> (i18n/t "TerritoryPage.title")
-               (str/replace "{{number}}" (:number territory)))]]
+     [:DemoDisclaimer] ; TODO
+     [:h1 (-> (i18n/t "TerritoryPage.title")
+              (str/replace "{{number}}" (:number territory)))]
      [:div.pure-g
       [:div.pure-u-1.pure-u-sm-2-3.pure-u-md-1-2.pure-u-lg-1-3.pure-u-xl-1-4
        [:div {:class (:details styles)}
@@ -130,12 +129,12 @@
 
       [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
        [:div {:class (:map styles)}
-        [:TerritoryMap {:territory "{territory}"
+        [:TerritoryMap {:territory "{territory}" ; TODO
                         :mapRaster "{mapRaster}"
                         :printout "{false}"
                         :key "{i18n.resolvedLanguage}"}]]
        [:div.no-print
-        [:MapInteractionHelp]]]])))
+        [:MapInteractionHelp]]]]))) ; TODO
 
 (defn view! [request]
   (view (model! request)))
@@ -146,24 +145,29 @@
    [""
     {:name ::territory-page
      :get {:handler (fn [request]
-                      (html/response (layout/page! request {:title "Territory Page"}
-                                       (view! request))))}}]
+                      (-> (view! request)
+                          (layout/page! request)
+                          (html/response)))}}]
 
    ["/do-not-calls/edit"
     {:get {:handler (fn [request]
-                      (html/response (do-not-calls--edit! request)))}}]
+                      (-> (do-not-calls--edit! request)
+                          (html/response)))}}]
 
    ["/do-not-calls/save"
     {:post {:handler (fn [request]
-                       (html/response (do-not-calls--save! request)))}}]
+                       (-> (do-not-calls--save! request)
+                           (html/response)))}}]
 
    ["/share-link/open"
     {:get {:middleware [middleware/wrap-always-refresh-projections]
            :handler (fn [request]
-                      (-> (html/response (share-link--open! request))
+                      (-> (share-link--open! request)
+                          (html/response)
                           ;; avoid creating lots of new shares if the user clicks the share button repeatedly
                           (response/header "Cache-Control" "max-age=300, must-revalidate")))}}]
 
    ["/share-link/close"
     {:get {:handler (fn [_request]
-                      (html/response (share-link--closed)))}}]])
+                      (-> (share-link--closed)
+                          (html/response)))}}]])

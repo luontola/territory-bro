@@ -16,28 +16,24 @@
   (:import (java.util UUID)))
 
 (def anonymous-model
-  {:title "the title"
-   :congregation nil
+  {:congregation nil
    :user nil
    ;; the page path and query string should both be included in the return-to-url
    :login-url "/login?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk"
    :dev? false})
 (def developer-model
-  {:title "the title"
-   :congregation nil
+  {:congregation nil
    :user nil
    :login-url "/login?return-to-url=%2F"
    :dev? true})
 (def logged-in-model
-  {:title "the title"
-   :congregation nil
+  {:congregation nil
    :user {:user/id (UUID. 0 2)
           :name "John Doe"}
    :login-url nil
    :dev? false})
 (def congregation-model
-  {:title "the title"
-   :congregation {:id (UUID. 0 1)
+  {:congregation {:id (UUID. 0 1)
                   :name "the congregation"}
    :user {:user/id (UUID. 0 2)
           :name "John Doe"}
@@ -54,14 +50,14 @@
         (let [request {:uri "/some/page"
                        :query-string "foo=bar&gazonk"}]
           (is (= anonymous-model
-                 (layout/model! request {:title "the title"})))))
+                 (layout/model! request)))))
 
       (testing "top level, developer"
         (binding [config/env (replace-in config/env [:dev] false true)]
           (let [request {:uri "/"
                          :query-string nil}]
             (is (= developer-model
-                   (layout/model! request {:title "the title"}))))))
+                   (layout/model! request))))))
 
       (testing "top level, logged in"
         (let [request {:uri "/"
@@ -69,7 +65,7 @@
                        :session (auth/user-session {:name "John Doe"} user-id)}]
           (is (= (-> logged-in-model
                      (replace-in [:user :user/id] (UUID. 0 2) user-id))
-                 (layout/model! request {:title "the title"})))))
+                 (layout/model! request)))))
 
       (testing "congregation level"
         (let [request {:uri "/"
@@ -79,7 +75,7 @@
           (is (= (-> congregation-model
                      (replace-in [:congregation :id] (UUID. 0 1) cong-id)
                      (replace-in [:user :user/id] (UUID. 0 2) user-id))
-                 (layout/model! request {:title "the title"}))))))))
+                 (layout/model! request))))))))
 
 (deftest page-test
   (testing "minimal data"
@@ -95,8 +91,8 @@
 
              Sorry, something went wrong 🥺
              Close")
-           (html/visible-text
-            (layout/page nil nil)))))
+           (-> (layout/page nil nil)
+               (html/visible-text)))))
 
   (testing "top-level navigation"
     (is (= (html/normalize-whitespace
@@ -113,10 +109,12 @@
              Sorry, something went wrong 🥺
              Close
 
+             the title
              the content")
-           (html/visible-text
-            (layout/page logged-in-model
-              (h/html [:p "the content"]))))))
+           (-> (h/html [:h1 "the title"]
+                       [:p "the content"])
+               (layout/page logged-in-model)
+               (html/visible-text)))))
 
   (testing "congregation-level navigation"
     (is (= (html/normalize-whitespace
@@ -135,13 +133,35 @@
              Sorry, something went wrong 🥺
              Close
 
+             the title
              the content")
-           (html/visible-text
-            (layout/page congregation-model
-              (h/html [:p "the content"])))))))
+           (-> (h/html [:h1 "the title"]
+                       [:p "the content"])
+               (layout/page congregation-model)
+               (html/visible-text))))))
 
 
 ;;;; Components and helpers
+
+(deftest page-title-test
+  (testing "page without <h1>"
+    (let [page (-> (h/html [:p "no <h1>"])
+                   (layout/page nil))]
+      (is (str/includes? page "<title>Territory Bro</title>")
+          "show only application name")))
+
+  (testing "page with <h1>"
+    (let [page (-> (h/html [:h1 "Page Title"])
+                   (layout/page nil))]
+      (is (str/includes? page "<title>Page Title - Territory Bro</title>")
+          "show page title before application name")))
+
+  (testing "page with <h1> equal to application name, as on the home page"
+    (let [page (-> (h/html [:h1 "Territory Bro"])
+                   (layout/page nil))]
+      (is (str/includes? page
+                         "<title>Territory Bro</title>")
+          "show only application name"))))
 
 (deftest active-link?-test
   (testing "on home page"

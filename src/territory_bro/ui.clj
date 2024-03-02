@@ -31,70 +31,70 @@
 
      ["/"
       {:get {:handler (fn [request]
-                        (let [title "home page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title])))))}}]
+                        (-> (h/html [:h1 "home page placeholder"])
+                            (layout/page! request)
+                            (html/response)))}}]
      ["/join"
       {:get {:handler (fn [request]
-                        (let [title "join page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title])))))}}]
+                        (-> (h/html [:h1 "join page placeholder"])
+                            (layout/page! request)
+                            (html/response)))}}]
      ["/register"
       {:get {:handler (fn [request]
-                        (let [title "register page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title])))))}}]
+                        (-> (h/html [:h1 "register page placeholder"])
+                            (layout/page! request)
+                            (html/response)))}}]
      ["/support"
       {:get {:handler (fn [request]
-                        (let [title "support page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title])))))}}]
+                        (-> (h/html [:h1 "support page placeholder"])
+                            (layout/page! request)
+                            (html/response)))}}]
      ["/share/:share-key"
       {:get {:handler (fn [request]
-                        (let [title "share page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title]
-                                                   [:p (-> request :path-params :share-key)])))))}}]
+                        (-> (h/html [:h1 "share page placeholder"]
+                                    [:p (-> request :path-params :share-key)])
+                            (layout/page! request)
+                            (html/response)))}}]
      ["/share/:share-key/*number"
       {:get {:handler (fn [request]
-                        (let [title "share page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title]
-                                                   [:p (-> request :path-params :share-key)]
-                                                   [:p (-> request :path-params :number)])))))}}]
+                        (-> (h/html [:h1 "share page placeholder"]
+                                    [:p (-> request :path-params :share-key)]
+                                    [:p (-> request :path-params :number)])
+                            (layout/page! request)
+                            (html/response)))}}]
 
      auth0/routes
 
      ["/congregation/:congregation"
       {:get {:handler (fn [request]
-                        (let [title "congregation page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title])))))}}]
+                        (-> (h/html [:h1 "congregation page placeholder"])
+                            (layout/page! request)
+                            (html/response)))}}]
 
      ["/congregation/:congregation/territories"
       {:get {:handler (fn [request]
-                        (let [title "territories list page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title])))))}}]
+                        (-> (h/html [:h1 "territories list page placeholder"])
+                            (layout/page! request)
+                            (html/response)))}}]
 
      territory-page/routes
 
      ["/congregation/:congregation/printouts"
       {:get {:handler (fn [request]
-                        (let [title "printouts page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title])))))}}]
+                        (-> (h/html [:h1 "printouts page placeholder"])
+                            (layout/page! request)
+                            (html/response)))}}]
 
      ["/congregation/:congregation/settings"
       {:get {:handler (fn [request]
-                        (let [title "settings page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title])))))}}]
+                        (-> (h/html [:h1 "settings page placeholder"])
+                            (layout/page! request)
+                            (html/response)))}}]
 
      ["/congregation/:congregation/support"
       {:get {:handler (fn [request]
-                        (let [title "support page placeholder"]
-                          (html/response (layout/page! request {:title title}
-                                           (h/html [:h1 title])))))}}]
+                        (-> (h/html [:h1 "support page placeholder"])
+                            (layout/page! request)
+                            (html/response)))}}]
 
      error-page/routes])))

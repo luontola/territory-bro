@@ -31,7 +31,8 @@
     (testing "500 Internal Server Error"
       (is (= {:status 500
               :body (html/normalize-whitespace
-                     (str layout-header
+                     (str "Sorry, something went wrong 🥺 - "
+                          layout-header
                           "Sorry, something went wrong 🥺
                            Return to the front page and try again"))
               :headers {"Content-Type" "text/html"}}
@@ -40,7 +41,8 @@
     (testing "404 Not Found"
       (is (= {:status 404
               :body (html/normalize-whitespace
-                     (str layout-header
+                     (str "Page not found 😵 - "
+                          layout-header
                           "Page not found 😵
                            Return to the front page and try again"))
               :headers {"Content-Type" "text/html"}}
@@ -49,7 +51,8 @@
     (testing "403 Forbidden"
       (is (= {:status 403
               :body (html/normalize-whitespace
-                     (str layout-header
+                     (str "Access denied 🛑 - "
+                          layout-header
                           "Access denied 🛑
                            Return to the front page and try again"))
               :headers {"Content-Type" "text/html"}}
