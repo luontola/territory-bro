@@ -10,7 +10,6 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.resources :as resources]
-            [territory-bro.infra.util :refer [getx]]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]))
@@ -26,7 +25,7 @@
                auth/*user*)
        :login-url (when-not (auth/logged-in?)
                     (auth0/login-url request))
-       :dev? (getx config/env :dev)})))
+       :dev? (:dev config/env)})))
 
 
 (defn- minify-html [html]
