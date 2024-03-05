@@ -12,6 +12,7 @@ import {queryClient} from "./api.ts";
 import App from "./App.tsx";
 import './i18n.ts';
 import htmx from 'htmx.org';
+import {TerritoryMapElement} from "./maps/TerritoryMap.ts";
 
 window.htmx = htmx;
 
@@ -103,3 +104,6 @@ document.body.addEventListener('htmx:afterRequest', (event: Event) => {
     }
   }
 });
+
+// web components for htmx UI
+customElements.define('territory-map', TerritoryMapElement);

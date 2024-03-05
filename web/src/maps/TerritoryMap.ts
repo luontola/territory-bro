@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,6 +7,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Style from "ol/style/Style";
 import {
+  findMapRasterById,
   makeControls,
   makeInteractions,
   makePrintoutView,
@@ -23,6 +24,7 @@ import Feature from 'ol/Feature';
 import Geolocation from 'ol/Geolocation';
 import Point from 'ol/geom/Point';
 import {Circle as CircleStyle, Fill, Stroke} from 'ol/style';
+import mapStyles from "./OpenLayersMap.module.css";
 
 type Props = {
   territory: Territory;
@@ -58,6 +60,26 @@ export default class TerritoryMap extends OpenLayersMap<Props> {
 
   componentWillUnmount() {
     this.map.unmount()
+  }
+}
+
+export class TerritoryMapElement extends HTMLElement {
+  constructor() {
+    super();
+    const location = this.getAttribute("location");
+    const mapRaster = findMapRasterById(this.getAttribute("map-raster") || 'osmhd');
+    const printout = !!this.getAttribute("printout");
+
+    let className = mapStyles.root;
+    if (printout) {
+      className += " " + mapStyles.printout;
+    }
+    const root = document.createElement("div");
+    root.setAttribute("class", className)
+    this.appendChild(root)
+
+    const map = initTerritoryMap(root, {location} as Territory, printout)
+    map.setStreetsLayerRaster(mapRaster);
   }
 }
 

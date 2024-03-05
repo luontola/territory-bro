@@ -132,10 +132,9 @@
 
       [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
        [:div {:class (:map styles)}
-        [:TerritoryMap {:territory "{territory}" ; TODO
-                        :mapRaster "{mapRaster}"
-                        :printout "{false}"
-                        :key "{i18n.resolvedLanguage}"}]]
+        [:territory-map {:location (:location territory)
+                         :map-raster "osmhd"
+                         :printout false}]]
        [:div.no-print
         [:MapInteractionHelp]]]]))) ; TODO
 
