@@ -14,20 +14,23 @@
             [territory-bro.ui.layout :as layout]))
 
 (defn model! [request]
-  (let [territory (:body (api/get-territory request))]
-    {:territory territory}))
+  (let [congregation (:body (api/get-congregation request))
+        territory (:body (api/get-territory request))]
+    {:territory territory
+     :permissions (-> (:permissions congregation)
+                      (select-keys [:editDoNotCalls :shareTerritoryLink]))}))
 
 
-(defn do-not-calls--viewing [{:keys [territory]}]
+(defn do-not-calls--viewing [{:keys [territory permissions]}]
   (h/html
    [:div {:hx-target "this"
           :hx-swap "outerHTML"}
-    ;; TODO: check if has edit permission
-    [:button.pure-button {:hx-get (str html/*page-path* "/do-not-calls/edit")
-                          :hx-disabled-elt "this"
-                          :type "button"
-                          :style "float: right; font-size: 70%;"}
-     (i18n/t "TerritoryPage.edit")]
+    (when (:editDoNotCalls permissions)
+      [:button.pure-button {:hx-get (str html/*page-path* "/do-not-calls/edit")
+                            :hx-disabled-elt "this"
+                            :type "button"
+                            :style "float: right; font-size: 70%;"}
+       (i18n/t "TerritoryPage.edit")])
     (or (:doNotCalls territory)
         "-")]))
 
@@ -99,7 +102,7 @@
   (share-link {:open? false}))
 
 
-(defn view [{:keys [territory] :as model}]
+(defn view [{:keys [territory permissions] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
      [:DemoDisclaimer] ; TODO
@@ -123,9 +126,9 @@
            [:th (i18n/t "TerritoryPage.doNotCalls")]
            [:td (do-not-calls--viewing model)]]]]]
 
-       ;; TODO: check if has share permission
-       [:div {:class (:actions styles)}
-        (share-link--closed)]]
+       (when (:shareTerritoryLink permissions)
+         [:div {:class (:actions styles)}
+          (share-link--closed)])]
 
       [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
        [:div {:class (:map styles)}
