@@ -1,10 +1,10 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import Control from "ol/control/Control";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faRotateRight} from '@fortawesome/free-solid-svg-icons';
+import {faMinimize} from '@fortawesome/free-solid-svg-icons';
 import {createRoot} from "react-dom/client";
 import i18n from "../i18n";
 
@@ -24,7 +24,7 @@ class ResetZoom extends Control {
 
     createRoot(element).render(
       <button type="button" title={i18n.t('Map.resetZoom')} onClick={onClick}>
-        <FontAwesomeIcon icon={faRotateRight} rotation={270} style={{verticalAlign: "text-bottom"}}/>
+        <FontAwesomeIcon icon={faMinimize} style={{verticalAlign: "text-bottom"}}/>
       </button>
     );
   }
