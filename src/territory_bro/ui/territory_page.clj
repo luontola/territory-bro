@@ -11,15 +11,16 @@
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
-            [territory-bro.ui.layout :as layout]))
+            [territory-bro.ui.layout :as layout]
+            [territory-bro.ui.map-interaction-help :as map-interaction-help]))
 
 (defn model! [request]
   (let [congregation (:body (api/get-congregation request))
         territory (:body (api/get-territory request))]
-    {:territory territory
-     :permissions (-> (:permissions congregation)
-                      (select-keys [:editDoNotCalls :shareTerritoryLink]))}))
-
+    (-> {:territory territory
+         :permissions (-> (:permissions congregation)
+                          (select-keys [:editDoNotCalls :shareTerritoryLink]))}
+        (merge (map-interaction-help/model request)))))
 
 (defn do-not-calls--viewing [{:keys [territory permissions]}]
   (h/html
@@ -136,7 +137,7 @@
                          :map-raster "osmhd"
                          :printout false}]]
        [:div.no-print
-        [:MapInteractionHelp]]]]))) ; TODO
+        (map-interaction-help/view model)]]])))
 
 (defn view! [request]
   (view (model! request)))

@@ -22,7 +22,8 @@
                :location testdata/wkt-multi-polygon
                :doNotCalls "the do-not-calls"}
    :permissions {:editDoNotCalls true
-                 :shareTerritoryLink true}})
+                 :shareTerritoryLink true}
+   :mac? false})
 
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
@@ -54,7 +55,12 @@
              Edit
              the do-not-calls
 
-           {fa-share-nodes} Share a link")
+           {fa-share-nodes} Share a link
+
+           {fa-info-circle} How to interact with the maps?
+           Move: drag with two fingers / drag with the left mouse button
+           Zoom: pinch or spread with two fingers / hold Ctrl and scroll with the mouse wheel
+           Rotate: rotate with two fingers / hold Alt + Shift and drag with the left mouse button")
          (-> (territory-page/view model)
              html/visible-text)))
 
@@ -71,7 +77,12 @@
                  the addresses
                Do not contact
                  Edit
-                 the do-not-calls")
+                 the do-not-calls
+
+               {fa-info-circle} How to interact with the maps?
+               Move: drag with two fingers / drag with the left mouse button
+               Zoom: pinch or spread with two fingers / hold Ctrl and scroll with the mouse wheel
+               Rotate: rotate with two fingers / hold Alt + Shift and drag with the left mouse button")
              (-> (territory-page/view model)
                  html/visible-text))))))
 
