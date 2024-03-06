@@ -61,30 +61,33 @@
                    (territory-page/model! request)))))))))
 
 (deftest view-test
-  (is (= (html/normalize-whitespace
-          "Territory 123
+  (testing "full permissions"
+    (is (= (html/normalize-whitespace
+            "Territory 123
 
-           Number
-             123
-           Region
-             the region
-           Addresses
-             the addresses
-           Do not contact
-             Edit
-             the do-not-calls
+             Number
+               123
+             Region
+               the region
+             Addresses
+               the addresses
+             Do not contact
+               Edit
+               the do-not-calls
 
-           {fa-share-nodes} Share a link
+             {fa-share-nodes} Share a link
 
-           {fa-info-circle} How to interact with the maps?
-           Move: drag with two fingers / drag with the left mouse button
-           Zoom: pinch or spread with two fingers / hold Ctrl and scroll with the mouse wheel
-           Rotate: rotate with two fingers / hold Alt + Shift and drag with the left mouse button")
-         (-> (territory-page/view model)
-             html/visible-text)))
+             {fa-info-circle} How to interact with the maps?
+             Move: drag with two fingers / drag with the left mouse button
+             Zoom: pinch or spread with two fingers / hold Ctrl and scroll with the mouse wheel
+             Rotate: rotate with two fingers / hold Alt + Shift and drag with the left mouse button")
+           (-> (territory-page/view model)
+               html/visible-text))))
 
-  (testing "without share permission"
-    (let [model (replace-in model [:permissions :shareTerritoryLink] true false)]
+  (testing "minimum permissions"
+    (let [model (-> model
+                    (replace-in [:permissions :editDoNotCalls] true false)
+                    (replace-in [:permissions :shareTerritoryLink] true false))]
       (is (= (html/normalize-whitespace
               "Territory 123
 
@@ -95,7 +98,6 @@
                Addresses
                  the addresses
                Do not contact
-                 Edit
                  the do-not-calls
 
                {fa-info-circle} How to interact with the maps?
@@ -114,13 +116,7 @@
             "Edit
              the do-not-calls")
            (-> (territory-page/do-not-calls--viewing model)
-               html/visible-text)))
-
-    (testing "without edit permission"
-      (let [model (replace-in model [:permissions :editDoNotCalls] true false)]
-        (is (= "the do-not-calls"
-               (-> (territory-page/do-not-calls--viewing model)
-                   html/visible-text))))))
+               html/visible-text))))
 
   (testing "editing"
     (is (= (html/normalize-whitespace
