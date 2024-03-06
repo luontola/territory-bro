@@ -112,7 +112,7 @@ MapInteractionHelp:
   title: ¿Cómo interactuar con los mapas?
   move: <b>Movimiento:</b> arrastra con dos dedos / arrastra con el botón izquierdo del ratón
   zoom: <b>Zoom:</b> pellizcar o separar con dos dedos / mantener <kbd>{{ctrl}}</kbd> y desplazar la rueda del ratón
-  rotate: <b>Rotar:</b> girar con dos dedos / mantener <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> y arrastrar con el botón izquierdo del ratón
+  rotate: <b>Rotar:</b> girar con dos dedos / mantener <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> y arrastrar con el botón izquierdo del ratón
 Territory:
   number: Número
   region: Región

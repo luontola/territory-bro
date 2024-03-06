@@ -112,7 +112,7 @@ MapInteractionHelp:
   title: Come interagire con le mappe?
   move: <b>Movimento:</b> trascina con due dita / trascina con il pulsante sinistro del mouse
   zoom: <b>Zoom:</b> pizzica o allontana con due dita / tieni premuto <kbd>{{ctrl}}</kbd> e scorri con la rotella del mouse
-  rotate: <b>Ruota:</b> ruota con due dita / tieni premuti <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> e trascina con il pulsante sinistro del mouse
+  rotate: <b>Ruota:</b> ruota con due dita / tieni premuti <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> e trascina con il pulsante sinistro del mouse
 Territory:
   number: Numero
   region: Regione

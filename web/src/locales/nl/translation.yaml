@@ -112,7 +112,7 @@ MapInteractionHelp:
   title: Hoe te interageren met de kaarten?
   move: <b>Verplaatsen:</b> slepen met twee vingers / slepen met de linker muisknop
   zoom: <b>Inzoomen:</b> knijpen of uitspreiden met twee vingers / <kbd>{{ctrl}}</kbd> ingedrukt houden en scrollen met het muiswiel
-  rotate: <b>Roteren:</b> roteren met twee vingers / <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> ingedrukt houden en slepen met de linker muisknop
+  rotate: <b>Roteren:</b> roteren met twee vingers / <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> ingedrukt houden en slepen met de linker muisknop
 Territory:
   number: Nummer
   region: Regio

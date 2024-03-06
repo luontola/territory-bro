@@ -20,6 +20,11 @@ a:active {
     color: #f1d874;
 }
 
+kbd {
+    /* With the default monospace font, the ⇧ icon looks too small to read. */
+    font-family: "system-ui", sans-serif;
+}
+
 /* layout */
 
 .navbar {

@@ -112,7 +112,7 @@ MapInteractionHelp:
   title: Kuinka käyttää karttaa?
   move: <b>Liikuta:</b> raahaa kahta sormea / raahaa hiiren vasemmalla painikkeella
   zoom: <b>Suurenna/pienennä:</b> nipistä tai levitä kahta sormea / pidä <kbd>{{ctrl}}</kbd> pohjassa ja vieritä hiiren pyörällä
-  rotate: <b>Pyöritä:</b> kierrä kahta sormea / pidä <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> pohjassa ja raahaa hiiren vasemmalla painikkeella
+  rotate: <b>Pyöritä:</b> kierrä kahta sormea / pidä <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> pohjassa ja raahaa hiiren vasemmalla painikkeella
 Territory:
   number: Numero
   region: Seutu

@@ -37,7 +37,7 @@
     (is (= (html/normalize-whitespace
             "{fa-info-circle} How to interact with the maps?
              Move: drag with two fingers / drag with the left mouse button
-             Zoom: pinch or spread with two fingers / hold Cmd and scroll with the mouse wheel
-             Rotate: rotate with two fingers / hold Option + Shift and drag with the left mouse button")
+             Zoom: pinch or spread with two fingers / hold ⌘ Command and scroll with the mouse wheel
+             Rotate: rotate with two fingers / hold ⌥ Option + ⇧ Shift and drag with the left mouse button")
            (-> (map-interaction-help/view mac-model)
                html/visible-text)))))

@@ -13,11 +13,15 @@
     {:mac? (str/includes? user-agent "Mac OS")}))
 
 (defn view [{:keys [mac?]}]
-  (info-box/view
-   {:title (i18n/t "MapInteractionHelp.title")}
-   (h/html
-    [:p (h/raw (i18n/t "MapInteractionHelp.move"))]
-    [:p (h/raw (-> (i18n/t "MapInteractionHelp.zoom")
-                   (str/replace "{{ctrl}}" (if mac? "Cmd" "Ctrl"))))]
-    [:p (h/raw (-> (i18n/t "MapInteractionHelp.rotate")
-                   (str/replace "{{alt}}" (if mac? "Option" "Alt"))))])))
+  (let [ctrl (if mac? "⌘ Command" "Ctrl")
+        alt (if mac? "⌥ Option" "Alt")
+        shift (if mac? "⇧ Shift" "Shift")]
+    (info-box/view
+     {:title (i18n/t "MapInteractionHelp.title")}
+     (h/html
+      [:p (h/raw (i18n/t "MapInteractionHelp.move"))]
+      [:p (h/raw (-> (i18n/t "MapInteractionHelp.zoom")
+                     (str/replace "{{ctrl}}" ctrl)))]
+      [:p (h/raw (-> (i18n/t "MapInteractionHelp.rotate")
+                     (str/replace "{{alt}}" alt)
+                     (str/replace "{{shift}}" shift)))]))))

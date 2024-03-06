@@ -113,7 +113,7 @@ MapInteractionHelp:
   title: How to interact with the maps?
   move: <b>Move:</b> drag with two fingers / drag with the left mouse button
   zoom: <b>Zoom:</b> pinch or spread with two fingers / hold <kbd>{{ctrl}}</kbd> and scroll with the mouse wheel
-  rotate: <b>Rotate:</b> rotate with two fingers / hold <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> and drag with the left mouse button
+  rotate: <b>Rotate:</b> rotate with two fingers / hold <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> and drag with the left mouse button
 Territory:
   number: Number
   region: Region

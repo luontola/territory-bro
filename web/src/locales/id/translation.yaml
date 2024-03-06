@@ -112,7 +112,7 @@ MapInteractionHelp:
   title: Cara berinteraksi dengan peta?
   move: <b>Pindah:</b> tarik dengan dua jari / tarik dengan tombol kiri mouse
   zoom: <b>Perbesar:</b> cubit atau lebarkan dengan dua jari / tekan <kbd>{{ctrl}}</kbd> dan gulirkan dengan scroll mouse
-  rotate: <b>Putar:</b> putar dengan dua jari / tahan <kbd>{{alt}}</kbd>+<kbd>Shift</kbd> dan tarik dengan tombol kiri mouse
+  rotate: <b>Putar:</b> putar dengan dua jari / tahan <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> dan tarik dengan tombol kiri mouse
 Territory:
   number: Nomor
   region: Wilayah
