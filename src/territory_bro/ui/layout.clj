@@ -12,19 +12,25 @@
             [territory-bro.infra.resources :as resources]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.i18n :as i18n]))
+            [territory-bro.ui.i18n :as i18n]
+            [territory-bro.ui.info-box :as info-box]))
 
 (defn model! [request]
   (auth/with-user-from-session request
-    (let [congregation (when (some? (get-in request [:params :congregation]))
-                         (-> (:body (api/get-congregation request))
+    (let [cong-id (get-in request [:params :congregation])
+          demo? (= "demo" cong-id)
+          congregation (when (some? cong-id)
+                         (-> (if demo?
+                               (:body (api/get-demo-congregation request))
+                               (:body (api/get-congregation request)))
                              (select-keys [:id :name])))]
       {:congregation congregation
        :user (when (auth/logged-in?)
                auth/*user*)
        :login-url (when-not (auth/logged-in?)
                     (auth0/login-url request))
-       :dev? (:dev config/env)})))
+       :dev? (:dev config/env)
+       :demo? demo?})))
 
 
 (defn- minify-html [html]
@@ -116,6 +122,13 @@
               (h/html " " [:a#dev-login-button.pure-button {:href "/dev-login?sub=developer&name=Developer&email=developer@example.com"}
                            "Dev Login"])))))
 
+(defn demo-disclaimer []
+  (h/html
+   [:div.no-print
+    (info-box/view {:title (i18n/t "DemoDisclaimer.welcome")}
+                   (h/html
+                    [:p (i18n/t "DemoDisclaimer.introduction")]))]))
+
 (defn- parse-title [view]
   (second (re-find #"<h1>(.*?)</h1>" (str view))))
 
@@ -169,6 +182,8 @@
                (i18n/t "Errors.closeDialog")]]]
 
             [:main {:class (:content styles)}
+             (when (:demo? model)
+               (demo-disclaimer))
              view]]]))))
 
 (defn page! [view request]

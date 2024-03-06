@@ -7,6 +7,7 @@
             [territory-bro.api-test :as at]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
@@ -24,6 +25,15 @@
    :permissions {:editDoNotCalls true
                  :shareTerritoryLink true}
    :mac? false})
+(def demo-model ; the important difference is hiding do-not-calls, to avoid accidental PII leaks
+  {:territory {:id (UUID. 0 1)
+               :number "123"
+               :addresses "the addresses"
+               :region "the region"
+               :meta {:foo "bar"}
+               :location testdata/wkt-multi-polygon}
+   :permissions {:shareTerritoryLink true}
+   :mac? false})
 
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
@@ -37,9 +47,18 @@
           request {:params {:congregation (str cong-id)
                             :territory (str territory-id)}
                    :session {::auth/user {:user/id user-id}}}]
-      (is (= (-> model
-                 (replace-in [:territory :id] (UUID. 0 1) territory-id))
-             (territory-page/model! request))))))
+
+      (testing "default"
+        (is (= (-> model
+                   (replace-in [:territory :id] (UUID. 0 1) territory-id))
+               (territory-page/model! request))))
+
+      (testing "demo congregation"
+        (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+          (let [request (replace-in request [:params :congregation] (str cong-id) "demo")]
+            (is (= (-> demo-model
+                       (replace-in [:territory :id] (UUID. 0 1) territory-id))
+                   (territory-page/model! request)))))))))
 
 (deftest view-test
   (is (= (html/normalize-whitespace

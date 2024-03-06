@@ -20,25 +20,36 @@
    :user nil
    ;; the page path and query string should both be included in the return-to-url
    :login-url "/login?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk"
-   :dev? false})
+   :dev? false
+   :demo? false})
 (def developer-model
   {:congregation nil
    :user nil
    :login-url "/login?return-to-url=%2F"
-   :dev? true})
+   :dev? true
+   :demo? false})
 (def logged-in-model
   {:congregation nil
    :user {:user/id (UUID. 0 2)
           :name "John Doe"}
    :login-url nil
-   :dev? false})
+   :dev? false
+   :demo? false})
 (def congregation-model
   {:congregation {:id (UUID. 0 1)
                   :name "the congregation"}
    :user {:user/id (UUID. 0 2)
           :name "John Doe"}
    :login-url nil
-   :dev? false})
+   :dev? false
+   :demo? false})
+(def demo-congregation-model
+  {:congregation {:id "demo"
+                  :name "Demo Congregation"}
+   :user nil
+   :login-url "/login?return-to-url=%2Fcongregation%2Fdemo"
+   :dev? false
+   :demo? true})
 
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
@@ -75,7 +86,15 @@
           (is (= (-> congregation-model
                      (replace-in [:congregation :id] (UUID. 0 1) cong-id)
                      (replace-in [:user :user/id] (UUID. 0 2) user-id))
-                 (layout/model! request))))))))
+                 (layout/model! request)))))
+
+      (testing "demo congregation"
+        (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+          (let [request {:uri "/congregation/demo"
+                         :query-string nil
+                         :params {:congregation "demo"}}]
+            (is (= demo-congregation-model
+                   (layout/model! request)))))))))
 
 (deftest page-test
   (testing "minimal data"
@@ -138,6 +157,32 @@
            (-> (h/html [:h1 "the title"]
                        [:p "the content"])
                (layout/page congregation-model)
+               (html/visible-text)))))
+
+  (testing "demo congregation"
+    (is (= (html/normalize-whitespace
+            "the title - Territory Bro
+
+             🏠 Home
+             Demo Congregation
+             📍 Territories
+             🖨️ Printouts
+             ⚙️ Settings
+             🛟 Support
+
+             Login
+
+             Sorry, something went wrong 🥺
+             Close
+
+             {fa-info-circle} Welcome to the demo
+             This demo is limited to only viewing a congregation. Some features are restricted.
+
+             the title
+             the content")
+           (-> (h/html [:h1 "the title"]
+                       [:p "the content"])
+               (layout/page demo-congregation-model)
                (html/visible-text))))))
 
 

@@ -15,8 +15,13 @@
             [territory-bro.ui.map-interaction-help :as map-interaction-help]))
 
 (defn model! [request]
-  (let [congregation (:body (api/get-congregation request))
-        territory (:body (api/get-territory request))]
+  (let [demo? (= "demo" (get-in request [:params :congregation]))
+        congregation (if demo?
+                       (:body (api/get-demo-congregation request))
+                       (:body (api/get-congregation request)))
+        territory (if demo?
+                    (:body (api/get-demo-territory request))
+                    (:body (api/get-territory request)))]
     (-> {:territory territory
          :permissions (-> (:permissions congregation)
                           (select-keys [:editDoNotCalls :shareTerritoryLink]))}
@@ -106,7 +111,6 @@
 (defn view [{:keys [territory permissions] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
-     [:DemoDisclaimer] ; TODO
      [:h1 (-> (i18n/t "TerritoryPage.title")
               (str/replace "{{number}}" (:number territory)))]
      [:div.pure-g
