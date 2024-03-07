@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -95,7 +95,7 @@ const TerritoryListPage = () => {
                         key={i18n.resolvedLanguage}/>
     </div>
     <SearchForm search={search} setSearch={setSearch}/>
-    <table className="pure-table pure-table-striped">
+    <table id="territory-list" className="pure-table pure-table-striped">
       <thead>
       <tr>
         <th>{t('Territory.number')}</th>
