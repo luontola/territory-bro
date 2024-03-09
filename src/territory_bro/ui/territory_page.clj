@@ -61,11 +61,13 @@
 
 
 (defn share-link [{:keys [open? link]}]
-  (let [styles (:TerritoryPage (css/modules))]
+  (let [styles (:TerritoryPage (css/modules))
+        ;; if the user has changed the language, stop caching "/share-link/open"
+        cache-buster (str "?v=" (name i18n/*lang*))]
     (h/html
      [:form.pure-form {:hx-target "this"
                        :hx-swap "outerHTML"}
-      [:button.pure-button {:hx-get (str html/*page-path* "/share-link/" (if open? "close" "open"))
+      [:button.pure-button {:hx-get (str html/*page-path* "/share-link/" (if open? "close" (str "open" cache-buster)))
                             :type "button"
                             :class (when open?
                                      "pure-button-active")
