@@ -37,8 +37,7 @@
                             :type "button"
                             :style "float: right; font-size: 70%;"}
        (i18n/t "TerritoryPage.edit")])
-    (or (:doNotCalls territory)
-        "-")]))
+    (:doNotCalls territory)]))
 
 (defn do-not-calls--editing [{:keys [territory]}]
   (h/html
