@@ -127,7 +127,7 @@
            [:th (i18n/t "Territory.addresses")]
            [:td (:addresses territory)]]
           [:tr
-           [:th (i18n/t "TerritoryPage.doNotCalls")]
+           [:th (h/raw (i18n/t "TerritoryPage.doNotCalls"))]
            [:td (do-not-calls--viewing model)]]]]]
 
        (when (:shareTerritoryLink permissions)

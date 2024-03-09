@@ -25,7 +25,7 @@ const options = {
     escapeValue: false // React already escapes by default
   },
   react: {
-    transKeepBasicHtmlNodesFor: ['p', 'br', 'strong', 'em', 'i', 'u', 'b', 'kbd']
+    transKeepBasicHtmlNodesFor: ['p', 'br', 'strong', 'em', 'i', 'u', 'b', 'kbd', 'wbr']
   }
 };
 

@@ -6,15 +6,20 @@
 
 .details table {
     width: 100%;
-}
 
-.details table th {
-    text-align: left;
-    vertical-align: top;
-}
+    th, td {
+        text-align: left;
+        vertical-align: top;
+    }
 
-.details table td {
-    white-space: pre-line;
+    th {
+        white-space: nowrap;
+    }
+
+    td {
+        width: 100%;
+        white-space: pre-line;
+    }
 }
 
 /* Actions panel */

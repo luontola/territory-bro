@@ -11,7 +11,7 @@ import MapInteractionHelp from "../maps/MapInteractionHelp";
 import {useParams} from "react-router-dom";
 import {faCopy, faShareNodes, faXmark} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {useTranslation} from "react-i18next";
+import {Trans, useTranslation} from "react-i18next";
 import PageTitle from "../layout/PageTitle.tsx";
 import DemoDisclaimer from "./DemoDisclaimer.tsx";
 import {installCopyToClipboard} from "../clipboard.ts";
@@ -113,7 +113,7 @@ const TerritoryPage = () => {
               <td>{territory.addresses}</td>
             </tr>
             <tr>
-              <th>{t('TerritoryPage.doNotCalls')}</th>
+              <th><Trans i18nKey="TerritoryPage.doNotCalls"/></th>
               <td>
                 {editingDoNotCalls ? (
                   <form className="pure-form"
