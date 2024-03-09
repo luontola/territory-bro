@@ -8,17 +8,17 @@ import styles from "./TerritoryPage.module.css"
 import TerritoryMap from "../maps/TerritoryMap";
 import {mapRasters} from "../maps/mapOptions";
 import MapInteractionHelp from "../maps/MapInteractionHelp";
-import ClipboardJS from "clipboard";
 import {useParams} from "react-router-dom";
 import {faCopy, faShareNodes, faXmark} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useTranslation} from "react-i18next";
 import PageTitle from "../layout/PageTitle.tsx";
 import DemoDisclaimer from "./DemoDisclaimer.tsx";
+import {installCopyToClipboard} from "../clipboard.ts";
 
 const mapRaster = mapRasters[0];
 
-new ClipboardJS('#copy-share-link');
+installCopyToClipboard('#copy-share-link');
 
 const ShareButton = ({congregationId, territoryId, territoryNumber}) => {
   const {t} = useTranslation();

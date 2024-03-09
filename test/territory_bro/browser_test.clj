@@ -162,9 +162,7 @@
         (b/click {:tag :button, :fn/text "Share a link"})
         (b/wait-visible :copy-share-link)
         (b/click :copy-share-link))
-      ;; TODO: can't test copying to clipboard - fails with "javascript error: Failed to execute 'readText' on 'Clipboard': Read permission denied."
-      #_(is (= "" (b/js-execute *driver* "return navigator.clipboard.readText()")))
-      (let [share-link (b/get-element-value *driver* :share-link)]
+      (let [share-link (b/js-execute *driver* "return window.latestCopyToClipboard")]
         (is (str/starts-with? share-link (str *base-url* "/share/"))
             "generates a share link")
 

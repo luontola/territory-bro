@@ -1,14 +1,14 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {useSettings} from "../api";
 import {auth0Authenticator} from "../authentication";
-import ClipboardJS from "clipboard";
 import {Trans, useTranslation} from "react-i18next";
 import PageTitle from "../layout/PageTitle.tsx";
+import {installCopyToClipboard} from "../clipboard.ts";
 
-new ClipboardJS('#copy-your-user-id');
+installCopyToClipboard('#copy-your-user-id');
 
 const JoinPage = () => {
   const {t} = useTranslation();
