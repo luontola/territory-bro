@@ -93,8 +93,7 @@
     [servlet-request servlet-response *response]))
 
 (defn public-url []
-  (-> (getx config/env :public-url)
-      (str/replace "8080" "8081"))) ; TODO: remove me
+  (getx config/env :public-url))
 
 (defn return-to-url [{:keys [uri query-string]}]
   (if (some? query-string)

@@ -8,6 +8,7 @@
             [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.util.http-response :refer :all]
             [territory-bro.infra.auth0 :as auth0]
+            [territory-bro.infra.config :as config]
             [territory-bro.ui.error-page :as error-page]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.layout :as layout]
@@ -21,11 +22,20 @@
     (let [request (update request :params merge (:path-params request))]
       (handler request))))
 
+(defn wrap-base-url-compat [handler]
+  (fn [request]
+    ;; the SPA site runs on port 8080, the SSR site runs on port 8081
+    (binding [config/env (if (= "http://localhost:8080" (:public-url config/env))
+                           (assoc config/env :public-url "http://localhost:8081")
+                           config/env)]
+      (handler request))))
+
 (def ring-handler
   (ring/ring-handler
    (ring/router
     [""
-     {:middleware [[html/wrap-page-path nil]
+     {:middleware [wrap-base-url-compat ; outermost middleware first
+                   [html/wrap-page-path nil]
                    auth0/wrap-redirect-to-login
                    wrap-http-response
                    wrap-json-api-compat]}

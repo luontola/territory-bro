@@ -16,7 +16,8 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.jwt-test :as jwt-test]
-            [territory-bro.test.testutil :refer [replace-in]])
+            [territory-bro.test.testutil :refer [replace-in]]
+            [territory-bro.ui :as ui])
   (:import (com.auth0 AuthenticationController IdentityVerificationException Tokens)
            (java.net URL)
            (java.util UUID)
@@ -56,7 +57,7 @@
   (let [request {:request-method :get
                  :uri "/login"
                  :headers {}}
-        response (auth0/login-handler request)
+        response ((ui/wrap-base-url-compat auth0/login-handler) request)
         location (URL. (response/get-header response "Location"))
         query-params (-> (codec/form-decode (.getQuery location))
                          (update-keys keyword))]
@@ -84,7 +85,7 @@
                      :uri "/login"
                      :params {:return-to-url "/some/page?foo=bar&gazonk"}
                      :headers {}}
-            response (auth0/login-handler request)
+            response ((ui/wrap-base-url-compat auth0/login-handler) request)
             location (URL. (response/get-header response "Location"))
             query-params (-> (codec/form-decode (.getQuery location))
                              (update-keys keyword))
@@ -194,7 +195,7 @@
                  :uri "/logout"
                  :headers {}
                  :session {::auth/user {:user/id (UUID. 0 1)}}}
-        response (auth0/logout-handler request)]
+        response ((ui/wrap-base-url-compat auth0/logout-handler) request)]
 
     (testing "clears the application session"
       (is (= {:session nil}

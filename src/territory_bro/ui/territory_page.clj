@@ -103,8 +103,7 @@
 (defn share-link--open! [request]
   (let [share (:body (api/share-territory-link request))]
     (share-link {:open? true
-                 :link (-> (:url share)
-                           (str/replace "8080" "8081"))}))) ; TODO: remove me
+                 :link (:url share)})))
 
 (defn share-link--closed []
   (share-link {:open? false}))
