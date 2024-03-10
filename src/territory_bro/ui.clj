@@ -11,6 +11,7 @@
             [territory-bro.ui.error-page :as error-page]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.layout :as layout]
+            [territory-bro.ui.open-share-page :as open-share-page]
             [territory-bro.ui.territory-page :as territory-page]))
 
 (defn wrap-json-api-compat [handler]
@@ -49,19 +50,8 @@
                         (-> (h/html [:h1 "support page placeholder"])
                             (layout/page! request)
                             (html/response)))}}]
-     ["/share/:share-key"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "share page placeholder"]
-                                    [:p (-> request :path-params :share-key)])
-                            (layout/page! request)
-                            (html/response)))}}]
-     ["/share/:share-key/*number"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "share page placeholder"]
-                                    [:p (-> request :path-params :share-key)]
-                                    [:p (-> request :path-params :number)])
-                            (layout/page! request)
-                            (html/response)))}}]
+
+     open-share-page/routes
 
      auth0/routes
 
