@@ -10,6 +10,7 @@
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.config :as config]
             [territory-bro.ui.error-page :as error-page]
+            [territory-bro.ui.home-page :as home-page]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.open-share-page :as open-share-page]
@@ -40,11 +41,8 @@
                    wrap-http-response
                    wrap-json-api-compat]}
 
-     ["/"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "home page placeholder"])
-                            (layout/page! request)
-                            (html/response)))}}]
+     home-page/routes
+
      ["/join"
       {:get {:handler (fn [request]
                         (-> (h/html [:h1 "join page placeholder"])
