@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.flywaydb/flyway-core:10.9.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/flywaydb/flyway-core/10.9.1/flyway-core-10.9.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

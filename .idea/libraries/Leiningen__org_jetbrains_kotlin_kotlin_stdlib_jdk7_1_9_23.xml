@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-jdk7:1.9.23">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib-jdk7/1.9.23/kotlin-stdlib-jdk7-1.9.23.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

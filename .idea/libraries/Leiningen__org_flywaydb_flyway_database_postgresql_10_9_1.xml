@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.flywaydb/flyway-database-postgresql:10.9.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/flywaydb/flyway-database-postgresql/10.9.1/flyway-database-postgresql-10.9.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

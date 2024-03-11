@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.clojure/spec.alpha:0.4.233">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/clojure/spec.alpha/0.4.233/spec.alpha-0.4.233.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
