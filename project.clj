@@ -90,6 +90,7 @@
                        :uberjar-name "territory-bro.jar"}
 
              :dev {:dependencies [[com.github.kyleburton/clj-xpath "1.4.13"]
+                                  [criterium "0.4.6"]
                                   [etaoin "1.0.40"]
                                   [lambdaisland/kaocha "1.87.1366"]
                                   [org.clojure/test.check "1.1.1"]
