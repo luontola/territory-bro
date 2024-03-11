@@ -9,6 +9,7 @@
             [ring.util.http-response :refer :all]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.config :as config]
+            [territory-bro.ui.congregation-page :as congregation-page]
             [territory-bro.ui.error-page :as error-page]
             [territory-bro.ui.home-page :as home-page]
             [territory-bro.ui.html :as html]
@@ -64,11 +65,7 @@
 
      auth0/routes
 
-     ["/congregation/:congregation"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "congregation page placeholder"])
-                            (layout/page! request)
-                            (html/response)))}}]
+     congregation-page/routes
 
      territory-list-page/routes
 
