@@ -13,7 +13,8 @@
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
-            [territory-bro.ui.info-box :as info-box]))
+            [territory-bro.ui.info-box :as info-box]
+            [territory-bro.ui.visible :as visible]))
 
 (defn model! [request]
   (auth/with-user-from-session request
@@ -23,7 +24,7 @@
                          (-> (if demo?
                                (:body (api/get-demo-congregation request))
                                (:body (api/get-congregation request)))
-                             (select-keys [:id :name])))]
+                             (select-keys [:id :name :permissions])))]
       {:congregation congregation
        :user (when (auth/logged-in?)
                auth/*user*)
@@ -97,11 +98,11 @@
       [:li (nav-link {:href (str "/congregation/" cong-id "/territories")
                       :icon "📍"
                       :title (i18n/t "TerritoryListPage.title")})]
-      (when true ; TODO: congregation.permissions.viewCongregation
+      (when (visible/printouts-page? (:permissions congregation))
         [:li (nav-link {:href (str "/congregation/" cong-id "/printouts")
                         :icon "🖨️"
                         :title (i18n/t "PrintoutPage.title")})])
-      (when true ; TODO: (congregation.permissions.configureCongregation || congregation.permissions.gisAccess)
+      (when (visible/settings-page? (:permissions congregation))
         [:li (nav-link {:href (str "/congregation/" cong-id "/settings")
                         :icon "⚙️"
                         :title (i18n/t "SettingsPage.title")})])

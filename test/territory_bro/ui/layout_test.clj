@@ -37,7 +37,12 @@
    :demo? false})
 (def congregation-model
   {:congregation {:id (UUID. 0 1)
-                  :name "the congregation"}
+                  :name "the congregation"
+                  :permissions {:configureCongregation true
+                                :editDoNotCalls true
+                                :gisAccess true
+                                :shareTerritoryLink true
+                                :viewCongregation true}}
    :user {:user/id (UUID. 0 2)
           :name "John Doe"}
    :login-url nil
@@ -45,7 +50,9 @@
    :demo? false})
 (def demo-congregation-model
   {:congregation {:id "demo"
-                  :name "Demo Congregation"}
+                  :name "Demo Congregation"
+                  :permissions {:shareTerritoryLink true
+                                :viewCongregation true}}
    :user nil
    :login-url "/login?return-to-url=%2Fcongregation%2Fdemo"
    :dev? false
@@ -157,7 +164,29 @@
            (-> (h/html [:h1 "the title"]
                        [:p "the content"])
                (layout/page congregation-model)
-               (html/visible-text)))))
+               (html/visible-text))))
+
+    (testing "with minimum permissions"
+      (is (= (html/normalize-whitespace
+              "the title - Territory Bro
+
+               🏠 Home
+               the congregation
+               📍 Territories
+               🛟 Support
+
+               {fa-user-large} John Doe
+               Logout
+
+               Sorry, something went wrong 🥺
+               Close
+
+               the title
+               the content")
+             (-> (h/html [:h1 "the title"]
+                         [:p "the content"])
+                 (layout/page (assoc-in congregation-model [:congregation :permissions] {}))
+                 (html/visible-text))))))
 
   (testing "demo congregation"
     (is (= (html/normalize-whitespace
@@ -167,7 +196,6 @@
              Demo Congregation
              📍 Territories
              🖨️ Printouts
-             ⚙️ Settings
              🛟 Support
 
              Login
