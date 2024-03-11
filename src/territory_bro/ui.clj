@@ -14,6 +14,7 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.open-share-page :as open-share-page]
+            [territory-bro.ui.territory-list-page :as territory-list-page]
             [territory-bro.ui.territory-page :as territory-page]))
 
 (defn wrap-json-api-compat [handler]
@@ -69,11 +70,7 @@
                             (layout/page! request)
                             (html/response)))}}]
 
-     ["/congregation/:congregation/territories"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "territories list page placeholder"])
-                            (layout/page! request)
-                            (html/response)))}}]
+     territory-list-page/routes
 
      territory-page/routes
 
