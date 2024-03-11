@@ -80,7 +80,7 @@
       (b/wait-has-text h1 congregation-name))))
 
 (defn go-to-territory-list [driver]
-  (let [link [{:tag :nav} {:tag :a, :fn/text "Territories"}]]
+  (let [link [{:tag :nav} {:tag :a, :fn/has-text "Territories"}]]
     (doto driver
       (b/wait-visible link)
       (b/click link)
@@ -159,7 +159,7 @@
       (go-to-territory *driver* (:number shared-territory))
 
       (doto *driver*
-        (b/click {:tag :button, :fn/text "Share a link"})
+        (b/click {:tag :button, :fn/has-text "Share a link"})
         (b/wait-visible :copy-share-link)
         (b/click :copy-share-link))
       (let [share-link (b/js-execute *driver* "return window.latestCopyToClipboard")]
