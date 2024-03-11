@@ -8,6 +8,7 @@
             [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.util.http-response :refer :all]
             [territory-bro.infra.auth0 :as auth0]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.ui.congregation-page :as congregation-page]
             [territory-bro.ui.error-page :as error-page]
@@ -33,6 +34,11 @@
                            config/env)]
       (handler request))))
 
+(defn wrap-current-user [handler]
+  (fn [request]
+    (auth/with-user-from-session request
+      (handler request))))
+
 (def ring-handler
   (ring/ring-handler
    (ring/router
@@ -40,6 +46,7 @@
      {:middleware [wrap-base-url-compat ; outermost middleware first
                    [html/wrap-page-path nil]
                    auth0/wrap-redirect-to-login
+                   wrap-current-user
                    wrap-http-response
                    wrap-json-api-compat]}
 

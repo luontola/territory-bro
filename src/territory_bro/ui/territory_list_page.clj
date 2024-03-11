@@ -6,21 +6,43 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [territory-bro.api :as api]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
+            [territory-bro.ui.info-box :as info-box]
             [territory-bro.ui.layout :as layout]))
 
 (defn model! [request]
   (let [congregation (:body (api/get-congregation request))]
     {:territories (->> (:territories congregation)
                        ;;  TODO: use natural sort
-                       (sort-by :number))}))
+                       (sort-by :number))
+     :permissions (:permissions congregation)}))
 
-(defn view [{:keys [territories]}]
+(defn limited-visibility-help []
+  (info-box/view
+   {:title (i18n/t "TerritoryListPage.limitedVisibility.title")}
+   (h/html
+    [:p
+     (i18n/t "TerritoryListPage.limitedVisibility.explanation")
+     " "
+     (if (auth/logged-in?)
+       (-> (i18n/t "TerritoryListPage.limitedVisibility.needToRequestAccess")
+           (str/replace "<0>" "<a href=\"/join\">")
+           (str/replace "</0>" "</a>")
+           (h/raw))
+       (-> (i18n/t "TerritoryListPage.limitedVisibility.needToLogin")
+           (str/replace "<0>" "<a href=\"/login\">")
+           (str/replace "</0>" "</a>")
+           (h/raw)))])))
+
+(defn view [{:keys [territories permissions]}]
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
      [:h1 (i18n/t "TerritoryListPage.title")]
+     (when-not (:viewCongregation permissions)
+       (limited-visibility-help))
      ;; TODO: this is an MVP - migrate the rest of the page
      [:table#territory-list.pure-table.pure-table-striped
       [:thead

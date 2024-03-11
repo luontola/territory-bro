@@ -207,7 +207,7 @@
                             :territory/do-not-calls "the do-not-calls"}))
     territory-id))
 
-(defn- create-share! [cong-id territory-id share-key]
+(defn create-share! [cong-id territory-id share-key]
   (db/with-db [conn {}]
     (dispatcher/command! conn (projections/cached-state)
                          {:command/type :share.command/create-share
