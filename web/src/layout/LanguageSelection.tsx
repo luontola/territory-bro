@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -82,6 +82,7 @@ let LanguageSelection = () => {
                                className={styles.languageSelectionIcon}/>
               {' '}
               <Field name="language"
+                     id="language-selection"
                      component="select"
                      aria-label={t('Navigation.changeLanguage')}
                      title={t('Navigation.changeLanguage')}

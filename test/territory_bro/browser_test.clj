@@ -134,6 +134,22 @@
         (is (= restricted-page-url (b/get-url *driver*)))))))
 
 
+(deftest change-language-test
+  (with-per-test-postmortem
+    (doto *driver*
+      (b/go *base-url*)
+      (b/wait-visible :language-selection))
+
+    (testing "default language is English"
+      (is (b/visible? *driver* [{:tag :nav} {:tag :a, :fn/has-string "Home"}])))
+
+    (testing "user can change the language"
+      (doto *driver*
+        (b/click :language-selection)
+        (b/click [:language-selection {:tag :option, :fn/has-string "suomi - Finnish"}])
+        (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string "Etusivu"}])))))
+
+
 (defn- two-random-territories [driver]
   (->> (b/query-all driver [:territory-list {:tag :a}])
        (shuffle) ; pick the territories randomly
