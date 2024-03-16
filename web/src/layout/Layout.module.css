@@ -110,6 +110,18 @@ h1 {
     margin-top: 0;
 }
 
+
+/* XXX: avoid layout flicker due to Font Awesome icons rendering asynchronously: https://docs.fontawesome.com/web/dig-deeper/svg-async */
+/* TODO: switch to using bare SVG, without JS: https://docs.fontawesome.com/web/add-icons/svg-bare */
+.wait-for-icons {
+    display: none;
+}
+
+:global(.fontawesome-i2svg-active) .wait-for-icons {
+    display: initial;
+}
+
+
 @media screen and (min-width: 768px) {
     .navbar {
         display: flex;

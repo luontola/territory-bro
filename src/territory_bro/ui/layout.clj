@@ -199,7 +199,7 @@
                       :crossorigin "anonymous"
                       :referrerpolicy "no-referrer"}]
             (head-injections)]
-           [:body
+           [:body {:class (:wait-for-icons styles)}
             [:nav.no-print {:class (:navbar styles)}
              (if (some? (:congregation model))
                (congregation-navigation model)
