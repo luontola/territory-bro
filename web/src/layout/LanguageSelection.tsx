@@ -41,7 +41,7 @@ function getElementFont(element) {
   return `${fontWeight} ${fontSize} ${fontFamily}`;
 }
 
-function adjustDropdownWidthToContent(element?: HTMLSelectElement) {
+export function adjustDropdownWidthToContent(element?: HTMLSelectElement) {
   if (!element) {
     return;
   }

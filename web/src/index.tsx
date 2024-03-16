@@ -13,6 +13,7 @@ import App from "./App.tsx";
 import './i18n.ts';
 import htmx from 'htmx.org';
 import {TerritoryMapElement} from "./maps/TerritoryMap.ts";
+import {adjustDropdownWidthToContent} from "./layout/LanguageSelection.tsx";
 
 window.htmx = htmx;
 
@@ -107,3 +108,15 @@ document.body.addEventListener('htmx:afterRequest', (event: Event) => {
 
 // web components for htmx UI
 customElements.define('territory-map', TerritoryMapElement);
+
+// event handlers for htmx UI
+const languageSelection = document.getElementById("language-selection");
+if (languageSelection) {
+  const adjust = () => {
+    adjustDropdownWidthToContent(languageSelection as any);
+  };
+  languageSelection.addEventListener("change", adjust)
+  languageSelection.addEventListener("focus", adjust)
+  languageSelection.addEventListener("blur", adjust)
+  adjust();
+}
