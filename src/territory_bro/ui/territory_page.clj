@@ -93,7 +93,6 @@
                               :value link
                               :readonly true
                               :style "color: unset; background-color: unset;"}]
-          ;; TODO: should copy link to clipboard
           [:button#copy-share-link.pure-button {:type "button"
                                                 :data-clipboard-target "#share-link"
                                                 :aria-label (i18n/t "TerritoryPage.shareLink.copy")
