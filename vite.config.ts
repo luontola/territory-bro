@@ -8,6 +8,7 @@ import i18nextLoader from 'vite-plugin-i18next-loader'
 import fs from "fs";
 import * as path from "path";
 import * as child_process from "child_process";
+import md5 from "crypto-js/md5";
 
 function serverExport() {
   return {
@@ -55,7 +56,12 @@ export default defineConfig(({command}) => ({
           fs.writeFileSync(file, JSON.stringify(cssModulesJson, null, 2))
         }
       },
-      generateScopedName: "[name]__[local]--[hash:base64:5]"
+      generateScopedName: function (local, filename, css) {
+        filename = filename.split('?')[0]; // remove "?used" suffix
+        filename = path.basename(filename, ".module.css"); // remove .module.css suffix
+        const hash = md5(css).toString().substring(0, 8);
+        return `${filename}__${local}--${hash}`;
+      },
     }
   },
   server: {
