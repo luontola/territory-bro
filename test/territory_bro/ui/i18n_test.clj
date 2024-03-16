@@ -37,31 +37,38 @@
   (let [handler (-> (fn [_request]
                       {:body {:lang i18n/*lang*}})
                     i18n/wrap-current-language
-                    cookies/wrap-cookies)]
+                    cookies/wrap-cookies)
+        en-cookie {"Set-Cookie" ["lang=en; Max-Age=31536000; Path=/"]}
+        fi-cookie {"Set-Cookie" ["lang=fi; Max-Age=31536000; Path=/"]}]
     (testing "default language from system defaults"
-      (is (= {:body {:lang :en}}
+      (is (= {:body {:lang :en}
+              :headers en-cookie}
              (handler {}))))
 
     (testing "default language from Accept-Language request header"
-      (is (= {:body {:lang :fi}}
+      (is (= {:body {:lang :fi}
+              :headers fi-cookie}
              (handler {:headers {"accept-language" "fi,en-GB;q=0.9,en-US;q=0.8,en;q=0.7",}}))
           "match found")
-      (is (= {:body {:lang :en}}
+      (is (= {:body {:lang :en}
+              :headers en-cookie}
              (handler {:headers {"accept-language" "xx"}}))
           "no match")
-      (is (= {:body {:lang :en}}
+      (is (= {:body {:lang :en}
+              :headers en-cookie}
              (handler {:headers {"accept-language" "*"}}))
           "wildcard"))
 
-    (testing "language from cookie"
+    (testing "language from cookie (does not set a new cookie)"
       (is (= {:body {:lang :fi}}
              (handler {:cookies {"lang" {:value "fi"}}}))))
 
-    (testing "change language, save as cookie"
+    (testing "change language using query parameter"
       (is (= {:body {:lang :fi}
-              :headers {"Set-Cookie" ["lang=fi; Max-Age=31536000; Path=/"]}}
+              :headers fi-cookie}
              (handler {:params {:lang "fi"}}))))
 
     (testing "ignores unknown language codes"
-      (is (= {:body {:lang :en}}
+      (is (= {:body {:lang :en}
+              :headers en-cookie}
              (handler {:cookies {"lang" {:value "xx"}}}))))))

@@ -45,6 +45,6 @@
                                            default-lang)))]
       (binding [*lang* lang]
         (cond-> (handler request)
-          (some? param-lang)
+          (not= cookie-lang (name lang))
           (response/set-cookie "lang" (name lang) {:max-age (.toSeconds (Duration/ofDays 365))
                                                    :path "/"}))))))
