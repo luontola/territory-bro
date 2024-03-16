@@ -7,16 +7,16 @@
 .details table {
     width: 100%;
 
-    th, td {
+    :is(th), td {
         text-align: left;
         vertical-align: top;
     }
 
-    th {
+    :is(th) {
         white-space: nowrap;
     }
 
-    td {
+    :is(td) {
         width: 100%;
         white-space: pre-line;
     }
