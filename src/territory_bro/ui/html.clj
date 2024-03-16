@@ -15,6 +15,9 @@
       (str/replace #"\s+" " ")
       (str/trim)))
 
+(defn- font-awesome-class? [class]
+  (str/starts-with? class "fa-"))
+
 (def ^:private font-awesome-icon-styles
   #{"fa-duotone"
     "fa-light"
@@ -31,6 +34,7 @@
       (str/replace #"<i\b[^>]*\bclass=\"(fa-.*?)\".*?></i>"
                    (fn [[_ class]]
                      (let [class (->> (str/split class #" ")
+                                      (filter font-awesome-class?)
                                       (remove font-awesome-icon-styles)
                                       (str/join " "))]
                        (str " {" class "} "))))

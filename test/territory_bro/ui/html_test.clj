@@ -27,6 +27,8 @@
         "icon style missing")
     (is (= "{fa-share-nodes}" (html/visible-text "<i attr1=\"\" class=\"fa-solid fa-share-nodes\" attr2=\"\"></i>"))
         "more attributes")
+    (is (= "{fa-language}" (html/visible-text "<i class=\"fa-solid fa-language Layout-module__languageSelectionIcon--VcMOP\"></i>"))
+        "more classes")
     (is (= "foo {fa-share-nodes} bar" (html/visible-text "foo<i class=\"fa-solid fa-share-nodes\"></i>bar"))
         "add spacing around icon")
     (is (= "" (html/visible-text "<i class=\"whatever\"></i>"))
