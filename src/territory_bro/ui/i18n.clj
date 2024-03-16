@@ -30,16 +30,18 @@
     lang
     default-lang))
 
+(defn- parse-accept-language [request]
+  (when-some [ranges (get-in request [:headers "accept-language"])]
+    (Locale/lookupTag (Locale$LanguageRange/parse ranges)
+                      (map :code (languages)))))
+
 (defn wrap-current-language [handler]
   (fn [request]
     (let [param-lang (get-in request [:params :lang])
           cookie-lang (get-in request [:cookies "lang" :value])
-          accept-lang (when-some [ranges (get-in request [:headers "accept-language"])]
-                        (Locale/lookupTag (Locale$LanguageRange/parse ranges)
-                                          (map :code (languages))))
           lang (validate-lang (keyword (or param-lang
                                            cookie-lang
-                                           accept-lang
+                                           (parse-accept-language request)
                                            default-lang)))]
       (binding [*lang* lang]
         (cond-> (handler request)
