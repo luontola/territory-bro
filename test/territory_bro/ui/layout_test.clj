@@ -12,6 +12,7 @@
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
+            [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout])
   (:import (java.util UUID)))
 
@@ -113,6 +114,7 @@
              News {fa-external-link-alt}
              🛟 Support
 
+             {fa-language} English
              Login
 
              Sorry, something went wrong 🥺
@@ -129,6 +131,7 @@
              News {fa-external-link-alt}
              🛟 Support
 
+             {fa-language} English
              {fa-user-large} John Doe
              Logout
 
@@ -153,6 +156,7 @@
              ⚙️ Settings
              🛟 Support
 
+             {fa-language} English
              {fa-user-large} John Doe
              Logout
 
@@ -175,6 +179,7 @@
                📍 Territories
                🛟 Support
 
+               {fa-language} English
                {fa-user-large} John Doe
                Logout
 
@@ -198,6 +203,7 @@
              🖨️ Printouts
              🛟 Support
 
+             {fa-language} English
              Login
 
              Sorry, something went wrong 🥺
@@ -286,3 +292,21 @@
              Logout")
            (html/visible-text
             (layout/authentication-panel logged-in-model))))))
+
+(deftest language-selection-test
+  (testing "the current language is shown using only its native name"
+    (is (= "{fa-language} English"
+           (html/visible-text
+            (layout/language-selection))))
+    (binding [i18n/*lang* :fi]
+      (is (= "{fa-language} suomi"
+             (html/visible-text
+              (layout/language-selection))))))
+
+  (testing "other languages are shown using their native and English name"
+    (binding [i18n/*lang* :xx]
+      (is (str/includes? (layout/language-selection)
+                         "<option value=\"fi\">suomi - Finnish</option>"))
+      (is (str/includes? (layout/language-selection)
+                         "<option value=\"en\">English</option>")
+          "except English, which is shown only once in English"))))

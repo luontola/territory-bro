@@ -14,6 +14,7 @@
             [territory-bro.ui.error-page :as error-page]
             [territory-bro.ui.home-page :as home-page]
             [territory-bro.ui.html :as html]
+            [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.open-share-page :as open-share-page]
             [territory-bro.ui.territory-list-page :as territory-list-page]
@@ -46,6 +47,7 @@
      {:middleware [wrap-base-url-compat ; outermost middleware first
                    [html/wrap-page-path nil]
                    auth0/wrap-redirect-to-login
+                   i18n/wrap-current-language
                    wrap-current-user
                    wrap-http-response
                    wrap-json-api-compat]}

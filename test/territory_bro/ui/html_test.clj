@@ -18,6 +18,13 @@
   (testing "input tags are replaced with their visible text"
     (is (= "the text" (html/visible-text "<input type=\"text\" value=\"the text\" required>"))))
 
+  (testing "select tags are replaced with the selected option's visible text"
+    ;; TODO: do we need real html parsing, not just regex? consider enlive/html-snippet
+    #_(is (= "Option 1" (html/visible-text "<select name=\"foo\"><option value=\"opt1\">Option 1</option><option value=\"opt2\">Option 2</option></select>"))
+          "the first element is selected by default")
+    (is (= "Option 2" (html/visible-text "<select name=\"foo\"><option value=\"opt1\">Option 1</option><option value=\"opt2\" selected>Option 2</option></select>"))
+        "explicitly selected option"))
+
   (testing "Font Awesome icons are replaced with the icon name"
     (is (= "{fa-share-nodes}" (html/visible-text "<i class=\"fa-solid fa-share-nodes\"></i>"))
         "icon style solid")

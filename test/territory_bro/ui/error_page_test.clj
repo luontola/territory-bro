@@ -15,6 +15,8 @@
    User guide {fa-external-link-alt}
    News {fa-external-link-alt}
    🛟 Support
+
+   {fa-language} English
    Login
 
    Sorry, something went wrong 🥺

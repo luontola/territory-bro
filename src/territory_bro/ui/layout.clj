@@ -110,6 +110,37 @@
                       :icon "🛟"
                       :title (i18n/t "SupportPage.title")})]])))
 
+(defn- format-language-name [{:keys [code englishName nativeName]} current-language]
+  (cond
+    (= current-language code)
+    nativeName
+
+    (= englishName nativeName)
+    nativeName
+
+    :else
+    (str nativeName " - " englishName)))
+
+(defn language-selection []
+  (let [styles (:Layout (css/modules))
+        current-language (name i18n/*lang*)]
+    (h/html
+     [:form.pure-form {:method "get"}
+      [:label
+       [:i.fa-solid.fa-language {:title (i18n/t "Navigation.changeLanguage")
+                                 :class (:languageSelectionIcon styles)}]
+       " "
+       ;; TODO: resize to fit visible text on load
+       [:select#language-selection {:name "lang"
+                                    :aria-label (i18n/t "Navigation.changeLanguage")
+                                    :title (i18n/t "Navigation.changeLanguage")
+                                    :class (:languageSelection styles)
+                                    :onchange "this.form.submit()"}
+        (for [language (i18n/languages)]
+          [:option {:value (:code language)
+                    :selected (= current-language (:code language))}
+           (format-language-name language current-language)])]]])))
+
 (defn authentication-panel [{:keys [user login-url dev?]}]
   (if (some? user)
     (h/html [:i.fa-solid.fa-user-large {:style {:font-size "1.25em"
@@ -171,7 +202,7 @@
                (congregation-navigation model)
                (home-navigation))
              [:div {:class (:lang styles)}
-              [:LanguageSelection]] ; TODO
+              (language-selection)]
              [:div {:class (:auth styles)}
               (authentication-panel model)]]
 
