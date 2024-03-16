@@ -173,7 +173,7 @@
                       (-> (share-link--open! request)
                           (html/response)
                           ;; avoid creating lots of new shares if the user clicks the share button repeatedly
-                          (response/header "Cache-Control" "max-age=300, must-revalidate")))}}]
+                          (response/header "Cache-Control" "private, max-age=300, must-revalidate")))}}]
 
    ["/share-link/close"
     {:get {:handler (fn [_request]
