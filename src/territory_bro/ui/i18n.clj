@@ -7,9 +7,11 @@
             [ring.util.response :as response]
             [territory-bro.infra.json :as json]
             [territory-bro.infra.resources :as resources])
-  (:import (java.time Duration)))
+  (:import (java.time Duration)
+           (java.util Locale Locale$LanguageRange)))
 
-(def ^:dynamic *lang* :en)
+(def default-lang :en)
+(def ^:dynamic *lang* default-lang)
 
 (def i18n
   (resources/auto-refresher "i18n.json" #(json/read-value (slurp %))))
@@ -26,15 +28,19 @@
 (defn- validate-lang [lang]
   (if (some? (get-in (i18n) [:resources lang]))
     lang
-    *lang*))
+    default-lang))
 
 (defn wrap-current-language [handler]
   (fn [request]
     (let [param-lang (get-in request [:params :lang])
           cookie-lang (get-in request [:cookies "lang" :value])
+          accept-lang (when-some [ranges (get-in request [:headers "accept-language"])]
+                        (Locale/lookupTag (Locale$LanguageRange/parse ranges)
+                                          (map :code (languages))))
           lang (validate-lang (keyword (or param-lang
                                            cookie-lang
-                                           *lang*)))]
+                                           accept-lang
+                                           default-lang)))]
       (binding [*lang* lang]
         (cond-> (handler request)
           (some? param-lang)

@@ -38,11 +38,20 @@
                       {:body {:lang i18n/*lang*}})
                     i18n/wrap-current-language
                     cookies/wrap-cookies)]
-    (testing "default language"
+    (testing "default language from system defaults"
       (is (= {:body {:lang :en}}
              (handler {}))))
 
-    ;; TODO: default from accept-language header
+    (testing "default language from Accept-Language request header"
+      (is (= {:body {:lang :fi}}
+             (handler {:headers {"accept-language" "fi,en-GB;q=0.9,en-US;q=0.8,en;q=0.7",}}))
+          "match found")
+      (is (= {:body {:lang :en}}
+             (handler {:headers {"accept-language" "xx"}}))
+          "no match")
+      (is (= {:body {:lang :en}}
+             (handler {:headers {"accept-language" "*"}}))
+          "wildcard"))
 
     (testing "language from cookie"
       (is (= {:body {:lang :fi}}
