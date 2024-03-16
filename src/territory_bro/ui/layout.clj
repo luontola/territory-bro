@@ -24,12 +24,14 @@
                          (-> (if demo?
                                (:body (api/get-demo-congregation request))
                                (:body (api/get-congregation request)))
-                             (select-keys [:id :name :permissions])))]
+                             (select-keys [:id :name :permissions])))
+          language-selection-width (get-in request [:cookies "languageSelectionWidth" :value])]
       {:congregation congregation
        :user (when (auth/logged-in?)
                auth/*user*)
        :login-url (when-not (auth/logged-in?)
                     (auth0/login-url request))
+       :language-selection-width language-selection-width
        :dev? (:dev config/env)
        :demo? demo?})))
 
@@ -121,7 +123,7 @@
     :else
     (str nativeName " - " englishName)))
 
-(defn language-selection []
+(defn language-selection [{:keys [language-selection-width]}]
   (let [styles (:Layout (css/modules))
         current-language (name i18n/*lang*)]
     (h/html
@@ -130,11 +132,12 @@
        [:i.fa-solid.fa-language {:title (i18n/t "Navigation.changeLanguage")
                                  :class (:languageSelectionIcon styles)}]
        " "
-       ;; TODO: resize to fit visible text on load
        [:select#language-selection {:name "lang"
                                     :aria-label (i18n/t "Navigation.changeLanguage")
                                     :title (i18n/t "Navigation.changeLanguage")
                                     :class (:languageSelection styles)
+                                    :style (when (some? language-selection-width)
+                                             {:width language-selection-width})
                                     :onchange "this.form.submit()"}
         (for [language (i18n/languages)]
           [:option {:value (:code language)
@@ -202,7 +205,7 @@
                (congregation-navigation model)
                (home-navigation))
              [:div {:class (:lang styles)}
-              (language-selection)]
+              (language-selection model)]
              [:div {:class (:auth styles)}
               (authentication-panel model)]]
 

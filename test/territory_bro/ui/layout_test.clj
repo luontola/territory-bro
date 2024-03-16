@@ -21,12 +21,14 @@
    :user nil
    ;; the page path and query string should both be included in the return-to-url
    :login-url "/login?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk"
+   :language-selection-width "42px"
    :dev? false
    :demo? false})
 (def developer-model
   {:congregation nil
    :user nil
    :login-url "/login?return-to-url=%2F"
+   :language-selection-width nil
    :dev? true
    :demo? false})
 (def logged-in-model
@@ -34,6 +36,7 @@
    :user {:user/id (UUID. 0 2)
           :name "John Doe"}
    :login-url nil
+   :language-selection-width nil
    :dev? false
    :demo? false})
 (def congregation-model
@@ -47,6 +50,7 @@
    :user {:user/id (UUID. 0 2)
           :name "John Doe"}
    :login-url nil
+   :language-selection-width nil
    :dev? false
    :demo? false})
 (def demo-congregation-model
@@ -56,6 +60,7 @@
                                 :viewCongregation true}}
    :user nil
    :login-url "/login?return-to-url=%2Fcongregation%2Fdemo"
+   :language-selection-width nil
    :dev? false
    :demo? true})
 
@@ -67,7 +72,8 @@
 
       (testing "top level, anonymous"
         (let [request {:uri "/some/page"
-                       :query-string "foo=bar&gazonk"}]
+                       :query-string "foo=bar&gazonk"
+                       :cookies {"languageSelectionWidth" {:value "42px"}}}]
           (is (= anonymous-model
                  (layout/model! request)))))
 
@@ -297,16 +303,23 @@
   (testing "the current language is shown using only its native name"
     (is (= "{fa-language} English"
            (html/visible-text
-            (layout/language-selection))))
+            (layout/language-selection anonymous-model))))
     (binding [i18n/*lang* :fi]
       (is (= "{fa-language} suomi"
              (html/visible-text
-              (layout/language-selection))))))
+              (layout/language-selection anonymous-model))))))
 
   (testing "other languages are shown using their native and English name"
     (binding [i18n/*lang* :xx]
-      (is (str/includes? (layout/language-selection)
+      (is (str/includes? (layout/language-selection anonymous-model)
                          "<option value=\"fi\">suomi - Finnish</option>"))
-      (is (str/includes? (layout/language-selection)
+      (is (str/includes? (layout/language-selection anonymous-model)
                          "<option value=\"en\">English</option>")
-          "except English, which is shown only once in English"))))
+          "except English, which is shown only once in English")))
+
+  (testing "default element width to avoid layout flicker"
+    (is (str/includes? (layout/language-selection anonymous-model)
+                       "style=\"width:42px;\""))
+    (is (not (str/includes? (layout/language-selection (dissoc anonymous-model :language-selection-width))
+                            "style="))
+        "no style if width is not known")))

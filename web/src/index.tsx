@@ -114,6 +114,8 @@ const languageSelection = document.getElementById("language-selection");
 if (languageSelection) {
   const adjust = () => {
     adjustDropdownWidthToContent(languageSelection as any);
+    // avoid layout flicker: pass the computed width to the backend for the next page render
+    document.cookie = `languageSelectionWidth=${(languageSelection.style.width)}; path=/`
   };
   languageSelection.addEventListener("change", adjust)
   languageSelection.addEventListener("focus", adjust)
