@@ -53,10 +53,10 @@
 
 (defn submit-auth0-login-form [driver]
   (doto driver
-    (b/wait-visible :1-email)
-    (b/fill :1-email auth0-username)
-    (b/fill :1-password auth0-password)
-    (b/click :1-submit)))
+    (b/wait-visible :username)
+    (b/fill :username auth0-username)
+    (b/fill :password auth0-password)
+    (b/click {:css "button[type=submit]"})))
 
 (defn do-auth0-login [driver]
   (doto driver
@@ -205,8 +205,8 @@
 
           (doto *driver*
             (b/go (:link unrelated-territory))
-            (b/wait-visible :1-email))
-          (is (= "Sign In with Auth0"
+            (b/wait-visible :username))
+          (is (= "Log in | Territory Bro (Dev)"
                  (b/get-title *driver*))
               "trying to view an unrelated territory of the same congregation requires logging in"))))))
 
