@@ -39,7 +39,7 @@ export function auth0Authenticator(settings: Settings) {
   }
 
   function login() {
-    webAuth.authorize();
+    webAuth.authorize({prompt: "select_account"});
   }
 
   function logout() {

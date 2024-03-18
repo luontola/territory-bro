@@ -125,6 +125,7 @@
         [servlet-request servlet-response *ring-response] (ring->servlet ring-request)
         authorize-url (-> (.buildAuthorizeUrl auth-controller servlet-request servlet-response callback-url)
                           (.withScope "openid email profile")
+                          (.withParameter "prompt" "select_account")
                           (.build))]
     (meta-merge @*ring-response
                 (response/redirect authorize-url :see-other))))

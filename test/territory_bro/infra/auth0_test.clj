@@ -67,8 +67,9 @@
       (is (= "luontola.eu.auth0.com" (.getHost location)))
       (is (= {:redirect_uri "http://localhost:8081/login-callback"
               :client_id "8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"
+              :response_type "code"
               :scope "openid email profile"
-              :response_type "code"}
+              :prompt "select_account"}
              (dissoc query-params :state))))
 
     (testing "saves OIDC state in session"
