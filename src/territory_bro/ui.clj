@@ -17,6 +17,7 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.open-share-page :as open-share-page]
+            [territory-bro.ui.support-page :as support-page]
             [territory-bro.ui.territory-list-page :as territory-list-page]
             [territory-bro.ui.territory-page :as territory-page]))
 
@@ -64,11 +65,8 @@
                         (-> (h/html [:h1 "register page placeholder"])
                             (layout/page! request)
                             (html/response)))}}]
-     ["/support"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "support page placeholder"])
-                            (layout/page! request)
-                            (html/response)))}}]
+
+     support-page/routes
 
      open-share-page/routes
 
@@ -89,12 +87,6 @@
      ["/congregation/:congregation/settings"
       {:get {:handler (fn [request]
                         (-> (h/html [:h1 "settings page placeholder"])
-                            (layout/page! request)
-                            (html/response)))}}]
-
-     ["/congregation/:congregation/support"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "support page placeholder"])
                             (layout/page! request)
                             (html/response)))}}]
 
