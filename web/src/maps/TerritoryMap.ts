@@ -80,6 +80,9 @@ export class TerritoryMapElement extends HTMLElement {
 
     const map = initTerritoryMap(root, {location} as Territory, printout)
     map.setStreetsLayerRaster(mapRaster);
+    // XXX: randomly the zoom level is not correct on page load
+    setTimeout(map.fixInitialZoom, 10);
+    setTimeout(map.fixInitialZoom, 100);
   }
 }
 
@@ -163,6 +166,10 @@ function initTerritoryMap(element: HTMLDivElement, territory: Territory, printou
     },
     unmount() {
       map.setTarget(undefined)
+    },
+    fixInitialZoom() {
+      // XXX: randomly the zoom level is not correct on page load, so this can be called after a short timeout
+      resetZoom(map, {});
     }
   };
 }
