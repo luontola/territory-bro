@@ -55,7 +55,7 @@
          [:tr
           [:td {:class (:number styles)}
            [:a {:href (str html/*page-path* "/" (:id territory))}
-            (if (str/blank? (:number territory)) ; TODO: test "-"
+            (if (str/blank? (:number territory))
               "-"
               (:number territory))]]
           [:td (:region territory)]

@@ -62,6 +62,15 @@
            (-> (territory-list-page/view model)
                html/visible-text))))
 
+  (testing "missing territory number: shows a placeholder so that the link can be clicked"
+    (is (= (html/normalize-whitespace
+            "Territories
+
+             Number   Region       Addresses
+             -        the region   the addresses")
+           (-> (territory-list-page/view (replace-in model [:territories 0 :number] "123" ""))
+               html/visible-text))))
+
   (testing "anonymous user, has opened a share"
     (is (= (html/normalize-whitespace
             "Territories
