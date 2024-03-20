@@ -7,6 +7,7 @@ import LoginButton from "../layout/LoginButton";
 import {Link} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
 import PageTitle, {siteTitle} from "../layout/PageTitle.tsx";
+import styles from "./HomePage.module.css"
 
 const ViewDemoButton = () => {
   const {t} = useTranslation();
@@ -34,16 +35,16 @@ const HomePage = () => {
 
     {congregations.length > 0 && <>
       <h2>{t('HomePage.yourCongregations')}</h2>
-      <ul id="congregation-list">
-        {congregations.map(cong => <li key={cong.id} style={{fontSize: '150%'}}><Link
-          to={`/congregation/${cong.id}`}>{cong.name}</Link></li>)}
+      <ul id="congregation-list" className={styles.congregationList}>
+        {congregations.map(cong =>
+          <li key={cong.id}><Link to={`/congregation/${cong.id}`}>{cong.name}</Link></li>)}
       </ul>
-      <p style={{paddingTop: '1.5em'}}>
+      <p className={styles.smallActions}>
         {settings.demoAvailable && <ViewDemoButton/>} <RegisterButton/> <JoinButton/>
       </p>
     </>}
 
-    {congregations.length === 0 && <div style={{fontSize: '150%', maxWidth: '20em', textAlign: 'center'}}>
+    {congregations.length === 0 && <div className={styles.bigActions}>
       {!settings.user && <p><LoginButton/></p>}
       {settings.demoAvailable && <p><ViewDemoButton/></p>}
       <p><RegisterButton/></p>

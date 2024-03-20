@@ -6,31 +6,69 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [territory-bro.api :as api]
+            [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
+            [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]))
 
 (defn model! [request]
-  (let [congregations (:body (api/list-congregations request))]
-    {:congregations (->> congregations
-                         (sort-by (comp str/lower-case :name)))}))
+  (auth/with-user-from-session request
+    (let [congregations (:body (api/list-congregations request))]
+      {:congregations (->> congregations
+                           (sort-by (comp str/lower-case :name)))
+       :logged-in? (auth/logged-in?)
+       :demo-available? (some? (:demo-congregation config/env))})))
 
-(defn view [{:keys [congregations]}]
-  (h/html
-   [:h1 "Territory Bro"]
-   [:p (-> (i18n/t "HomePage.introduction")
-           (str/replace "<0>" "<a href=\"https://territorybro.com\">")
-           (str/replace "</0>" "</a>")
-           (h/raw))]
-   ;; TODO: this is an MVP - migrate the rest of the page
-   (when-not (empty? congregations)
-     (h/html
-      [:h2 (i18n/t "HomePage.yourCongregations")]
-      [:ul#congregation-list
-       (for [congregation congregations]
-         [:li {:style {:font-size "150%"}}
-          [:a {:href (str "/congregation/" (:id congregation))}
-           (:name congregation)]])]))))
+(defn login-button []
+  (h/html [:a.pure-button {:href "/login"}
+           (i18n/t "Navigation.login")]))
+
+(defn view-demo-button []
+  (h/html [:a.pure-button {:href "/congregation/demo"}
+           (i18n/t "HomePage.viewDemo")]))
+
+(defn register-button []
+  (h/html [:a.pure-button {:href "/register"}
+           (i18n/t "RegistrationPage.title")]))
+
+(defn join-button []
+  (h/html [:a.pure-button {:href "/join"}
+           (i18n/t "JoinPage.title")]))
+
+(defn view [{:keys [congregations logged-in? demo-available?]}]
+  (let [styles (:HomePage (css/modules))]
+    (h/html
+     [:h1 "Territory Bro"]
+     [:p (-> (i18n/t "HomePage.introduction")
+             (str/replace "<0>" "<a href=\"https://territorybro.com\">")
+             (str/replace "</0>" "</a>")
+             (h/raw))]
+
+     (if (empty? congregations)
+       [:div {:class (:bigActions styles)}
+        (when-not logged-in?
+          [:p (login-button)])
+        (when demo-available?
+          [:p (view-demo-button)])
+        [:p (register-button)]
+        [:p (join-button)]]
+
+       ; TODO: use h/html instead of :div after fixing https://github.com/weavejester/hiccup/issues/210
+       [:div
+        [:h2 (i18n/t "HomePage.yourCongregations")]
+        [:ul#congregation-list {:class (:congregationList styles)}
+         (for [congregation congregations]
+           [:li [:a {:href (str "/congregation/" (:id congregation))}
+                 (:name congregation)]])]
+        [:p {:class (:smallActions styles)}
+         (when demo-available?
+           (view-demo-button))
+         " "
+         (register-button)
+         " "
+         (join-button)]]))))
 
 (defn view! [request]
   (view (model! request)))

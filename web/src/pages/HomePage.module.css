@@ -1,0 +1,14 @@
+
+.congregationList {
+    font-size: 150%;
+}
+
+.bigActions {
+    font-size: 150%;
+    max-width: 20em;
+    text-align: center;
+}
+
+.smallActions {
+    padding-top: 1.5em;
+}
