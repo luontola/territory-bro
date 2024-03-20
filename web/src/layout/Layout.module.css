@@ -96,8 +96,8 @@ select.languageSelection:not(:focus):hover {
     }
 
     &::backdrop {
-        background-color: #ccc;
-        opacity: 0.75;
+        background: #fff5;
+        backdrop-filter: blur(2px);
     }
 }
 
