@@ -64,8 +64,13 @@ export default class TerritoryMap extends OpenLayersMap<Props> {
 }
 
 export class TerritoryMapElement extends HTMLElement {
+  #map;
+
   constructor() {
     super();
+  }
+
+  connectedCallback() {
     const location = this.getAttribute("location");
     const mapRaster = findMapRasterById(this.getAttribute("map-raster") || 'osmhd');
     const printout = !!this.getAttribute("printout");
@@ -78,11 +83,15 @@ export class TerritoryMapElement extends HTMLElement {
     root.setAttribute("class", className)
     this.appendChild(root)
 
-    const map = initTerritoryMap(root, {location} as Territory, printout)
-    map.setStreetsLayerRaster(mapRaster);
+    this.#map = initTerritoryMap(root, {location} as Territory, printout)
+    this.#map.setStreetsLayerRaster(mapRaster);
     // XXX: randomly the zoom level is not correct on page load
-    setTimeout(map.fixInitialZoom, 10);
-    setTimeout(map.fixInitialZoom, 100);
+    setTimeout(this.#map.fixInitialZoom, 10);
+    setTimeout(this.#map.fixInitialZoom, 100);
+  }
+
+  disconnectedCallback() {
+    this.#map.unmount();
   }
 }
 
