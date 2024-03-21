@@ -122,3 +122,24 @@ if (languageSelection) {
   languageSelection.addEventListener("blur", adjust)
   adjust();
 }
+
+const territorySearch = document.getElementById("territory-search") as HTMLInputElement | null;
+const clearTerritorySearch = document.getElementById("clear-territory-search");
+const territoryList = document.getElementById("territory-list");
+if (territorySearch && clearTerritorySearch && territoryList) {
+  const onTerritorySearch = () => {
+    const needle = territorySearch.value.toLowerCase().trim();
+    clearTerritorySearch.style.display = needle === "" ? "none" : ""
+    for (const row of territoryList.querySelectorAll("[data-searchable]")) {
+      const haystack = row.getAttribute("data-searchable") ?? '';
+      row.style.display = haystack.includes(needle) ? "" : "none";
+    }
+  };
+  const onClearTerritorySearch = () => {
+    territorySearch.value = "";
+    territorySearch.focus();
+    onTerritorySearch();
+  };
+  (window as any).onTerritorySearch = onTerritorySearch;
+  (window as any).onClearTerritorySearch = onClearTerritorySearch;
+}

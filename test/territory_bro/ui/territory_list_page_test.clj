@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.territory-list-page-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [territory-bro.api :as api]
             [territory-bro.api-test :as at]
             [territory-bro.domain.testdata :as testdata]
@@ -57,15 +58,28 @@
     (is (= (html/normalize-whitespace
             "Territories
 
+             Search Clear
              Number   Region       Addresses
              123      the region   the addresses")
            (-> (territory-list-page/view model)
                html/visible-text))))
 
+  (testing "each row embeds the searchable text in lowercase"
+    (let [model (-> model
+                    (replace-in [:territories 0 :number] "123" "123A")
+                    (replace-in [:territories 0 :region] "the region" "Some Region")
+                    ;; addresses are commonly multiline
+                    (replace-in [:territories 0 :addresses] "the addresses" "Some Street\nAnother Street\n"))]
+      ;; newline is used as the separator, so that you could not accidentally search from two
+      ;; adjacent fields at the same time (one does not simply type a newline to a search field)
+      (is (str/includes? (str (territory-list-page/view model))
+                         "<tr data-searchable=\"123a\nsome region\nsome street\nanother street\">"))))
+
   (testing "missing territory number: shows a placeholder so that the link can be clicked"
     (is (= (html/normalize-whitespace
             "Territories
 
+             Search Clear
              Number   Region       Addresses
              -        the region   the addresses")
            (-> (territory-list-page/view (replace-in model [:territories 0 :number] "123" ""))
@@ -79,6 +93,7 @@
              Only those territories which have been shared with you are currently shown.
              You will need to login to see the rest.
 
+             Search Clear
              Number   Region       Addresses
              123      the region   the addresses")
            (-> (territory-list-page/view anonymous-model)
@@ -92,6 +107,7 @@
              Only those territories which have been shared with you are currently shown.
              You will need to request access to see the rest.
 
+             Search Clear
              Number   Region       Addresses
              123      the region   the addresses")
            (binding [auth/*user* {:user/id (UUID/randomUUID)}]

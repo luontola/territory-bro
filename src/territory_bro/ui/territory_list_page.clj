@@ -43,7 +43,20 @@
      [:h1 (i18n/t "TerritoryListPage.title")]
      (when-not (:viewCongregation permissions)
        (limited-visibility-help))
-     ;; TODO: this is an MVP - migrate the rest of the page
+     ;; TODO: map
+
+     [:form.pure-form {:class (:search styles)}
+      [:label {:for "territory-search"}
+       (i18n/t "TerritoryListPage.search")]
+      [:input#territory-search.pure-input-rounded {:type "text"
+                                                   :oninput "onTerritorySearch()"
+                                                   :autocomplete "off"}]
+      [:button#clear-territory-search.pure-button {:type "button"
+                                                   :onclick "onClearTerritorySearch()"
+                                                   ;; onTerritorySearch will make this visible
+                                                   :style {:display "none"}}
+       (i18n/t "TerritoryListPage.clear")]]
+
      [:table#territory-list.pure-table.pure-table-striped
       [:thead
        [:tr
@@ -51,8 +64,13 @@
         [:th (i18n/t "Territory.region")]
         [:th (i18n/t "Territory.addresses")]]]
       [:tbody
+       ;; TODO: natural sorting by number
        (for [territory territories]
-         [:tr
+         [:tr {:data-searchable (-> (str/join "\n" [(:number territory)
+                                                    (:region territory)
+                                                    (:addresses territory)])
+                                    (str/lower-case)
+                                    (str/trim))}
           [:td {:class (:number styles)}
            [:a {:href (str html/*page-path* "/" (:id territory))}
             (if (str/blank? (:number territory))
