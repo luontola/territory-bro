@@ -4,7 +4,8 @@
 
 (ns territory-bro.infra.resources
   (:require [clojure.java.io :as io])
-  (:import (java.net URL)))
+  (:import (java.io IOException)
+           (java.net URL)))
 
 (defn- invalid-resource [resource]
   (IllegalArgumentException. (str "Resource must be an URL or string: " (pr-str resource))))
@@ -13,6 +14,16 @@
   (when (nil? resource)
     (throw (invalid-resource resource)))
   (atom {::resource resource}))
+
+(defn- last-modified [^URL resource]
+  (let [connection (.openConnection resource)
+        result (.getLastModified connection)]
+    (try
+      ;; URLConnection doesn't expose a close() method, but its resources
+      ;; can be released by closing the InputStream
+      (.close (.getInputStream connection))
+      (catch IOException _))
+    result))
 
 (defn auto-refresh! [*state load-resource]
   ;; TODO: implement detecting resource changes to clojure.tools.namespace.repl/refresh
@@ -23,9 +34,7 @@
                                         resource
                                         (throw (IllegalStateException. (str "Resource not found: " resource))))
                    :else (throw (invalid-resource resource)))
-        new-last-modified (-> ^URL resource
-                              (.openConnection)
-                              (.getLastModified))]
+        new-last-modified (last-modified resource)]
     (if (or (= old-last-modified new-last-modified)
             ;; file was deleted (temporarily), reuse the old value
             (and (zero? new-last-modified)
