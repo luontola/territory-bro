@@ -85,6 +85,31 @@
            (-> (territory-list-page/view (replace-in model [:territories 0 :number] "123" ""))
                html/visible-text))))
 
+  (testing "territory numbers are sorted naturally"
+    (let [territories (shuffle [{:number ""}
+                                {:number nil} ; nil should not crash, but be treated same as ""
+                                {:number "1"}
+                                {:number "2"} ; basic string sort would put this after "10"
+                                {:number "10"}
+                                {:number "10A"}
+                                {:number "10b"} ; sorting should be case-insensitive
+                                {:number "10C"}])]
+      (is (= (html/normalize-whitespace
+              "Territories
+
+               Search Clear
+               Number   Region       Addresses
+               -
+               -
+               1
+               2
+               10
+               10A
+               10b
+               10C")
+             (-> (territory-list-page/view (assoc model :territories territories))
+                 html/visible-text)))))
+
   (testing "anonymous user, has opened a share"
     (is (= (html/normalize-whitespace
             "Territories

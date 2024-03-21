@@ -28,6 +28,7 @@
                  [metosin/ring-middleware-format "0.6.0"] ; TODO: replace with newer library
                  [metosin/schema-tools "0.13.1"]
                  [mount "0.1.18"]
+                 [net.grey-panther/natural-comparator "1.1"]
                  [org.apache.commons/commons-lang3 "3.14.0"]
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.11.2"]

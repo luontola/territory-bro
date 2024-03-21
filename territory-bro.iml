@@ -129,6 +129,7 @@
     <orderEntry type="library" name="Leiningen: mvxcvi/puget:1.1.2" level="project" />
     <orderEntry type="library" name="Leiningen: net.bytebuddy/byte-buddy-agent:1.14.12" level="project" />
     <orderEntry type="library" name="Leiningen: net.bytebuddy/byte-buddy:1.14.12" level="project" />
+    <orderEntry type="library" name="Leiningen: net.grey-panther/natural-comparator:1.1" level="project" />
     <orderEntry type="library" name="Leiningen: net.incongru.watchservice/barbary-watchservice:1.0" level="project" />
     <orderEntry type="library" name="Leiningen: net.java.dev.jna/jna:5.12.1" level="project" />
     <orderEntry type="library" name="Leiningen: net.jodah/expiringmap:0.5.8" level="project" />

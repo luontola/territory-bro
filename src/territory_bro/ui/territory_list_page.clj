@@ -11,7 +11,8 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]
-            [territory-bro.ui.layout :as layout]))
+            [territory-bro.ui.layout :as layout])
+  (:import (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
 (defn model! [request]
   (let [congregation (:body (api/get-congregation request))]
@@ -64,8 +65,9 @@
         [:th (i18n/t "Territory.region")]
         [:th (i18n/t "Territory.addresses")]]]
       [:tbody
-       ;; TODO: natural sorting by number
-       (for [territory territories]
+       (for [territory (sort-by (comp str :number)
+                                (CaseInsensitiveSimpleNaturalComparator/getInstance)
+                                territories)]
          [:tr {:data-searchable (-> (str/join "\n" [(:number territory)
                                                     (:region territory)
                                                     (:addresses territory)])
