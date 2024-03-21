@@ -83,11 +83,14 @@ export class TerritoryMapElement extends HTMLElement {
     root.setAttribute("class", className)
     this.appendChild(root)
 
-    this.#map = initTerritoryMap(root, {location} as Territory, printout)
-    this.#map.setStreetsLayerRaster(mapRaster);
-    // XXX: randomly the zoom level is not correct on page load
-    setTimeout(this.#map.fixInitialZoom, 10);
-    setTimeout(this.#map.fixInitialZoom, 100);
+    // If we instantiate the map immediately after creating the div, then resetZoom
+    // sometimes fails to fit the map to the visible area. Waiting a short while
+    // avoids that. It's not known if there is some event we could await instead.
+    // Maybe the browser's layout engine hasn't yet determined the div's size?
+    setTimeout(() => {
+      this.#map = initTerritoryMap(root, {location} as Territory, printout)
+      this.#map.setStreetsLayerRaster(mapRaster);
+    }, 20);
   }
 
   disconnectedCallback() {
@@ -176,9 +179,5 @@ function initTerritoryMap(element: HTMLDivElement, territory: Territory, printou
     unmount() {
       map.setTarget(undefined)
     },
-    fixInitialZoom() {
-      // XXX: randomly the zoom level is not correct on page load, so this can be called after a short timeout
-      resetZoom(map, {});
-    }
   };
 }
