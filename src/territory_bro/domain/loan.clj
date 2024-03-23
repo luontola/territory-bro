@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -35,9 +35,12 @@
       (->> rows
            (remove #(str/blank? (:number %)))
            (map (fn [row]
-                  {:territory/number (:number row)
-                   :territory/loaned? (Boolean/parseBoolean (:loaned row))
-                   :territory/staleness (Long/parseLong (:staleness row))}))))))
+                  (try
+                    {:territory/number (:number row)
+                     :territory/loaned? (Boolean/parseBoolean (:loaned row))
+                     :territory/staleness (Long/parseLong (:staleness row))}
+                    (catch Exception e
+                      (log/warn e "Failed to parse loans CSV row" (pr-str row))))))))))
 
 (defn enrich-territory-loans! [congregation]
   (try

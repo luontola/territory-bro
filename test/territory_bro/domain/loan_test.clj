@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -80,16 +80,16 @@
             (str "Number,foo,Loaned,bar,,,Staleness\n"
                  "101,,FALSE,,,,4"))))))
 
-(deftest enrich-territory-loans-test
+(deftest enrich-territory-loans!-test
   (let [congregation {:congregation/id (UUID. 0 1)
                       :congregation/territories [{:territory/number "101"}
                                                  {:territory/number "102"}
                                                  {:territory/number "103"}]}
         loans-csv (str "Number,Loaned,Staleness\n"
                        "101,TRUE,1\n"
-                       ",,\n"
+                       ",,\n" ; CSV has no data for 102 -> don't add loans data for 102
                        "103,FALSE,3\n"
-                       "104,FALSE,4\n")]
+                       "104,FALSE,4\n")] ; CSV has data for 104, which doesn't exist -> ignore silently
     (is (= {:congregation/id (UUID. 0 1)
             :congregation/territories [{:territory/number "101"
                                         :territory/loaned? true
