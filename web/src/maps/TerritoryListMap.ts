@@ -20,7 +20,7 @@ import {
 } from "./mapOptions";
 import {Congregation, mergeMultiPolygons, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
-import {isEmpty} from "ol/extent";
+import {isEmpty as isEmptyExtent} from "ol/extent";
 import {getPageState, setPageState} from "../util";
 import {isEqual} from "lodash-es";
 import mapStyles from "./OpenLayersMap.module.css";
@@ -72,9 +72,8 @@ export class TerritoryListMapElement extends HTMLElement {
 
     const jsonData = this.querySelector("template.json-data") as HTMLTemplateElement | null;
     const data = JSON.parse(jsonData?.content.textContent ?? "{}");
-    const congregation = {
-      location: mergeMultiPolygons(data.congregationBoundaries)
-    } as Congregation;
+    const congregationBoundaries = data.congregationBoundaries ?? [];
+    const territories = data.territories ?? [];
     const onClick = (territoryId: string) => {
       document.location.href = `${document.location.pathname}/${territoryId}`
     }
@@ -84,7 +83,9 @@ export class TerritoryListMapElement extends HTMLElement {
     // avoids that. It's not known if there is some event we could await instead.
     // Maybe the browser's layout engine hasn't yet determined the div's size?
     setTimeout(() => {
-      this.#map = initMap(root, congregation, data.territories, onClick);
+      this.#map = initMap(root, {
+        location: mergeMultiPolygons(congregationBoundaries)
+      } as Congregation, territories, onClick);
     }, 20);
   }
 
@@ -168,9 +169,15 @@ function initMap(element: HTMLDivElement,
   const streetsLayer = makeStreetsLayer();
 
   function resetZoom(map, opts) {
+    // by default fit all territories
     let extent = territoryLayer.getSource().getExtent();
-    if (isEmpty(extent)) {
+    if (isEmptyExtent(extent)) {
+      // if there are no territories, fit congregation boundaries
       extent = congregationLayer.getSource().getExtent();
+    }
+    if (isEmptyExtent(extent)) {
+      // if there is no congregation boundary, skip fitting (it would just throw an error)
+      return;
     }
     const padding = 50;
     map.getView().fit(extent, {

@@ -4,7 +4,7 @@
 
 import {api} from "./util";
 import alphanumSort from "alphanum-sort";
-import {findIndex, keyBy, sortBy} from "lodash-es";
+import {findIndex, isEmpty, keyBy, sortBy} from "lodash-es";
 import WKT from "ol/format/WKT";
 import MultiPolygon from "ol/geom/MultiPolygon";
 import {QueryClient, useQuery, useSuspenseQuery} from '@tanstack/react-query'
@@ -154,7 +154,7 @@ function getEnclosing(innerWkt: string, enclosingCandidateWkts: string[]): strin
 }
 
 export function mergeMultiPolygons(multiPolygons: string[]): string | null {
-  if (multiPolygons.length === 0) {
+  if (isEmpty(multiPolygons)) {
     return null;
   }
   const wkt = new WKT();
