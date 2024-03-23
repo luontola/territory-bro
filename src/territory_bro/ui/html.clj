@@ -41,6 +41,8 @@
                                       (remove font-awesome-icon-styles)
                                       (str/join " "))]
                        (str " {" class "} "))))
+      ;; hide template elements
+      (str/replace #"<template\b[^>]*>.*?</template>" " ")
       ;; strip all HTML tags
       (str/replace #"<[^>]*>" " ")
       (normalize-whitespace)))

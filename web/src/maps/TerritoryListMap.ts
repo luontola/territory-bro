@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -18,11 +18,12 @@ import {
   wktToFeature,
   wktToFeatures
 } from "./mapOptions";
-import {Congregation, Territory} from "../api";
+import {Congregation, mergeMultiPolygons, Territory} from "../api";
 import OpenLayersMap from "./OpenLayersMap";
 import {isEmpty} from "ol/extent";
 import {getPageState, setPageState} from "../util";
 import {isEqual} from "lodash-es";
+import mapStyles from "./OpenLayersMap.module.css";
 
 type Props = {
   congregation: Congregation;
@@ -54,6 +55,41 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
 
   componentWillUnmount() {
     this.map.unmount()
+  }
+}
+
+export class TerritoryListMapElement extends HTMLElement {
+  #map;
+
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const root = document.createElement("div");
+    root.setAttribute("class", mapStyles.root)
+    this.appendChild(root)
+
+    const jsonData = this.querySelector("template.json-data") as HTMLTemplateElement | null;
+    const data = JSON.parse(jsonData?.content.textContent ?? "{}");
+    const congregation = {
+      location: mergeMultiPolygons(data.congregationBoundaries)
+    } as Congregation;
+    const onClick = (territoryId: string) => {
+      document.location.href = `${document.location.pathname}/${territoryId}`
+    }
+
+    // If we instantiate the map immediately after creating the div, then resetZoom
+    // sometimes fails to fit the map to the visible area. Waiting a short while
+    // avoids that. It's not known if there is some event we could await instead.
+    // Maybe the browser's layout engine hasn't yet determined the div's size?
+    setTimeout(() => {
+      this.#map = initMap(root, congregation, data.territories, onClick);
+    }, 20);
+  }
+
+  disconnectedCallback() {
+    this.#map.unmount();
   }
 }
 

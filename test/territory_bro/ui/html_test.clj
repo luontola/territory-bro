@@ -41,6 +41,10 @@
     (is (= "" (html/visible-text "<i class=\"whatever\"></i>"))
         "not an icon"))
 
+  (testing "hides template elements"
+    (is (= "" (html/visible-text "<template>stuff</template>")))
+    (is (= "" (html/visible-text "<template id=\"xyz\">stuff</template>"))))
+
   (testing "normalizes whitespace"
     (is (= "one two" (html/visible-text "  <p>one</p>\n<br><p>two</p>\n  "))))
 

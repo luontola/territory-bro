@@ -168,6 +168,21 @@
     (refresh-projections!)
     cong-id))
 
+(defn create-congregation-boundary! [cong-id]
+  (let [congregation-boundary-id (UUID/randomUUID)
+        state (projections/cached-state)]
+    (db/with-db [conn {}]
+      (dispatcher/command! conn state
+                           {:command/type :congregation-boundary.command/define-congregation-boundary
+                            :command/time (Instant/now)
+                            :command/system "test"
+                            :gis-change/id 42
+                            :congregation/id cong-id
+                            :congregation-boundary/id congregation-boundary-id
+                            :congregation-boundary/location testdata/wkt-multi-polygon}))
+    (refresh-projections!)
+    congregation-boundary-id))
+
 (defn revoke-access-from-all! [cong-id]
   (let [state (projections/cached-state)
         user-ids (congregation/get-users state cong-id)]

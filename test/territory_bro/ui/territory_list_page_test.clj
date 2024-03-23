@@ -16,7 +16,8 @@
   (:import (java.util UUID)))
 
 (def model
-  {:territories [{:id (UUID. 0 1)
+  {:congregation-boundaries [testdata/wkt-multi-polygon]
+   :territories [{:id (UUID. 0 1)
                   :number "123"
                   :addresses "the addresses"
                   :region "the region"
@@ -28,7 +29,9 @@
                  :shareTerritoryLink true
                  :viewCongregation true}})
 (def anonymous-model
-  (assoc model :permissions {}))
+  (assoc model
+         :congregation-boundaries []
+         :permissions {}))
 
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
@@ -36,6 +39,7 @@
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
           cong-id (at/create-congregation! session "foo")
+          _ (at/create-congregation-boundary! cong-id)
           territory-id (at/create-territory! cong-id)
           request {:params {:congregation (str cong-id)
                             :territory (str territory-id)}
@@ -109,6 +113,13 @@
                10C")
              (-> (territory-list-page/view (assoc model :territories territories))
                  html/visible-text)))))
+
+  (testing "territory-list-map's JSON data is guarded against XSS"
+    ;; If we used a <script type="application/json"> element, we would need to
+    ;; guard against "</script>" strings. By using a <template> element, we can
+    ;; rely on basic HTML encoding, which Hiccup does automatically.
+    (is (str/includes? (str (territory-list-page/view (replace-in model [:territories 0 :number] "123" "</script>")))
+                       "&quot;number&quot;:&quot;&lt;/script&gt;&quot;")))
 
   (testing "anonymous user, has opened a share"
     (is (= (html/normalize-whitespace

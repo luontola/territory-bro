@@ -7,6 +7,7 @@
             [hiccup2.core :as h]
             [territory-bro.api :as api]
             [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.json :as json]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
@@ -16,9 +17,9 @@
 
 (defn model! [request]
   (let [congregation (:body (api/get-congregation request))]
-    {:territories (->> (:territories congregation)
-                       ;;  TODO: use natural sort
-                       (sort-by :number))
+    {:congregation-boundaries (->> (:congregationBoundaries congregation)
+                                   (map :location))
+     :territories (:territories congregation)
      :permissions (:permissions congregation)}))
 
 (defn limited-visibility-help []
@@ -38,13 +39,20 @@
            (str/replace "</0>" "</a>")
            (h/raw)))])))
 
-(defn view [{:keys [territories permissions]}]
+(defn view [{:keys [congregation-boundaries territories permissions]}]
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
      [:h1 (i18n/t "TerritoryListPage.title")]
      (when-not (:viewCongregation permissions)
        (limited-visibility-help))
-     ;; TODO: map
+
+     [:div {:class (:map styles)}
+      [:territory-list-map {:map-raster "osmhd"}
+       [:template.json-data
+        (json/write-value-as-string
+         {:congregationBoundaries congregation-boundaries
+          :territories (map #(select-keys % [:id :number :location :loaned :staleness])
+                            territories)})]]]
 
      [:form.pure-form {:class (:search styles)}
       [:label {:for "territory-search"}
