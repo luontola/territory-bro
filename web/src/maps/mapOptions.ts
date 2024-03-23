@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -30,6 +30,7 @@ export type MapRaster = {
   name: string;
   makeSource: () => TileSource;
 };
+const transition = 100;
 export const mapRasters: MapRaster[] = [{
   id: 'osmhd',
   name: "World - OpenStreetMap",
@@ -37,12 +38,15 @@ export const mapRasters: MapRaster[] = [{
     url: 'https://{a-c}.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
     tileSize: [512, 512],
     tileGrid: createXYZ({tileSize: [256, 256]}),
-    attributions: OSM_ATTRIBUTION
+    attributions: OSM_ATTRIBUTION,
+    transition,
   })
 }, {
   id: 'osm',
   name: "World - OpenStreetMap (backup server, low DPI)",
-  makeSource: () => new OSM()
+  makeSource: () => new OSM({
+    transition,
+  })
 }, {
   id: 'mmlTaustakartta',
   name: "Finland - Maanmittauslaitoksen taustakarttasarja",
@@ -50,7 +54,8 @@ export const mapRasters: MapRaster[] = [{
     url: 'https://tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
     tileSize: [256, 256],
     tileGrid: createXYZ({tileSize: [128, 128]}),
-    attributions: '&copy; Maanmittauslaitos'
+    attributions: '&copy; Maanmittauslaitos',
+    transition,
   })
 }, {
   id: 'vantaaKaupunkikartta',
@@ -59,7 +64,8 @@ export const mapRasters: MapRaster[] = [{
     url: 'https://gis.vantaa.fi/geoserver/wms',
     params: {'LAYERS': 'taustakartta:kaupunkikartta', 'TILED': true},
     serverType: 'geoserver',
-    attributions: '&copy; Vantaan kaupunki'
+    attributions: '&copy; Vantaan kaupunki',
+    transition,
   })
 }];
 
