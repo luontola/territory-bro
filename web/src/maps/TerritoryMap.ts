@@ -7,7 +7,6 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Style from "ol/style/Style";
 import {
-  findMapRasterById,
   makeControls,
   makeInteractions,
   makePrintoutView,
@@ -19,12 +18,11 @@ import {
   wktToFeatures
 } from "./mapOptions";
 import {Territory} from "../api";
-import OpenLayersMap from "./OpenLayersMap";
+import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
 import Feature from 'ol/Feature';
 import Geolocation from 'ol/Geolocation';
 import Point from 'ol/geom/Point';
 import {Circle as CircleStyle, Fill, Stroke} from 'ol/style';
-import mapStyles from "./OpenLayersMap.module.css";
 
 type Props = {
   territory: Territory;
@@ -63,38 +61,16 @@ export default class TerritoryMap extends OpenLayersMap<Props> {
   }
 }
 
-export class TerritoryMapElement extends HTMLElement {
-  #map;
-
+export class TerritoryMapElement extends OpenLayersMapElement {
   constructor() {
     super();
   }
 
-  connectedCallback() {
+  createMap({root, printout, mapRaster}) {
     const location = this.getAttribute("location");
-    const mapRaster = findMapRasterById(this.getAttribute("map-raster") || 'osmhd');
-    const printout = !!this.getAttribute("printout");
-
-    let className = mapStyles.root;
-    if (printout) {
-      className += " " + mapStyles.printout;
-    }
-    const root = document.createElement("div");
-    root.setAttribute("class", className)
-    this.appendChild(root)
-
-    // If we instantiate the map immediately after creating the div, then resetZoom
-    // sometimes fails to fit the map to the visible area. Waiting a short while
-    // avoids that. It's not known if there is some event we could await instead.
-    // Maybe the browser's layout engine hasn't yet determined the div's size?
-    setTimeout(() => {
-      this.#map = initTerritoryMap(root, {location} as Territory, printout)
-      this.#map.setStreetsLayerRaster(mapRaster);
-    }, 20);
-  }
-
-  disconnectedCallback() {
-    this.#map.unmount();
+    const map = initTerritoryMap(root, {location} as Territory, printout)
+    map.setStreetsLayerRaster(mapRaster);
+    return map
   }
 }
 

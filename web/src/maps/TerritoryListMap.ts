@@ -19,11 +19,10 @@ import {
   wktToFeatures
 } from "./mapOptions";
 import {Congregation, mergeMultiPolygons, Territory} from "../api";
-import OpenLayersMap from "./OpenLayersMap";
+import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
 import {isEmpty as isEmptyExtent} from "ol/extent";
 import {getPageState, setPageState} from "../util";
 import {isEqual} from "lodash-es";
-import mapStyles from "./OpenLayersMap.module.css";
 
 type Props = {
   congregation: Congregation;
@@ -58,39 +57,24 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
   }
 }
 
-export class TerritoryListMapElement extends HTMLElement {
-  #map;
-
+export class TerritoryListMapElement extends OpenLayersMapElement {
   constructor() {
     super();
   }
 
-  connectedCallback() {
-    const root = document.createElement("div");
-    root.setAttribute("class", mapStyles.root)
-    this.appendChild(root)
-
+  createMap({root}) {
     const jsonData = this.querySelector("template.json-data") as HTMLTemplateElement | null;
     const data = JSON.parse(jsonData?.content.textContent ?? "{}");
     const congregationBoundaries = data.congregationBoundaries ?? [];
     const territories = data.territories ?? [];
+
+    const congregation = {
+      location: mergeMultiPolygons(congregationBoundaries)
+    } as Congregation;
     const onClick = (territoryId: string) => {
       document.location.href = `${document.location.pathname}/${territoryId}`
     }
-
-    // If we instantiate the map immediately after creating the div, then resetZoom
-    // sometimes fails to fit the map to the visible area. Waiting a short while
-    // avoids that. It's not known if there is some event we could await instead.
-    // Maybe the browser's layout engine hasn't yet determined the div's size?
-    setTimeout(() => {
-      this.#map = initMap(root, {
-        location: mergeMultiPolygons(congregationBoundaries)
-      } as Congregation, territories, onClick);
-    }, 20);
-  }
-
-  disconnectedCallback() {
-    this.#map.unmount();
+    return initMap(root, congregation, territories, onClick);
   }
 }
 
