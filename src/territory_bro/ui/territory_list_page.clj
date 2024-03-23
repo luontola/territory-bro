@@ -15,12 +15,14 @@
             [territory-bro.ui.layout :as layout])
   (:import (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
-(defn model! [request]
-  (let [congregation (:body (api/get-congregation request))]
+(defn model! [request {:keys [fetch-loans?]}]
+  (let [congregation (:body (api/get-congregation request {:fetch-loans? fetch-loans?}))]
     {:congregation-boundaries (->> (:congregationBoundaries congregation)
                                    (map :location))
      :territories (:territories congregation)
+     :has-loans? (some? (:loansCsvUrl congregation))
      :permissions (:permissions congregation)}))
+
 
 (defn limited-visibility-help []
   (info-box/view
@@ -39,7 +41,21 @@
            (str/replace "</0>" "</a>")
            (h/raw)))])))
 
-(defn view [{:keys [congregation-boundaries territories permissions]}]
+
+(defn territory-list-map [{:keys [congregation-boundaries territories]}]
+  (h/html
+   [:territory-list-map
+    [:template.json-data
+     (json/write-value-as-string
+      {:congregationBoundaries congregation-boundaries
+       :territories (map #(select-keys % [:id :number :location :loaned :staleness])
+                         territories)})]]))
+
+(defn territory-list-map! [request]
+  (territory-list-map (model! request {:fetch-loans? true})))
+
+
+(defn view [{:keys [territories has-loans? permissions] :as model}]
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
      [:h1 (i18n/t "TerritoryListPage.title")]
@@ -47,12 +63,14 @@
        (limited-visibility-help))
 
      [:div {:class (:map styles)}
-      [:territory-list-map {:map-raster "osmhd"}
-       [:template.json-data
-        (json/write-value-as-string
-         {:congregationBoundaries congregation-boundaries
-          :territories (map #(select-keys % [:id :number :location :loaned :staleness])
-                            territories)})]]]
+      (if has-loans?
+        [:div {:class (:placeholder styles)
+               :hx-target "this"
+               :hx-swap "outerHTML"
+               :hx-trigger "load"
+               :hx-get (str html/*page-path* "/map")}
+         [:i.fa-solid.fa-map-location-dot]]
+        (territory-list-map model))]
 
      [:form.pure-form {:class (:search styles)}
       [:label {:for "territory-search"}
@@ -90,11 +108,22 @@
           [:td (:addresses territory)]])]])))
 
 (defn view! [request]
-  (view (model! request)))
+  (view (model! request {:fetch-loans? false})))
 
 (def routes
   ["/congregation/:congregation/territories"
-   {:get {:handler (fn [request]
-                     (-> (view! request)
-                         (layout/page! request)
-                         (html/response)))}}])
+   {:middleware [[html/wrap-page-path ::page]]}
+   [""
+    {:name ::page
+     :get {:handler (fn [request]
+                      (-> (view! request)
+                          (layout/page! request)
+                          (html/response)))}}]
+
+   ["/map"
+    {:name ::map
+     :conflicting true
+     :get {:handler (fn [request]
+                      (-> (territory-list-map! request)
+                          (html/response)))}}]])
+

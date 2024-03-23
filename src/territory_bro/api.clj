@@ -209,7 +209,7 @@
 
 (def ^:private validate-congregation (s/validator Congregation))
 
-(defn get-congregation [request]
+(defn get-congregation [request {:keys [fetch-loans?]}]
   (auth/with-user-from-session request
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           user-id (current-user-id)
@@ -224,7 +224,7 @@
         (forbidden! "No congregation access"))
       (db/with-db [conn {:read-only? true}]
         (ok (-> congregation
-                (loan/enrich-territory-loans!)
+                (cond-> fetch-loans? (loan/enrich-territory-loans!))
                 (enrich-congregation-users conn)
                 (format-for-api)
                 (validate-congregation)))))))
@@ -515,7 +515,7 @@
   (GET "/api/congregations" request (list-congregations request))
   (GET "/api/congregation/demo" request (get-demo-congregation request))
   (GET "/api/congregation/demo/territory/:territory" request (get-demo-territory request))
-  (GET "/api/congregation/:congregation" request (get-congregation request))
+  (GET "/api/congregation/:congregation" request (get-congregation request {:fetch-loans? true}))
   (POST "/api/congregation/:congregation/add-user" request (add-user request))
   (POST "/api/congregation/:congregation/set-user-permissions" request (set-user-permissions request))
   (POST "/api/congregation/:congregation/settings" request (save-congregation-settings request))

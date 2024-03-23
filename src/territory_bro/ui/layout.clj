@@ -23,7 +23,7 @@
           congregation (when (some? cong-id)
                          (-> (if demo?
                                (:body (api/get-demo-congregation request))
-                               (:body (api/get-congregation request)))
+                               (:body (api/get-congregation request {})))
                              (select-keys [:id :name :permissions])))
           language-selection-width (get-in request [:cookies "languageSelectionWidth" :value])]
       {:congregation congregation

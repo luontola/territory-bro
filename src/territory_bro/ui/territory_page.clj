@@ -18,7 +18,7 @@
   (let [demo? (= "demo" (get-in request [:params :congregation]))
         congregation (if demo?
                        (:body (api/get-demo-congregation request))
-                       (:body (api/get-congregation request)))
+                       (:body (api/get-congregation request {})))
         territory (if demo?
                     (:body (api/get-demo-territory request))
                     (:body (api/get-territory request)))]
@@ -26,6 +26,7 @@
          :permissions (-> (:permissions congregation)
                           (select-keys [:editDoNotCalls :shareTerritoryLink]))}
         (merge (map-interaction-help/model request)))))
+
 
 (defn do-not-calls--viewing [{:keys [territory permissions]}]
   (h/html
@@ -148,9 +149,10 @@
 
 (def routes
   ["/congregation/:congregation/territories/:territory"
-   {:middleware [[html/wrap-page-path ::territory-page]]}
+   {:middleware [[html/wrap-page-path ::page]]}
    [""
-    {:name ::territory-page
+    {:name ::page
+     :conflicting true
      :get {:handler (fn [request]
                       (-> (view! request)
                           (layout/page! request)

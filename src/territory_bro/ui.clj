@@ -41,53 +41,53 @@
     (auth/with-user-from-session request
       (handler request))))
 
-(def ring-handler
-  (ring/ring-handler
-   (ring/router
-    [""
-     {:middleware [wrap-base-url-compat ; outermost middleware first
-                   [html/wrap-page-path nil]
-                   auth0/wrap-redirect-to-login
-                   i18n/wrap-current-language
-                   wrap-current-user
-                   wrap-http-response
-                   wrap-json-api-compat]}
+(def routes
+  [""
+   {:middleware [wrap-base-url-compat ; outermost middleware first
+                 [html/wrap-page-path nil]
+                 auth0/wrap-redirect-to-login
+                 i18n/wrap-current-language
+                 wrap-current-user
+                 wrap-http-response
+                 wrap-json-api-compat]}
 
-     home-page/routes
+   home-page/routes
 
-     ["/join"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "join page placeholder"])
-                            (layout/page! request)
-                            (html/response)))}}]
-     ["/register"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "register page placeholder"])
-                            (layout/page! request)
-                            (html/response)))}}]
+   ["/join"
+    {:get {:handler (fn [request]
+                      (-> (h/html [:h1 "join page placeholder"])
+                          (layout/page! request)
+                          (html/response)))}}]
+   ["/register"
+    {:get {:handler (fn [request]
+                      (-> (h/html [:h1 "register page placeholder"])
+                          (layout/page! request)
+                          (html/response)))}}]
 
-     support-page/routes
+   support-page/routes
 
-     open-share-page/routes
+   open-share-page/routes
 
-     auth0/routes
+   auth0/routes
 
-     congregation-page/routes
+   congregation-page/routes
 
-     territory-list-page/routes
+   territory-list-page/routes ; must be before territory-page to avoid route conflicts
 
-     territory-page/routes
+   territory-page/routes
 
-     ["/congregation/:congregation/printouts"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "printouts page placeholder"])
-                            (layout/page! request)
-                            (html/response)))}}]
+   ["/congregation/:congregation/printouts"
+    {:get {:handler (fn [request]
+                      (-> (h/html [:h1 "printouts page placeholder"])
+                          (layout/page! request)
+                          (html/response)))}}]
 
-     ["/congregation/:congregation/settings"
-      {:get {:handler (fn [request]
-                        (-> (h/html [:h1 "settings page placeholder"])
-                            (layout/page! request)
-                            (html/response)))}}]
+   ["/congregation/:congregation/settings"
+    {:get {:handler (fn [request]
+                      (-> (h/html [:h1 "settings page placeholder"])
+                          (layout/page! request)
+                          (html/response)))}}]
 
-     error-page/routes])))
+   error-page/routes])
+
+(def ring-handler (ring/ring-handler (ring/router routes)))

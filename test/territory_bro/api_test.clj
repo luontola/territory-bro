@@ -168,6 +168,19 @@
     (refresh-projections!)
     cong-id))
 
+(defn change-congregation-settings! [cong-id name loans-csv-url]
+  (let [state (projections/cached-state)]
+    (db/with-db [conn {}]
+      (dispatcher/command! conn state
+                           {:command/type :congregation.command/update-congregation
+                            :command/time (Instant/now)
+                            :command/system "test"
+                            :congregation/id cong-id
+                            :congregation/name name
+                            :congregation/loans-csv-url loans-csv-url}))
+    (refresh-projections!)
+    nil))
+
 (defn create-congregation-boundary! [cong-id]
   (let [congregation-boundary-id (UUID/randomUUID)
         state (projections/cached-state)]

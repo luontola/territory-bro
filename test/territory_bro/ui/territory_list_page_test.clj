@@ -5,14 +5,18 @@
 (ns territory-bro.ui.territory-list-page-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
+            [reitit.core :as reitit]
             [territory-bro.api :as api]
             [territory-bro.api-test :as at]
+            [territory-bro.domain.loan :as loan]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
+            [territory-bro.ui :as ui]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.territory-list-page :as territory-list-page])
+            [territory-bro.ui.territory-list-page :as territory-list-page]
+            [territory-bro.ui.territory-page :as territory-page])
   (:import (java.util UUID)))
 
 (def model
@@ -23,11 +27,17 @@
                   :region "the region"
                   :meta {:foo "bar"}
                   :location testdata/wkt-multi-polygon}]
+   :has-loans? false
    :permissions {:configureCongregation true
                  :editDoNotCalls true
                  :gisAccess true
                  :shareTerritoryLink true
                  :viewCongregation true}})
+(def model-loans-enabled
+  (replace-in model [:has-loans?] false true))
+(def model-loans-fetched
+  (update-in model-loans-enabled [:territories 0] merge {:loaned true
+                                                         :staleness 7}))
 (def anonymous-model
   (assoc model
          :congregation-boundaries []
@@ -43,19 +53,31 @@
           territory-id (at/create-territory! cong-id)
           request {:params {:congregation (str cong-id)
                             :territory (str territory-id)}
-                   :session {::auth/user {:user/id user-id}}}]
+                   :session {::auth/user {:user/id user-id}}}
+          fix #(replace-in % [:territories 0 :id] (UUID. 0 1) territory-id)]
+
       (testing "default"
-        (is (= (-> model
-                   (replace-in [:territories 0 :id] (UUID. 0 1) territory-id))
-               (territory-list-page/model! request))))
+        (is (= (fix model)
+               (territory-list-page/model! request {}))))
 
       (testing "anonymous user, has opened a share"
         (at/create-share! cong-id territory-id "share123")
         (let [{:keys [session]} (api/open-share {:params {:share-key "share123"}})
               request (assoc request :session session)]
-          (is (= (-> anonymous-model
-                     (replace-in [:territories 0 :id] (UUID. 0 1) territory-id))
-                 (territory-list-page/model! request))))))))
+          (is (= (fix anonymous-model)
+                 (territory-list-page/model! request {})))))
+
+      (testing "loans enabled,"
+        (at/change-congregation-settings! cong-id "foo" "https://docs.google.com/example")
+        (binding [loan/download! (constantly (str "Number,Loaned,Staleness\n"
+                                                  "123,TRUE,7\n"))]
+          (testing "not fetched"
+            (is (= (fix model-loans-enabled)
+                   (territory-list-page/model! request {:fetch-loans? false}))))
+
+          (testing "fetched"
+            (is (= (fix model-loans-fetched)
+                   (territory-list-page/model! request {:fetch-loans? true})))))))))
 
 (deftest view-test
   (testing "default"
@@ -121,31 +143,59 @@
     (is (str/includes? (str (territory-list-page/view (replace-in model [:territories 0 :number] "123" "</script>")))
                        "&quot;number&quot;:&quot;&lt;/script&gt;&quot;")))
 
-  (testing "anonymous user, has opened a share"
-    (is (= (html/normalize-whitespace
-            "Territories
+  (testing "loans lazy loading:"
+    ;; Loan data is currently loaded from Google Sheets, which can easily take a couple of seconds.
+    ;; Lazy loading is needed to load the territory list page faster and defer rendering the map.
+    (let [map-html "<territory-list-map"
+          placeholder-icon "{fa-map-location-dot}"]
+      (testing "loans disabled -> show map immediately"
+        (let [rendered (territory-list-page/view model)]
+          (is (str/includes? rendered map-html))
+          (is (not (str/includes? (html/visible-text rendered) placeholder-icon)))))
 
-             {fa-info-circle} Why so few territories?
-             Only those territories which have been shared with you are currently shown.
-             You will need to login to see the rest.
+      (testing "loans enabled -> show a placeholder and lazy load the map"
+        (let [rendered (territory-list-page/view model-loans-enabled)]
+          (is (not (str/includes? rendered map-html)))
+          (is (str/includes? (html/visible-text rendered) placeholder-icon))))))
 
-             Search Clear
-             Number   Region       Addresses
-             123      the region   the addresses")
-           (-> (territory-list-page/view anonymous-model)
-               html/visible-text))))
+  (testing "limited visibility disclaimer:"
+    (testing "anonymous user, has opened a share"
+      (is (= (html/normalize-whitespace
+              "Territories
 
-  (testing "logged-in user without congregation access, has opened a share"
-    (is (= (html/normalize-whitespace
-            "Territories
+               {fa-info-circle} Why so few territories?
+               Only those territories which have been shared with you are currently shown.
+               You will need to login to see the rest.
 
-             {fa-info-circle} Why so few territories?
-             Only those territories which have been shared with you are currently shown.
-             You will need to request access to see the rest.
-
-             Search Clear
-             Number   Region       Addresses
-             123      the region   the addresses")
-           (binding [auth/*user* {:user/id (UUID/randomUUID)}]
+               Search Clear
+               Number   Region       Addresses
+               123      the region   the addresses")
              (-> (territory-list-page/view anonymous-model)
-                 html/visible-text))))))
+                 html/visible-text))))
+
+    (testing "logged-in user without congregation access, has opened a share"
+      (is (= (html/normalize-whitespace
+              "Territories
+
+               {fa-info-circle} Why so few territories?
+               Only those territories which have been shared with you are currently shown.
+               You will need to request access to see the rest.
+
+               Search Clear
+               Number   Region       Addresses
+               123      the region   the addresses")
+             (binding [auth/*user* {:user/id (UUID/randomUUID)}]
+               (-> (territory-list-page/view anonymous-model)
+                   html/visible-text)))))))
+
+(deftest route-conflicts-test
+  (let [router (reitit/router ui/routes)
+        uuid (str (UUID/randomUUID))]
+    (testing "htmx component URLs shouldn't conflict with territory page URLs"
+      (is (= ::territory-list-page/map
+             (-> (reitit/match-by-path router (str "/congregation/" uuid "/territories/map"))
+                 :data :name)))
+      (is (= ::territory-page/page
+             (-> (reitit/match-by-path router (str "/congregation/" uuid "/territories/" uuid))
+                 :data :name))))))
+

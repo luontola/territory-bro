@@ -35,3 +35,14 @@ td.number:hover a {
     width: 100%;
     height: min(700px, calc(100vh - 8em));
 }
+
+.placeholder {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fafafa;
+    color: #f0f0f0;
+    /* 300px is for desktop, but on mobile it should be smaller to not fill the whole width/height (depending on device orientation) */
+    font-size: min(300px, 60cqw, 60cqh);
+}
