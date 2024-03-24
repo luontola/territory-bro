@@ -40,7 +40,7 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
       territories,
       onClick,
     } = this.props;
-    this.map = initMap(this.elementRef.current, congregation, territories, onClick);
+    this.map = initMap(this.elementRef.current, congregation, territories, territories.map(t => t.id), onClick);
   }
 
   componentDidUpdate(prevProps, _prevState) {
@@ -58,8 +58,32 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
 }
 
 export class TerritoryListMapElement extends OpenLayersMapElement {
+  static observedAttributes = ['visible-territories'];
+
   constructor() {
     super();
+  }
+
+  connectedCallback() {
+    const onTerritorySearch = window.onTerritorySearch;
+    if (onTerritorySearch) {
+      // This will cause the search to populate the visible-territories attribute.
+      // It's important to do this before the map has been created: When the user
+      // navigates back in history, the map zoom and position should be restored
+      // to what it was previously, instead of resetting the zoom to its defaults.
+      // After the map has been created, changing the visible-territories attribute
+      // will automatically reset the zoom.
+      onTerritorySearch()
+    }
+    super.connectedCallback();
+  }
+
+  attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null) {
+    if (name === 'visible-territories') {
+      if (this.map) { // the map might not yet have been created
+        this.map.updateVisibleTerritories(JSON.parse(newValue ?? "[]"));
+      }
+    }
   }
 
   createMap({root}) {
@@ -67,6 +91,7 @@ export class TerritoryListMapElement extends OpenLayersMapElement {
     const data = JSON.parse(jsonData?.content.textContent ?? "{}");
     const congregationBoundaries = data.congregationBoundaries ?? [];
     const territories = data.territories ?? [];
+    const visibleTerritories: string[] = JSON.parse(this.getAttribute("visible-territories") ?? "[]");
 
     const congregation = {
       location: mergeMultiPolygons(congregationBoundaries)
@@ -74,7 +99,7 @@ export class TerritoryListMapElement extends OpenLayersMapElement {
     const onClick = (territoryId: string) => {
       document.location.href = `${document.location.pathname}/${territoryId}`
     }
-    return initMap(root, congregation, territories, onClick);
+    return initMap(root, congregation, territories, visibleTerritories, onClick);
   }
 }
 
@@ -107,6 +132,7 @@ function loanableTerritoryFill(loaned, staleness) {
 function initMap(element: HTMLDivElement,
                  congregation: Congregation,
                  territories: Territory[],
+                 visibleTerritories: string[],
                  onClick: (string) => void): any {
   const congregationLayer = new VectorLayer({
     source: new VectorSource({
@@ -136,19 +162,29 @@ function initMap(element: HTMLDivElement,
     }
   });
 
-  function setTerritories(territories) {
-    const features = territories.map(function (territory) {
-      const feature = wktToFeature(territory.location);
-      feature.set('territoryId', territory.id);
-      feature.set('number', territory.number);
-      feature.set('loaned', territory.loaned);
-      feature.set('staleness', territory.staleness);
-      return feature;
-    });
+  const allTerritories = territories.map(territoryToFeature);
+  setVisibleTerritories(visibleTerritories);
+
+  function territoryToFeature(territory: Territory) {
+    const feature = wktToFeature(territory.location);
+    feature.set('territoryId', territory.id);
+    feature.set('number', territory.number);
+    feature.set('loaned', territory.loaned);
+    feature.set('staleness', territory.staleness);
+    return feature;
+  }
+
+  function setAllTerritories(territories: Territory[]) { // TODO: remove me after removing SPA
+    const features = territories.map(territoryToFeature);
     territoryLayer.setSource(new VectorSource({features}))
   }
 
-  setTerritories(territories);
+  function setVisibleTerritories(territoryIds: string[]) {
+    const visible = new Set(territoryIds);
+    const features = allTerritories.filter(feature => visible.has(feature.get('territoryId')));
+    territoryLayer.setSource(new VectorSource({features}))
+  }
+
 
   const streetsLayer = makeStreetsLayer();
 
@@ -208,8 +244,12 @@ function initMap(element: HTMLDivElement,
   });
 
   return {
-    updateTerritories(territories: Territory[]): void {
-      setTerritories(territories);
+    updateVisibleTerritories(territoryIds: string[]) {
+      setVisibleTerritories(territoryIds);
+      resetZoom(map, {duration: 300});
+    },
+    updateTerritories(territories: Territory[]): void { // TODO: remove me after removing SPA
+      setAllTerritories(territories);
       resetZoom(map, {duration: 300});
     },
     unmount() {

@@ -72,7 +72,8 @@
          [:i.fa-solid.fa-map-location-dot]]
         (territory-list-map model))]
 
-     [:form.pure-form {:class (:search styles)}
+     [:form.pure-form {:class (:search styles)
+                       :onsubmit "return false"}
       [:label {:for "territory-search"}
        (i18n/t "TerritoryListPage.search")]
       [:input#territory-search.pure-input-rounded {:type "text"
@@ -94,7 +95,8 @@
        (for [territory (sort-by (comp str :number)
                                 (CaseInsensitiveSimpleNaturalComparator/getInstance)
                                 territories)]
-         [:tr {:data-searchable (-> (str/join "\n" [(:number territory)
+         [:tr {:data-territory-id (:id territory)
+               :data-searchable (-> (str/join "\n" [(:number territory)
                                                     (:region territory)
                                                     (:addresses territory)])
                                     (str/lower-case)

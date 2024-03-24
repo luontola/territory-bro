@@ -99,7 +99,9 @@
       ;; newline is used as the separator, so that you could not accidentally search from two
       ;; adjacent fields at the same time (one does not simply type a newline to a search field)
       (is (str/includes? (str (territory-list-page/view model))
-                         "<tr data-searchable=\"123a\nsome region\nsome street\nanother street\">"))))
+                         "data-searchable=\"123a\nsome region\nsome street\nanother street\""))
+      (is (str/includes? (str (territory-list-page/view model))
+                         "data-territory-id=\"00000000-0000-0000-0000-000000000001\""))))
 
   (testing "missing territory number: shows a placeholder so that the link can be clicked"
     (is (= (html/normalize-whitespace

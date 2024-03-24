@@ -130,18 +130,38 @@ const clearTerritorySearch = document.getElementById("clear-territory-search");
 const territoryList = document.getElementById("territory-list");
 if (territorySearch && clearTerritorySearch && territoryList) {
   const onTerritorySearch = () => {
+    setPageState('territorySearch', territorySearch.value);
     const needle = territorySearch.value.toLowerCase().trim();
     clearTerritorySearch.style.display = needle === "" ? "none" : ""
-    for (const row of territoryList.querySelectorAll("[data-searchable]")) {
-      const haystack = row.getAttribute("data-searchable") ?? '';
-      row.style.display = haystack.includes(needle) ? "" : "none";
+
+    const visibleTerritories: string[] = [];
+    for (const row of territoryList.querySelectorAll("[data-searchable]") as NodeListOf<HTMLElement>) {
+      const territoryId = row.getAttribute("data-territory-id");
+      const haystack = row.getAttribute("data-searchable");
+      if (territoryId && haystack) {
+        if (haystack.includes(needle)) {
+          visibleTerritories.push(territoryId);
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      }
+    }
+    // guard against zero map elements, if it's lazy loaded
+    for (const territoryListMap of document.querySelectorAll("territory-list-map")) {
+      territoryListMap.setAttribute("visible-territories", JSON.stringify(visibleTerritories));
     }
   };
+
   const onClearTerritorySearch = () => {
     territorySearch.value = "";
     territorySearch.focus();
     onTerritorySearch();
   };
-  (window as any).onTerritorySearch = onTerritorySearch;
-  (window as any).onClearTerritorySearch = onClearTerritorySearch;
+
+  territorySearch.value = getPageState('territorySearch') ?? '';
+  onTerritorySearch(); // apply the search term from page state to filter the rows
+
+  window.onTerritorySearch = onTerritorySearch;
+  window.onClearTerritorySearch = onClearTerritorySearch;
 }
