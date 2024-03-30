@@ -1,10 +1,9 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis.gis-user
-  (:require [medley.core :refer [dissoc-in]]
-            [territory-bro.infra.util :refer [conj-set]])
+  (:require [medley.core :refer [dissoc-in]])
   (:import (java.security SecureRandom)
            (java.util Base64)))
 
