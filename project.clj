@@ -94,6 +94,7 @@
                                   [criterium "0.4.6"]
                                   [etaoin "1.0.40"]
                                   [lambdaisland/kaocha "1.87.1366"]
+                                  [nubank/matcher-combinators "3.9.1"]
                                   [org.clojure/test.check "1.1.1"]
                                   [org.mockito/mockito-core "5.11.0"]
                                   [prismatic/schema-generators "0.1.5"]

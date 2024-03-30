@@ -135,6 +135,7 @@
     <orderEntry type="library" name="Leiningen: net.jodah/expiringmap:0.5.8" level="project" />
     <orderEntry type="library" name="Leiningen: net.jodah/failsafe:2.4.1" level="project" />
     <orderEntry type="library" name="Leiningen: nrepl:1.0.0" level="project" />
+    <orderEntry type="library" name="Leiningen: nubank/matcher-combinators:3.9.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.apache.commons/commons-fileupload2-core:2.0.0-M1" level="project" />
     <orderEntry type="library" name="Leiningen: org.apache.commons/commons-lang3:3.14.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.apache.httpcomponents/httpasyncclient:4.1.4" level="project" />
@@ -156,6 +157,7 @@
     <orderEntry type="library" name="Leiningen: org.clojure/data.priority-map:0.0.7" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/java.classpath:1.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/java.jdbc:0.7.12" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/math.combinatorics:0.2.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/spec.alpha:0.4.233" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/test.check:1.1.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/tools.cli:1.1.230" level="project" />
