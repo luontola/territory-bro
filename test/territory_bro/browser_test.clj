@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns ^:e2e territory-bro.browser-test
-  (:require [clojure.java.io :as io]
+  (:require [clj-http.client :as http]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer :all]
             [etaoin.api :as b]
@@ -38,6 +39,7 @@
        (b/postmortem-handler *driver* opts#))))
 
 (defn with-browser [f]
+  (is true) ; disable Kaocha's warning about missing `is` - Etaoin's waits are like assertions without an `is`
   (b2/with-chrome-headless [driver browser-config]
     (binding [*driver* driver]
       (f))))
@@ -70,6 +72,23 @@
     (b/wait-visible :dev-login-button)
     (b/click :dev-login-button)
     (b/wait-visible :logout-button)))
+
+(defn dev-login-as [driver name]
+  (let [username (-> name
+                     (str/replace #"\s" "")
+                     (str/lower-case))
+        params (http/generate-query-string {"sub" username
+                                            "name" name
+                                            "email" (str username "@example.com")})]
+    (if (str/ends-with? *base-url* ":8080") ; TODO: remove this conditional together with SPA UI
+      (doto driver ; SPA UI
+        (b/go (str *base-url* (str "/api/dev-login?" params)))
+        (b/wait-visible {:fn/text "Logged in"})
+        (b/go *base-url*)
+        (b/wait-visible :logout-button))
+      (doto driver ; SSR UI
+        (b/go (str *base-url* (str "/dev-login?" params)))
+        (b/wait-visible :logout-button)))))
 
 (defn go-to-any-congregation [driver]
   (let [link [:congregation-list {:tag :a}]
@@ -148,6 +167,23 @@
         (b/click :language-selection)
         (b/click [:language-selection {:tag :option, :fn/has-string "suomi - Finnish"}])
         (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string "Etusivu"}])))))
+
+
+(deftest registration-test
+  (with-per-test-postmortem
+    (let [nonce (System/currentTimeMillis)
+          user (str "Test User " nonce)
+          congregation-name (str "Test Congregation " nonce)]
+      (doto *driver*
+        (dev-login-as user)
+
+        (b/click {:tag :a, :fn/has-string "Register a new congregation"})
+        (b/wait-visible {:tag :h1, :fn/has-string "Register a new congregation"})
+        (b/fill :congregationName congregation-name)
+        (b/click {:tag :button, :fn/has-string "Register"})
+
+        ;; we should arrive at the newly created congregation's front page
+        (b/wait-visible {:tag :h1, :fn/has-string congregation-name})))))
 
 
 (defn- two-random-territories [driver]

@@ -507,6 +507,7 @@
 
 (defroutes api-routes
   (POST "/api/login" request (login request))
+  (GET "/api/dev-login" request (dev-login request))
   (POST "/api/dev-login" request (dev-login request))
   (POST "/api/logout" [] (logout))
   (GET "/api/sudo" request (sudo request))
