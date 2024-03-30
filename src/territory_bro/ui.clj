@@ -17,6 +17,7 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.open-share-page :as open-share-page]
+            [territory-bro.ui.registration-page :as registration-page]
             [territory-bro.ui.support-page :as support-page]
             [territory-bro.ui.territory-list-page :as territory-list-page]
             [territory-bro.ui.territory-page :as territory-page]))
@@ -58,11 +59,8 @@
                       (-> (h/html [:h1 "join page placeholder"])
                           (layout/page! request)
                           (html/response)))}}]
-   ["/register"
-    {:get {:handler (fn [request]
-                      (-> (h/html [:h1 "register page placeholder"])
-                          (layout/page! request)
-                          (html/response)))}}]
+
+   registration-page/routes
 
    support-page/routes
 
