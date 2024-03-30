@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,7 +7,7 @@
             [territory-bro.events :as events]
             [territory-bro.gis.db-admin :as db-admin]
             [territory-bro.test.spy :as spy]
-            [territory-bro.test.testutil :as testutil])
+            [territory-bro.test.testutil :as testutil :refer [thrown?]])
   (:import (java.time Instant)
            (java.util UUID)
            (territory_bro NoPermitException)))

@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,7 +8,7 @@
             [territory-bro.infra.db :as db]
             [territory-bro.infra.user :as user]
             [territory-bro.test.fixtures :refer [db-fixture]]
-            [territory-bro.test.testutil :refer [re-equals]])
+            [territory-bro.test.testutil :refer [re-equals thrown-with-msg?]])
   (:import (java.util UUID)
            (territory_bro ValidationException)))
 

@@ -7,7 +7,7 @@
             [clojure.string :as str]
             [clojure.test :refer :all]
             [territory-bro.infra.resources :as resources]
-            [territory-bro.test.testutil :refer [re-equals]])
+            [territory-bro.test.testutil :refer [re-equals thrown-with-msg?]])
   (:import (java.net URL)))
 
 (def test-resource "db/flyway/master/R__functions.sql")

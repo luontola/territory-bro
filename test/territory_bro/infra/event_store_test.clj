@@ -1,4 +1,4 @@
-;; Copyright © 2015-2021 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -10,7 +10,7 @@
             [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.json :as json]
             [territory-bro.test.fixtures :refer [db-fixture]]
-            [territory-bro.test.testutil :refer [re-equals re-contains grab-exception]])
+            [territory-bro.test.testutil :refer [grab-exception re-contains re-equals thrown-with-msg?]])
   (:import (clojure.lang ExceptionInfo)
            (java.util UUID)
            (org.postgresql.util PSQLException)

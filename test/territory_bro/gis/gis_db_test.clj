@@ -11,7 +11,8 @@
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
-            [territory-bro.test.fixtures :refer [db-fixture]])
+            [territory-bro.test.fixtures :refer [db-fixture]]
+            [territory-bro.test.testutil :refer [thrown-with-msg? thrown?]])
   (:import (java.sql Connection)
            (java.util UUID)
            (org.postgresql.util PSQLException)))

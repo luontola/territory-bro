@@ -1,11 +1,12 @@
-;; Copyright © 2015-2023 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.jwt-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
-            [territory-bro.infra.jwt :as jwt])
+            [territory-bro.infra.jwt :as jwt]
+            [territory-bro.test.testutil :refer [thrown-with-msg?]])
   (:import (com.auth0.jwk Jwk JwkProvider)
            (com.auth0.jwt.exceptions InvalidClaimException SignatureVerificationException TokenExpiredException)
            (java.nio.charset StandardCharsets)

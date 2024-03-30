@@ -1,16 +1,17 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.poller-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
-            [territory-bro.infra.poller :as poller])
+            [territory-bro.infra.poller :as poller]
+            [territory-bro.test.testutil :refer [thrown?]])
   (:import (ch.qos.logback.classic Logger)
            (ch.qos.logback.classic.spi LoggingEvent)
            (ch.qos.logback.core.read ListAppender)
            (java.time Duration)
-           (java.util.concurrent CountDownLatch TimeUnit CyclicBarrier TimeoutException)
+           (java.util.concurrent CountDownLatch CyclicBarrier TimeUnit TimeoutException)
            (org.slf4j LoggerFactory)))
 
 ;; slow enough to be noticed as a slow test, because normally this should never be reached

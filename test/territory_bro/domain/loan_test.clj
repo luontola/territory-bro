@@ -6,7 +6,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [territory-bro.domain.loan :as loan]
-            [territory-bro.test.testutil :refer [re-equals]])
+            [territory-bro.test.testutil :refer [re-equals thrown-with-msg?]])
   (:import (java.util UUID)))
 
 (deftest ^:slow download-test

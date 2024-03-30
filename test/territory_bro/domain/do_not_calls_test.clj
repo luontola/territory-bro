@@ -7,7 +7,8 @@
             [clojure.test :refer :all]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.infra.db :as db]
-            [territory-bro.test.fixtures :refer [db-fixture]])
+            [territory-bro.test.fixtures :refer [db-fixture]]
+            [territory-bro.test.testutil :refer [thrown?]])
   (:import (java.time Instant)
            (java.util UUID)
            (territory_bro NoPermitException)))

@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -9,7 +9,7 @@
             [schema-generators.generators :as sg]
             [schema.core :as s]
             [territory-bro.events :as events]
-            [territory-bro.test.testutil :refer [re-equals re-contains]])
+            [territory-bro.test.testutil :refer [re-contains re-equals thrown-with-msg? thrown?]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)))

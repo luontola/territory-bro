@@ -9,6 +9,12 @@
             [territory-bro.infra.foreign-key :as foreign-key])
   (:import (java.util.regex Pattern)))
 
+;; these can be required to avoid IDE warnings about the built-in clojure.test/is macro special forms
+(declare ^{:arglists '([exception-class body])}
+         thrown?)
+(declare ^{:arglists '([exception-class regex body])}
+         thrown-with-msg?)
+
 (defn re-equals [^String s]
   (re-pattern (str "^" (Pattern/quote s) "$")))
 

@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,7 +6,7 @@
   (:require [clojure.test :refer :all]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.util :refer [getx]]
-            [territory-bro.test.testutil :refer [re-contains]])
+            [territory-bro.test.testutil :refer [re-contains thrown-with-msg?]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)))

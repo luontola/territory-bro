@@ -8,7 +8,7 @@
             [territory-bro.events :as events]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]
-            [territory-bro.test.testutil :as testutil :refer [re-equals]])
+            [territory-bro.test.testutil :as testutil :refer [re-equals thrown-with-msg? thrown?]])
   (:import (java.time Instant)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException WriteConflictException)))

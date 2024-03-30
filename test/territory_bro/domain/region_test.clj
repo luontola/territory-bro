@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,7 +7,7 @@
             [territory-bro.domain.region :as region]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.events :as events]
-            [territory-bro.test.testutil :as testutil :refer [re-equals]])
+            [territory-bro.test.testutil :as testutil :refer [re-equals thrown-with-msg? thrown?]])
   (:import (java.time Instant)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException)))

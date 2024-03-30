@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,7 +8,7 @@
             [territory-bro.commands :as commands]
             [territory-bro.infra.foreign-key :as foreign-key]
             [territory-bro.infra.permissions :as permissions]
-            [territory-bro.test.testutil :as testutil :refer [re-contains re-equals]])
+            [territory-bro.test.testutil :as testutil :refer [re-contains re-equals thrown-with-msg? thrown?]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)
