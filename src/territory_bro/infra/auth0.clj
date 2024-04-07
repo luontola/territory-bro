@@ -107,7 +107,7 @@
   (fn [request]
     (let [response (handler request)]
       (if (= 401 (:status response))
-        (response/redirect (login-url request) :see-other)
+        (http-response/see-other (login-url request))
         response))))
 
 (defn login-handler [ring-request]
@@ -128,7 +128,7 @@
                           (.withParameter "prompt" "select_account")
                           (.build))]
     (meta-merge @*ring-response
-                (response/redirect authorize-url :see-other))))
+                (http-response/see-other authorize-url))))
 
 (defn login-callback-handler [ring-request]
   (try
@@ -145,7 +145,7 @@
                       (assoc ::tokens tokens)
                       (merge (auth/user-session id-token user-id)))]
       (log/info "Logged in using OIDC. ID token was" (pr-str id-token))
-      (-> (response/redirect (or return-to-url "/") :see-other)
+      (-> (http-response/see-other (or return-to-url "/"))
           (assoc :session session)))
     (catch IdentityVerificationException e
       (log/warn e "Login failed")
@@ -170,7 +170,7 @@
           session (-> (:session request)
                       (merge (auth/user-session id-token user-id)))]
       (log/info "Logged in using dev login. ID token was" (pr-str id-token))
-      (-> (response/redirect "/" :see-other)
+      (-> (http-response/see-other "/")
           (assoc :session session)))
     (http-response/forbidden "Dev mode disabled")))
 
@@ -182,7 +182,7 @@
         return-to-url (str (public-url) "/")
         logout-url (-> (.logoutUrl api return-to-url true)
                        (.build))]
-    (-> (response/redirect logout-url :see-other)
+    (-> (http-response/see-other logout-url)
         (assoc :session nil))))
 
 (def routes
