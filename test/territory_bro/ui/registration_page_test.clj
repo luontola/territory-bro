@@ -31,6 +31,36 @@
                                        :headers {}}}
                            (registration-page/model! (dissoc request :session))))))))
 
+(deftest ^:slow submit!-test
+  (with-fixtures [db-fixture api-fixture]
+    (let [session (at/login! at/app)
+          user-id (at/get-user-id session)
+          request {:params {:congregationName "the name"}
+                   :session (auth/user-session {:name "John Doe"} user-id)}]
+
+      (testing "logged in"
+        (with-fixtures [fake-dispatcher-fixture]
+          (let [response (registration-page/submit! request)]
+            (is (= {:command/type :congregation.command/create-congregation
+                    :command/user user-id
+                    :congregation/name "the name"}
+                   (select-keys @*last-command [:command/type
+                                                :command/user
+                                                :congregation/name])))
+            (is (= {:status 303
+                    :headers {"Location" (str "/congregation/" (:congregation/id @*last-command))}
+                    :body ""}
+                   response)))))
+
+      (testing "anonymous user"
+        (with-fixtures [fake-dispatcher-fixture]
+          (is (thrown-match? ExceptionInfo
+                             {:type :ring.util.http-response/response
+                              :response {:status 401
+                                         :body "Not logged in"
+                                         :headers {}}}
+                             (registration-page/submit! (dissoc request :session)))))))))
+
 (deftest view-test
   (is (= (html/normalize-whitespace
           "Register a new congregation

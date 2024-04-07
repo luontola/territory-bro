@@ -175,7 +175,7 @@
                (print "\n")
                (pprint/pprint object))))
 
-(defn command! [conn state command]
+(defn ^:dynamic command! [conn state command]
   (let [command (commands/sorted-keys command)]
     (try
       (log/info "Dispatch command:" (pretty-str command))

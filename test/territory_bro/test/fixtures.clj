@@ -6,6 +6,7 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [mount.core :as mount]
+            [territory-bro.dispatcher :as dispatcher]
             [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
@@ -41,12 +42,27 @@
   (f)
   (mount/stop))
 
+
 (defn api-fixture [f]
   (binding [config/env (merge config/env jwt-test/env)]
     (mount/start-with {#'jwt/jwk-provider jwt-test/fake-jwk-provider})
     (mount/start #'router/app)
     (f))
   (mount/stop))
+
+
+(def *last-command (atom nil))
+
+(defn fake-dispatcher [_conn _state command]
+  (reset! *last-command command)
+  [])
+
+(defn fake-dispatcher-fixture [f]
+  (reset! *last-command nil)
+  (binding [dispatcher/command! fake-dispatcher]
+    (f))
+  (reset! *last-command nil))
+
 
 (defmacro with-fixtures [fixtures & body]
   `(let [fixture# (clojure.test/join-fixtures ~fixtures)]

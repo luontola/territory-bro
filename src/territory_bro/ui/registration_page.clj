@@ -5,6 +5,7 @@
 (ns territory-bro.ui.registration-page
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
+            [ring.util.http-response :as http-response]
             [territory-bro.api :as api]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.html :as html]
@@ -43,9 +44,16 @@
 (defn view! [request]
   (view (model! request)))
 
+(defn submit! [request]
+  (let [cong-name (get-in request [:params :congregationName])
+        api-request (assoc request :params {:name cong-name})
+        cong-id (:id (:body (api/create-congregation api-request)))]
+    (http-response/see-other (str "/congregation/" cong-id))))
+
 (def routes
-  [["/register"
-    {:get {:handler (fn [request]
-                      (-> (view! request)
-                          (layout/page! request)
-                          (html/response)))}}]])
+  ["/register"
+   {:get {:handler (fn [request]
+                     (-> (view! request)
+                         (layout/page! request)
+                         (html/response)))}
+    :post {:handler submit!}}])
