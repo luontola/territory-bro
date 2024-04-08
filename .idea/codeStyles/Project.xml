@@ -38,7 +38,7 @@
       <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="999" />
       <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="999" />
     </JavaCodeStyleSettings>
-    <PostgresCodeStyleSettings version="6">
+    <PostgresCodeStyleSettings version="7">
       <option name="USE_GENERAL_STYLE" value="false" />
       <option name="SELECT_ALIGN_AS" value="false" />
       <option name="FROM_INDENT_JOIN" value="false" />
