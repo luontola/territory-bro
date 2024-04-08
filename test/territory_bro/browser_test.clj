@@ -80,6 +80,7 @@
         params (http/generate-query-string {"sub" username
                                             "name" name
                                             "email" (str username "@example.com")})]
+    (b/delete-cookies driver)
     (if (str/ends-with? *base-url* ":8080") ; TODO: remove this conditional together with SPA UI
       (doto driver ; SPA UI
         (b/go (str *base-url* (str "/api/dev-login?" params)))
@@ -172,18 +173,72 @@
 (deftest registration-test
   (with-per-test-postmortem
     (let [nonce (System/currentTimeMillis)
-          user (str "Test User " nonce)
-          congregation-name (str "Test Congregation " nonce)]
-      (doto *driver*
-        (dev-login-as user)
+          user1 (str "Test User1 " nonce)
+          user2 (str "Test User2 " nonce)
+          *user2-id (atom nil)
+          congregation-name (str "Test Congregation " nonce)
+          *congregation-url (atom nil)]
 
-        (b/click {:tag :a, :fn/has-string "Register a new congregation"})
-        (b/wait-visible {:tag :h1, :fn/has-string "Register a new congregation"})
-        (b/fill :congregationName congregation-name)
-        (b/click {:tag :button, :fn/has-string "Register"})
+      (testing "register new congregation"
+        (doto *driver*
+          (dev-login-as user1)
 
-        ;; we should arrive at the newly created congregation's front page
-        (b/wait-visible {:tag :h1, :fn/has-string congregation-name})))))
+          (b/click {:tag :a, :fn/has-string "Register a new congregation"})
+          (b/wait-visible {:tag :h1, :fn/has-string "Register a new congregation"})
+          (b/fill :congregationName congregation-name)
+          (b/click {:tag :button, :fn/has-string "Register"})
+
+          ;; we should arrive at the newly created congregation's front page
+          (b/wait-visible {:tag :h1, :fn/has-string congregation-name}))
+        (reset! *congregation-url (b/get-url *driver*)))
+
+      (testing "find out a user2's ID"
+        (doto *driver*
+          (dev-login-as user2)
+
+          (b/click {:tag :a, :fn/has-string "Join an existing congregation"})
+          (b/wait-visible {:tag :h1, :fn/has-string "Join an existing congregation"}))
+
+        (let [user2-id (b/get-element-text *driver* :your-user-id)]
+          (is (some? (parse-uuid user2-id)))
+          (reset! *user2-id user2-id)))
+
+      (testing "add user2 to congregation"
+        (doto *driver*
+          (dev-login-as user1)
+          (b/go @*congregation-url)
+          (b/wait-visible {:tag :h1, :fn/has-string congregation-name})
+
+          (b/click [{:tag :nav} {:tag :a, :fn/has-string "Settings"}])
+          (b/wait-visible {:tag :h1, :fn/has-string "Settings"})
+
+          (b/fill [:users-section :user-id] @*user2-id)
+          (b/click [:users-section :add-user])
+          (b/wait-visible [:users-section {:tag :td, :fn/has-string user2}])))
+
+      (testing "user2 can view congregation after being added"
+        (doto *driver*
+          (dev-login-as user2)
+          (b/go @*congregation-url)
+          (b/wait-visible {:tag :h1, :fn/has-string congregation-name})))
+
+      (testing "remove user2 from congregation"
+        (doto *driver*
+          (dev-login-as user1)
+          (b/go @*congregation-url)
+          (b/wait-visible {:tag :h1, :fn/has-string congregation-name})
+
+          (b/click [{:tag :nav} {:tag :a, :fn/has-string "Settings"}])
+          (b/wait-visible {:tag :h1, :fn/has-string "Settings"})
+
+          (b/click [:users-section {:tag :tr, :fn/has-string user2} {:tag :button, :fn/has-string "Remove user"}])
+          (b/wait-invisible [:users-section {:tag :td, :fn/has-string user2}])))
+
+      (testing "user2 cannot view congregation after being removed"
+        (doto *driver*
+          (dev-login-as user2)
+          (b/go @*congregation-url)
+          (b/wait-visible {:tag :h1, :fn/has-string "Access denied"}))))))
 
 
 (defn- two-random-territories [driver]

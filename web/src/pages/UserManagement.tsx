@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -94,7 +94,7 @@ const UserManagement = () => {
         setSubmitting(false);
       }
     }}>
-    {({isSubmitting}) => <section>
+    {({isSubmitting}) => <section id="users-section">
       <h2>{t('UserManagement.title')}</h2>
 
       <p><Trans i18nKey="UserManagement.addUserInstructions" values={{joinPageUrl}}>
@@ -104,14 +104,14 @@ const UserManagement = () => {
       <Form className="pure-form pure-form-aligned">
         <fieldset>
           <div className="pure-control-group">
-            <label htmlFor="userId">{t('UserManagement.userId')}</label>
-            <Field name="userId" id="userId" type="text" autoComplete="off" required={true}
+            <label htmlFor="user-id">{t('UserManagement.userId')}</label>
+            <Field id="user-id" name="userId" type="text" autoComplete="off" required={true}
                    pattern={`\\s*${UUID_PATTERN}\\s*`}/>
             <ErrorMessage name="userId" component="span" className="pure-form-message-inline"/>
           </div>
 
           <div className="pure-controls">
-            <button type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">
+            <button id="add-user" type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">
               {t('UserManagement.addUser')}
             </button>
           </div>
