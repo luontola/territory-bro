@@ -25,12 +25,12 @@
     [:fieldset
      ;; congregation name field
      [:div.pure-control-group
-      [:label {:for "congregationName"}
+      [:label {:for "congregation-name"}
        (i18n/t "CongregationSettings.congregationName")]
-      [:input#congregationName {:type "text"
-                                :name "congregationName"
-                                :autocomplete "off"
-                                :required true}]]
+      [:input#congregation-name {:type "text"
+                                 :name "congregationName"
+                                 :autocomplete "off"
+                                 :required true}]]
      ;; submit button
      [:div.pure-controls
       [:button.pure-button.pure-button-primary {:type "submit"}

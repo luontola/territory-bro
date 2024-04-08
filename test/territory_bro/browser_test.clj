@@ -99,12 +99,12 @@
       (b/click link)
       (b/wait-has-text h1 congregation-name))))
 
-(defn go-to-territory-list [driver]
-  (let [link [{:tag :nav} {:tag :a, :fn/has-string "Territories"}]]
+(defn go-to-page [driver title]
+  (let [link {:tag :a, :fn/has-string title}]
     (doto driver
       (b/wait-visible link)
       (b/click link)
-      (b/wait-has-text h1 "Territories"))))
+      (b/wait-has-text h1 title))))
 
 (defn go-to-territory [driver territory-number]
   (doto driver
@@ -182,22 +182,22 @@
       (testing "register new congregation"
         (doto *driver*
           (dev-login-as user1)
+          (go-to-page "Register a new congregation")
 
-          (b/click {:tag :a, :fn/has-string "Register a new congregation"})
-          (b/wait-visible {:tag :h1, :fn/has-string "Register a new congregation"})
-          (b/fill :congregationName congregation-name)
-          (b/click {:tag :button, :fn/has-string "Register"})
+          (b/fill :congregation-name congregation-name)
+          (b/click {:tag :button, :fn/text "Register"})
 
           ;; we should arrive at the newly created congregation's front page
-          (b/wait-visible {:tag :h1, :fn/has-string congregation-name}))
+          (b/wait-has-text h1 congregation-name))
         (reset! *congregation-url (b/get-url *driver*)))
 
-      (testing "find out a user2's ID"
+      ;; TODO: extract the above to a shared test setup, so that all tests will use the same congregation as test data
+      ;; TODO: extract the below as user-management-test?
+
+      (testing "find out user2's ID"
         (doto *driver*
           (dev-login-as user2)
-
-          (b/click {:tag :a, :fn/has-string "Join an existing congregation"})
-          (b/wait-visible {:tag :h1, :fn/has-string "Join an existing congregation"}))
+          (go-to-page "Join an existing congregation"))
 
         (let [user2-id (b/get-element-text *driver* :your-user-id)]
           (is (some? (parse-uuid user2-id)))
@@ -207,38 +207,34 @@
         (doto *driver*
           (dev-login-as user1)
           (b/go @*congregation-url)
-          (b/wait-visible {:tag :h1, :fn/has-string congregation-name})
-
-          (b/click [{:tag :nav} {:tag :a, :fn/has-string "Settings"}])
-          (b/wait-visible {:tag :h1, :fn/has-string "Settings"})
+          (b/wait-has-text h1 congregation-name)
+          (go-to-page "Settings")
 
           (b/fill [:users-section :user-id] @*user2-id)
-          (b/click [:users-section :add-user])
-          (b/wait-visible [:users-section {:tag :td, :fn/has-string user2}])))
+          (b/click [:users-section {:tag :button, :fn/text "Add user"}])
+          (b/wait-visible [:users-section {:tag :tr, :fn/has-string user2}])))
 
       (testing "user2 can view congregation after being added"
         (doto *driver*
           (dev-login-as user2)
           (b/go @*congregation-url)
-          (b/wait-visible {:tag :h1, :fn/has-string congregation-name})))
+          (b/wait-has-text h1 congregation-name)))
 
       (testing "remove user2 from congregation"
         (doto *driver*
           (dev-login-as user1)
           (b/go @*congregation-url)
-          (b/wait-visible {:tag :h1, :fn/has-string congregation-name})
+          (b/wait-has-text h1 congregation-name)
+          (go-to-page "Settings")
 
-          (b/click [{:tag :nav} {:tag :a, :fn/has-string "Settings"}])
-          (b/wait-visible {:tag :h1, :fn/has-string "Settings"})
-
-          (b/click [:users-section {:tag :tr, :fn/has-string user2} {:tag :button, :fn/has-string "Remove user"}])
-          (b/wait-invisible [:users-section {:tag :td, :fn/has-string user2}])))
+          (b/click [:users-section {:tag :tr, :fn/has-string user2} {:tag :button, :fn/text "Remove user"}])
+          (b/wait-invisible [:users-section {:tag :tr, :fn/has-string user2}])))
 
       (testing "user2 cannot view congregation after being removed"
         (doto *driver*
           (dev-login-as user2)
           (b/go @*congregation-url)
-          (b/wait-visible {:tag :h1, :fn/has-string "Access denied"}))))))
+          (b/wait-has-text h1 "Access denied"))))))
 
 
 (defn- two-random-territories [driver]
@@ -258,7 +254,7 @@
       ;; XXX: this test assumes that the test user already has a congregation and territories
       ;; TODO: test registration and adding territories; use that as test data for other tests
       (go-to-any-congregation)
-      (go-to-territory-list))
+      (go-to-page "Territories"))
 
     (let [[shared-territory unrelated-territory] (two-random-territories *driver*)]
       (is (not (str/blank? (:number shared-territory))))
@@ -285,8 +281,7 @@
               "user is not logged in"))
 
         (testing "cannot see territories which were not shared"
-          (doto *driver*
-            (go-to-territory-list))
+          (go-to-page *driver* "Territories")
           (is (= [(:number shared-territory)]
                  (->> (b/query-all *driver* [:territory-list {:tag :a}])
                       (map #(b/get-element-text-el *driver* %))))

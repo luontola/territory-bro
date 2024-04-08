@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -50,7 +50,7 @@ const RegistrationPage = () => {
         <fieldset>
           <div className="pure-control-group">
             <label htmlFor="congregationName">{t('CongregationSettings.congregationName')}</label>
-            <Field type="text" name="congregationName" id="congregationName" autoComplete="off"/>
+            <Field type="text" name="congregationName" id="congregation-name" autoComplete="off"/>
             <ErrorMessage name="congregationName" component="div" className="pure-form-message-inline"/>
           </div>
           <div className="pure-controls">

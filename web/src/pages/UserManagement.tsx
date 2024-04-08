@@ -111,7 +111,7 @@ const UserManagement = () => {
           </div>
 
           <div className="pure-controls">
-            <button id="add-user" type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">
+            <button type="submit" disabled={isSubmitting} className="pure-button pure-button-primary">
               {t('UserManagement.addUser')}
             </button>
           </div>
