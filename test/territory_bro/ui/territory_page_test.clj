@@ -136,7 +136,7 @@
             "{fa-share-nodes} Share a link
              {fa-xmark}
              People with this link will be able to view this territory map without logging in:
-             https://territorybro.com/link {fa-copy}")
+             [https://territorybro.com/link] {fa-copy}")
            (-> (territory-page/share-link {:open? true
                                            :link "https://territorybro.com/link"})
                html/visible-text)))))

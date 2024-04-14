@@ -120,7 +120,7 @@
              News {fa-external-link-alt}
              🛟 Support
 
-             {fa-language} English
+             {fa-language} [English]
              Login
 
              Sorry, something went wrong 🥺
@@ -137,7 +137,7 @@
              News {fa-external-link-alt}
              🛟 Support
 
-             {fa-language} English
+             {fa-language} [English]
              {fa-user-large} John Doe
              Logout
 
@@ -162,7 +162,7 @@
              ⚙️ Settings
              🛟 Support
 
-             {fa-language} English
+             {fa-language} [English]
              {fa-user-large} John Doe
              Logout
 
@@ -185,7 +185,7 @@
                📍 Territories
                🛟 Support
 
-               {fa-language} English
+               {fa-language} [English]
                {fa-user-large} John Doe
                Logout
 
@@ -209,7 +209,7 @@
              🖨️ Printouts
              🛟 Support
 
-             {fa-language} English
+             {fa-language} [English]
              Login
 
              Sorry, something went wrong 🥺
@@ -301,11 +301,11 @@
 
 (deftest language-selection-test
   (testing "the current language is shown using only its native name"
-    (is (= "{fa-language} English"
+    (is (= "{fa-language} [English]"
            (html/visible-text
             (layout/language-selection anonymous-model))))
     (binding [i18n/*lang* :fi]
-      (is (= "{fa-language} suomi"
+      (is (= "{fa-language} [suomi]"
              (html/visible-text
               (layout/language-selection anonymous-model))))))
 

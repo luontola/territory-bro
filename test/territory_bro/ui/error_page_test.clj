@@ -16,7 +16,7 @@
    News {fa-external-link-alt}
    🛟 Support
 
-   {fa-language} English
+   {fa-language} [English]
    Login
 
    Sorry, something went wrong 🥺

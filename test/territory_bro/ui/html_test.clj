@@ -16,17 +16,17 @@
     (is (= "one two" (html/visible-text "<p>one</p><p>two</p>"))))
 
   (testing "input tags are replaced with their visible text"
-    (is (= "the text" (html/visible-text "<input type=\"text\" value=\"the text\" required>")))
-    (is (= "x Value y" (html/visible-text "x<input value=\"Value\">y"))
+    (is (= "[the text]" (html/visible-text "<input type=\"text\" value=\"the text\" required>")))
+    (is (= "x [Value] y" (html/visible-text "x<input value=\"Value\">y"))
         "spacing before and after element"))
 
   (testing "select tags are replaced with the selected option's visible text"
     ;; TODO: do we need real html parsing, not just regex? consider enlive/html-snippet
-    #_(is (= "Option 1" (html/visible-text "<select name=\"foo\"><option value=\"opt1\">Option 1</option><option value=\"opt2\">Option 2</option></select>"))
+    #_(is (= "[Option 1]" (html/visible-text "<select name=\"foo\"><option value=\"opt1\">Option 1</option><option value=\"opt2\">Option 2</option></select>"))
           "the first element is selected by default")
-    (is (= "Option 2" (html/visible-text "<select name=\"foo\"><option value=\"opt1\">Option 1</option><option value=\"opt2\" selected>Option 2</option></select>"))
+    (is (= "[Option 2]" (html/visible-text "<select name=\"foo\"><option value=\"opt1\">Option 1</option><option value=\"opt2\" selected>Option 2</option></select>"))
         "explicitly selected option")
-    (is (= "x Option y" (html/visible-text "x<select><option selected>Option</option></select>y"))
+    (is (= "x [Option] y" (html/visible-text "x<select><option selected>Option</option></select>y"))
         "spacing before and after element"))
 
   (testing "elements with the data-test-icon attribute are replaced with its value"
