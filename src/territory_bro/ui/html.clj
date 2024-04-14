@@ -28,6 +28,8 @@
 
 (defn visible-text [html]
   (-> (str html)
+      ;; custom visualization using data-test-icon attribute
+      (str/replace #"<[^<>]+\bdata-test-icon=\"(.*?)\".*?>" " $1 ")
       ;; visualize input field's text
       (str/replace #"<input\b[^>]*\bvalue=\"(.*?)\".*?>" " $1 ")
       ;; visualize select field's selected option

@@ -29,6 +29,11 @@
     (is (= "x Option y" (html/visible-text "x<select><option selected>Option</option></select>y"))
         "spacing before and after element"))
 
+  (testing "elements with the data-test-icon attribute are replaced with its value"
+    (is (= "☑️" (html/visible-text "<input type=\"checkbox\" data-test-icon=\"☑️\" checked value=\"true\">")))
+    (is (= "x 🟢 y z" (html/visible-text "x<div data-test-icon=\"🟢\">y</div>z"))
+        "spacing before, inside and after element"))
+
   (testing "Font Awesome icons are replaced with the icon name"
     (is (= "{fa-share-nodes}" (html/visible-text "<i class=\"fa-solid fa-share-nodes\"></i>"))
         "icon style solid")
