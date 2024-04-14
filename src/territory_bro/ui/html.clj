@@ -29,9 +29,9 @@
 (defn visible-text [html]
   (-> (str html)
       ;; visualize input field's text
-      (str/replace #"<input\b[^>]*\bvalue=\"(.*?)\".*?>" "$1")
+      (str/replace #"<input\b[^>]*\bvalue=\"(.*?)\".*?>" " $1 ")
       ;; visualize select field's selected option
-      (str/replace #"<option\b[^>]*\bselected\b.*?>(.*?)</option>" "$1") ; keep selected option
+      (str/replace #"<option\b[^>]*\bselected\b.*?>(.*?)</option>" " $1 ") ; keep selected option
       (str/replace #"<option\b.*?>(.*?)</option>" "") ; remove all other options
       ;; visualize Font Awesome icons
       (str/replace #"<i\b[^>]*\bclass=\"(fa-.*?)\".*?></i>"
