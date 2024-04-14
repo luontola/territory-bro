@@ -45,6 +45,14 @@
     (is (= "" (html/visible-text "<template>stuff</template>")))
     (is (= "" (html/visible-text "<template id=\"xyz\">stuff</template>"))))
 
+  (testing "replaces HTML character entities"
+    (is (= "1 000" (html/visible-text "1&nbsp;000")))
+    (is (= "<" (html/visible-text "&lt;")))
+    (is (= ">" (html/visible-text "&gt;")))
+    (is (= "&" (html/visible-text "&amp;")))
+    (is (= "\"" (html/visible-text "&quot;")))
+    (is (= "'" (html/visible-text "&apos;"))))
+
   (testing "normalizes whitespace"
     (is (= "one two" (html/visible-text "  <p>one</p>\n<br><p>two</p>\n  "))))
 

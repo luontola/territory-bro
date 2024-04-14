@@ -45,6 +45,13 @@
       (str/replace #"<template\b[^>]*>.*?</template>" " ")
       ;; strip all HTML tags
       (str/replace #"<[^>]*>" " ")
+      ;; replace HTML character entities
+      (str/replace #"&nbsp;" " ")
+      (str/replace #"&lt;" "<") ; must be after stripping HTML tags, to avoid creating accidental elements
+      (str/replace #"&gt;" ">")
+      (str/replace #"&quot;" "\"")
+      (str/replace #"&apos;" "'")
+      (str/replace #"&amp;" "&") ; must be last, to avoid creating accidental character entities
       (normalize-whitespace)))
 
 (defn response [html]
