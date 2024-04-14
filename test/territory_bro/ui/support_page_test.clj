@@ -37,22 +37,22 @@
   (testing "default"
     (is (= (html/normalize-whitespace
             "Support
-             Territory Bro is an open source project developed by Esko Luontola .
+             Territory Bro is an open source project developed by Esko Luontola.
              We recommend subscribing to our mailing list to be notified about important Territory Bro updates.
              The user guide should answer the most common questions related to creating territory maps.
              If that is not enough, you may email support@example.com to ask for help with using Territory Bro.
              See the translation instructions if you would like to help improve the current translations or add new languages.
-             Bugs and feature requests may also be reported to this project's issue tracker .")
+             Bugs and feature requests may also be reported to this project's issue tracker.")
            (-> (support-page/view model)
                html/visible-text))))
 
   (testing "anonymous user"
     (is (= (html/normalize-whitespace
             "Support
-             Territory Bro is an open source project developed by Esko Luontola .
+             Territory Bro is an open source project developed by Esko Luontola.
              We recommend subscribing to our mailing list to be notified about important Territory Bro updates.
              The user guide should answer the most common questions related to creating territory maps.
              See the translation instructions if you would like to help improve the current translations or add new languages.
-             Bugs and feature requests may also be reported to this project's issue tracker .")
+             Bugs and feature requests may also be reported to this project's issue tracker.")
            (-> (support-page/view anonymous-model)
                html/visible-text)))))

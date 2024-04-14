@@ -62,6 +62,14 @@
     (is (= "\"" (html/visible-text "&quot;")))
     (is (= "'" (html/visible-text "&apos;"))))
 
+  (testing "inline elements will not add spacing to text"
+    (is (= "xyz"
+           (html/visible-text
+            (h/html
+             "x"
+             [:a [:abbr [:b [:big [:cite [:code [:em [:i [:small [:span [:strong [:tt "y"]]]]]]]]]]]]
+             "z")))))
+
   (testing "normalizes whitespace"
     (is (= "one two" (html/visible-text "  <p>one</p>\n<br><p>two</p>\n  "))))
 

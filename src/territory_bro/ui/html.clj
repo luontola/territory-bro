@@ -46,7 +46,8 @@
       ;; hide template elements
       (str/replace #"<template\b[^>]*>.*?</template>" " ")
       ;; strip all HTML tags
-      (str/replace #"<[^>]*>" " ")
+      (str/replace #"</?(a|abbr|b|big|cite|code|em|i|small|span|strong|tt)\b.*?>" "") ; inline elements
+      (str/replace #"<[^>]*>" " ") ; block elements
       ;; replace HTML character entities
       (str/replace #"&nbsp;" " ")
       (str/replace #"&lt;" "<") ; must be after stripping HTML tags, to avoid creating accidental elements
