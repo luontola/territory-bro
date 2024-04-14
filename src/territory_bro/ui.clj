@@ -15,6 +15,7 @@
             [territory-bro.ui.home-page :as home-page]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
+            [territory-bro.ui.join-page :as join-page]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.open-share-page :as open-share-page]
             [territory-bro.ui.registration-page :as registration-page]
@@ -54,11 +55,7 @@
 
    home-page/routes
 
-   ["/join"
-    {:get {:handler (fn [request]
-                      (-> (h/html [:h1 "join page placeholder"])
-                          (layout/page! request)
-                          (html/response)))}}]
+   join-page/routes
 
    registration-page/routes
 
