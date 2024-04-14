@@ -31,6 +31,7 @@
         verifier (-> (JWT/require algorithm)
                      (.withIssuer (strings (getx env :jwt-issuer)))
                      (.withAudience (strings (getx env :jwt-audience)))
+                     (.acceptLeeway 60)
                      (->> ^JWTVerifier$BaseVerification (cast JWTVerifier$BaseVerification))
                      (.build clock))]
     (-> (.verify verifier jwt)
