@@ -19,6 +19,7 @@
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.open-share-page :as open-share-page]
             [territory-bro.ui.registration-page :as registration-page]
+            [territory-bro.ui.settings-page :as settings-page]
             [territory-bro.ui.support-page :as support-page]
             [territory-bro.ui.territory-list-page :as territory-list-page]
             [territory-bro.ui.territory-page :as territory-page]))
@@ -77,11 +78,7 @@
                           (layout/page! request)
                           (html/response)))}}]
 
-   ["/congregation/:congregation/settings"
-    {:get {:handler (fn [request]
-                      (-> (h/html [:h1 "settings page placeholder"])
-                          (layout/page! request)
-                          (html/response)))}}]
+   settings-page/routes
 
    error-page/routes])
 
