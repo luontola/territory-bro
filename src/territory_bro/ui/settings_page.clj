@@ -5,18 +5,23 @@
 (ns territory-bro.ui.settings-page
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
+            [ring.util.http-response :as http-response]
             [territory-bro.api :as api]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]
-            [territory-bro.ui.layout :as layout]))
+            [territory-bro.ui.layout :as layout])
+  (:import (clojure.lang ExceptionInfo)))
 
 (defn model! [request]
-  (auth/with-user-from-session request
-    (api/require-logged-in!)
-    {}))
+  (let [congregation (:body (api/get-congregation request {}))]
+    {:congregation/name (or (get-in request [:params :congregationName])
+                            (:name congregation))
+     :congregation/loans-csv-url (or (get-in request [:params :loansCsvUrl])
+                                     (:loansCsvUrl congregation))
+     :congregation/users (:users congregation)}))
+
 
 (defn loans-csv-url-info []
   (let [styles (:CongregationSettings (css/modules))]
@@ -49,39 +54,49 @@
        "Publish that sheet as a CSV file and enter its URL to the above field on this settings page."]))))
 
 (defn congregation-settings-section [model]
-  (h/html
-   [:section
-    [:form.pure-form.pure-form-aligned {:action "#"}
-     [:fieldset
-      [:div.pure-control-group
-       [:label {:for "congregationName"}
-        (i18n/t "CongregationSettings.congregationName")]
-       [:input#congregationName {:name "congregationName"
-                                 :type "text"
-                                 :required true
-                                 :value ""}]]
+  (let [styles (:CongregationSettings (css/modules))
+        errors (->> (:errors model)
+                    (group-by first))]
+    (h/html
+     [:section
+      [:form.pure-form.pure-form-aligned {:method "post"}
+       [:fieldset
+        (let [error? (contains? errors :missing-name)]
+          [:div.pure-control-group
+           [:label {:for "congregationName"}
+            (i18n/t "CongregationSettings.congregationName")]
+           [:input#congregationName {:name "congregationName"
+                                     :value (:congregation/name model)
+                                     :type "text"
+                                     :required true
+                                     :aria-invalid (when error? "true")}]
+           (when error?
+             " ⚠️ ")])
 
-      [:div.pure-controls
-       [:label.pure-checkbox
-        [:input {:name "experimentalFeatures"
-                 :type "checkbox"
-                 :value "true"
-                 :data-test-icon (if true "☑" "☐")}]
-        " " (i18n/t "CongregationSettings.experimentalFeatures")]]
+        [:details {:class (:experimentalFeatures styles)
+                   :open (some? (:congregation/loans-csv-url model))}
+         [:summary (i18n/t "CongregationSettings.experimentalFeatures")]
 
-      [:div {:lang "en"}
-       [:div.pure-control-group
-        [:label {:for "loansCsvUrl"}
-         "Territory loans CSV URL (optional)"]
-        [:input#loansCsvUrl {:name "loansCsvUrl"
-                             :type "text"
-                             :size "50"
-                             :value ""}]]
-       (loans-csv-url-info)]
+         [:div {:lang "en"}
+          (let [error? (contains? errors :disallowed-loans-csv-url)]
+            [:div.pure-control-group
+             [:label {:for "loansCsvUrl"}
+              "Territory loans CSV URL (optional)"]
+             [:input#loansCsvUrl {:name "loansCsvUrl"
+                                  :value (:congregation/loans-csv-url model)
+                                  :type "text"
+                                  :size "50"
+                                  :pattern "https://docs\\.google\\.com/.*"
+                                  :aria-invalid (when error? "true")}]
+             (when error?
+               " ⚠️ ")
+             [:span.pure-form-message-inline "Link to a Google Sheets spreadsheet published to the web as CSV"]])
+          (loans-csv-url-info)]]
 
-      [:div.pure-controls
-       [:button.pure-button.pure-button-primary {:type "submit"}
-        (i18n/t "CongregationSettings.save")]]]]]))
+        [:div.pure-controls
+         [:button.pure-button.pure-button-primary {:type "submit"}
+          (i18n/t "CongregationSettings.save")]]]]])))
+
 
 (defn editing-maps-section [model]
   (h/html
@@ -95,6 +110,7 @@
             (h/raw))]
     [:p [:a.pure-button {:href (str html/*page-path* "/../qgis-project")}
          (i18n/t "EditingMaps.downloadQgisProject")]]]))
+
 
 (defn user-management-section [model]
   (let [styles (:UserManagement (css/modules))]
@@ -140,6 +156,7 @@
                                     :class (:removeUser styles)}
                (i18n/t "UserManagement.removeUser")]]]]]])))
 
+
 (defn view [model]
   (let [styles (:SettingsPage (css/modules))]
     (h/html
@@ -152,9 +169,28 @@
 (defn view! [request]
   (view (model! request)))
 
+(defn save-congregation-settings! [request]
+  (try
+    (api/save-congregation-settings request)
+    (http-response/see-other html/*page-path*)
+    (catch ExceptionInfo e ; TODO: catch ValidationException directly
+      (let [errors (when (and (= :ring.util.http-response/response (:type (ex-data e)))
+                              (= 400 (:status (:response (ex-data e)))))
+                     (:errors (:body (:response (ex-data e)))))]
+        (if (some? errors)
+          (-> (model! request)
+              (assoc :errors errors)
+              (view)
+              (layout/page! request)
+              (html/response)
+              (assoc :status 400))
+          (throw e))))))
+
 (def routes
   ["/congregation/:congregation/settings"
    {:get {:handler (fn [request]
                      (-> (view! request)
                          (layout/page! request)
-                         (html/response)))}}])
+                         (html/response)))}
+    :post {:handler (fn [request]
+                      (save-congregation-settings! request))}}])

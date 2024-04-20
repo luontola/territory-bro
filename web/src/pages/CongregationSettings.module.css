@@ -6,3 +6,14 @@ table.spreadsheet td {
     border: 1px solid gray;
     padding: 3px;
 }
+
+details.experimentalFeatures {
+    summary {
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    &[open] summary {
+        margin-bottom: 1em;
+    }
+}

@@ -3,22 +3,38 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.settings-page-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [territory-bro.api-test :as at]
+            [territory-bro.dispatcher :as dispatcher]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.settings-page :as settings-page])
-  (:import (clojure.lang ExceptionInfo)))
+  (:import (clojure.lang ExceptionInfo)
+           (java.util UUID)
+           (territory_bro ValidationException)))
 
-(def model {})
+(def model
+  {:congregation/name "Congregation Name"
+   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
+   :congregation/users [{:id (UUID. 0 1)
+                         :name "Esko Luontola"
+                         :nickname "esko.luontola"
+                         :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"
+                         :sub "google-oauth2|102883237794451111459"}]})
 
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
-          request {:session (auth/user-session {:name "John Doe"} user-id)}]
+          cong-id (at/create-congregation! session "Congregation Name")
+          request {:params {:congregation (str cong-id)}
+                   :session (auth/user-session {:name "John Doe"} user-id)}
+          model (replace-in model [:congregation/users 0 :id] (UUID. 0 1) user-id)]
+      (at/change-congregation-settings! cong-id "Congregation Name" "https://docs.google.com/spreadsheets/123")
 
       (testing "logged in"
         (is (= model (settings-page/model! request))))
@@ -35,11 +51,11 @@
   (is (= (html/normalize-whitespace
           "Settings
 
-          Congregation name []
+          Congregation name [Congregation Name]
 
-          ☑ Experimental features
+          Experimental features
 
-          Territory loans CSV URL (optional) []
+          Territory loans CSV URL (optional) [https://docs.google.com/spreadsheets/123] Link to a Google Sheets spreadsheet published to the web as CSV
              
             {fa-info-circle} Early Access Feature: Integrate with territory loans data from Google Sheets
 
@@ -91,3 +107,41 @@
           👨‍💼  Developer (You)   developer@example.com (Unverified)   developer      Remove user")
          (-> (settings-page/view model)
              html/visible-text))))
+
+(deftest ^:slow save-congregation-settings!-test
+  (with-fixtures [db-fixture api-fixture]
+    (let [session (at/login! at/app)
+          user-id (at/get-user-id session)
+          cong-id (at/create-congregation! session "foo")
+          request {:params {:congregation (str cong-id)
+                            :congregationName "new name"
+                            :loansCsvUrl "new url"}
+                   :session (auth/user-session {:name "John Doe"} user-id)}]
+      (binding [html/*page-path* "/current/url"]
+
+        (testing "save successful: redirects to same page"
+          (with-fixtures [fake-dispatcher-fixture]
+            (let [response (settings-page/save-congregation-settings! request)]
+              (is (= {:status 303
+                      :headers {"Location" "/current/url"}
+                      :body ""}
+                     response))
+              (is (= {:command/type :congregation.command/update-congregation
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :congregation/loans-csv-url "new url"
+                      :congregation/name "new name"}
+                     (dissoc @*last-command :command/time))))))
+
+        (testing "save failed: highlights erroneous form fields, doesn't forget invalid user input"
+          (binding [dispatcher/command! (fn [& _]
+                                          (throw (ValidationException. [[:missing-name]
+                                                                        [:disallowed-loans-csv-url]])))]
+            (let [response (settings-page/save-congregation-settings! request)]
+              (is (= 400 (:status response)))
+              (is (str/includes?
+                   (html/visible-text (:body response))
+                   (html/normalize-whitespace
+                    "Congregation name [new name] ⚠️
+                     Experimental features
+                     Territory loans CSV URL (optional) [new url] ⚠️"))))))))))
