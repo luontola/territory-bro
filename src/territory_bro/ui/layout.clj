@@ -170,6 +170,7 @@
 (defn page [view model]
   (let [styles (:Layout (css/modules))
         title (parse-title view)]
+    (assert (= :html hiccup.util/*html-mode*))
     (str (h/html
           (hiccup.page/doctype :html5)
           [:html {:lang "en"}

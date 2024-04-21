@@ -4,9 +4,12 @@
 
 (ns territory-bro.ui.html
   (:require [clojure.string :as str]
+            [hiccup.util :as hiccup.util]
             [reitit.core :as reitit]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]))
+
+(alter-var-root #'hiccup.util/*html-mode* (constantly :html)) ; change default from :xhtml to :html
 
 (def ^:dynamic *page-path*)
 
