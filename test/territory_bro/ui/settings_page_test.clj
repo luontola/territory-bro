@@ -24,7 +24,9 @@
                          :name "Esko Luontola"
                          :nickname "esko.luontola"
                          :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"
-                         :sub "google-oauth2|102883237794451111459"}]})
+                         :sub "google-oauth2|102883237794451111459"}]
+   :permissions {:configureCongregation true
+                 :gisAccess true}})
 
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
@@ -46,6 +48,21 @@
                                        :body "Not logged in"
                                        :headers {}}}
                            (settings-page/model! (dissoc request :session))))))))
+
+(deftest congregation-settings-section-test
+  (testing "requires the configure-congregation permission"
+    (let [model (replace-in model [:permissions :configureCongregation] true false)]
+      (is (nil? (settings-page/congregation-settings-section model))))))
+
+(deftest editing-maps-section-test
+  (testing "requires the gis-access permission"
+    (let [model (replace-in model [:permissions :gisAccess] true false)]
+      (is (nil? (settings-page/editing-maps-section model))))))
+
+(deftest user-management-section-test
+  (testing "requires the configure-congregation permission"
+    (let [model (replace-in model [:permissions :configureCongregation] true false)]
+      (is (nil? (settings-page/user-management-section model))))))
 
 (deftest view-test
   (is (= (html/normalize-whitespace
