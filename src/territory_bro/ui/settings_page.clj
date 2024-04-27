@@ -111,7 +111,7 @@
               (str/replace "<1>" "<a href=\"https://www.qgis.org/\" target=\"_blank\">")
               (str/replace "</1>" "</a>")
               (h/raw))]
-      [:p [:a.pure-button {:href (str html/*page-path* "/../qgis-project")}
+      [:p [:a.pure-button {:href (str html/*page-path* "/qgis-project")}
            (i18n/t "EditingMaps.downloadQgisProject")]]])))
 
 
@@ -192,9 +192,16 @@
 
 (def routes
   ["/congregation/:congregation/settings"
-   {:get {:handler (fn [request]
-                     (-> (view! request)
-                         (layout/page! request)
-                         (html/response)))}
-    :post {:handler (fn [request]
-                      (save-congregation-settings! request))}}])
+   {:middleware [[html/wrap-page-path ::page]]}
+   [""
+    {:name ::page
+     :get {:handler (fn [request]
+                      (-> (view! request)
+                          (layout/page! request)
+                          (html/response)))}
+     :post {:handler (fn [request]
+                       (save-congregation-settings! request))}}]
+
+   ["/qgis-project"
+    {:get {:handler (fn [request]
+                      (api/download-qgis-project request))}}]])
