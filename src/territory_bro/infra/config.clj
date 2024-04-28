@@ -39,7 +39,7 @@
 
 (def validate-env (s/validator Env))
 
-(defn- try-parse-uuid [s]
+(defn- parse-uuid-or-string [s]
   (try
     (UUID/fromString s)
     (catch Exception _
@@ -53,9 +53,10 @@
          :super-users (->> (str/split (or (:super-users env) "")
                                       #"\s+")
                            (remove str/blank?)
-                           (map try-parse-uuid)
+                           (map parse-uuid-or-string)
                            (set))
-         :demo-congregation (try-parse-uuid (:demo-congregation env))))
+         :demo-congregation (some-> (:demo-congregation env)
+                                    (parse-uuid))))
 
 (defn load-config []
   (cprop/load-config :resource "config-defaults.edn")) ; TODO: use ":as-is? true" and schema coercion?)
