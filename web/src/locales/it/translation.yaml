@@ -73,7 +73,7 @@ UserManagement:
   userId: ID utente
   userIdRequired: L'ID utente è obbligatorio.
   userIdWrongFormat: "Non sembra un ID utente. Dovrebbe assomigliare a qualcosa del genere: 01234567-89ab-cdef-0123-456789abcdef"
-  userIdNotExist: "L'utente non esiste: {{userId}}"
+  userIdNotExist: "L'utente non esiste"
   addUserInstructions: Per aggiungere utenti a questa congregazione, chiedi loro di visitare <0>{{joinPageUrl}}</0> e copiare il loro <em>ID utente</em> da quella pagina e inviarlo a te.
   addUser: Aggiungi utente
   name: Nome

@@ -17,13 +17,22 @@
   (:import (clojure.lang ExceptionInfo)))
 
 (defn model! [request]
-  (let [congregation (:body (api/get-congregation request {}))]
+  (let [congregation (:body (api/get-congregation request {}))
+        new-user (some-> (get-in request [:params :new-user])
+                         (parse-uuid))]
     {:congregation/name (or (get-in request [:params :congregationName])
                             (:name congregation))
      :congregation/loans-csv-url (or (get-in request [:params :loansCsvUrl])
                                      (:loansCsvUrl congregation))
-     :congregation/users (:users congregation)
-     :permissions (select-keys (:permissions congregation) [:configureCongregation :gisAccess])}))
+     :congregation/users (->> (:users congregation)
+                              (map (fn [user]
+                                     (assoc user :new? (= new-user (:id user)))))
+                              (sort-by (fn [user]
+                                         ;; new user first, then alphabetically by name
+                                         [(if (:new? user) 1 2)
+                                          (str/lower-case (str (:name user)))])))
+     :permissions (select-keys (:permissions congregation) [:configureCongregation :gisAccess])
+     :form/user-id (get-in request [:params :userId])}))
 
 
 (defn loans-csv-url-info []
@@ -127,7 +136,8 @@
 (defn users-table-row [user]
   (let [styles (:UserManagement (css/modules))]
     (h/html
-     [:tr
+     [:tr {:class (when (:new? user)
+                    (:newUser styles))}
       [:td {:class (:profilePicture styles)}
        (when (some? (:picture user))
          [:img {:src (:picture user)
@@ -152,42 +162,46 @@
 
 (defn user-management-section [model]
   (when (-> model :permissions :configureCongregation)
-    (h/html
-     [:section#users-section
-      [:h2 (i18n/t "UserManagement.title")]
-      [:p (-> (i18n/t "UserManagement.addUserInstructions")
-              (str/replace "{{joinPageUrl}}" "http://localhost:8080/join")
-              (str/replace "<0>" "<a href=\"/join\">")
-              (str/replace "</0>" "</a>")
-              (h/raw))]
+    (let [errors (group-by first (:errors model))]
+      (h/html
+       [:section#users-section {:hx-target "this"
+                                :hx-swap "outerHTML"}
+        [:h2 (i18n/t "UserManagement.title")]
+        [:p (-> (i18n/t "UserManagement.addUserInstructions")
+                (str/replace "{{joinPageUrl}}" "http://localhost:8080/join")
+                (str/replace "<0>" "<a href=\"/join\">")
+                (str/replace "</0>" "</a>")
+                (h/raw))]
 
-      [:form.pure-form.pure-form-aligned
-       [:fieldset
-        [:div.pure-control-group
-         [:label {:for "user-id"}
-          (i18n/t "UserManagement.userId")]
-         [:input#user-id {:name "userId"
-                          :type "text"
-                          :autocomplete "off"
-                          :required true
-                          :pattern "\\s*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\s*"
-                          :value ""}]]
-        [:div.pure-controls
-         ;; TODO: implement adding
-         [:button.pure-button.pure-button-primary {:type "submit"}
-          (i18n/t "UserManagement.addUser")]]]]
+        [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/users")}
+         [:fieldset
+          (let [no-such-user? (contains? errors :no-such-user)]
+            [:div.pure-control-group
+             [:label {:for "user-id"}
+              (i18n/t "UserManagement.userId")]
+             [:input#user-id {:name "userId"
+                              :type "text"
+                              :autocomplete "off"
+                              :required true
+                              :pattern "\\s*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\s*"
+                              :value (:form/user-id model)}]
+             (when no-such-user?
+               (h/html " ⚠️ " [:span.pure-form-message-inline (i18n/t "UserManagement.userIdNotExist")]))])
+          [:div.pure-controls
+           [:button.pure-button.pure-button-primary {:type "submit"}
+            (i18n/t "UserManagement.addUser")]]]]
 
-      [:table.pure-table.pure-table-horizontal
-       [:thead
-        [:tr
-         [:th]
-         [:th (i18n/t "UserManagement.name")]
-         [:th (i18n/t "UserManagement.email")]
-         [:th (i18n/t "UserManagement.loginMethod")]
-         [:th (i18n/t "UserManagement.actions")]]]
-       [:tbody
-        (for [user (:congregation/users model)]
-          (users-table-row user))]]])))
+        [:table.pure-table.pure-table-horizontal
+         [:thead
+          [:tr
+           [:th]
+           [:th (i18n/t "UserManagement.name")]
+           [:th (i18n/t "UserManagement.email")]
+           [:th (i18n/t "UserManagement.loginMethod")]
+           [:th (i18n/t "UserManagement.actions")]]]
+         [:tbody
+          (for [user (:congregation/users model)]
+            (users-table-row user))]]]))))
 
 
 (defn view [model]
@@ -219,6 +233,23 @@
               (assoc :status http-status/validation-error))
           (throw e))))))
 
+(defn add-user! [request]
+  (try
+    (let [user-id (parse-uuid (str/trim (get-in request [:params :userId])))]
+      (api/add-user request)
+      (http-response/see-other (str html/*page-path* "/users?new-user=" user-id)))
+    (catch ExceptionInfo e ; TODO: catch ValidationException directly
+      (let [errors (when (and (= :ring.util.http-response/response (:type (ex-data e)))
+                              (= 400 (:status (:response (ex-data e)))))
+                     (:errors (:body (:response (ex-data e)))))]
+        (if (some? errors)
+          (-> (model! request)
+              (assoc :errors errors)
+              (user-management-section)
+              (html/response)
+              (assoc :status http-status/validation-error))
+          (throw e))))))
+
 (def routes
   ["/congregation/:congregation/settings"
    {:middleware [[html/wrap-page-path ::page]]}
@@ -233,4 +264,12 @@
 
    ["/qgis-project"
     {:get {:handler (fn [request]
-                      (api/download-qgis-project request))}}]])
+                      (api/download-qgis-project request))}}]
+
+   ["/users"
+    {:get {:handler (fn [request]
+                      (-> (model! request)
+                          (user-management-section)
+                          (html/response)))}
+     :post {:handler (fn [request]
+                       (add-user! request))}}]])

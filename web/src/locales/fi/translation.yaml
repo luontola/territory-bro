@@ -73,7 +73,7 @@ UserManagement:
   userId: Käyttäjätunnus
   userIdRequired: Käyttäjätunnus vaaditaan.
   userIdWrongFormat: "Tämä ei näytä käyttäjätunnukselta. Sen tulisi näyttää joltakin tällaiselta: 01234567-89ab-cdef-0123-456789abcdef"
-  userIdNotExist: "Käyttäjää ei ole olemassa: {{userId}}"
+  userIdNotExist: "Käyttäjää ei ole olemassa"
   addUserInstructions: Lisätäksesi käyttäjiä tähän seurakuntaan, pyydä heitä käymään osoitteessa <0>{{joinPageUrl}}</0> ja kopioimaan heidän <em>käyttäjätunnuksensa</em> tuolta sivulta ja lähettämään sen sinulle.
   addUser: Lisää käyttäjä
   name: Nimi

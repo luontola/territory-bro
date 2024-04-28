@@ -73,7 +73,7 @@ UserManagement:
   userId: Gebruikers-ID
   userIdRequired: Gebruikers-ID is verplicht.
   userIdWrongFormat: "Dat lijkt niet op een Gebruikers-ID. Het zou er ongeveer zo uit moeten zien: 01234567-89ab-cdef-0123-456789abcdef"
-  userIdNotExist: "Gebruiker bestaat niet: {{userId}}"
+  userIdNotExist: "Gebruiker bestaat niet"
   addUserInstructions: Om gebruikers aan deze congregatie toe te voegen, vraag hen om <0>{{joinPageUrl}}</0> te bezoeken en hun <em>Gebruikers-ID</em> van die pagina te kopiëren en naar jou te sturen.
   addUser: Gebruiker toevoegen
   name: Naam

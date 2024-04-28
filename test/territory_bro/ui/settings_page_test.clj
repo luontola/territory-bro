@@ -25,9 +25,11 @@
                          :name "Esko Luontola"
                          :nickname "esko.luontola"
                          :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"
-                         :sub "google-oauth2|102883237794451111459"}]
+                         :sub "google-oauth2|102883237794451111459"
+                         :new? false}]
    :permissions {:configureCongregation true
-                 :gisAccess true}})
+                 :gisAccess true}
+   :form/user-id nil})
 
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
@@ -48,7 +50,12 @@
                             :response {:status 401
                                        :body "Not logged in"
                                        :headers {}}}
-                           (settings-page/model! (dissoc request :session))))))))
+                           (settings-page/model! (dissoc request :session)))))
+
+      (testing "user was added"
+        (let [request (assoc-in request [:params :new-user] (str user-id))
+              model (replace-in model [:congregation/users 0 :new?] false true)]
+          (is (= model (settings-page/model! request))))))))
 
 (deftest congregation-settings-section-test
   (testing "requires the configure-congregation permission"
@@ -75,7 +82,8 @@
               :picture "http://example.com/picture.jpg"
               :email "john.doe@example.com"
               :emailVerified true
-              :sub "google-oauth2|123456789"}]
+              :sub "google-oauth2|123456789"
+              :new? false}]
     (binding [auth/*user* {:user/id current-user-id}]
 
       (testing "shows user information"
@@ -87,6 +95,14 @@
              (str (settings-page/users-table-row user))
              "src=\"http://example.com/picture.jpg\"")
             "profile picture"))
+
+      (testing "highlights new users"
+        (is (str/starts-with? (str (settings-page/users-table-row user))
+                              "<tr>")
+            "old user")
+        (is (str/starts-with? (str (settings-page/users-table-row (replace-in user [:new?] false true)))
+                              "<tr class=\"UserManagement__newUser--")
+            "new user"))
 
       (testing "highlights the current user"
         (is (= (html/normalize-whitespace
@@ -182,13 +198,13 @@
                             :congregationName "new name"
                             :loansCsvUrl "new url"}
                    :session (auth/user-session {:name "John Doe"} user-id)}]
-      (binding [html/*page-path* "/current/url"]
+      (binding [html/*page-path* "/settings-page-url"]
 
         (testing "save successful: redirects to same page"
           (with-fixtures [fake-dispatcher-fixture]
             (let [response (settings-page/save-congregation-settings! request)]
               (is (= {:status 303
-                      :headers {"Location" "/current/url"}
+                      :headers {"Location" "/settings-page-url"}
                       :body ""}
                      response))
               (is (= {:command/type :congregation.command/update-congregation
@@ -210,3 +226,47 @@
                     "Congregation name [new name] ⚠️
                      Experimental features
                      Territory loans CSV URL (optional) [new url] ⚠️"))))))))))
+
+(deftest ^:slow add-user!-test
+  (with-fixtures [db-fixture api-fixture]
+    (let [session (at/login! at/app)
+          user-id (at/get-user-id session)
+          new-user-id (UUID. 0 2)
+          cong-id (at/create-congregation! session "foo")
+          request {:params {:congregation (str cong-id)
+                            :userId (str new-user-id)}
+                   :session (auth/user-session {:name "John Doe"} user-id)}]
+      (binding [html/*page-path* "/settings-page-url"]
+
+        (testing "add successful: highlights the added user"
+          (with-fixtures [fake-dispatcher-fixture]
+            (let [response (settings-page/add-user! request)]
+              (is (= {:status 303
+                      :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
+                      :body ""}
+                     response))
+              (is (= {:command/type :congregation.command/add-user
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :user/id new-user-id}
+                     (dissoc @*last-command :command/time))))))
+
+        (testing "trims the user ID"
+          (with-fixtures [fake-dispatcher-fixture]
+            (let [request (replace-in request [:params :userId] (str new-user-id) (str "  " new-user-id "  "))
+                  response (settings-page/add-user! request)]
+              (is (= {:status 303
+                      :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
+                      :body ""}
+                     response)))))
+
+        (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
+          (binding [dispatcher/command! (fn [& _]
+                                          (throw (ValidationException. [[:no-such-user new-user-id]])))]
+            (let [response (settings-page/add-user! request)]
+              (is (= http-status/validation-error (:status response)))
+              (is (str/includes?
+                   (html/visible-text (:body response))
+                   (html/normalize-whitespace
+                    "User ID [00000000-0000-0000-0000-000000000002] ⚠️ User does not exist
+                     Add user"))))))))))

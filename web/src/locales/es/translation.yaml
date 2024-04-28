@@ -73,7 +73,7 @@ UserManagement:
   userId: ID de usuario
   userIdRequired: Se requiere el ID de usuario.
   userIdWrongFormat: "Eso no parece ser un ID de usuario. Debería tener un formato similar a: 01234567-89ab-cdef-0123-456789abcdef"
-  userIdNotExist: "El usuario no existe: {{userId}}"
+  userIdNotExist: "El usuario no existe"
   addUserInstructions: Para agregar usuarios a esta congregación, pídeles que visiten <0>{{joinPageUrl}}</0> y copien su <em>ID de usuario</em> de esa página y te lo envíen.
   addUser: Agregar usuario
   name: Nombre
