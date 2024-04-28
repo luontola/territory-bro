@@ -12,6 +12,7 @@
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
+            [territory-bro.ui.http-status :as http-status]
             [territory-bro.ui.settings-page :as settings-page])
   (:import (clojure.lang ExceptionInfo)
            (java.util UUID)
@@ -202,7 +203,7 @@
                                           (throw (ValidationException. [[:missing-name]
                                                                         [:disallowed-loans-csv-url]])))]
             (let [response (settings-page/save-congregation-settings! request)]
-              (is (= 400 (:status response)))
+              (is (= http-status/validation-error (:status response)))
               (is (str/includes?
                    (html/visible-text (:body response))
                    (html/normalize-whitespace

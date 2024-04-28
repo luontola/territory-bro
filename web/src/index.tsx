@@ -85,6 +85,18 @@ function formatXhrError({status, statusText, responseText}) {
   return message;
 }
 
+const VALIDATION_ERROR = 422;
+
+// Source: https://stackoverflow.com/questions/69364278/handle-errors-with-htmx
+document.body.addEventListener('htmx:beforeOnLoad', function (evt: Event) {
+  if (evt instanceof CustomEvent) {
+    if (evt.detail.xhr.status === VALIDATION_ERROR) {
+      evt.detail.shouldSwap = true;
+      evt.detail.isError = false;
+    }
+  }
+});
+
 // Source: https://xvello.net/blog/htmx-error-handling/
 document.body.addEventListener('htmx:afterRequest', (event: Event) => {
   const dialog = document.getElementById("htmx-error-dialog") as HTMLDialogElement | null;

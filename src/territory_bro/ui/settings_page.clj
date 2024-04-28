@@ -10,6 +10,7 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
+            [territory-bro.ui.http-status :as http-status]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]
             [territory-bro.ui.layout :as layout])
@@ -215,7 +216,7 @@
               (view)
               (layout/page! request)
               (html/response)
-              (assoc :status 400))
+              (assoc :status http-status/validation-error))
           (throw e))))))
 
 (def routes
