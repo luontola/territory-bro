@@ -65,7 +65,7 @@
   (is (= (html/normalize-whitespace
           "Register a new congregation
 
-           Congregation name
+           Congregation name []
            Register
 
            We recommend subscribing to our mailing list to be notified about important Territory Bro updates.")

@@ -18,7 +18,9 @@
   (testing "input tags are replaced with their visible text"
     (is (= "[the text]" (html/visible-text "<input type=\"text\" value=\"the text\" required>")))
     (is (= "x [Value] y" (html/visible-text "x<input value=\"Value\">y"))
-        "spacing before and after element"))
+        "spacing before and after element")
+    (is (= "[]" (html/visible-text "<input type=\"text\">"))
+        "without explicit value field"))
 
   (testing "select tags are replaced with the selected option's visible text"
     ;; TODO: do we need real html parsing, not just regex? consider enlive/html-snippet

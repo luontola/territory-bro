@@ -84,7 +84,7 @@
     (is (= (html/normalize-whitespace
             "Territories
 
-             Search Clear
+             Search [] Clear
              Number   Region       Addresses
              123      the region   the addresses")
            (-> (territory-list-page/view model)
@@ -107,7 +107,7 @@
     (is (= (html/normalize-whitespace
             "Territories
 
-             Search Clear
+             Search [] Clear
              Number   Region       Addresses
              -        the region   the addresses")
            (-> (territory-list-page/view (replace-in model [:territories 0 :number] "123" ""))
@@ -125,7 +125,7 @@
       (is (= (html/normalize-whitespace
               "Territories
 
-               Search Clear
+               Search [] Clear
                Number   Region       Addresses
                -
                -
@@ -169,7 +169,7 @@
                Only those territories which have been shared with you are currently shown.
                You will need to login to see the rest.
 
-               Search Clear
+               Search [] Clear
                Number   Region       Addresses
                123      the region   the addresses")
              (-> (territory-list-page/view anonymous-model)
@@ -183,7 +183,7 @@
                Only those territories which have been shared with you are currently shown.
                You will need to request access to see the rest.
 
-               Search Clear
+               Search [] Clear
                Number   Region       Addresses
                123      the region   the addresses")
              (binding [auth/*user* {:user/id (UUID/randomUUID)}]
