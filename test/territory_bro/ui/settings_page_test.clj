@@ -59,10 +59,57 @@
     (let [model (replace-in model [:permissions :gisAccess] true false)]
       (is (nil? (settings-page/editing-maps-section model))))))
 
+
+(deftest identity-provider-test
+  (is (= "" (settings-page/identity-provider nil)))
+  (is (= "Google" (settings-page/identity-provider {:sub "google-oauth2|123456789"})))
+  (is (= "Facebook" (settings-page/identity-provider {:sub "facebook|10224970701722883"})))
+  (is (= "developer" (settings-page/identity-provider {:sub "developer"}))))
+
+(deftest users-table-row-test
+  (let [user-id (UUID. 0 1)
+        current-user-id (UUID. 0 2)
+        user {:id user-id
+              :name "John Doe"
+              :picture "http://example.com/picture.jpg"
+              :email "john.doe@example.com"
+              :emailVerified true
+              :sub "google-oauth2|123456789"}]
+    (binding [auth/*user* {:user/id current-user-id}]
+
+      (testing "shows user information"
+        (is (= (html/normalize-whitespace
+                "John Doe   john.doe@example.com   Google   Remove user")
+               (-> (settings-page/users-table-row user)
+                   html/visible-text)))
+        (is (str/includes?
+             (str (settings-page/users-table-row user))
+             "src=\"http://example.com/picture.jpg\"")
+            "profile picture"))
+
+      (testing "highlights the current user"
+        (is (= (html/normalize-whitespace
+                "John Doe (You)   john.doe@example.com   Google   Remove user")
+               (-> (settings-page/users-table-row (assoc user :id current-user-id))
+                   html/visible-text))))
+
+      (testing "highlights unverified emails"
+        (is (= (html/normalize-whitespace
+                "John Doe   john.doe@example.com (Unverified)   Google   Remove user")
+               (-> (settings-page/users-table-row (assoc user :emailVerified false))
+                   html/visible-text))))
+
+      (testing "user data missing, show ID as placeholder"
+        (is (= (html/normalize-whitespace
+                "00000000-0000-0000-0000-000000000001   Remove user")
+               (-> (settings-page/users-table-row {:id user-id})
+                   html/visible-text)))))))
+
 (deftest user-management-section-test
   (testing "requires the configure-congregation permission"
     (let [model (replace-in model [:permissions :configureCongregation] true false)]
       (is (nil? (settings-page/user-management-section model))))))
+
 
 (deftest view-test
   (is (= (html/normalize-whitespace
@@ -120,8 +167,8 @@
           User ID []
           Add user
 
-              Name              Email                                Login method   Actions
-          👨‍💼  Developer (You)   developer@example.com (Unverified)   developer      Remove user")
+          Name              Email       Login method   Actions
+          Esko Luontola                 Google         Remove user")
          (-> (settings-page/view model)
              html/visible-text))))
 
