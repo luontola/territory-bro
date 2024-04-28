@@ -332,7 +332,7 @@
   (auth/with-user-from-session request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          user-id (UUID/fromString (str/trim (get-in request [:params :userId])))
+          user-id (UUID/fromString (get-in request [:params :userId]))
           state (state-for-request request)]
       (db/with-db [conn {}]
         (dispatch! conn state {:command/type :congregation.command/add-user

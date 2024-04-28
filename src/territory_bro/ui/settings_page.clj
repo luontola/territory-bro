@@ -235,7 +235,8 @@
 
 (defn add-user! [request]
   (try
-    (let [user-id (parse-uuid (str/trim (get-in request [:params :userId])))]
+    (let [request (update-in request [:params :userId] str/trim)
+          user-id (parse-uuid (get-in request [:params :userId]))]
       (api/add-user request)
       (http-response/see-other (str html/*page-path* "/users?new-user=" user-id)))
     (catch ExceptionInfo e ; TODO: catch ValidationException directly
