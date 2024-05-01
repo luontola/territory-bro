@@ -105,6 +105,7 @@ document.body.addEventListener('htmx:afterRequest', (event: Event) => {
     const status = event.detail.xhr.status
     if (event.detail.successful
       // XXX: when there is a HX-Redirect header, the event.detail.successful field will be undefined; don't report that as an error
+      //      See https://github.com/bigskysoftware/htmx/issues/2523
       || (status >= 200 && status < 400)
     ) {
       dialog.close();
