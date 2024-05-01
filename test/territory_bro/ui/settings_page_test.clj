@@ -83,43 +83,50 @@
               :email "john.doe@example.com"
               :emailVerified true
               :sub "google-oauth2|123456789"
-              :new? false}]
+              :new? false}
+        self-delete-confirmation "hx-confirm=\"Are you sure you want to REMOVE YOURSELF from Congregation Name? You will not be able to add yourself back.\""]
     (binding [auth/*user* {:user/id current-user-id}]
 
       (testing "shows user information"
         (is (= (html/normalize-whitespace
                 "John Doe   john.doe@example.com   Google   Remove user")
-               (-> (settings-page/users-table-row user)
+               (-> (settings-page/users-table-row user model)
                    html/visible-text)))
-        (is (str/includes?
-             (str (settings-page/users-table-row user))
-             "src=\"http://example.com/picture.jpg\"")
-            "profile picture"))
-
-      (testing "highlights new users"
-        (is (str/starts-with? (str (settings-page/users-table-row user))
-                              "<tr>")
-            "old user")
-        (is (str/starts-with? (str (settings-page/users-table-row (replace-in user [:new?] false true)))
-                              "<tr class=\"UserManagement__newUser--")
-            "new user"))
+        (is (str/includes? (str (settings-page/users-table-row user model))
+                           "src=\"http://example.com/picture.jpg\"")
+            "profile picture")
+        (is (not (str/includes? (str (settings-page/users-table-row user model))
+                                self-delete-confirmation))
+            "no delete confirmation"))
 
       (testing "highlights the current user"
-        (is (= (html/normalize-whitespace
-                "John Doe (You)   john.doe@example.com   Google   Remove user")
-               (-> (settings-page/users-table-row (assoc user :id current-user-id))
-                   html/visible-text))))
+        (let [current-user (assoc user :id current-user-id)]
+          (is (= (html/normalize-whitespace
+                  "John Doe (You)   john.doe@example.com   Google   Remove user")
+                 (-> (settings-page/users-table-row current-user model)
+                     html/visible-text)))
+          (is (str/includes? (str (settings-page/users-table-row current-user model))
+                             self-delete-confirmation)
+              "delete confirmation")))
+
+      (testing "highlights new users"
+        (is (str/starts-with? (str (settings-page/users-table-row user model))
+                              "<tr>")
+            "old user")
+        (is (str/starts-with? (str (settings-page/users-table-row (replace-in user [:new?] false true) model))
+                              "<tr class=\"UserManagement__newUser--")
+            "new user"))
 
       (testing "highlights unverified emails"
         (is (= (html/normalize-whitespace
                 "John Doe   john.doe@example.com (Unverified)   Google   Remove user")
-               (-> (settings-page/users-table-row (assoc user :emailVerified false))
+               (-> (settings-page/users-table-row (assoc user :emailVerified false) model)
                    html/visible-text))))
 
       (testing "user data missing, show ID as placeholder"
         (is (= (html/normalize-whitespace
                 "00000000-0000-0000-0000-000000000001   Remove user")
-               (-> (settings-page/users-table-row {:id user-id})
+               (-> (settings-page/users-table-row {:id user-id} model)
                    html/visible-text)))))))
 
 (deftest user-management-section-test
@@ -270,3 +277,45 @@
                    (html/normalize-whitespace
                     "User ID [00000000-0000-0000-0000-000000000002] ⚠️ User does not exist
                      Add user"))))))))))
+
+(deftest ^:slow remove-user!-test
+  (with-fixtures [db-fixture api-fixture]
+    (let [session (at/login! at/app)
+          current-user-id (at/get-user-id session)
+          other-user-id (UUID. 0 2)
+          cong-id (at/create-congregation! session "foo")
+          request {:params {:congregation (str cong-id)
+                            :userId (str other-user-id)}
+                   :session (auth/user-session {:name "John Doe"} current-user-id)}]
+      (binding [html/*page-path* "/settings-page-url"]
+        (auth/with-user-from-session request
+
+          (testing "removes the user and refreshes the users list"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (settings-page/remove-user! request)]
+                (is (= {:status 303
+                        :headers {"Location" "/settings-page-url/users"}
+                        :body ""}
+                       response))
+                (is (= {:command/type :congregation.command/set-user-permissions
+                        :command/user current-user-id
+                        :congregation/id cong-id
+                        :user/id other-user-id
+                        :permission/ids []}
+                       (dissoc @*last-command :command/time))))))
+
+          (testing "removing the current user will redirect to the front page"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (settings-page/remove-user! (assoc-in request [:params :userId] (str current-user-id)))]
+                (is (= {:status 200
+                        :headers {"Content-Type" "text/html"
+                                  "hx-redirect" "/"}
+                        :body ""}
+                       response))
+                (is (= {:command/type :congregation.command/set-user-permissions
+                        :command/user current-user-id
+                        :congregation/id cong-id
+                        :user/id current-user-id
+                        :permission/ids []}
+                       (dissoc @*last-command :command/time)))))))))))
+

@@ -102,7 +102,11 @@ document.body.addEventListener('htmx:afterRequest', (event: Event) => {
   const dialog = document.getElementById("htmx-error-dialog") as HTMLDialogElement | null;
   const message = document.getElementById("htmx-error-message");
   if (event instanceof CustomEvent && dialog && message) {
-    if (event.detail.successful) {
+    const status = event.detail.xhr.status
+    if (event.detail.successful
+      // XXX: when there is a HX-Redirect header, the event.detail.successful field will be undefined; don't report that as an error
+      || (status >= 200 && status < 400)
+    ) {
       dialog.close();
       message.innerText = "";
 

@@ -5,7 +5,9 @@
 (ns territory-bro.ui.settings-page
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
+            [ring.util.codec :as codec]
             [ring.util.http-response :as http-response]
+            [ring.util.response :as response]
             [territory-bro.api :as api]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.css :as css]
@@ -14,7 +16,8 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]
             [territory-bro.ui.layout :as layout])
-  (:import (clojure.lang ExceptionInfo)))
+  (:import (clojure.lang ExceptionInfo)
+           (java.util UUID)))
 
 (defn model! [request]
   (let [congregation (:body (api/get-congregation request {}))
@@ -133,8 +136,10 @@
       (str/starts-with? sub "facebook|") "Facebook"
       :else sub)))
 
-(defn users-table-row [user]
-  (let [styles (:UserManagement (css/modules))]
+(defn users-table-row [user model]
+  (let [styles (:UserManagement (css/modules))
+        current-user? (= (:id user)
+                         (:user/id auth/*user*))]
     (h/html
      [:tr {:class (when (:new? user)
                     (:newUser styles))}
@@ -146,8 +151,7 @@
        (if (str/blank? (:name user))
          (:id user)
          (:name user))
-       (when (= (:id user)
-                (:user/id auth/*user*))
+       (when current-user?
          (h/html " " [:em "(" (i18n/t "UserManagement.you") ")"]))]
       [:td
        (:email user)
@@ -155,9 +159,12 @@
                   (not (:emailVerified user)))
          (h/html " " [:em "(" (i18n/t "UserManagement.unverified") ")"]))]
       [:td (identity-provider user)]
-      ;; TODO: implement removing
       [:td [:button.pure-button {:type "button"
-                                 :class (:removeUser styles)}
+                                 :class (:removeUser styles)
+                                 :hx-delete (str html/*page-path* "/users?userId=" (codec/url-encode (:id user)))
+                                 :hx-confirm (when current-user?
+                                               (-> (i18n/t "UserManagement.removeYourselfWarning")
+                                                   (str/replace "{{congregation}}" (:congregation/name model))))}
             (i18n/t "UserManagement.removeUser")]]])))
 
 (defn user-management-section [model]
@@ -201,7 +208,7 @@
            [:th (i18n/t "UserManagement.actions")]]]
          [:tbody
           (for [user (:congregation/users model)]
-            (users-table-row user))]]]))))
+            (users-table-row user model))]]]))))
 
 
 (defn view [model]
@@ -251,6 +258,18 @@
               (assoc :status http-status/validation-error))
           (throw e))))))
 
+(defn remove-user! [request]
+  (let [request (assoc-in request [:params :permissions] [])
+        user-id (UUID/fromString (get-in request [:params :userId]))
+        current-user? (= user-id (:user/id auth/*user*))]
+    (api/set-user-permissions request)
+    (if current-user?
+      (-> (html/response "")
+          ;; the user can no longer view this congregation, so redirect them to the front page
+          (response/header "hx-redirect" "/"))
+      (http-response/see-other (str html/*page-path* "/users")))))
+
+
 (def routes
   ["/congregation/:congregation/settings"
    {:middleware [[html/wrap-page-path ::page]]}
@@ -273,4 +292,6 @@
                           (user-management-section)
                           (html/response)))}
      :post {:handler (fn [request]
-                       (add-user! request))}}]])
+                       (add-user! request))}
+     :delete {:handler (fn [request]
+                         (remove-user! request))}}]])
