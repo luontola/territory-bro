@@ -209,7 +209,7 @@
 
 (def ^:private validate-congregation (s/validator Congregation))
 
-(defn get-congregation [request {:keys [fetch-loans?]}]
+(defn ^:dynamic get-congregation [request {:keys [fetch-loans?]}]
   (auth/with-user-from-session request
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           user-id (current-user-id)

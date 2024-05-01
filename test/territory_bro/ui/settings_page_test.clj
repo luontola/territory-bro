@@ -6,6 +6,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
+            [territory-bro.api :as api]
             [territory-bro.api-test :as at]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.infra.authentication :as auth]
@@ -55,7 +56,23 @@
       (testing "user was added"
         (let [request (assoc-in request [:params :new-user] (str user-id))
               model (replace-in model [:congregation/users 0 :new?] false true)]
-          (is (= model (settings-page/model! request))))))))
+          (is (= model (settings-page/model! request)))))
+
+      (testing "shows new users first, followed by the rest alphabetically"
+        (let [new-user-id (UUID. 0 5)
+              users [;; should be case-insensitive
+                     {:id (UUID. 0 1), :name "a"}
+                     {:id (UUID. 0 2), :name "B"}
+                     ;; new ones should be first
+                     {:id new-user-id, :name "c"}
+                     ;; doesn't sort by ID
+                     {:id (UUID. 0 9), :name "D"}
+                     {:id (UUID. 0 8), :name "e"}]]
+          (binding [api/get-congregation (constantly {:body {:users (shuffle users)}})]
+            (is (= ["c" "a" "B" "D" "e"]
+                   (->> (settings-page/model! (assoc-in request [:params :new-user] (str new-user-id)))
+                        :congregation/users
+                        (map :name))))))))))
 
 (deftest congregation-settings-section-test
   (testing "requires the configure-congregation permission"
