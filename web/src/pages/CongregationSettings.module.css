@@ -8,7 +8,7 @@ table.spreadsheet td {
 }
 
 details.experimentalFeatures {
-    summary {
+    :is(summary) {
         font-weight: bold;
         cursor: pointer;
     }
