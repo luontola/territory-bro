@@ -191,6 +191,7 @@
              [:input#user-id {:name "userId"
                               :type "text"
                               :autocomplete "off"
+                              :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
                               :required true
                               :pattern "\\s*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\s*"
                               :value (:form/user-id model)
