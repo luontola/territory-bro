@@ -90,7 +90,7 @@
                " ⚠️ ")])
 
           [:details {:class (:experimentalFeatures styles)
-                     :open (some? (:congregation/loans-csv-url model))}
+                     :open (not (str/blank? (:congregation/loans-csv-url model)))}
            [:summary (i18n/t "CongregationSettings.experimentalFeatures")]
 
            [:div {:lang "en"}
