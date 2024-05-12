@@ -3,16 +3,20 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.registration-page-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [territory-bro.api-test :as at]
+            [territory-bro.dispatcher :as dispatcher]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.ui.html :as html]
+            [territory-bro.ui.http-status :as http-status]
             [territory-bro.ui.registration-page :as registration-page])
-  (:import (clojure.lang ExceptionInfo)))
+  (:import (clojure.lang ExceptionInfo)
+           (territory_bro ValidationException)))
 
-(def model {})
+(def model {:form nil})
 
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
@@ -59,7 +63,18 @@
                               :response {:status 401
                                          :body "Not logged in"
                                          :headers {}}}
-                             (registration-page/submit! (dissoc request :session)))))))))
+                             (registration-page/submit! (dissoc request :session))))))
+
+      (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
+        (binding [dispatcher/command! (fn [& _]
+                                        (throw (ValidationException. [[:missing-name]])))]
+          (let [response (registration-page/submit! request)]
+            (is (= http-status/validation-error (:status response)))
+            (is (str/includes?
+                 (html/visible-text (:body response))
+                 (html/normalize-whitespace
+                  "Congregation name [the name] ⚠️
+                   Register")))))))))
 
 (deftest view-test
   (is (= (html/normalize-whitespace

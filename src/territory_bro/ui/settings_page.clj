@@ -182,7 +182,10 @@
 
         [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/users")}
          [:fieldset
-          (let [no-such-user? (contains? errors :no-such-user)]
+          (let [invalid-user-id? (contains? errors :invalid-user-id)
+                no-such-user? (contains? errors :no-such-user)
+                error? (or invalid-user-id?
+                           no-such-user?)]
             [:div.pure-control-group
              [:label {:for "user-id"}
               (i18n/t "UserManagement.userId")]
@@ -191,9 +194,12 @@
                               :autocomplete "off"
                               :required true
                               :pattern "\\s*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\s*"
-                              :value (:form/user-id model)}]
+                              :value (:form/user-id model)
+                              :aria-invalid (when error? "true")}]
+             (when error?
+               " ⚠️ ")
              (when no-such-user?
-               (h/html " ⚠️ " [:span.pure-form-message-inline (i18n/t "UserManagement.userIdNotExist")]))])
+               [:span.pure-form-message-inline (i18n/t "UserManagement.userIdNotExist")])])
           [:div.pure-controls
            [:button.pure-button.pure-button-primary {:type "submit"}
             (i18n/t "UserManagement.addUser")]]]]

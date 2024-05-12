@@ -332,7 +332,9 @@
   (auth/with-user-from-session request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          user-id (UUID/fromString (get-in request [:params :userId]))
+          user-id (or (parse-uuid (get-in request [:params :userId]))
+                      ;; TODO: throw ValidationException directly
+                      (bad-request! {:errors (.getErrors (ValidationException. [[:invalid-user-id]]))}))
           state (state-for-request request)]
       (db/with-db [conn {}]
         (dispatch! conn state {:command/type :congregation.command/add-user

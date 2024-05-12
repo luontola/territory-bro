@@ -293,6 +293,17 @@
                    (html/visible-text (:body response))
                    (html/normalize-whitespace
                     "User ID [00000000-0000-0000-0000-000000000002] ⚠️ User does not exist
+                     Add user")))))
+
+          (binding [dispatcher/command! (fn [& _]
+                                          (throw (ValidationException. [[:invalid-user-id]])))]
+            (let [request (replace-in request [:params :userId] (str new-user-id) "foo")
+                  response (settings-page/add-user! request)]
+              (is (= http-status/validation-error (:status response)))
+              (is (str/includes?
+                   (html/visible-text (:body response))
+                   (html/normalize-whitespace
+                    "User ID [foo] ⚠️
                      Add user"))))))))))
 
 (deftest ^:slow remove-user!-test
