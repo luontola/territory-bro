@@ -182,7 +182,7 @@
     <orderEntry type="library" name="Leiningen: org.eclipse.jetty/jetty-xml:11.0.18" level="project" />
     <orderEntry type="library" name="Leiningen: org.flywaydb/flyway-core:10.9.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.flywaydb/flyway-database-postgresql:10.9.1" level="project" />
-    <orderEntry type="library" name="Leiningen: org.javassist/javassist:3.18.1-GA" level="project" />
+    <orderEntry type="library" name="Leiningen: org.javassist/javassist:3.28.0-GA" level="project" />
     <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-common:1.9.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-jdk7:1.9.23" level="project" />
     <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-jdk8:1.9.23" level="project" />
@@ -193,6 +193,7 @@
     <orderEntry type="library" name="Leiningen: org.nrepl/incomplete:0.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.objenesis/objenesis:3.3" level="project" />
     <orderEntry type="library" name="Leiningen: org.postgresql/postgresql:42.7.2" level="project" />
+    <orderEntry type="library" name="Leiningen: org.reflections/reflections:0.10.2" level="project" />
     <orderEntry type="library" name="Leiningen: org.ring-clojure/ring-jakarta-servlet:1.11.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.ring-clojure/ring-websocket-protocols:1.11.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.slf4j/slf4j-api:2.0.12" level="project" />

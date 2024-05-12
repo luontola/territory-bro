@@ -7,7 +7,9 @@
             [hiccup.util :as hiccup.util]
             [reitit.core :as reitit]
             [ring.util.http-response :as http-response]
-            [ring.util.response :as response]))
+            [ring.util.response :as response])
+  (:import (org.reflections Reflections)
+           (org.reflections.scanners Scanners)))
 
 (alter-var-root #'hiccup.util/*html-mode* (constantly :html)) ; change default from :xhtml to :html
 
@@ -76,3 +78,12 @@
       (assert (some? page-path))
       (binding [*page-path* page-path]
         (handler request)))))
+
+(def public-resources
+  (let [reflections (Reflections. "public" (into-array [Scanners/Resources]))]
+    (->> (.getResources reflections #".*")
+         (map (fn [resource-path]
+                (let [url (str/replace resource-path #"^public/" "/") ; resource path -> absolute URL
+                      wildcard-url (str/replace url #"-[0-9a-f]{8}\." "-*.")] ; mapping for content-hashed filenames
+                  [wildcard-url url])))
+         (into {}))))

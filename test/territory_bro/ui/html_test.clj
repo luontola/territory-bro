@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.html-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer :all]
             [hiccup2.core :as h]
             [territory-bro.ui.html :as html]))
 
@@ -77,3 +78,12 @@
 
   (testing "works for raw hiccup strings"
     (is (= "stuff" (html/visible-text (h/raw "<p>stuff</p>"))))))
+
+(deftest public-resources-test
+  (testing "regular files are mapped as-is"
+    (is (= "/index.html" (get html/public-resources "/index.html"))))
+
+  (testing "content-hashed files are mapped using a wildcard"
+    (let [path (get html/public-resources "/assets/crop-mark-*.svg")]
+      (is (some? path))
+      (is (some? (io/resource (str "public" path)))))))

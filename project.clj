@@ -37,6 +37,7 @@
                  [org.flywaydb/flyway-core "10.9.1"]
                  [org.flywaydb/flyway-database-postgresql "10.9.1"]
                  [org.postgresql/postgresql "42.7.2"]
+                 [org.reflections/reflections "0.10.2"]
                  [prismatic/schema "1.4.1"]
                  [ring "1.11.0"]
                  [ring-logger "1.1.1"]

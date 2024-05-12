@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.reflections/reflections:0.10.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/reflections/reflections/0.10.2/reflections-0.10.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/reflections/reflections/0.10.2/reflections-0.10.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
