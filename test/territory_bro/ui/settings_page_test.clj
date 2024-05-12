@@ -12,8 +12,8 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
+            [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.http-status :as http-status]
             [territory-bro.ui.settings-page :as settings-page])
   (:import (clojure.lang ExceptionInfo)
            (java.util UUID)
@@ -243,7 +243,7 @@
                                           (throw (ValidationException. [[:missing-name]
                                                                         [:disallowed-loans-csv-url]])))]
             (let [response (settings-page/save-congregation-settings! request)]
-              (is (= http-status/validation-error (:status response)))
+              (is (= forms/validation-error-http-status (:status response)))
               (is (str/includes?
                    (html/visible-text (:body response))
                    (html/normalize-whitespace
@@ -288,7 +288,7 @@
           (binding [dispatcher/command! (fn [& _]
                                           (throw (ValidationException. [[:no-such-user new-user-id]])))]
             (let [response (settings-page/add-user! request)]
-              (is (= http-status/validation-error (:status response)))
+              (is (= forms/validation-error-http-status (:status response)))
               (is (str/includes?
                    (html/visible-text (:body response))
                    (html/normalize-whitespace
@@ -299,7 +299,7 @@
                                           (throw (ValidationException. [[:invalid-user-id]])))]
             (let [request (replace-in request [:params :userId] (str new-user-id) "foo")
                   response (settings-page/add-user! request)]
-              (is (= http-status/validation-error (:status response)))
+              (is (= forms/validation-error-http-status (:status response)))
               (is (str/includes?
                    (html/visible-text (:body response))
                    (html/normalize-whitespace

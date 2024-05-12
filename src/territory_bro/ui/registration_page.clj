@@ -8,11 +8,10 @@
             [ring.util.http-response :as http-response]
             [territory-bro.api :as api]
             [territory-bro.infra.authentication :as auth]
+            [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.http-status :as http-status]
             [territory-bro.ui.i18n :as i18n]
-            [territory-bro.ui.layout :as layout])
-  (:import (clojure.lang ExceptionInfo)))
+            [territory-bro.ui.layout :as layout]))
 
 (defn model! [request]
   (auth/with-user-from-session request
@@ -59,18 +58,8 @@
           api-request (assoc request :params {:name cong-name})
           cong-id (:id (:body (api/create-congregation api-request)))]
       (http-response/see-other (str "/congregation/" cong-id)))
-    (catch ExceptionInfo e ; TODO: catch ValidationException directly
-      (let [errors (when (and (= :ring.util.http-response/response (:type (ex-data e)))
-                              (= 400 (:status (:response (ex-data e)))))
-                     (:errors (:body (:response (ex-data e)))))]
-        (if (some? errors)
-          (-> (model! request)
-              (assoc :errors errors)
-              (view)
-              (layout/page! request)
-              (html/response)
-              (assoc :status http-status/validation-error))
-          (throw e))))))
+    (catch Exception e
+      (forms/validation-error-page-response e request model! view))))
 
 (def routes
   ["/register"

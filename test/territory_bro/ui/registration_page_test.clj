@@ -10,8 +10,8 @@
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.http-status :as http-status]
             [territory-bro.ui.registration-page :as registration-page])
   (:import (clojure.lang ExceptionInfo)
            (territory_bro ValidationException)))
@@ -69,7 +69,7 @@
         (binding [dispatcher/command! (fn [& _]
                                         (throw (ValidationException. [[:missing-name]])))]
           (let [response (registration-page/submit! request)]
-            (is (= http-status/validation-error (:status response)))
+            (is (= forms/validation-error-http-status (:status response)))
             (is (str/includes?
                  (html/visible-text (:body response))
                  (html/normalize-whitespace

@@ -11,13 +11,12 @@
             [territory-bro.api :as api]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.css :as css]
+            [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.http-status :as http-status]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]
             [territory-bro.ui.layout :as layout])
-  (:import (clojure.lang ExceptionInfo)
-           (java.util UUID)))
+  (:import (java.util UUID)))
 
 (defn model! [request]
   (let [congregation (:body (api/get-congregation request {}))
@@ -233,18 +232,8 @@
   (try
     (api/save-congregation-settings request)
     (http-response/see-other html/*page-path*)
-    (catch ExceptionInfo e ; TODO: catch ValidationException directly
-      (let [errors (when (and (= :ring.util.http-response/response (:type (ex-data e)))
-                              (= 400 (:status (:response (ex-data e)))))
-                     (:errors (:body (:response (ex-data e)))))]
-        (if (some? errors)
-          (-> (model! request)
-              (assoc :errors errors)
-              (view)
-              (layout/page! request)
-              (html/response)
-              (assoc :status http-status/validation-error))
-          (throw e))))))
+    (catch Exception e
+      (forms/validation-error-page-response e request model! view))))
 
 (defn add-user! [request]
   (try
@@ -252,17 +241,8 @@
           user-id (parse-uuid (get-in request [:params :userId]))]
       (api/add-user request)
       (http-response/see-other (str html/*page-path* "/users?new-user=" user-id)))
-    (catch ExceptionInfo e ; TODO: catch ValidationException directly
-      (let [errors (when (and (= :ring.util.http-response/response (:type (ex-data e)))
-                              (= 400 (:status (:response (ex-data e)))))
-                     (:errors (:body (:response (ex-data e)))))]
-        (if (some? errors)
-          (-> (model! request)
-              (assoc :errors errors)
-              (user-management-section)
-              (html/response)
-              (assoc :status http-status/validation-error))
-          (throw e))))))
+    (catch Exception e
+      (forms/validation-error-htmx-response e request model! user-management-section))))
 
 (defn remove-user! [request]
   (let [request (assoc-in request [:params :permissions] [])
