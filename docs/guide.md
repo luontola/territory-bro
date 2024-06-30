@@ -11,12 +11,12 @@ permalink: /guide/
 1. [Getting Started](#getting-started)
 2. [Basic Concepts](#basic-concepts)
 3. [Editing the Maps](#editing-the-maps)
-   1. [Adding Congregation Boundaries](#adding-congregation-boundaries)
-   2. [Adding Territories](#adding-territories)
-   3. [Importing City Suburb Boundaries (optional)](#importing-city-suburb-boundaries-optional)
+   1. [How to Create Congregation Boundaries](#how-to-create-congregation-boundaries)
+   2. [How to Create and Edit Territories](#how-to-create-and-edit-territories)
+   3. [How to Import City District Boundaries (optional)](#how-to-import-city-district-boundaries-optional)
 4. [Printing Territory Cards](#printing-territory-cards)
-5. [Advanced Topics](#advanced-topics)
-    1. [Importing City Suburb Boundaries](#importing-city-suburb-boundaries)
+5. [Tips](#tips)
+    1. [Importing Map Data from KML/KMZ Files](#importing-map-data-from-kmlkmz-files)
     2. [Locating Staircase Entrances](#locating-staircase-entrances)
 
 
@@ -32,9 +32,9 @@ permalink: /guide/
 
 3. Download and install the latest [QGIS 3.x LTR (Long Term Release)](https://www.qgis.org/). This program will be used to edit the territory maps.
 
-4. Use QGIS to open your congregation's QGIS project file (from step 2). You should see a world map, and you can zoom to your city. If you can't see the map, zoom all the way out using the **View \| Zoom Full** action from the application menus.
+4. Use QGIS to open your congregation's QGIS project file (from step 2). You should see a world map, and you can zoom to your city. If you can't see the map, it could be because the map zoomed into a sea. Zoom all the way out using the **View \| Zoom Full** action from the application menus.
 
-After this the next steps are to draw your congregation's boundaries on the map and then start drawing individual territories.
+After this, the next steps are to draw your congregation's boundaries on the map, and then start drawing individual territories.
 
 
 ## Basic Concepts
@@ -51,9 +51,9 @@ What the features on these layers mean is best understood by looking at a printe
 
 The shape of a feature on the **territory layer** is shown in the map as a red border ①, its **number attribute** is shown in the right corner ②, its **addresses attribute** is shown on the right side ③, and its **subregion attribute** is shown in the heading ④.
 
-The minimap ⑤ is composed from multiple layers: The **territory layer**'s feature is shown as a dot. The **congregation_boundary layer**'s feature(s) are shown as a black border. The **subregion layer**'s feature which contains the current territory, is shown as a dark gray area.
+The minimap ⑤ is composed of multiple layers: The **territory layer**'s feature is shown as a dot. The **congregation_boundary layer**'s feature(s) are shown as a black border. The **subregion layer**'s feature which contains the current territory, is shown as a dark gray area.
 
-The **card_minimap_viewport layer** determines the minimap's ⑤ zoom level. By default the whole **congregation_boundary** is shown in the minimap, but if the **card_minimap_viewport layer** contains features and the current territory is inside one of them, the minimap will zoom to that **card_minimap_viewport**.
+The **card_minimap_viewport layer** determines the minimap's ⑤ zoom level. By default, the whole **congregation_boundary** is shown in the minimap, but if the **card_minimap_viewport layer** contains features and the current territory is inside one of them, the minimap will zoom to that **card_minimap_viewport**.
 
 > Only the **congregation_boundary** and **territory** layers are mandatory. The other layers can be left empty.
 
@@ -71,65 +71,47 @@ The feature is saved to the database only after you select **Layer \| Save Layer
 After you are done editing a layer, you can choose **Layer \| Toggle Editing** again to make the layer read-only.
 
 
-### Adding Congregation Boundaries
+### How to Create Congregation Boundaries
 
-> *This video is an unedited preview. Hopefully it will be of help. A proper tutorial video with some explanations will be published later.*
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/48aRI8kir9Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/MBoxkZvLPqc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
-### Adding Territories
+### How to Create and Edit Territories
 
-> *This video is an unedited preview. Hopefully it will be of help. A proper tutorial video with some explanations will be published later.*
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/WdT-uGJJbos" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/yBPH5XU-NQo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
-### Importing City Suburb Boundaries (optional)
+### How to Import City District Boundaries (optional)
 
-> *This video is an unedited preview. Hopefully it will be of help. A proper tutorial video with some explanations will be published later.*
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/a3diEBgYEiw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/S0s3Y7IB9ho?si=yeBUyvWA6QlAHPDm" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
 ## Printing Territory Cards
 
-> **Note: This video is a bit old, so you can skip the beginning and start watching from 4:00.** The export/import phase is no more needed, because you can now login to Territory Bro and it will show your territories directly. Also the experimental web browser features mentioned in the video are no more experimental.  
+Log in to <https://beta.territorybro.com>, choose your congregation and to go **Printouts**. You should see your territories ready to be printed using various card templates. You can print multiple territories at once by holding down `Ctrl` or `Shift` to select them from the territories list. 
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/WSxMMV6CpPg?start=239" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+By default, the background maps from OpenStreetMap are used, but Territory Bro can support also other freely available maps. [Create an issue](https://github.com/luontola/territory-bro/issues) if you know about a map you wish to use. (Note that due to [license restrictions](https://github.com/luontola/territory-bro/issues/34#issuecomment-1709913100), Google Maps cannot be added there.)
 
-Log in to <https://beta.territorybro.com>, choose your congregation and to go printouts. You should see your territories ready to be printed using various card templates. You can print multiple territories by holding down `Ctrl` or `Shift` to select them from the territories list. 
+You can do minor adjustments to the maps: drag with mouse to move, scroll mouse wheel to zoom, hold `Alt+Shift` while dragging to rotate. These adjustments are lost after you leave the page, so do them right before printing the cards. 
 
-By default, the background maps from OpenStreetMap are used, but Territory Bro can support also other freely available maps. [Create an issue](https://github.com/luontola/territory-bro/issues) if you know about a map you wish to use.
+Do a test print with one page, and check if the territory cards come out the right size. You might need to adjust the print scale in your web browser's or printer's settings. If it doesn't allow specifying the scale with an exact percentage, you can first save the page as PDF, and then print the PDF using [Adobe Reader](https://get.adobe.com/reader/). Print one page with 100% scale on paper (one A4 sheet fits 2 cards) and measure the distance between the printed crop marks. Then measure that what the dimensions of the card should really be, so that it would fit inside your protective plastic cases. Calculate the correct scale for printing the cards by dividing those two measures and try printing again.
 
-You can do minor adjustments to the maps: drag with mouse to move, scroll mouse wheel to zoom, hold `Alt+Shift` while dragging to rotate. These adjustments are not saved after you leave the page, so do them right before printing the cards. 
-
-Using the latest Chrome or Firefox, save the territory cards page as PDF. Open the PDF in [Adobe Reader](https://get.adobe.com/reader/), print one page with 100% scale on paper (one A4 sheet fits 2 cards) and measure the distance between the printed crop marks. Then measure that what the dimensions of the card should really be, so that it would fit inside your protective plastic cases. Calculate the correct scale for printing the cards by dividing those two measures and try printing again.
-
-Print the territory cards with the correct scale on thick paper. Cut the cards along the crop marks using a ruler and a sharp knife. Optionally cover the cards with adhesive book covering film (before cutting them out).
-
-*TODO: Update this section of the user guide (the video).*
+Print the territory cards with the correct scale on thick paper. Cut the cards along the crop marks using a ruler and a sharp knife. Optionally cover the cards with adhesive book covering film (best done before cutting them out).
 
 
-## Advanced Topics
+## Tips
 
-### Importing City Suburb Boundaries
+### Importing Map Data from KML/KMZ Files
 
-> **Note: This video is a bit old. It shows an older version of QGIS.** With QGIS 3 some things may work differently, and some things you might be able to do without installing plugins.
+If you've used Google Maps or Google Earth to store your territory data, you can export them as KML/KMZ files from there, and import them into QGIS. You can import pretty much any map data format to QGIS.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/19vtQn6CwEU" frameborder="0" allowfullscreen></iframe>
+Drag and drop the map data file to QGIS, and QGIS will add it as a new layer. You can then copy the features from that layer and paste them to the territories layer.
 
-The above video shows starting at 4:45 that how to use QGIS to copy city suburb boundaries from a WFS service to your **subregion layer**. The video shows an old version of QGIS and Territory Bro, but the basic idea is the same.
+To copy also the territory numbers and addresses, the field names must be the same in both layers. Right-click a layer and choose **Open Attribute Table** to check the names of the fields.
 
-*TODO: Update this section of the user guide (importing WFS/OSM/KML).*
+You can't edit a layer backed by a KML/KMZ file in QGIS, so you must make a copy of the layer to be able to rename the fields. Choose **Edit \| Select \| Select All Features** to select all features on the layer, copy them with **Edit \| Copy Features**, and paste them to a new layer with **Edit \| Paste Features As \| Temporary Scratch Layer**. Now you can enable editing the layer and rename the fields by right-clicking the layer and going to **Properties \| Fields**.
 
 
 ### Locating Staircase Entrances
 
-> **Note: This video is a bit old. It shows an older version of QGIS.** With QGIS 3 some things may work differently, and some things you might be able to do without installing plugins.
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Oj9Lt4W5F4c" frameborder="0" allowfullscreen></iframe>
-
-The above video shows at time 1:05-3:40 that how to use [OpenStreetMap](https://www.openstreetmap.org/) to find out the staircase entrance letters/numbers easily. You could also use Google Street View.
-
-*TODO: Update this section of the user guide.*
+Sometimes it's possible to use [OpenStreetMap](https://www.openstreetmap.org/) to find out the staircase entrance letters/numbers easily. On the right side of the map, there is a **Query features** tool (a mouse cursor with a question mark). Click the building with that, and it might show the staircase entrance in the nearby features list. You could also use Google Street View. That can be helpful in drawing the territory maps, so that you don't always need to visit the places physically.
