@@ -96,7 +96,7 @@ After you are done editing a layer, you can choose **Layer \| Toggle Editing** a
 
 > **Note: This video is a bit old, so you can skip the beginning and start watching from 4:00.** The export/import phase is no more needed, because you can now login to Territory Bro and it will show your territories directly. Also the experimental web browser features mentioned in the video are no more experimental.  
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/WSxMMV6CpPg?list=PLSADDT9dzgRCEEopQhYLrdjVOfyfrC-Iz&start=239" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/WSxMMV6CpPg?start=239" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 Log in to <https://beta.territorybro.com>, choose your congregation and to go printouts. You should see your territories ready to be printed using various card templates. You can print multiple territories by holding down `Ctrl` or `Shift` to select them from the territories list. 
 
@@ -117,7 +117,7 @@ Print the territory cards with the correct scale on thick paper. Cut the cards a
 
 > **Note: This video is a bit old. It shows an older version of QGIS.** With QGIS 3 some things may work differently, and some things you might be able to do without installing plugins.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/19vtQn6CwEU?list=PLSADDT9dzgRCEEopQhYLrdjVOfyfrC-Iz" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/19vtQn6CwEU" frameborder="0" allowfullscreen></iframe>
 
 The above video shows starting at 4:45 that how to use QGIS to copy city suburb boundaries from a WFS service to your **subregion layer**. The video shows an old version of QGIS and Territory Bro, but the basic idea is the same.
 
@@ -128,7 +128,7 @@ The above video shows starting at 4:45 that how to use QGIS to copy city suburb 
 
 > **Note: This video is a bit old. It shows an older version of QGIS.** With QGIS 3 some things may work differently, and some things you might be able to do without installing plugins.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Oj9Lt4W5F4c?list=PLSADDT9dzgRCEEopQhYLrdjVOfyfrC-Iz" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Oj9Lt4W5F4c" frameborder="0" allowfullscreen></iframe>
 
 The above video shows at time 1:05-3:40 that how to use [OpenStreetMap](https://www.openstreetmap.org/) to find out the staircase entrance letters/numbers easily. You could also use Google Street View.
 
