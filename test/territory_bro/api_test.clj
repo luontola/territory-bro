@@ -971,6 +971,36 @@
         (let [state-after (projections/cached-state)]
           (is (= state-before state-after)))))))
 
+(deftest share-demo-territory-link-bugfix-test
+  (let [*session (atom (login! app))
+        *session-anonymous (atom nil)
+        cong-id (create-congregation! @*session "Congregation")
+        territory-id (create-territory! cong-id)
+        share-key (-> (request :post (str "/api/congregation/" cong-id "/territory/" territory-id "/share"))
+                      (json-body {})
+                      (merge @*session)
+                      app
+                      :body
+                      :key)]
+    (assert (some? share-key))
+
+    (testing "given: anonymous user has opened a normal share"
+      (let [response (-> (request :get (str "/api/share/" share-key))
+                         app)]
+        (is (ok? response))
+        (reset! *session-anonymous (get-session response))))
+
+    (testing "when: anonymous user tries to create a demo share"
+      ;; This crashed because share-territory-link didn't call with-user-from-session for demo shares,
+      ;; and state-for-request depends on current-user-id which requires auth/*user* to be set.
+      ;; A more fundamental fix would be to always initialize auth/*user* in a middleware, after which
+      ;; this special case wouldn't exist anymore.
+      (let [response (-> (request :post (str "/api/congregation/demo/territory/" territory-id "/share"))
+                         (json-body {})
+                         (merge @*session-anonymous)
+                         app)]
+        (is (ok? response))))))
+
 (deftest create-qr-code-test
   (let [*session (atom (login! app))
         cong-id (create-congregation! @*session "Congregation")
