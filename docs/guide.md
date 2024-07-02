@@ -28,32 +28,37 @@ permalink: /guide/
      2. Send the User ID to the person who already can access your congregation in Territory Bro.
      3. They will need to visit the congregation's settings page in Territory Bro, and add you there using your User ID.
 
-2. After registering the congregation, in the congregation's settings page there is a button to download a *QGIS project file*. Save the project file on your computer.
+2. After registering the congregation, in the congregation's *Settings* page there is a button to download a *QGIS project file*. Save the project file on your computer.
 
 3. Download and install the latest [QGIS 3.x LTR (Long Term Release)](https://www.qgis.org/). This program will be used to edit the territory maps.
 
-4. Use QGIS to open your congregation's QGIS project file (from step 2). You should see a world map, and you can zoom to your city. If you can't see the map, it could be because the map zoomed into a sea. Zoom all the way out using the **View \| Zoom Full** action from the application menus.
+4. Use QGIS to open your congregation's QGIS project file (from step 2). You should see a world map, and you can zoom to your city.
+   * If you can't see the map, it could be because the map is zoomed into a sea. Zoom all the way out using the **View \| Zoom Full** action from the application menus.
 
-After this, the next steps are to draw your congregation's boundaries on the map, and then start drawing individual territories.
+After this, the next steps are to draw your congregation's boundaries and individual territories.
 
 
 ## Basic Concepts
 
-After opening your congregation's project file in QGIS, you should see a *layers* panel. If it is not visible, select **View \| Panels \| Layers** from the application menus.
+Consider the following territory card. This chapter will explain how the elements on that card map to elements in QGIS.
 
-<img alt="Layers panel" src="layers-panel-1x.png" srcset="layers-panel-2x.png 2x">
+![Example territory card](/examples/card.jpg)
 
-On these layers you can draw *features*. A feature is what QGIS calls a shape and any *attributes* which describe the shape.
+Right in the middle is the territory's map. Each territory can be seen in QGIS as a "feature" on the territory "layer". With QGIS you can draw the territory as a polygon, and then write some "attributes" for the feature. The territory layer's feature attributes correspond to these elements of the territory card:
 
-What the features on these layers mean is best understood by looking at a printed territory card:
+![Explanation of QGIS feature attributes on the territory layer](/guide/attributes-explanation.png)
 
-<img alt="Territory card" src="territory-card-parts-1x.jpg" srcset="territory-card-parts-2x.jpg 2x" style="border: 1px solid #ccc;">
+Then let's consider the minimap in the top left corner, since it demonstrates every layer in QGIS:
 
-The shape of a feature on the **territory layer** is shown in the map as a red border ①, its **number attribute** is shown in the right corner ②, its **addresses attribute** is shown on the right side ③, and its **subregion attribute** is shown in the heading ④.
+![Explanation of QGIS layers](/guide/layers-explanation.png)
 
-The minimap ⑤ is composed of multiple layers: The **territory layer**'s feature is shown as a dot. The **congregation_boundary layer**'s feature(s) are shown as a black border. The **subregion layer**'s feature which contains the current territory, is shown as a dark gray area.
+The **territory** layer we've already mentioned. The territory's location is also shown in the minimap as a black circle.
 
-The **card_minimap_viewport layer** determines the minimap's ⑤ zoom level. By default, the whole **congregation_boundary** is shown in the minimap, but if the **card_minimap_viewport layer** contains features and the current territory is inside one of them, the minimap will zoom to that **card_minimap_viewport**.
+The **congregation_boundary** layer is for marking the whole area which is the congregation's responsibility. It is shown as a black line in the minimap.
+
+The **subregion** layer is optional. It can be used to mark city districts or postal code areas, if it makes easier to organize your territories. The minimap shows the current territory's region as a darkened area.
+
+The **card_minimap_viewport** layer is optional. It can be used to crop the minimap. The example card's congregation boundary goes far to the east, to the countryside, but the minimap will be easier to see if it's limited to just the city for city territories. That can be done by adding to the minimap viewport a polygon feature which covers just the city portion, and another polygon feature which covers the countryside.
 
 > Only the **congregation_boundary** and **territory** layers are mandatory. The other layers can be left empty.
 
@@ -62,13 +67,13 @@ In the layers panel there are also various background maps. The default is **Ope
 
 ## Editing the Maps
 
-In QGIS, to draw a feature on one of the layers, first select the layer in the Layers panel and choose **Layer \| Toggle Editing** from the application menus.
+In QGIS, to draw a feature on one of the layers, first select the layer in the Layers panel (**View \| Panels \| Layers**) and choose **Layer \| Toggle Editing** from the application menus.
 
 Now the layer is editable and you can choose the **Edit \| Add Polygon Feature** tool. Left-click on the map to draw the polygon's corners. Right-click when you're finished, after which you can type the feature's attributes.
 
 The feature is saved to the database only after you select **Layer \| Save Layer Edits**. To avoid losing work, it's best to save after each new territory you add, in case QGIS crashes and you need to restart QGIS (it is known to happen).
 
-After you are done editing a layer, you can choose **Layer \| Toggle Editing** again to make the layer read-only.
+After you are done editing a layer, you can choose **Layer \| Toggle Editing** again to make the layer read-only. (If there is a problem saving the data, you can typically recover by toggling the editing off and back on, and choosing to discard all unsaved changes.)
 
 
 ### How to Create Congregation Boundaries
@@ -88,7 +93,7 @@ After you are done editing a layer, you can choose **Layer \| Toggle Editing** a
 
 ## Printing Territory Cards
 
-Log in to <https://beta.territorybro.com>, choose your congregation and to go **Printouts**. You should see your territories ready to be printed using various card templates. You can print multiple territories at once by holding down `Ctrl` or `Shift` to select them from the territories list. 
+Log in to <https://beta.territorybro.com>, choose your congregation and go to the *Printouts* page. You should see your territories ready to be printed using various card templates. You can print multiple territories at once by holding down `Ctrl` or `Shift` to select them from the territories list. 
 
 By default, the background maps from OpenStreetMap are used, but Territory Bro can support also other freely available maps. [Create an issue](https://github.com/luontola/territory-bro/issues) if you know about a map you wish to use. (Note that due to [license restrictions](https://github.com/luontola/territory-bro/issues/34#issuecomment-1709913100), Google Maps cannot be added there.)
 
