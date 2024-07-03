@@ -25,7 +25,7 @@
 (defn languages []
   (:languages (i18n)))
 
-(defn- validate-lang [lang]
+(defn validate-lang [lang]
   (if (some? (get-in (i18n) [:resources lang]))
     lang
     default-lang))

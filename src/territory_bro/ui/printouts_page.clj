@@ -122,7 +122,8 @@
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
 
 (defn view [{:keys [congregation territories regions form errors] :as model}]
-  (let [errors (group-by first errors)]
+  (let [errors (group-by first errors)
+        printout-lang (i18n/validate-lang (keyword (:language form)))]
     (h/html
      [:div.no-print
       [:h1 (i18n/t "PrintoutPage.title")]
@@ -190,12 +191,12 @@
        [:button "Submit"]
        [:p (str form)]]]
 
-     ;; TODO: switch language based on selected language
-     [:div {:lang "fi"}
+     [:div {:lang printout-lang}
       (for [territory territories
             :when (contains? (:territories form) (:id territory))]
-        ;; TODO: conditional based on selected template
-        (territory-card territory))]
+        (binding [i18n/*lang* printout-lang]
+          ;; TODO: conditional based on selected template
+          (territory-card territory)))]
 
      [:div.no-print
       (map-interaction-help/view model)])))
