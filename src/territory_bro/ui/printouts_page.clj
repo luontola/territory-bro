@@ -15,19 +15,6 @@
             [territory-bro.ui.map-interaction-help :as map-interaction-help])
   (:import (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
-(defn model! [request]
-  (let [congregation (:body (api/get-congregation request {}))]
-    (-> {:congregation (-> (select-keys congregation [:id :name])
-                           (assoc :locations (->> (:congregationBoundaries congregation)
-                                                  (map :location))))
-         :regions (->> (:regions congregation)
-                       (sort-by (comp str :name)
-                                (CaseInsensitiveSimpleNaturalComparator/getInstance)))
-         :territories (->> (:territories congregation)
-                           (sort-by (comp str :number)
-                                    (CaseInsensitiveSimpleNaturalComparator/getInstance)))}
-        (merge (map-interaction-help/model request)))))
-
 (def templates
   [{:id "TerritoryCard"
     :type :territory}
@@ -46,6 +33,41 @@
 
 (def map-rasters
   (resources/auto-refresher "map-rasters.json" #(json/read-value (slurp %))))
+
+(defn parse-uuid-multiselect [value]
+  ;; Ring form params for a <select> element may be a string or a vector of strings,
+  ;; depending on whether one or many values were selected. Coerce them all to a set of UUIDs.
+  (if (string? value)
+    (parse-uuid-multiselect [value])
+    (into #{}
+          (comp (map parse-uuid)
+                (filter some?))
+          value)))
+
+(defn model! [request]
+  (let [congregation (:body (api/get-congregation request {}))
+        regions (->> (:regions congregation)
+                     (sort-by (comp str :name)
+                              (CaseInsensitiveSimpleNaturalComparator/getInstance)))
+        territories (->> (:territories congregation)
+                         (sort-by (comp str :number)
+                                  (CaseInsensitiveSimpleNaturalComparator/getInstance)))
+        default-params {:template (:id (first templates))
+                        :language (name i18n/*lang*)
+                        :mapRaster (:id (first (map-rasters)))
+                        :regions (str (:id congregation)) ; congregation boundary is shown first in the regions list
+                        :territories (str (:id (first territories)))}]
+    (-> {:congregation (-> (select-keys congregation [:id :name])
+                           (assoc :locations (->> (:congregationBoundaries congregation)
+                                                  (map :location))))
+         :regions regions
+         :territories territories
+         :form (-> (merge default-params (:params request))
+                   (select-keys [:template :language :mapRaster :regions :territories])
+                   (update :regions parse-uuid-multiselect)
+                   (update :territories parse-uuid-multiselect))}
+        (merge (map-interaction-help/model request)))))
+
 
 (defn crop-marks [content]
   (let [styles (:CropMarks (css/modules))
@@ -99,13 +121,13 @@
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
 
-(defn view [{:keys [congregation territories regions errors] :as model}]
+(defn view [{:keys [congregation territories regions form errors] :as model}]
   (let [errors (group-by first errors)]
     (h/html
      [:div.no-print
       [:h1 (i18n/t "PrintoutPage.title")]
 
-      [:form.pure-form.pure-form-stacked {:action "#"}
+      [:form.pure-form.pure-form-stacked {:method "post"}
        [:fieldset
         [:legend (i18n/t "PrintoutPage.printOptions")]
 
@@ -114,14 +136,17 @@
           [:label {:for "template"} (i18n/t "PrintoutPage.template")]
           [:select#template.pure-input-1 {:name "template"}
            (for [{:keys [id]} templates]
-             [:option {:value id} (i18n/t (str "PrintoutPage.templates." id))])]]]
+             [:option {:value id
+                       :selected (= id (:template form))}
+              (i18n/t (str "PrintoutPage.templates." id))])]]]
 
         [:div.pure-g
          [:div.pure-u-1.pure-u-md-1-2.pure-u-lg-1-3
           [:label {:for "language"} (i18n/t "PrintoutPage.language")]
           [:select#language.pure-input-1 {:name "language"}
            (for [{:keys [code englishName nativeName]} (i18n/languages)]
-             [:option {:value code}
+             [:option {:value code
+                       :selected (= code (:language form))}
               nativeName
               (when-not (= nativeName englishName)
                 (str " - " englishName))])]]]
@@ -131,7 +156,9 @@
           [:label {:for "mapRaster"} (i18n/t "PrintoutPage.mapRaster")]
           [:select#mapRaster.pure-input-1 {:name "mapRaster"}
            (for [{:keys [id name]} (map-rasters)]
-             [:option {:value id} name])]]]
+             [:option {:value id
+                       :selected (= id (:mapRaster form))}
+              name])]]]
 
         ;; TODO: conditional based on selected template
         [:div.pure-g
@@ -141,7 +168,9 @@
                                          :multiple true
                                          :size "7"}
            (for [{:keys [id name]} (concat [congregation] regions)]
-             [:option {:value id} name])]]]
+             [:option {:value id
+                       :selected (contains? (:regions form) id)}
+              name])]]]
 
         ;; TODO: conditional based on selected template
         [:div.pure-g
@@ -151,15 +180,22 @@
                                              :multiple true
                                              :size "7"}
            (for [{:keys [id number region]} territories]
-             [:option {:value id}
+             [:option {:value id
+                       :selected (contains? (:territories form) id)}
               number
               (when-not (str/blank? region)
-                (str " - " region))])]]]]]]
+                (str " - " region))])]]]]
+
+       ;; TODO: submit on form change
+       [:button "Submit"]
+       [:p (str form)]]]
 
      ;; TODO: switch language based on selected language
      [:div {:lang "fi"}
-      ;; TODO: conditional based on selected template
-      (territory-card (first territories))]
+      (for [territory territories
+            :when (contains? (:territories form) (:id territory))]
+        ;; TODO: conditional based on selected template
+        (territory-card territory))]
 
      [:div.no-print
       (map-interaction-help/view model)])))
@@ -175,4 +211,8 @@
      :get {:handler (fn [request]
                       (-> (view! request)
                           (layout/page! request)
-                          (html/response)))}}]])
+                          (html/response)))}
+     :post {:handler (fn [request]
+                       (-> (view! request)
+                           (layout/page! request)
+                           (html/response)))}}]])
