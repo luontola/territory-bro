@@ -20,7 +20,7 @@
       [:div {:class (:bottomLeft styles)} image]
       [:div {:class (:bottomRight styles)} image]])))
 
-(defn territory-card [territory]
+(defn territory-card [{:keys [territory]}]
   (let [styles (:TerritoryCard (css/modules))]
     (crop-marks
      (h/html

@@ -17,6 +17,7 @@
 
 (def templates
   [{:id "TerritoryCard"
+    :fn printout-templates/territory-card
     :type :territory}
    {:id "TerritoryCardMapOnly"
     :type :territory}
@@ -70,7 +71,10 @@
 
 
 (defn view [{:keys [congregation territories regions form] :as model}]
-  (let [printout-lang (i18n/validate-lang (keyword (:language form)))]
+  (let [printout-lang (i18n/validate-lang (keyword (:language form)))
+        template (->> templates
+                      (filter #(= (:template form) (:id %)))
+                      (first))]
     (h/html
      [:div.no-print
       [:h1 (i18n/t "PrintoutPage.title")]
@@ -113,8 +117,8 @@
                        :selected (= id (:mapRaster form))}
               name])]]]
 
-        ;; TODO: conditional based on selected template
-        [:div.pure-g
+        [:div.pure-g {:style (when-not (= :region (:type template))
+                               {:display "none"})}
          [:div.pure-u-1.pure-u-md-1-2.pure-u-lg-1-3
           [:label {:for "regions"} (i18n/t "PrintoutPage.regions")]
           [:select#regions.pure-input-1 {:name "regions"
@@ -125,8 +129,8 @@
                        :selected (contains? (:regions form) id)}
               name])]]]
 
-        ;; TODO: conditional based on selected template
-        [:div.pure-g
+        [:div.pure-g {:style (when-not (= :territory (:type template))
+                               {:display "none"})}
          [:div.pure-u-1.pure-u-md-1-2.pure-u-lg-1-3
           [:label {:for "territories"} (i18n/t "PrintoutPage.territories")]
           [:select#territories.pure-input-1 {:name "territories"
@@ -143,8 +147,8 @@
       (for [territory territories
             :when (contains? (:territories form) (:id territory))]
         (binding [i18n/*lang* printout-lang]
-          ;; TODO: conditional based on selected template
-          (printout-templates/territory-card territory)))]
+          (when (:fn template)
+            ((:fn template) {:territory territory}))))]
 
      [:div.no-print
       (map-interaction-help/view model)])))
