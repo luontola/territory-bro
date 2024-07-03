@@ -22,7 +22,7 @@
     "clipboard": "^2.0.11",
     "date-fns": "^2.30.0",
     "formik": "^2.4.4",
-    "htmx.org": "^1.9.10",
+    "htmx.org": "^2.0.0",
     "i18next": "^23.5.1",
     "i18next-browser-languagedetector": "^7.1.0",
     "idiomorph": "^0.3.0",
