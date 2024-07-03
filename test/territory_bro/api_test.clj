@@ -196,6 +196,22 @@
     (refresh-projections!)
     congregation-boundary-id))
 
+(defn create-region! [cong-id]
+  (let [region-id (UUID/randomUUID)
+        state (projections/cached-state)]
+    (db/with-db [conn {}]
+      (dispatcher/command! conn state
+                           {:command/type :region.command/define-region
+                            :command/time (Instant/now)
+                            :command/system "test"
+                            :gis-change/id 42
+                            :congregation/id cong-id
+                            :region/id region-id
+                            :region/name "the region"
+                            :region/location testdata/wkt-multi-polygon}))
+    (refresh-projections!)
+    region-id))
+
 (defn revoke-access-from-all! [cong-id]
   (let [state (projections/cached-state)
         user-ids (congregation/get-users state cong-id)]

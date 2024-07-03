@@ -5,13 +5,20 @@
 import * as fs from "fs";
 import {languages, resources} from "./i18n.ts";
 import path from "path";
+import {mapRasters} from "./maps/mapOptions.ts";
+import {pick} from "lodash-es";
 
-const i18n = {
-  languages,
-  resources
-};
+function exportFile(filename, data) {
+  const file = "target/web-dist/" + filename;
+  fs.mkdirSync(path.dirname(file), {recursive: true})
+  fs.writeFileSync(file, JSON.stringify(data, null, 2))
+  console.log("Wrote " + file)
+}
 
-const file = "target/web-dist/i18n.json";
-fs.mkdirSync(path.dirname(file), {recursive: true})
-fs.writeFileSync(file, JSON.stringify(i18n, null, 2))
-console.log("Wrote " + file)
+exportFile("i18n.json",
+  {languages, resources}
+);
+
+exportFile("map-rasters.json",
+  mapRasters.map(raster => pick(raster, ["id", "name"]))
+);

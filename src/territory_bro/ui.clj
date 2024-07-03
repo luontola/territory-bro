@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui
-  (:require [hiccup2.core :as h]
-            [reitit.ring :as ring]
+  (:require [reitit.ring :as ring]
             [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.util.http-response :refer :all]
             [territory-bro.infra.auth0 :as auth0]
@@ -16,8 +15,8 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.join-page :as join-page]
-            [territory-bro.ui.layout :as layout]
             [territory-bro.ui.open-share-page :as open-share-page]
+            [territory-bro.ui.printouts-page :as printouts-page]
             [territory-bro.ui.registration-page :as registration-page]
             [territory-bro.ui.settings-page :as settings-page]
             [territory-bro.ui.support-page :as support-page]
@@ -72,11 +71,7 @@
 
    territory-page/routes
 
-   ["/congregation/:congregation/printouts"
-    {:get {:handler (fn [request]
-                      (-> (h/html [:h1 "printouts page placeholder"])
-                          (layout/page! request)
-                          (html/response)))}}]
+   printouts-page/routes
 
    settings-page/routes
 
