@@ -15,11 +15,11 @@
   (testing "language defaults to English"
     (is (= "Home" (i18n/t "HomePage.title"))))
 
-  (testing "fallback: unsupported language"
+  (testing "fallback: unsupported language -> English"
     (binding [i18n/*lang* :xx]
-      (is (= "HomePage.title" (i18n/t "HomePage.title")))))
+      (is (= "Home" (i18n/t "HomePage.title")))))
 
-  (testing "fallback: non-existing translation key"
+  (testing "fallback: non-existing translation key -> show key"
     (is (= "foo.bar" (i18n/t "foo.bar")))))
 
 (deftest languages-test

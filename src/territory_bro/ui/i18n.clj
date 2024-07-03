@@ -20,6 +20,7 @@
   (let [path (->> (str/split key #"\.")
                   (map keyword))]
     (or (-> (i18n) :resources *lang* :translation (get-in path))
+        (-> (i18n) :resources default-lang :translation (get-in path))
         key)))
 
 (defn languages []
