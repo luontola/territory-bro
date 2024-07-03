@@ -17,6 +17,7 @@ import {adjustDropdownWidthToContent} from "./layout/LanguageSelection.tsx";
 import {TerritoryListMapElement} from "./maps/TerritoryListMap.ts";
 
 window.htmx = htmx;
+import("idiomorph/dist/idiomorph-ext.js");
 
 function NavigationListener({children}) {
   const location = useLocation()

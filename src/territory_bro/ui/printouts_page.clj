@@ -121,14 +121,18 @@
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
 
-(defn view [{:keys [congregation territories regions form errors] :as model}]
-  (let [errors (group-by first errors)
-        printout-lang (i18n/validate-lang (keyword (:language form)))]
+(defn view [{:keys [congregation territories regions form] :as model}]
+  (let [printout-lang (i18n/validate-lang (keyword (:language form)))]
     (h/html
      [:div.no-print
       [:h1 (i18n/t "PrintoutPage.title")]
 
-      [:form.pure-form.pure-form-stacked {:method "post"}
+      [:form.pure-form.pure-form-stacked {:method "post"
+                                          :hx-post html/*page-path*
+                                          :hx-trigger "change"
+                                          :hx-target "body"
+                                          :hx-ext "morph"
+                                          :hx-swap "morph:innerHTML"}
        [:fieldset
         [:legend (i18n/t "PrintoutPage.printOptions")]
 
@@ -185,11 +189,7 @@
                        :selected (contains? (:territories form) id)}
               number
               (when-not (str/blank? region)
-                (str " - " region))])]]]]
-
-       ;; TODO: submit on form change
-       [:button "Submit"]
-       [:p (str form)]]]
+                (str " - " region))])]]]]]]
 
      [:div {:lang printout-lang}
       (for [territory territories

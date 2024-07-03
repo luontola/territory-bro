@@ -25,6 +25,7 @@
     "htmx.org": "^1.9.10",
     "i18next": "^23.5.1",
     "i18next-browser-languagedetector": "^7.1.0",
+    "idiomorph": "^0.3.0",
     "lodash-es": "^4.17.21",
     "ol": "^8.1.0",
     "purecss": "^3.0.0",
