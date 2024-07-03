@@ -11,13 +11,10 @@ import {QueryClientProvider} from "@tanstack/react-query";
 import {queryClient} from "./api.ts";
 import App from "./App.tsx";
 import './i18n.ts';
-import htmx from 'htmx.org';
+import "./htmx-with-extensions.js";
 import {TerritoryMapElement} from "./maps/TerritoryMap.ts";
 import {adjustDropdownWidthToContent} from "./layout/LanguageSelection.tsx";
 import {TerritoryListMapElement} from "./maps/TerritoryListMap.ts";
-
-window.htmx = htmx;
-import("idiomorph/dist/idiomorph-ext.js");
 
 function NavigationListener({children}) {
   const location = useLocation()
