@@ -20,7 +20,7 @@
       [:div {:class (:bottomLeft styles)} image]
       [:div {:class (:bottomRight styles)} image]])))
 
-(defn territory-card [{:keys [territory]}]
+(defn territory-card [{:keys [territory map-raster]}]
   (let [styles (:TerritoryCard (css/modules))]
     (crop-marks
      (h/html
@@ -45,10 +45,9 @@
          ;;       https://github.com/RomanIakovlev/timeshape
          [:div.PrintDateNotice__notice--5851a1da "Printed 2024-05-12 with TerritoryBro.com"]
          [:div.PrintDateNotice__content--5851a1da
-          ;; TODO: map using web components
-          [:div.OpenLayersMap__root--f9d8701d.OpenLayersMap__printout--f9d8701d
-           [:div.ol-viewport {:style "position: relative; overflow: hidden; width: 100%; height: 100%;"}
-            "[OpenLayersMap]"]]]]]
+          [:territory-map {:location (:location territory)
+                           :map-raster map-raster
+                           :printout true}]]]]
 
        [:div {:class (:addresses styles)}
         [:div {:class (:qrCode styles)}

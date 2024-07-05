@@ -39,7 +39,7 @@ export abstract class OpenLayersMapElement extends HTMLElement {
 
   connectedCallback() {
     const mapRaster = findMapRasterById(this.getAttribute("map-raster") ?? mapRasters[0].id) ?? mapRasters[0];
-    const printout = !!this.getAttribute("printout");
+    const printout = this.getAttribute("printout") !== null;
 
     let className = styles.root;
     if (printout) {

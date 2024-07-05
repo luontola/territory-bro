@@ -79,12 +79,16 @@
      [:div.no-print
       [:h1 (i18n/t "PrintoutPage.title")]
 
-      [:form.pure-form.pure-form-stacked {:method "post"
-                                          :hx-post html/*page-path*
-                                          :hx-trigger "change"
-                                          :hx-target "body"
-                                          :hx-ext "morph"
-                                          :hx-swap "morph:innerHTML"}
+      [:form#print-options.pure-form.pure-form-stacked {:method "post"
+                                                        :hx-post html/*page-path*
+                                                        :hx-trigger "change"
+                                                        ;; morph the form to keep form element focus and scroll state
+                                                        :hx-select "#print-options"
+                                                        :hx-target "this"
+                                                        :hx-ext "morph"
+                                                        :hx-swap "morph:outerHTML"
+                                                        ;; don't morph the printouts, since it would break web components
+                                                        :hx-select-oob "#printouts:outerHTML"}
        [:fieldset
         [:legend (i18n/t "PrintoutPage.printOptions")]
 
@@ -143,12 +147,13 @@
               (when-not (str/blank? region)
                 (str " - " region))])]]]]]]
 
-     [:div {:lang printout-lang}
+     [:div#printouts {:lang printout-lang}
       (for [territory territories
             :when (contains? (:territories form) (:id territory))]
         (binding [i18n/*lang* printout-lang]
           (when (:fn template)
-            ((:fn template) {:territory territory}))))]
+            ((:fn template) {:territory territory
+                             :map-raster (:mapRaster form)}))))]
 
      [:div.no-print
       (map-interaction-help/view model)])))
