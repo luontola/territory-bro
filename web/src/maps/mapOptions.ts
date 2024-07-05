@@ -30,7 +30,7 @@ export type MapRaster = {
   name: string;
   makeSource: () => TileSource;
 };
-const transition = 100;
+const transition = 0;
 export const mapRasters: MapRaster[] = [{
   id: 'osmhd',
   name: "World - OpenStreetMap",
