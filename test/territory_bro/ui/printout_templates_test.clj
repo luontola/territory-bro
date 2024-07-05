@@ -6,9 +6,15 @@
   (:require [clojure.test :refer :all]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.ui.printout-templates :as printout-templates])
-  (:import (java.time ZoneId)))
+  (:import (java.time ZoneId ZoneOffset)))
 
 (deftest timezone-for-location-test
+  (testing "invalid or missing location"
+    (is (= ZoneOffset/UTC
+           (printout-templates/timezone-for-location nil)
+           (printout-templates/timezone-for-location "")
+           (printout-templates/timezone-for-location "foo"))))
+
   (testing "Helsinki - positive timezone"
     (is (= (ZoneId/of "Europe/Helsinki")
            (printout-templates/timezone-for-location "MULTIPOLYGON(((24.941469073172712 60.17126251652484,24.94092595911725 60.17078337925611,24.942114661578245 60.17078337925611,24.941469073172712 60.17126251652484)))"))))

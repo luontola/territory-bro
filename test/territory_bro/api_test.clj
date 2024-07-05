@@ -192,7 +192,7 @@
                             :gis-change/id 42
                             :congregation/id cong-id
                             :congregation-boundary/id congregation-boundary-id
-                            :congregation-boundary/location testdata/wkt-multi-polygon}))
+                            :congregation-boundary/location testdata/wkt-helsinki}))
     (refresh-projections!)
     congregation-boundary-id))
 
@@ -208,7 +208,7 @@
                             :congregation/id cong-id
                             :region/id region-id
                             :region/name "the region"
-                            :region/location testdata/wkt-multi-polygon}))
+                            :region/location testdata/wkt-south-helsinki}))
     (refresh-projections!)
     region-id))
 
@@ -239,7 +239,7 @@
                             :territory/addresses "the addresses"
                             :territory/region "the region"
                             :territory/meta {:foo "bar"}
-                            :territory/location testdata/wkt-multi-polygon}))
+                            :territory/location testdata/wkt-helsinki-rautatientori}))
     (refresh-projections!)
     (db/with-db [conn {}]
       (dispatcher/command! conn (projections/cached-state)

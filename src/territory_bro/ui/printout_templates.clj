@@ -27,11 +27,14 @@
 (defonce *timezone-engine (future (TimeZoneEngine/initialize))) ; takes 370ms on an Apple M3 Max, so worth initializing on the background
 
 (defn timezone-for-location ^ZoneId [^String location]
-  (time (let [point (-> (WKTReader.)
-                        (.read location)
-                        (.getInteriorPoint))]
-          (-> (.query @*timezone-engine (.getY point) (.getX point))
-              (.orElse ZoneOffset/UTC)))))
+  (try
+    (let [point (-> (WKTReader.)
+                    (.read location)
+                    (.getInteriorPoint))]
+      (-> (.query @*timezone-engine (.getY point) (.getX point))
+          (.orElse ZoneOffset/UTC)))
+    (catch Exception _
+      ZoneOffset/UTC)))
 
 (defn print-date-notice [^LocalDate print-date content]
   (let [styles (:PrintDateNotice (css/modules))]
@@ -42,7 +45,7 @@
        content]])))
 
 
-(defn territory-card [{:keys [territory map-raster]}]
+(defn territory-card [{:keys [territory map-raster print-date]}]
   (let [styles (:TerritoryCard (css/modules))]
     (crop-marks
      (h/html
@@ -62,7 +65,7 @@
 
        [:div {:class (:map styles)}
         (print-date-notice
-         (LocalDate/now (timezone-for-location (:location territory)))
+         print-date
          [:territory-map {:location (:location territory)
                           :map-raster map-raster
                           :printout true}])]

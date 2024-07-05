@@ -20,7 +20,7 @@
                :addresses "the addresses"
                :region "the region"
                :meta {:foo "bar"}
-               :location testdata/wkt-multi-polygon
+               :location testdata/wkt-helsinki-rautatientori
                :doNotCalls "the do-not-calls"}
    :permissions {:editDoNotCalls true
                  :shareTerritoryLink true}
@@ -31,7 +31,7 @@
                :addresses "the addresses"
                :region "the region"
                :meta {:foo "bar"}
-               :location testdata/wkt-multi-polygon}
+               :location testdata/wkt-helsinki-rautatientori}
    :permissions {:shareTerritoryLink true}
    :mac? false})
 

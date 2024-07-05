@@ -10,21 +10,23 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.ui.printouts-page :as printouts-page])
-  (:import (java.util UUID)))
+  (:import (java.time ZoneId)
+           (java.util UUID)))
 
 (def default-model
   {:congregation {:id (UUID. 0 1)
                   :name "Example Congregation"
-                  :locations [testdata/wkt-multi-polygon]}
+                  :locations [testdata/wkt-helsinki]
+                  :timezone (ZoneId/of "Europe/Helsinki")}
    :regions [{:id (UUID. 0 2)
               :name "the region"
-              :location testdata/wkt-multi-polygon}]
+              :location testdata/wkt-south-helsinki}]
    :territories [{:id (UUID. 0 3)
                   :number "123"
                   :addresses "the addresses"
                   :region "the region"
                   :meta {:foo "bar"}
-                  :location testdata/wkt-multi-polygon}]
+                  :location testdata/wkt-helsinki-rautatientori}]
    :form {:template "TerritoryCard"
           :language "en"
           :mapRaster "osmhd"

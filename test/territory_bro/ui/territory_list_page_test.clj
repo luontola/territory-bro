@@ -20,13 +20,13 @@
   (:import (java.util UUID)))
 
 (def model
-  {:congregation-boundaries [testdata/wkt-multi-polygon]
+  {:congregation-boundaries [testdata/wkt-helsinki]
    :territories [{:id (UUID. 0 1)
                   :number "123"
                   :addresses "the addresses"
                   :region "the region"
                   :meta {:foo "bar"}
-                  :location testdata/wkt-multi-polygon}]
+                  :location testdata/wkt-helsinki-rautatientori}]
    :has-loans? false
    :permissions {:configureCongregation true
                  :editDoNotCalls true

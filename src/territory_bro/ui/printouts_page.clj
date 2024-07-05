@@ -13,7 +13,8 @@
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
             [territory-bro.ui.printout-templates :as printout-templates])
-  (:import (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
+  (:import (java.time LocalDate ZoneId)
+           (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
 (def templates
   [{:id "TerritoryCard"
@@ -60,7 +61,10 @@
                         :territories (str (:id (first territories)))}]
     (-> {:congregation (-> (select-keys congregation [:id :name])
                            (assoc :locations (->> (:congregationBoundaries congregation)
-                                                  (map :location))))
+                                                  (map :location)))
+                           ;; TODO: the timezone could be already precalculated in the state (when it's needed elsewhere, e.g. when recording loans)
+                           (assoc :timezone (printout-templates/timezone-for-location
+                                             (:location (first (:congregationBoundaries congregation))))))
          :regions regions
          :territories territories
          :form (-> (merge default-params (:params request))
@@ -74,7 +78,8 @@
   (let [printout-lang (i18n/validate-lang (keyword (:language form)))
         template (->> templates
                       (filter #(= (:template form) (:id %)))
-                      (first))]
+                      (first))
+        print-date (LocalDate/now ^ZoneId (:timezone congregation))]
     (h/html
      [:div.no-print
       [:h1 (i18n/t "PrintoutPage.title")]
@@ -153,7 +158,8 @@
         (binding [i18n/*lang* printout-lang]
           (when (:fn template)
             ((:fn template) {:territory territory
-                             :map-raster (:mapRaster form)}))))]
+                             :map-raster (:mapRaster form)
+                             :print-date print-date}))))]
 
      [:div.no-print
       (map-interaction-help/view model)])))
