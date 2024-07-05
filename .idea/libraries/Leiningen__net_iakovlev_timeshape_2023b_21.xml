@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Leiningen: net.iakovlev/timeshape:2023b.21">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/iakovlev/timeshape/2023b.21/timeshape-2023b.21.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/iakovlev/timeshape/2023b.21/timeshape-2023b.21-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

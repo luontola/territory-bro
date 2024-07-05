@@ -6,7 +6,10 @@
   (:require [hiccup2.core :as h]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.i18n :as i18n]))
+            [territory-bro.ui.i18n :as i18n])
+  (:import (java.time LocalDate ZoneId ZoneOffset)
+           (net.iakovlev.timeshape TimeZoneEngine)
+           (org.locationtech.jts.io WKTReader)))
 
 (defn crop-marks [content]
   (let [styles (:CropMarks (css/modules))
@@ -19,6 +22,25 @@
       [:div {:class (:cropArea styles)} content]
       [:div {:class (:bottomLeft styles)} image]
       [:div {:class (:bottomRight styles)} image]])))
+
+
+(defonce *timezone-engine (future (TimeZoneEngine/initialize))) ; takes 370ms on an Apple M3 Max, so worth initializing on the background
+
+(defn timezone-for-location ^ZoneId [^String location]
+  (time (let [point (-> (WKTReader.)
+                        (.read location)
+                        (.getInteriorPoint))]
+          (-> (.query @*timezone-engine (.getY point) (.getX point))
+              (.orElse ZoneOffset/UTC)))))
+
+(defn print-date-notice [^LocalDate print-date content]
+  (let [styles (:PrintDateNotice (css/modules))]
+    (h/html
+     [:div {:class (:root styles)}
+      [:div {:class (:notice styles)} (str "Printed " print-date " with TerritoryBro.com")]
+      [:div {:class (:content styles)}
+       content]])))
+
 
 (defn territory-card [{:keys [territory map-raster]}]
   (let [styles (:TerritoryCard (css/modules))]
@@ -39,15 +61,11 @@
        [:div {:class (:number styles)} (:number territory)]
 
        [:div {:class (:map styles)}
-        [:div.PrintDateNotice__root--5851a1da
-         ;; TODO: find out timezone for current date based on congregation location
-         ;;       https://stackoverflow.com/questions/16086962/how-to-get-a-time-zone-from-a-location-using-latitude-and-longitude-coordinates/16086964#16086964
-         ;;       https://github.com/RomanIakovlev/timeshape
-         [:div.PrintDateNotice__notice--5851a1da "Printed 2024-05-12 with TerritoryBro.com"]
-         [:div.PrintDateNotice__content--5851a1da
-          [:territory-map {:location (:location territory)
-                           :map-raster map-raster
-                           :printout true}]]]]
+        (print-date-notice
+         (LocalDate/now (timezone-for-location (:location territory)))
+         [:territory-map {:location (:location territory)
+                          :map-raster map-raster
+                          :printout true}])]
 
        [:div {:class (:addresses styles)}
         [:div {:class (:qrCode styles)}

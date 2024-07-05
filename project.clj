@@ -29,6 +29,7 @@
                  [metosin/schema-tools "0.13.1"]
                  [mount "0.1.18"]
                  [net.grey-panther/natural-comparator "1.1"]
+                 [net.iakovlev/timeshape "2023b.21"]
                  [org.apache.commons/commons-lang3 "3.14.0"]
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.11.2"]
@@ -36,6 +37,7 @@
                  [org.clojure/tools.logging "1.3.0"] ; TODO: find out what logging framework we use, move to SLF4J if necessary, preferably something that logs ex-data by default (avoid Timbre, it has a bad track record of slow updates)
                  [org.flywaydb/flyway-core "10.9.1"]
                  [org.flywaydb/flyway-database-postgresql "10.9.1"]
+                 [org.locationtech.jts/jts-core "1.19.0"]
                  [org.postgresql/postgresql "42.7.2"]
                  [org.reflections/reflections "0.10.2"]
                  [prismatic/schema "1.4.1"]
