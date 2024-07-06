@@ -25,13 +25,15 @@
 
 
 (defonce *timezone-engine (future (TimeZoneEngine/initialize))) ; takes 370ms on an Apple M3 Max, so worth initializing on the background
+(defn- timezone-engine ^TimeZoneEngine []
+  @*timezone-engine)
 
 (defn timezone-for-location ^ZoneId [^String location]
   (try
     (let [point (-> (WKTReader.)
                     (.read location)
                     (.getInteriorPoint))]
-      (-> (.query @*timezone-engine (.getY point) (.getX point))
+      (-> (.query (timezone-engine) (.getY point) (.getX point))
           (.orElse ZoneOffset/UTC)))
     (catch Exception _
       ZoneOffset/UTC)))

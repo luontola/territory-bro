@@ -45,7 +45,7 @@ export default class TerritoryMiniMap extends OpenLayersMap<Props> {
 
 function getCenterPoint(multiPolygon: string) {
   const wkt = new WKT();
-  const centerPoint = wkt.readFeature(multiPolygon).getGeometry().getInteriorPoints().getPoint(0);
+  const centerPoint = wkt.readFeature(multiPolygon).getGeometry()!.getInteriorPoints().getPoint(0);
   return wkt.writeGeometry(centerPoint);
 }
 

@@ -141,12 +141,12 @@ export function enrichCongregation(congregation): Congregation {
 function getEnclosing(innerWkt: string, enclosingCandidateWkts: string[]): string | null {
   const wkt = new WKT();
   // TODO: sort by overlapping area instead of center point
-  const centerPoint = wkt.readFeature(innerWkt).getGeometry().getInteriorPoints().getPoint(0);
+  const centerPoint = wkt.readFeature(innerWkt).getGeometry()!.getInteriorPoints().getPoint(0);
   const territoryCoordinate = centerPoint.getCoordinates();
 
-  let result = null;
+  let result: string | null = null;
   enclosingCandidateWkts.forEach(enclosing => {
-    if (wkt.readFeature(enclosing).getGeometry().intersectsCoordinate(territoryCoordinate)) {
+    if (wkt.readFeature(enclosing).getGeometry()!.intersectsCoordinate(territoryCoordinate)) {
       result = enclosing;
     }
   });
