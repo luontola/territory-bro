@@ -32,7 +32,7 @@
                  [net.iakovlev/timeshape "2023b.21"]
                  [org.apache.commons/commons-lang3 "3.14.0"]
                  [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
-                 [org.clojure/clojure "1.11.3"]
+                 [org.clojure/clojure "1.12.0-beta1"]
                  [org.clojure/data.csv "1.1.0"]
                  [org.clojure/tools.logging "1.3.0"] ; TODO: find out what logging framework we use, move to SLF4J if necessary, preferably something that logs ex-data by default (avoid Timbre, it has a bad track record of slow updates)
                  [org.flywaydb/flyway-core "10.15.2"]

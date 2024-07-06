@@ -116,7 +116,7 @@
 
 (def ^:dynamic *clean-disabled* true)
 
-(defn- ^"[Ljava.lang.String;" strings [& ss]
+(defn- ^String/1 strings [& ss]
   (into-array String ss))
 
 (defn ^Flyway master-schema [schema]

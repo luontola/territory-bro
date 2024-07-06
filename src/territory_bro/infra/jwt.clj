@@ -21,7 +21,7 @@
   (let [key-id (.getKeyId (JWT/decode jwt))]
     (.getPublicKey (.get jwk-provider key-id))))
 
-(defn- ^"[Ljava.lang.String;" strings [& ss]
+(defn- ^String/1 strings [& ss]
   (into-array String ss))
 
 (defn validate [^String jwt env]
