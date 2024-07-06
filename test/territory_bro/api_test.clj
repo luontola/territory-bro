@@ -450,7 +450,7 @@
       (is (= "Esko Luontola" (get-in user [:user/attributes :name])))))
 
   (testing "login with expired token"
-    (binding [config/env (assoc config/env :now #(Instant/now))]
+    (binding [config/env (assoc config/env :now Instant/now)]
       (let [response (-> (request :post "/api/login")
                          (json-body {:idToken jwt-test/token})
                          app)]

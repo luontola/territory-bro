@@ -446,7 +446,7 @@
   (auth/with-user-from-session request
     (if (= "demo" (get-in request [:params :congregation]))
       (let [territory-ids (->> (get-in request [:params :territories])
-                               (mapv #(UUID/fromString %)))
+                               (mapv UUID/fromString))
             shares (into [] (for [territory-id territory-ids]
                               (let [share-key (share/demo-share-key territory-id)]
                                 {:territory territory-id
@@ -457,7 +457,7 @@
         (require-logged-in!)
         (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
               territory-ids (->> (get-in request [:params :territories])
-                                 (mapv #(UUID/fromString %)))]
+                                 (mapv UUID/fromString))]
           (db/with-db [conn {}]
             (let [share-cache (or (-> request :session ::share-cache)
                                   {})

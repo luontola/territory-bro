@@ -246,7 +246,7 @@
       (testing "some cookies"
         (is (= [["foo" "bar"]]
                (->> (.getCookies request)
-                    (map (juxt #(.getName ^Cookie %) #(.getValue ^Cookie %)))))))))
+                    (map (juxt Cookie/.getName Cookie/.getValue))))))))
 
   (testing "response cookies"
     (let [[_ ^HttpServletResponse response *ring-response] (auth0/ring->servlet {})]
