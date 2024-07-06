@@ -54,3 +54,12 @@
 
     (testing "when overlaps multiple areas, returns the smallest enclosing area"
       (is (= area-1 (geometry/find-enclosing enclosed-by-1 (shuffle [area-1 big-area-1])))))))
+
+(deftest union-test
+  (let [area-1 (geometry/square [0 0] [10 10])
+        area-2 (geometry/square [10 0] [20 10])
+        area-1+2 (geometry/square [0 0] [20 10])]
+    (is (nil? (geometry/union nil)))
+    (is (nil? (geometry/union [])))
+    (is (= area-1 (geometry/union [area-1])))
+    (is (.isEmpty (.difference area-1+2 (geometry/union [area-1 area-2]))))))

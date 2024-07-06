@@ -15,8 +15,7 @@
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
             [territory-bro.ui.printout-templates :as printout-templates])
   (:import (java.time LocalDate ZoneId)
-           (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)
-           (org.locationtech.jts.geom Geometry)))
+           (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
 (def templates
   [{:id "TerritoryCard"
@@ -64,8 +63,7 @@
         congregation-boundary (->> (:congregationBoundaries congregation)
                                    (mapv (comp geometry/parse-wkt :location))
                                    ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
-                                   (reduce (fn [^Geometry a ^Geometry b]
-                                             (.union a b)))
+                                   (geometry/union)
                                    (str))]
     (-> {:congregation (-> (select-keys congregation [:id :name])
                            (assoc :location congregation-boundary)

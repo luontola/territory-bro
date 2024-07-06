@@ -35,6 +35,10 @@
                    (.getArea enclosing)])) ; secondly prefer the smallest enclosing area
        (first)))
 
+(defn union ^Geometry [geometries]
+  (when-not (empty? geometries)
+    (reduce Geometry/.union geometries)))
+
 
 ;;;; Helpers for tests
 
