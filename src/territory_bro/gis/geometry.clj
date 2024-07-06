@@ -5,19 +5,42 @@
 (ns territory-bro.gis.geometry
   (:import (java.time ZoneId ZoneOffset)
            (net.iakovlev.timeshape TimeZoneEngine)
+           (org.locationtech.jts.geom Coordinate Geometry GeometryFactory Polygon)
            (org.locationtech.jts.io WKTReader)))
 
-(defonce ^:private *timezone-engine (future (TimeZoneEngine/initialize))) ; takes 370ms on an Apple M3 Max, so worth initializing on the background
+(def geometry-factory (GeometryFactory.))
 
-(defn- timezone-engine ^TimeZoneEngine []
+(defonce ^:private *timezone-engine (future (TimeZoneEngine/initialize))) ; takes 370ms on an Apple M3 Max, so worth initializing on the background
+(defn timezone-engine ^TimeZoneEngine []
   @*timezone-engine)
 
 (defn timezone-for-location ^ZoneId [^String location]
   (try
-    (let [point (-> (WKTReader.)
+    (let [point (-> (WKTReader. geometry-factory)
                     (.read location)
                     (.getInteriorPoint))]
       (-> (.query (timezone-engine) (.getY point) (.getX point))
           (.orElse ZoneOffset/UTC)))
     (catch Exception _
       ZoneOffset/UTC)))
+
+(defn find-enclosing ^Geometry [^Geometry needle haystack]
+  (->> haystack
+       (filter #(.intersects needle ^Geometry %))
+       ;; if there are more than one match
+       (sort-by (fn [^Geometry enclosing]
+                  [(- (.getArea (.intersection needle enclosing))) ; firstly prefer the area which intersects the most
+                   (.getArea enclosing)])) ; secondly prefer the smallest enclosing area
+       (first)))
+
+
+;;;; Helpers for tests
+
+(defn square ^Polygon [[start-x start-y] [end-x end-y]]
+  (.createPolygon geometry-factory
+                  ^Coordinate/1
+                  (into-array Coordinate [(Coordinate. start-x start-y)
+                                          (Coordinate. end-x start-y)
+                                          (Coordinate. end-x end-y)
+                                          (Coordinate. start-x end-y)
+                                          (Coordinate. start-x start-y)])))

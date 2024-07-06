@@ -30,3 +30,27 @@
   (testing "Buenos Aires - negative latitude and longitude"
     (is (= (ZoneId/of "America/Argentina/Buenos_Aires")
            (geometry/timezone-for-location "MULTIPOLYGON(((-58.445267316446234 -34.604002458035154,-58.45017281675289 -34.60971073580903,-58.43545631583296 -34.610685280599476,-58.445267316446234 -34.604002458035154)))")))))
+
+(deftest find-enclosing-test
+  (let [area-1 (geometry/square [0 0] [10 10])
+        area-2 (geometry/square [10 0] [20 10])
+        big-area-1 (geometry/square [0 0] [20 20])
+        enclosed-by-1 (geometry/square [5 5] [6 6])
+        enclosed-by-2 (geometry/square [15 5] [16 6])
+        overlaps-more-by-1 (geometry/square [8 5] [11 6])]
+
+    (testing "returns nil when nothing was found"
+      (is (nil? (geometry/find-enclosing enclosed-by-1 nil)))
+      (is (nil? (geometry/find-enclosing enclosed-by-1 [])))
+      (is (nil? (geometry/find-enclosing enclosed-by-1 [area-2]))))
+
+    (testing "returns the enclosing area when there is only one option"
+      (let [areas (shuffle [area-1 area-2])]
+        (is (= area-1 (geometry/find-enclosing enclosed-by-1 areas)))
+        (is (= area-2 (geometry/find-enclosing enclosed-by-2 areas)))))
+
+    (testing "when overlaps multiple areas, returns the one which overlaps more"
+      (is (= area-1 (geometry/find-enclosing overlaps-more-by-1 (shuffle [area-1 area-2])))))
+
+    (testing "when overlaps multiple areas, returns the smallest enclosing area"
+      (is (= area-1 (geometry/find-enclosing enclosed-by-1 (shuffle [area-1 big-area-1])))))))
