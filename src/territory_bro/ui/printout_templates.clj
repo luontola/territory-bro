@@ -7,9 +7,7 @@
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n])
-  (:import (java.time LocalDate ZoneId ZoneOffset)
-           (net.iakovlev.timeshape TimeZoneEngine)
-           (org.locationtech.jts.io WKTReader)))
+  (:import (java.time LocalDate)))
 
 (defn crop-marks [content]
   (let [styles (:CropMarks (css/modules))
@@ -22,21 +20,6 @@
       [:div {:class (:cropArea styles)} content]
       [:div {:class (:bottomLeft styles)} image]
       [:div {:class (:bottomRight styles)} image]])))
-
-
-(defonce *timezone-engine (future (TimeZoneEngine/initialize))) ; takes 370ms on an Apple M3 Max, so worth initializing on the background
-(defn- timezone-engine ^TimeZoneEngine []
-  @*timezone-engine)
-
-(defn timezone-for-location ^ZoneId [^String location]
-  (try
-    (let [point (-> (WKTReader.)
-                    (.read location)
-                    (.getInteriorPoint))]
-      (-> (.query (timezone-engine) (.getY point) (.getX point))
-          (.orElse ZoneOffset/UTC)))
-    (catch Exception _
-      ZoneOffset/UTC)))
 
 (defn print-date-notice [^LocalDate print-date content]
   (let [styles (:PrintDateNotice (css/modules))]

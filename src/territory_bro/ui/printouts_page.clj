@@ -6,6 +6,7 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [territory-bro.api :as api]
+            [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.json :as json]
             [territory-bro.infra.resources :as resources]
             [territory-bro.ui.html :as html]
@@ -63,7 +64,7 @@
                            (assoc :locations (->> (:congregationBoundaries congregation)
                                                   (map :location)))
                            ;; TODO: the timezone could be already precalculated in the state (when it's needed elsewhere, e.g. when recording loans)
-                           (assoc :timezone (printout-templates/timezone-for-location
+                           (assoc :timezone (geometry/timezone-for-location
                                              (:location (first (:congregationBoundaries congregation))))))
          :regions regions
          :territories territories
