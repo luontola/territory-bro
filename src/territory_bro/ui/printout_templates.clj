@@ -30,17 +30,17 @@
        content]])))
 
 
-(defn territory-card [{:keys [territory map-raster print-date]}]
+(defn territory-card [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date]}]
   (let [styles (:TerritoryCard (css/modules))]
     (crop-marks
      (h/html
       [:div {:class (:root styles)}
 
        [:div {:class (:minimap styles)}
-        ;; TODO: map using web components
-        [:div.OpenLayersMap__root--f9d8701d.OpenLayersMap__printout--f9d8701d
-         [:div.ol-viewport {:style "position: relative; overflow: hidden; width: 100%; height: 100%;"}
-          "[OpenLayersMap]"]]]
+        [:territory-mini-map {:territory (:location territory)
+                              :congregation-boundary congregation-boundary
+                              :enclosing-region enclosing-region
+                              :enclosing-minimap-viewport enclosing-minimap-viewport}]]
 
        [:div {:class (:header styles)}
         [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]

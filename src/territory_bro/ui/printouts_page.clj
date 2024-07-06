@@ -15,7 +15,8 @@
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
             [territory-bro.ui.printout-templates :as printout-templates])
   (:import (java.time LocalDate ZoneId)
-           (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
+           (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)
+           (org.locationtech.jts.geom Geometry)))
 
 (def templates
   [{:id "TerritoryCard"
@@ -59,15 +60,20 @@
                         :language (name i18n/*lang*)
                         :mapRaster (:id (first (map-rasters)))
                         :regions (str (:id congregation)) ; congregation boundary is shown first in the regions list
-                        :territories (str (:id (first territories)))}]
+                        :territories (str (:id (first territories)))}
+        congregation-boundary (->> (:congregationBoundaries congregation)
+                                   (mapv (comp geometry/parse-wkt :location))
+                                   ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
+                                   (reduce (fn [^Geometry a ^Geometry b]
+                                             (.union a b)))
+                                   (str))]
     (-> {:congregation (-> (select-keys congregation [:id :name])
-                           (assoc :locations (->> (:congregationBoundaries congregation)
-                                                  (map :location)))
+                           (assoc :location congregation-boundary)
                            ;; TODO: the timezone could be already precalculated in the state (when it's needed elsewhere, e.g. when recording loans)
-                           (assoc :timezone (geometry/timezone-for-location
-                                             (:location (first (:congregationBoundaries congregation))))))
+                           (assoc :timezone (geometry/timezone-for-location congregation-boundary)))
          :regions regions
          :territories territories
+         :card-minimap-viewports (mapv :location (:cardMinimapViewports congregation))
          :form (-> (merge default-params (:params request))
                    (select-keys [:template :language :mapRaster :regions :territories])
                    (update :regions parse-uuid-multiselect)
@@ -75,7 +81,7 @@
         (merge (map-interaction-help/model request)))))
 
 
-(defn view [{:keys [congregation territories regions form] :as model}]
+(defn view [{:keys [congregation territories regions card-minimap-viewports form] :as model}]
   (let [printout-lang (i18n/validate-lang (keyword (:language form)))
         template (->> templates
                       (filter #(= (:template form) (:id %)))
@@ -87,7 +93,16 @@
 
       [:form#print-options.pure-form.pure-form-stacked {:method "post"
                                                         :hx-post html/*page-path*
-                                                        :hx-trigger "change"
+                                                        :hx-trigger "change delay:100ms"
+
+                                                        ;; FIXME: we need hx-sync to avoid earlier request overwriting a later request, but hx-sync causes NPE inside htmx
+                                                        ;; htmx.esm.js:721 Uncaught TypeError: Cannot read properties of null (reading 'htmx-internal-data')
+                                                        ;;    at getInternalData (htmx.esm.js:721:16)
+                                                        ;;    at issueAjaxRequest (htmx.esm.js:4111:17)
+                                                        ;;    at htmx.esm.js:2538:13
+                                                        ;;    at HTMLFormElement.ot (htmx.esm.js:2444:13)
+                                                        #_#_:hx-sync "queue last"
+
                                                         ;; morph the form to keep form element focus and scroll state
                                                         :hx-select "#print-options"
                                                         :hx-target "this"
@@ -154,13 +169,22 @@
                 (str " - " region))])]]]]]]
 
      [:div#printouts {:lang printout-lang}
-      (for [territory territories
-            :when (contains? (:territories form) (:id territory))]
-        (binding [i18n/*lang* printout-lang]
-          (when (:fn template)
-            ((:fn template) {:territory territory
-                             :map-raster (:mapRaster form)
-                             :print-date print-date}))))]
+      (let [region-boundaries (mapv (comp geometry/parse-wkt :location) regions)
+            minimap-viewport-boundaries (mapv geometry/parse-wkt card-minimap-viewports)]
+        (for [territory territories
+              :when (contains? (:territories form) (:id territory))]
+          (binding [i18n/*lang* printout-lang]
+            (let [template-fn (:fn template)
+                  territory-boundary (geometry/parse-wkt (:location territory))
+                  enclosing-region (str (geometry/find-enclosing territory-boundary region-boundaries))
+                  enclosing-minimap-viewport (str (geometry/find-enclosing territory-boundary minimap-viewport-boundaries))]
+              (when template-fn
+                (template-fn {:territory territory
+                              :congregation-boundary (:location congregation)
+                              :enclosing-region enclosing-region
+                              :enclosing-minimap-viewport enclosing-minimap-viewport
+                              :map-raster (:mapRaster form)
+                              :print-date print-date}))))))]
 
      [:div.no-print
       (map-interaction-help/view model)])))

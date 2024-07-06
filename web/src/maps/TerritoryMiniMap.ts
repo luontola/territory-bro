@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -14,7 +14,7 @@ import {fromLonLat} from "ol/proj";
 import WKT from "ol/format/WKT";
 import {makeStreetsLayer, wktToFeatures} from "./mapOptions";
 import {Congregation, Territory} from "../api";
-import OpenLayersMap from "./OpenLayersMap";
+import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
 
 type Props = {
   territory: Territory;
@@ -40,6 +40,26 @@ export default class TerritoryMiniMap extends OpenLayersMap<Props> {
 
   componentWillUnmount() {
     this.map.unmount()
+  }
+}
+
+export class TerritoryMiniMapElement extends OpenLayersMapElement {
+  constructor() {
+    super();
+  }
+
+  createMap({root}) {
+    const territory = {
+      location: this.getAttribute("territory"),
+      enclosingMinimapViewport: this.getAttribute("enclosing-minimap-viewport"),
+      enclosingRegion: this.getAttribute("enclosing-region"),
+    };
+    const congregation = {
+      location: this.getAttribute("congregation-boundary"),
+    };
+    if (congregation.location) {
+      return initTerritoryMiniMap(root, territory as Territory, congregation as Congregation);
+    }
   }
 }
 

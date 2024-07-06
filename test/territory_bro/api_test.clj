@@ -196,6 +196,21 @@
     (refresh-projections!)
     congregation-boundary-id))
 
+(defn create-card-minimap-viewport! [cong-id]
+  (let [card-minimap-viewport-id (UUID/randomUUID)
+        state (projections/cached-state)]
+    (db/with-db [conn {}]
+      (dispatcher/command! conn state
+                           {:command/type :card-minimap-viewport.command/define-card-minimap-viewport
+                            :command/time (Instant/now)
+                            :command/system "test"
+                            :gis-change/id 42
+                            :congregation/id cong-id
+                            :card-minimap-viewport/id card-minimap-viewport-id
+                            :card-minimap-viewport/location testdata/wkt-helsinki}))
+    (refresh-projections!)
+    card-minimap-viewport-id))
+
 (defn create-region! [cong-id]
   (let [region-id (UUID/randomUUID)
         state (projections/cached-state)]

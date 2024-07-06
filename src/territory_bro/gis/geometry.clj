@@ -14,11 +14,13 @@
 (defn timezone-engine ^TimeZoneEngine []
   @*timezone-engine)
 
+(defn parse-wkt ^Geometry [^String wkt]
+  (-> (WKTReader. geometry-factory)
+      (.read wkt)))
+
 (defn timezone-for-location ^ZoneId [^String location]
   (try
-    (let [point (-> (WKTReader. geometry-factory)
-                    (.read location)
-                    (.getInteriorPoint))]
+    (let [point (.getInteriorPoint (parse-wkt location))]
       (-> (.query (timezone-engine) (.getY point) (.getX point))
           (.orElse ZoneOffset/UTC)))
     (catch Exception _

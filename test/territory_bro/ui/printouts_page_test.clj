@@ -7,6 +7,7 @@
             [clojure.walk :as walk]
             [territory-bro.api-test :as at]
             [territory-bro.domain.testdata :as testdata]
+            [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.ui.printouts-page :as printouts-page])
@@ -16,7 +17,7 @@
 (def default-model
   {:congregation {:id (UUID. 0 1)
                   :name "Example Congregation"
-                  :locations [testdata/wkt-helsinki]
+                  :location (str (geometry/parse-wkt testdata/wkt-helsinki))
                   :timezone (ZoneId/of "Europe/Helsinki")}
    :regions [{:id (UUID. 0 2)
               :name "the region"
@@ -27,6 +28,7 @@
                   :region "the region"
                   :meta {:foo "bar"}
                   :location testdata/wkt-helsinki-rautatientori}]
+   :card-minimap-viewports [testdata/wkt-helsinki]
    :form {:template "TerritoryCard"
           :language "en"
           :mapRaster "osmhd"
@@ -50,7 +52,8 @@
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
           cong-id (at/create-congregation! session "Example Congregation")
-          congregation-boundary-id (at/create-congregation-boundary! cong-id)
+          _ (at/create-congregation-boundary! cong-id)
+          _ (at/create-card-minimap-viewport! cong-id)
           region-id (at/create-region! cong-id)
           territory-id (at/create-territory! cong-id)
           request {:params {:congregation (str cong-id)}
