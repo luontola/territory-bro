@@ -179,5 +179,4 @@
                           (html/response)))}
      :post {:handler (fn [request]
                        (-> (view! request)
-                           (layout/page! request)
                            (html/response)))}}]])
