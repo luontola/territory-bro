@@ -63,12 +63,11 @@
         congregation-boundary (->> (:congregationBoundaries congregation)
                                    (mapv (comp geometry/parse-wkt :location))
                                    ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
-                                   (geometry/union)
-                                   (str))]
+                                   (geometry/union))]
     (-> {:congregation (-> (select-keys congregation [:id :name])
-                           (assoc :location congregation-boundary)
+                           (assoc :location (str congregation-boundary))
                            ;; TODO: the timezone could be already precalculated in the state (when it's needed elsewhere, e.g. when recording loans)
-                           (assoc :timezone (geometry/timezone-for-location congregation-boundary)))
+                           (assoc :timezone (geometry/timezone congregation-boundary)))
          :regions regions
          :territories territories
          :card-minimap-viewports (mapv :location (:cardMinimapViewports congregation))

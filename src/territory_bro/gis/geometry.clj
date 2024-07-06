@@ -8,7 +8,7 @@
            (org.locationtech.jts.geom Coordinate Geometry GeometryFactory Polygon)
            (org.locationtech.jts.io WKTReader)))
 
-(def geometry-factory (GeometryFactory.))
+(def ^GeometryFactory geometry-factory (GeometryFactory.))
 
 (defonce ^:private *timezone-engine (future (TimeZoneEngine/initialize))) ; takes 370ms on an Apple M3 Max, so worth initializing on the background
 (defn timezone-engine ^TimeZoneEngine []
@@ -18,9 +18,9 @@
   (-> (WKTReader. geometry-factory)
       (.read wkt)))
 
-(defn timezone-for-location ^ZoneId [^String location]
+(defn timezone ^ZoneId [^Geometry location]
   (try
-    (let [point (.getInteriorPoint (parse-wkt location))]
+    (let [point (.getInteriorPoint location)]
       (-> (.query (timezone-engine) (.getY point) (.getX point))
           (.orElse ZoneOffset/UTC)))
     (catch Exception _

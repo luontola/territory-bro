@@ -8,28 +8,28 @@
             [territory-bro.test.fixtures :refer :all])
   (:import (java.time ZoneId ZoneOffset)))
 
-(deftest timezone-for-location-test
-  (testing "invalid or missing location"
-    (is (= ZoneOffset/UTC
-           (geometry/timezone-for-location nil)
-           (geometry/timezone-for-location "")
-           (geometry/timezone-for-location "foo"))))
+(deftest timezone-test
+  (testing "defaults to UTC on error"
+    (is (= ZoneOffset/UTC (geometry/timezone nil))
+        "nil location")
+    (is (= ZoneOffset/UTC (geometry/timezone (.createEmpty geometry/geometry-factory 2)))
+        "empty location"))
 
   (testing "Helsinki - positive timezone"
     (is (= (ZoneId/of "Europe/Helsinki")
-           (geometry/timezone-for-location "MULTIPOLYGON(((24.941469073172712 60.17126251652484,24.94092595911725 60.17078337925611,24.942114661578245 60.17078337925611,24.941469073172712 60.17126251652484)))"))))
+           (geometry/timezone (geometry/parse-wkt "MULTIPOLYGON(((24.941469073172712 60.17126251652484,24.94092595911725 60.17078337925611,24.942114661578245 60.17078337925611,24.941469073172712 60.17126251652484)))")))))
 
   (testing "London - near UTC, but uses daylight saving time"
     (is (= (ZoneId/of "Europe/London")
-           (geometry/timezone-for-location "MULTIPOLYGON(((-0.092339529987027 51.51767499211157,-0.096080368276224 51.51400976107682,-0.087961953265625 51.51351443696474,-0.092339529987027 51.51767499211157)))"))))
+           (geometry/timezone (geometry/parse-wkt "MULTIPOLYGON(((-0.092339529987027 51.51767499211157,-0.096080368276224 51.51400976107682,-0.087961953265625 51.51351443696474,-0.092339529987027 51.51767499211157)))")))))
 
   (testing "New York - negative timezone"
     (is (= (ZoneId/of "America/New_York")
-           (geometry/timezone-for-location "MULTIPOLYGON(((-74.00664903771184 40.71882142880113,-74.01503824925818 40.70845374345747,-73.9960713361969 40.70859198988125,-74.00664903771184 40.71882142880113)))"))))
+           (geometry/timezone (geometry/parse-wkt "MULTIPOLYGON(((-74.00664903771184 40.71882142880113,-74.01503824925818 40.70845374345747,-73.9960713361969 40.70859198988125,-74.00664903771184 40.71882142880113)))")))))
 
   (testing "Buenos Aires - negative latitude and longitude"
     (is (= (ZoneId/of "America/Argentina/Buenos_Aires")
-           (geometry/timezone-for-location "MULTIPOLYGON(((-58.445267316446234 -34.604002458035154,-58.45017281675289 -34.60971073580903,-58.43545631583296 -34.610685280599476,-58.445267316446234 -34.604002458035154)))")))))
+           (geometry/timezone (geometry/parse-wkt "MULTIPOLYGON(((-58.445267316446234 -34.604002458035154,-58.45017281675289 -34.60971073580903,-58.43545631583296 -34.610685280599476,-58.445267316446234 -34.604002458035154)))"))))))
 
 (deftest find-enclosing-test
   (let [area-1 (geometry/square [0 0] [10 10])
