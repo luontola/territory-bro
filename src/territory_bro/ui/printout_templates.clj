@@ -57,10 +57,10 @@
 
        [:div {:class (:addresses styles)}
         [:div {:class (:qrCode styles)}
-         ;; TODO: QR code using lazy loading with caching
-         [:svg {:height "128" :width "128" :viewBox "0 0 29 29" :style "width: 100%; height: auto;"}
-          [:path {:fill "#FFFFFF" :d "M0,0 h29v29H0z" :shape-rendering "crispEdges"}]
-          [:path {:fill "#000000" :d "M0 0h7v1H0zM11 0h1v1H11zM14 0h1v1H14zM18 0h1v1H18zM22,0 h7v1H22zM0 1h1v1H0zM6 1h1v1H6zM8 1h2v1H8zM13 1h1v1H13zM17 1h1v1H17zM22 1h1v1H22zM28,27 h1v1H28zM0 28h7v1H0zM8 28h1v1H8zM10 28h3v1H10zM14 28h2v1H14zM19 28h1v1H19zM24 28h3v1H24z" :shape-rendering "crispEdges"}]]]
+         [:div {:hx-target "this"
+                :hx-swap "outerHTML"
+                :hx-trigger "load"
+                :hx-get (str html/*page-path* "/qr-code/" (:id territory))}]]
         (:addresses territory)]
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))

@@ -85,3 +85,8 @@
     /* make the text flow around the image */
     shape-outside: inset(calc(100% - var(--qr-code-size)) 0 0 0);
 }
+
+.qrCode > svg {
+    width: 100%;
+    height: auto;
+}

@@ -5,6 +5,9 @@
 (ns territory-bro.ui.printouts-page
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
+            [medley.core :refer [dissoc-in]]
+            [ring.util.http-response :as http-response]
+            [ring.util.response :as response]
             [territory-bro.api :as api]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.json :as json]
@@ -14,8 +17,10 @@
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
             [territory-bro.ui.printout-templates :as printout-templates])
-  (:import (java.time LocalDate ZoneId)
-           (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
+  (:import (io.nayuki.qrcodegen QrCode QrCode$Ecc)
+           (java.time Duration LocalDate ZoneId)
+           (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)
+           (territory_bro QrCodeGenerator)))
 
 (def templates
   [{:id "TerritoryCard"
@@ -181,6 +186,10 @@
 (defn view! [request]
   (view (model! request)))
 
+(defn render-qr-code-svg [^String data]
+  (let [qr-code (QrCode/encodeText data QrCode$Ecc/MEDIUM)]
+    (QrCodeGenerator/toSvgString qr-code 0 "white" "black")))
+
 (def routes
   ["/congregation/:congregation/printouts"
    {:middleware [[html/wrap-page-path ::page]]}
@@ -192,4 +201,18 @@
                           (html/response)))}
      :post {:handler (fn [request]
                        (-> (view! request)
-                           (html/response)))}}]])
+                           (html/response)))}}]
+
+   ["/qr-code/:territory"
+    {:get {:handler (fn [request]
+                      (let [territory (get-in request [:params :territory])
+                            response (api/generate-qr-codes (-> request
+                                                                (dissoc-in [:params :territory])
+                                                                (assoc-in [:params :territories] [territory])))
+                            share-url (:url (first (:qrCodes (:body response))))]
+                        (when-not (= 200 (:status response))
+                          (http-response/throw! (assoc response :body "")))
+                        (-> (render-qr-code-svg share-url)
+                            (html/response)
+                            ;; avoid generating QR codes unnecessarily while the user is tweaking the settings
+                            (response/header "Cache-Control" (str "private, max-age=" (.toSeconds (Duration/ofHours 12)) ", must-revalidate")))))}}]])

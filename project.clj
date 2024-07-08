@@ -20,6 +20,7 @@
                  [cprop "0.1.20"]
                  [hiccup "2.0.0-RC3"]
                  [hikari-cp "3.1.0"]
+                 [io.nayuki/qrcodegen "1.8.0"]
                  [liberator "0.15.3"]
                  [medley "1.4.0"]
                  [metosin/jsonista "0.3.9"]

@@ -92,6 +92,7 @@
     <orderEntry type="library" name="Leiningen: hikari-cp:3.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: instaparse:1.4.8" level="project" />
     <orderEntry type="library" name="Leiningen: io.methvin/directory-watcher:0.17.3" level="project" />
+    <orderEntry type="library" name="Leiningen: io.nayuki/qrcodegen:1.8.0" level="project" />
     <orderEntry type="library" name="Leiningen: javax.activation/javax.activation-api:1.2.0" level="project" />
     <orderEntry type="library" name="Leiningen: javax.servlet/javax.servlet-api:3.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: javax.xml.bind/jaxb-api:2.4.0-b180830.0359" level="project" />

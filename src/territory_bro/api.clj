@@ -459,6 +459,7 @@
               territory-ids (->> (get-in request [:params :territories])
                                  (mapv UUID/fromString))]
           (db/with-db [conn {}]
+            ;; TODO: the ::share-cache can be removed after removing the React site, because HTMX uses the browser's cache
             (let [share-cache (or (-> request :session ::share-cache)
                                   {})
                   shares (into [] (for [territory-id territory-ids]
