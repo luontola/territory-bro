@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: metosin/ring-swagger-ui:5.9.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/metosin/ring-swagger-ui/5.9.0/ring-swagger-ui-5.9.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: metosin/reitit-core:0.7.0-alpha7">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/metosin/reitit-core/0.7.0-alpha7/reitit-core-0.7.0-alpha7.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
