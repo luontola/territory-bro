@@ -116,6 +116,11 @@ document.body.addEventListener('htmx:afterRequest', (event: Event) => {
       dialog.showModal();
 
     } else {
+      const element = event.detail.elt;
+      if (element && element.getAttribute('hx-sync')) {
+        console.warn("Unspecified error on hx-sync, probably an aborted request", event.detail); // happens when hx-sync aborts a request
+        return;
+      }
       console.error("Unspecified error", event.detail); // usually network error
       message.innerText = "" + message.getAttribute("data-default-message");
       dialog.showModal();

@@ -90,16 +90,8 @@
 
       [:form#print-options.pure-form.pure-form-stacked {:method "post"
                                                         :hx-post html/*page-path*
-                                                        :hx-trigger "change delay:100ms"
-
-                                                        ;; FIXME: we need hx-sync to avoid earlier request overwriting a later request, but hx-sync causes NPE inside htmx
-                                                        ;; htmx.esm.js:721 Uncaught TypeError: Cannot read properties of null (reading 'htmx-internal-data')
-                                                        ;;    at getInternalData (htmx.esm.js:721:16)
-                                                        ;;    at issueAjaxRequest (htmx.esm.js:4111:17)
-                                                        ;;    at htmx.esm.js:2538:13
-                                                        ;;    at HTMLFormElement.ot (htmx.esm.js:2444:13)
-                                                        #_#_:hx-sync "queue last"
-
+                                                        :hx-trigger "change delay:250ms"
+                                                        :hx-sync "#print-options:replace"
                                                         ;; morph the form to keep form element focus and scroll state
                                                         :hx-select "#print-options"
                                                         :hx-target "this"
