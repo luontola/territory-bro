@@ -15,10 +15,13 @@
 
 (def ^:dynamic *page-path*)
 
-(defn normalize-whitespace [s]
-  (-> s
-      (str/replace #"\s+" " ")
-      (str/trim)))
+(defn normalize-whitespace
+  ([s]
+   (-> s
+       (str/replace #"\s+" " ")
+       (str/trim)))
+  ([s & more]
+   (normalize-whitespace (str/join "\n" (cons s more)))))
 
 (defn- font-awesome-class? [class]
   (str/starts-with? class "fa-"))

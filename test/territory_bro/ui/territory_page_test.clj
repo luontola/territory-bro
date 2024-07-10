@@ -11,6 +11,7 @@
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
+            [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.territory-page :as territory-page])
   (:import (java.util UUID)))
 
@@ -75,12 +76,8 @@
                Edit
                the do-not-calls
 
-             {fa-share-nodes} Share a link
-
-             {fa-info-circle} How to interact with the maps?
-             Move: drag with two fingers / drag with the left mouse button
-             Zoom: pinch or spread with two fingers / hold Ctrl and scroll with the mouse wheel
-             Rotate: rotate with two fingers / hold Alt + Shift and drag with the left mouse button")
+             {fa-share-nodes} Share a link"
+            map-interaction-help-test/default-visible-text)
            (-> (territory-page/view model)
                html/visible-text))))
 
@@ -98,12 +95,8 @@
                Addresses
                  the addresses
                Do not contact
-                 the do-not-calls
-
-               {fa-info-circle} How to interact with the maps?
-               Move: drag with two fingers / drag with the left mouse button
-               Zoom: pinch or spread with two fingers / hold Ctrl and scroll with the mouse wheel
-               Rotate: rotate with two fingers / hold Alt + Shift and drag with the left mouse button")
+                 the do-not-calls"
+              map-interaction-help-test/default-visible-text)
              (-> (territory-page/view model)
                  html/visible-text))))))
 
