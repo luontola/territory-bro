@@ -18,9 +18,11 @@
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
             [territory-bro.ui.printout-templates :as printout-templates])
   (:import (io.nayuki.qrcodegen QrCode QrCode$Ecc)
-           (java.time Duration LocalDate ZoneId)
+           (java.time Clock Duration LocalDate)
            (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)
            (territory_bro QrCodeGenerator)))
+
+(def ^:dynamic ^Clock *clock* (Clock/systemUTC))
 
 (def templates
   [{:id "TerritoryCard"
@@ -88,7 +90,7 @@
         template (->> templates
                       (filter #(= (:template form) (:id %)))
                       (first))
-        print-date (LocalDate/now ^ZoneId (:timezone congregation))]
+        print-date (LocalDate/now (.withZone *clock* (:timezone congregation)))]
     (h/html
      [:div.no-print
       [:h1 (i18n/t "PrintoutPage.title")]

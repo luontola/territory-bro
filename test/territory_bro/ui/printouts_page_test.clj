@@ -3,22 +3,25 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.printouts-page-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [clojure.walk :as walk]
             [territory-bro.api-test :as at]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.ui.html :as html]
+            [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.printouts-page :as printouts-page])
-  (:import (java.time ZoneId)
+  (:import (java.time Clock Duration ZoneOffset ZonedDateTime)
            (java.util UUID)))
 
 (def default-model
   {:congregation {:id (UUID. 0 1)
                   :name "Example Congregation"
                   :location (str (geometry/parse-wkt testdata/wkt-helsinki))
-                  :timezone (ZoneId/of "Europe/Helsinki")}
+                  :timezone testdata/timezone-helsinki}
    :regions [{:id (UUID. 0 2)
               :name "the region"
               :location testdata/wkt-south-helsinki}]
@@ -88,3 +91,41 @@
            (UUID. 0 2)}
          (printouts-page/parse-uuid-multiselect ["00000000-0000-0000-0000-000000000001"
                                                  "00000000-0000-0000-0000-000000000002"]))))
+
+(deftest render-qr-code-svg-test
+  (let [svg (printouts-page/render-qr-code-svg "foo")]
+    (is (str/includes? svg "viewBox=\"0 0 21 21\""))
+    (is (str/includes? svg "M0,0h1v1h-1z M1,0h1v1h-1z"))))
+
+(deftest view-test
+  (binding [printouts-page/*clock* (-> (.toInstant (ZonedDateTime/of 2000 12 31 23 59 0 0 testdata/timezone-helsinki))
+                                       (Clock/fixed ZoneOffset/UTC))]
+    (testing "territory printout"
+      (is (= (html/normalize-whitespace
+              "Printouts
+
+               Print options
+                 Template [Territory card]
+                 Language [English]
+                 Background map [World - OpenStreetMap]
+                 Regions [Example Congregation]
+                 Territories [123 - the region]
+
+               Territory Map Card
+                 the region
+                 123
+                 Printed 2000-12-31 with TerritoryBro.com
+                 the addresses
+                 Please keep this card in the envelope. Do not soil, mark or bend it.
+                 Each time the territory is covered, please inform the brother who cares for the territory files."
+              map-interaction-help-test/default-visible-text)
+             (-> (printouts-page/view default-model)
+                 html/visible-text))))
+
+    (testing "region printout") ; TODO
+
+    (binding [printouts-page/*clock* (Clock/offset printouts-page/*clock* (Duration/ofMinutes 1))]
+      (testing "print date uses the congregation timezone"
+        (is (str/includes? (-> (printouts-page/view default-model)
+                               html/visible-text)
+                           "Printed 2001-01-01"))))))
