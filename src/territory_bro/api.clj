@@ -214,7 +214,8 @@
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           user-id (current-user-id)
           state (state-for-request request)
-          congregation (facade/get-congregation state cong-id user-id)]
+          congregation (facade/get-congregation state cong-id user-id)
+          permissions (:congregation/permissions congregation)]
       (when-not congregation
         ;; This function must support anonymous access for opened shares.
         ;; If anonymous user cannot see the congregation, first prompt them
@@ -224,7 +225,9 @@
         (forbidden! "No congregation access"))
       (db/with-db [conn {:read-only? true}]
         (ok (-> congregation
-                (cond-> fetch-loans? (loan/enrich-territory-loans!))
+                (cond-> (and fetch-loans?
+                             (:view-congregation permissions))
+                        (loan/enrich-territory-loans!))
                 (enrich-congregation-users conn)
                 (format-for-api)
                 (validate-congregation)))))))
