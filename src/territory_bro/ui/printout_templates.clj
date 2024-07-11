@@ -105,6 +105,16 @@
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
 
+(defn neighborhood-card [{:keys [territory map-raster]}]
+  (let [styles (:NeighborhoodCard (css/modules))]
+    (crop-marks
+     (h/html
+      [:div {:class (:root styles)}
+       [:neighborhood-map {:territory-number (:number territory)
+                           :territory-location (:location territory)
+                           :map-raster map-raster
+                           :printout true}]]))))
+
 (defn region-printout [{:keys [region territories map-raster print-date]}]
   (let [styles (:RegionPrintout (css/modules))]
     (a4-print-frame

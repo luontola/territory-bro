@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -18,7 +18,7 @@ import {
   wktToFeatures
 } from "./mapOptions";
 import {Territory} from "../api";
-import OpenLayersMap from "./OpenLayersMap";
+import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
 
 type Props = {
   territory: Territory;
@@ -53,6 +53,18 @@ export default class NeighborhoodMap extends OpenLayersMap<Props> {
 
   componentWillUnmount() {
     this.map.unmount()
+  }
+}
+
+export class NeighborhoodMapElement extends OpenLayersMapElement {
+  createMap({root, mapRaster}) {
+    const territory = {
+      number: this.getAttribute("territory-number"),
+      location: this.getAttribute("territory-location")
+    };
+    const map = initNeighborhoodMap(root, territory as Territory)
+    map.setStreetsLayerRaster(mapRaster);
+    return map
   }
 }
 

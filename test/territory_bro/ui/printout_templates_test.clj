@@ -93,6 +93,18 @@
       (is (str/includes? html "map-raster=\"osmhd\""))
       (is (str/includes? html "hx-get=\"page-url/qr-code/00000000-0000-0000-0000-000000000001\"")))))
 
+(deftest neighborhood-card-test
+  (testing "no data"
+    (is (= "" (-> (printout-templates/neighborhood-card nil)
+                  html/visible-text))))
+
+  (testing "full data"
+    (let [html (printout-templates/neighborhood-card territory-printout-model)]
+      (is (= "" (html/visible-text html)))
+      (is (str/includes? html "territory-number=\"123\""))
+      (is (str/includes? html "territory-location=\"MULTIPOLYGON(territory)\""))
+      (is (str/includes? html "map-raster=\"osmhd\"")))))
+
 (deftest region-printout-test
   (testing "no data"
     (is (= "Printed with TerritoryBro.com"

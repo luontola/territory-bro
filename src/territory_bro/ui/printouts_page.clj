@@ -32,6 +32,7 @@
     :fn printout-templates/territory-card-map-only
     :type :territory}
    {:id "NeighborhoodCard"
+    :fn printout-templates/neighborhood-card
     :type :territory}
    {:id "RuralTerritoryCard"
     :type :territory}

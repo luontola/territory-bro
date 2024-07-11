@@ -17,6 +17,7 @@ import {adjustDropdownWidthToContent} from "./layout/LanguageSelection.tsx";
 import {TerritoryListMapElement} from "./maps/TerritoryListMap.ts";
 import {TerritoryMiniMapElement} from "./maps/TerritoryMiniMap.ts";
 import {RegionMapElement} from "./maps/RegionMap.ts";
+import {NeighborhoodMapElement} from "./maps/NeighborhoodMap.ts";
 
 function NavigationListener({children}) {
   const location = useLocation()
@@ -133,6 +134,7 @@ document.body.addEventListener('htmx:afterRequest', (event: Event) => {
 customElements.define('territory-map', TerritoryMapElement);
 customElements.define('territory-list-map', TerritoryListMapElement);
 customElements.define('territory-mini-map', TerritoryMiniMapElement);
+customElements.define('neighborhood-map', NeighborhoodMapElement);
 customElements.define('region-map', RegionMapElement);
 
 // event handlers for htmx UI
