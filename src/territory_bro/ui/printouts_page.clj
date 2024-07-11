@@ -101,7 +101,7 @@
 
       [:form#print-options.pure-form.pure-form-stacked {:method "post"
                                                         :hx-post html/*page-path*
-                                                        :hx-trigger "change delay:250ms"
+                                                        :hx-trigger "load delay:1ms, change delay:250ms"
                                                         :hx-sync "#print-options:replace"
                                                         ;; morph the form to keep form element focus and scroll state
                                                         :hx-select "#print-options"
