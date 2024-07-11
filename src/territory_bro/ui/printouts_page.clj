@@ -38,6 +38,7 @@
     :fn printout-templates/rural-territory-card
     :type :territory}
    {:id "QrCodeOnly"
+    :fn printout-templates/qr-code-only
     :type :territory}
    {:id "RegionPrintout"
     :fn printout-templates/region-printout

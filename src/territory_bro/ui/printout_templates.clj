@@ -43,6 +43,13 @@
       [:div {:class (:content styles)}
        content]])))
 
+(defn territory-qr-code [territory]
+  (h/html
+   [:div {:hx-target "this"
+          :hx-swap "outerHTML"
+          :hx-trigger "load"
+          :hx-get (str html/*page-path* "/qr-code/" (:id territory))}]))
+
 
 (defn territory-card [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date]}]
   (let [styles (:TerritoryCard (css/modules))]
@@ -70,11 +77,7 @@
                           :printout true}])]
 
        [:div {:class (:addresses styles)}
-        [:div {:class (:qrCode styles)}
-         [:div {:hx-target "this"
-                :hx-swap "outerHTML"
-                :hx-trigger "load"
-                :hx-get (str html/*page-path* "/qr-code/" (:id territory))}]]
+        [:div {:class (:qrCode styles)} (territory-qr-code territory)]
         (:addresses territory)]
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
@@ -105,11 +108,7 @@
                           :map-raster map-raster
                           :printout true}])]
 
-       [:div {:class (:qrCode styles)}
-        [:div {:hx-target "this"
-               :hx-swap "outerHTML"
-               :hx-trigger "load"
-               :hx-get (str html/*page-path* "/qr-code/" (:id territory))}]]
+       [:div {:class (:qrCode styles)} (territory-qr-code territory)]
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
 
@@ -139,11 +138,15 @@
                           :map-raster map-raster
                           :printout true}])]
 
-       [:div {:class (:qrCode styles)}
-        [:div {:hx-target "this"
-               :hx-swap "outerHTML"
-               :hx-trigger "load"
-               :hx-get (str html/*page-path* "/qr-code/" (:id territory))}]]]))))
+       [:div {:class (:qrCode styles)} (territory-qr-code territory)]]))))
+
+(defn qr-code-only [{:keys [territory]}]
+  (let [styles (:QrCodeOnly (css/modules))]
+    (h/html
+     [:div {:class (:cropArea styles)}
+      [:div {:class (:root styles)}
+       [:div {:class (:number styles)} (:number territory)]
+       [:div {:class (:qrCode styles)} (territory-qr-code territory)]]])))
 
 (defn neighborhood-card [{:keys [territory map-raster]}]
   (let [styles (:NeighborhoodCard (css/modules))]

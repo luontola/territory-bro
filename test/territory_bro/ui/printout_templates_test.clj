@@ -128,6 +128,16 @@
       (is (str/includes? html "territory-location=\"MULTIPOLYGON(territory)\""))
       (is (str/includes? html "map-raster=\"osmhd\"")))))
 
+(deftest qr-code-only-test
+  (testing "no data"
+    (is (= "" (-> (printout-templates/qr-code-only nil)
+                  html/visible-text))))
+
+  (testing "full data"
+    (let [html (printout-templates/qr-code-only territory-printout-model)]
+      (is (= "123" (html/visible-text html)))
+      (is (str/includes? html "hx-get=\"page-url/qr-code/00000000-0000-0000-0000-000000000001\"")))))
+
 (deftest region-printout-test
   (testing "no data"
     (is (= "Printed with TerritoryBro.com"
