@@ -93,6 +93,29 @@
       (is (str/includes? html "map-raster=\"osmhd\""))
       (is (str/includes? html "hx-get=\"page-url/qr-code/00000000-0000-0000-0000-000000000001\"")))))
 
+(deftest rural-territory-card-test
+  (testing "no data"
+    (is (= (html/normalize-whitespace
+            "Territory Map Card
+             Printed with TerritoryBro.com")
+           (-> (printout-templates/rural-territory-card nil)
+               html/visible-text))))
+
+  (testing "full data"
+    (let [html (printout-templates/rural-territory-card territory-printout-model)]
+      (is (= (html/normalize-whitespace
+              "Territory Map Card
+               The Region
+               123
+               Printed 2024-07-10 with TerritoryBro.com")
+             (html/visible-text html)))
+      (is (str/includes? html "territory-location=\"MULTIPOLYGON(territory)\""))
+      (is (str/includes? html "congregation-boundary=\"MULTIPOLYGON(congregation boundary)\""))
+      (is (str/includes? html "enclosing-region=\"MULTIPOLYGON(region)\""))
+      (is (str/includes? html "enclosing-minimap-viewport=\"POLYGON(minimap viewport)\""))
+      (is (str/includes? html "map-raster=\"osmhd\""))
+      (is (str/includes? html "hx-get=\"page-url/qr-code/00000000-0000-0000-0000-000000000001\"")))))
+
 (deftest neighborhood-card-test
   (testing "no data"
     (is (= "" (-> (printout-templates/neighborhood-card nil)

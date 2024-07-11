@@ -21,7 +21,15 @@
       [:div {:class (:bottomLeft styles)} image]
       [:div {:class (:bottomRight styles)} image]])))
 
+(defn a5-print-frame [content]
+  ;; TODO: deduplicate print frames
+  (let [styles (:A5PrintFrame (css/modules))]
+    (h/html
+     [:div {:class (:cropArea styles)}
+      content])))
+
 (defn a4-print-frame [content]
+  ;; TODO: deduplicate print frames
   (let [styles (:A4PrintFrame (css/modules))]
     (h/html
      [:div {:class (:cropArea styles)}
@@ -104,6 +112,38 @@
                :hx-get (str html/*page-path* "/qr-code/" (:id territory))}]]
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
+
+(defn rural-territory-card [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date]}]
+  ;; TODO: deduplicate with TerritoryCard
+  (let [styles (:RuralTerritoryCard (css/modules))]
+    (a5-print-frame
+     (h/html
+      [:div {:class (:root styles)}
+
+       [:div {:class (:minimap styles)}
+        [:territory-mini-map {:territory-location (:location territory)
+                              :congregation-boundary congregation-boundary
+                              :enclosing-region enclosing-region
+                              :enclosing-minimap-viewport enclosing-minimap-viewport}]]
+
+       [:div {:class (:header styles)}
+        [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
+        [:div {:class (:region styles)} (:region territory)]]
+
+       [:div {:class (:number styles)} (:number territory)]
+
+       [:div {:class (:map styles)}
+        (print-date-notice
+         print-date
+         [:territory-map {:territory-location (:location territory)
+                          :map-raster map-raster
+                          :printout true}])]
+
+       [:div {:class (:qrCode styles)}
+        [:div {:hx-target "this"
+               :hx-swap "outerHTML"
+               :hx-trigger "load"
+               :hx-get (str html/*page-path* "/qr-code/" (:id territory))}]]]))))
 
 (defn neighborhood-card [{:keys [territory map-raster]}]
   (let [styles (:NeighborhoodCard (css/modules))]

@@ -35,6 +35,7 @@
     :fn printout-templates/neighborhood-card
     :type :territory}
    {:id "RuralTerritoryCard"
+    :fn printout-templates/rural-territory-card
     :type :territory}
    {:id "Finland2024TerritoryCard"
     :type :territory}
