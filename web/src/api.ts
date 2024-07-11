@@ -153,7 +153,7 @@ function getEnclosing(innerWkt: string, enclosingCandidateWkts: string[]): strin
   return result;
 }
 
-export function mergeMultiPolygons(multiPolygons: string[]): string | null {
+function mergeMultiPolygons(multiPolygons: string[]): string | null {
   if (isEmpty(multiPolygons)) {
     return null;
   }

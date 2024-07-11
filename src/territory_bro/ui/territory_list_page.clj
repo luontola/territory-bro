@@ -6,6 +6,7 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [territory-bro.api :as api]
+            [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.json :as json]
             [territory-bro.ui.css :as css]
@@ -16,9 +17,13 @@
   (:import (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
 (defn model! [request {:keys [fetch-loans?]}]
-  (let [congregation (:body (api/get-congregation request {:fetch-loans? fetch-loans?}))]
-    {:congregation-boundaries (->> (:congregationBoundaries congregation)
-                                   (map :location))
+  (let [congregation (:body (api/get-congregation request {:fetch-loans? fetch-loans?}))
+        congregation-boundary (->> (:congregationBoundaries congregation)
+                                   (mapv (comp geometry/parse-wkt :location))
+                                   ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
+                                   (geometry/union)
+                                   (str))]
+    {:congregation-boundary congregation-boundary
      :territories (:territories congregation)
      :has-loans? (some? (:loansCsvUrl congregation))
      :permissions (:permissions congregation)}))
@@ -42,12 +47,12 @@
            (h/raw)))])))
 
 
-(defn territory-list-map [{:keys [congregation-boundaries territories]}]
+(defn territory-list-map [{:keys [congregation-boundary territories]}]
   (h/html
    [:territory-list-map
     [:template.json-data
      (json/write-value-as-string
-      {:congregationBoundaries congregation-boundaries
+      {:congregationBoundary congregation-boundary
        :territories (map #(select-keys % [:id :number :location :loaned :staleness])
                          territories)})]]))
 

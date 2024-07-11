@@ -18,7 +18,7 @@ import {
   wktToFeature,
   wktToFeatures
 } from "./mapOptions";
-import {Congregation, mergeMultiPolygons, Territory} from "../api";
+import {Congregation, Territory} from "../api";
 import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
 import {isEmpty as isEmptyExtent} from "ol/extent";
 import {getPageState, setPageState} from "../util";
@@ -89,12 +89,12 @@ export class TerritoryListMapElement extends OpenLayersMapElement {
   createMap({root}) {
     const jsonData = this.querySelector("template.json-data") as HTMLTemplateElement | null;
     const data = JSON.parse(jsonData?.content.textContent ?? "{}");
-    const congregationBoundaries = data.congregationBoundaries ?? [];
+    const congregationBoundary = data.congregationBoundary;
     const territories = data.territories ?? [];
     const visibleTerritories: string[] = JSON.parse(this.getAttribute("visible-territories") ?? "[]");
 
     const congregation = {
-      location: mergeMultiPolygons(congregationBoundaries)
+      location: congregationBoundary
     } as Congregation;
     const onClick = (territoryId: string) => {
       document.location.href = `${document.location.pathname}/${territoryId}`

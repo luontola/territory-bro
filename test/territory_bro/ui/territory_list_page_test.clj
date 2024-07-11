@@ -10,6 +10,7 @@
             [territory-bro.api-test :as at]
             [territory-bro.domain.loan :as loan]
             [territory-bro.domain.testdata :as testdata]
+            [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
@@ -20,7 +21,7 @@
   (:import (java.util UUID)))
 
 (def model
-  {:congregation-boundaries [testdata/wkt-helsinki]
+  {:congregation-boundary (str (geometry/parse-wkt testdata/wkt-helsinki))
    :territories [{:id (UUID. 0 1)
                   :number "123"
                   :addresses "the addresses"
@@ -40,7 +41,7 @@
                                                          :staleness 7}))
 (def anonymous-model
   (assoc model
-         :congregation-boundaries []
+         :congregation-boundary ""
          :permissions {}))
 
 (deftest ^:slow model!-test
