@@ -71,6 +71,40 @@
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
 
+(defn territory-card-map-only [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date]}]
+  ;; TODO: deduplicate with TerritoryCard
+  (let [styles (:TerritoryCardMapOnly (css/modules))]
+    (crop-marks
+     (h/html
+      [:div {:class (:root styles)}
+
+       [:div {:class (:minimap styles)}
+        [:territory-mini-map {:territory (:location territory)
+                              :congregation-boundary congregation-boundary
+                              :enclosing-region enclosing-region
+                              :enclosing-minimap-viewport enclosing-minimap-viewport}]]
+
+       [:div {:class (:header styles)}
+        [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
+        [:div {:class (:region styles)} (:region territory)]]
+
+       [:div {:class (:number styles)} (:number territory)]
+
+       [:div {:class (:map styles)}
+        (print-date-notice
+         print-date
+         [:territory-map {:territory (:location territory)
+                          :map-raster map-raster
+                          :printout true}])]
+
+       [:div {:class (:qrCode styles)}
+        [:div {:hx-target "this"
+               :hx-swap "outerHTML"
+               :hx-trigger "load"
+               :hx-get (str html/*page-path* "/qr-code/" (:id territory))}]]
+
+       [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
+
 (defn region-printout [{:keys [region territories map-raster print-date]}]
   (let [styles (:RegionPrintout (css/modules))]
     (a4-print-frame

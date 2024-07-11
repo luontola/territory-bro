@@ -66,6 +66,33 @@
       (is (str/includes? html "map-raster=\"osmhd\""))
       (is (str/includes? html "hx-get=\"page-url/qr-code/00000000-0000-0000-0000-000000000001\"")))))
 
+(deftest territory-card-map-only-test
+  (testing "no data"
+    (is (= (html/normalize-whitespace
+            "Territory Map Card
+             Printed with TerritoryBro.com
+             Please keep this card in the envelope. Do not soil, mark or bend it.
+             Each time the territory is covered, please inform the brother who cares for the territory files.")
+           (-> (printout-templates/territory-card-map-only nil)
+               html/visible-text))))
+
+  (testing "full data"
+    (let [html (printout-templates/territory-card-map-only territory-printout-model)]
+      (is (= (html/normalize-whitespace
+              "Territory Map Card
+               The Region
+               123
+               Printed 2024-07-10 with TerritoryBro.com
+               Please keep this card in the envelope. Do not soil, mark or bend it.
+               Each time the territory is covered, please inform the brother who cares for the territory files.")
+             (html/visible-text html)))
+      (is (str/includes? html "territory=\"MULTIPOLYGON(territory)\""))
+      (is (str/includes? html "congregation-boundary=\"MULTIPOLYGON(congregation boundary)\""))
+      (is (str/includes? html "enclosing-region=\"MULTIPOLYGON(region)\""))
+      (is (str/includes? html "enclosing-minimap-viewport=\"POLYGON(minimap viewport)\""))
+      (is (str/includes? html "map-raster=\"osmhd\""))
+      (is (str/includes? html "hx-get=\"page-url/qr-code/00000000-0000-0000-0000-000000000001\"")))))
+
 (deftest region-printout-test
   (testing "no data"
     (is (= "Printed with TerritoryBro.com"
