@@ -15,7 +15,6 @@ import QrCodeOnly from "./QrCodeOnly";
 import {usePageState} from "../util";
 import {I18nextProvider, useTranslation} from "react-i18next";
 import {isolatedI18nInstance, languages} from "../i18n.ts";
-import Finland2024TerritoryCard from "./Finland2024TerritoryCard.tsx";
 
 const templates = [{
   id: 'TerritoryCard',
@@ -32,10 +31,6 @@ const templates = [{
 }, {
   id: 'RuralTerritoryCard',
   component: RuralTerritoryCard,
-  type: 'territory'
-}, {
-  id: 'Finland2024TerritoryCard',
-  component: Finland2024TerritoryCard,
   type: 'territory'
 }, {
   id: 'QrCodeOnly',

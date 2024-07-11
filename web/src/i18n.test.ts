@@ -8,12 +8,10 @@ import i18n, {languages} from "./i18n.ts";
 import readme from "./locales/README.md?raw";
 import {sortBy} from "lodash-es";
 
-const notTranslatedKeys = new Set(["translation.PrintoutPage.templates.Finland2024TerritoryCard"]);
-
 describe("i18n", () => {
   describe("all languages contain the same translation keys", () => {
     const englishData = i18n.getDataByLanguage("en");
-    const englishKeys = getAllKeyPaths(englishData).sort().filter(k => !notTranslatedKeys.has(k));
+    const englishKeys = getAllKeyPaths(englishData).sort();
     languages.forEach(language => {
       it(`${language.code} ${language.englishName}`, () => {
         if (language.code === 'en') {

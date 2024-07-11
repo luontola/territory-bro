@@ -55,7 +55,6 @@ PrintoutPage:
     TerritoryCardMapOnly: Territory card, map only
     NeighborhoodCard: Neighborhood map
     RuralTerritoryCard: Rural territory card
-    Finland2024TerritoryCard: 2024 Finland Special Convention
     QrCodeOnly: QR code only (for adding them as stickers to old cards)
     RegionPrintout: Region map
 SettingsPage:
