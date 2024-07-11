@@ -59,7 +59,7 @@
                Please keep this card in the envelope. Do not soil, mark or bend it.
                Each time the territory is covered, please inform the brother who cares for the territory files.")
              (html/visible-text html)))
-      (is (str/includes? html "territory=\"MULTIPOLYGON(territory)\""))
+      (is (str/includes? html "territory-location=\"MULTIPOLYGON(territory)\""))
       (is (str/includes? html "congregation-boundary=\"MULTIPOLYGON(congregation boundary)\""))
       (is (str/includes? html "enclosing-region=\"MULTIPOLYGON(region)\""))
       (is (str/includes? html "enclosing-minimap-viewport=\"POLYGON(minimap viewport)\""))
@@ -86,7 +86,7 @@
                Please keep this card in the envelope. Do not soil, mark or bend it.
                Each time the territory is covered, please inform the brother who cares for the territory files.")
              (html/visible-text html)))
-      (is (str/includes? html "territory=\"MULTIPOLYGON(territory)\""))
+      (is (str/includes? html "territory-location=\"MULTIPOLYGON(territory)\""))
       (is (str/includes? html "congregation-boundary=\"MULTIPOLYGON(congregation boundary)\""))
       (is (str/includes? html "enclosing-region=\"MULTIPOLYGON(region)\""))
       (is (str/includes? html "enclosing-minimap-viewport=\"POLYGON(minimap viewport)\""))
@@ -105,6 +105,6 @@
               "The Region
                Printed 2024-07-10 with TerritoryBro.com")
              (html/visible-text html)))
-      (is (str/includes? html "region=\"MULTIPOLYGON(region)\""))
+      (is (str/includes? html "region-location=\"MULTIPOLYGON(region)\""))
       (is (str/includes? html "territories=\"[{&quot;number&quot;:&quot;123&quot;,&quot;location&quot;:&quot;MULTIPOLYGON(territory)&quot;}]\""))
       (is (str/includes? html "map-raster=\"osmhd\"")))))

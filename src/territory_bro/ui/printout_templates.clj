@@ -43,7 +43,7 @@
       [:div {:class (:root styles)}
 
        [:div {:class (:minimap styles)}
-        [:territory-mini-map {:territory (:location territory)
+        [:territory-mini-map {:territory-location (:location territory)
                               :congregation-boundary congregation-boundary
                               :enclosing-region enclosing-region
                               :enclosing-minimap-viewport enclosing-minimap-viewport}]]
@@ -57,7 +57,7 @@
        [:div {:class (:map styles)}
         (print-date-notice
          print-date
-         [:territory-map {:location (:location territory)
+         [:territory-map {:territory-location (:location territory)
                           :map-raster map-raster
                           :printout true}])]
 
@@ -79,7 +79,7 @@
       [:div {:class (:root styles)}
 
        [:div {:class (:minimap styles)}
-        [:territory-mini-map {:territory (:location territory)
+        [:territory-mini-map {:territory-location (:location territory)
                               :congregation-boundary congregation-boundary
                               :enclosing-region enclosing-region
                               :enclosing-minimap-viewport enclosing-minimap-viewport}]]
@@ -93,7 +93,7 @@
        [:div {:class (:map styles)}
         (print-date-notice
          print-date
-         [:territory-map {:territory (:location territory)
+         [:territory-map {:territory-location (:location territory)
                           :map-raster map-raster
                           :printout true}])]
 
@@ -114,7 +114,7 @@
        [:div {:class (:map styles)}
         (print-date-notice
          print-date
-         [:region-map {:region (:location region)
+         [:region-map {:region-location (:location region)
                        :territories territories
                        :map-raster map-raster
                        :printout true}])]]))))

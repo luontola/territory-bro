@@ -46,7 +46,7 @@ export default class TerritoryMiniMap extends OpenLayersMap<Props> {
 export class TerritoryMiniMapElement extends OpenLayersMapElement {
   createMap({root}) {
     const territory = {
-      location: this.getAttribute("territory"),
+      location: this.getAttribute("territory-location"),
       enclosingMinimapViewport: this.getAttribute("enclosing-minimap-viewport"),
       enclosingRegion: this.getAttribute("enclosing-region"),
     };
