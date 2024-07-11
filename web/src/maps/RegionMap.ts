@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -19,7 +19,7 @@ import {
   wktToFeatures
 } from "./mapOptions";
 import {Congregation, Region, Territory} from "../api";
-import OpenLayersMap from "./OpenLayersMap";
+import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
 
 type Props = {
   region: Region | Congregation;
@@ -56,6 +56,17 @@ export default class RegionMap extends OpenLayersMap<Props> {
 
   componentWillUnmount() {
     this.map.unmount()
+  }
+}
+
+export class RegionMapElement extends OpenLayersMapElement {
+
+  createMap({root, mapRaster}) {
+    const region = {location: this.getAttribute("region")};
+    const territories = JSON.parse(this.getAttribute("territories") ?? "[]");
+    const map = initRegionMap(root, region as Region, territories);
+    map.setStreetsLayerRaster(mapRaster);
+    return map
   }
 }
 

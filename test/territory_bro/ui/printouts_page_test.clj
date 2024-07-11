@@ -122,7 +122,22 @@
              (-> (printouts-page/view default-model)
                  html/visible-text))))
 
-    (testing "region printout") ; TODO
+    (testing "region printout"
+      (is (= (html/normalize-whitespace
+              "Printouts
+
+               Print options
+                 Template [Region map]
+                 Language [English]
+                 Background map [World - OpenStreetMap]
+                 Regions [Example Congregation]
+                 Territories [123 - the region]
+
+               Example Congregation
+                 Printed 2000-12-31 with TerritoryBro.com"
+              map-interaction-help-test/default-visible-text)
+             (-> (printouts-page/view (assoc-in default-model [:form :template] "RegionPrintout"))
+                 html/visible-text))))
 
     (binding [printouts-page/*clock* (Clock/offset printouts-page/*clock* (Duration/ofMinutes 1))]
       (testing "print date uses the congregation timezone"

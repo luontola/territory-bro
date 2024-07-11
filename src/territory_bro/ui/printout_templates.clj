@@ -21,6 +21,12 @@
       [:div {:class (:bottomLeft styles)} image]
       [:div {:class (:bottomRight styles)} image]])))
 
+(defn a4-print-frame [content]
+  (let [styles (:A4PrintFrame (css/modules))]
+    (h/html
+     [:div {:class (:cropArea styles)}
+      content])))
+
 (defn print-date-notice [^LocalDate print-date content]
   (let [styles (:PrintDateNotice (css/modules))]
     (h/html
@@ -64,3 +70,17 @@
         (:addresses territory)]
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
+
+(defn region-printout [{:keys [region territories map-raster print-date]}]
+  (let [styles (:RegionPrintout (css/modules))]
+    (a4-print-frame
+     (h/html
+      [:div {:class (:root styles)}
+       [:div {:class (:name styles)} (:name region)]
+       [:div {:class (:map styles)}
+        (print-date-notice
+         print-date
+         [:region-map {:region (:location region)
+                       :territories territories
+                       :map-raster map-raster
+                       :printout true}])]]))))

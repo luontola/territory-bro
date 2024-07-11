@@ -31,7 +31,12 @@
    :map-raster "osmhd"
    :print-date (LocalDate/of 2024 7 10)})
 
-(def region-printout-model) ; TODO
+(def region-printout-model
+  {:region {:name "The Region"
+            :location "MULTIPOLYGON(region)"}
+   :territories "[{\"number\":\"123\",\"location\":\"MULTIPOLYGON(territory)\"}]"
+   :map-raster "osmhd"
+   :print-date (LocalDate/of 2024 7 10)})
 
 (deftest territory-card-test
   (testing "no data"
@@ -60,3 +65,19 @@
       (is (str/includes? html "enclosing-minimap-viewport=\"POLYGON(minimap viewport)\""))
       (is (str/includes? html "map-raster=\"osmhd\""))
       (is (str/includes? html "hx-get=\"page-url/qr-code/00000000-0000-0000-0000-000000000001\"")))))
+
+(deftest region-printout-test
+  (testing "no data"
+    (is (= "Printed with TerritoryBro.com"
+           (-> (printout-templates/region-printout nil)
+               html/visible-text))))
+
+  (testing "full data"
+    (let [html (printout-templates/region-printout region-printout-model)]
+      (is (= (html/normalize-whitespace
+              "The Region
+               Printed 2024-07-10 with TerritoryBro.com")
+             (html/visible-text html)))
+      (is (str/includes? html "region=\"MULTIPOLYGON(region)\""))
+      (is (str/includes? html "territories=\"[{&quot;number&quot;:&quot;123&quot;,&quot;location&quot;:&quot;MULTIPOLYGON(territory)&quot;}]\""))
+      (is (str/includes? html "map-raster=\"osmhd\"")))))

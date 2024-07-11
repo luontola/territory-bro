@@ -39,6 +39,7 @@
    {:id "QrCodeOnly"
     :type :territory}
    {:id "RegionPrintout"
+    :fn printout-templates/region-printout
     :type :region}])
 
 (def map-rasters
@@ -90,7 +91,8 @@
         template (->> templates
                       (filter #(= (:template form) (:id %)))
                       (first))
-        print-date (LocalDate/now (.withZone *clock* (:timezone congregation)))]
+        print-date (LocalDate/now (.withZone *clock* (:timezone congregation)))
+        congregation-and-regions (concat [congregation] regions)]
     (h/html
      [:div.no-print
       [:h1 (i18n/t "PrintoutPage.title")]
@@ -145,7 +147,7 @@
           [:select#regions.pure-input-1 {:name "regions"
                                          :multiple true
                                          :size "7"}
-           (for [{:keys [id name]} (concat [congregation] regions)]
+           (for [{:keys [id name]} congregation-and-regions]
              [:option {:value id
                        :selected (contains? (:regions form) id)}
               name])]]]
@@ -165,22 +167,35 @@
                 (str " - " region))])]]]]]]
 
      [:div#printouts {:lang printout-lang}
-      (let [region-boundaries (mapv (comp geometry/parse-wkt :location) regions)
-            minimap-viewport-boundaries (mapv geometry/parse-wkt card-minimap-viewports)]
-        (for [territory territories
-              :when (contains? (:territories form) (:id territory))]
-          (binding [i18n/*lang* printout-lang]
-            (let [template-fn (:fn template)
-                  territory-boundary (geometry/parse-wkt (:location territory))
-                  enclosing-region (str (geometry/find-enclosing territory-boundary region-boundaries))
-                  enclosing-minimap-viewport (str (geometry/find-enclosing territory-boundary minimap-viewport-boundaries))]
-              (when template-fn
-                (template-fn {:territory territory
-                              :congregation-boundary (:location congregation)
-                              :enclosing-region enclosing-region
-                              :enclosing-minimap-viewport enclosing-minimap-viewport
-                              :map-raster (:mapRaster form)
-                              :print-date print-date}))))))]
+      (when-some [template-fn (:fn template)]
+        (binding [i18n/*lang* printout-lang]
+          (doall ; binding needs eager evaluation
+           (case (:type template)
+             :territory
+             (let [region-boundaries (mapv (comp geometry/parse-wkt :location) regions)
+                   minimap-viewport-boundaries (mapv geometry/parse-wkt card-minimap-viewports)]
+               (for [territory territories
+                     :when (contains? (:territories form) (:id territory))]
+                 (let [territory-boundary (geometry/parse-wkt (:location territory))
+                       enclosing-region (str (geometry/find-enclosing territory-boundary region-boundaries))
+                       enclosing-minimap-viewport (str (geometry/find-enclosing territory-boundary minimap-viewport-boundaries))]
+                   (template-fn {:territory territory
+                                 :congregation-boundary (:location congregation)
+                                 :enclosing-region enclosing-region
+                                 :enclosing-minimap-viewport enclosing-minimap-viewport
+                                 :map-raster (:mapRaster form)
+                                 :print-date print-date}))))
+
+             :region
+             (let [territories (->> territories
+                                    (mapv #(select-keys % [:number :location]))
+                                    (json/write-value-as-string))] ; for improved performance, avoid serializing multiple times
+               (for [region congregation-and-regions
+                     :when (contains? (:regions form) (:id region))]
+                 (template-fn {:region region
+                               :territories territories
+                               :map-raster (:mapRaster form)
+                               :print-date print-date})))))))]
 
      [:div.no-print
       (map-interaction-help/view model)])))
