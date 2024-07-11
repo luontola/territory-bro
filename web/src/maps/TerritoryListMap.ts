@@ -60,10 +60,6 @@ export default class TerritoryListMap extends OpenLayersMap<Props> {
 export class TerritoryListMapElement extends OpenLayersMapElement {
   static observedAttributes = ['visible-territories'];
 
-  constructor() {
-    super();
-  }
-
   connectedCallback() {
     const onTerritorySearch = window.onTerritorySearch;
     if (onTerritorySearch) {

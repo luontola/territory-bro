@@ -62,10 +62,6 @@ export default class TerritoryMap extends OpenLayersMap<Props> {
 }
 
 export class TerritoryMapElement extends OpenLayersMapElement {
-  constructor() {
-    super();
-  }
-
   createMap({root, printout, mapRaster}) {
     const location = this.getAttribute("location");
     const map = initTerritoryMap(root, {location} as Territory, printout)

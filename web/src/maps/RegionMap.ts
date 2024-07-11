@@ -60,7 +60,6 @@ export default class RegionMap extends OpenLayersMap<Props> {
 }
 
 export class RegionMapElement extends OpenLayersMapElement {
-
   createMap({root, mapRaster}) {
     const region = {location: this.getAttribute("region")};
     const territories = JSON.parse(this.getAttribute("territories") ?? "[]");

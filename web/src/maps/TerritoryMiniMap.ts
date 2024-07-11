@@ -44,10 +44,6 @@ export default class TerritoryMiniMap extends OpenLayersMap<Props> {
 }
 
 export class TerritoryMiniMapElement extends OpenLayersMapElement {
-  constructor() {
-    super();
-  }
-
   createMap({root}) {
     const territory = {
       location: this.getAttribute("territory"),

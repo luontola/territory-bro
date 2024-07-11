@@ -33,10 +33,6 @@ export default class OpenLayersMap<P extends Props> extends React.Component<P> {
 export abstract class OpenLayersMapElement extends HTMLElement {
   map;
 
-  constructor() {
-    super();
-  }
-
   connectedCallback() {
     const mapRaster = findMapRasterById(this.getAttribute("map-raster") ?? mapRasters[0].id) ?? mapRasters[0];
     const printout = this.getAttribute("printout") !== null;
