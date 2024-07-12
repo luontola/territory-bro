@@ -14,7 +14,7 @@ services:
       SUPPORT_EMAIL: support@example.com
       DATABASE_URL: jdbc:postgresql://db:5432/territorybro?user=territorybro&password=territorybro
       GIS_DATABASE_HOST: localhost
-    mem_reservation: 300m
+    mem_reservation: 500m
     mem_limit: 500m
     ports:
       - "127.0.0.1:8080:8080"
@@ -28,7 +28,7 @@ services:
     volumes:
       - postgres-storage:/var/lib/postgresql/data
       - ./postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql
-    mem_reservation: 100m
+    mem_reservation: 250m
     mem_limit: 500m
     ports:
       - "127.0.0.1:5432:5432"

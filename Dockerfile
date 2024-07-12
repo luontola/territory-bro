@@ -20,4 +20,8 @@ RUN java -Xshare:dump \
     rm classes.list
 
 USER app
-ENTRYPOINT ["java", "-Xshare:on", "-XX:SharedArchiveFile=classes.jsa", "-jar", "territory-bro.jar"]
+ENTRYPOINT ["java", \
+            "-Xshare:on", "-XX:SharedArchiveFile=classes.jsa", \
+            "-XX:InitialRAMPercentage=70", "-XX:MaxRAMPercentage=70", \
+            "-XX:+PrintCommandLineFlags", \
+            "-jar", "territory-bro.jar"]
