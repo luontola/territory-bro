@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.middleware
-  (:require [clojure.tools.logging :as log]
+  (:require [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [ring-ttl-session.core :as ttl-session]
             [ring.logger :as logger]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
@@ -75,6 +76,27 @@
         (refresh-projections!))
       resp)))
 
+(defn- static-asset? [path]
+  (or (str/starts-with? path "/assets/")
+      (= "/favicon.ico" path)))
+
+(defn- content-hashed? [path]
+  (some? (re-find #"-[0-9a-f]{8,40}\.\w+$" path)))
+
+(defn wrap-cache-control [handler]
+  (fn [request]
+    (let [response (handler request)
+          path (:uri request)]
+      (if (some? (response/get-header response "cache-control"))
+        response
+        (response/header response "Cache-Control"
+                         (if (and (= 200 (:status response))
+                                  (static-asset? path))
+                           (if (content-hashed? path)
+                             "public, max-age=2592000, immutable"
+                             "public, max-age=3600, stale-while-revalidate=86400")
+                           "private, no-cache"))))))
+
 (defn wrap-base [handler]
   (-> handler
       wrap-auto-refresh-projections
@@ -90,4 +112,5 @@
                          (assoc-in [:security :anti-forgery] false) ; TODO: enable CSRF, create a custom error page for it
                          (assoc-in [:session :store] session-store)
                          (assoc-in [:session :flash] false)))
+      wrap-cache-control
       wrap-internal-error))
