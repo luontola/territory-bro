@@ -171,6 +171,50 @@
         (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string "Etusivu"}])))))
 
 
+(deftest demo-test
+  (with-per-test-postmortem
+    (testing "view demo congregation"
+      (doto *driver*
+        (b/go *base-url*)
+        (wait-and-click {:tag :a, :fn/has-string "View a demo"})
+        (b/wait-has-text h1 "Demo Congregation")))
+
+    (testing "view territories list"
+      (doto *driver*
+        (wait-and-click [{:tag :nav} {:tag :a, :fn/has-string "Territories"}])
+        (b/wait-has-text h1 "Territories")))
+
+    (testing "view one territory"
+      (doto *driver*
+        (wait-and-click [:territory-list {:tag :a}])
+        (b/wait-has-text h1 "Territory")))
+
+    (testing "share a link"
+      (doto *driver*
+        (wait-and-click {:tag :button, :fn/has-string "Share a link"})
+        (wait-and-click :copy-share-link))
+      (let [original-url (b/get-url *driver*)
+            share-link (b/js-execute *driver* "return window.latestCopyToClipboard")]
+        (is (str/includes? share-link "/share/demo-")
+            "generates a demo share link")
+
+        (testing "- open the share"
+          (doto *driver*
+            (b/go "about:blank")
+            (b/go share-link))
+          (is (= original-url (b/get-url *driver*))))))
+
+    (testing "view printouts"
+      (doto *driver*
+        (wait-and-click [{:tag :nav} {:tag :a, :fn/has-string "Printouts"}])
+        (b/wait-has-text h1 "Printouts")))
+
+    (testing "view support page"
+      (doto *driver*
+        (wait-and-click [{:tag :nav} {:tag :a, :fn/has-string "Support"}])
+        (b/wait-has-text h1 "Support")))))
+
+
 (deftest registration-test
   (with-per-test-postmortem
     (let [nonce (System/currentTimeMillis)
