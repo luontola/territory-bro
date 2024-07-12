@@ -212,7 +212,13 @@
     (testing "view support page"
       (doto *driver*
         (wait-and-click [{:tag :nav} {:tag :a, :fn/has-string "Support"}])
-        (b/wait-has-text h1 "Support")))))
+        (b/wait-has-text h1 "Support")))
+
+    (testing "cannot view settings"
+      (doto *driver*
+        (b/go (-> (b/get-url *driver*)
+                  (str/replace "support" "settings")))
+        (b/wait-has-text h1 "Page not found")))))
 
 
 (deftest registration-test

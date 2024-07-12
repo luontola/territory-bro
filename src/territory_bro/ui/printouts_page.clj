@@ -53,12 +53,18 @@
   (if (string? value)
     (parse-uuid-multiselect [value])
     (into #{}
-          (comp (map parse-uuid)
+          (comp (map (fn [s]
+                       (when-not (str/blank? s)
+                         (or (parse-uuid s)
+                             s)))) ; cong-id can be "demo"
                 (filter some?))
           value)))
 
 (defn model! [request]
-  (let [congregation (:body (api/get-congregation request {}))
+  (let [demo? (= "demo" (get-in request [:params :congregation]))
+        congregation (:body (if demo?
+                              (api/get-demo-congregation request)
+                              (api/get-congregation request {})))
         regions (->> (:regions congregation)
                      (sort-by (comp str :name)
                               (CaseInsensitiveSimpleNaturalComparator/getInstance)))

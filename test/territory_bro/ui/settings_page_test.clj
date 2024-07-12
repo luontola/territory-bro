@@ -10,6 +10,7 @@
             [territory-bro.api-test :as at]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.forms :as forms]
@@ -44,6 +45,16 @@
 
       (testing "logged in"
         (is (= model (settings-page/model! request))))
+
+      (testing "demo congregation"
+        (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+          (let [request {:params {:congregation "demo"}}]
+            (is (thrown-match? ExceptionInfo
+                               {:type :ring.util.http-response/response
+                                :response {:status 404
+                                           :body "Not available in demo"
+                                           :headers {}}}
+                               (settings-page/model! request))))))
 
       (testing "anonymous user"
         (is (thrown-match? ExceptionInfo

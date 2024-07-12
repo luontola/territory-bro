@@ -12,6 +12,7 @@
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui :as ui]
@@ -39,6 +40,10 @@
 (def model-loans-fetched
   (update-in model-loans-enabled [:territories 0] merge {:loaned true
                                                          :staleness 7}))
+(def demo-model
+  (assoc model
+         :permissions {:shareTerritoryLink true
+                       :viewCongregation true}))
 (def anonymous-model
   (assoc model
          :congregation-boundary ""
@@ -52,14 +57,19 @@
           cong-id (at/create-congregation! session "foo")
           _ (at/create-congregation-boundary! cong-id)
           territory-id (at/create-territory! cong-id)
-          request {:params {:congregation (str cong-id)
-                            :territory (str territory-id)}
+          request {:params {:congregation (str cong-id)}
                    :session {::auth/user {:user/id user-id}}}
           fix #(replace-in % [:territories 0 :id] (UUID. 0 1) territory-id)]
 
       (testing "default"
         (is (= (fix model)
                (territory-list-page/model! request {}))))
+
+      (testing "demo congregation"
+        (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+          (let [request {:params {:congregation "demo"}}]
+            (is (= (fix demo-model)
+                   (territory-list-page/model! request {}))))))
 
       (testing "anonymous user, has opened a share"
         (at/create-share! cong-id territory-id "share123")

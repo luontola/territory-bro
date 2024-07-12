@@ -1,4 +1,4 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -10,11 +10,16 @@ import {useParams} from "react-router-dom";
 import {useCongregationById} from "../api.ts";
 import styles from "./SettingsPage.module.css";
 import PageTitle from "../layout/PageTitle.tsx";
+import NotFoundPage from "./NotFoundPage.tsx";
+import React from "react";
 
 const SettingsPage = ({}) => {
   const {t} = useTranslation();
   const {congregationId} = useParams()
   const congregation = useCongregationById(congregationId);
+  if (congregationId === "demo") {
+    return <NotFoundPage/>;
+  }
   return <>
     <PageTitle title={t('SettingsPage.title')}/>
     <div className={styles.sections}>

@@ -17,7 +17,10 @@
   (:import (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
 (defn model! [request {:keys [fetch-loans?]}]
-  (let [congregation (:body (api/get-congregation request {:fetch-loans? fetch-loans?}))
+  (let [demo? (= "demo" (get-in request [:params :congregation]))
+        congregation (:body (if demo?
+                              (api/get-demo-congregation request)
+                              (api/get-congregation request {:fetch-loans? fetch-loans?})))
         congregation-boundary (->> (:congregationBoundaries congregation)
                                    (mapv (comp geometry/parse-wkt :location))
                                    ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID

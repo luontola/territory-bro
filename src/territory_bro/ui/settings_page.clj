@@ -19,7 +19,10 @@
   (:import (java.util UUID)))
 
 (defn model! [request]
-  (let [congregation (:body (api/get-congregation request {}))
+  (let [demo? (= "demo" (get-in request [:params :congregation]))
+        congregation (:body (if demo?
+                              (http-response/not-found! "Not available in demo")
+                              (api/get-congregation request {})))
         new-user (some-> (get-in request [:params :new-user])
                          (parse-uuid))]
     {:congregation/name (or (get-in request [:params :congregationName])

@@ -10,7 +10,9 @@
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.printouts-page :as printouts-page])
@@ -49,6 +51,12 @@
                 :territories #{(UUID. 0 6)
                                (UUID. 0 7)}}))
 
+(def demo-model
+  (-> default-model
+      (replace-in [:congregation :id] (UUID. 0 1) "demo")
+      (replace-in [:congregation :name] "Example Congregation" "Demo Congregation")
+      (replace-in [:form :regions] #{(UUID. 0 1)} #{"demo"})))
+
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
     ;; TODO: decouple this test from the database
@@ -80,11 +88,18 @@
                                                      :territories [(str (UUID. 0 6))
                                                                    (str (UUID. 0 7))]})]
           (is (= (fix form-changed-model)
-                 (printouts-page/model! request))))))))
+                 (printouts-page/model! request)))))
+
+      (testing "demo congregation"
+        (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+          (let [request {:params {:congregation "demo"}}]
+            (is (= (fix demo-model)
+                   (printouts-page/model! request)))))))))
 
 (deftest parse-uuid-multiselect-test
   (is (= #{} (printouts-page/parse-uuid-multiselect nil)))
   (is (= #{} (printouts-page/parse-uuid-multiselect "")))
+  (is (= #{"demo"} (printouts-page/parse-uuid-multiselect "demo")))
   (is (= #{(UUID. 0 1)}
          (printouts-page/parse-uuid-multiselect "00000000-0000-0000-0000-000000000001")))
   (is (= #{(UUID. 0 1)

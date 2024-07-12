@@ -11,7 +11,10 @@
             [territory-bro.ui.visible :as visible]))
 
 (defn model! [request]
-  (let [congregation (:body (api/get-congregation request {}))]
+  (let [demo? (= "demo" (get-in request [:params :congregation]))
+        congregation (:body (if demo?
+                              (api/get-demo-congregation request)
+                              (api/get-congregation request {})))]
     {:name (:name congregation)
      :permissions (:permissions congregation)}))
 
