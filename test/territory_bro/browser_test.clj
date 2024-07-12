@@ -53,24 +53,27 @@
 
 (def h1 {:tag :h1})
 
+(defn wait-and-click [driver q]
+  (doto driver
+    (b/wait-visible q)
+    (b/click q)))
+
 (defn submit-auth0-login-form [driver]
   (doto driver
     (b/wait-visible :username)
     (b/fill :username auth0-username)
     (b/fill :password auth0-password)
-    (b/click {:css "button[type=submit]"})))
+    (wait-and-click {:css "button[type=submit]"})))
 
 (defn do-auth0-login [driver]
   (doto driver
-    (b/wait-visible :login-button)
-    (b/click :login-button)
+    (wait-and-click :login-button)
     (submit-auth0-login-form)
     (b/wait-visible :logout-button)))
 
 (defn do-dev-login [driver]
   (doto driver
-    (b/wait-visible :dev-login-button)
-    (b/click :dev-login-button)
+    (wait-and-click :dev-login-button)
     (b/wait-visible :logout-button)))
 
 (defn dev-login-as [driver name]
@@ -96,20 +99,18 @@
         _ (b/wait-visible driver link)
         congregation-name (b/get-element-text driver link)]
     (doto driver
-      (b/click link)
+      (wait-and-click link)
       (b/wait-has-text h1 congregation-name))))
 
 (defn go-to-page [driver title]
   (let [link {:tag :a, :fn/has-string title}]
     (doto driver
-      (b/wait-visible link)
-      (b/click link)
+      (wait-and-click link)
       (b/wait-has-text h1 title))))
 
 (defn go-to-territory [driver territory-number]
   (doto driver
-    (b/wait-visible :territory-list)
-    (b/click [:territory-list {:tag :a, :fn/text territory-number}])
+    (wait-and-click [:territory-list {:tag :a, :fn/text territory-number}])
     (b/wait-has-text h1 (str "Territory " territory-number))))
 
 
@@ -131,7 +132,7 @@
 
       (testing "logout"
         (doto *driver*
-          (b/click :logout-button)
+          (wait-and-click :logout-button)
           (b/wait-visible :login-button)))
 
       (testing "shows the user is logged out"
@@ -165,8 +166,8 @@
 
     (testing "user can change the language"
       (doto *driver*
-        (b/click :language-selection)
-        (b/click [:language-selection {:tag :option, :fn/has-string "suomi - Finnish"}])
+        (wait-and-click :language-selection)
+        (wait-and-click [:language-selection {:tag :option, :fn/has-string "suomi - Finnish"}])
         (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string "Etusivu"}])))))
 
 
@@ -185,7 +186,7 @@
           (go-to-page "Register a new congregation")
 
           (b/fill :congregation-name congregation-name)
-          (b/click {:tag :button, :fn/text "Register"})
+          (wait-and-click {:tag :button, :fn/text "Register"})
 
           ;; we should arrive at the newly created congregation's front page
           (b/wait-has-text h1 congregation-name))
@@ -211,7 +212,7 @@
           (go-to-page "Settings")
 
           (b/fill [:users-section :user-id] @*user2-id)
-          (b/click [:users-section {:tag :button, :fn/text "Add user"}])
+          (wait-and-click [:users-section {:tag :button, :fn/text "Add user"}])
           (b/wait-visible [:users-section {:tag :tr, :fn/has-string user2}])))
 
       (testing "user2 can view congregation after being added"
@@ -227,7 +228,7 @@
           (b/wait-has-text h1 congregation-name)
           (go-to-page "Settings")
 
-          (b/click [:users-section {:tag :tr, :fn/has-string user2} {:tag :button, :fn/text "Remove user"}])
+          (wait-and-click [:users-section {:tag :tr, :fn/has-string user2} {:tag :button, :fn/text "Remove user"}])
           (b/wait-invisible [:users-section {:tag :tr, :fn/has-string user2}])))
 
       (testing "user2 cannot view congregation after being removed"
@@ -262,9 +263,8 @@
       (go-to-territory *driver* (:number shared-territory))
 
       (doto *driver*
-        (b/click {:tag :button, :fn/has-string "Share a link"})
-        (b/wait-visible :copy-share-link)
-        (b/click :copy-share-link))
+        (wait-and-click {:tag :button, :fn/has-string "Share a link"})
+        (wait-and-click :copy-share-link))
       (let [share-link (b/js-execute *driver* "return window.latestCopyToClipboard")]
         (is (str/starts-with? share-link (str *base-url* "/share/"))
             "generates a share link")
