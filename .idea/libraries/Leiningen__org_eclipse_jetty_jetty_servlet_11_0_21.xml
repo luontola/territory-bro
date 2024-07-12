@@ -4,6 +4,8 @@
       <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-servlet/11.0.21/jetty-servlet-11.0.21.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-servlet/11.0.21/jetty-servlet-11.0.21-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

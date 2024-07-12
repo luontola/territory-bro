@@ -15,14 +15,17 @@
             [territory-bro.projections :as projections])
   (:import (java.net URI)
            (java.net.http HttpClient HttpRequest HttpResponse$BodyHandlers)
-           (org.eclipse.jetty.server Server))
+           (org.eclipse.jetty.server Server)
+           (org.eclipse.jetty.server.handler.gzip GzipHandler))
   (:gen-class))
 
 (mount/defstate ^{:tag Server, :on-reload :noop} http-server
   :start
   (httpd/run-jetty #'router/app
                    {:port (:port config/env)
-                    :join? false})
+                    :join? false
+                    :configurator (fn [^Server server]
+                                    (.insertHandler server (GzipHandler.)))})
   :stop
   (.stop ^Server http-server))
 
