@@ -8,7 +8,9 @@
             [clojure.string :as str]
             [clojure.test :refer :all]
             [etaoin.api :as b]
-            [etaoin.api2 :as b2])
+            [etaoin.api2 :as b2]
+            [reitit.core :as reitit]
+            [territory-bro.ui :as ui])
   (:import (java.util UUID)
            (org.apache.commons.io FileUtils)))
 
@@ -215,10 +217,13 @@
         (b/wait-has-text h1 "Support")))
 
     (testing "cannot view settings"
-      (doto *driver*
-        (b/go (-> (b/get-url *driver*)
-                  (str/replace "support" "settings")))
-        (b/wait-has-text h1 "Page not found")))))
+      (let [settings-path (-> ui/router
+                              (reitit/match-by-name :territory-bro.ui.settings-page/page {:congregation "demo"})
+                              (reitit/match->path))]
+        (is (= "/congregation/demo/settings" settings-path))
+        (doto *driver*
+          (b/go (str *base-url* settings-path))
+          (b/wait-has-text h1 "Page not found"))))))
 
 
 (deftest registration-test

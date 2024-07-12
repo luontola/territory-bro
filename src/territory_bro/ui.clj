@@ -77,4 +77,6 @@
 
    error-page/routes])
 
-(def ring-handler (ring/ring-handler (ring/router routes)))
+(def router (ring/router routes))
+
+(def ring-handler (ring/ring-handler router))
