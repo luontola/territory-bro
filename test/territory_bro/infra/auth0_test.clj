@@ -16,8 +16,7 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.jwt-test :as jwt-test]
-            [territory-bro.test.testutil :refer [replace-in]]
-            [territory-bro.ui :as ui])
+            [territory-bro.test.testutil :refer [replace-in]])
   (:import (com.auth0 AuthenticationController IdentityVerificationException Tokens)
            (java.net URL)
            (java.util UUID)
@@ -57,7 +56,7 @@
   (let [request {:request-method :get
                  :uri "/login"
                  :headers {}}
-        response ((ui/wrap-base-url-compat auth0/login-handler) request)
+        response (auth0/login-handler request)
         location (URL. (response/get-header response "Location"))
         query-params (-> (codec/form-decode (.getQuery location))
                          (update-keys keyword))]
@@ -65,7 +64,7 @@
     (testing "redirects to Auth0"
       (is (http-predicates/see-other? response))
       (is (= "luontola.eu.auth0.com" (.getHost location)))
-      (is (= {:redirect_uri "http://localhost:8081/login-callback"
+      (is (= {:redirect_uri "http://localhost:8080/login-callback"
               :client_id "8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"
               :response_type "code"
               :scope "openid email profile"
@@ -86,12 +85,12 @@
                      :uri "/login"
                      :params {:return-to-url "/some/page?foo=bar&gazonk"}
                      :headers {}}
-            response ((ui/wrap-base-url-compat auth0/login-handler) request)
+            response (auth0/login-handler request)
             location (URL. (response/get-header response "Location"))
             query-params (-> (codec/form-decode (.getQuery location))
                              (update-keys keyword))
             callback-url (:redirect_uri query-params)]
-        (is (= "http://localhost:8081/login-callback?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk"
+        (is (= "http://localhost:8080/login-callback?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk"
                callback-url))))))
 
 
@@ -104,7 +103,7 @@
     (let [request {:request-method :get
                    :scheme :http
                    :server-name "localhost"
-                   :server-port 8081
+                   :server-port 8080
                    :uri "/login-callback"
                    :params {:code "mjuZmU8Tw3WO9U4n6No3PJ1g3kTJzYoEYX2nfK8_0U8wY"
                             :state "XJ3KBCcGcXmLnH09gb2AVsQp9bpjiVxLXvo5N4SKEqw"}
@@ -196,7 +195,7 @@
                  :uri "/logout"
                  :headers {}
                  :session {::auth/user {:user/id (UUID. 0 1)}}}
-        response ((ui/wrap-base-url-compat auth0/logout-handler) request)]
+        response (auth0/logout-handler request)]
 
     (testing "clears the application session"
       (is (= {:session nil}
@@ -207,7 +206,7 @@
       ;;     https://auth0.com/docs/authenticate/login/logout/log-users-out-of-auth0
       ;;     https://auth0.com/docs/api/authentication#oidc-logout
       (is (= {:status 303
-              :headers {"Location" "https://luontola.eu.auth0.com/v2/logout?returnTo=http://localhost:8081/&client_id=8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"}}
+              :headers {"Location" "https://luontola.eu.auth0.com/v2/logout?returnTo=http://localhost:8080/&client_id=8tVkdfnw8ynZ6rXNndD6eZ6ErsHdIgPi"}}
              (select-keys response [:status :headers]))))))
 
 
@@ -218,9 +217,9 @@
     (testing "http, custom port"
       (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:scheme :http
                                                                     :server-name "localhost"
-                                                                    :server-port 8081
+                                                                    :server-port 8080
                                                                     :uri "/the/path"})]
-        (is (= "http://localhost:8081/the/path" (str (.getRequestURL request))))))
+        (is (= "http://localhost:8080/the/path" (str (.getRequestURL request))))))
 
     (testing "https, default port"
       (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:scheme :https

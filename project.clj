@@ -91,7 +91,8 @@
   :test-selectors {:default (fn [m] (not (:e2e m)))
                    :e2e :e2e}
 
-  :profiles {:uberjar {:omit-source true
+  :profiles {:uberjar {:auto-clean false
+                       :omit-source true
                        :aot :all
                        :uberjar-name "territory-bro.jar"}
 

@@ -1,11 +1,3 @@
-/target/
-/node_modules/
-/.lein-*
-/.nrepl-port
-/profiles.clj
-.DS_Store
-*.tmp
-*.bak
-*.log
-*.qgs~
-/.git/
+*
+!/target/uberjar/territory-bro.jar
+!/target/uberjar/classes.list

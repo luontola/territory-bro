@@ -8,7 +8,6 @@
             [ring.util.http-response :refer :all]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.authentication :as auth]
-            [territory-bro.infra.config :as config]
             [territory-bro.ui.congregation-page :as congregation-page]
             [territory-bro.ui.error-page :as error-page]
             [territory-bro.ui.home-page :as home-page]
@@ -30,14 +29,6 @@
     (let [request (update request :params merge (:path-params request))]
       (handler request))))
 
-(defn wrap-base-url-compat [handler]
-  (fn [request]
-    ;; the SPA site runs on port 8080, the SSR site runs on port 8081
-    (binding [config/env (if (= "http://localhost:8080" (:public-url config/env))
-                           (assoc config/env :public-url "http://localhost:8081")
-                           config/env)]
-      (handler request))))
-
 (defn wrap-current-user [handler]
   (fn [request]
     (auth/with-user-from-session request
@@ -45,8 +36,7 @@
 
 (def routes
   [""
-   {:middleware [wrap-base-url-compat ; outermost middleware first
-                 [html/wrap-page-path nil]
+   {:middleware [[html/wrap-page-path nil] ; outermost middleware first
                  auth0/wrap-redirect-to-login
                  i18n/wrap-current-language
                  wrap-current-user

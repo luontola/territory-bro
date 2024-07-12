@@ -6,12 +6,11 @@ TAG="${1:-$DEFAULT_TAG}"
 echo TAG="$TAG"
 set -x
 
-docker pull "luontola/territory-bro:ci"
+docker compose build --pull app
 
 git tag "$TAG"
 
-docker tag "luontola/territory-bro:ci" "luontola/territory-bro:$TAG"
-docker tag "luontola/territory-bro:ci" "luontola/territory-bro:latest"
+docker tag "luontola/territory-bro:latest" "luontola/territory-bro:$TAG"
 
 docker push "luontola/territory-bro:$TAG"
 docker push "luontola/territory-bro:latest"

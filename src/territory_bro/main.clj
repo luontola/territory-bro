@@ -80,7 +80,7 @@
     (let [client (-> (HttpClient/newBuilder)
                      (.build))
           request (-> (HttpRequest/newBuilder)
-                      (.uri (URI. (format "http://localhost:%s/api/settings" (:port config/env))))
+                      (.uri (URI. (str "http://localhost:" (:port config/env))))
                       (.build))]
       (.send client request (HttpResponse$BodyHandlers/ofString)))
     (stop-app)

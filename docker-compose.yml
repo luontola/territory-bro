@@ -1,23 +1,10 @@
-version: '2'
 services:
 
-  web:
+  app:
     build:
       context: .
-      dockerfile: Dockerfile-web
-    image: luontola/territory-bro-web
-    environment:
-      API_URL: http://api:8080
-    mem_reservation: 10m
-    mem_limit: 20m
-    ports:
-      - "127.0.0.1:8080:80"
-
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile-api
-    image: luontola/territory-bro-api
+      dockerfile: Dockerfile
+    image: luontola/territory-bro
     environment:
       PUBLIC_URL: http://localhost:8080
       AUTH0_DOMAIN: luontola.eu.auth0.com
@@ -30,7 +17,7 @@ services:
     mem_reservation: 300m
     mem_limit: 500m
     ports:
-      - "127.0.0.1:8081:8080"
+      - "127.0.0.1:8080:8080"
       - "127.0.0.1:7000:7000"
 
   db:
