@@ -12,7 +12,7 @@ import Fill from "ol/style/Fill";
 import Circle from "ol/style/Circle";
 import {fromLonLat} from "ol/proj";
 import WKT from "ol/format/WKT";
-import {makeStreetsLayer, wktToFeatures} from "./mapOptions";
+import {makeStreetsLayer, MapRaster, wktToFeatures} from "./mapOptions";
 import {Congregation, Territory} from "../api";
 import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
 
@@ -44,7 +44,7 @@ export default class TerritoryMiniMap extends OpenLayersMap<Props> {
 }
 
 export class TerritoryMiniMapElement extends OpenLayersMapElement {
-  createMap({root}) {
+  createMap({root, mapRaster}) {
     const territory = {
       location: this.getAttribute("territory-location"),
       enclosingMinimapViewport: this.getAttribute("enclosing-minimap-viewport"),
@@ -54,7 +54,9 @@ export class TerritoryMiniMapElement extends OpenLayersMapElement {
       location: this.getAttribute("congregation-boundary"),
     };
     if (congregation.location) {
-      return initTerritoryMiniMap(root, territory as Territory, congregation as Congregation);
+      const map = initTerritoryMiniMap(root, territory as Territory, congregation as Congregation);
+      map.setStreetsLayerRaster(mapRaster);
+      return map;
     }
   }
 }
@@ -107,12 +109,12 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
     })
   });
 
-  const streetLayer = makeStreetsLayer();
+  const streetsLayer = makeStreetsLayer();
 
   const map = new Map({
     target: element,
     pixelRatio: 2, // render at high DPI for printing
-    layers: [streetLayer, regionsLayer, congregationLayer, territoryLayer],
+    layers: [streetsLayer, regionsLayer, congregationLayer, territoryLayer],
     controls: [],
     interactions: [],
     view: new View({
@@ -126,6 +128,9 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
   });
 
   return {
+    setStreetsLayerRaster(mapRaster: MapRaster): void {
+      streetsLayer.setSource(mapRaster.makeSource());
+    },
     unmount() {
       map.setTarget(undefined)
     }

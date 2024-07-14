@@ -61,7 +61,8 @@
         [:territory-mini-map {:territory-location (:location territory)
                               :congregation-boundary congregation-boundary
                               :enclosing-region enclosing-region
-                              :enclosing-minimap-viewport enclosing-minimap-viewport}]]
+                              :enclosing-minimap-viewport enclosing-minimap-viewport
+                              :map-raster map-raster}]]
 
        [:div {:class (:header styles)}
         [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
@@ -93,7 +94,8 @@
         [:territory-mini-map {:territory-location (:location territory)
                               :congregation-boundary congregation-boundary
                               :enclosing-region enclosing-region
-                              :enclosing-minimap-viewport enclosing-minimap-viewport}]]
+                              :enclosing-minimap-viewport enclosing-minimap-viewport
+                              :map-raster map-raster}]]
 
        [:div {:class (:header styles)}
         [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
@@ -123,7 +125,8 @@
         [:territory-mini-map {:territory-location (:location territory)
                               :congregation-boundary congregation-boundary
                               :enclosing-region enclosing-region
-                              :enclosing-minimap-viewport enclosing-minimap-viewport}]]
+                              :enclosing-minimap-viewport enclosing-minimap-viewport
+                              :map-raster map-raster}]]
 
        [:div {:class (:header styles)}
         [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
