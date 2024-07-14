@@ -14,34 +14,7 @@ import {fromLonLat} from "ol/proj";
 import WKT from "ol/format/WKT";
 import {makeStreetsLayer, MapRaster, wktToFeatures} from "./mapOptions";
 import {Congregation, Territory} from "../api";
-import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
-
-type Props = {
-  territory: Territory;
-  congregation: Congregation;
-  printout: boolean; // TODO: this should be always true and not needed here
-};
-
-export default class TerritoryMiniMap extends OpenLayersMap<Props> {
-  private map;
-
-  componentDidMount() {
-    const {
-      territory,
-      congregation,
-    } = this.props;
-    if (congregation.location) {
-      this.map = initTerritoryMiniMap(this.elementRef.current, territory, congregation);
-    } else {
-      // TODO: this is never reached because of the default congregation boundary
-      this.elementRef.current.innerText = "Error: Congregation boundary is not defined";
-    }
-  }
-
-  componentWillUnmount() {
-    this.map.unmount()
-  }
-}
+import {OpenLayersMapElement} from "./OpenLayersMap";
 
 export class TerritoryMiniMapElement extends OpenLayersMapElement {
   createMap({root, mapRaster}) {

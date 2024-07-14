@@ -18,48 +18,11 @@ import {
   wktToFeatures
 } from "./mapOptions";
 import {Territory} from "../api";
-import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
+import {OpenLayersMapElement} from "./OpenLayersMap";
 import Feature from 'ol/Feature';
 import Geolocation from 'ol/Geolocation';
 import Point from 'ol/geom/Point';
 import {Circle as CircleStyle, Fill, Stroke} from 'ol/style';
-
-type Props = {
-  territory: Territory;
-  mapRaster: MapRaster;
-  printout: boolean;
-};
-
-export default class TerritoryMap extends OpenLayersMap<Props> {
-
-  map: any;
-  prevMapRaster: any;
-
-  componentDidMount() {
-    const {
-      territory,
-      mapRaster,
-      printout,
-    } = this.props;
-    this.prevMapRaster = mapRaster;
-    this.map = initTerritoryMap(this.elementRef.current, territory, printout);
-    this.map.setStreetsLayerRaster(mapRaster);
-  }
-
-  componentDidUpdate() {
-    const {
-      mapRaster
-    } = this.props;
-    if (this.prevMapRaster !== mapRaster) {
-      this.prevMapRaster = mapRaster;
-      this.map.setStreetsLayerRaster(mapRaster);
-    }
-  }
-
-  componentWillUnmount() {
-    this.map.unmount()
-  }
-}
 
 export class TerritoryMapElement extends OpenLayersMapElement {
   createMap({root, mapRaster, printout}) {

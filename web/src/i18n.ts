@@ -37,21 +37,10 @@ i18n.use(LanguageDetector)
     setDocumentLanguage();
   });
 
-export async function changeLanguage(language: string) {
-  await i18n.changeLanguage(language);
-  setDocumentLanguage();
-}
-
 function setDocumentLanguage() {
   if (typeof document !== 'undefined') { // avoid crash when running in Node.js
     document.documentElement.setAttribute('lang', i18n.resolvedLanguage);
   }
-}
-
-export function isolatedI18nInstance(language: string) {
-  const inst = i18n.createInstance({...options, lng: language});
-  inst.init();
-  return inst;
 }
 
 export default i18n;

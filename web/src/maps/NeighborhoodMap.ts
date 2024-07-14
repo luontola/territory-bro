@@ -18,43 +18,7 @@ import {
   wktToFeatures
 } from "./mapOptions";
 import {Territory} from "../api";
-import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
-
-type Props = {
-  territory: Territory;
-  mapRaster: MapRaster;
-  printout: boolean; // TODO: this should be always true and not needed here
-};
-
-export default class NeighborhoodMap extends OpenLayersMap<Props> {
-
-  map: any;
-  prevMapRaster: any;
-
-  componentDidMount() {
-    const {
-      territory,
-      mapRaster
-    } = this.props;
-    this.prevMapRaster = mapRaster;
-    this.map = initNeighborhoodMap(this.elementRef.current, territory);
-    this.map.setStreetsLayerRaster(mapRaster);
-  }
-
-  componentDidUpdate() {
-    const {
-      mapRaster
-    } = this.props;
-    if (this.prevMapRaster !== mapRaster) {
-      this.prevMapRaster = mapRaster;
-      this.map.setStreetsLayerRaster(mapRaster);
-    }
-  }
-
-  componentWillUnmount() {
-    this.map.unmount()
-  }
-}
+import {OpenLayersMapElement} from "./OpenLayersMap";
 
 export class NeighborhoodMapElement extends OpenLayersMapElement {
   createMap({root, mapRaster}) {

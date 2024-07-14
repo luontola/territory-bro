@@ -20,43 +20,9 @@ import {
   wktToFeatures
 } from "./mapOptions";
 import {Congregation, Territory} from "../api";
-import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
+import {OpenLayersMapElement} from "./OpenLayersMap";
 import {isEmpty as isEmptyExtent} from "ol/extent";
 import {getPageState, setPageState} from "../util";
-import {isEqual} from "lodash-es";
-
-type Props = {
-  congregation: Congregation;
-  territories: Territory[];
-  onClick: (string) => void;
-};
-
-export default class TerritoryListMap extends OpenLayersMap<Props> {
-
-  map: any;
-
-  componentDidMount() {
-    const {
-      congregation,
-      territories,
-      onClick,
-    } = this.props;
-    this.map = initMap(this.elementRef.current, congregation, territories, territories.map(t => t.id), onClick);
-  }
-
-  componentDidUpdate(prevProps, _prevState) {
-    const {
-      territories
-    } = this.props;
-    if (!isEqual(territories, prevProps.territories)) {
-      this.map.updateTerritories(territories);
-    }
-  }
-
-  componentWillUnmount() {
-    this.map.unmount()
-  }
-}
 
 export class TerritoryListMapElement extends OpenLayersMapElement {
   static observedAttributes = ['visible-territories'];

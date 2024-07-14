@@ -19,45 +19,7 @@ import {
   wktToFeatures
 } from "./mapOptions";
 import {Congregation, Region, Territory} from "../api";
-import OpenLayersMap, {OpenLayersMapElement} from "./OpenLayersMap";
-
-type Props = {
-  region: Region | Congregation;
-  territories: Territory[];
-  mapRaster: MapRaster;
-  printout: boolean; // TODO: this should be always true and not needed here
-};
-
-export default class RegionMap extends OpenLayersMap<Props> {
-
-  map: any;
-  prevMapRaster: any;
-
-  componentDidMount() {
-    const {
-      region,
-      territories,
-      mapRaster
-    } = this.props;
-    this.prevMapRaster = mapRaster;
-    this.map = initRegionMap(this.elementRef.current, region, territories);
-    this.map.setStreetsLayerRaster(mapRaster);
-  }
-
-  componentDidUpdate() {
-    const {
-      mapRaster
-    } = this.props;
-    if (this.prevMapRaster !== mapRaster) {
-      this.prevMapRaster = mapRaster;
-      this.map.setStreetsLayerRaster(mapRaster);
-    }
-  }
-
-  componentWillUnmount() {
-    this.map.unmount()
-  }
-}
+import {OpenLayersMapElement} from "./OpenLayersMap";
 
 export class RegionMapElement extends OpenLayersMapElement {
   createMap({root, mapRaster}) {
