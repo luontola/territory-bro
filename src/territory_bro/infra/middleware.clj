@@ -104,6 +104,7 @@
         (:dev env) (wrap-reload {:dirs ["src" "resources"]}))
       wrap-sqlexception-chain
       wrap-http-response
+      wrap-formats
       wrap-default-content-type
       error-page/wrap-error-pages
       (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
