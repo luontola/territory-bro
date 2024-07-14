@@ -5,6 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: luontola/territory-bro
+    platform: linux/amd64
     environment:
       PUBLIC_URL: http://localhost:8080
       AUTH0_DOMAIN: luontola.eu.auth0.com
