@@ -13,7 +13,8 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]
-            [territory-bro.ui.layout :as layout])
+            [territory-bro.ui.layout :as layout]
+            [territory-bro.ui.maps :as maps])
   (:import (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
 (defn model! [request {:keys [fetch-loans?]}]
@@ -52,7 +53,7 @@
 
 (defn territory-list-map [{:keys [congregation-boundary territories]}]
   (h/html
-   [:territory-list-map
+   [:territory-list-map {:map-raster maps/default-for-availability}
     [:template.json-data
      (json/write-value-as-string
       {:congregationBoundary congregation-boundary

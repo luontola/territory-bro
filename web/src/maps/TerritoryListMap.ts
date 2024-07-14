@@ -13,6 +13,7 @@ import {
   makeInteractions,
   makeStreetsLayer,
   makeView,
+  MapRaster,
   territoryStrokeStyle,
   territoryTextStyle,
   wktToFeature,
@@ -82,7 +83,7 @@ export class TerritoryListMapElement extends OpenLayersMapElement {
     }
   }
 
-  createMap({root}) {
+  createMap({root, mapRaster}) {
     const jsonData = this.querySelector("template.json-data") as HTMLTemplateElement | null;
     const data = JSON.parse(jsonData?.content.textContent ?? "{}");
     const congregationBoundary = data.congregationBoundary;
@@ -95,7 +96,9 @@ export class TerritoryListMapElement extends OpenLayersMapElement {
     const onClick = (territoryId: string) => {
       document.location.href = `${document.location.pathname}/${territoryId}`
     }
-    return initMap(root, congregation, territories, visibleTerritories, onClick);
+    const map = initMap(root, congregation, territories, visibleTerritories, onClick);
+    map.setStreetsLayerRaster(mapRaster);
+    return map;
   }
 }
 
@@ -240,6 +243,9 @@ function initMap(element: HTMLDivElement,
   });
 
   return {
+    setStreetsLayerRaster(mapRaster: MapRaster): void {
+      streetsLayer.setSource(mapRaster.makeSource());
+    },
     updateVisibleTerritories(territoryIds: string[]) {
       setVisibleTerritories(territoryIds);
       resetZoom(map, {duration: 300});

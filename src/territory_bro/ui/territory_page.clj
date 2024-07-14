@@ -12,7 +12,8 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]
-            [territory-bro.ui.map-interaction-help :as map-interaction-help]))
+            [territory-bro.ui.map-interaction-help :as map-interaction-help]
+            [territory-bro.ui.maps :as maps]))
 
 (defn model! [request]
   (let [demo? (= "demo" (get-in request [:params :congregation]))
@@ -139,8 +140,7 @@
       [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
        [:div {:class (:map styles)}
         [:territory-map {:territory-location (:location territory)
-                         :map-raster "osmhd"
-                         :printout false}]]
+                         :map-raster maps/default-for-availability}]]
        [:div.no-print
         (map-interaction-help/view model)]]])))
 

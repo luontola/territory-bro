@@ -11,11 +11,11 @@
             [territory-bro.api :as api]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.json :as json]
-            [territory-bro.infra.resources :as resources]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
+            [territory-bro.ui.maps :as maps]
             [territory-bro.ui.printout-templates :as printout-templates])
   (:import (io.nayuki.qrcodegen QrCode QrCode$Ecc)
            (java.time Clock Duration LocalDate)
@@ -44,9 +44,6 @@
     :fn printout-templates/region-printout
     :type :region}])
 
-(def map-rasters
-  (resources/auto-refresher "map-rasters.json" #(json/read-value (slurp %))))
-
 (defn parse-uuid-multiselect [value]
   ;; Ring form params for a <select> element may be a string or a vector of strings,
   ;; depending on whether one or many values were selected. Coerce them all to a set of UUIDs.
@@ -73,7 +70,7 @@
                                   (CaseInsensitiveSimpleNaturalComparator/getInstance)))
         default-params {:template (:id (first templates))
                         :language (name i18n/*lang*)
-                        :mapRaster (:id (first (map-rasters)))
+                        :mapRaster maps/default-for-quality
                         :regions (str (:id congregation)) ; congregation boundary is shown first in the regions list
                         :territories (str (:id (first territories)))}
         congregation-boundary (->> (:congregationBoundaries congregation)
@@ -143,7 +140,7 @@
          [:div.pure-u-1.pure-u-md-1-2.pure-u-lg-1-3
           [:label {:for "mapRaster"} (i18n/t "PrintoutPage.mapRaster")]
           [:select#mapRaster.pure-input-1 {:name "mapRaster"}
-           (for [{:keys [id name]} (map-rasters)]
+           (for [{:keys [id name]} (maps/map-rasters)]
              [:option {:value id
                        :selected (= id (:mapRaster form))}
               name])]]]
