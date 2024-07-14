@@ -21,6 +21,9 @@ from event
 where stream_id = :stream
 limit 1;
 
+-- :name lock-events-table-for-writing :!
+lock table event in share row exclusive mode;
+
 -- :name save-event :<! :1
 insert into event (stream_id, stream_revision, data)
 values (:stream, :stream_revision, :data::jsonb)

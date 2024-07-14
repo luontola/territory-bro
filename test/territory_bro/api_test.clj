@@ -1113,6 +1113,18 @@
         (is (= state-before state-after)
             "does not write anything to application state")))
 
+    (testing "parallel requests won't conflict or deadlock"
+      (let [user-id (territory-bro.api-test/get-user-id @*session)]
+        (is (->> (repeatedly 10 #(future
+                                  (binding [auth/*user* {:user/id user-id}]
+                                    (db/with-db [conn {}]
+                                      ;; bypassing the caching functions, because otherwise this test would need
+                                      ;; a different territory-id for each thread
+                                      (api/generate-qr-code! conn nil cong-id territory-id)))))
+                 (doall) ; evaluate lazy seq -> all futures should now be running in parallel
+                 (mapv deref) ; wait for futures to finish
+                 (every? #(not (str/blank? %)))))))
+
     ;; TODO: cannot link to a territory which doesn't belong to the specified congregation
 
     #__))

@@ -22,6 +22,7 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
+            [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.jwt :as jwt]
             [territory-bro.infra.user :as user]
             [territory-bro.infra.util :refer [conj-set getx]]
@@ -434,8 +435,9 @@
             (ok {:url (share/build-share-url share-key (:territory/number territory))
                  :key share-key})))))))
 
-(defn- generate-qr-code! [conn request cong-id territory-id]
+(defn generate-qr-code! [conn request cong-id territory-id]
   (let [share-key (share/generate-share-key)
+        _ (event-store/acquire-write-lock! conn)
         state (current-state-for-request conn request)]
     (dispatch! conn state {:command/type :share.command/create-share
                            :share/id (UUID/randomUUID)

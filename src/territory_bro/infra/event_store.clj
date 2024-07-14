@@ -1,4 +1,4 @@
-;; Copyright © 2015-2021 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -85,6 +85,14 @@
                 (assoc :event/global-revision (:global_revision result))
                 (sorted-keys)))))
        (doall)))
+
+(defn acquire-write-lock!
+  "Normally save! already locks the events table, but if a transaction reads from the table before writing to it, that
+   can cause a deadlock when it happens concurrently. For those situations, you can call this method before the first
+   read to acquire the necessary write lock, and to wait for concurrent transactions to finish, avoiding deadlocks."
+  [conn]
+  (query! conn :lock-events-table-for-writing)
+  nil)
 
 (defn stream-info [conn stream-id]
   (first (jdbc/query conn ["select * from stream where stream_id = ?"
