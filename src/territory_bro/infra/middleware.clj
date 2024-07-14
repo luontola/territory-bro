@@ -20,22 +20,22 @@
   (:import (java.time Duration)))
 
 (defn wrap-internal-error [handler]
-  (fn [req]
+  (fn [request]
     (try
-      (handler req)
+      (handler request)
       (catch Throwable t
         ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
         (log/error t (str "Uncaught exception "
-                          (pr-str (select-keys req [:request-method :uri]))
+                          (pr-str (select-keys request [:request-method :uri]))
                           "\n"
                           (pr-str t)))
         (-> (internal-server-error "Internal Server Error")
             (response/content-type "text/html; charset=utf-8"))))))
 
 (defn wrap-sqlexception-chain [handler]
-  (fn [req]
+  (fn [request]
     (try
-      (handler req)
+      (handler request)
       (catch Throwable t
         (throw (util/fix-sqlexception-chain t))))))
 
@@ -47,11 +47,11 @@
   ;; Chrome gives an ERR_INVALID_RESPONSE error about 4xx pages
   ;; with application/octet-stream content type, which is Ring's
   ;; default when no content type is not defined.
-  (fn [req]
-    (let [resp (handler req)]
-      (if (response/get-header resp "Content-Type")
-        resp
-        (response/content-type resp "text/plain")))))
+  (fn [request]
+    (let [response (handler request)]
+      (if (response/get-header response "Content-Type")
+        response
+        (response/content-type response "text/plain")))))
 
 ;; defonce to avoid forgetting sessions every time the code is reloaded in development mode
 (defonce session-store (ttl-session/ttl-memory-store (.toSeconds (Duration/ofHours 4))))
@@ -64,17 +64,17 @@
   (projections/await-refreshed (Duration/ofSeconds 10)))
 
 (defn wrap-always-refresh-projections [handler]
-  (fn [req]
-    (let [resp (handler req)]
+  (fn [request]
+    (let [response (handler request)]
       (refresh-projections!)
-      resp)))
+      response)))
 
 (defn wrap-auto-refresh-projections [handler]
-  (fn [req]
-    (let [resp (handler req)]
-      (when (contains? mutative-operation (:request-method req))
+  (fn [request]
+    (let [response (handler request)]
+      (when (contains? mutative-operation (:request-method request))
         (refresh-projections!))
-      resp)))
+      response)))
 
 (defn- static-asset? [path]
   (or (str/starts-with? path "/assets/")
