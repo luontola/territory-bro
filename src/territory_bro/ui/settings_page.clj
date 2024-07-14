@@ -10,6 +10,7 @@
             [ring.util.response :as response]
             [territory-bro.api :as api]
             [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
@@ -177,7 +178,7 @@
                                 :hx-swap "outerHTML"}
         [:h2 (i18n/t "UserManagement.title")]
         [:p (-> (i18n/t "UserManagement.addUserInstructions")
-                (str/replace "{{joinPageUrl}}" "http://localhost:8080/join")
+                (str/replace "{{joinPageUrl}}" (str (:public-url config/env) "/join"))
                 (str/replace "<0>" "<a href=\"/join\">")
                 (str/replace "</0>" "</a>")
                 (h/raw))]
