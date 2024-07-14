@@ -109,8 +109,7 @@ document.body.addEventListener('htmx:afterRequest', (event: Event) => {
       //      See https://github.com/bigskysoftware/htmx/issues/2523
       || (status >= 200 && status < 400)
     ) {
-      dialog.close();
-      message.innerText = "";
+      return;
 
     } else if (event.detail.failed && event.detail.xhr) {
       console.warn("Server error", event.detail);
