@@ -36,13 +36,15 @@
         (.build))))
 
 (defn- request-url [request]
-  (let [url (URL. (name (:scheme request))
-                  (:server-name request)
-                  (:server-port request)
-                  (:uri request))]
-    (if (= (.getDefaultPort url) (.getPort url))
-      (request-url (assoc request :server-port -1))
-      url)))
+  (let [base-url (URL. (:public-url config/env))]
+    (URL. base-url (:uri request)))
+  #_(let [url (URL. (name (:scheme request))
+                    (:server-name request)
+                    (:server-port request)
+                    (:uri request))]
+      (if (= (.getDefaultPort url) (.getPort url))
+        (request-url (assoc request :server-port -1))
+        url)))
 
 (defn ring->servlet [request]
   (let [*response (atom (-> (response/response "")

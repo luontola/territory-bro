@@ -214,19 +214,27 @@
   (testing "request URL"
     ;; Servlet spec: The returned URL contains a protocol, server name, port number,
     ;; and server path, but it does not include query string parameters.
-    (testing "http, custom port"
-      (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:scheme :http
-                                                                    :server-name "localhost"
-                                                                    :server-port 8080
-                                                                    :uri "/the/path"})]
-        (is (= "http://localhost:8080/the/path" (str (.getRequestURL request))))))
+    #_(testing "http, custom port"
+        (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:scheme :http
+                                                                      :server-name "localhost"
+                                                                      :server-port 8080
+                                                                      :uri "/the/path"})]
+          (is (= "http://localhost:8080/the/path" (str (.getRequestURL request))))))
 
-    (testing "https, default port"
-      (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:scheme :https
-                                                                    :server-name "example.com"
-                                                                    :server-port 443
-                                                                    :uri "/"})]
-        (is (= "https://example.com/" (str (.getRequestURL request)))))))
+    #_(testing "https, default port"
+        (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:scheme :https
+                                                                      :server-name "example.com"
+                                                                      :server-port 443
+                                                                      :uri "/"})]
+          (is (= "https://example.com/" (str (.getRequestURL request))))))
+
+    (testing "always uses the public-url from config, instead of the scheme/server-name/server-port from the request"
+      (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:scheme :http
+                                                                    :server-name "whatever"
+                                                                    :server-port 42
+                                                                    :uri "/the/path"})]
+        (binding [config/env (replace-in config/env [:public-url] "http://localhost:8080" "https://example.com")]
+          (is (= "https://example.com/the/path" (str (.getRequestURL request))))))))
 
   (testing "request parameters"
     (let [[^HttpServletRequest request _ _] (auth0/ring->servlet {:params {:foo "bar"}})]
