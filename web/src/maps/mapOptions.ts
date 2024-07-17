@@ -33,7 +33,7 @@ export type MapRaster = {
 const transition = 0;
 export const mapRasters: MapRaster[] = [{
   id: 'osmhd',
-  name: "World - OpenStreetMap",
+  name: "World - OpenStreetMap (RRZE server, high DPI)",
   makeSource: () => new XYZ({
     url: 'https://{a-c}.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
     tileSize: [512, 512],
@@ -43,7 +43,7 @@ export const mapRasters: MapRaster[] = [{
   })
 }, {
   id: 'osm',
-  name: "World - OpenStreetMap (backup server, low DPI)",
+  name: "World - OpenStreetMap (official server, low DPI)",
   makeSource: () => new OSM({
     transition,
   })

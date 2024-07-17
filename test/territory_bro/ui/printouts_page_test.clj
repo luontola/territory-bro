@@ -122,7 +122,7 @@
                Print options
                  Template [Territory card]
                  Language [English]
-                 Background map [World - OpenStreetMap]
+                 Background map [World - OpenStreetMap (RRZE server, high DPI)]
                  Regions [Example Congregation]
                  Territories [123 - the region]
 
@@ -144,7 +144,7 @@
                Print options
                  Template [Region map]
                  Language [English]
-                 Background map [World - OpenStreetMap]
+                 Background map [World - OpenStreetMap (RRZE server, high DPI)]
                  Regions [Example Congregation]
                  Territories [123 - the region]
 
