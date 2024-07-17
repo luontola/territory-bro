@@ -20,11 +20,7 @@
 (def auth0-username "browser-test@example.com")
 (def auth0-password "m6ER6MU7bBYEHrByt8lyop3cG1W811r2")
 
-(def browser-config
-  {:size [1920 1080]
-   ;; TODO: figure out how to enable reading what the browser copied to clipboard
-   #_#_:prefs {:profile.content_settings.exceptions.clipboard {"*" {"setting" 1
-                                                                    "last_modified" (System/currentTimeMillis)}}}})
+(def browser-config {:size [1920 1080]})
 (def postmortem-dir (io/file "target/etaoin-postmortem"))
 
 (defn per-test-subdir [parent-dir]
@@ -59,6 +55,11 @@
   (doto driver
     (b/wait-visible q)
     (b/click q)))
+
+(defn clipboard-content [driver]
+  ;; Headless Chrome won't modify the system clipboard, so the browser tests
+  ;; don't have a direct method for observing what was copied to clipboard.
+  (b/js-execute driver "return window.latestCopyToClipboard"))
 
 (defn submit-auth0-login-form [driver]
   (doto driver
@@ -196,9 +197,11 @@
         (wait-and-click {:tag :button, :fn/has-string "Share a link"})
         (wait-and-click :copy-share-link))
       (let [original-url (b/get-url *driver*)
-            share-link (b/js-execute *driver* "return window.latestCopyToClipboard")]
+            share-link (b/get-element-value *driver* :share-link)]
         (is (str/includes? share-link "/share/demo-")
             "generates a demo share link")
+        (is (= share-link (clipboard-content *driver*))
+            "can copy to clipboard")
 
         (testing "- open the share"
           (doto *driver*
@@ -253,11 +256,13 @@
       (testing "find out user2's ID"
         (doto *driver*
           (dev-login-as user2)
-          (go-to-page "Join an existing congregation"))
-
-        (let [user2-id (b/get-element-text *driver* :your-user-id)]
-          (is (some? (parse-uuid user2-id)))
-          (reset! *user2-id user2-id)))
+          (go-to-page "Join an existing congregation")
+          (wait-and-click :copy-your-user-id))
+        (let [user2-id (reset! *user2-id (b/get-element-text *driver* :your-user-id))]
+          (is (some? (parse-uuid user2-id))
+              "shows the user ID")
+          (is (= user2-id (clipboard-content *driver*))
+              "can copy to clipboard")))
 
       (testing "add user2 to congregation"
         (doto *driver*
@@ -320,9 +325,12 @@
       (doto *driver*
         (wait-and-click {:tag :button, :fn/has-string "Share a link"})
         (wait-and-click :copy-share-link))
-      (let [share-link (b/js-execute *driver* "return window.latestCopyToClipboard")]
-        (is (str/starts-with? share-link (str *base-url* "/share/"))
-            "generates a share link")
+      (let [share-link (b/get-element-value *driver* :share-link)]
+        (testing "share a link"
+          (is (str/starts-with? share-link (str *base-url* "/share/"))
+              "generates a share link")
+          (is (= share-link (clipboard-content *driver*))
+              "can copy to clipboard"))
 
         (testing "open shared link as anonymous user"
           (doto *driver*
