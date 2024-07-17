@@ -31,10 +31,10 @@
     <layer-tree-layer checked="Qt::Checked" expanded="1" id="card_minimap_viewport_c81045cd_d929_4b00_8b57_939c3318a10c" name="card_minimap_viewport" providerKey="postgres" source="dbname='DBNAME_GOES_HERE' host=HOST_GOES_HERE port=5432 user='USERNAME_GOES_HERE' key='id' srid=4326 type=Polygon table=&quot;SCHEMA_GOES_HERE&quot;.&quot;card_minimap_viewport&quot; (location) sql=">
       <customproperties></customproperties>
     </layer-tree-layer>
-    <layer-tree-layer checked="Qt::Unchecked" expanded="1" id="Maanmittauslaitos_taustakarttasarja_9fb3d1cd_6aa6_4240_bbe0_fa531f1b49e4" name="Maanmittauslaitos taustakarttasarja" providerKey="wms" source="crs=EPSG:3857&amp;format&amp;type=xyz&amp;url=http://tiles.kartat.kapsi.fi/taustakartta/%7Bz%7D/%7Bx%7D/%7By%7D.jpg&amp;zmax=18&amp;zmin=0">
+    <layer-tree-layer checked="Qt::Unchecked" expanded="1" id="Maanmittauslaitos_taustakarttasarja_9fb3d1cd_6aa6_4240_bbe0_fa531f1b49e4" name="Maanmittauslaitos taustakarttasarja" providerKey="wms" source="crs=EPSG:3857&amp;format&amp;type=xyz&amp;url=https://tiles.kartat.kapsi.fi/taustakartta/%7Bz%7D/%7Bx%7D/%7By%7D.jpg&amp;zmax=18&amp;zmin=0">
       <customproperties></customproperties>
     </layer-tree-layer>
-    <layer-tree-layer checked="Qt::Checked" expanded="1" id="OpenStreetMap_d5ff0239_0edd_4d90_940e_45b23b4251bd" name="OpenStreetMap" providerKey="wms" source="crs=EPSG:3857&amp;format&amp;type=xyz&amp;url=http://a.tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png&amp;zmax=19&amp;zmin=0">
+    <layer-tree-layer checked="Qt::Checked" expanded="1" id="OpenStreetMap_d5ff0239_0edd_4d90_940e_45b23b4251bd" name="OpenStreetMap" providerKey="wms" source="crs=EPSG:3857&amp;format&amp;type=xyz&amp;url=https://a.tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png&amp;zmax=19&amp;zmin=0">
       <customproperties></customproperties>
     </layer-tree-layer>
     <custom-order enabled="0">
@@ -122,7 +122,7 @@
         <ymax>20037508.34278924390673637</ymax>
       </extent>
       <id>Maanmittauslaitos_taustakarttasarja_9fb3d1cd_6aa6_4240_bbe0_fa531f1b49e4</id>
-      <datasource>crs=EPSG:3857&amp;format&amp;type=xyz&amp;url=http://tiles.kartat.kapsi.fi/taustakartta/%7Bz%7D/%7Bx%7D/%7By%7D.jpg&amp;zmax=18&amp;zmin=0</datasource>
+      <datasource>crs=EPSG:3857&amp;format&amp;type=xyz&amp;url=https://tiles.kartat.kapsi.fi/taustakartta/%7Bz%7D/%7Bx%7D/%7By%7D.jpg&amp;zmax=18&amp;zmin=0</datasource>
       <keywordList>
         <value></value>
       </keywordList>
@@ -204,7 +204,7 @@
         <ymax>20037508.34278924390673637</ymax>
       </extent>
       <id>OpenStreetMap_d5ff0239_0edd_4d90_940e_45b23b4251bd</id>
-      <datasource>crs=EPSG:3857&amp;format&amp;type=xyz&amp;url=http://a.tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png&amp;zmax=19&amp;zmin=0</datasource>
+      <datasource>crs=EPSG:3857&amp;format&amp;type=xyz&amp;url=https://a.tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png&amp;zmax=19&amp;zmin=0</datasource>
       <keywordList>
         <value></value>
       </keywordList>
