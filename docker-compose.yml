@@ -21,8 +21,13 @@ services:
       - "127.0.0.1:8080:8080"
       - "127.0.0.1:7000:7000"
 
+  # TODO: official arm64 build of postgis - currently using test builds
+  # https://github.com/postgis/docker-postgis/issues/216#issuecomment-2016916803
+  # https://github.com/postgis/docker-postgis/pull/356
+  # https://hub.docker.com/r/imresamu/postgis/tags
   db:
-    image: postgis/postgis:13-3.1
+    #image: postgis/postgis:13-3.1
+    image: imresamu/postgis:13-3.4
     environment:
       POSTGRES_USER: territorybro
       POSTGRES_PASSWORD: territorybro
