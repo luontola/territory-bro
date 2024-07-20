@@ -80,16 +80,12 @@
   "scripts": {
     "test": "vitest run",
     "autotest": "vitest watch",
-    "start": "vite dev",
     "build": "vite build",
     "autobuild": "vite build --watch",
     "server-export": "vite-node web/src/server-export.ts",
-    "preview": "vite preview",
     "analyze": "vite-bundle-visualizer",
-    "lint": "tsc && eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "tsc && eslint . --ext ts --report-unused-disable-directives --max-warnings 0",
     "browserslist": "browserslist",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
     "outdated": "npm-check-updates",
     "upgrade": "npm-check-updates --interactive"
   }

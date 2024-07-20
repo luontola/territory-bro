@@ -3,7 +3,6 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import {defineConfig} from 'vitest/config'
-import react from '@vitejs/plugin-react'
 import i18nextLoader from 'vite-plugin-i18next-loader'
 import fs from "fs";
 import * as path from "path";
@@ -26,7 +25,6 @@ const cssModulesJson = {}
 export default defineConfig(({command}) => ({
   root: "web",
   plugins: [
-    react(),
     i18nextLoader({
       paths: ['./web/src/locales'],
       namespaceResolution: 'basename',
