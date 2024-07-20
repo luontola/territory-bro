@@ -160,7 +160,7 @@
     ;; Loan data is currently loaded from Google Sheets, which can easily take a couple of seconds.
     ;; Lazy loading is needed to load the territory list page faster and defer rendering the map.
     (let [map-html "<territory-list-map"
-          placeholder-icon "{fa-map-location-dot}"]
+          placeholder-icon "{map-location.svg}"]
       (testing "loans disabled -> show map immediately"
         (let [rendered (territory-list-page/view model)]
           (is (str/includes? rendered map-html))
@@ -176,7 +176,7 @@
       (is (= (html/normalize-whitespace
               "Territories
 
-               {fa-info-circle} Why so few territories?
+               {info.svg} Why so few territories?
                Only those territories which have been shared with you are currently shown.
                You will need to login to see the rest.
 
@@ -190,7 +190,7 @@
       (is (= (html/normalize-whitespace
               "Territories
 
-               {fa-info-circle} Why so few territories?
+               {info.svg} Why so few territories?
                Only those territories which have been shared with you are currently shown.
                You will need to request access to see the rest.
 

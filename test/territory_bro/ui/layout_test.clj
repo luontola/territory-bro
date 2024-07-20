@@ -116,11 +116,11 @@
             "Territory Bro
 
              🏠 Home
-             User guide {fa-external-link-alt}
-             News {fa-external-link-alt}
+             User guide {external-link.svg}
+             News {external-link.svg}
              🛟 Support
 
-             {fa-language} [English]
+             {language.svg} Change language [English]
              Login
 
              Sorry, something went wrong 🥺
@@ -133,12 +133,12 @@
             "the title - Territory Bro
 
              🏠 Home
-             User guide {fa-external-link-alt}
-             News {fa-external-link-alt}
+             User guide {external-link.svg}
+             News {external-link.svg}
              🛟 Support
 
-             {fa-language} [English]
-             {fa-user-large} John Doe
+             {language.svg} Change language [English]
+             {user.svg} John Doe
              Logout
 
              Sorry, something went wrong 🥺
@@ -162,8 +162,8 @@
              ⚙️ Settings
              🛟 Support
 
-             {fa-language} [English]
-             {fa-user-large} John Doe
+             {language.svg} Change language [English]
+             {user.svg} John Doe
              Logout
 
              Sorry, something went wrong 🥺
@@ -185,8 +185,8 @@
                📍 Territories
                🛟 Support
 
-               {fa-language} [English]
-               {fa-user-large} John Doe
+               {language.svg} Change language [English]
+               {user.svg} John Doe
                Logout
 
                Sorry, something went wrong 🥺
@@ -209,13 +209,13 @@
              🖨️ Printouts
              🛟 Support
 
-             {fa-language} [English]
+             {language.svg} Change language [English]
              Login
 
              Sorry, something went wrong 🥺
              Close
 
-             {fa-info-circle} Welcome to the demo
+             {info.svg} Welcome to the demo
              This demo is limited to only viewing a congregation. Some features are restricted.
 
              the title
@@ -299,18 +299,18 @@
 
   (testing "logged in"
     (is (= (html/normalize-whitespace
-            "{fa-user-large} John Doe
+            "{user.svg} John Doe
              Logout")
            (html/visible-text
             (layout/authentication-panel logged-in-model))))))
 
 (deftest language-selection-test
   (testing "the current language is shown using only its native name"
-    (is (= "{fa-language} [English]"
+    (is (= "{language.svg} Change language [English]"
            (html/visible-text
             (layout/language-selection anonymous-model))))
     (binding [i18n/*lang* :fi]
-      (is (= "{fa-language} [suomi]"
+      (is (= "{language.svg} Vaihda kieltä [suomi]"
              (html/visible-text
               (layout/language-selection anonymous-model))))))
 

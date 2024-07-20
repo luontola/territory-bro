@@ -173,7 +173,7 @@
 
           Territory loans CSV URL (optional) [https://docs.google.com/spreadsheets/123] Link to a Google Sheets spreadsheet published to the web as CSV
              
-            {fa-info-circle} Early Access Feature: Integrate with territory loans data from Google Sheets
+            {info.svg} Early Access Feature: Integrate with territory loans data from Google Sheets
 
             If you keep track of your territory loans using Google Sheets, it's possible to export the data from there
             and visualize it on the map on Territory Bro's Territories page. Eventually Territory Bro will handle the

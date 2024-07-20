@@ -4,7 +4,9 @@
 
 (ns territory-bro.ui.html-test
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer :all]
+            [hiccup.util :as hiccup.util]
             [hiccup2.core :as h]
             [territory-bro.ui.html :as html]))
 
@@ -36,22 +38,6 @@
     (is (= "☑️" (html/visible-text "<input type=\"checkbox\" data-test-icon=\"☑️\" checked value=\"true\">")))
     (is (= "x 🟢 y z" (html/visible-text "x<div data-test-icon=\"🟢\">y</div>z"))
         "spacing before, inside and after element"))
-
-  (testing "Font Awesome icons are replaced with the icon name"
-    (is (= "{fa-share-nodes}" (html/visible-text "<i class=\"fa-solid fa-share-nodes\"></i>"))
-        "icon style solid")
-    (is (= "{fa-share-nodes}" (html/visible-text "<i class=\"fa-regular fa-share-nodes\"></i>"))
-        "icon style regular")
-    (is (= "{fa-bell}" (html/visible-text "<i class=\"fa-bell\"></i>"))
-        "icon style missing")
-    (is (= "{fa-share-nodes}" (html/visible-text "<i attr1=\"\" class=\"fa-solid fa-share-nodes\" attr2=\"\"></i>"))
-        "more attributes")
-    (is (= "{fa-language}" (html/visible-text "<i class=\"fa-solid fa-language Layout-module__languageSelectionIcon--VcMOP\"></i>"))
-        "more classes")
-    (is (= "foo {fa-share-nodes} bar" (html/visible-text "foo<i class=\"fa-solid fa-share-nodes\"></i>bar"))
-        "add spacing around icon")
-    (is (= "" (html/visible-text "<i class=\"whatever\"></i>"))
-        "not an icon"))
 
   (testing "hides template elements"
     (is (= "" (html/visible-text "<template>stuff</template>")))
@@ -87,3 +73,30 @@
     (let [path (get html/public-resources "/assets/crop-mark-*.svg")]
       (is (some? path))
       (is (some? (io/resource (str "public" path)))))))
+
+(deftest inline-svg-test
+  (testing "returns the SVG image"
+    (let [svg (html/inline-svg "icons/info.svg")]
+      (is (hiccup.util/raw-string? svg))
+      (is (str/starts-with? svg "<svg"))
+      (is (str/includes? svg " class=\"svg-inline--fa\""))
+      (is (str/includes? svg " data-test-icon=\"{info.svg}\""))))
+
+  (testing "supports custom attributes"
+    (is (str/includes? (html/inline-svg "icons/info.svg" {:foo "bar"})
+                       " foo=\"bar\"")
+        "known at compile time")
+    (is (str/includes? (html/inline-svg "icons/info.svg" {:foo (str/upper-case "bar")})
+                       " foo=\"BAR\"")
+        "dynamically computed"))
+
+  (testing "supports extra CSS classes"
+    (is (str/includes? (html/inline-svg "icons/info.svg" {:class "custom-class"})
+                       " class=\"svg-inline--fa custom-class\"")))
+
+  (testing "supports titles using the SVG <title> element"
+    (is (str/includes? (html/inline-svg "icons/info.svg" {:title "The Title"})
+                       "<title>The Title</title>")))
+
+  (testing "error: file not found"
+    (is (nil? (html/inline-svg "no-such-file")))))

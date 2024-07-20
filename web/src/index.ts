@@ -13,8 +13,9 @@ import {TerritoryListMapElement} from "./maps/TerritoryListMap.ts";
 import {TerritoryMapElement} from "./maps/TerritoryMap.ts";
 import {TerritoryMiniMapElement} from "./maps/TerritoryMiniMap.ts";
 import "ol/ol.css";
-import "purecss/build/pure-min.css";
-import "purecss/build/grids-responsive-min.css";
+import "purecss/build/pure.css";
+import "purecss/build/grids-responsive.css";
+import "@fortawesome/fontawesome-free/css/svg-with-js.css"
 
 import.meta.glob('./**/*.module.css', {eager: true})
 import.meta.glob('./**/*.svg', {eager: true})

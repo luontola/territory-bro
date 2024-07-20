@@ -70,7 +70,7 @@
         :title (i18n/t "Navigation.opensInNewWindow")}
     title
     " "
-    [:i.fa-solid.fa-external-link-alt]]))
+    (html/inline-svg "icons/external-link.svg")]))
 
 (defn home-navigation []
   (let [styles (:Layout (css/modules))]
@@ -129,8 +129,9 @@
     (h/html
      [:form.pure-form {:method "get"}
       [:label
-       [:i.fa-solid.fa-language {:title (i18n/t "Navigation.changeLanguage")
-                                 :class (:languageSelectionIcon styles)}]
+       (html/inline-svg "icons/language.svg"
+                        {:title (i18n/t "Navigation.changeLanguage")
+                         :class (:languageSelectionIcon styles)})
        " "
        [:select#language-selection {:name "lang"
                                     :aria-label (i18n/t "Navigation.changeLanguage")
@@ -146,8 +147,9 @@
 
 (defn authentication-panel [{:keys [user login-url dev?]}]
   (if (some? user)
-    (h/html [:i.fa-solid.fa-user-large {:style {:font-size "1.25em"
-                                                :vertical-align "middle"}}]
+    (h/html (html/inline-svg "icons/user.svg"
+                             {:style {:font-size "1.25em"
+                                      :vertical-align "middle"}})
             " " (:name user) " "
             [:a#logout-button.pure-button {:href "/logout"}
              (i18n/t "Navigation.logout")])
@@ -182,25 +184,8 @@
                (str title " - "))
              "Territory Bro"]
             [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-            ;; https://fontawesome.com/v5/docs/web/use-with/wordpress/install-manually#set-up-svg-with-cdn
-            ;; https://cdnjs.com/libraries/font-awesome
-            [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/solid.min.js"
-                      :integrity "sha512-+fI924YJzeYFv7M0R29zJvRThPinSUOAmo5rpR9v6G4eWIbva/prHdZGSPN440vuf781/sOd/Fr+5ey0pqdW9w=="
-                      :defer true
-                      :crossorigin "anonymous"
-                      :referrerpolicy "no-referrer"}]
-            [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/regular.min.js"
-                      :integrity "sha512-T4H/jsKWzCRypzaFpVpYyWyBUhjKfp5e/hSD234qFO/h45wKAXba+0wG/iFRq1RhybT7dXxjPYYBYCLAwPfE0Q=="
-                      :defer true
-                      :crossorigin "anonymous"
-                      :referrerpolicy "no-referrer"}]
-            [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/fontawesome.min.js"
-                      :integrity "sha512-C8qHv0HOaf4yoA7ISuuCTrsPX8qjolYTZyoFRKNA9dFKnxgzIHnYTOJhXQIt6zwpIFzCrRzUBuVgtC4e5K1nhA=="
-                      :defer true
-                      :crossorigin "anonymous"
-                      :referrerpolicy "no-referrer"}]
             (head-injections)]
-           [:body {:class (:wait-for-icons styles)}
+           [:body
             [:nav.no-print {:class (:navbar styles)}
              (if (some? (:congregation model))
                (congregation-navigation model)

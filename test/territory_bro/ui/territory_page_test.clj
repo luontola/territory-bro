@@ -76,7 +76,7 @@
                Edit
                the do-not-calls
 
-             {fa-share-nodes} Share a link"
+             {share.svg} Share a link"
             map-interaction-help-test/default-visible-text)
            (-> (territory-page/view model)
                html/visible-text))))
@@ -120,16 +120,16 @@
 
 (deftest share-link-test
   (testing "closed"
-    (is (= "{fa-share-nodes} Share a link"
+    (is (= "{share.svg} Share a link"
            (-> (territory-page/share-link {:open? false})
                html/visible-text))))
 
   (testing "open"
     (is (= (html/normalize-whitespace
-            "{fa-share-nodes} Share a link
-             {fa-xmark}
+            "{share.svg} Share a link
+             {close.svg}
              People with this link will be able to view this territory map without logging in:
-             [https://territorybro.com/link] {fa-copy}")
+             [https://territorybro.com/link] {copy.svg}")
            (-> (territory-page/share-link {:open? true
                                            :link "https://territorybro.com/link"})
                html/visible-text)))))

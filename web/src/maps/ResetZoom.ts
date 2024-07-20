@@ -4,7 +4,7 @@
 
 import Control from "ol/control/Control";
 import i18n from "../i18n.ts";
-import minimizeSvg from '@fortawesome/fontawesome-free/svgs/solid/minimize.svg?raw';
+import resetZoomSvg from '@fortawesome/fontawesome-free/svgs/solid/minimize.svg?raw';
 import {parseFontAwesomeIcon} from "../font-awesome.ts";
 
 class ResetZoom extends Control {
@@ -18,11 +18,14 @@ class ResetZoom extends Control {
       resetZoom(super.getMap(), {duration: 500});
     }
 
+    const icon = parseFontAwesomeIcon(resetZoomSvg);
+    icon.style.verticalAlign = "text-bottom";
+
     const button = document.createElement("button");
     button.type = "button";
     button.title = i18n.t('Map.resetZoom');
     button.addEventListener("click", onClick);
-    button.appendChild(parseFontAwesomeIcon(minimizeSvg));
+    button.appendChild(icon);
 
     const element = this.element;
     element.className = 'ol-zoom-extent ol-unselectable ol-control';

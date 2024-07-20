@@ -4,7 +4,8 @@
 
 (ns territory-bro.ui.info-box
   (:require [hiccup2.core :as h]
-            [territory-bro.ui.css :as css]))
+            [territory-bro.ui.css :as css]
+            [territory-bro.ui.html :as html]))
 
 (defn view [{:keys [title]} content]
   (let [styles (:InfoBox (css/modules))]
@@ -12,7 +13,7 @@
      [:div {:class (:root styles)}
       (when (some? title)
         [:div {:class (:title styles)}
-         [:i.fa-solid.fa-info-circle]
+         (html/inline-svg "icons/info.svg")
          " "
          title])
       [:div {:class (:content styles)}

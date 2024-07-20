@@ -3,8 +3,11 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.html
-  (:require [clojure.string :as str]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [hiccup.util :as hiccup.util]
+            [hiccup2.core :as h]
             [reitit.core :as reitit]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response])
@@ -23,17 +26,6 @@
   ([s & more]
    (normalize-whitespace (str/join "\n" (cons s more)))))
 
-(defn- font-awesome-class? [class]
-  (str/starts-with? class "fa-"))
-
-(def ^:private font-awesome-icon-styles
-  #{"fa-duotone"
-    "fa-light"
-    "fa-regular"
-    "fa-sharp"
-    "fa-solid"
-    "fa-thin"})
-
 (defn visible-text [html]
   (-> (str html)
       ;; custom visualization using data-test-icon attribute
@@ -44,14 +36,6 @@
       ;; visualize select field's selected option
       (str/replace #"<option\b[^>]*\bselected\b.*?>(.*?)</option>" " [$1] ") ; keep selected option
       (str/replace #"<option\b.*?>(.*?)</option>" "") ; remove all other options
-      ;; visualize Font Awesome icons
-      (str/replace #"<i\b[^>]*\bclass=\"(fa-.*?)\".*?></i>"
-                   (fn [[_ class]]
-                     (let [class (->> (str/split class #" ")
-                                      (filter font-awesome-class?)
-                                      (remove font-awesome-icon-styles)
-                                      (str/join " "))]
-                       (str " {" class "} "))))
       ;; hide template elements
       (str/replace #"<template\b[^>]*>.*?</template>" " ")
       ;; strip all HTML tags
@@ -90,3 +74,34 @@
                       wildcard-url (str/replace url #"-[0-9a-f]{8}\." "-*.")] ; mapping for content-hashed filenames
                   [wildcard-url url])))
          (into {}))))
+
+(defn inline-svg* [path args]
+  {:pre [(string? path)
+         (or (nil? args) (map? args))]}
+  (if-some [resource (io/resource path)]
+    (let [args-tmp (str (h/html [:svg (-> args
+                                          (assoc :data-test-icon (str "{" (.getName (io/file path)) "}"))
+                                          (dissoc :class))]))
+          args-html (second (re-find #"(<svg.*?)>" args-tmp))]
+      ;; TODO: this is getting too complicated - use a HTML/XML transformation library like Enlive or Hickory
+      (-> (slurp resource)
+          (str/replace #"(class=\".*?)(\")" (if-some [class (:class args)]
+                                              (str "$1 "
+                                                   (str/escape class {\< "&lt;"
+                                                                      \> "&gt;"
+                                                                      \& "&amp;"})
+                                                   "$2")
+                                              "$1$2"))
+          (str/replace-first ">" (if-some [title (:title args)]
+                                   (str ">" (h/html [:title title]))
+                                   ">"))
+          (str/replace "<svg" args-html)))
+    (log/warn "territory-bro.ui.html/inline-svg: Resource not found:" path)))
+
+(defmacro inline-svg
+  ([path]
+   (when-some [svg (inline-svg* path nil)]
+     `(h/raw ~svg)))
+  ([path args]
+   ;; if the args are dynamic, this macro can't precompute the SVG at compile time
+   `(h/raw (inline-svg* ~path ~args))))

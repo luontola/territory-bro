@@ -12,11 +12,11 @@
   "Territory Bro
 
    🏠 Home
-   User guide {fa-external-link-alt}
-   News {fa-external-link-alt}
+   User guide {external-link.svg}
+   News {external-link.svg}
    🛟 Support
 
-   {fa-language} [English]
+   {language.svg} Change language [English]
    Login
 
    Sorry, something went wrong 🥺

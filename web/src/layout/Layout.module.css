@@ -81,7 +81,8 @@ select.languageSelection:not(:focus):hover {
 
 .languageSelectionIcon {
     font-size: 2em;
-    vertical-align: middle;
+    /* must use !important to override the Font Awesome defaults */
+    vertical-align: middle !important;
 }
 
 .languageSelectionIcon:has(+ select.languageSelection:not(:focus)) {
@@ -112,17 +113,6 @@ select.languageSelection:not(:focus):hover {
 
 h1 {
     margin-top: 0;
-}
-
-
-/* XXX: avoid layout flicker due to Font Awesome icons rendering asynchronously: https://docs.fontawesome.com/web/dig-deeper/svg-async */
-/* TODO: switch to using bare SVG, without JS: https://docs.fontawesome.com/web/add-icons/svg-bare */
-.wait-for-icons {
-    display: none;
-}
-
-:global(.fontawesome-i2svg-active) .wait-for-icons {
-    display: initial;
 }
 
 

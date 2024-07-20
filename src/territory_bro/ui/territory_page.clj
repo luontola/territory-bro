@@ -74,7 +74,7 @@
                             :class (when open?
                                      "pure-button-active")
                             :aria-expanded (if open? "true" "false")}
-       [:i.fa-solid.fa-share-nodes]
+       (html/inline-svg "icons/share.svg")
        " "
        (i18n/t "TerritoryPage.shareLink.button")]
 
@@ -85,7 +85,7 @@
                                :class (:closeButton styles)
                                :aria-label (i18n/t "TerritoryPage.shareLink.closePopup")
                                :title (i18n/t "TerritoryPage.shareLink.closePopup")}
-          [:i.fa-solid.fa-xmark]]
+          (html/inline-svg "icons/close.svg")]
 
          [:label {:htmlFor "share-link"}
           (i18n/t "TerritoryPage.shareLink.description")]
@@ -99,7 +99,7 @@
                                                 :data-clipboard-target "#share-link"
                                                 :aria-label (i18n/t "TerritoryPage.shareLink.copy")
                                                 :title (i18n/t "TerritoryPage.shareLink.copy")}
-           [:i.fa-solid.fa-copy]]]])])))
+           (html/inline-svg "icons/copy.svg")]]])])))
 
 (defn share-link--open! [request]
   (let [share (:body (api/share-territory-link request))]

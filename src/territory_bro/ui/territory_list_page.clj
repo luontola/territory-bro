@@ -78,7 +78,7 @@
                :hx-swap "outerHTML"
                :hx-trigger "load"
                :hx-get (str html/*page-path* "/map")}
-         [:i.fa-solid.fa-map-location-dot]]
+         (html/inline-svg "icons/map-location.svg")]
         (territory-list-map model))]
 
      [:form.pure-form {:class (:search styles)

@@ -7,7 +7,7 @@ import {boundingExtent, buffer, containsCoordinate, extend, extendCoordinate, ge
 import style from "./ShowMyLocation.module.css";
 import i18n from "../i18n.ts";
 import {parseFontAwesomeIcon} from "../font-awesome.ts";
-import locationArrowSvg from "@fortawesome/fontawesome-free/svgs/solid/location-arrow.svg?raw";
+import gpsLocationSvg from "@fortawesome/fontawesome-free/svgs/solid/location-arrow.svg?raw";
 import Geolocation from "ol/Geolocation";
 
 class ShowMyLocation extends Control {
@@ -65,11 +65,14 @@ class ShowMyLocation extends Control {
       }
     };
 
+    const icon = parseFontAwesomeIcon(gpsLocationSvg);
+    icon.style.verticalAlign = "text-bottom";
+
     const button = document.createElement("button");
     button.type = "button";
     button.title = i18n.t('Map.showMyLocation');
     button.addEventListener("click", onClick);
-    button.appendChild(parseFontAwesomeIcon(locationArrowSvg));
+    button.appendChild(icon);
 
     const element = this.element;
     element.className = `ol-unselectable ol-control ${style.showMyLocation}`;

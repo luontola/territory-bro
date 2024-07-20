@@ -24,12 +24,12 @@
            (map-interaction-help/model {:headers {"user-agent" "Mozilla/5.0 (iPhone; CPU iPhone OS 13_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Mobile/15E148 Safari/604.1"}})))))
 
 (def default-visible-text
-  "{fa-info-circle} How to interact with the maps?
+  "{info.svg} How to interact with the maps?
    Move: drag with two fingers / drag with the left mouse button
    Zoom: pinch or spread with two fingers / hold Ctrl and scroll with the mouse wheel
    Rotate: rotate with two fingers / hold Alt + Shift and drag with the left mouse button")
 (def mac-visible-text
-  "{fa-info-circle} How to interact with the maps?
+  "{info.svg} How to interact with the maps?
    Move: drag with two fingers / drag with the left mouse button
    Zoom: pinch or spread with two fingers / hold ⌘ Command and scroll with the mouse wheel
    Rotate: rotate with two fingers / hold ⌥ Option + ⇧ Shift and drag with the left mouse button")
