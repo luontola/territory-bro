@@ -3,10 +3,9 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import Control from "ol/control/Control";
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faMinimize} from '@fortawesome/free-solid-svg-icons';
-import {createRoot} from "react-dom/client";
 import i18n from "../i18n";
+import minimizeSvg from '@fortawesome/fontawesome-free/svgs/solid/minimize.svg?raw';
+import {parseFontAwesomeIcon} from "../font-awesome.ts";
 
 class ResetZoom extends Control {
   constructor(resetZoom: (map: any, opts: {}) => void) {
@@ -19,14 +18,15 @@ class ResetZoom extends Control {
       resetZoom(super.getMap(), {duration: 500});
     }
 
+    const button = document.createElement("button");
+    button.type = "button";
+    button.title = i18n.t('Map.resetZoom');
+    button.addEventListener("click", onClick);
+    button.appendChild(parseFontAwesomeIcon(minimizeSvg));
+
     const element = this.element;
     element.className = 'ol-zoom-extent ol-unselectable ol-control';
-
-    createRoot(element).render(
-      <button type="button" title={i18n.t('Map.resetZoom')} onClick={onClick}>
-        <FontAwesomeIcon icon={faMinimize} style={{verticalAlign: "text-bottom"}}/>
-      </button>
-    );
+    element.appendChild(button);
   }
 }
 

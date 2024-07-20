@@ -1,22 +1,22 @@
-// Copyright © 2015-2023 Esko Luontola
+// Copyright © 2015-2024 Esko Luontola
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import Control from "ol/control/Control";
 import {boundingExtent, buffer, containsCoordinate, extend, extendCoordinate, getHeight, getWidth} from "ol/extent";
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faLocationArrow} from '@fortawesome/free-solid-svg-icons';
-import {createRoot} from "react-dom/client";
 import style from "./ShowMyLocation.module.css";
 import i18n from "../i18n";
+import {parseFontAwesomeIcon} from "../font-awesome.ts";
+import locationArrowSvg from "@fortawesome/fontawesome-free/svgs/solid/location-arrow.svg?raw";
+import Geolocation from "ol/Geolocation";
 
 class ShowMyLocation extends Control {
-  constructor(startGeolocation: (map: any) => void) {
+  constructor(startGeolocation: (map: any) => Geolocation) {
     super({
       element: document.createElement('div')
     });
 
-    let geolocation = null;
+    let geolocation: null | Geolocation = null;
     const onClick = event => {
       event.preventDefault();
       const map = super.getMap();
@@ -27,7 +27,7 @@ class ShowMyLocation extends Control {
       }
 
       function zoomOutToFit(position) {
-        const view = map.getView();
+        const view = map!.getView();
         const extent = view.calculateExtent()
 
         // TODO: calculate distance to nearest edge, and zoom out if too close to it
@@ -60,19 +60,20 @@ class ShowMyLocation extends Control {
         zoomOutToFit(position);
       } else {
         geolocation.once('change:position', () => {
-          zoomOutToFit(geolocation.getPosition());
+          zoomOutToFit(geolocation!.getPosition());
         })
       }
     };
 
+    const button = document.createElement("button");
+    button.type = "button";
+    button.title = i18n.t('Map.showMyLocation');
+    button.addEventListener("click", onClick);
+    button.appendChild(parseFontAwesomeIcon(locationArrowSvg));
+
     const element = this.element;
     element.className = `ol-unselectable ol-control ${style.showMyLocation}`;
-
-    createRoot(element).render(
-      <button type="button" title={i18n.t('Map.showMyLocation')} onClick={onClick}>
-        <FontAwesomeIcon icon={faLocationArrow}/>
-      </button>
-    );
+    element.appendChild(button);
   }
 }
 
