@@ -9,17 +9,18 @@ import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
 import {
+  LocationOnly,
   makeControls,
   makeInteractions,
   makeStreetsLayer,
   makeView,
   MapRaster,
+  TerritoryPlus,
   territoryStrokeStyle,
   territoryTextStyle,
   wktToFeature,
   wktToFeatures
 } from "./mapOptions.ts";
-import {Congregation, Territory} from "../api.ts";
 import {OpenLayersMapElement} from "./OpenLayersMap.ts";
 import {isEmpty as isEmptyExtent} from "ol/extent";
 import {getPageState, setPageState} from "../util.ts";
@@ -58,7 +59,7 @@ export class TerritoryListMapElement extends OpenLayersMapElement {
 
     const congregation = {
       location: congregationBoundary
-    } as Congregation;
+    };
     const onClick = (territoryId: string) => {
       document.location.href = `${document.location.pathname}/${territoryId}`
     }
@@ -95,8 +96,8 @@ function loanableTerritoryFill(loaned, staleness) {
 }
 
 function initMap(element: HTMLDivElement,
-                 congregation: Congregation,
-                 territories: Territory[],
+                 congregation: LocationOnly,
+                 territories: TerritoryPlus[],
                  visibleTerritories: string[],
                  onClick: (string) => void): any {
   const congregationLayer = new VectorLayer({
@@ -130,7 +131,7 @@ function initMap(element: HTMLDivElement,
   const allTerritories = territories.map(territoryToFeature);
   setVisibleTerritories(visibleTerritories);
 
-  function territoryToFeature(territory: Territory) {
+  function territoryToFeature(territory: TerritoryPlus) {
     const feature = wktToFeature(territory.location);
     feature.set('territoryId', territory.id);
     feature.set('number', territory.number);
@@ -139,26 +140,20 @@ function initMap(element: HTMLDivElement,
     return feature;
   }
 
-  function setAllTerritories(territories: Territory[]) { // TODO: remove me after removing SPA
-    const features = territories.map(territoryToFeature);
-    territoryLayer.setSource(new VectorSource({features}))
-  }
-
   function setVisibleTerritories(territoryIds: string[]) {
     const visible = new Set(territoryIds);
     const features = allTerritories.filter(feature => visible.has(feature.get('territoryId')));
     territoryLayer.setSource(new VectorSource({features}))
   }
 
-
   const streetsLayer = makeStreetsLayer();
 
   function resetZoom(map, opts) {
     // by default fit all territories
-    let extent = territoryLayer.getSource().getExtent();
+    let extent = territoryLayer.getSource()!.getExtent();
     if (isEmptyExtent(extent)) {
       // if there are no territories, fit congregation boundaries
-      extent = congregationLayer.getSource().getExtent();
+      extent = congregationLayer.getSource()!.getExtent();
     }
     if (isEmptyExtent(extent)) {
       // if there is no congregation boundary, skip fitting (it would just throw an error)
@@ -214,10 +209,6 @@ function initMap(element: HTMLDivElement,
     },
     updateVisibleTerritories(territoryIds: string[]) {
       setVisibleTerritories(territoryIds);
-      resetZoom(map, {duration: 300});
-    },
-    updateTerritories(territories: Territory[]): void { // TODO: remove me after removing SPA
-      setAllTerritories(territories);
       resetZoom(map, {duration: 300});
     },
     unmount() {

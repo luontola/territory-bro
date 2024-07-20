@@ -7,6 +7,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Style from "ol/style/Style";
 import {
+  LocationOnly,
   makeControls,
   makeInteractions,
   makePrintoutView,
@@ -17,7 +18,6 @@ import {
   territoryStrokeStyle,
   wktToFeatures
 } from "./mapOptions.ts";
-import {Territory} from "../api.ts";
 import {OpenLayersMapElement} from "./OpenLayersMap.ts";
 import Feature from 'ol/Feature';
 import Geolocation from 'ol/Geolocation';
@@ -29,7 +29,7 @@ export class TerritoryMapElement extends OpenLayersMapElement {
     const territory = {
       location: this.getAttribute("territory-location")
     };
-    const map = initTerritoryMap(root, territory as Territory, printout)
+    const map = initTerritoryMap(root, territory, printout)
     map.setStreetsLayerRaster(mapRaster);
     return map
   }
@@ -46,7 +46,7 @@ function startGeolocation(map) {
 
   const accuracyFeature = new Feature();
   geolocation.on('change:accuracyGeometry', function () {
-    accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
+    accuracyFeature.setGeometry(geolocation.getAccuracyGeometry()!);
   });
 
   const positionFeature = new Feature();
@@ -64,7 +64,7 @@ function startGeolocation(map) {
   }));
   geolocation.on('change:position', function () {
     const coordinates = geolocation.getPosition();
-    positionFeature.setGeometry(coordinates ? new Point(coordinates) : null);
+    positionFeature.setGeometry(coordinates ? new Point(coordinates) : undefined);
   });
 
   new VectorLayer({
@@ -76,7 +76,7 @@ function startGeolocation(map) {
   return geolocation;
 }
 
-function initTerritoryMap(element: HTMLDivElement, territory: Territory, printout: boolean): any {
+function initTerritoryMap(element: HTMLDivElement, territory: LocationOnly, printout: boolean): any {
   const territoryWkt = territory.location;
 
   const territoryLayer = new VectorLayer({
@@ -92,7 +92,7 @@ function initTerritoryMap(element: HTMLDivElement, territory: Territory, printou
   const streetsLayer = makeStreetsLayer();
 
   function resetZoom(map, opts) {
-    map.getView().fit(territoryLayer.getSource().getExtent(), {
+    map.getView().fit(territoryLayer.getSource()!.getExtent(), {
       padding: [20, 20, 20, 20],
       minResolution: 1.25, // prevent zooming too close, show more surrounding for small territories
       ...opts,
@@ -103,7 +103,7 @@ function initTerritoryMap(element: HTMLDivElement, territory: Territory, printou
     target: element,
     pixelRatio: 2, // render at high DPI for printing
     layers: [streetsLayer, territoryLayer],
-    controls: makeControls({resetZoom, startGeolocation: printout ? null : startGeolocation}),
+    controls: makeControls({resetZoom, startGeolocation: printout ? undefined : startGeolocation}),
     interactions: makeInteractions(),
     view: printout ? makePrintoutView() : makeView({}),
   });

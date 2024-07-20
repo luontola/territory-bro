@@ -12,14 +12,14 @@ import Fill from "ol/style/Fill";
 import Circle from "ol/style/Circle";
 import {fromLonLat} from "ol/proj";
 import WKT from "ol/format/WKT";
-import {makeStreetsLayer, MapRaster, wktToFeatures} from "./mapOptions.ts";
-import {Congregation, Territory} from "../api.ts";
+import {LocationOnly, makeStreetsLayer, MapRaster, wktToFeatures} from "./mapOptions.ts";
 import {OpenLayersMapElement} from "./OpenLayersMap.ts";
+import MultiPolygon from "ol/geom/MultiPolygon";
 
 export class TerritoryMiniMapElement extends OpenLayersMapElement {
   createMap({root, mapRaster}) {
     const territory = {
-      location: this.getAttribute("territory-location"),
+      location: this.getAttribute("territory-location")!,
       enclosingMinimapViewport: this.getAttribute("enclosing-minimap-viewport"),
       enclosingRegion: this.getAttribute("enclosing-region"),
     };
@@ -27,20 +27,27 @@ export class TerritoryMiniMapElement extends OpenLayersMapElement {
       location: this.getAttribute("congregation-boundary"),
     };
     if (congregation.location) {
-      const map = initTerritoryMiniMap(root, territory as Territory, congregation as Congregation);
+      const map = initTerritoryMiniMap(root, territory, congregation);
       map.setStreetsLayerRaster(mapRaster);
       return map;
     }
   }
 }
 
-function getCenterPoint(multiPolygon: string) {
+function getCenterPoint(multiPolygonWkt: string) {
   const wkt = new WKT();
-  const centerPoint = wkt.readFeature(multiPolygon).getGeometry()!.getInteriorPoints().getPoint(0);
+  const multiPolygon = wkt.readFeature(multiPolygonWkt).getGeometry() as MultiPolygon;
+  const centerPoint = multiPolygon.getInteriorPoints().getPoint(0);
   return wkt.writeGeometry(centerPoint);
 }
 
-function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congregation: Congregation) {
+function initTerritoryMiniMap(element: HTMLElement,
+                              territory: {
+                                location: string;
+                                enclosingMinimapViewport: string | null;
+                                enclosingRegion: string | null
+                              },
+                              congregation: LocationOnly) {
   const territoryLayer = new VectorLayer({
     source: new VectorSource({
       features: wktToFeatures(getCenterPoint(territory.location))
@@ -97,7 +104,6 @@ function initTerritoryMiniMap(element: HTMLElement, territory: Territory, congre
   });
   map.getView().fit(viewportSource.getExtent(), {
     padding: [1, 1, 1, 1], // minimum padding where the congregation lines still show up
-    constrainResolution: false
   });
 
   return {

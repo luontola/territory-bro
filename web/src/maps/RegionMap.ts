@@ -8,17 +8,18 @@ import VectorSource from "ol/source/Vector";
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import {
+  LocationOnly,
   makeControls,
   makeInteractions,
   makePrintoutView,
   makeStreetsLayer,
   MapRaster,
+  Territory,
   territoryStrokeStyle,
   territoryTextStyle,
   wktToFeature,
   wktToFeatures
 } from "./mapOptions.ts";
-import {Congregation, Region, Territory} from "../api.ts";
 import {OpenLayersMapElement} from "./OpenLayersMap.ts";
 
 export class RegionMapElement extends OpenLayersMapElement {
@@ -27,13 +28,13 @@ export class RegionMapElement extends OpenLayersMapElement {
       location: this.getAttribute("region-location")
     };
     const territories = JSON.parse(this.getAttribute("territories") ?? "[]");
-    const map = initRegionMap(root, region as Region, territories);
+    const map = initRegionMap(root, region, territories);
     map.setStreetsLayerRaster(mapRaster);
     return map
   }
 }
 
-function initRegionMap(element: HTMLDivElement, region: Region | Congregation, territories: Territory[]): any {
+function initRegionMap(element: HTMLDivElement, region: LocationOnly, territories: Territory[]): any {
   const regionLayer = new VectorLayer({
     source: new VectorSource({
       features: wktToFeatures(region.location)
@@ -66,7 +67,7 @@ function initRegionMap(element: HTMLDivElement, region: Region | Congregation, t
   const streetsLayer = makeStreetsLayer();
 
   function resetZoom(map, opts) {
-    map.getView().fit(regionLayer.getSource().getExtent(), {
+    map.getView().fit(regionLayer.getSource()!.getExtent(), {
       padding: [5, 5, 5, 5],
       minResolution: 3.0,
       ...opts,

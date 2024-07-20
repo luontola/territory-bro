@@ -12,21 +12,21 @@ import {
   makePrintoutView,
   makeStreetsLayer,
   MapRaster,
+  Territory,
   territoryFillStyle,
   territoryStrokeStyle,
   territoryTextStyle,
   wktToFeatures
 } from "./mapOptions.ts";
-import {Territory} from "../api.ts";
 import {OpenLayersMapElement} from "./OpenLayersMap.ts";
 
 export class NeighborhoodMapElement extends OpenLayersMapElement {
   createMap({root, mapRaster}) {
     const territory = {
-      number: this.getAttribute("territory-number"),
-      location: this.getAttribute("territory-location")
+      number: this.getAttribute("territory-number")!,
+      location: this.getAttribute("territory-location")!
     };
-    const map = initNeighborhoodMap(root, territory as Territory)
+    const map = initNeighborhoodMap(root, territory)
     map.setStreetsLayerRaster(mapRaster);
     return map
   }
@@ -50,7 +50,7 @@ function initNeighborhoodMap(element: HTMLDivElement, territory: Territory): any
   const streetsLayer = makeStreetsLayer();
 
   function resetZoom(map, opts) {
-    map.getView().fit(territoryLayer.getSource().getExtent(), {
+    map.getView().fit(territoryLayer.getSource()!.getExtent(), {
       padding: [5, 5, 5, 5],
       minResolution: 3.0,
       ...opts,

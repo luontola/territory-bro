@@ -24,12 +24,26 @@ import ResetZoom from "./ResetZoom.ts";
 import ShowMyLocation from "./ShowMyLocation.ts";
 import {createXYZ} from "ol/tilegrid";
 import i18n from "../i18n.ts";
+import Geolocation from "ol/Geolocation";
 
+export type LocationOnly = {
+  location: string | null;
+}
+export type Territory = {
+  number: string;
+  location: string;
+}
+export type TerritoryPlus = Territory & {
+  id: string;
+  loaned?: boolean;
+  staleness?: number;
+}
 export type MapRaster = {
   id: string;
   name: string;
   makeSource: () => TileSource;
 };
+
 const transition = 0;
 export const mapRasters: MapRaster[] = [{
   id: 'osmhd',
@@ -80,7 +94,7 @@ export function findMapRasterById(mapRasterId: string) {
 
 export function wktToFeature(wkt: string): Feature {
   const feature = new WKT().readFeature(wkt);
-  feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
+  feature.getGeometry()!.transform('EPSG:4326', 'EPSG:3857');
   return feature;
 }
 
@@ -98,7 +112,10 @@ export function makeStreetsLayer() {
   });
 }
 
-export function makeControls({resetZoom, startGeolocation}) {
+export function makeControls({resetZoom, startGeolocation}: {
+  resetZoom: (map: any, opts: {}) => void,
+  startGeolocation?: (map: any) => Geolocation
+}) {
   const controls = controlDefaults({
     attribution: false,
     zoomOptions: {
@@ -122,7 +139,7 @@ export function makeInteractions() {
     new DragPan({
       condition: function (event) {
         if (event.originalEvent.pointerType === 'touch') {
-          return this.getPointerCount() === 2 || platformModifierKeyOnly(event);
+          return (this as DragPan).getPointerCount() === 2 || platformModifierKeyOnly(event);
         }
         return true
       }

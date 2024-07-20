@@ -8,7 +8,7 @@ import resources from 'virtual:i18next-loader';
 export {resources};
 
 export const languages = Object.entries(resources)
-  .map(([code, resource]) => ({
+  .map(([code, resource]: any) => ({
     code: code,
     englishName: resource.translation.englishName as string,
     nativeName: resource.translation.nativeName as string,
