@@ -12,9 +12,9 @@ import Fill from "ol/style/Fill";
 import Circle from "ol/style/Circle";
 import {fromLonLat} from "ol/proj";
 import WKT from "ol/format/WKT";
-import {makeStreetsLayer, MapRaster, wktToFeatures} from "./mapOptions";
-import {Congregation, Territory} from "../api";
-import {OpenLayersMapElement} from "./OpenLayersMap";
+import {makeStreetsLayer, MapRaster, wktToFeatures} from "./mapOptions.ts";
+import {Congregation, Territory} from "../api.ts";
+import {OpenLayersMapElement} from "./OpenLayersMap.ts";
 
 export class TerritoryMiniMapElement extends OpenLayersMapElement {
   createMap({root, mapRaster}) {

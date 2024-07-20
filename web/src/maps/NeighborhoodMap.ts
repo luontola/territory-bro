@@ -16,9 +16,9 @@ import {
   territoryStrokeStyle,
   territoryTextStyle,
   wktToFeatures
-} from "./mapOptions";
-import {Territory} from "../api";
-import {OpenLayersMapElement} from "./OpenLayersMap";
+} from "./mapOptions.ts";
+import {Territory} from "../api.ts";
+import {OpenLayersMapElement} from "./OpenLayersMap.ts";
 
 export class NeighborhoodMapElement extends OpenLayersMapElement {
   createMap({root, mapRaster}) {

@@ -4,8 +4,8 @@
 
 import "./htmx-with-extensions.js";
 import './i18n.ts';
-import {adjustDropdownWidthToContent} from "./layout/LanguageSelection.tsx";
-import {getPageState, setPageState} from "./util";
+import {adjustDropdownWidthToContent} from "./layout/LanguageSelection.ts";
+import {getPageState, setPageState} from "./util.ts";
 import {installCopyToClipboard} from "./clipboard.ts";
 import {NeighborhoodMapElement} from "./maps/NeighborhoodMap.ts";
 import {RegionMapElement} from "./maps/RegionMap.ts";

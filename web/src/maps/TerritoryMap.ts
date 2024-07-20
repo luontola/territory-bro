@@ -16,9 +16,9 @@ import {
   territoryFillStyle,
   territoryStrokeStyle,
   wktToFeatures
-} from "./mapOptions";
-import {Territory} from "../api";
-import {OpenLayersMapElement} from "./OpenLayersMap";
+} from "./mapOptions.ts";
+import {Territory} from "../api.ts";
+import {OpenLayersMapElement} from "./OpenLayersMap.ts";
 import Feature from 'ol/Feature';
 import Geolocation from 'ol/Geolocation';
 import Point from 'ol/geom/Point';

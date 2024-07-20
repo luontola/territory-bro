@@ -5,7 +5,7 @@
 import Control from "ol/control/Control";
 import {boundingExtent, buffer, containsCoordinate, extend, extendCoordinate, getHeight, getWidth} from "ol/extent";
 import style from "./ShowMyLocation.module.css";
-import i18n from "../i18n";
+import i18n from "../i18n.ts";
 import {parseFontAwesomeIcon} from "../font-awesome.ts";
 import locationArrowSvg from "@fortawesome/fontawesome-free/svgs/solid/location-arrow.svg?raw";
 import Geolocation from "ol/Geolocation";

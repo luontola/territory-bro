@@ -3,7 +3,7 @@
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 import Control from "ol/control/Control";
-import i18n from "../i18n";
+import i18n from "../i18n.ts";
 import minimizeSvg from '@fortawesome/fontawesome-free/svgs/solid/minimize.svg?raw';
 import {parseFontAwesomeIcon} from "../font-awesome.ts";
 

@@ -18,11 +18,11 @@ import {
   territoryTextStyle,
   wktToFeature,
   wktToFeatures
-} from "./mapOptions";
-import {Congregation, Territory} from "../api";
-import {OpenLayersMapElement} from "./OpenLayersMap";
+} from "./mapOptions.ts";
+import {Congregation, Territory} from "../api.ts";
+import {OpenLayersMapElement} from "./OpenLayersMap.ts";
 import {isEmpty as isEmptyExtent} from "ol/extent";
-import {getPageState, setPageState} from "../util";
+import {getPageState, setPageState} from "../util.ts";
 
 export class TerritoryListMapElement extends OpenLayersMapElement {
   static observedAttributes = ['visible-territories'];

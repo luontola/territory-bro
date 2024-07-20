@@ -20,10 +20,10 @@ import DragPan from "ol/interaction/DragPan";
 import MouseWheelZoom from "ol/interaction/MouseWheelZoom";
 import {platformModifierKeyOnly} from "ol/events/condition";
 import {fromLonLat} from "ol/proj";
-import ResetZoom from "./ResetZoom.tsx";
-import ShowMyLocation from "./ShowMyLocation.tsx";
+import ResetZoom from "./ResetZoom.ts";
+import ShowMyLocation from "./ShowMyLocation.ts";
 import {createXYZ} from "ol/tilegrid";
-import i18n from "../i18n";
+import i18n from "../i18n.ts";
 
 export type MapRaster = {
   id: string;

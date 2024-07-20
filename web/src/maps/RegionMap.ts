@@ -17,9 +17,9 @@ import {
   territoryTextStyle,
   wktToFeature,
   wktToFeatures
-} from "./mapOptions";
-import {Congregation, Region, Territory} from "../api";
-import {OpenLayersMapElement} from "./OpenLayersMap";
+} from "./mapOptions.ts";
+import {Congregation, Region, Territory} from "../api.ts";
+import {OpenLayersMapElement} from "./OpenLayersMap.ts";
 
 export class RegionMapElement extends OpenLayersMapElement {
   createMap({root, mapRaster}) {
