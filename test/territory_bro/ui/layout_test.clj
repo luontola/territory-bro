@@ -223,7 +223,12 @@
            (-> (h/html [:h1 "the title"]
                        [:p "the content"])
                (layout/page demo-congregation-model)
-               (html/visible-text))))))
+               (html/visible-text)))))
+
+  (testing "current language is defined in the <html> element"
+    (is (str/includes? (layout/page nil nil) "<html lang=\"en\">"))
+    (binding [i18n/*lang* :fi]
+      (is (str/includes? (layout/page nil nil) "<html lang=\"fi\">")))))
 
 
 ;;;; Components and helpers

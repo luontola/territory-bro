@@ -173,7 +173,7 @@
     (assert (= :html hiccup.util/*html-mode*))
     (str (h/html
           (hiccup.page/doctype :html5)
-          [:html {:lang "en"}
+          [:html {:lang (name i18n/*lang*)}
            [:head
             [:meta {:charset "utf-8"}]
             [:title
