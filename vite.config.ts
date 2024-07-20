@@ -12,6 +12,9 @@ import md5 from "crypto-js/md5";
 function serverExport() {
   return {
     name: 'server-export',
+    buildStart() {
+      this.addWatchFile(path.resolve(__dirname, 'web/src/server-export.ts'))
+    },
     writeBundle(options, bundle) {
       console.log(child_process.execSync("npm run server-export").toString());
     },
