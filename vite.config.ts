@@ -2,8 +2,8 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-import {defineConfig} from 'vitest/config'
-import i18nextLoader from 'vite-plugin-i18next-loader'
+import {defineConfig} from "vitest/config"
+import i18nextLoader from "vite-plugin-i18next-loader"
 import fs from "fs";
 import * as path from "path";
 import * as child_process from "child_process";

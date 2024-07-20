@@ -4,7 +4,7 @@
 
 import Control from "ol/control/Control";
 import i18n from "../i18n.ts";
-import resetZoomSvg from '@fortawesome/fontawesome-free/svgs/solid/minimize.svg?raw';
+import resetZoomSvg from "@fortawesome/fontawesome-free/svgs/solid/minimize.svg?raw";
 import {parseFontAwesomeIcon} from "../font-awesome.ts";
 
 class ResetZoom extends Control {

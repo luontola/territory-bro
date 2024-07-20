@@ -19,10 +19,10 @@ import {
   wktToFeatures
 } from "./mapOptions.ts";
 import {OpenLayersMapElement} from "./OpenLayersMap.ts";
-import Feature from 'ol/Feature';
-import Geolocation from 'ol/Geolocation';
-import Point from 'ol/geom/Point';
-import {Circle as CircleStyle, Fill, Stroke} from 'ol/style';
+import Feature from "ol/Feature";
+import Geolocation from "ol/Geolocation";
+import Point from "ol/geom/Point";
+import {Circle as CircleStyle, Fill, Stroke} from "ol/style";
 
 export class TerritoryMapElement extends OpenLayersMapElement {
   createMap({root, mapRaster, printout}) {
