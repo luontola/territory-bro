@@ -22,34 +22,68 @@
 (defn normalize-whitespace
   ([s]
    (-> s
-       (str/replace #"\s+" " ")
+       ;; Enlive replaces &nbsp; with \u00a0 before our character entity processing,
+       ;; so we need to guard against NBSP also here. It could also originally come as Unicode.
+       (str/replace #"[\s\u00a0]+" " ")
        (str/trim)))
   ([s & more]
    (normalize-whitespace (str/join "\n" (cons s more)))))
 
+(defn- visualize-data-test-icon-attribute [node]
+  ((en/substitute " " (:data-test-icon (:attrs node)) " " (:content node) " ")))
+
+(defn- visualize-input-element [node]
+  ((en/substitute " [" (:value (:attrs node)) "] ")))
+
+(defn- visualize-select-element [node]
+  (let [options (:content node)
+        first-option (:content (first options))
+        selected-options (into []
+                               (comp (filter (comp :selected :attrs))
+                                     (map :content)
+                                     (interpose ", "))
+                               options)
+        value (cond
+                (:multiple (:attrs node)) selected-options
+                (empty? selected-options) first-option
+                :else selected-options)]
+    ((en/substitute " [" value "] "))))
+
+(def ^:private hidden-element? #{:script :template})
+(def ^:private inline-element? #{:a :abbr :b :big :cite :code :em :i :small :span :strong :tt})
+
+(defn- strip-html-tags [node]
+  (cond
+    (string? node) node ; keep text nodes
+
+    (nil? (:tag node)) nil ; strip comments, doctype etc.
+
+    (hidden-element? (:tag node))
+    nil
+
+    (inline-element? (:tag node))
+    ((en/substitute (:content node)))
+
+    :else
+    ((en/substitute " " (:content node) " "))))
+
+(def ^:private html-character-entities
+  {"&nbsp;" " "
+   "&lt;" "<"
+   "&gt;" ">"
+   "&quot;" "\""
+   "&apos;" "'"
+   "&amp;" "&"})
+
 (defn visible-text [html]
-  (-> (str html)
-      ;; custom visualization using data-test-icon attribute
-      (str/replace #"<[^<>]+\bdata-test-icon=\"(.*?)\".*?>" " $1 ")
-      ;; visualize input field's text
-      (str/replace #"<input\b[^>]*\bvalue=\"(.*?)\".*?>" " [$1] ")
-      (str/replace #"<input\b.*?>" " [] ")
-      ;; visualize select field's selected option
-      (str/replace #"<option\b[^>]*\bselected\b.*?>(.*?)</option>" " [$1] ") ; keep selected option
-      (str/replace #"<option\b.*?>(.*?)</option>" "") ; remove all other options
-      ;; hide template elements
-      (str/replace #"<template\b[^>]*>.*?</template>" " ")
-      ;; strip all HTML tags
-      (str/replace #"</?(a|abbr|b|big|cite|code|em|i|small|span|strong|tt)\b.*?>" "") ; inline elements
-      (str/replace #"<[^>]*>" " ") ; block elements
-      ;; replace HTML character entities
-      (str/replace #"&nbsp;" " ")
-      (str/replace #"&lt;" "<") ; must be after stripping HTML tags, to avoid creating accidental elements
-      (str/replace #"&gt;" ">")
-      (str/replace #"&quot;" "\"")
-      (str/replace #"&apos;" "'")
-      (str/replace #"&amp;" "&") ; must be last, to avoid creating accidental character entities
-      (normalize-whitespace)))
+  (let [nodes (-> (en/html-snippet (str html))
+                  (en/transform [(en/attr? :data-test-icon)] visualize-data-test-icon-attribute)
+                  (en/transform [:input] visualize-input-element)
+                  (en/transform [:select] visualize-select-element)
+                  (en/transform [en/any-node] strip-html-tags))]
+    (-> (apply str (en/emit* nodes))
+        (str/replace #"&nbsp;|&lt;|&gt;|&quot;|&apos;|&amp;" html-character-entities)
+        (normalize-whitespace))))
 
 (defn response [html]
   (when (some? html)

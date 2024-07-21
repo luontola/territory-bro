@@ -17,30 +17,46 @@
   (testing "replaces html tags with whitespace"
     (is (= "one two" (html/visible-text "<p>one</p><p>two</p>"))))
 
-  (testing "input tags are replaced with their visible text"
-    (is (= "[the text]" (html/visible-text "<input type=\"text\" value=\"the text\" required>")))
-    (is (= "x [Value] y" (html/visible-text "x<input value=\"Value\">y"))
+  (testing "input elements are replaced with their visible text"
+    (is (= "[the text]" (html/visible-text "<input type=\"text\" value=\"the text\">")))
+    (is (= "x [stuff] y" (html/visible-text "x<input type=\"search\" value=\"stuff\">y"))
         "spacing before and after element")
-    (is (= "[]" (html/visible-text "<input type=\"text\">"))
-        "without explicit value field"))
+    (is (= "[]" (html/visible-text "<input>"))
+        "type and value attributes are optional"))
 
-  (testing "select tags are replaced with the selected option's visible text"
-    ;; TODO: do we need real html parsing, not just regex? consider enlive/html-snippet
-    #_(is (= "[Option 1]" (html/visible-text "<select name=\"foo\"><option value=\"opt1\">Option 1</option><option value=\"opt2\">Option 2</option></select>"))
+  (testing "select elements are replaced with the selected option's visible text"
+    (testing "- single select"
+      (is (= "[Option 1]" (html/visible-text "<select><option>Option 1</option><option>Option 2</option></select>"))
           "the first element is selected by default")
-    (is (= "[Option 2]" (html/visible-text "<select name=\"foo\"><option value=\"opt1\">Option 1</option><option value=\"opt2\" selected>Option 2</option></select>"))
-        "explicitly selected option")
-    (is (= "x [Option] y" (html/visible-text "x<select><option selected>Option</option></select>y"))
-        "spacing before and after element"))
+      (is (= "[Option 2]" (html/visible-text "<select><option>Option 1</option><option selected>Option 2</option></select>"))
+          "explicitly selected option")
+      (is (= "x [Option] y" (html/visible-text "x<select><option selected>Option</option></select>y"))
+          "spacing before and after element"))
+
+    (testing "- multiple select"
+      (is (= "[]" (html/visible-text "<select multiple><option>Option 1</option><option>Option 2</option></select>"))
+          "no element is selected by default")
+      (is (= "[Option 1, Option 2]" (html/visible-text "<select multiple><option selected>Option 1</option><option selected>Option 2</option></select>"))
+          "allows multiple selection")))
 
   (testing "elements with the data-test-icon attribute are replaced with its value"
-    (is (= "☑️" (html/visible-text "<input type=\"checkbox\" data-test-icon=\"☑️\" checked value=\"true\">")))
+    (is (= "☑️" (html/visible-text "<input data-test-icon=\"☑️\" type=\"checkbox\" checked value=\"true\">")))
     (is (= "x 🟢 y z" (html/visible-text "x<div data-test-icon=\"🟢\">y</div>z"))
-        "spacing before, inside and after element"))
+        "spacing before, inside and after the element")
+    (is (= "bar" (html/visible-text "<input data-test-icon=\"bar\" type=\"text\" value=\"foo\">"))
+        "data-test-icon takes precedence over the default visualization of form elements"))
 
   (testing "hides template elements"
-    (is (= "" (html/visible-text "<template>stuff</template>")))
-    (is (= "" (html/visible-text "<template id=\"xyz\">stuff</template>"))))
+    (is (= "" (html/visible-text "<template>stuff</template>"))))
+
+  (testing "hides script elements"
+    (is (= "" (html/visible-text "<script>stuff</script>"))))
+
+  (testing "hides comments"
+    (is (= "" (html/visible-text "<!-- comment -->"))))
+
+  (testing "hides doctype declarations"
+    (is (= "" (html/visible-text "<!DOCTYPE html>"))))
 
   (testing "replaces HTML character entities"
     (is (= "1 000" (html/visible-text "1&nbsp;000")))
@@ -59,7 +75,9 @@
              "z")))))
 
   (testing "normalizes whitespace"
-    (is (= "one two" (html/visible-text "  <p>one</p>\n<br><p>two</p>\n  "))))
+    (is (= "one two" (html/visible-text "  <p>one</p>\n<br><p>two</p>\n  \u00a0")))
+    (is (= "one two" (html/visible-text "one \u00a0 two"))
+        "U+00A0, NO-BREAK SPACE"))
 
   (testing "works for raw hiccup strings"
     (is (= "stuff" (html/visible-text (h/raw "<p>stuff</p>"))))))
