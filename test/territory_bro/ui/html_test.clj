@@ -6,7 +6,6 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer :all]
-            [hiccup.util :as hiccup.util]
             [hiccup2.core :as h]
             [territory-bro.ui.html :as html]))
 
@@ -80,7 +79,9 @@
       (is (hiccup.util/raw-string? svg))
       (is (str/starts-with? svg "<svg"))
       (is (str/includes? svg " class=\"svg-inline--fa\""))
-      (is (str/includes? svg " data-test-icon=\"{info.svg}\""))))
+      (is (str/includes? svg " data-test-icon=\"{info.svg}\""))
+      (is (str/includes? svg "/>")
+          "emits XML with self-closing tags, instead of HTML")))
 
   (testing "supports custom attributes"
     (is (str/includes? (html/inline-svg "icons/info.svg" {:foo "bar"})
@@ -88,15 +89,27 @@
         "known at compile time")
     (is (str/includes? (html/inline-svg "icons/info.svg" {:foo (str/upper-case "bar")})
                        " foo=\"BAR\"")
-        "dynamically computed"))
+        "dynamically computed")
+    (let [svg (html/inline-svg "icons/info.svg" {:foo 1, :bar 2})]
+      (is (and (str/includes? svg " foo=\"1\"")
+               (str/includes? svg " bar=\"2\""))
+          "multiple attributes")))
 
   (testing "supports extra CSS classes"
     (is (str/includes? (html/inline-svg "icons/info.svg" {:class "custom-class"})
                        " class=\"svg-inline--fa custom-class\"")))
 
+  (testing "supports style attribute as a map"
+    (is (str/includes? (html/inline-svg "icons/info.svg"
+                                        {:style {:font-size "1.25em"
+                                                 :vertical-align "middle"}})
+                       " style=\"font-size:1.25em;vertical-align:middle;\"")))
+
   (testing "supports titles using the SVG <title> element"
-    (is (str/includes? (html/inline-svg "icons/info.svg" {:title "The Title"})
-                       "<title>The Title</title>")))
+    (let [svg (html/inline-svg "icons/info.svg" {:title "The Title"})]
+      (is (str/includes? svg "<title>The Title</title>"))
+      (is (not (str/includes? svg "title="))
+          "should not add a title attribute - they do nothing in SVG")))
 
   (testing "error: file not found"
     (is (nil? (html/inline-svg "no-such-file")))))

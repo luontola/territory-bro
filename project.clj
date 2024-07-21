@@ -18,6 +18,7 @@
                  [com.layerware/hugsql "0.5.3"]
                  [compojure "1.7.1"]
                  [cprop "0.1.20"]
+                 [enlive "1.1.6"]
                  [hiccup "2.0.0-RC3"]
                  [hikari-cp "3.1.0"]
                  [io.nayuki/qrcodegen "1.8.0"]

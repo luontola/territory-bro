@@ -8,6 +8,7 @@
             [clojure.tools.logging :as log]
             [hiccup.util :as hiccup.util]
             [hiccup2.core :as h]
+            [net.cgrand.enlive-html :as en]
             [reitit.core :as reitit]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response])
@@ -75,28 +76,46 @@
                   [wildcard-url url])))
          (into {}))))
 
-(defn inline-svg* [path args]
-  {:pre [(string? path)
+;; XXX: Enlive always generates HTML and doesn't have a parameter for producing XML (SVG).
+;;      Couldn't get clojure.xml/emit-element to work with Enlive's nodes.
+;;      If net.cgrand.enlive-html/self-closing-tags were dynamic, we could use binding
+;;      to trick Enlive into generating XML. Using alter-var-root as the second best thing.
+;;      This may break when using -Dclojure.compiler.direct-linking=true.
+(alter-var-root (var en/self-closing-tags) (constantly (constantly true)))
+(defn- emit-xml [nodes]
+  (apply str (en/emit* nodes)))
+
+(defn- flatten-map [m]
+  (mapcat identity m))
+
+(defn inline-svg* [svg-path args]
+  {:pre [(string? svg-path)
          (or (nil? args) (map? args))]}
-  (if-some [resource (io/resource path)]
-    (let [args-tmp (str (h/html [:svg (-> args
-                                          (assoc :data-test-icon (str "{" (.getName (io/file path)) "}"))
-                                          (dissoc :class))]))
-          args-html (second (re-find #"(<svg.*?)>" args-tmp))]
-      ;; TODO: this is getting too complicated - use a HTML/XML transformation library like Enlive or Hickory
-      (-> (slurp resource)
-          (str/replace #"(class=\".*?)(\")" (if-some [class (:class args)]
-                                              (str "$1 "
-                                                   (str/escape class {\< "&lt;"
-                                                                      \> "&gt;"
-                                                                      \& "&amp;"})
-                                                   "$2")
-                                              "$1$2"))
-          (str/replace-first ">" (if-some [title (:title args)]
-                                   (str ">" (h/html [:title title]))
-                                   ">"))
-          (str/replace "<svg" args-html)))
-    (log/warn "territory-bro.ui.html/inline-svg: Resource not found:" path)))
+  (if-some [svg-resource (io/resource svg-path)]
+    (let [{:keys [class style title]} args
+          other-attrs (dissoc args :class :style :title)
+          set-data-test-icon-attr (en/set-attr :data-test-icon (str "{" (.getName (io/file svg-path)) "}"))
+          set-class-attr (if (some? class)
+                           (en/add-class class)
+                           identity)
+          set-style-attr (if (some? style)
+                           (en/set-attr :style (#'hiccup.compiler/render-style-map style))
+                           identity)
+          set-other-attrs (if-some [kvs (seq (flatten-map other-attrs))]
+                            (apply en/set-attr kvs)
+                            identity)
+          add-title-element (if (some? title)
+                              (en/prepend {:tag :title
+                                           :content [title]})
+                              identity)]
+      (-> (en/xml-resource svg-resource)
+          (en/transform [:svg] (comp set-data-test-icon-attr
+                                     set-class-attr
+                                     set-style-attr
+                                     set-other-attrs
+                                     add-title-element))
+          (emit-xml)))
+    (log/warn "territory-bro.ui.html/inline-svg: Resource not found:" svg-path)))
 
 (defmacro inline-svg
   ([path]
