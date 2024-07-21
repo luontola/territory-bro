@@ -37,7 +37,8 @@
       [:button.pure-button {:hx-get (str html/*page-path* "/do-not-calls/edit")
                             :hx-disabled-elt "this"
                             :type "button"
-                            :style "float: right; font-size: 70%;"}
+                            :style {:float "right"
+                                    :font-size "70%"}}
        (i18n/t "TerritoryPage.edit")])
     (:doNotCalls territory)]))
 
@@ -94,7 +95,8 @@
           [:input#share-link {:type "text"
                               :value link
                               :readonly true
-                              :style "color: unset; background-color: unset;"}]
+                              :style {:color "unset"
+                                      :background-color "unset"}}]
           [:button#copy-share-link.pure-button {:type "button"
                                                 :data-clipboard-target "#share-link"
                                                 :aria-label (i18n/t "TerritoryPage.shareLink.copy")
