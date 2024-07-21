@@ -109,11 +109,11 @@
                                            :content [title]})
                               identity)]
       (-> (en/xml-resource svg-resource)
-          (en/transform [:svg] (comp set-data-test-icon-attr
-                                     set-class-attr
-                                     set-style-attr
+          (en/transform [:svg] (comp add-title-element
                                      set-other-attrs
-                                     add-title-element))
+                                     set-style-attr
+                                     set-class-attr
+                                     set-data-test-icon-attr))
           (emit-xml)))
     (log/warn "territory-bro.ui.html/inline-svg: Resource not found:" svg-path)))
 

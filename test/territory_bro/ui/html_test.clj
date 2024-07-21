@@ -78,8 +78,10 @@
     (let [svg (html/inline-svg "icons/info.svg")]
       (is (hiccup.util/raw-string? svg))
       (is (str/starts-with? svg "<svg"))
-      (is (str/includes? svg " class=\"svg-inline--fa\""))
-      (is (str/includes? svg " data-test-icon=\"{info.svg}\""))
+      (is (str/includes? svg " class=\"svg-inline--fa\"")
+          "adds font-awesome CSS classes")
+      (is (str/includes? svg " data-test-icon=\"{info.svg}\"")
+          "adds data-test-icon attributes")
       (is (str/includes? svg "/>")
           "emits XML with self-closing tags, instead of HTML")))
 
@@ -93,7 +95,10 @@
     (let [svg (html/inline-svg "icons/info.svg" {:foo 1, :bar 2})]
       (is (and (str/includes? svg " foo=\"1\"")
                (str/includes? svg " bar=\"2\""))
-          "multiple attributes")))
+          "multiple attributes"))
+    (is (str/includes? (html/inline-svg "icons/info.svg" {:data-test-icon "✅"})
+                       " data-test-icon=\"✅\"")
+        "custom data-test-icon takes precedence over the default"))
 
   (testing "supports extra CSS classes"
     (is (str/includes? (html/inline-svg "icons/info.svg" {:class "custom-class"})
