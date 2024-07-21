@@ -64,7 +64,9 @@
     (is (= ">" (html/visible-text "&gt;")))
     (is (= "&" (html/visible-text "&amp;")))
     (is (= "\"" (html/visible-text "&quot;")))
-    (is (= "'" (html/visible-text "&apos;"))))
+    (is (= "'" (html/visible-text "&apos;")))
+    (is (= "&xxx;" (html/visible-text "&xxx;"))
+        "keeps unrecognized character entities"))
 
   (testing "inline elements will not add spacing to text"
     (is (= "xyz"

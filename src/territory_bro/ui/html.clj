@@ -68,11 +68,8 @@
     ((en/substitute " " (:content node) " "))))
 
 (def ^:private html-character-entities
-  {"&nbsp;" " "
-   "&lt;" "<"
+  {"&lt;" "<"
    "&gt;" ">"
-   "&quot;" "\""
-   "&apos;" "'"
    "&amp;" "&"})
 
 (defn visible-text [html]
@@ -82,7 +79,7 @@
                   (en/transform [:select] visualize-select-element)
                   (en/transform [en/any-node] strip-html-tags))]
     (-> (apply str (en/emit* nodes))
-        (str/replace #"&nbsp;|&lt;|&gt;|&quot;|&apos;|&amp;" html-character-entities)
+        (str/replace #"&\w+;" html-character-entities)
         (normalize-whitespace))))
 
 (defn response [html]
