@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -euo pipefail
 #: ${1:? Usage: $0 RELEASE_VERSION}
 DEFAULT_TAG=$(date +%Y-%m-%d)
 TAG="${1:-$DEFAULT_TAG}"

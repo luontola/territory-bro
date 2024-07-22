@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eux
+set -euxo pipefail
 
 export VITE_GIT_COMMIT=$(git rev-parse --short HEAD)
 
