@@ -43,32 +43,19 @@
                  wrap-current-user
                  wrap-http-response
                  wrap-json-api-compat]}
-
-   home-page/routes
-
-   join-page/routes
-
-   registration-page/routes
-
-   support-page/routes
-
-   open-share-page/routes
-
    auth0/routes
-
    congregation-page/routes
-
-   territory-list-page/routes ; must be before territory-page to avoid route conflicts
-
-   territory-page/routes
-
+   error-page/routes
+   home-page/routes
+   join-page/routes
+   open-share-page/routes
    printouts-page/routes
-
+   registration-page/routes
    settings-page/routes
-
    status-page/routes
-
-   error-page/routes])
+   support-page/routes
+   territory-list-page/routes ; must be before territory-page to avoid route conflicts
+   territory-page/routes])
 
 (def router (ring/router routes))
 
