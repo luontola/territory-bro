@@ -31,3 +31,8 @@ ENV GIT_COMMIT=$GIT_COMMIT
 
 ARG BUILD_TIMESTAMP
 ENV BUILD_TIMESTAMP=$BUILD_TIMESTAMP
+
+# The version number is not known at CI build time, but it's included
+# here as a reminder of its existence, and for use during a local build.
+ARG RELEASE_VERSION
+ENV RELEASE_VERSION=$RELEASE_VERSION

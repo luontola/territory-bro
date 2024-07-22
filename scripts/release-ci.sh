@@ -8,10 +8,21 @@ set -x
 
 docker pull "luontola/territory-bro:ci"
 
-git tag "$TAG"
+GIT_COMMIT=$(docker inspect "luontola/territory-bro:ci" | jq -r '.[0].Config.Env[] | select(startswith("GIT_COMMIT=")) | split("=")[1]')
 
-docker tag "luontola/territory-bro:ci" "luontola/territory-bro:$TAG"
-docker tag "luontola/territory-bro:ci" "luontola/territory-bro:latest"
+docker build \
+  -t "luontola/territory-bro:latest" \
+  --build-arg="RELEASE_VERSION=$TAG" \
+  --platform=linux/amd64 \
+  - <<EOF
+FROM luontola/territory-bro:ci
+ARG RELEASE_VERSION
+ENV RELEASE_VERSION=\$RELEASE_VERSION
+EOF
+
+git tag "$TAG" "$GIT_COMMIT"
+
+docker tag "luontola/territory-bro:latest" "luontola/territory-bro:$TAG"
 
 docker push "luontola/territory-bro:$TAG"
 docker push "luontola/territory-bro:latest"
