@@ -18,6 +18,7 @@
             [territory-bro.ui.printouts-page :as printouts-page]
             [territory-bro.ui.registration-page :as registration-page]
             [territory-bro.ui.settings-page :as settings-page]
+            [territory-bro.ui.status-page :as status-page]
             [territory-bro.ui.support-page :as support-page]
             [territory-bro.ui.territory-list-page :as territory-list-page]
             [territory-bro.ui.territory-page :as territory-page]))
@@ -64,6 +65,8 @@
    printouts-page/routes
 
    settings-page/routes
+
+   status-page/routes
 
    error-page/routes])
 
