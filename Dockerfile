@@ -25,3 +25,9 @@ ENTRYPOINT ["java", \
             "-XX:InitialRAMPercentage=70", "-XX:MaxRAMPercentage=70", \
             "-XX:+PrintCommandLineFlags", \
             "-jar", "territory-bro.jar"]
+
+ARG GIT_COMMIT
+ENV GIT_COMMIT=$GIT_COMMIT
+
+ARG BUILD_TIMESTAMP
+ENV BUILD_TIMESTAMP=$BUILD_TIMESTAMP

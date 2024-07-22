@@ -4,6 +4,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - GIT_COMMIT
+        - BUILD_TIMESTAMP
     image: luontola/territory-bro
     platform: linux/amd64
     environment:

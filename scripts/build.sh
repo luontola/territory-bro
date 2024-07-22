@@ -29,4 +29,6 @@ lein do kaocha fast slow, uberjar
 
 java -XX:DumpLoadedClassList=target/uberjar/classes.list -Dconf=test-config.edn -jar "target/uberjar/territory-bro.jar" app-cds-setup
 
+export GIT_COMMIT=$(git rev-parse HEAD)
+export BUILD_TIMESTAMP=$(date -Iseconds)
 docker compose build --pull app
