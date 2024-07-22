@@ -17,15 +17,11 @@ Start the database
 
 Start the application
 
-    docker compose up -d
+    docker compose up -d app
 
 The application will run at http://localhost:8080
 
-Stop the application
-
-    docker compose stop
-
-Stop the application and remove all data
+Stop the application (does not remove the database volume)
 
     docker compose down
 
@@ -38,39 +34,43 @@ The tools for developing this project are
 [Docker](https://www.docker.com/). It might also be useful to have the [PostgreSQL](https://www.postgresql.org/) command
 line tools, even if you run the database with Docker.
 
+Install dependencies
+
+    npm install
+
+Build the frontend assets for the backend (once or automatically)
+
+    npm run build
+    npm run autobuild
+
 Start the database
 
     docker compose up -d db
 
-Start the API backend
+Start the backend, it will run at http://localhost:8080
 
     lein repl
     (start)
 
-Restart the API backend, reloading code changes
+Restart the backend, reloading code changes
 
     (reset)
-
-Start the web frontend
-
-    npm install
-    npm run start
-
-The application will run at http://localhost:8080
 
 Run tests
 
     lein test
     npm run test
 
+Run tests selectively
+
+    lein kaocha fast
+    lein kaocha slow
+    lein kaocha e2e
+
 Run tests automatically on change
 
     lein autotest
     npm run autotest
-
-View storybook visual tests
-
-    npm run storybook
 
 Upgrade dependencies
 
@@ -86,21 +86,8 @@ Produce canonical XML for better diffs
 
     xmllint --c14n11 example.qgs > resources/template-territories.qgs
 
-### SSR UI
-
-The new server-side rendered UI will run at http://localhost:8081, and it shares session cookies
-with the SPA UI at http://localhost:8080
-
-Build the frontend assets for the backend
-
-    npm run build
-
-Build the CSS assets automatically during development
-
-    npm run autobuild
-
 ## License
 
-Copyright © 2015-2023, [Esko Luontola](https://www.luontola.fi)
+Copyright © 2015-2024, [Esko Luontola](https://www.luontola.fi)
 
 This software is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
