@@ -19,6 +19,7 @@
             [territory-bro.ui.registration-page :as registration-page]
             [territory-bro.ui.settings-page :as settings-page]
             [territory-bro.ui.status-page :as status-page]
+            [territory-bro.ui.sudo-page :as sudo-page]
             [territory-bro.ui.support-page :as support-page]
             [territory-bro.ui.territory-list-page :as territory-list-page]
             [territory-bro.ui.territory-page :as territory-page]))
@@ -53,6 +54,7 @@
    registration-page/routes
    settings-page/routes
    status-page/routes
+   sudo-page/routes
    support-page/routes
    territory-list-page/routes ; must be before territory-page to avoid route conflicts
    territory-page/routes])

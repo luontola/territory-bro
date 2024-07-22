@@ -379,3 +379,23 @@
         (b/wait-visible h1))
       (is (= "Access denied 🛑"
              (b/get-element-text *driver* h1))))))
+
+(deftest sudo-test
+  (with-per-test-postmortem
+    (testing "regular users cannot use sudo"
+      (doto *driver*
+        (b/go *base-url*)
+        (dev-login-as "Regular User")
+        (b/go (str *base-url* "/sudo"))
+        (b/wait-visible h1))
+      (is (= "Access denied 🛑"
+             (b/get-element-text *driver* h1))))
+
+    (testing "super users can use sudo"
+      (doto *driver*
+        (wait-and-click :logout-button)
+        (do-dev-login)
+        (b/go (str *base-url* "/sudo"))
+        (b/wait-visible h1))
+      (is (= "Territory Bro"
+             (b/get-element-text *driver* h1))))))
