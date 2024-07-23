@@ -18,11 +18,11 @@
 (defn model! [request]
   (let [demo? (= "demo" (get-in request [:params :congregation]))
         congregation (if demo?
-                       (:body (api/get-demo-congregation request))
-                       (:body (api/get-congregation request {})))
+                       (api/format-for-api (:body (api/get-demo-congregation request)))
+                       (api/format-for-api (:body (api/get-congregation request {}))))
         territory (if demo?
-                    (:body (api/get-demo-territory request))
-                    (:body (api/get-territory request)))]
+                    (api/format-for-api (:body (api/get-demo-territory request)))
+                    (api/format-for-api (:body (api/get-territory request))))]
     (-> {:territory territory
          :permissions (-> (:permissions congregation)
                           (select-keys [:editDoNotCalls :shareTerritoryLink]))}

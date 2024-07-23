@@ -59,9 +59,9 @@
 
 (defn model! [request]
   (let [demo? (= "demo" (get-in request [:params :congregation]))
-        congregation (:body (if demo?
-                              (api/get-demo-congregation request)
-                              (api/get-congregation request {})))
+        congregation (if demo?
+                       (api/format-for-api (:body (api/get-demo-congregation request)))
+                       (api/format-for-api (:body (api/get-congregation request {}))))
         regions (->> (:regions congregation)
                      (sort-by (comp str :name)
                               (CaseInsensitiveSimpleNaturalComparator/getInstance)))

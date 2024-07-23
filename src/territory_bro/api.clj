@@ -224,8 +224,7 @@
                 (cond-> (and fetch-loans?
                              (:view-congregation permissions))
                         (loan/enrich-territory-loans!))
-                (enrich-congregation-users conn)
-                (format-for-api)))))))
+                (enrich-congregation-users conn)))))))
 
 (defn get-demo-congregation [request]
   ;; anonymous access is allowed
@@ -236,8 +235,7 @@
           congregation (facade/get-demo-congregation state cong-id user-id)]
       (when-not congregation
         (forbidden! "No demo congregation"))
-      (ok (-> congregation
-              (format-for-api))))))
+      (ok congregation))))
 
 (defn get-territory [request]
   (auth/with-user-from-session request
@@ -254,8 +252,7 @@
           (require-logged-in!)
           (forbidden! "No territory access"))
         (ok (-> territory
-                (dissoc :congregation/id)
-                (format-for-api)))))))
+                (dissoc :congregation/id)))))))
 
 (defn get-demo-territory [request]
   ;; anonymous access is allowed
@@ -267,8 +264,7 @@
       (when-not territory
         (forbidden! "No demo congregation"))
       (ok (-> territory
-              (dissoc :congregation/id)
-              (format-for-api))))))
+              (dissoc :congregation/id))))))
 
 (defn- enrich-command [command]
   (let [user-id (current-user-id)]
