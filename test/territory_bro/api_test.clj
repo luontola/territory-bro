@@ -9,6 +9,8 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.test :refer :all]
+            [compojure.core :as compojure]
+            [compojure.route :as route]
             [ring.mock.request :refer :all]
             [ring.util.http-predicates :refer :all]
             [territory-bro.api :as api]
@@ -29,7 +31,7 @@
             [territory-bro.infra.json :as json]
             [territory-bro.infra.jwt :as jwt]
             [territory-bro.infra.jwt-test :as jwt-test]
-            [territory-bro.infra.router :as router]
+            [territory-bro.infra.middleware :as middleware]
             [territory-bro.infra.user :as user]
             [territory-bro.projections :as projections]
             [territory-bro.test.fixtures :refer [api-fixture db-fixture]])
@@ -71,8 +73,15 @@
       (update response :body parse-json)
       response)))
 
+(def test-routes
+  (-> (compojure/routes #'api/api-routes
+                        (route/not-found "Not Found"))
+      (middleware/wrap-base)))
+
 (defn app [request]
-  (-> request router/app read-body))
+  (-> request
+      test-routes
+      read-body))
 
 (defn assert-response [response predicate]
   (assert (predicate response)
@@ -424,10 +433,10 @@
                      (:response (ex-data e)))))))))))
 
 (deftest basic-routes-test
-  (testing "index"
-    (let [response (-> (request :get "/")
-                       app)]
-      (is (ok? response))))
+  #_(testing "index"
+      (let [response (-> (request :get "/")
+                         app)]
+        (is (ok? response))))
 
   (testing "page not found"
     (let [response (-> (request :get "/invalid")

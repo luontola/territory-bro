@@ -87,15 +87,9 @@
                                             "name" name
                                             "email" (str username "@example.com")})]
     (b/delete-cookies driver)
-    (if (str/ends-with? *base-url* ":8080") ; TODO: remove this conditional together with SPA UI
-      (doto driver ; SPA UI
-        (b/go (str *base-url* (str "/api/dev-login?" params)))
-        (b/wait-visible {:fn/text "Logged in"})
-        (b/go *base-url*)
-        (b/wait-visible :logout-button))
-      (doto driver ; SSR UI
-        (b/go (str *base-url* (str "/dev-login?" params)))
-        (b/wait-visible :logout-button)))))
+    (doto driver
+      (b/go (str *base-url* (str "/dev-login?" params)))
+      (b/wait-visible :logout-button))))
 
 (defn go-to-any-congregation [driver]
   (let [link [:congregation-list {:tag :a}]

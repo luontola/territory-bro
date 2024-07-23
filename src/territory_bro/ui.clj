@@ -5,7 +5,7 @@
 (ns territory-bro.ui
   (:require [reitit.ring :as ring]
             [ring.middleware.http-response :refer [wrap-http-response]]
-            [ring.util.http-response :refer :all]
+            [ring.util.http-response :as http-response]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.congregation-page :as congregation-page]
@@ -61,4 +61,4 @@
 
 (def router (ring/router routes))
 
-(def ring-handler (ring/ring-handler router))
+(def ring-handler (ring/ring-handler router (constantly (http-response/not-found "Not found"))))
