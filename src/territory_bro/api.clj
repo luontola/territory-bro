@@ -188,16 +188,13 @@
     (enrich-state-for-request state request)))
 
 
-(def ^:private validate-congregation-list (s/validator [CongregationSummary]))
-
 (defn list-congregations [request]
   (auth/with-user-from-session request
     (let [state (state-for-request request)]
       (ok (->> (congregation/get-my-congregations state (current-user-id))
                (map (fn [congregation]
                       {:id (:congregation/id congregation)
-                       :name (:congregation/name congregation)}))
-               (validate-congregation-list))))))
+                       :name (:congregation/name congregation)})))))))
 
 (defn- enrich-congregation-users [congregation conn]
   (let [user-ids (->> (:congregation/users congregation)
@@ -207,8 +204,6 @@
                     (assoc :id (:user/id user))
                     (assoc :sub (:user/subject user))))]
     (assoc congregation :congregation/users users)))
-
-(def ^:private validate-congregation (s/validator Congregation))
 
 (defn ^:dynamic get-congregation [request {:keys [fetch-loans?]}]
   (auth/with-user-from-session request
@@ -230,8 +225,7 @@
                              (:view-congregation permissions))
                         (loan/enrich-territory-loans!))
                 (enrich-congregation-users conn)
-                (format-for-api)
-                (validate-congregation)))))))
+                (format-for-api)))))))
 
 (defn get-demo-congregation [request]
   ;; anonymous access is allowed
@@ -243,10 +237,7 @@
       (when-not congregation
         (forbidden! "No demo congregation"))
       (ok (-> congregation
-              (format-for-api)
-              (validate-congregation))))))
-
-(def ^:private validate-territory (s/validator Territory))
+              (format-for-api))))))
 
 (defn get-territory [request]
   (auth/with-user-from-session request
@@ -264,8 +255,7 @@
           (forbidden! "No territory access"))
         (ok (-> territory
                 (dissoc :congregation/id)
-                (format-for-api)
-                (validate-territory)))))))
+                (format-for-api)))))))
 
 (defn get-demo-territory [request]
   ;; anonymous access is allowed
@@ -278,8 +268,7 @@
         (forbidden! "No demo congregation"))
       (ok (-> territory
               (dissoc :congregation/id)
-              (format-for-api)
-              (validate-territory))))))
+              (format-for-api))))))
 
 (defn- enrich-command [command]
   (let [user-id (current-user-id)]

@@ -73,9 +73,15 @@
       (update response :body parse-json)
       response)))
 
+(defn wrap-format-for-api [handler]
+  (fn [request]
+    (-> (handler request)
+        (update :body api/format-for-api))))
+
 (def test-routes
   (-> (compojure/routes #'api/api-routes
                         (route/not-found "Not Found"))
+      (wrap-format-for-api) ; avoid the need to change these tests, when we remove format-for-api from the handler functions
       (middleware/wrap-base)))
 
 (defn app [request]
