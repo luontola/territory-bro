@@ -14,7 +14,7 @@
             [schema.core :as s]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.congregation :as congregation]
-            [territory-bro.domain.facade :as facade]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.loan :as loan]
             [territory-bro.domain.share :as share]
             [territory-bro.gis.gis-user :as gis-user]
@@ -210,7 +210,7 @@
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
           user-id (current-user-id)
           state (state-for-request request)
-          congregation (facade/get-congregation state cong-id user-id)
+          congregation (dmz/get-congregation state cong-id user-id)
           permissions (:congregation/permissions congregation)]
       (when-not congregation
         ;; This function must support anonymous access for opened shares.
@@ -232,7 +232,7 @@
     (let [cong-id (:demo-congregation config/env)
           user-id (current-user-id)
           state (state-for-request request)
-          congregation (facade/get-demo-congregation state cong-id user-id)]
+          congregation (dmz/get-demo-congregation state cong-id user-id)]
       (when-not congregation
         (forbidden! "No demo congregation"))
       (ok congregation))))
@@ -244,7 +244,7 @@
             territory-id (UUID/fromString (get-in request [:params :territory]))
             user-id (current-user-id)
             state (state-for-request request)
-            territory (facade/get-territory conn state cong-id territory-id user-id)]
+            territory (dmz/get-territory conn state cong-id territory-id user-id)]
         (when-not territory
           ;; This function must support anonymous access for opened shares.
           ;; If anonymous user cannot see the congregation, first prompt them
@@ -260,7 +260,7 @@
     (let [cong-id (:demo-congregation config/env)
           territory-id (UUID/fromString (get-in request [:params :territory]))
           state (state-for-request request)
-          territory (facade/get-demo-territory state cong-id territory-id)]
+          territory (dmz/get-demo-territory state cong-id territory-id)]
       (when-not territory
         (forbidden! "No demo congregation"))
       (ok (-> territory
@@ -400,7 +400,7 @@
             territory-id (UUID/fromString (get-in request [:params :territory]))
             state (state-for-request request)
             share-key (share/demo-share-key territory-id)
-            territory (facade/get-demo-territory state cong-id territory-id)]
+            territory (dmz/get-demo-territory state cong-id territory-id)]
         (ok {:url (share/build-share-url share-key (:territory/number territory))
              :key share-key}))
       (do
@@ -409,7 +409,7 @@
               territory-id (UUID/fromString (get-in request [:params :territory]))
               state (state-for-request request)
               share-key (share/generate-share-key)
-              territory (facade/get-demo-territory state cong-id territory-id)]
+              territory (dmz/get-demo-territory state cong-id territory-id)]
           (db/with-db [conn {}]
             (dispatch! conn state {:command/type :share.command/create-share
                                    :share/id (UUID/randomUUID)
