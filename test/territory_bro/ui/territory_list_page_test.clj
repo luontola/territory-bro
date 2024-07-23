@@ -23,27 +23,27 @@
 
 (def model
   {:congregation-boundary (str (geometry/parse-wkt testdata/wkt-helsinki))
-   :territories [{:id (UUID. 0 1)
-                  :number "123"
-                  :addresses "the addresses"
-                  :region "the region"
-                  :meta {:foo "bar"}
-                  :location testdata/wkt-helsinki-rautatientori}]
+   :territories [{:territory/id (UUID. 0 1)
+                  :territory/number "123"
+                  :territory/addresses "the addresses"
+                  :territory/region "the region"
+                  :territory/meta {:foo "bar"}
+                  :territory/location testdata/wkt-helsinki-rautatientori}]
    :has-loans? false
-   :permissions {:configureCongregation true
-                 :editDoNotCalls true
-                 :gisAccess true
-                 :shareTerritoryLink true
-                 :viewCongregation true}})
+   :permissions {:configure-congregation true
+                 :edit-do-not-calls true
+                 :gis-access true
+                 :share-territory-link true
+                 :view-congregation true}})
 (def model-loans-enabled
   (replace-in model [:has-loans?] false true))
 (def model-loans-fetched
-  (update-in model-loans-enabled [:territories 0] merge {:loaned true
-                                                         :staleness 7}))
+  (update-in model-loans-enabled [:territories 0] merge {:territory/loaned? true
+                                                         :territory/staleness 7}))
 (def demo-model
   (assoc model
-         :permissions {:shareTerritoryLink true
-                       :viewCongregation true}))
+         :permissions {:share-territory-link true
+                       :view-congregation true}))
 (def anonymous-model
   (assoc model
          :congregation-boundary ""
@@ -59,7 +59,7 @@
           territory-id (at/create-territory! cong-id)
           request {:params {:congregation (str cong-id)}
                    :session {::auth/user {:user/id user-id}}}
-          fix #(replace-in % [:territories 0 :id] (UUID. 0 1) territory-id)]
+          fix #(replace-in % [:territories 0 :territory/id] (UUID. 0 1) territory-id)]
 
       (testing "default"
         (is (= (fix model)
@@ -103,10 +103,10 @@
 
   (testing "each row embeds the searchable text in lowercase"
     (let [model (-> model
-                    (replace-in [:territories 0 :number] "123" "123A")
-                    (replace-in [:territories 0 :region] "the region" "Some Region")
+                    (replace-in [:territories 0 :territory/number] "123" "123A")
+                    (replace-in [:territories 0 :territory/region] "the region" "Some Region")
                     ;; addresses are commonly multiline
-                    (replace-in [:territories 0 :addresses] "the addresses" "Some Street\nAnother Street\n"))]
+                    (replace-in [:territories 0 :territory/addresses] "the addresses" "Some Street\nAnother Street\n"))]
       ;; newline is used as the separator, so that you could not accidentally search from two
       ;; adjacent fields at the same time (one does not simply type a newline to a search field)
       (is (str/includes? (str (territory-list-page/view model))
@@ -121,18 +121,18 @@
              Search [] Clear
              Number   Region       Addresses
              -        the region   the addresses")
-           (-> (territory-list-page/view (replace-in model [:territories 0 :number] "123" ""))
+           (-> (territory-list-page/view (replace-in model [:territories 0 :territory/number] "123" ""))
                html/visible-text))))
 
   (testing "territory numbers are sorted naturally"
-    (let [territories (shuffle [{:number ""}
-                                {:number nil} ; nil should not crash, but be treated same as ""
-                                {:number "1"}
-                                {:number "2"} ; basic string sort would put this after "10"
-                                {:number "10"}
-                                {:number "10A"}
-                                {:number "10b"} ; sorting should be case-insensitive
-                                {:number "10C"}])]
+    (let [territories (shuffle [{:territory/number ""}
+                                {:territory/number nil} ; nil should not crash, but be treated same as ""
+                                {:territory/number "1"}
+                                {:territory/number "2"} ; basic string sort would put this after "10"
+                                {:territory/number "10"}
+                                {:territory/number "10A"}
+                                {:territory/number "10b"} ; sorting should be case-insensitive
+                                {:territory/number "10C"}])]
       (is (= (html/normalize-whitespace
               "Territories
 
@@ -153,7 +153,7 @@
     ;; If we used a <script type="application/json"> element, we would need to
     ;; guard against "</script>" strings. By using a <template> element, we can
     ;; rely on basic HTML encoding, which Hiccup does automatically.
-    (is (str/includes? (str (territory-list-page/view (replace-in model [:territories 0 :number] "123" "</script>")))
+    (is (str/includes? (str (territory-list-page/view (replace-in model [:territories 0 :territory/number] "123" "</script>")))
                        "&quot;number&quot;:&quot;&lt;/script&gt;&quot;")))
 
   (testing "loans lazy loading:"
@@ -211,4 +211,3 @@
       (is (= ::territory-page/page
              (-> (reitit/match-by-path router (str "/congregation/" uuid "/territories/" uuid))
                  :data :name))))))
-

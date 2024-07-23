@@ -20,17 +20,17 @@
 (defn model! [request {:keys [fetch-loans?]}]
   (let [demo? (= "demo" (get-in request [:params :congregation]))
         congregation (if demo?
-                       (api/format-for-api (:body (api/get-demo-congregation request)))
-                       (api/format-for-api (:body (api/get-congregation request {:fetch-loans? fetch-loans?}))))
-        congregation-boundary (->> (:congregationBoundaries congregation)
-                                   (mapv (comp geometry/parse-wkt :location))
+                       (:body (api/get-demo-congregation request))
+                       (:body (api/get-congregation request {:fetch-loans? fetch-loans?})))
+        congregation-boundary (->> (:congregation/congregation-boundaries congregation)
+                                   (mapv (comp geometry/parse-wkt :congregation-boundary/location))
                                    ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
                                    (geometry/union)
                                    (str))]
     {:congregation-boundary congregation-boundary
-     :territories (:territories congregation)
-     :has-loans? (some? (:loansCsvUrl congregation))
-     :permissions (:permissions congregation)}))
+     :territories (:congregation/territories congregation)
+     :has-loans? (some? (:congregation/loans-csv-url congregation))
+     :permissions (:congregation/permissions congregation)}))
 
 
 (defn limited-visibility-help []
@@ -57,8 +57,13 @@
     [:template.json-data
      (json/write-value-as-string
       {:congregationBoundary congregation-boundary
-       :territories (map #(select-keys % [:id :number :location :loaned :staleness])
-                         territories)})]]))
+       :territories (mapv (fn [territory]
+                            {:id (:territory/id territory)
+                             :number (:territory/number territory)
+                             :location (:territory/location territory)
+                             :loaned (:territory/loaned? territory)
+                             :staleness (:territory/staleness territory)})
+                          territories)})]]))
 
 (defn territory-list-map! [request]
   (territory-list-map (model! request {:fetch-loans? true})))
@@ -68,7 +73,7 @@
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
      [:h1 (i18n/t "TerritoryListPage.title")]
-     (when-not (:viewCongregation permissions)
+     (when-not (:view-congregation permissions)
        (limited-visibility-help))
 
      [:div {:class (:map styles)}
@@ -101,22 +106,22 @@
         [:th (i18n/t "Territory.region")]
         [:th (i18n/t "Territory.addresses")]]]
       [:tbody
-       (for [territory (sort-by (comp str :number)
+       (for [territory (sort-by (comp str :territory/number)
                                 (CaseInsensitiveSimpleNaturalComparator/getInstance)
                                 territories)]
-         [:tr {:data-territory-id (:id territory)
-               :data-searchable (-> (str/join "\n" [(:number territory)
-                                                    (:region territory)
-                                                    (:addresses territory)])
+         [:tr {:data-territory-id (:territory/id territory)
+               :data-searchable (-> (str/join "\n" [(:territory/number territory)
+                                                    (:territory/region territory)
+                                                    (:territory/addresses territory)])
                                     (str/lower-case)
                                     (str/trim))}
           [:td {:class (:number styles)}
-           [:a {:href (str html/*page-path* "/" (:id territory))}
-            (if (str/blank? (:number territory))
+           [:a {:href (str html/*page-path* "/" (:territory/id territory))}
+            (if (str/blank? (:territory/number territory))
               "-"
-              (:number territory))]]
-          [:td (:region territory)]
-          [:td (:addresses territory)]])]])))
+              (:territory/number territory))]]
+          [:td (:territory/region territory)]
+          [:td (:territory/addresses territory)]])]])))
 
 (defn view! [request]
   (view (model! request {:fetch-loans? false})))
