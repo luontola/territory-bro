@@ -20,23 +20,23 @@
            (java.util UUID)))
 
 (def default-model
-  {:congregation {:id (UUID. 0 1)
-                  :name "Example Congregation"
-                  :location (str (geometry/parse-wkt testdata/wkt-helsinki))
-                  :timezone testdata/timezone-helsinki}
-   :regions [{:id (UUID. 0 2)
-              :name "the region"
-              :location testdata/wkt-south-helsinki}]
-   :territories [{:id (UUID. 0 3)
-                  :number "123"
-                  :addresses "the addresses"
-                  :region "the region"
-                  :meta {:foo "bar"}
-                  :location testdata/wkt-helsinki-rautatientori}]
+  {:congregation {:congregation/id (UUID. 0 1)
+                  :congregation/name "Example Congregation"
+                  :congregation/location (str (geometry/parse-wkt testdata/wkt-helsinki))
+                  :congregation/timezone testdata/timezone-helsinki}
+   :regions [{:region/id (UUID. 0 2)
+              :region/name "the region"
+              :region/location testdata/wkt-south-helsinki}]
+   :territories [{:territory/id (UUID. 0 3)
+                  :territory/number "123"
+                  :territory/addresses "the addresses"
+                  :territory/region "the region"
+                  :territory/meta {:foo "bar"}
+                  :territory/location testdata/wkt-helsinki-rautatientori}]
    :card-minimap-viewports [testdata/wkt-helsinki]
    :form {:template "TerritoryCard"
           :language "en"
-          :mapRaster "osmhd"
+          :map-raster "osmhd"
           :regions #{(UUID. 0 1)} ; congregation boundary is shown first in the regions list
           :territories #{(UUID. 0 3)}}
    :mac? false})
@@ -45,7 +45,7 @@
   (assoc default-model
          :form {:template "NeighborhoodCard"
                 :language "fi"
-                :mapRaster "mmlTaustakartta"
+                :map-raster "mmlTaustakartta"
                 :regions #{(UUID. 0 4)
                            (UUID. 0 5)}
                 :territories #{(UUID. 0 6)
@@ -53,8 +53,8 @@
 
 (def demo-model
   (-> default-model
-      (replace-in [:congregation :id] (UUID. 0 1) "demo")
-      (replace-in [:congregation :name] "Example Congregation" "Demo Congregation")
+      (replace-in [:congregation :congregation/id] (UUID. 0 1) "demo")
+      (replace-in [:congregation :congregation/name] "Example Congregation" "Demo Congregation")
       (replace-in [:form :regions] #{(UUID. 0 1)} #{"demo"})))
 
 (deftest ^:slow model!-test
@@ -82,7 +82,7 @@
       (testing "every form value changed"
         (let [request (update request :params merge {:template "NeighborhoodCard"
                                                      :language "fi"
-                                                     :mapRaster "mmlTaustakartta"
+                                                     :map-raster "mmlTaustakartta"
                                                      :regions [(str (UUID. 0 4))
                                                                (str (UUID. 0 5))]
                                                      :territories [(str (UUID. 0 6))

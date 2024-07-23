@@ -60,32 +60,33 @@
 (defn model! [request]
   (let [demo? (= "demo" (get-in request [:params :congregation]))
         congregation (if demo?
-                       (api/format-for-api (:body (api/get-demo-congregation request)))
-                       (api/format-for-api (:body (api/get-congregation request {}))))
-        regions (->> (:regions congregation)
-                     (sort-by (comp str :name)
+                       (:body (api/get-demo-congregation request))
+                       (:body (api/get-congregation request {})))
+        regions (->> (:congregation/regions congregation)
+                     (sort-by (comp str :region/name)
                               (CaseInsensitiveSimpleNaturalComparator/getInstance)))
-        territories (->> (:territories congregation)
-                         (sort-by (comp str :number)
+        territories (->> (:congregation/territories congregation)
+                         (sort-by (comp str :territory/number)
                                   (CaseInsensitiveSimpleNaturalComparator/getInstance)))
         default-params {:template (:id (first templates))
                         :language (name i18n/*lang*)
-                        :mapRaster maps/default-for-quality
-                        :regions (str (:id congregation)) ; congregation boundary is shown first in the regions list
-                        :territories (str (:id (first territories)))}
-        congregation-boundary (->> (:congregationBoundaries congregation)
-                                   (mapv (comp geometry/parse-wkt :location))
+                        :map-raster maps/default-for-quality
+                        :regions (str (:congregation/id congregation)) ; congregation boundary is shown first in the regions list
+                        :territories (str (:territory/id (first territories)))}
+        congregation-boundary (->> (:congregation/congregation-boundaries congregation)
+                                   (mapv (comp geometry/parse-wkt :congregation-boundary/location))
                                    ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
                                    (geometry/union))]
-    (-> {:congregation (-> (select-keys congregation [:id :name])
-                           (assoc :location (str congregation-boundary))
+    (-> {:congregation (-> (select-keys congregation [:congregation/id :congregation/name])
+                           (assoc :congregation/location (str congregation-boundary))
                            ;; TODO: the timezone could be already precalculated in the state (when it's needed elsewhere, e.g. when recording loans)
-                           (assoc :timezone (geometry/timezone congregation-boundary)))
+                           (assoc :congregation/timezone (geometry/timezone congregation-boundary)))
          :regions regions
          :territories territories
-         :card-minimap-viewports (mapv :location (:cardMinimapViewports congregation))
+         :card-minimap-viewports (->> (:congregation/card-minimap-viewports congregation)
+                                      (mapv :card-minimap-viewport/location))
          :form (-> (merge default-params (:params request))
-                   (select-keys [:template :language :mapRaster :regions :territories])
+                   (select-keys [:template :language :map-raster :regions :territories])
                    (update :regions parse-uuid-multiselect)
                    (update :territories parse-uuid-multiselect))}
         (merge (map-interaction-help/model request)))))
@@ -96,8 +97,11 @@
         template (->> templates
                       (filter #(= (:template form) (:id %)))
                       (first))
-        print-date (LocalDate/now (.withZone *clock* (:timezone congregation)))
-        congregation-and-regions (concat [congregation] regions)]
+        print-date (LocalDate/now (.withZone *clock* (:congregation/timezone congregation)))
+        congregation-and-regions (concat [{:region/id (:congregation/id congregation)
+                                           :region/name (:congregation/name congregation)
+                                           :region/location (:congregation/location congregation)}]
+                                         regions)]
     (h/html
      [:div.no-print
       [:h1 (i18n/t "PrintoutPage.title")]
@@ -138,11 +142,11 @@
 
         [:div.pure-g
          [:div.pure-u-1.pure-u-md-1-2.pure-u-lg-1-3
-          [:label {:for "mapRaster"} (i18n/t "PrintoutPage.mapRaster")]
-          [:select#mapRaster.pure-input-1 {:name "mapRaster"}
+          [:label {:for "map-raster"} (i18n/t "PrintoutPage.mapRaster")]
+          [:select#map-raster.pure-input-1 {:name "map-raster"}
            (for [{:keys [id name]} (maps/map-rasters)]
              [:option {:value id
-                       :selected (= id (:mapRaster form))}
+                       :selected (= id (:map-raster form))}
               name])]]]
 
         [:div.pure-g {:style (when-not (= :region (:type template))
@@ -152,7 +156,7 @@
           [:select#regions.pure-input-1 {:name "regions"
                                          :multiple true
                                          :size "7"}
-           (for [{:keys [id name]} congregation-and-regions]
+           (for [{:region/keys [id name]} congregation-and-regions]
              [:option {:value id
                        :selected (contains? (:regions form) id)}
               name])]]]
@@ -164,7 +168,7 @@
           [:select#territories.pure-input-1 {:name "territories"
                                              :multiple true
                                              :size "7"}
-           (for [{:keys [id number region]} territories]
+           (for [{:territory/keys [id number region]} territories]
              [:option {:value id
                        :selected (contains? (:territories form) id)}
               number
@@ -177,29 +181,31 @@
           (doall ; binding needs eager evaluation
            (case (:type template)
              :territory
-             (let [region-boundaries (mapv (comp geometry/parse-wkt :location) regions)
+             (let [region-boundaries (mapv (comp geometry/parse-wkt :region/location) regions)
                    minimap-viewport-boundaries (mapv geometry/parse-wkt card-minimap-viewports)]
                (for [territory territories
-                     :when (contains? (:territories form) (:id territory))]
-                 (let [territory-boundary (geometry/parse-wkt (:location territory))
+                     :when (contains? (:territories form) (:territory/id territory))]
+                 (let [territory-boundary (geometry/parse-wkt (:territory/location territory))
                        enclosing-region (str (geometry/find-enclosing territory-boundary region-boundaries))
                        enclosing-minimap-viewport (str (geometry/find-enclosing territory-boundary minimap-viewport-boundaries))]
                    (template-fn {:territory territory
-                                 :congregation-boundary (:location congregation)
+                                 :congregation-boundary (:congregation/location congregation)
                                  :enclosing-region enclosing-region
                                  :enclosing-minimap-viewport enclosing-minimap-viewport
-                                 :map-raster (:mapRaster form)
+                                 :map-raster (:map-raster form)
                                  :print-date print-date}))))
 
              :region
              (let [territories (->> territories
-                                    (mapv #(select-keys % [:number :location]))
+                                    (mapv (fn [territory]
+                                            {:number (:territory/number territory)
+                                             :location (:territory/location territory)}))
                                     (json/write-value-as-string))] ; for improved performance, avoid serializing multiple times
                (for [region congregation-and-regions
-                     :when (contains? (:regions form) (:id region))]
+                     :when (contains? (:regions form) (:region/id region))]
                  (template-fn {:region region
                                :territories territories
-                               :map-raster (:mapRaster form)
+                               :map-raster (:map-raster form)
                                :print-date print-date})))))))]
 
      [:div.no-print

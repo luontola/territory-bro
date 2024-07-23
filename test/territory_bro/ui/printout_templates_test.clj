@@ -20,11 +20,11 @@
              html/visible-text))))
 
 (def territory-printout-model
-  {:territory {:id (UUID. 0 1)
-               :number "123"
-               :addresses "The Addresses"
-               :region "The Region"
-               :location "MULTIPOLYGON(territory)"}
+  {:territory {:territory/id (UUID. 0 1)
+               :territory/number "123"
+               :territory/addresses "The Addresses"
+               :territory/region "The Region"
+               :territory/location "MULTIPOLYGON(territory)"}
    :congregation-boundary "MULTIPOLYGON(congregation boundary)"
    :enclosing-region "MULTIPOLYGON(region)"
    :enclosing-minimap-viewport "POLYGON(minimap viewport)"
@@ -32,8 +32,8 @@
    :print-date (LocalDate/of 2024 7 10)})
 
 (def region-printout-model
-  {:region {:name "The Region"
-            :location "MULTIPOLYGON(region)"}
+  {:region {:region/name "The Region"
+            :region/location "MULTIPOLYGON(region)"}
    :territories "[{\"number\":\"123\",\"location\":\"MULTIPOLYGON(territory)\"}]"
    :map-raster "osmhd"
    :print-date (LocalDate/of 2024 7 10)})

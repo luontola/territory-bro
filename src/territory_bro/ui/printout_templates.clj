@@ -48,7 +48,7 @@
    [:div {:hx-target "this"
           :hx-swap "outerHTML"
           :hx-trigger "load"
-          :hx-get (str html/*page-path* "/qr-code/" (:id territory))}]))
+          :hx-get (str html/*page-path* "/qr-code/" (:territory/id territory))}]))
 
 
 (defn territory-card [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date]}]
@@ -58,7 +58,7 @@
       [:div {:class (:root styles)}
 
        [:div {:class (:minimap styles)}
-        [:territory-mini-map {:territory-location (:location territory)
+        [:territory-mini-map {:territory-location (:territory/location territory)
                               :congregation-boundary congregation-boundary
                               :enclosing-region enclosing-region
                               :enclosing-minimap-viewport enclosing-minimap-viewport
@@ -66,20 +66,20 @@
 
        [:div {:class (:header styles)}
         [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
-        [:div {:class (:region styles)} (:region territory)]]
+        [:div {:class (:region styles)} (:territory/region territory)]]
 
-       [:div {:class (:number styles)} (:number territory)]
+       [:div {:class (:number styles)} (:territory/number territory)]
 
        [:div {:class (:map styles)}
         (print-date-notice
          print-date
-         [:territory-map {:territory-location (:location territory)
+         [:territory-map {:territory-location (:territory/location territory)
                           :map-raster map-raster
                           :printout true}])]
 
        [:div {:class (:addresses styles)}
         [:div {:class (:qrCode styles)} (territory-qr-code territory)]
-        (:addresses territory)]
+        (:territory/addresses territory)]
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
 
@@ -91,7 +91,7 @@
       [:div {:class (:root styles)}
 
        [:div {:class (:minimap styles)}
-        [:territory-mini-map {:territory-location (:location territory)
+        [:territory-mini-map {:territory-location (:territory/location territory)
                               :congregation-boundary congregation-boundary
                               :enclosing-region enclosing-region
                               :enclosing-minimap-viewport enclosing-minimap-viewport
@@ -99,14 +99,14 @@
 
        [:div {:class (:header styles)}
         [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
-        [:div {:class (:region styles)} (:region territory)]]
+        [:div {:class (:region styles)} (:territory/region territory)]]
 
-       [:div {:class (:number styles)} (:number territory)]
+       [:div {:class (:number styles)} (:territory/number territory)]
 
        [:div {:class (:map styles)}
         (print-date-notice
          print-date
-         [:territory-map {:territory-location (:location territory)
+         [:territory-map {:territory-location (:territory/location territory)
                           :map-raster map-raster
                           :printout true}])]
 
@@ -122,7 +122,7 @@
       [:div {:class (:root styles)}
 
        [:div {:class (:minimap styles)}
-        [:territory-mini-map {:territory-location (:location territory)
+        [:territory-mini-map {:territory-location (:territory/location territory)
                               :congregation-boundary congregation-boundary
                               :enclosing-region enclosing-region
                               :enclosing-minimap-viewport enclosing-minimap-viewport
@@ -130,14 +130,14 @@
 
        [:div {:class (:header styles)}
         [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
-        [:div {:class (:region styles)} (:region territory)]]
+        [:div {:class (:region styles)} (:territory/region territory)]]
 
-       [:div {:class (:number styles)} (:number territory)]
+       [:div {:class (:number styles)} (:territory/number territory)]
 
        [:div {:class (:map styles)}
         (print-date-notice
          print-date
-         [:territory-map {:territory-location (:location territory)
+         [:territory-map {:territory-location (:territory/location territory)
                           :map-raster map-raster
                           :printout true}])]
 
@@ -148,7 +148,7 @@
     (h/html
      [:div {:class (:cropArea styles)}
       [:div {:class (:root styles)}
-       [:div {:class (:number styles)} (:number territory)]
+       [:div {:class (:number styles)} (:territory/number territory)]
        [:div {:class (:qrCode styles)} (territory-qr-code territory)]]])))
 
 (defn neighborhood-card [{:keys [territory map-raster]}]
@@ -156,8 +156,8 @@
     (crop-marks
      (h/html
       [:div {:class (:root styles)}
-       [:neighborhood-map {:territory-number (:number territory)
-                           :territory-location (:location territory)
+       [:neighborhood-map {:territory-number (:territory/number territory)
+                           :territory-location (:territory/location territory)
                            :map-raster map-raster
                            :printout true}]]))))
 
@@ -166,11 +166,11 @@
     (a4-print-frame
      (h/html
       [:div {:class (:root styles)}
-       [:div {:class (:name styles)} (:name region)]
+       [:div {:class (:name styles)} (:region/name region)]
        [:div {:class (:map styles)}
         (print-date-notice
          print-date
-         [:region-map {:region-location (:location region)
+         [:region-map {:region-location (:region/location region)
                        :territories territories
                        :map-raster map-raster
                        :printout true}])]]))))
