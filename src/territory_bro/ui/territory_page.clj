@@ -18,14 +18,14 @@
 (defn model! [request]
   (let [demo? (= "demo" (get-in request [:params :congregation]))
         congregation (if demo?
-                       (api/format-for-api (:body (api/get-demo-congregation request)))
-                       (api/format-for-api (:body (api/get-congregation request {}))))
+                       (:body (api/get-demo-congregation request))
+                       (:body (api/get-congregation request {})))
         territory (if demo?
-                    (api/format-for-api (:body (api/get-demo-territory request)))
-                    (api/format-for-api (:body (api/get-territory request))))]
+                    (:body (api/get-demo-territory request))
+                    (:body (api/get-territory request)))]
     (-> {:territory territory
-         :permissions (-> (:permissions congregation)
-                          (select-keys [:editDoNotCalls :shareTerritoryLink]))}
+         :permissions (-> (:congregation/permissions congregation)
+                          (select-keys [:edit-do-not-calls :share-territory-link]))}
         (merge (map-interaction-help/model request)))))
 
 
@@ -33,14 +33,14 @@
   (h/html
    [:div {:hx-target "this"
           :hx-swap "outerHTML"}
-    (when (:editDoNotCalls permissions)
+    (when (:edit-do-not-calls permissions)
       [:button.pure-button {:hx-get (str html/*page-path* "/do-not-calls/edit")
                             :hx-disabled-elt "this"
                             :type "button"
                             :style {:float "right"
                                     :font-size "70%"}}
        (i18n/t "TerritoryPage.edit")])
-    (:doNotCalls territory)]))
+    (:territory/do-not-calls territory)]))
 
 (defn do-not-calls--editing [{:keys [territory]}]
   (h/html
@@ -51,7 +51,7 @@
     [:textarea.pure-input-1 {:name "do-not-calls"
                              :rows 5
                              :autofocus true}
-     (:doNotCalls territory)]
+     (:territory/do-not-calls territory)]
     [:button.pure-button.pure-button-primary {:type "submit"}
      (i18n/t "TerritoryPage.save")]]))
 
@@ -116,7 +116,7 @@
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
      [:h1 (-> (i18n/t "TerritoryPage.title")
-              (str/replace "{{number}}" (:number territory)))]
+              (str/replace "{{number}}" (:territory/number territory)))]
      [:div.pure-g
       [:div.pure-u-1.pure-u-sm-2-3.pure-u-md-1-2.pure-u-lg-1-3.pure-u-xl-1-4
        [:div {:class (:details styles)}
@@ -124,24 +124,24 @@
          [:tbody
           [:tr
            [:th (i18n/t "Territory.number")]
-           [:td (:number territory)]]
+           [:td (:territory/number territory)]]
           [:tr
            [:th (i18n/t "Territory.region")]
-           [:td (:region territory)]]
+           [:td (:territory/region territory)]]
           [:tr
            [:th (i18n/t "Territory.addresses")]
-           [:td (:addresses territory)]]
+           [:td (:territory/addresses territory)]]
           [:tr
            [:th (h/raw (i18n/t "TerritoryPage.doNotCalls"))]
            [:td (do-not-calls--viewing model)]]]]]
 
-       (when (:shareTerritoryLink permissions)
+       (when (:share-territory-link permissions)
          [:div {:class (:actions styles)}
           (share-link--closed)])]
 
       [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
        [:div {:class (:map styles)}
-        [:territory-map {:territory-location (:location territory)
+        [:territory-map {:territory-location (:territory/location territory)
                          :map-raster maps/default-for-availability}]]
        [:div.no-print
         (map-interaction-help/view model)]]])))

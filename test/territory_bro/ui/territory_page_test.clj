@@ -16,24 +16,24 @@
   (:import (java.util UUID)))
 
 (def model
-  {:territory {:id (UUID. 0 1)
-               :number "123"
-               :addresses "the addresses"
-               :region "the region"
-               :meta {:foo "bar"}
-               :location testdata/wkt-helsinki-rautatientori
-               :doNotCalls "the do-not-calls"}
-   :permissions {:editDoNotCalls true
-                 :shareTerritoryLink true}
+  {:territory {:territory/id (UUID. 0 1)
+               :territory/number "123"
+               :territory/addresses "the addresses"
+               :territory/region "the region"
+               :territory/meta {:foo "bar"}
+               :territory/location testdata/wkt-helsinki-rautatientori
+               :territory/do-not-calls "the do-not-calls"}
+   :permissions {:edit-do-not-calls true
+                 :share-territory-link true}
    :mac? false})
 (def demo-model ; the important difference is hiding do-not-calls, to avoid accidental PII leaks
-  {:territory {:id (UUID. 0 1)
-               :number "123"
-               :addresses "the addresses"
-               :region "the region"
-               :meta {:foo "bar"}
-               :location testdata/wkt-helsinki-rautatientori}
-   :permissions {:shareTerritoryLink true}
+  {:territory {:territory/id (UUID. 0 1)
+               :territory/number "123"
+               :territory/addresses "the addresses"
+               :territory/region "the region"
+               :territory/meta {:foo "bar"}
+               :territory/location testdata/wkt-helsinki-rautatientori}
+   :permissions {:share-territory-link true}
    :mac? false})
 
 (deftest ^:slow model!-test
@@ -51,14 +51,14 @@
 
       (testing "default"
         (is (= (-> model
-                   (replace-in [:territory :id] (UUID. 0 1) territory-id))
+                   (replace-in [:territory :territory/id] (UUID. 0 1) territory-id))
                (territory-page/model! request))))
 
       (testing "demo congregation"
         (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
           (let [request (replace-in request [:params :congregation] (str cong-id) "demo")]
             (is (= (-> demo-model
-                       (replace-in [:territory :id] (UUID. 0 1) territory-id))
+                       (replace-in [:territory :territory/id] (UUID. 0 1) territory-id))
                    (territory-page/model! request)))))))))
 
 (deftest view-test
@@ -83,8 +83,8 @@
 
   (testing "minimum permissions"
     (let [model (-> model
-                    (replace-in [:permissions :editDoNotCalls] true false)
-                    (replace-in [:permissions :shareTerritoryLink] true false))]
+                    (replace-in [:permissions :edit-do-not-calls] true false)
+                    (replace-in [:permissions :share-territory-link] true false))]
       (is (= (html/normalize-whitespace
               "Territory 123
 
