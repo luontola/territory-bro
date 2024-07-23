@@ -17,7 +17,7 @@
   (auth/with-user-from-session request
     (let [congregations (:body (api/list-congregations request))]
       {:congregations (->> congregations
-                           (sort-by (comp str/lower-case :name)))
+                           (sort-by (comp str/lower-case :congregation/name)))
        :logged-in? (auth/logged-in?)
        :demo-available? (some? (:demo-congregation config/env))})))
 
@@ -60,8 +60,8 @@
         [:h2 (i18n/t "HomePage.yourCongregations")]
         [:ul#congregation-list {:class (:congregationList styles)}
          (for [congregation congregations]
-           [:li [:a {:href (str "/congregation/" (:id congregation))}
-                 (:name congregation)]])]
+           [:li [:a {:href (str "/congregation/" (:congregation/id congregation))}
+                 (:congregation/name congregation)]])]
         [:p {:class (:smallActions styles)}
          (when demo-available?
            (view-demo-button))

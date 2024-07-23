@@ -14,10 +14,10 @@
   (:import (java.util UUID)))
 
 (def model
-  {:congregations [{:id (UUID. 0 1)
-                    :name "Congregation 1"}
-                   {:id (UUID. 0 2)
-                    :name "Congregation 2"}]
+  {:congregations [{:congregation/id (UUID. 0 1)
+                    :congregation/name "Congregation 1"}
+                   {:congregation/id (UUID. 0 2)
+                    :congregation/name "Congregation 2"}]
    :logged-in? true
    :demo-available? true})
 (def anonymous-model
@@ -40,8 +40,8 @@
       (binding [config/env (replace-in config/env [:demo-congregation] nil (UUID. 0 42))]
         (testing "logged in, with congregations"
           (is (= (-> model
-                     (replace-in [:congregations 0 :id] (UUID. 0 1) cong-id1)
-                     (replace-in [:congregations 1 :id] (UUID. 0 2) cong-id2))
+                     (replace-in [:congregations 0 :congregation/id] (UUID. 0 1) cong-id1)
+                     (replace-in [:congregations 1 :congregation/id] (UUID. 0 2) cong-id2))
                  (home-page/model! {:session {::auth/user {:user/id user-id}}}))))
 
         (testing "anonymous user"

@@ -192,9 +192,8 @@
   (auth/with-user-from-session request
     (let [state (state-for-request request)]
       (ok (->> (congregation/get-my-congregations state (current-user-id))
-               (map (fn [congregation]
-                      {:id (:congregation/id congregation)
-                       :name (:congregation/name congregation)})))))))
+               (mapv (fn [congregation]
+                       (select-keys congregation [:congregation/id :congregation/name]))))))))
 
 (defn- enrich-congregation-users [congregation conn]
   (let [user-ids (->> (:congregation/users congregation)
