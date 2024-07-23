@@ -23,22 +23,22 @@
   (let [demo? (= "demo" (get-in request [:params :congregation]))
         congregation (if demo?
                        (http-response/not-found! "Not available in demo")
-                       (api/format-for-api (:body (api/get-congregation request {}))))
+                       (:body (api/get-congregation request {})))
         new-user (some-> (get-in request [:params :new-user])
                          (parse-uuid))]
-    {:congregation/name (or (get-in request [:params :congregationName])
-                            (:name congregation))
-     :congregation/loans-csv-url (or (get-in request [:params :loansCsvUrl])
-                                     (:loansCsvUrl congregation))
-     :congregation/users (->> (:users congregation)
+    {:congregation/name (or (get-in request [:params :congregation-name])
+                            (:congregation/name congregation))
+     :congregation/loans-csv-url (or (get-in request [:params :loans-csv-url])
+                                     (:congregation/loans-csv-url congregation))
+     :congregation/users (->> (:congregation/users congregation)
                               (map (fn [user]
                                      (assoc user :new? (= new-user (:id user)))))
                               (sort-by (fn [user]
                                          ;; new user first, then alphabetically by name
                                          [(if (:new? user) 1 2)
                                           (str/lower-case (str (:name user)))])))
-     :permissions (select-keys (:permissions congregation) [:configureCongregation :gisAccess])
-     :form/user-id (get-in request [:params :userId])}))
+     :congregation/permissions (select-keys (:congregation/permissions congregation) [:configure-congregation :gis-access])
+     :form/user-id (get-in request [:params :user-id])}))
 
 
 (defn loans-csv-url-info []
@@ -72,7 +72,7 @@
        "Publish that sheet as a CSV file and enter its URL to the above field on this settings page."]))))
 
 (defn congregation-settings-section [model]
-  (when (-> model :permissions :configureCongregation)
+  (when (-> model :congregation/permissions :configure-congregation)
     (let [styles (:CongregationSettings (css/modules))
           errors (->> (:errors model)
                       (group-by first))]
@@ -82,13 +82,13 @@
          [:fieldset
           (let [error? (contains? errors :missing-name)]
             [:div.pure-control-group
-             [:label {:for "congregationName"}
+             [:label {:for "congregation-name"}
               (i18n/t "CongregationSettings.congregationName")]
-             [:input#congregationName {:name "congregationName"
-                                       :value (:congregation/name model)
-                                       :type "text"
-                                       :required true
-                                       :aria-invalid (when error? "true")}]
+             [:input#congregation-name {:name "congregation-name"
+                                        :value (:congregation/name model)
+                                        :type "text"
+                                        :required true
+                                        :aria-invalid (when error? "true")}]
              (when error?
                " ⚠️ ")])
 
@@ -99,14 +99,14 @@
            [:div {:lang "en"}
             (let [error? (contains? errors :disallowed-loans-csv-url)]
               [:div.pure-control-group
-               [:label {:for "loansCsvUrl"}
+               [:label {:for "loans-csv-url"}
                 "Territory loans CSV URL (optional)"]
-               [:input#loansCsvUrl {:name "loansCsvUrl"
-                                    :value (:congregation/loans-csv-url model)
-                                    :type "text"
-                                    :size "50"
-                                    :pattern "https://docs\\.google\\.com/.*"
-                                    :aria-invalid (when error? "true")}]
+               [:input#loans-csv-url {:name "loans-csv-url"
+                                      :value (:congregation/loans-csv-url model)
+                                      :type "text"
+                                      :size "50"
+                                      :pattern "https://docs\\.google\\.com/.*"
+                                      :aria-invalid (when error? "true")}]
                (when error?
                  " ⚠️ ")
                [:span.pure-form-message-inline "Link to a Google Sheets spreadsheet published to the web as CSV"]])
@@ -118,7 +118,7 @@
 
 
 (defn editing-maps-section [model]
-  (when (-> model :permissions :gisAccess)
+  (when (-> model :congregation/permissions :gis-access)
     (h/html
      [:section
       [:h2 (i18n/t "EditingMaps.title")]
@@ -164,14 +164,14 @@
       [:td (identity-provider user)]
       [:td [:button.pure-button {:type "button"
                                  :class (:removeUser styles)
-                                 :hx-delete (str html/*page-path* "/users?userId=" (codec/url-encode (:id user)))
+                                 :hx-delete (str html/*page-path* "/users?user-id=" (codec/url-encode (:id user)))
                                  :hx-confirm (when current-user?
                                                (-> (i18n/t "UserManagement.removeYourselfWarning")
                                                    (str/replace "{{congregation}}" (:congregation/name model))))}
             (i18n/t "UserManagement.removeUser")]]])))
 
 (defn user-management-section [model]
-  (when (-> model :permissions :configureCongregation)
+  (when (-> model :congregation/permissions :configure-congregation)
     (let [errors (group-by first (:errors model))]
       (h/html
        [:section#users-section {:hx-target "this"
@@ -192,7 +192,7 @@
             [:div.pure-control-group
              [:label {:for "user-id"}
               (i18n/t "UserManagement.userId")]
-             [:input#user-id {:name "userId"
+             [:input#user-id {:name "user-id"
                               :type "text"
                               :autocomplete "off"
                               :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
@@ -242,8 +242,8 @@
 
 (defn add-user! [request]
   (try
-    (let [request (update-in request [:params :userId] str/trim)
-          user-id (parse-uuid (get-in request [:params :userId]))]
+    (let [request (update-in request [:params :user-id] str/trim)
+          user-id (parse-uuid (get-in request [:params :user-id]))]
       (api/add-user request)
       (http-response/see-other (str html/*page-path* "/users?new-user=" user-id)))
     (catch Exception e
@@ -251,7 +251,7 @@
 
 (defn remove-user! [request]
   (let [request (assoc-in request [:params :permissions] [])
-        user-id (UUID/fromString (get-in request [:params :userId]))
+        user-id (UUID/fromString (get-in request [:params :user-id]))
         current-user? (= user-id (:user/id auth/*user*))]
     (api/set-user-permissions request)
     (if current-user?

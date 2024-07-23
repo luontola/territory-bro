@@ -29,8 +29,8 @@
                          :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"
                          :sub "google-oauth2|102883237794451111459"
                          :new? false}]
-   :permissions {:configureCongregation true
-                 :gisAccess true}
+   :congregation/permissions {:configure-congregation true
+                              :gis-access true}
    :form/user-id nil})
 
 (deftest ^:slow model!-test
@@ -79,7 +79,7 @@
                      ;; doesn't sort by ID
                      {:id (UUID. 0 9), :name "D"}
                      {:id (UUID. 0 8), :name "e"}]]
-          (binding [api/get-congregation (constantly {:body {:users (shuffle users)}})]
+          (binding [api/get-congregation (constantly {:body {:congregation/users (shuffle users)}})]
             (is (= ["c" "a" "B" "D" "e"]
                    (->> (settings-page/model! (assoc-in request [:params :new-user] (str new-user-id)))
                         :congregation/users
@@ -87,12 +87,12 @@
 
 (deftest congregation-settings-section-test
   (testing "requires the configure-congregation permission"
-    (let [model (replace-in model [:permissions :configureCongregation] true false)]
+    (let [model (replace-in model [:congregation/permissions :configure-congregation] true false)]
       (is (nil? (settings-page/congregation-settings-section model))))))
 
 (deftest editing-maps-section-test
   (testing "requires the gis-access permission"
-    (let [model (replace-in model [:permissions :gisAccess] true false)]
+    (let [model (replace-in model [:congregation/permissions :gis-access] true false)]
       (is (nil? (settings-page/editing-maps-section model))))))
 
 
@@ -159,7 +159,7 @@
 
 (deftest user-management-section-test
   (testing "requires the configure-congregation permission"
-    (let [model (replace-in model [:permissions :configureCongregation] true false)]
+    (let [model (replace-in model [:congregation/permissions :configure-congregation] true false)]
       (is (nil? (settings-page/user-management-section model))))))
 
 
@@ -231,8 +231,8 @@
           user-id (at/get-user-id session)
           cong-id (at/create-congregation! session "foo")
           request {:params {:congregation (str cong-id)
-                            :congregationName "new name"
-                            :loansCsvUrl "new url"}
+                            :congregation-name "new name"
+                            :loans-csv-url "new url"}
                    :session (auth/user-session {:name "John Doe"} user-id)}]
       (binding [html/*page-path* "/settings-page-url"]
 
@@ -270,7 +270,7 @@
           new-user-id (UUID. 0 2)
           cong-id (at/create-congregation! session "foo")
           request {:params {:congregation (str cong-id)
-                            :userId (str new-user-id)}
+                            :user-id (str new-user-id)}
                    :session (auth/user-session {:name "John Doe"} user-id)}]
       (binding [html/*page-path* "/settings-page-url"]
 
@@ -289,7 +289,7 @@
 
         (testing "trims the user ID"
           (with-fixtures [fake-dispatcher-fixture]
-            (let [request (replace-in request [:params :userId] (str new-user-id) (str "  " new-user-id "  "))
+            (let [request (replace-in request [:params :user-id] (str new-user-id) (str "  " new-user-id "  "))
                   response (settings-page/add-user! request)]
               (is (= {:status 303
                       :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
@@ -309,7 +309,7 @@
 
           (binding [dispatcher/command! (fn [& _]
                                           (throw (ValidationException. [[:invalid-user-id]])))]
-            (let [request (replace-in request [:params :userId] (str new-user-id) "foo")
+            (let [request (replace-in request [:params :user-id] (str new-user-id) "foo")
                   response (settings-page/add-user! request)]
               (is (= forms/validation-error-http-status (:status response)))
               (is (str/includes?
@@ -325,7 +325,7 @@
           other-user-id (UUID. 0 2)
           cong-id (at/create-congregation! session "foo")
           request {:params {:congregation (str cong-id)
-                            :userId (str other-user-id)}
+                            :user-id (str other-user-id)}
                    :session (auth/user-session {:name "John Doe"} current-user-id)}]
       (binding [html/*page-path* "/settings-page-url"]
         (auth/with-user-from-session request
@@ -346,7 +346,7 @@
 
           (testing "removing the current user will redirect to the front page"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [response (settings-page/remove-user! (assoc-in request [:params :userId] (str current-user-id)))]
+              (let [response (settings-page/remove-user! (assoc-in request [:params :user-id] (str current-user-id)))]
                 (is (= {:status 200
                         :headers {"Content-Type" "text/html"
                                   "hx-redirect" "/"}
@@ -358,4 +358,3 @@
                         :user/id current-user-id
                         :permission/ids []}
                        (dissoc @*last-command :command/time)))))))))))
-

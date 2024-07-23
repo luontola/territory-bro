@@ -321,7 +321,7 @@
   (auth/with-user-from-session request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          user-id (or (parse-uuid (get-in request [:params :userId]))
+          user-id (or (parse-uuid (get-in request [:params :user-id]))
                       (throw (ValidationException. [[:invalid-user-id]])))
           state (state-for-request request)]
       (db/with-db [conn {}]
@@ -333,7 +333,7 @@
 (defn set-user-permissions [request]
   (auth/with-user-from-session request
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          user-id (UUID/fromString (get-in request [:params :userId]))
+          user-id (UUID/fromString (get-in request [:params :user-id]))
           permissions (->> (get-in request [:params :permissions])
                            (map keyword))
           state (state-for-request request)]
@@ -348,8 +348,8 @@
   (auth/with-user-from-session request
     (require-logged-in!)
     (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          name (get-in request [:params :congregationName])
-          loans-csv-url (get-in request [:params :loansCsvUrl])
+          name (get-in request [:params :congregation-name])
+          loans-csv-url (get-in request [:params :loans-csv-url])
           state (state-for-request request)]
       (db/with-db [conn {}]
         (dispatch! conn state {:command/type :congregation.command/update-congregation

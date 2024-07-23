@@ -153,14 +153,14 @@
 
 (defn try-rename-congregation! [session cong-id name]
   (-> (request :post (str "/api/congregation/" cong-id "/settings"))
-      (json-body {:congregationName name
-                  :loansCsvUrl ""})
+      (json-body {:congregation-name name
+                  :loans-csv-url ""})
       (merge session)
       app))
 
 (defn try-add-user! [session cong-id user-id]
   (-> (request :post (str "/api/congregation/" cong-id "/add-user"))
-      (json-body {:userId (str user-id)})
+      (json-body {:user-id (str user-id)})
       (merge session)
       app))
 
@@ -853,7 +853,7 @@
 
     (testing "remove user"
       (let [response (-> (request :post (str "/api/congregation/" cong-id "/set-user-permissions"))
-                         (json-body {:userId (str user-id)
+                         (json-body {:user-id (str user-id)
                                      :permissions []})
                          (merge session)
                          app)]
@@ -864,7 +864,7 @@
 
     (testing "invalid user"
       (let [response (-> (request :post (str "/api/congregation/" cong-id "/set-user-permissions"))
-                         (json-body {:userId (str (UUID. 0 1))
+                         (json-body {:user-id (str (UUID. 0 1))
                                      :permissions []})
                          (merge session)
                          app)]
@@ -875,7 +875,7 @@
     (testing "no access"
       (revoke-access-from-all! cong-id)
       (let [response (-> (request :post (str "/api/congregation/" cong-id "/set-user-permissions"))
-                         (json-body {:userId (str user-id)
+                         (json-body {:user-id (str user-id)
                                      :permissions []})
                          (merge session)
                          app)]
