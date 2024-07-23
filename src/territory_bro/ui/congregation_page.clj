@@ -13,12 +13,11 @@
 (defn model! [request]
   (let [demo? (= "demo" (get-in request [:params :congregation]))
         congregation (if demo?
-                       (api/format-for-api (:body (api/get-demo-congregation request)))
-                       (api/format-for-api (:body (api/get-congregation request {}))))]
-    {:name (:name congregation)
-     :permissions (:permissions congregation)}))
+                       (:body (api/get-demo-congregation request))
+                       (:body (api/get-congregation request {})))]
+    (select-keys congregation [:congregation/name :congregation/permissions])))
 
-(defn view [{:keys [name permissions]}]
+(defn view [{:congregation/keys [name permissions]}]
   (h/html
    [:h1 name]
    [:p [:a {:href (str html/*page-path* "/territories")}

@@ -5,8 +5,13 @@
 (ns territory-bro.ui.visible)
 
 (defn printouts-page? [permissions]
-  (true? (:viewCongregation permissions)))
+  (or (true? (:view-congregation permissions))
+      ;; TODO: remove me
+      (true? (:viewCongregation permissions))))
 
 (defn settings-page? [permissions]
-  (true? (or (:configureCongregation permissions)
-             (:gisAccess permissions))))
+  (or (true? (or (:configure-congregation permissions)
+                 (:gis-access permissions)))
+      ;; TODO: remove me
+      (true? (or (:configureCongregation permissions)
+                 (:gisAccess permissions)))))

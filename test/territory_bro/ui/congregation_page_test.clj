@@ -13,16 +13,16 @@
             [territory-bro.ui.html :as html]))
 
 (def model
-  {:name "Example Congregation"
-   :permissions {:configureCongregation true
-                 :editDoNotCalls true
-                 :gisAccess true
-                 :shareTerritoryLink true
-                 :viewCongregation true}})
+  {:congregation/name "Example Congregation"
+   :congregation/permissions {:configure-congregation true
+                              :edit-do-not-calls true
+                              :gis-access true
+                              :share-territory-link true
+                              :view-congregation true}})
 (def demo-model
-  {:name "Demo Congregation"
-   :permissions {:shareTerritoryLink true
-                 :viewCongregation true}})
+  {:congregation/name "Demo Congregation"
+   :congregation/permissions {:share-territory-link true
+                              :view-congregation true}})
 
 (deftest ^:slow model!-test
   (with-fixtures [db-fixture api-fixture]
@@ -55,5 +55,5 @@
     (is (= (html/normalize-whitespace
             "Example Congregation
              Territories")
-           (-> (congregation-page/view (dissoc model :permissions))
+           (-> (congregation-page/view (dissoc model :congregation/permissions))
                html/visible-text)))))
