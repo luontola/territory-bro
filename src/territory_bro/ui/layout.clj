@@ -22,9 +22,9 @@
           demo? (= "demo" cong-id)
           congregation (when (some? cong-id)
                          (-> (if demo?
-                               (api/format-for-api (:body (api/get-demo-congregation request)))
-                               (api/format-for-api (:body (api/get-congregation request {}))))
-                             (select-keys [:id :name :permissions])))
+                               (:body (api/get-demo-congregation request))
+                               (:body (api/get-congregation request {})))
+                             (select-keys [:congregation/id :congregation/name :congregation/permissions])))
           language-selection-width (get-in request [:cookies "languageSelectionWidth" :value])]
       {:congregation congregation
        :user (when (auth/logged-in?)
@@ -88,7 +88,7 @@
                       :title (i18n/t "SupportPage.title")})]])))
 
 (defn congregation-navigation [{:keys [congregation]}]
-  (let [cong-id (:id congregation)
+  (let [cong-id (:congregation/id congregation)
         styles (:Layout (css/modules))]
     (h/html
      [:ul {:class (:nav styles)}
@@ -96,15 +96,15 @@
                       :icon "🏠"
                       :title (i18n/t "HomePage.title")})]
       [:li (nav-link {:href (str "/congregation/" cong-id)
-                      :title (:name congregation)})]
+                      :title (:congregation/name congregation)})]
       [:li (nav-link {:href (str "/congregation/" cong-id "/territories")
                       :icon "📍"
                       :title (i18n/t "TerritoryListPage.title")})]
-      (when (visible/printouts-page? (:permissions congregation))
+      (when (visible/printouts-page? (:congregation/permissions congregation))
         [:li (nav-link {:href (str "/congregation/" cong-id "/printouts")
                         :icon "🖨️"
                         :title (i18n/t "PrintoutPage.title")})])
-      (when (visible/settings-page? (:permissions congregation))
+      (when (visible/settings-page? (:congregation/permissions congregation))
         [:li (nav-link {:href (str "/congregation/" cong-id "/settings")
                         :icon "⚙️"
                         :title (i18n/t "SettingsPage.title")})])

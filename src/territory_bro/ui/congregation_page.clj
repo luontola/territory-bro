@@ -17,15 +17,15 @@
                        (:body (api/get-congregation request {})))]
     (select-keys congregation [:congregation/name :congregation/permissions])))
 
-(defn view [{:congregation/keys [name permissions]}]
+(defn view [model]
   (h/html
-   [:h1 name]
+   [:h1 (:congregation/name model)]
    [:p [:a {:href (str html/*page-path* "/territories")}
         (i18n/t "TerritoryListPage.title")]]
-   (when (visible/printouts-page? permissions)
+   (when (visible/printouts-page? (:congregation/permissions model))
      [:p [:a {:href (str html/*page-path* "/printouts")}
           (i18n/t "PrintoutPage.title")]])
-   (when (visible/settings-page? permissions)
+   (when (visible/settings-page? (:congregation/permissions model))
      [:p [:a {:href (str html/*page-path* "/settings")}
           (i18n/t "SettingsPage.title")]])))
 

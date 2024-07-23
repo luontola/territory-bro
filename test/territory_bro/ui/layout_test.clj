@@ -40,13 +40,13 @@
    :dev? false
    :demo? false})
 (def congregation-model
-  {:congregation {:id (UUID. 0 1)
-                  :name "the congregation"
-                  :permissions {:configureCongregation true
-                                :editDoNotCalls true
-                                :gisAccess true
-                                :shareTerritoryLink true
-                                :viewCongregation true}}
+  {:congregation {:congregation/id (UUID. 0 1)
+                  :congregation/name "the congregation"
+                  :congregation/permissions {:configure-congregation true
+                                             :edit-do-not-calls true
+                                             :gis-access true
+                                             :share-territory-link true
+                                             :view-congregation true}}
    :user {:user/id (UUID. 0 2)
           :name "John Doe"}
    :login-url nil
@@ -54,10 +54,10 @@
    :dev? false
    :demo? false})
 (def demo-congregation-model
-  {:congregation {:id "demo"
-                  :name "Demo Congregation"
-                  :permissions {:shareTerritoryLink true
-                                :viewCongregation true}}
+  {:congregation {:congregation/id "demo"
+                  :congregation/name "Demo Congregation"
+                  :congregation/permissions {:share-territory-link true
+                                             :view-congregation true}}
    :user nil
    :login-url "/login?return-to-url=%2Fcongregation%2Fdemo"
    :language-selection-width nil
@@ -98,7 +98,7 @@
                        :params {:congregation (str cong-id)}
                        :session (auth/user-session {:name "John Doe"} user-id)}]
           (is (= (-> congregation-model
-                     (replace-in [:congregation :id] (UUID. 0 1) cong-id)
+                     (replace-in [:congregation :congregation/id] (UUID. 0 1) cong-id)
                      (replace-in [:user :user/id] (UUID. 0 2) user-id))
                  (layout/model! request)))))
 
@@ -196,7 +196,7 @@
                the content")
              (-> (h/html [:h1 "the title"]
                          [:p "the content"])
-                 (layout/page (assoc-in congregation-model [:congregation :permissions] {}))
+                 (layout/page (assoc-in congregation-model [:congregation :congregation/permissions] {}))
                  (html/visible-text))))))
 
   (testing "demo congregation"
