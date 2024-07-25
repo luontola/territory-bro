@@ -34,7 +34,8 @@
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.infra.user :as user]
             [territory-bro.projections :as projections]
-            [territory-bro.test.fixtures :refer [api-fixture db-fixture]])
+            [territory-bro.test.fixtures :refer [api-fixture db-fixture]]
+            [territory-bro.ui :as ui])
   (:import (clojure.lang ExceptionInfo)
            (java.time Duration Instant)
            (java.util UUID)
@@ -82,6 +83,7 @@
   (-> (compojure/routes #'api/api-routes
                         (route/not-found "Not Found"))
       (wrap-format-for-api) ; avoid the need to change these tests, when we remove format-for-api from the handler functions
+      (ui/wrap-current-user)
       (middleware/wrap-base)))
 
 (defn app [request]

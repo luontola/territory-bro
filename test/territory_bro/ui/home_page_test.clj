@@ -35,22 +35,24 @@
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
           cong-id1 (at/create-congregation! session "Congregation 1")
-          cong-id2 (at/create-congregation! session "Congregation 2")]
+          cong-id2 (at/create-congregation! session "Congregation 2")
+          request {}]
 
       (binding [config/env (replace-in config/env [:demo-congregation] nil (UUID. 0 42))]
         (testing "logged in, with congregations"
-          (is (= (-> model
-                     (replace-in [:congregations 0 :congregation/id] (UUID. 0 1) cong-id1)
-                     (replace-in [:congregations 1 :congregation/id] (UUID. 0 2) cong-id2))
-                 (home-page/model! {:session {::auth/user {:user/id user-id}}}))))
+          (auth/with-user-id user-id
+            (is (= (-> model
+                       (replace-in [:congregations 0 :congregation/id] (UUID. 0 1) cong-id1)
+                       (replace-in [:congregations 1 :congregation/id] (UUID. 0 2) cong-id2))
+                   (home-page/model! request)))))
 
         (testing "anonymous user"
-          (is (= anonymous-model
-                 (home-page/model! {})))))
+          (auth/with-anonymous-user
+            (is (= anonymous-model (home-page/model! request))))))
 
       (testing "anonymous user, no demo"
-        (is (= no-demo-model
-               (home-page/model! {})))))))
+        (auth/with-anonymous-user
+          (is (= no-demo-model (home-page/model! request))))))))
 
 (deftest view-test
   (let [introduction "Territory Bro

@@ -20,19 +20,21 @@
   (with-fixtures [db-fixture api-fixture]
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
-          request {:session (auth/user-session {:name "John Doe"} user-id)}
+          request {}
           model (replace-in model [:user-id] (UUID. 0 1) user-id)]
 
       (testing "logged in"
-        (is (= model (join-page/model! request))))
+        (auth/with-user-id user-id
+          (is (= model (join-page/model! request)))))
 
       (testing "anonymous user"
-        (is (thrown-match? ExceptionInfo
-                           {:type :ring.util.http-response/response
-                            :response {:status 401
-                                       :body "Not logged in"
-                                       :headers {}}}
-                           (join-page/model! (dissoc request :session))))))))
+        (auth/with-anonymous-user
+          (is (thrown-match? ExceptionInfo
+                             {:type :ring.util.http-response/response
+                              :response {:status 401
+                                         :body "Not logged in"
+                                         :headers {}}}
+                             (join-page/model! request))))))))
 
 (deftest view-test
   (is (= (html/normalize-whitespace

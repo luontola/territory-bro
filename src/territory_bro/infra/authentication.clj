@@ -5,11 +5,11 @@
 (ns territory-bro.infra.authentication
   (:import (java.util UUID)))
 
-(def ^:dynamic *user*)
-
 (def user-profile-keys [:sub :name :nickname :email :email_verified :picture])
 (def anonymous-user-id (UUID. 0 0))
-(def ^:private anonymous-user {:user/id anonymous-user-id})
+(def anonymous-user {:user/id anonymous-user-id})
+
+(def ^:dynamic *user* anonymous-user)
 
 (defn anonymous?
   ([]
@@ -28,10 +28,22 @@
   {::user (-> (select-keys jwt user-profile-keys)
               (assoc :user/id user-id))})
 
-(defn with-user* [request f]
-  (binding [*user* (or (get-in request [:session ::user])
-                       anonymous-user)]
-    (f)))
+(defmacro with-anonymous-user [& body]
+  `(binding [*user* anonymous-user]
+     ~@body))
+
+(defmacro with-user [user & body]
+  `(binding [*user* (let [user# ~user]
+                      (assert (map? user#) (pr-str user#))
+                      (assert (uuid? (:user/id user#)) (pr-str user#))
+                      user#)]
+     ~@body))
+
+(defmacro with-user-id [user-id & body]
+  `(with-user {:user/id ~user-id}
+     ~@body))
 
 (defmacro with-user-from-session [request & body]
-  `(with-user* ~request (fn [] ~@body)))
+  `(with-user (or (get-in ~request [:session ::user])
+                  anonymous-user)
+     ~@body))

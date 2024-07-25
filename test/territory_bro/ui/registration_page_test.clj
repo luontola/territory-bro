@@ -22,59 +22,62 @@
   (with-fixtures [db-fixture api-fixture]
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
-          request {:session (auth/user-session {:name "John Doe"} user-id)}]
+          request {}]
+      (auth/with-user-id user-id
 
-      (testing "logged in"
-        (is (= model (registration-page/model! request))))
+        (testing "logged in"
+          (is (= model (registration-page/model! request))))
 
-      (testing "anonymous user"
-        (is (thrown-match? ExceptionInfo
-                           {:type :ring.util.http-response/response
-                            :response {:status 401
-                                       :body "Not logged in"
-                                       :headers {}}}
-                           (registration-page/model! (dissoc request :session))))))))
+        (testing "anonymous user"
+          (auth/with-anonymous-user
+            (is (thrown-match? ExceptionInfo
+                               {:type :ring.util.http-response/response
+                                :response {:status 401
+                                           :body "Not logged in"
+                                           :headers {}}}
+                               (registration-page/model! request)))))))))
 
 (deftest ^:slow submit!-test
   (with-fixtures [db-fixture api-fixture]
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
-          request {:params {:congregationName "the name"}
-                   :session (auth/user-session {:name "John Doe"} user-id)}]
+          request {:params {:congregationName "the name"}}]
+      (auth/with-user-id user-id
 
-      (testing "logged in"
-        (with-fixtures [fake-dispatcher-fixture]
-          (let [response (registration-page/submit! request)]
-            (is (= {:command/type :congregation.command/create-congregation
-                    :command/user user-id
-                    :congregation/name "the name"}
-                   (select-keys @*last-command [:command/type
-                                                :command/user
-                                                :congregation/name])))
-            (is (= {:status 303
-                    :headers {"Location" (str "/congregation/" (:congregation/id @*last-command))}
-                    :body ""}
-                   response)))))
+        (testing "logged in"
+          (with-fixtures [fake-dispatcher-fixture]
+            (let [response (registration-page/submit! request)]
+              (is (= {:command/type :congregation.command/create-congregation
+                      :command/user user-id
+                      :congregation/name "the name"}
+                     (select-keys @*last-command [:command/type
+                                                  :command/user
+                                                  :congregation/name])))
+              (is (= {:status 303
+                      :headers {"Location" (str "/congregation/" (:congregation/id @*last-command))}
+                      :body ""}
+                     response)))))
 
-      (testing "anonymous user"
-        (with-fixtures [fake-dispatcher-fixture]
-          (is (thrown-match? ExceptionInfo
-                             {:type :ring.util.http-response/response
-                              :response {:status 401
-                                         :body "Not logged in"
-                                         :headers {}}}
-                             (registration-page/submit! (dissoc request :session))))))
+        (testing "anonymous user"
+          (auth/with-anonymous-user
+            (with-fixtures [fake-dispatcher-fixture]
+              (is (thrown-match? ExceptionInfo
+                                 {:type :ring.util.http-response/response
+                                  :response {:status 401
+                                             :body "Not logged in"
+                                             :headers {}}}
+                                 (registration-page/submit! request))))))
 
-      (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
-        (binding [dispatcher/command! (fn [& _]
-                                        (throw (ValidationException. [[:missing-name]])))]
-          (let [response (registration-page/submit! request)]
-            (is (= forms/validation-error-http-status (:status response)))
-            (is (str/includes?
-                 (html/visible-text (:body response))
-                 (html/normalize-whitespace
-                  "Congregation name [the name] ⚠️
-                   Register")))))))))
+        (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
+          (binding [dispatcher/command! (fn [& _]
+                                          (throw (ValidationException. [[:missing-name]])))]
+            (let [response (registration-page/submit! request)]
+              (is (= forms/validation-error-http-status (:status response)))
+              (is (str/includes?
+                   (html/visible-text (:body response))
+                   (html/normalize-whitespace
+                    "Congregation name [the name] ⚠️
+                     Register"))))))))))
 
 (deftest view-test
   (is (= (html/normalize-whitespace

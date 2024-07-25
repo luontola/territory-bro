@@ -7,16 +7,14 @@
             [hiccup2.core :as h]
             [ring.util.http-response :as http-response]
             [territory-bro.api :as api]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]))
 
 (defn model! [request]
-  (auth/with-user-from-session request
-    (api/require-logged-in!)
-    {:form (:params request)}))
+  (api/require-logged-in!)
+  {:form (:params request)})
 
 (defn view [model]
   (let [errors (group-by first (:errors model))]

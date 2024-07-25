@@ -57,38 +57,41 @@
           cong-id (at/create-congregation! session "foo")
           _ (at/create-congregation-boundary! cong-id)
           territory-id (at/create-territory! cong-id)
-          request {:params {:congregation (str cong-id)}
-                   :session {::auth/user {:user/id user-id}}}
+          request {:params {:congregation (str cong-id)}}
           fix #(replace-in % [:territories 0 :territory/id] (UUID. 0 1) territory-id)]
+      (auth/with-user-id user-id
 
-      (testing "default"
-        (is (= (fix model)
-               (territory-list-page/model! request {}))))
+        (testing "default"
+          (is (= (fix model)
+                 (territory-list-page/model! request {}))))
 
-      (testing "demo congregation"
-        (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-          (let [request {:params {:congregation "demo"}}]
-            (is (= (fix demo-model)
-                   (territory-list-page/model! request {}))))))
+        (testing "demo congregation"
+          (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+            (let [request {:params {:congregation "demo"}}]
+              (is (= (fix demo-model)
+                     (territory-list-page/model! request {})
+                     (auth/with-anonymous-user
+                       (territory-list-page/model! request {})))))))
 
-      (testing "anonymous user, has opened a share"
-        (at/create-share! cong-id territory-id "share123")
-        (let [{:keys [session]} (api/open-share {:params {:share-key "share123"}})
-              request (assoc request :session session)]
-          (is (= (fix anonymous-model)
-                 (territory-list-page/model! request {})))))
+        (testing "anonymous user, has opened a share"
+          (at/create-share! cong-id territory-id "share123")
+          (auth/with-anonymous-user
+            (let [{:keys [session]} (api/open-share {:params {:share-key "share123"}})
+                  request (assoc request :session session)]
+              (is (= (fix anonymous-model)
+                     (territory-list-page/model! request {}))))))
 
-      (testing "loans enabled,"
-        (at/change-congregation-settings! cong-id "foo" "https://docs.google.com/example")
-        (binding [loan/download! (constantly (str "Number,Loaned,Staleness\n"
-                                                  "123,TRUE,7\n"))]
-          (testing "not fetched"
-            (is (= (fix model-loans-enabled)
-                   (territory-list-page/model! request {:fetch-loans? false}))))
+        (testing "loans enabled,"
+          (at/change-congregation-settings! cong-id "foo" "https://docs.google.com/example")
+          (binding [loan/download! (constantly (str "Number,Loaned,Staleness\n"
+                                                    "123,TRUE,7\n"))]
+            (testing "not fetched"
+              (is (= (fix model-loans-enabled)
+                     (territory-list-page/model! request {:fetch-loans? false}))))
 
-          (testing "fetched"
-            (is (= (fix model-loans-fetched)
-                   (territory-list-page/model! request {:fetch-loans? true})))))))))
+            (testing "fetched"
+              (is (= (fix model-loans-fetched)
+                     (territory-list-page/model! request {:fetch-loans? true}))))))))))
 
 (deftest view-test
   (testing "default"

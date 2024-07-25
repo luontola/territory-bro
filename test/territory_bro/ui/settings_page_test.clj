@@ -38,52 +38,53 @@
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
           cong-id (at/create-congregation! session "Congregation Name")
-          request {:params {:congregation (str cong-id)}
-                   :session (auth/user-session {:name "John Doe"} user-id)}
+          request {:params {:congregation (str cong-id)}}
           model (replace-in model [:congregation/users 0 :id] (UUID. 0 1) user-id)]
       (at/change-congregation-settings! cong-id "Congregation Name" "https://docs.google.com/spreadsheets/123")
+      (auth/with-user-id user-id
 
-      (testing "logged in"
-        (is (= model (settings-page/model! request))))
+        (testing "logged in"
+          (is (= model (settings-page/model! request))))
 
-      (testing "demo congregation"
-        (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-          (let [request {:params {:congregation "demo"}}]
+        (testing "demo congregation"
+          (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+            (let [request {:params {:congregation "demo"}}]
+              (is (thrown-match? ExceptionInfo
+                                 {:type :ring.util.http-response/response
+                                  :response {:status 404
+                                             :body "Not available in demo"
+                                             :headers {}}}
+                                 (settings-page/model! request))))))
+
+        (testing "anonymous user"
+          (auth/with-anonymous-user
             (is (thrown-match? ExceptionInfo
                                {:type :ring.util.http-response/response
-                                :response {:status 404
-                                           :body "Not available in demo"
+                                :response {:status 401
+                                           :body "Not logged in"
                                            :headers {}}}
-                               (settings-page/model! request))))))
+                               (settings-page/model! request)))))
 
-      (testing "anonymous user"
-        (is (thrown-match? ExceptionInfo
-                           {:type :ring.util.http-response/response
-                            :response {:status 401
-                                       :body "Not logged in"
-                                       :headers {}}}
-                           (settings-page/model! (dissoc request :session)))))
+        (testing "user was added"
+          (let [request (assoc-in request [:params :new-user] (str user-id))
+                model (replace-in model [:congregation/users 0 :new?] false true)]
+            (is (= model (settings-page/model! request)))))
 
-      (testing "user was added"
-        (let [request (assoc-in request [:params :new-user] (str user-id))
-              model (replace-in model [:congregation/users 0 :new?] false true)]
-          (is (= model (settings-page/model! request)))))
-
-      (testing "shows new users first, followed by the rest alphabetically"
-        (let [new-user-id (UUID. 0 5)
-              users [;; should be case-insensitive
-                     {:id (UUID. 0 1), :name "a"}
-                     {:id (UUID. 0 2), :name "B"}
-                     ;; new ones should be first
-                     {:id new-user-id, :name "c"}
-                     ;; doesn't sort by ID
-                     {:id (UUID. 0 9), :name "D"}
-                     {:id (UUID. 0 8), :name "e"}]]
-          (binding [api/get-congregation (constantly {:body {:congregation/users (shuffle users)}})]
-            (is (= ["c" "a" "B" "D" "e"]
-                   (->> (settings-page/model! (assoc-in request [:params :new-user] (str new-user-id)))
-                        :congregation/users
-                        (map :name))))))))))
+        (testing "shows new users first, followed by the rest alphabetically"
+          (let [new-user-id (UUID. 0 5)
+                users [;; should be case-insensitive
+                       {:id (UUID. 0 1), :name "a"}
+                       {:id (UUID. 0 2), :name "B"}
+                       ;; new ones should be first
+                       {:id new-user-id, :name "c"}
+                       ;; doesn't sort by ID
+                       {:id (UUID. 0 9), :name "D"}
+                       {:id (UUID. 0 8), :name "e"}]]
+            (binding [api/get-congregation (constantly {:body {:congregation/users (shuffle users)}})]
+              (is (= ["c" "a" "B" "D" "e"]
+                     (->> (settings-page/model! (assoc-in request [:params :new-user] (str new-user-id)))
+                          :congregation/users
+                          (map :name)))))))))))
 
 (deftest congregation-settings-section-test
   (testing "requires the configure-congregation permission"
@@ -232,36 +233,36 @@
           cong-id (at/create-congregation! session "foo")
           request {:params {:congregation (str cong-id)
                             :congregation-name "new name"
-                            :loans-csv-url "new url"}
-                   :session (auth/user-session {:name "John Doe"} user-id)}]
+                            :loans-csv-url "new url"}}]
       (binding [html/*page-path* "/settings-page-url"]
+        (auth/with-user-id user-id
 
-        (testing "save successful: redirects to same page"
-          (with-fixtures [fake-dispatcher-fixture]
-            (let [response (settings-page/save-congregation-settings! request)]
-              (is (= {:status 303
-                      :headers {"Location" "/settings-page-url"}
-                      :body ""}
-                     response))
-              (is (= {:command/type :congregation.command/update-congregation
-                      :command/user user-id
-                      :congregation/id cong-id
-                      :congregation/loans-csv-url "new url"
-                      :congregation/name "new name"}
-                     (dissoc @*last-command :command/time))))))
+          (testing "save successful: redirects to same page"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (settings-page/save-congregation-settings! request)]
+                (is (= {:status 303
+                        :headers {"Location" "/settings-page-url"}
+                        :body ""}
+                       response))
+                (is (= {:command/type :congregation.command/update-congregation
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :congregation/loans-csv-url "new url"
+                        :congregation/name "new name"}
+                       (dissoc @*last-command :command/time))))))
 
-        (testing "save failed: highlights erroneous form fields, doesn't forget invalid user input"
-          (binding [dispatcher/command! (fn [& _]
-                                          (throw (ValidationException. [[:missing-name]
-                                                                        [:disallowed-loans-csv-url]])))]
-            (let [response (settings-page/save-congregation-settings! request)]
-              (is (= forms/validation-error-http-status (:status response)))
-              (is (str/includes?
-                   (html/visible-text (:body response))
-                   (html/normalize-whitespace
-                    "Congregation name [new name] ⚠️
-                     Experimental features
-                     Territory loans CSV URL (optional) [new url] ⚠️"))))))))))
+          (testing "save failed: highlights erroneous form fields, doesn't forget invalid user input"
+            (binding [dispatcher/command! (fn [& _]
+                                            (throw (ValidationException. [[:missing-name]
+                                                                          [:disallowed-loans-csv-url]])))]
+              (let [response (settings-page/save-congregation-settings! request)]
+                (is (= forms/validation-error-http-status (:status response)))
+                (is (str/includes?
+                     (html/visible-text (:body response))
+                     (html/normalize-whitespace
+                      "Congregation name [new name] ⚠️
+                       Experimental features
+                       Territory loans CSV URL (optional) [new url] ⚠️")))))))))))
 
 (deftest ^:slow add-user!-test
   (with-fixtures [db-fixture api-fixture]
@@ -270,53 +271,53 @@
           new-user-id (UUID. 0 2)
           cong-id (at/create-congregation! session "foo")
           request {:params {:congregation (str cong-id)
-                            :user-id (str new-user-id)}
-                   :session (auth/user-session {:name "John Doe"} user-id)}]
+                            :user-id (str new-user-id)}}]
       (binding [html/*page-path* "/settings-page-url"]
+        (auth/with-user-id user-id
 
-        (testing "add successful: highlights the added user"
-          (with-fixtures [fake-dispatcher-fixture]
-            (let [response (settings-page/add-user! request)]
-              (is (= {:status 303
-                      :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
-                      :body ""}
-                     response))
-              (is (= {:command/type :congregation.command/add-user
-                      :command/user user-id
-                      :congregation/id cong-id
-                      :user/id new-user-id}
-                     (dissoc @*last-command :command/time))))))
+          (testing "add successful: highlights the added user"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (settings-page/add-user! request)]
+                (is (= {:status 303
+                        :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
+                        :body ""}
+                       response))
+                (is (= {:command/type :congregation.command/add-user
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :user/id new-user-id}
+                       (dissoc @*last-command :command/time))))))
 
-        (testing "trims the user ID"
-          (with-fixtures [fake-dispatcher-fixture]
-            (let [request (replace-in request [:params :user-id] (str new-user-id) (str "  " new-user-id "  "))
-                  response (settings-page/add-user! request)]
-              (is (= {:status 303
-                      :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
-                      :body ""}
-                     response)))))
+          (testing "trims the user ID"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [request (replace-in request [:params :user-id] (str new-user-id) (str "  " new-user-id "  "))
+                    response (settings-page/add-user! request)]
+                (is (= {:status 303
+                        :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
+                        :body ""}
+                       response)))))
 
-        (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
-          (binding [dispatcher/command! (fn [& _]
-                                          (throw (ValidationException. [[:no-such-user new-user-id]])))]
-            (let [response (settings-page/add-user! request)]
-              (is (= forms/validation-error-http-status (:status response)))
-              (is (str/includes?
-                   (html/visible-text (:body response))
-                   (html/normalize-whitespace
-                    "User ID [00000000-0000-0000-0000-000000000002] ⚠️ User does not exist
-                     Add user")))))
+          (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
+            (binding [dispatcher/command! (fn [& _]
+                                            (throw (ValidationException. [[:no-such-user new-user-id]])))]
+              (let [response (settings-page/add-user! request)]
+                (is (= forms/validation-error-http-status (:status response)))
+                (is (str/includes?
+                     (html/visible-text (:body response))
+                     (html/normalize-whitespace
+                      "User ID [00000000-0000-0000-0000-000000000002] ⚠️ User does not exist
+                       Add user")))))
 
-          (binding [dispatcher/command! (fn [& _]
-                                          (throw (ValidationException. [[:invalid-user-id]])))]
-            (let [request (replace-in request [:params :user-id] (str new-user-id) "foo")
-                  response (settings-page/add-user! request)]
-              (is (= forms/validation-error-http-status (:status response)))
-              (is (str/includes?
-                   (html/visible-text (:body response))
-                   (html/normalize-whitespace
-                    "User ID [foo] ⚠️
-                     Add user"))))))))))
+            (binding [dispatcher/command! (fn [& _]
+                                            (throw (ValidationException. [[:invalid-user-id]])))]
+              (let [request (replace-in request [:params :user-id] (str new-user-id) "foo")
+                    response (settings-page/add-user! request)]
+                (is (= forms/validation-error-http-status (:status response)))
+                (is (str/includes?
+                     (html/visible-text (:body response))
+                     (html/normalize-whitespace
+                      "User ID [foo] ⚠️
+                       Add user")))))))))))
 
 (deftest ^:slow remove-user!-test
   (with-fixtures [db-fixture api-fixture]
@@ -325,10 +326,9 @@
           other-user-id (UUID. 0 2)
           cong-id (at/create-congregation! session "foo")
           request {:params {:congregation (str cong-id)
-                            :user-id (str other-user-id)}
-                   :session (auth/user-session {:name "John Doe"} current-user-id)}]
+                            :user-id (str other-user-id)}}]
       (binding [html/*page-path* "/settings-page-url"]
-        (auth/with-user-from-session request
+        (auth/with-user-id current-user-id
 
           (testing "removes the user and refreshes the users list"
             (with-fixtures [fake-dispatcher-fixture]

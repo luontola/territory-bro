@@ -26,7 +26,10 @@
           <entry key="secretary.core/defroute" value="-1" />
           <entry key="territory-bro.browser-test/with-per-test-postmortem" value="0" />
           <entry key="territory-bro.gis.gis-db-test/with-tenant-schema" value="1" />
+          <entry key="territory-bro.infra.authentication/with-anonymous-user" value="0" />
+          <entry key="territory-bro.infra.authentication/with-user" value="1" />
           <entry key="territory-bro.infra.authentication/with-user-from-session" value="1" />
+          <entry key="territory-bro.infra.authentication/with-user-id" value="1" />
           <entry key="territory-bro.infra.db/as-tenant" value="1" />
           <entry key="territory-bro.infra.db/auto-explain" value="2" />
           <entry key="territory-bro.test.fixtures/with-fixtures" value="1" />

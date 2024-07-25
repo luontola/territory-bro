@@ -10,10 +10,9 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]))
 
-(defn model! [request]
-  (auth/with-user-from-session request
-    (api/require-logged-in!)
-    {:user-id (:user/id auth/*user*)}))
+(defn model! [_request]
+  (api/require-logged-in!)
+  {:user-id (:user/id auth/*user*)})
 
 (defn view [{:keys [user-id]}]
   (h/html

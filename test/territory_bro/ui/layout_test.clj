@@ -68,47 +68,48 @@
   (with-fixtures [db-fixture api-fixture]
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
-          cong-id (at/create-congregation! session "the congregation")]
+          cong-id (at/create-congregation! session "the congregation")
+          user {:user/id user-id
+                :name "John Doe"}]
+      (auth/with-user user
 
-      (testing "top level, anonymous"
-        (let [request {:uri "/some/page"
-                       :query-string "foo=bar&gazonk"
-                       :cookies {"languageSelectionWidth" {:value "42px"}}}]
-          (is (= anonymous-model
-                 (layout/model! request)))))
+        (testing "top level, anonymous"
+          (auth/with-anonymous-user
+            (let [request {:uri "/some/page"
+                           :query-string "foo=bar&gazonk"
+                           :cookies {"languageSelectionWidth" {:value "42px"}}}]
+              (is (= anonymous-model (layout/model! request))))))
 
-      (testing "top level, developer"
-        (binding [config/env (replace-in config/env [:dev] false true)]
+        (testing "top level, anonymous, developer mode"
+          (auth/with-anonymous-user
+            (binding [config/env (replace-in config/env [:dev] false true)]
+              (let [request {:uri "/"
+                             :query-string nil}]
+                (is (= developer-model (layout/model! request)))))))
+
+        (testing "top level, logged in"
           (let [request {:uri "/"
                          :query-string nil}]
-            (is (= developer-model
-                   (layout/model! request))))))
+            (is (= (-> logged-in-model
+                       (replace-in [:user :user/id] (UUID. 0 2) user-id))
+                   (layout/model! request)))))
 
-      (testing "top level, logged in"
-        (let [request {:uri "/"
-                       :query-string nil
-                       :session (auth/user-session {:name "John Doe"} user-id)}]
-          (is (= (-> logged-in-model
-                     (replace-in [:user :user/id] (UUID. 0 2) user-id))
-                 (layout/model! request)))))
-
-      (testing "congregation level"
-        (let [request {:uri "/"
-                       :query-string nil
-                       :params {:congregation (str cong-id)}
-                       :session (auth/user-session {:name "John Doe"} user-id)}]
-          (is (= (-> congregation-model
-                     (replace-in [:congregation :congregation/id] (UUID. 0 1) cong-id)
-                     (replace-in [:user :user/id] (UUID. 0 2) user-id))
-                 (layout/model! request)))))
-
-      (testing "demo congregation"
-        (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-          (let [request {:uri "/congregation/demo"
+        (testing "congregation level"
+          (let [request {:uri "/"
                          :query-string nil
-                         :params {:congregation "demo"}}]
-            (is (= demo-congregation-model
-                   (layout/model! request)))))))))
+                         :params {:congregation (str cong-id)}}]
+            (is (= (-> congregation-model
+                       (replace-in [:congregation :congregation/id] (UUID. 0 1) cong-id)
+                       (replace-in [:user :user/id] (UUID. 0 2) user-id))
+                   (layout/model! request)))))
+
+        (testing "demo congregation"
+          (auth/with-anonymous-user
+            (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+              (let [request {:uri "/congregation/demo"
+                             :query-string nil
+                             :params {:congregation "demo"}}]
+                (is (= demo-congregation-model (layout/model! request)))))))))))
 
 (deftest page-test
   (testing "minimal data"

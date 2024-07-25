@@ -67,34 +67,34 @@
           _ (at/create-card-minimap-viewport! cong-id)
           region-id (at/create-region! cong-id)
           territory-id (at/create-territory! cong-id)
-          request {:params {:congregation (str cong-id)}
-                   :session {::auth/user {:user/id user-id}}}
+          request {:params {:congregation (str cong-id)}}
           fix (fn [model]
                 (walk/postwalk-replace {(UUID. 0 1) cong-id
                                         (UUID. 0 2) region-id
                                         (UUID. 0 3) territory-id}
                                        model))]
+      (auth/with-user-id user-id
 
-      (testing "default"
-        (is (= (fix default-model)
-               (printouts-page/model! request))))
+        (testing "default"
+          (is (= (fix default-model)
+                 (printouts-page/model! request))))
 
-      (testing "every form value changed"
-        (let [request (update request :params merge {:template "NeighborhoodCard"
-                                                     :language "fi"
-                                                     :map-raster "mmlTaustakartta"
-                                                     :regions [(str (UUID. 0 4))
-                                                               (str (UUID. 0 5))]
-                                                     :territories [(str (UUID. 0 6))
-                                                                   (str (UUID. 0 7))]})]
-          (is (= (fix form-changed-model)
-                 (printouts-page/model! request)))))
+        (testing "every form value changed"
+          (let [request (update request :params merge {:template "NeighborhoodCard"
+                                                       :language "fi"
+                                                       :map-raster "mmlTaustakartta"
+                                                       :regions [(str (UUID. 0 4))
+                                                                 (str (UUID. 0 5))]
+                                                       :territories [(str (UUID. 0 6))
+                                                                     (str (UUID. 0 7))]})]
+            (is (= (fix form-changed-model)
+                   (printouts-page/model! request)))))
 
-      (testing "demo congregation"
-        (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-          (let [request {:params {:congregation "demo"}}]
-            (is (= (fix demo-model)
-                   (printouts-page/model! request)))))))))
+        (testing "demo congregation"
+          (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+            (let [request {:params {:congregation "demo"}}]
+              (is (= (fix demo-model)
+                     (printouts-page/model! request))))))))))
 
 (deftest parse-uuid-multiselect-test
   (is (= #{} (printouts-page/parse-uuid-multiselect nil)))

@@ -11,10 +11,9 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]))
 
-(defn model! [request]
-  (auth/with-user-from-session request
-    {:support-email (when (auth/logged-in?)
-                      (:support-email config/env))}))
+(defn model! [_request]
+  {:support-email (when (auth/logged-in?)
+                    (:support-email config/env))})
 
 (defn view [{:keys [support-email]}]
   (h/html

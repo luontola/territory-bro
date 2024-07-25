@@ -30,16 +30,19 @@
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
           cong-id (at/create-congregation! session "Example Congregation")
-          request {:params {:congregation (str cong-id)}
-                   :session {::auth/user {:user/id user-id}}}]
-      (is (= model
-             (congregation-page/model! request)))
+          request {:params {:congregation (str cong-id)}}]
+      (auth/with-user-id user-id
 
-      (testing "demo congregation"
-        (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-          (let [request {:params {:congregation "demo"}}]
-            (is (= demo-model
-                   (congregation-page/model! request)))))))))
+        (testing "regular congregation"
+          (is (= model (congregation-page/model! request))))
+
+        (testing "demo congregation"
+          (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+            (let [request {:params {:congregation "demo"}}]
+              (is (= demo-model
+                     (congregation-page/model! request)
+                     (auth/with-anonymous-user
+                       (congregation-page/model! request)))))))))))
 
 (deftest view-test
   (testing "full permissions"

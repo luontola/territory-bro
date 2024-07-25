@@ -17,23 +17,22 @@
             [territory-bro.ui.visible :as visible]))
 
 (defn model! [request]
-  (auth/with-user-from-session request
-    (let [cong-id (get-in request [:params :congregation])
-          demo? (= "demo" cong-id)
-          congregation (when (some? cong-id)
-                         (-> (if demo?
-                               (:body (api/get-demo-congregation request))
-                               (:body (api/get-congregation request {})))
-                             (select-keys [:congregation/id :congregation/name :congregation/permissions])))
-          language-selection-width (get-in request [:cookies "languageSelectionWidth" :value])]
-      {:congregation congregation
-       :user (when (auth/logged-in?)
-               auth/*user*)
-       :login-url (when-not (auth/logged-in?)
-                    (auth0/login-url request))
-       :language-selection-width language-selection-width
-       :dev? (:dev config/env)
-       :demo? demo?})))
+  (let [cong-id (get-in request [:params :congregation])
+        demo? (= "demo" cong-id)
+        congregation (when (some? cong-id)
+                       (-> (if demo?
+                             (:body (api/get-demo-congregation request))
+                             (:body (api/get-congregation request {})))
+                           (select-keys [:congregation/id :congregation/name :congregation/permissions])))
+        language-selection-width (get-in request [:cookies "languageSelectionWidth" :value])]
+    {:congregation congregation
+     :user (when (auth/logged-in?)
+             auth/*user*)
+     :login-url (when-not (auth/logged-in?)
+                  (auth0/login-url request))
+     :language-selection-width language-selection-width
+     :dev? (:dev config/env)
+     :demo? demo?}))
 
 
 (defn- minify-html [html]

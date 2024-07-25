@@ -14,12 +14,11 @@
             [territory-bro.ui.layout :as layout]))
 
 (defn model! [request]
-  (auth/with-user-from-session request
-    (let [congregations (:body (api/list-congregations request))]
-      {:congregations (->> congregations
-                           (sort-by (comp str/lower-case :congregation/name)))
-       :logged-in? (auth/logged-in?)
-       :demo-available? (some? (:demo-congregation config/env))})))
+  (let [congregations (:body (api/list-congregations request))]
+    {:congregations (->> congregations
+                         (sort-by (comp str/lower-case :congregation/name)))
+     :logged-in? (auth/logged-in?)
+     :demo-available? (some? (:demo-congregation config/env))}))
 
 (defn login-button []
   (h/html [:a.pure-button {:href "/login"}
