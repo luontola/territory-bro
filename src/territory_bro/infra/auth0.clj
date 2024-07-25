@@ -100,7 +100,7 @@
 (defn return-to-url [{:keys [uri query-string]}]
   (if (some? query-string)
     (str uri "?" query-string)
-    uri))
+    (str uri)))
 
 (defn login-url [request]
   (str "/login?return-to-url=" (codec/url-encode (return-to-url request))))
