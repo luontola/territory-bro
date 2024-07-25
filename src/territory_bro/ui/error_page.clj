@@ -7,13 +7,15 @@
             [clojure.tools.logging :as log]
             [hiccup2.core :as h]
             [ring.util.response :as response]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]))
 
 (defn safe-page [request view]
   (let [model (try
-                (layout/model! request)
+                (auth/with-user-from-session request
+                  (layout/model! request))
                 (catch Throwable t
                   (log/error t "Error in building the layout model")
                   nil))]
