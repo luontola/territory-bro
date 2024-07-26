@@ -192,7 +192,7 @@
              (mapv (fn [congregation]
                      (select-keys congregation [:congregation/id :congregation/name])))))))
 
-(defn- enrich-congregation-users [congregation conn]
+(defn enrich-congregation-users [congregation conn]
   (let [user-ids (->> (:congregation/users congregation)
                       (map :user/id))
         users (for [user (user/get-users conn {:ids user-ids})]

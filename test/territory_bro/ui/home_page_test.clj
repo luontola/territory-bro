@@ -34,28 +34,22 @@
    :demo-available? false})
 
 (deftest model!-test
-  (let [events [{:event/type :congregation.event/congregation-created
-                 :congregation/id cong-id1
-                 :congregation/name "Congregation 1"
-                 :congregation/schema-name "cong1_schema"}
-                {:event/type :congregation.event/permission-granted
-                 :congregation/id cong-id1
-                 :user/id user-id
-                 :permission/id :view-congregation}
+  (let [events (flatten [{:event/type :congregation.event/congregation-created
+                          :congregation/id cong-id1
+                          :congregation/name "Congregation 1"
+                          :congregation/schema-name "cong1_schema"}
+                         (territory-bro.domain.congregation/admin-permissions-granted cong-id1 user-id)
 
-                {:event/type :congregation.event/congregation-created
-                 :congregation/id cong-id2
-                 :congregation/name "Congregation 2"
-                 :congregation/schema-name "cong2_schema"}
-                {:event/type :congregation.event/permission-granted
-                 :congregation/id cong-id2
-                 :user/id user-id
-                 :permission/id :view-congregation}
+                         {:event/type :congregation.event/congregation-created
+                          :congregation/id cong-id2
+                          :congregation/name "Congregation 2"
+                          :congregation/schema-name "cong2_schema"}
+                         (territory-bro.domain.congregation/admin-permissions-granted cong-id2 user-id)
 
-                {:event/type :congregation.event/congregation-created
-                 :congregation/id (UUID. 0 0x666)
-                 :congregation/name "Unrelated Congregation"
-                 :congregation/schema-name "cong3_schema"}]
+                         {:event/type :congregation.event/congregation-created
+                          :congregation/id (UUID. 0 0x666)
+                          :congregation/name "Unrelated Congregation"
+                          :congregation/schema-name "cong3_schema"}])
         state (testutil/apply-events projections/projection events)
         request {:state state}]
     (binding [config/env {:demo-congregation (UUID/randomUUID)}]

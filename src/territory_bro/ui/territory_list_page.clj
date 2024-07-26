@@ -5,9 +5,13 @@
 (ns territory-bro.ui.territory-list-page
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
+            [ring.util.http-response :as http-response]
             [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
+            [territory-bro.domain.loan :as loan]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.json :as json]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
@@ -17,20 +21,53 @@
             [territory-bro.ui.maps :as maps])
   (:import (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
-(defn model! [request {:keys [fetch-loans?]}]
-  (let [demo? (= "demo" (get-in request [:params :congregation]))
-        congregation (if demo?
-                       (:body (api/get-demo-congregation request))
-                       (:body (api/get-congregation request {:fetch-loans? fetch-loans?})))
+(defn get-demo-congregation [state]
+  ;; anonymous access is allowed
+  (let [cong-id (:demo-congregation config/env)
+        user-id (api/current-user-id)
+        congregation (dmz/get-demo-congregation state cong-id user-id)]
+    (when-not congregation
+      (http-response/forbidden! "No demo congregation"))
+    congregation))
+
+(defn ^:dynamic get-congregation [state cong-id {:keys [fetch-loans?]}]
+  (let [user-id (api/current-user-id)
+        congregation (dmz/get-congregation state cong-id user-id)
+        permissions (:congregation/permissions congregation)]
+    (when-not congregation
+      ;; This function must support anonymous access for opened shares.
+      ;; If anonymous user cannot see the congregation, first prompt them
+      ;; to login before giving the forbidden error.
+      ;; TODO: refactor other routes to use this same pattern?
+      (api/require-logged-in!)
+      (http-response/forbidden! "No congregation access"))
+    (-> congregation
+        (cond-> (and fetch-loans?
+                     (:view-congregation permissions))
+                (loan/enrich-territory-loans!)))))
+
+(defn- parse-cong-id [s]
+  (if (= "demo" s)
+    "demo"
+    (parse-uuid s)))
+
+(defn model! [{:keys [state] :as request} {:keys [fetch-loans?]}]
+  (let [cong-id (parse-cong-id (get-in request [:params :congregation]))
+        state (api/enrich-state-for-request state request)
+        ;; TODO: unify the congregation getters into one, to get rid of "if demo"
+        congregation (if (= "demo" cong-id)
+                       (get-demo-congregation state)
+                       ;; TODO: move fetching loans to a separate function
+                       (get-congregation state cong-id {:fetch-loans? fetch-loans?}))
         congregation-boundary (->> (:congregation/congregation-boundaries congregation)
                                    (mapv (comp geometry/parse-wkt :congregation-boundary/location))
                                    ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
                                    (geometry/union)
                                    (str))]
     {:congregation-boundary congregation-boundary
-     :territories (:congregation/territories congregation)
+     :territories (:congregation/territories congregation) ; TODO: move fetching territories to a separate function
      :has-loans? (some? (:congregation/loans-csv-url congregation))
-     :permissions (:congregation/permissions congregation)}))
+     :permissions (:congregation/permissions congregation)})) ; TODO: get only the relevant permissions for this page
 
 
 (defn limited-visibility-help []

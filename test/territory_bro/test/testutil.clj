@@ -62,5 +62,8 @@
     (validate-command command))
   commands)
 
-(defn apply-events [projection events]
-  (reduce projection nil (events/validate-events events)))
+(defn apply-events
+  ([projection events]
+   (apply-events projection nil events))
+  ([projection state events]
+   (reduce projection state (events/validate-events events))))

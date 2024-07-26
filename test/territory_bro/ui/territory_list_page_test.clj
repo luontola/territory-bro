@@ -6,14 +6,14 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [reitit.core :as reitit]
-            [territory-bro.api :as api]
-            [territory-bro.api-test :as at]
             [territory-bro.domain.loan :as loan]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.projections :as projections]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.test.testutil :as testutil]
             [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui :as ui]
             [territory-bro.ui.html :as html]
@@ -21,9 +21,12 @@
             [territory-bro.ui.territory-page :as territory-page])
   (:import (java.util UUID)))
 
+(def user-id (UUID/randomUUID))
+(def cong-id (UUID/randomUUID))
+(def territory-id (UUID. 0 1))
 (def model
   {:congregation-boundary (str (geometry/parse-wkt testdata/wkt-helsinki))
-   :territories [{:territory/id (UUID. 0 1)
+   :territories [{:territory/id territory-id
                   :territory/number "123"
                   :territory/addresses "the addresses"
                   :territory/region "the region"
@@ -49,48 +52,69 @@
          :congregation-boundary ""
          :permissions {}))
 
-(deftest ^:slow model!-test
-  (with-fixtures [db-fixture api-fixture]
-    ;; TODO: decouple this test from the database
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          cong-id (at/create-congregation! session "foo")
-          _ (at/create-congregation-boundary! cong-id)
-          territory-id (at/create-territory! cong-id)
-          request {:params {:congregation (str cong-id)}}
-          fix #(replace-in % [:territories 0 :territory/id] (UUID. 0 1) territory-id)]
-      (auth/with-user-id user-id
+(deftest model!-test
+  (let [events (flatten [{:event/type :congregation.event/congregation-created
+                          :congregation/id cong-id
+                          :congregation/name "Congregation 1"
+                          :congregation/schema-name "cong1_schema"}
+                         (territory-bro.domain.congregation/admin-permissions-granted cong-id user-id)
+                         {:event/type :congregation-boundary.event/congregation-boundary-defined
+                          :congregation/id cong-id
+                          :congregation-boundary/id (UUID/randomUUID)
+                          :congregation-boundary/location testdata/wkt-helsinki}
+                         {:event/type :territory.event/territory-defined
+                          :congregation/id cong-id
+                          :territory/id territory-id
+                          :territory/number "123"
+                          :territory/addresses "the addresses"
+                          :territory/region "the region"
+                          :territory/meta {:foo "bar"}
+                          :territory/location testdata/wkt-helsinki-rautatientori}])
+        state (testutil/apply-events projections/projection events)
+        request {:params {:congregation (str cong-id)}
+                 :state state}]
+    (auth/with-user-id user-id
 
-        (testing "default"
-          (is (= (fix model)
-                 (territory-list-page/model! request {}))))
+      (testing "default"
+        (is (= model (territory-list-page/model! request {}))))
 
-        (testing "demo congregation"
-          (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-            (let [request {:params {:congregation "demo"}}]
-              (is (= (fix demo-model)
-                     (territory-list-page/model! request {})
-                     (auth/with-anonymous-user
-                       (territory-list-page/model! request {})))))))
+      (testing "demo congregation"
+        (binding [config/env {:demo-congregation cong-id}]
+          (let [request {:params {:congregation "demo"}
+                         :state state}]
+            (is (= demo-model
+                   (territory-list-page/model! request {})
+                   (auth/with-anonymous-user
+                     (territory-list-page/model! request {})))))))
 
-        (testing "anonymous user, has opened a share"
-          (at/create-share! cong-id territory-id "share123")
-          (auth/with-anonymous-user
-            (let [{:keys [session]} (api/open-share {:params {:share-key "share123"}})
-                  request (assoc request :session session)]
-              (is (= (fix anonymous-model)
-                     (territory-list-page/model! request {}))))))
+      (testing "anonymous user, has opened a share"
+        (auth/with-anonymous-user
+          (let [share-id (UUID/randomUUID)
+                state (testutil/apply-events projections/projection state [{:event/type :share.event/share-created
+                                                                            :share/id share-id
+                                                                            :share/key "share123"
+                                                                            :share/type :link
+                                                                            :congregation/id cong-id
+                                                                            :territory/id territory-id}])
+                request (assoc request
+                               :session {:territory-bro.api/opened-shares #{share-id}}
+                               :state state)]
+            (is (= anonymous-model
+                   (territory-list-page/model! request {}))))))
 
-        (testing "loans enabled,"
-          (at/change-congregation-settings! cong-id "foo" "https://docs.google.com/example")
+      (testing "loans enabled,"
+        (let [state (testutil/apply-events projections/projection state [{:event/type :congregation.event/settings-updated
+                                                                          :congregation/id cong-id
+                                                                          :congregation/loans-csv-url "https://docs.google.com/spreadsheets/1"}])
+              request (assoc request :state state)] ; TODO: updating request :state gets repetitive in tests, extract helper for adding events to current state
           (binding [loan/download! (constantly (str "Number,Loaned,Staleness\n"
                                                     "123,TRUE,7\n"))]
             (testing "not fetched"
-              (is (= (fix model-loans-enabled)
+              (is (= model-loans-enabled
                      (territory-list-page/model! request {:fetch-loans? false}))))
 
             (testing "fetched"
-              (is (= (fix model-loans-fetched)
+              (is (= model-loans-fetched
                      (territory-list-page/model! request {:fetch-loans? true}))))))))))
 
 (deftest view-test
