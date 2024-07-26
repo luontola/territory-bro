@@ -6,6 +6,7 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [territory-bro.api :as api]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.ui.css :as css]
@@ -13,8 +14,13 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]))
 
-(defn model! [request]
-  (let [congregations (:body (api/list-congregations request))]
+(defn list-congregations [state] ; TODO: move to dmz?
+  (->> (congregation/get-my-congregations state (api/current-user-id))
+       (mapv (fn [congregation]
+               (select-keys congregation [:congregation/id :congregation/name])))))
+
+(defn model! [{:keys [state]}]
+  (let [congregations (list-congregations state)]
     {:congregations (->> congregations
                          (sort-by (comp str/lower-case :congregation/name)))
      :logged-in? (auth/logged-in?)

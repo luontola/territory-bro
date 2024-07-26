@@ -6,6 +6,7 @@
   (:require [reitit.ring :as ring]
             [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.util.http-response :as http-response]
+            [territory-bro.api :as api]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.congregation-page :as congregation-page]
@@ -36,12 +37,19 @@
     (auth/with-user-from-session request
       (handler request))))
 
+(defn wrap-current-state [handler]
+  (fn [request]
+    (let [state (api/state-for-request request) ; TODO: move to DMZ? depends on session state (sudo & opened shares)
+          request (assoc request :state state)]
+      (handler request))))
+
 (def routes
   [""
    {:middleware [[html/wrap-page-path nil] ; outermost middleware first
                  auth0/wrap-redirect-to-login
                  i18n/wrap-current-language
                  wrap-current-user
+                 wrap-current-state
                  wrap-http-response
                  wrap-json-api-compat]}
    auth0/routes

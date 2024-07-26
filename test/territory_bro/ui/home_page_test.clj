@@ -4,19 +4,23 @@
 
 (ns territory-bro.ui.home-page-test
   (:require [clojure.test :refer :all]
-            [territory-bro.api-test :as at]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.projections :as projections]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.test.testutil :as testutil]
             [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.home-page :as home-page]
             [territory-bro.ui.html :as html])
   (:import (java.util UUID)))
 
+(def user-id (UUID. 1 0))
+(def cong-id1 (UUID. 0 1))
+(def cong-id2 (UUID. 0 2))
 (def model
-  {:congregations [{:congregation/id (UUID. 0 1)
+  {:congregations [{:congregation/id cong-id1
                     :congregation/name "Congregation 1"}
-                   {:congregation/id (UUID. 0 2)
+                   {:congregation/id cong-id2
                     :congregation/name "Congregation 2"}]
    :logged-in? true
    :demo-available? true})
@@ -29,27 +33,45 @@
    :logged-in? false
    :demo-available? false})
 
-(deftest ^:slow model!-test
-  (with-fixtures [db-fixture api-fixture]
-    ;; TODO: decouple this test from the database
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          cong-id1 (at/create-congregation! session "Congregation 1")
-          cong-id2 (at/create-congregation! session "Congregation 2")
-          request {}]
+(deftest model!-test
+  (let [events [{:event/type :congregation.event/congregation-created
+                 :congregation/id cong-id1
+                 :congregation/name "Congregation 1"
+                 :congregation/schema-name "cong1_schema"}
+                {:event/type :congregation.event/permission-granted
+                 :congregation/id cong-id1
+                 :user/id user-id
+                 :permission/id :view-congregation}
 
-      (binding [config/env (replace-in config/env [:demo-congregation] nil (UUID. 0 42))]
-        (testing "logged in, with congregations"
-          (auth/with-user-id user-id
-            (is (= (-> model
-                       (replace-in [:congregations 0 :congregation/id] (UUID. 0 1) cong-id1)
-                       (replace-in [:congregations 1 :congregation/id] (UUID. 0 2) cong-id2))
-                   (home-page/model! request)))))
+                {:event/type :congregation.event/congregation-created
+                 :congregation/id cong-id2
+                 :congregation/name "Congregation 2"
+                 :congregation/schema-name "cong2_schema"}
+                {:event/type :congregation.event/permission-granted
+                 :congregation/id cong-id2
+                 :user/id user-id
+                 :permission/id :view-congregation}
 
-        (testing "anonymous user"
-          (auth/with-anonymous-user
-            (is (= anonymous-model (home-page/model! request))))))
+                {:event/type :congregation.event/congregation-created
+                 :congregation/id (UUID. 0 0x666)
+                 :congregation/name "Unrelated Congregation"
+                 :congregation/schema-name "cong3_schema"}]
+        state (testutil/apply-events projections/projection events)
+        request {:state state}]
+    (binding [config/env {:demo-congregation (UUID/randomUUID)}]
 
+      (testing "logged in, with congregations"
+        (auth/with-user-id user-id
+          (is (= (-> model
+                     (replace-in [:congregations 0 :congregation/id] (UUID. 0 1) cong-id1)
+                     (replace-in [:congregations 1 :congregation/id] (UUID. 0 2) cong-id2))
+                 (home-page/model! request)))))
+
+      (testing "anonymous user"
+        (auth/with-anonymous-user
+          (is (= anonymous-model (home-page/model! request))))))
+
+    (binding [config/env {:demo-congregation nil}]
       (testing "anonymous user, no demo"
         (auth/with-anonymous-user
           (is (= no-demo-model (home-page/model! request))))))))

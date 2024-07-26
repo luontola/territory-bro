@@ -165,19 +165,19 @@
                  :user (when (auth/logged-in?)
                          (fix-user-for-liberator auth/*user*))})))
 
-(defn- current-user-id []
+(defn current-user-id []
   (let [id (:user/id auth/*user*)]
     (assert id)
     id))
 
-(defn- enrich-state-for-request [state request]
+(defn enrich-state-for-request [state request]
   (let [session (:session request)]
     (cond-> state
       (::sudo? session) (congregation/sudo (current-user-id))
       (some? (::opened-shares session)) (share/grant-opened-shares (::opened-shares session)
                                                                    (current-user-id)))))
 
-(defn- state-for-request [request]
+(defn state-for-request [request]
   (let [state (projections/cached-state)]
     (enrich-state-for-request state request)))
 
