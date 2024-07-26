@@ -33,11 +33,7 @@
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-helsinki-rautatientori}]
    :has-loans? false
-   :permissions {:configure-congregation true
-                 :edit-do-not-calls true
-                 :gis-access true
-                 :share-territory-link true
-                 :view-congregation true}})
+   :permissions {:view-congregation true}})
 (def model-loans-enabled
   (replace-in model [:has-loans?] false true))
 (def model-loans-fetched
@@ -45,8 +41,7 @@
                                                          :territory/staleness 7}))
 (def demo-model
   (assoc model
-         :permissions {:share-territory-link true
-                       :view-congregation true}))
+         :permissions {:view-congregation true}))
 (def anonymous-model
   (assoc model
          :congregation-boundary ""

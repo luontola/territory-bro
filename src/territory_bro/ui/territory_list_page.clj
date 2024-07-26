@@ -67,7 +67,7 @@
     {:congregation-boundary congregation-boundary
      :territories (:congregation/territories congregation) ; TODO: move fetching territories to a separate function
      :has-loans? (some? (:congregation/loans-csv-url congregation))
-     :permissions (:congregation/permissions congregation)})) ; TODO: get only the relevant permissions for this page
+     :permissions (select-keys (:congregation/permissions congregation) [:view-congregation])}))
 
 
 (defn limited-visibility-help []
