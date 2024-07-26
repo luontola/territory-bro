@@ -205,7 +205,7 @@
   (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
         user-id (current-user-id)
         state (state-for-request request)
-        congregation (dmz/get-congregation state cong-id user-id)
+        congregation (dmz/get-own-congregation state cong-id user-id)
         permissions (:congregation/permissions congregation)]
     (when-not congregation
       ;; This function must support anonymous access for opened shares.

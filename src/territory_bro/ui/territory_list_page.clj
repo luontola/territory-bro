@@ -32,7 +32,7 @@
 
 (defn ^:dynamic get-congregation [state cong-id {:keys [fetch-loans?]}]
   (let [user-id (api/current-user-id)
-        congregation (dmz/get-congregation state cong-id user-id)
+        congregation (dmz/get-own-congregation state cong-id user-id)
         permissions (:congregation/permissions congregation)]
     (when-not congregation
       ;; This function must support anonymous access for opened shares.

@@ -144,11 +144,11 @@
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
 
     (testing "has view permissions"
-      (is (= expected (dmz/get-congregation state cong-id user-id))))
+      (is (= expected (dmz/get-own-congregation state cong-id user-id))))
 
     (let [user-id (UUID. 0 0x666)]
       (testing "no permissions"
-        (is (nil? (dmz/get-congregation state cong-id user-id))))
+        (is (nil? (dmz/get-own-congregation state cong-id user-id))))
 
       (testing "opened a share"
         (let [state (share/grant-opened-shares state [share-id] user-id)
@@ -164,7 +164,7 @@
                               :congregation/congregation-boundaries []
                               :congregation/regions []
                               :congregation/card-minimap-viewports [])]
-          (is (= expected (dmz/get-congregation state cong-id user-id))))))))
+          (is (= expected (dmz/get-own-congregation state cong-id user-id))))))))
 
 (deftest test-get-demo-congregation
   (let [state (apply-events test-events)
@@ -202,7 +202,7 @@
       (is (= expected (dmz/get-demo-congregation state cong-id user-id))))
 
     (testing "cannot see the demo congregation as own congregation"
-      (is (nil? (dmz/get-congregation state cong-id user-id))))))
+      (is (nil? (dmz/get-own-congregation state cong-id user-id))))))
 
 (deftest test-get-territory
   (let [state (apply-events test-events)

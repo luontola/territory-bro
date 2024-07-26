@@ -49,7 +49,7 @@
       :else
       nil)))
 
-(defn get-congregation [state cong-id user-id]
+(defn get-own-congregation [state cong-id user-id]
   (some-> (congregation/get-unrestricted-congregation state cong-id)
           (enrich-congregation state user-id)
           (apply-user-permissions-for-congregation state user-id)))
