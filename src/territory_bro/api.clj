@@ -201,9 +201,8 @@
 
 (defn ^:dynamic get-congregation [request {:keys [fetch-loans?]}]
   (let [cong-id (get-in request [:path-params :congregation])
-        user-id (current-user-id)
         state (state-for-request request)
-        congregation (dmz/get-own-congregation state cong-id user-id)
+        congregation (dmz/get-own-congregation state cong-id)
         permissions (:congregation/permissions congregation)]
     (when-not congregation
       ;; This function must support anonymous access for opened shares.
@@ -222,9 +221,8 @@
 (defn get-demo-congregation [request]
   ;; anonymous access is allowed
   (let [cong-id (:demo-congregation config/env)
-        user-id (current-user-id)
         state (state-for-request request)
-        congregation (dmz/get-demo-congregation state cong-id user-id)]
+        congregation (dmz/get-demo-congregation state cong-id)]
     (when-not congregation
       (forbidden! "No demo congregation"))
     (ok congregation)))
@@ -233,9 +231,8 @@
   (db/with-db [conn {}]
     (let [cong-id (get-in request [:path-params :congregation])
           territory-id (get-in request [:path-params :territory])
-          user-id (current-user-id)
           state (state-for-request request)
-          territory (dmz/get-own-territory conn state cong-id territory-id user-id)]
+          territory (dmz/get-own-territory conn state cong-id territory-id)]
       (when-not territory
         ;; This function must support anonymous access for opened shares.
         ;; If anonymous user cannot see the congregation, first prompt them

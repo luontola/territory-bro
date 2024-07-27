@@ -14,8 +14,7 @@
             [territory-bro.ui.layout :as layout]))
 
 (defn model! [{:keys [state]}]
-  (let [user-id (auth/current-user-id)
-        congregations (->> (dmz/list-congregations state user-id)
+  (let [congregations (->> (dmz/list-congregations state)
                            (mapv #(select-keys % [:congregation/id :congregation/name]))
                            (sort-by (comp str/lower-case :congregation/name)))]
     {:congregations congregations

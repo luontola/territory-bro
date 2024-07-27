@@ -22,8 +22,7 @@
 (defn model! [{:keys [state] :as request} {:keys [fetch-loans?]}]
   (let [cong-id (get-in request [:path-params :congregation])
         state (api/enrich-state-for-request state request)
-        user-id (api/current-user-id)
-        congregation (dmz/get-congregation state cong-id user-id)
+        congregation (dmz/get-congregation state cong-id)
         _ (when-not congregation
             ;; This function must support anonymous access for opened shares.
             ;; If anonymous user cannot see the congregation, first prompt them
@@ -35,7 +34,7 @@
                                    ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
                                    (geometry/union)
                                    (str))
-        territories (dmz/list-territories! state cong-id {:fetch-loans? fetch-loans?} (api/current-user-id))]
+        territories (dmz/list-territories! state cong-id {:fetch-loans? fetch-loans?})]
     {:congregation-boundary congregation-boundary
      :territories territories
      :has-loans? (some? (:congregation/loans-csv-url congregation))
