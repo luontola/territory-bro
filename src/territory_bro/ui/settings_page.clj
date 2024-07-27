@@ -20,7 +20,7 @@
   (:import (java.util UUID)))
 
 (defn model! [request]
-  (let [demo? (= "demo" (get-in request [:params :congregation]))
+  (let [demo? (= "demo" (get-in request [:path-params :congregation]))
         congregation (if demo?
                        (http-response/not-found! "Not available in demo")
                        (:body (api/get-congregation request {})))

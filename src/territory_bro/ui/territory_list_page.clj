@@ -46,13 +46,8 @@
                      (:view-congregation permissions))
                 (loan/enrich-territory-loans!)))))
 
-(defn- parse-cong-id [s]
-  (if (= "demo" s)
-    "demo"
-    (parse-uuid s)))
-
 (defn model! [{:keys [state] :as request} {:keys [fetch-loans?]}]
-  (let [cong-id (parse-cong-id (get-in request [:params :congregation]))
+  (let [cong-id (get-in request [:path-params :congregation])
         state (api/enrich-state-for-request state request)
         ;; TODO: unify the congregation getters into one, to get rid of "if demo"
         congregation (if (= "demo" cong-id)

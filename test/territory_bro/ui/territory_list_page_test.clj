@@ -66,7 +66,7 @@
                           :territory/meta {:foo "bar"}
                           :territory/location testdata/wkt-helsinki-rautatientori}])
         state (testutil/apply-events projections/projection events)
-        request {:params {:congregation (str cong-id)}
+        request {:path-params {:congregation cong-id}
                  :state state}]
     (auth/with-user-id user-id
 
@@ -75,7 +75,7 @@
 
       (testing "demo congregation"
         (binding [config/env {:demo-congregation cong-id}]
-          (let [request {:params {:congregation "demo"}
+          (let [request {:path-params {:congregation "demo"}
                          :state state}]
             (is (= demo-model
                    (territory-list-page/model! request {})

@@ -67,7 +67,7 @@
           _ (at/create-card-minimap-viewport! cong-id)
           region-id (at/create-region! cong-id)
           territory-id (at/create-territory! cong-id)
-          request {:params {:congregation (str cong-id)}}
+          request {:path-params {:congregation cong-id}}
           fix (fn [model]
                 (walk/postwalk-replace {(UUID. 0 1) cong-id
                                         (UUID. 0 2) region-id
@@ -92,7 +92,7 @@
 
         (testing "demo congregation"
           (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-            (let [request {:params {:congregation "demo"}}]
+            (let [request {:path-params {:congregation "demo"}}]
               (is (= (fix demo-model)
                      (printouts-page/model! request))))))))))
 

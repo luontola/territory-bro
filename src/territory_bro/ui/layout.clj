@@ -17,7 +17,7 @@
             [territory-bro.ui.visible :as visible]))
 
 (defn model! [request]
-  (let [cong-id (get-in request [:params :congregation])
+  (let [cong-id (get-in request [:path-params :congregation])
         demo? (= "demo" cong-id)
         congregation (when (some? cong-id)
                        (-> (if demo?

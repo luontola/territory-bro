@@ -97,7 +97,7 @@
         (testing "congregation level"
           (let [request {:uri "/"
                          :query-string nil
-                         :params {:congregation (str cong-id)}}]
+                         :path-params {:congregation  cong-id}}]
             (is (= (-> congregation-model
                        (replace-in [:congregation :congregation/id] (UUID. 0 1) cong-id)
                        (replace-in [:user :user/id] (UUID. 0 2) user-id))
@@ -108,7 +108,7 @@
             (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
               (let [request {:uri "/congregation/demo"
                              :query-string nil
-                             :params {:congregation "demo"}}]
+                             :path-params {:congregation "demo"}}]
                 (is (= demo-congregation-model (layout/model! request)))))))))))
 
 (deftest page-test

@@ -16,7 +16,7 @@
             [territory-bro.ui.maps :as maps]))
 
 (defn model! [request]
-  (let [demo? (= "demo" (get-in request [:params :congregation]))
+  (let [demo? (= "demo" (get-in request [:path-params :congregation]))
         congregation (if demo?
                        (:body (api/get-demo-congregation request))
                        (:body (api/get-congregation request {})))

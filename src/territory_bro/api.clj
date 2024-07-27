@@ -202,7 +202,7 @@
     (assoc congregation :congregation/users users)))
 
 (defn ^:dynamic get-congregation [request {:keys [fetch-loans?]}]
-  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+  (let [cong-id (get-in request [:path-params :congregation])
         user-id (current-user-id)
         state (state-for-request request)
         congregation (dmz/get-own-congregation state cong-id user-id)
@@ -233,8 +233,8 @@
 
 (defn get-territory [request]
   (db/with-db [conn {}]
-    (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-          territory-id (UUID/fromString (get-in request [:params :territory]))
+    (let [cong-id (get-in request [:path-params :congregation])
+          territory-id (get-in request [:path-params :territory])
           user-id (current-user-id)
           state (state-for-request request)
           territory (dmz/get-territory conn state cong-id territory-id user-id)]
@@ -250,7 +250,7 @@
 (defn get-demo-territory [request]
   ;; anonymous access is allowed
   (let [cong-id (:demo-congregation config/env)
-        territory-id (UUID/fromString (get-in request [:params :territory]))
+        territory-id (get-in request [:path-params :territory])
         state (state-for-request request)
         territory (dmz/get-demo-territory state cong-id territory-id)]
     (when-not territory
@@ -310,7 +310,7 @@
 
 (defn add-user [request]
   (require-logged-in!)
-  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+  (let [cong-id (get-in request [:path-params :congregation])
         user-id (or (parse-uuid (get-in request [:params :user-id]))
                     (throw (ValidationException. [[:invalid-user-id]])))
         state (state-for-request request)]
@@ -321,7 +321,7 @@
       (ok ok-body))))
 
 (defn set-user-permissions [request]
-  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+  (let [cong-id (get-in request [:path-params :congregation])
         user-id (UUID/fromString (get-in request [:params :user-id]))
         permissions (->> (get-in request [:params :permissions])
                          (map keyword))
@@ -335,7 +335,7 @@
 
 (defn save-congregation-settings [request]
   (require-logged-in!)
-  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+  (let [cong-id (get-in request [:path-params :congregation])
         name (get-in request [:params :congregation-name])
         loans-csv-url (get-in request [:params :loans-csv-url])
         state (state-for-request request)]
@@ -348,7 +348,7 @@
 
 (defn download-qgis-project [request]
   (require-logged-in!)
-  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+  (let [cong-id (get-in request [:path-params :congregation])
         user-id (current-user-id)
         state (state-for-request request)
         congregation (congregation/get-my-congregation state cong-id user-id)
@@ -368,8 +368,8 @@
 
 (defn edit-do-not-calls [request]
   (require-logged-in!)
-  (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-        territory-id (UUID/fromString (get-in request [:params :territory]))
+  (let [cong-id (get-in request [:path-params :congregation])
+        territory-id (get-in request [:path-params :territory])
         do-not-calls (str/trim (str (get-in request [:params :do-not-calls])))
         state (state-for-request request)]
     (db/with-db [conn {}]
@@ -380,9 +380,9 @@
       (ok {}))))
 
 (defn share-territory-link [request]
-  (if (= "demo" (get-in request [:params :congregation]))
+  (if (= "demo" (get-in request [:path-params :congregation]))
     (let [cong-id (:demo-congregation config/env)
-          territory-id (UUID/fromString (get-in request [:params :territory]))
+          territory-id (get-in request [:path-params :territory])
           state (state-for-request request)
           share-key (share/demo-share-key territory-id)
           territory (dmz/get-demo-territory state cong-id territory-id)]
@@ -390,8 +390,8 @@
            :key share-key}))
     (do
       (require-logged-in!)
-      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
-            territory-id (UUID/fromString (get-in request [:params :territory]))
+      (let [cong-id (get-in request [:path-params :congregation])
+            territory-id (get-in request [:path-params :territory])
             state (state-for-request request)
             share-key (share/generate-share-key)
             territory (dmz/get-demo-territory state cong-id territory-id)]
@@ -418,7 +418,7 @@
     share-key))
 
 (defn generate-qr-codes [request]
-  (if (= "demo" (get-in request [:params :congregation]))
+  (if (= "demo" (get-in request [:path-params :congregation]))
     (let [territory-ids (->> (get-in request [:params :territories])
                              (mapv UUID/fromString))
           shares (into [] (for [territory-id territory-ids]
@@ -429,7 +429,7 @@
       (ok {:qrCodes shares}))
     (do
       (require-logged-in!)
-      (let [cong-id (UUID/fromString (get-in request [:params :congregation]))
+      (let [cong-id (get-in request [:path-params :congregation])
             territory-ids (->> (get-in request [:params :territories])
                                (mapv UUID/fromString))]
         (db/with-db [conn {}]
@@ -460,7 +460,7 @@
   (refresh-projections!)) ; XXX: this is a GET request, so it doesn't trigger automatic refresh
 
 (defn open-share [request]
-  (let [share-key (get-in request [:params :share-key])
+  (let [share-key (get-in request [:path-params :share-key])
         state (state-for-request request)
         share (share/find-share-by-key state share-key)
         demo-territory (share/demo-share-key->territory-id share-key)]
@@ -480,27 +480,42 @@
       :else
       (not-found {:message "Share not found"}))))
 
+(defn- try-parse-uuid [s]
+  (when s
+    (or (parse-uuid s)
+        s)))
+
+(defn compat [request]
+  ;; XXX: Compatibility with the new UI's request parameters, until this API is removed.
+  ;;      This cannot be done using middleware, because compojure.core/defroutes parses the URL,
+  ;;      so there is no spot for middleware between Compojure and the handler function.
+  (assoc request
+         :path-params (-> (:params request)
+                          (select-keys [:congregation :territory :share-key])
+                          (update :congregation try-parse-uuid)
+                          (update :territory try-parse-uuid))))
+
 (defroutes api-routes
-  (POST "/api/login" request (login request))
-  (GET "/api/dev-login" request (dev-login request))
-  (POST "/api/dev-login" request (dev-login request))
+  (POST "/api/login" request (login (compat request)))
+  (GET "/api/dev-login" request (dev-login (compat request)))
+  (POST "/api/dev-login" request (dev-login (compat request)))
   (POST "/api/logout" [] (logout))
-  (GET "/api/sudo" request (sudo request))
+  (GET "/api/sudo" request (sudo (compat request)))
   (ANY "/api/settings" [] settings)
-  (POST "/api/congregations" request (create-congregation request))
-  (GET "/api/congregations" request (list-congregations request))
-  (GET "/api/congregation/demo" request (get-demo-congregation request))
-  (GET "/api/congregation/demo/territory/:territory" request (get-demo-territory request))
-  (GET "/api/congregation/:congregation" request (get-congregation request {:fetch-loans? true}))
-  (POST "/api/congregation/:congregation/add-user" request (add-user request))
-  (POST "/api/congregation/:congregation/set-user-permissions" request (set-user-permissions request))
-  (POST "/api/congregation/:congregation/settings" request (save-congregation-settings request))
-  (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project request))
-  (POST "/api/congregation/:congregation/generate-qr-codes" request (generate-qr-codes request))
-  (GET "/api/congregation/:congregation/territory/:territory" request (get-territory request))
-  (POST "/api/congregation/:congregation/territory/:territory/do-not-calls" request (edit-do-not-calls request))
-  (POST "/api/congregation/:congregation/territory/:territory/share" request (share-territory-link request))
-  (GET "/api/share/:share-key" request (open-share request)))
+  (POST "/api/congregations" request (create-congregation (compat request)))
+  (GET "/api/congregations" request (list-congregations (compat request)))
+  (GET "/api/congregation/demo" request (get-demo-congregation (compat request)))
+  (GET "/api/congregation/demo/territory/:territory" request (get-demo-territory (compat request)))
+  (GET "/api/congregation/:congregation" request (get-congregation (compat request) {:fetch-loans? true}))
+  (POST "/api/congregation/:congregation/add-user" request (add-user (compat request)))
+  (POST "/api/congregation/:congregation/set-user-permissions" request (set-user-permissions (compat request)))
+  (POST "/api/congregation/:congregation/settings" request (save-congregation-settings (compat request)))
+  (GET "/api/congregation/:congregation/qgis-project" request (download-qgis-project (compat request)))
+  (POST "/api/congregation/:congregation/generate-qr-codes" request (generate-qr-codes (compat request)))
+  (GET "/api/congregation/:congregation/territory/:territory" request (get-territory (compat request)))
+  (POST "/api/congregation/:congregation/territory/:territory/do-not-calls" request (edit-do-not-calls (compat request)))
+  (POST "/api/congregation/:congregation/territory/:territory/share" request (share-territory-link (compat request)))
+  (GET "/api/share/:share-key" request (open-share (compat request))))
 
 (comment
   (db/with-db [conn {:read-only? true}]

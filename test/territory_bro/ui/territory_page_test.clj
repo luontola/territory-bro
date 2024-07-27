@@ -45,8 +45,8 @@
           user-id (at/get-user-id session)
           cong-id (at/create-congregation! session "foo")
           territory-id (at/create-territory! cong-id)
-          request {:params {:congregation (str cong-id)
-                            :territory (str territory-id)}}]
+          request {:path-params {:congregation cong-id
+                                 :territory territory-id}}]
       (auth/with-user-id user-id
 
         (testing "default"
@@ -56,7 +56,7 @@
 
         (testing "demo congregation"
           (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-            (let [request (replace-in request [:params :congregation] (str cong-id) "demo")]
+            (let [request (replace-in request [:path-params :congregation] cong-id "demo")]
               (is (= (-> demo-model
                          (replace-in [:territory :territory/id] (UUID. 0 1) territory-id))
                      (territory-page/model! request)

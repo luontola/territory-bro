@@ -5,7 +5,6 @@
 (ns territory-bro.ui.printouts-page
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
-            [medley.core :refer [dissoc-in]]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
             [territory-bro.api :as api]
@@ -58,7 +57,7 @@
           value)))
 
 (defn model! [request]
-  (let [demo? (= "demo" (get-in request [:params :congregation]))
+  (let [demo? (= "demo" (get-in request [:path-params :congregation]))
         congregation (if demo?
                        (:body (api/get-demo-congregation request))
                        (:body (api/get-congregation request {})))
@@ -233,10 +232,8 @@
 
    ["/qr-code/:territory"
     {:get {:handler (fn [request]
-                      (let [territory (get-in request [:params :territory])
-                            response (api/generate-qr-codes (-> request
-                                                                (dissoc-in [:params :territory])
-                                                                (assoc-in [:params :territories] [territory])))
+                      (let [territory (get-in request [:path-params :territory])
+                            response (api/generate-qr-codes (assoc-in request [:params :territories] [(str territory)]))
                             share-url (:url (first (:qrCodes (:body response))))]
                         (when-not (= 200 (:status response))
                           (http-response/throw! (assoc response :body "")))

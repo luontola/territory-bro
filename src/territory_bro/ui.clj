@@ -25,13 +25,6 @@
             [territory-bro.ui.territory-list-page :as territory-list-page]
             [territory-bro.ui.territory-page :as territory-page]))
 
-(defn wrap-json-api-compat [handler]
-  (fn [request]
-    ;; TODO: update all request handlers to use :path-params instead of :params
-    ;; TODO: add type coercion for :path-params
-    (let [request (update request :params merge (:path-params request))]
-      (handler request))))
-
 (defn wrap-current-user [handler]
   (fn [request]
     (auth/with-user-from-session request
@@ -43,6 +36,23 @@
           request (assoc request :state state)]
       (handler request))))
 
+(defn- parse-mandatory-uuid [s]
+  (or (parse-uuid s)
+      (throw (http-response/not-found! "Not found"))))
+
+(defn- parse-congregation-id [s]
+  (if (= "demo" s)
+    "demo"
+    (parse-mandatory-uuid s)))
+
+(defn wrap-parse-path-params [handler]
+  (fn [request]
+    (let [{:keys [congregation territory]} (:path-params request)
+          request (cond-> request
+                    (some? congregation) (update-in [:path-params :congregation] parse-congregation-id)
+                    (some? territory) (update-in [:path-params :territory] parse-mandatory-uuid))]
+      (handler request))))
+
 (def routes
   [""
    {:middleware [[html/wrap-page-path nil] ; outermost middleware first
@@ -50,8 +60,8 @@
                  i18n/wrap-current-language
                  wrap-current-user
                  wrap-current-state
-                 wrap-http-response
-                 wrap-json-api-compat]}
+                 wrap-parse-path-params
+                 wrap-http-response]}
    auth0/routes
    congregation-page/routes
    error-page/routes

@@ -38,7 +38,7 @@
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
           cong-id (at/create-congregation! session "Congregation Name")
-          request {:params {:congregation (str cong-id)}}
+          request {:path-params {:congregation cong-id}}
           model (replace-in model [:congregation/users 0 :id] (UUID. 0 1) user-id)]
       (at/change-congregation-settings! cong-id "Congregation Name" "https://docs.google.com/spreadsheets/123")
       (auth/with-user-id user-id
@@ -48,7 +48,7 @@
 
         (testing "demo congregation"
           (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-            (let [request {:params {:congregation "demo"}}]
+            (let [request {:path-params {:congregation "demo"}}]
               (is (thrown-match? ExceptionInfo
                                  {:type :ring.util.http-response/response
                                   :response {:status 404
@@ -231,8 +231,8 @@
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
           cong-id (at/create-congregation! session "foo")
-          request {:params {:congregation (str cong-id)
-                            :congregation-name "new name"
+          request {:path-params {:congregation cong-id}
+                   :params {:congregation-name "new name"
                             :loans-csv-url "new url"}}]
       (binding [html/*page-path* "/settings-page-url"]
         (auth/with-user-id user-id
@@ -270,8 +270,8 @@
           user-id (at/get-user-id session)
           new-user-id (UUID. 0 2)
           cong-id (at/create-congregation! session "foo")
-          request {:params {:congregation (str cong-id)
-                            :user-id (str new-user-id)}}]
+          request {:path-params {:congregation cong-id}
+                   :params {:user-id (str new-user-id)}}]
       (binding [html/*page-path* "/settings-page-url"]
         (auth/with-user-id user-id
 
@@ -325,8 +325,8 @@
           current-user-id (at/get-user-id session)
           other-user-id (UUID. 0 2)
           cong-id (at/create-congregation! session "foo")
-          request {:params {:congregation (str cong-id)
-                            :user-id (str other-user-id)}}]
+          request {:path-params {:congregation cong-id}
+                   :params {:user-id (str other-user-id)}}]
       (binding [html/*page-path* "/settings-page-url"]
         (auth/with-user-id current-user-id
 

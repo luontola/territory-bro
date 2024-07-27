@@ -30,7 +30,7 @@
     (let [session (at/login! at/app)
           user-id (at/get-user-id session)
           cong-id (at/create-congregation! session "Example Congregation")
-          request {:params {:congregation (str cong-id)}}]
+          request {:path-params {:congregation cong-id}}]
       (auth/with-user-id user-id
 
         (testing "regular congregation"
@@ -38,7 +38,7 @@
 
         (testing "demo congregation"
           (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-            (let [request {:params {:congregation "demo"}}]
+            (let [request {:path-params {:congregation "demo"}}]
               (is (= demo-model
                      (congregation-page/model! request)
                      (auth/with-anonymous-user
