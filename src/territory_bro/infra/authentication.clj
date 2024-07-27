@@ -11,6 +11,11 @@
 
 (def ^:dynamic *user* anonymous-user)
 
+(defn current-user-id []
+  (let [user-id (:user/id *user*)]
+    (assert (uuid? user-id))
+    user-id))
+
 (defn anonymous?
   ([]
    (anonymous? (:user/id *user*)))

@@ -7,6 +7,7 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.do-not-calls :as do-not-calls]
+            [territory-bro.domain.loan :as loan]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.territory :as territory]
             [territory-bro.infra.config :as config]
@@ -31,6 +32,7 @@
 
 (defn- apply-user-permissions-for-congregation [cong state user-id]
   (let [cong-id (:congregation/id cong)
+        ;; TODO: move territory fetching to list-territories
         territory-ids (lazy-seq (for [[_ _ territory-id] (permissions/match state user-id [:view-territory cong-id '*])]
                                   territory-id))]
     (cond
@@ -38,6 +40,7 @@
       (permissions/allowed? state user-id [:view-congregation cong-id])
       cong
 
+      ;; TODO: introduce a :view-congregation-temporarily permission when opening shares?
       (not (empty? territory-ids))
       (-> cong
           (assoc :congregation/users [])
@@ -71,6 +74,9 @@
     (get-demo-congregation state (:demo-congregation config/env) user-id)
     (get-own-congregation state cong-id user-id)))
 
+(defn list-congregations [state user-id]
+  (congregation/get-my-congregations state user-id))
+
 
 (defn- enrich-do-not-calls [territory conn cong-id territory-id]
   (merge territory
@@ -98,3 +104,13 @@
   (if (= "demo" cong-id)
     (get-demo-territory state (:demo-congregation config/env) territory-id)
     (get-own-territory conn state cong-id territory-id user-id)))
+
+(defn list-territories! [state cong-id {:keys [fetch-loans?]} user-id]
+  ;; TODO: inline get-own-congregation and only get the territories instead of everything in the congregation
+  (let [congregation (get-congregation state cong-id user-id)
+        fetch-loans? (and fetch-loans?
+                          (permissions/allowed? state user-id [:view-congregation cong-id])
+                          (some? (:congregation/loans-csv-url congregation)))]
+    (when congregation
+      (:congregation/territories (cond-> congregation
+                                   fetch-loans? (loan/enrich-territory-loans!))))))

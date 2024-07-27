@@ -166,9 +166,7 @@
                          (fix-user-for-liberator auth/*user*))})))
 
 (defn current-user-id []
-  (let [id (:user/id auth/*user*)]
-    (assert id)
-    id))
+  (auth/current-user-id))
 
 (defn enrich-state-for-request [state request]
   (let [session (:session request)]
