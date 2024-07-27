@@ -7,6 +7,7 @@
             [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.util.http-response :as http-response]
             [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.congregation-page :as congregation-page]
@@ -34,7 +35,8 @@
   (fn [request]
     (let [state (api/state-for-request request) ; TODO: move to DMZ? depends on session state (sudo & opened shares)
           request (assoc request :state state)]
-      (handler request))))
+      (binding [dmz/*state* state]
+        (handler request)))))
 
 (defn- parse-mandatory-uuid [s]
   (or (parse-uuid s)

@@ -14,23 +14,25 @@
             [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]))
 
-(defn- enrich-congregation [cong state]
+(def ^:dynamic *state* nil)
+
+(defn- enrich-congregation [cong]
   (let [user-id (auth/current-user-id)
         cong-id (:congregation/id cong)]
     {:congregation/id cong-id
      :congregation/name (:congregation/name cong)
      :congregation/loans-csv-url (:congregation/loans-csv-url cong)
-     :congregation/permissions (->> (permissions/list-permissions state user-id [cong-id])
+     :congregation/permissions (->> (permissions/list-permissions *state* user-id [cong-id])
                                     (map (fn [permission]
                                            [permission true]))
                                     (into {}))
-     :congregation/users (for [user-id (congregation/get-users state cong-id)]
+     :congregation/users (for [user-id (congregation/get-users *state* cong-id)]
                            {:user/id user-id})
      ;; TODO: extract query functions
-     :congregation/territories (sequence (vals (get-in state [::territory/territories cong-id])))
-     :congregation/congregation-boundaries (sequence (vals (get-in state [::congregation-boundary/congregation-boundaries cong-id])))
-     :congregation/regions (sequence (vals (get-in state [::region/regions cong-id])))
-     :congregation/card-minimap-viewports (sequence (vals (get-in state [::card-minimap-viewport/card-minimap-viewports cong-id])))}))
+     :congregation/territories (sequence (vals (get-in *state* [::territory/territories cong-id])))
+     :congregation/congregation-boundaries (sequence (vals (get-in *state* [::congregation-boundary/congregation-boundaries cong-id])))
+     :congregation/regions (sequence (vals (get-in *state* [::region/regions cong-id])))
+     :congregation/card-minimap-viewports (sequence (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports cong-id])))}))
 
 (defn- apply-user-permissions-for-congregation [cong state]
   (let [user-id (auth/current-user-id)
@@ -58,13 +60,13 @@
 
 (defn get-own-congregation [state cong-id]
   (some-> (congregation/get-unrestricted-congregation state cong-id)
-          (enrich-congregation state)
+          (enrich-congregation)
           (apply-user-permissions-for-congregation state)))
 
 (defn get-demo-congregation [state cong-id]
   (when cong-id
     (some-> (congregation/get-unrestricted-congregation state cong-id)
-            (enrich-congregation state)
+            (enrich-congregation)
             (assoc :congregation/id "demo")
             (assoc :congregation/name "Demo Congregation")
             (assoc :congregation/loans-csv-url nil)

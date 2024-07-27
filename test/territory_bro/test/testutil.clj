@@ -5,8 +5,10 @@
 (ns territory-bro.test.testutil
   (:require [clojure.test :refer :all]
             [territory-bro.commands :as commands]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.events :as events]
-            [territory-bro.infra.foreign-key :as foreign-key])
+            [territory-bro.infra.foreign-key :as foreign-key]
+            [territory-bro.projections :as projections])
   (:import (java.util.regex Pattern)))
 
 ;; these can be required to avoid IDE warnings about the built-in clojure.test/is macro special forms
@@ -67,3 +69,7 @@
    (apply-events projection nil events))
   ([projection state events]
    (reduce projection state (events/validate-events events))))
+
+(defmacro with-events [events & body]
+  `(binding [dmz/*state* (apply-events projections/projection dmz/*state* ~events)]
+     ~@body))

@@ -6,7 +6,6 @@
   (:require [clojure.test :refer :all]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
-            [territory-bro.projections :as projections]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil]
             [territory-bro.test.testutil :refer [replace-in]]
@@ -34,41 +33,39 @@
    :demo-available? false})
 
 (deftest model!-test
-  (let [events (flatten [{:event/type :congregation.event/congregation-created
-                          :congregation/id cong-id1
-                          :congregation/name "Congregation 1"
-                          :congregation/schema-name "cong1_schema"}
-                         (territory-bro.domain.congregation/admin-permissions-granted cong-id1 user-id)
+  (let [request {}]
+    (testutil/with-events (flatten [{:event/type :congregation.event/congregation-created
+                                     :congregation/id cong-id1
+                                     :congregation/name "Congregation 1"
+                                     :congregation/schema-name "cong1_schema"}
+                                    (territory-bro.domain.congregation/admin-permissions-granted cong-id1 user-id)
 
-                         {:event/type :congregation.event/congregation-created
-                          :congregation/id cong-id2
-                          :congregation/name "Congregation 2"
-                          :congregation/schema-name "cong2_schema"}
-                         (territory-bro.domain.congregation/admin-permissions-granted cong-id2 user-id)
+                                    {:event/type :congregation.event/congregation-created
+                                     :congregation/id cong-id2
+                                     :congregation/name "Congregation 2"
+                                     :congregation/schema-name "cong2_schema"}
+                                    (territory-bro.domain.congregation/admin-permissions-granted cong-id2 user-id)
 
-                         {:event/type :congregation.event/congregation-created
-                          :congregation/id (UUID. 0 0x666)
-                          :congregation/name "Unrelated Congregation"
-                          :congregation/schema-name "cong3_schema"}])
-        state (testutil/apply-events projections/projection events)
-        request {:state state}]
-    (binding [config/env {:demo-congregation (UUID/randomUUID)}]
+                                    {:event/type :congregation.event/congregation-created
+                                     :congregation/id (UUID. 0 0x666)
+                                     :congregation/name "Unrelated Congregation"
+                                     :congregation/schema-name "cong3_schema"}])
+      (binding [config/env {:demo-congregation (UUID/randomUUID)}]
+        (testing "logged in, with congregations"
+          (auth/with-user-id user-id
+            (is (= (-> model
+                       (replace-in [:congregations 0 :congregation/id] (UUID. 0 1) cong-id1)
+                       (replace-in [:congregations 1 :congregation/id] (UUID. 0 2) cong-id2))
+                   (home-page/model! request)))))
 
-      (testing "logged in, with congregations"
-        (auth/with-user-id user-id
-          (is (= (-> model
-                     (replace-in [:congregations 0 :congregation/id] (UUID. 0 1) cong-id1)
-                     (replace-in [:congregations 1 :congregation/id] (UUID. 0 2) cong-id2))
-                 (home-page/model! request)))))
+        (testing "anonymous user"
+          (auth/with-anonymous-user
+            (is (= anonymous-model (home-page/model! request))))))
 
-      (testing "anonymous user"
-        (auth/with-anonymous-user
-          (is (= anonymous-model (home-page/model! request))))))
-
-    (binding [config/env {:demo-congregation nil}]
-      (testing "anonymous user, no demo"
-        (auth/with-anonymous-user
-          (is (= no-demo-model (home-page/model! request))))))))
+      (binding [config/env {:demo-congregation nil}]
+        (testing "anonymous user, no demo"
+          (auth/with-anonymous-user
+            (is (= no-demo-model (home-page/model! request)))))))))
 
 (deftest view-test
   (let [introduction "Territory Bro

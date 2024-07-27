@@ -19,8 +19,9 @@
             [territory-bro.ui.maps :as maps])
   (:import (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
-(defn model! [{:keys [state] :as request} {:keys [fetch-loans?]}]
+(defn model! [request {:keys [fetch-loans?]}]
   (let [cong-id (get-in request [:path-params :congregation])
+        state dmz/*state*
         state (api/enrich-state-for-request state request)
         congregation (dmz/get-congregation state cong-id)
         _ (when-not congregation

@@ -143,30 +143,32 @@
                                           :region/location testdata/wkt-multi-polygon}]
                   :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
-    (auth/with-user-id user-id
-      (testing "has view permissions"
-        (is (= expected (dmz/get-own-congregation state cong-id)))))
-
-    (let [user-id (UUID. 0 0x666)]
+    (binding [dmz/*state* state]
       (auth/with-user-id user-id
-        (testing "no permissions"
-          (is (nil? (dmz/get-own-congregation state cong-id))))
+        (testing "has view permissions"
+          (is (= expected (dmz/get-own-congregation state cong-id)))))
 
-        (testing "opened a share"
-          (let [state (share/grant-opened-shares state [share-id] user-id)
-                expected (assoc expected
-                                :congregation/permissions {}
-                                :congregation/users []
-                                :congregation/territories [{:territory/id territory-id
-                                                            :territory/number "123"
-                                                            :territory/addresses "the addresses"
-                                                            :territory/region "the region"
-                                                            :territory/meta {:foo "bar"}
-                                                            :territory/location testdata/wkt-multi-polygon}]
-                                :congregation/congregation-boundaries []
-                                :congregation/regions []
-                                :congregation/card-minimap-viewports [])]
-            (is (= expected (dmz/get-own-congregation state cong-id)))))))))
+      (let [user-id (UUID. 0 0x666)]
+        (auth/with-user-id user-id
+          (testing "no permissions"
+            (is (nil? (dmz/get-own-congregation state cong-id))))
+
+          (testing "opened a share"
+            (let [state (share/grant-opened-shares state [share-id] user-id)
+                  expected (assoc expected
+                                  :congregation/permissions {}
+                                  :congregation/users []
+                                  :congregation/territories [{:territory/id territory-id
+                                                              :territory/number "123"
+                                                              :territory/addresses "the addresses"
+                                                              :territory/region "the region"
+                                                              :territory/meta {:foo "bar"}
+                                                              :territory/location testdata/wkt-multi-polygon}]
+                                  :congregation/congregation-boundaries []
+                                  :congregation/regions []
+                                  :congregation/card-minimap-viewports [])]
+              (binding [dmz/*state* state]
+                (is (= expected (dmz/get-own-congregation state cong-id)))))))))))
 
 (deftest test-get-demo-congregation
   (let [state (apply-events test-events)
@@ -196,15 +198,16 @@
                                           :region/location testdata/wkt-multi-polygon}]
                   :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
-    (auth/with-user-id user-id
-      (testing "no demo congregation"
-        (is (nil? (dmz/get-demo-congregation state nil))))
+    (binding [dmz/*state* state]
+      (auth/with-user-id user-id
+        (testing "no demo congregation"
+          (is (nil? (dmz/get-demo-congregation state nil))))
 
-      (testing "can see the demo congregation"
-        (is (= expected (dmz/get-demo-congregation state cong-id))))
+        (testing "can see the demo congregation"
+          (is (= expected (dmz/get-demo-congregation state cong-id))))
 
-      (testing "cannot see the demo congregation as own congregation"
-        (is (nil? (dmz/get-own-congregation state cong-id)))))))
+        (testing "cannot see the demo congregation as own congregation"
+          (is (nil? (dmz/get-own-congregation state cong-id))))))))
 
 (deftest test-get-territory
   (let [state (apply-events test-events)
