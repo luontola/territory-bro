@@ -35,6 +35,7 @@
           <entry key="territory-bro.test.fixtures/with-fixtures" value="1" />
           <entry key="territory-bro.test.testutil/grab-exception" value="0" />
           <entry key="territory-bro.test.testutil/with-events" value="1" />
+          <entry key="territory-bro.test.testutil/with-request-state" value="1" />
         </map>
       </option>
     </ClojureCodeStyleSettings>

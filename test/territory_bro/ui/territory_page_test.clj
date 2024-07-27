@@ -10,6 +10,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
+            [territory-bro.ui :as ui]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.territory-page :as territory-page])
@@ -52,16 +53,16 @@
         (testing "default"
           (is (= (-> model
                      (replace-in [:territory :territory/id] (UUID. 0 1) territory-id))
-                 (territory-page/model! request))))
+                 ((ui/wrap-current-state territory-page/model!) request))))
 
         (testing "demo congregation"
           (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
             (let [request (replace-in request [:path-params :congregation] cong-id "demo")]
               (is (= (-> demo-model
                          (replace-in [:territory :territory/id] (UUID. 0 1) territory-id))
-                     (territory-page/model! request)
+                     ((ui/wrap-current-state territory-page/model!) request)
                      (auth/with-anonymous-user
-                       (territory-page/model! request)))))))))))
+                       ((ui/wrap-current-state territory-page/model!) request)))))))))))
 
 (deftest view-test
   (testing "full permissions"

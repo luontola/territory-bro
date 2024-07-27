@@ -11,6 +11,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
+            [territory-bro.ui :as ui]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout])
@@ -78,30 +79,30 @@
             (let [request {:uri "/some/page"
                            :query-string "foo=bar&gazonk"
                            :cookies {"languageSelectionWidth" {:value "42px"}}}]
-              (is (= anonymous-model (layout/model! request))))))
+              (is (= anonymous-model ((ui/wrap-current-state layout/model!) request))))))
 
         (testing "top level, anonymous, developer mode"
           (auth/with-anonymous-user
             (binding [config/env (replace-in config/env [:dev] false true)]
               (let [request {:uri "/"
                              :query-string nil}]
-                (is (= developer-model (layout/model! request)))))))
+                (is (= developer-model ((ui/wrap-current-state layout/model!) request)))))))
 
         (testing "top level, logged in"
           (let [request {:uri "/"
                          :query-string nil}]
             (is (= (-> logged-in-model
                        (replace-in [:user :user/id] (UUID. 0 2) user-id))
-                   (layout/model! request)))))
+                   ((ui/wrap-current-state layout/model!) request)))))
 
         (testing "congregation level"
           (let [request {:uri "/"
                          :query-string nil
-                         :path-params {:congregation  cong-id}}]
+                         :path-params {:congregation cong-id}}]
             (is (= (-> congregation-model
                        (replace-in [:congregation :congregation/id] (UUID. 0 1) cong-id)
                        (replace-in [:user :user/id] (UUID. 0 2) user-id))
-                   (layout/model! request)))))
+                   ((ui/wrap-current-state layout/model!) request)))))
 
         (testing "demo congregation"
           (auth/with-anonymous-user
@@ -109,7 +110,7 @@
               (let [request {:uri "/congregation/demo"
                              :query-string nil
                              :path-params {:congregation "demo"}}]
-                (is (= demo-congregation-model (layout/model! request)))))))))))
+                (is (= demo-congregation-model ((ui/wrap-current-state layout/model!) request)))))))))))
 
 (deftest page-test
   (testing "minimal data"

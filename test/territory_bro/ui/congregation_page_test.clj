@@ -9,6 +9,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
+            [territory-bro.ui :as ui]
             [territory-bro.ui.congregation-page :as congregation-page]
             [territory-bro.ui.html :as html]))
 
@@ -34,15 +35,15 @@
       (auth/with-user-id user-id
 
         (testing "regular congregation"
-          (is (= model (congregation-page/model! request))))
+          (is (= model ((ui/wrap-current-state congregation-page/model!) request))))
 
         (testing "demo congregation"
           (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
             (let [request {:path-params {:congregation "demo"}}]
               (is (= demo-model
-                     (congregation-page/model! request)
+                     ((ui/wrap-current-state congregation-page/model!) request)
                      (auth/with-anonymous-user
-                       (congregation-page/model! request)))))))))))
+                       ((ui/wrap-current-state congregation-page/model!) request)))))))))))
 
 (deftest view-test
   (testing "full permissions"

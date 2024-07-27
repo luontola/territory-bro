@@ -13,6 +13,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
+            [territory-bro.ui :as ui]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.settings-page :as settings-page])
@@ -44,7 +45,7 @@
       (auth/with-user-id user-id
 
         (testing "logged in"
-          (is (= model (settings-page/model! request))))
+          (is (= model ((ui/wrap-current-state settings-page/model!) request))))
 
         (testing "demo congregation"
           (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
@@ -54,7 +55,7 @@
                                   :response {:status 404
                                              :body "Not available in demo"
                                              :headers {}}}
-                                 (settings-page/model! request))))))
+                                 ((ui/wrap-current-state settings-page/model!) request))))))
 
         (testing "anonymous user"
           (auth/with-anonymous-user
@@ -63,12 +64,12 @@
                                 :response {:status 401
                                            :body "Not logged in"
                                            :headers {}}}
-                               (settings-page/model! request)))))
+                               ((ui/wrap-current-state settings-page/model!) request)))))
 
         (testing "user was added"
           (let [request (assoc-in request [:params :new-user] (str user-id))
                 model (replace-in model [:congregation/users 0 :new?] false true)]
-            (is (= model (settings-page/model! request)))))
+            (is (= model ((ui/wrap-current-state settings-page/model!) request)))))
 
         (testing "shows new users first, followed by the rest alphabetically"
           (let [new-user-id (UUID. 0 5)
@@ -82,7 +83,7 @@
                        {:id (UUID. 0 8), :name "e"}]]
             (binding [api/get-congregation (constantly {:body {:congregation/users (shuffle users)}})]
               (is (= ["c" "a" "B" "D" "e"]
-                     (->> (settings-page/model! (assoc-in request [:params :new-user] (str new-user-id)))
+                     (->> ((ui/wrap-current-state settings-page/model!) (assoc-in request [:params :new-user] (str new-user-id)))
                           :congregation/users
                           (map :name)))))))))))
 
@@ -239,7 +240,7 @@
 
           (testing "save successful: redirects to same page"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [response (settings-page/save-congregation-settings! request)]
+              (let [response ((ui/wrap-current-state settings-page/save-congregation-settings!) request)]
                 (is (= {:status 303
                         :headers {"Location" "/settings-page-url"}
                         :body ""}
@@ -255,7 +256,7 @@
             (binding [dispatcher/command! (fn [& _]
                                             (throw (ValidationException. [[:missing-name]
                                                                           [:disallowed-loans-csv-url]])))]
-              (let [response (settings-page/save-congregation-settings! request)]
+              (let [response ((ui/wrap-current-state settings-page/save-congregation-settings!) request)]
                 (is (= forms/validation-error-http-status (:status response)))
                 (is (str/includes?
                      (html/visible-text (:body response))
@@ -277,7 +278,7 @@
 
           (testing "add successful: highlights the added user"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [response (settings-page/add-user! request)]
+              (let [response ((ui/wrap-current-state settings-page/add-user!) request)]
                 (is (= {:status 303
                         :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
                         :body ""}
@@ -291,7 +292,7 @@
           (testing "trims the user ID"
             (with-fixtures [fake-dispatcher-fixture]
               (let [request (replace-in request [:params :user-id] (str new-user-id) (str "  " new-user-id "  "))
-                    response (settings-page/add-user! request)]
+                    response ((ui/wrap-current-state settings-page/add-user!) request)]
                 (is (= {:status 303
                         :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
                         :body ""}
@@ -300,7 +301,7 @@
           (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
             (binding [dispatcher/command! (fn [& _]
                                             (throw (ValidationException. [[:no-such-user new-user-id]])))]
-              (let [response (settings-page/add-user! request)]
+              (let [response ((ui/wrap-current-state settings-page/add-user!) request)]
                 (is (= forms/validation-error-http-status (:status response)))
                 (is (str/includes?
                      (html/visible-text (:body response))
@@ -311,7 +312,7 @@
             (binding [dispatcher/command! (fn [& _]
                                             (throw (ValidationException. [[:invalid-user-id]])))]
               (let [request (replace-in request [:params :user-id] (str new-user-id) "foo")
-                    response (settings-page/add-user! request)]
+                    response ((ui/wrap-current-state settings-page/add-user!) request)]
                 (is (= forms/validation-error-http-status (:status response)))
                 (is (str/includes?
                      (html/visible-text (:body response))
@@ -332,7 +333,7 @@
 
           (testing "removes the user and refreshes the users list"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [response (settings-page/remove-user! request)]
+              (let [response ((ui/wrap-current-state settings-page/remove-user!) request)]
                 (is (= {:status 303
                         :headers {"Location" "/settings-page-url/users"}
                         :body ""}
@@ -346,7 +347,8 @@
 
           (testing "removing the current user will redirect to the front page"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [response (settings-page/remove-user! (assoc-in request [:params :user-id] (str current-user-id)))]
+              (let [request (assoc-in request [:params :user-id] (str current-user-id))
+                    response ((ui/wrap-current-state settings-page/remove-user!) request)]
                 (is (= {:status 200
                         :headers {"Content-Type" "text/html"
                                   "hx-redirect" "/"}

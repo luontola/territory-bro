@@ -13,6 +13,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
+            [territory-bro.ui :as ui]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.printouts-page :as printouts-page])
@@ -77,7 +78,7 @@
 
         (testing "default"
           (is (= (fix default-model)
-                 (printouts-page/model! request))))
+                 ((ui/wrap-current-state printouts-page/model!) request))))
 
         (testing "every form value changed"
           (let [request (update request :params merge {:template "NeighborhoodCard"
@@ -88,13 +89,13 @@
                                                        :territories [(str (UUID. 0 6))
                                                                      (str (UUID. 0 7))]})]
             (is (= (fix form-changed-model)
-                   (printouts-page/model! request)))))
+                   ((ui/wrap-current-state printouts-page/model!) request)))))
 
         (testing "demo congregation"
           (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
             (let [request {:path-params {:congregation "demo"}}]
               (is (= (fix demo-model)
-                     (printouts-page/model! request))))))))))
+                     ((ui/wrap-current-state printouts-page/model!) request))))))))))
 
 (deftest parse-uuid-multiselect-test
   (is (= #{} (printouts-page/parse-uuid-multiselect nil)))

@@ -87,8 +87,9 @@
                                       :share/type :link
                                       :congregation/id cong-id
                                       :territory/id territory-id}]
-                (is (= anonymous-model
-                       (territory-list-page/model! request {})))))))
+                (testutil/with-request-state request
+                  (is (= anonymous-model
+                         (territory-list-page/model! request {}))))))))
 
         (testing "loans enabled,"
           (testutil/with-events [{:event/type :congregation.event/settings-updated
