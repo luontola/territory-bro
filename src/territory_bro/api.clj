@@ -201,8 +201,7 @@
 
 (defn ^:dynamic get-congregation [request {:keys [fetch-loans?]}]
   (let [cong-id (get-in request [:path-params :congregation])
-        state (state-for-request request)
-        congregation (dmz/get-own-congregation state cong-id)
+        congregation (dmz/get-own-congregation cong-id)
         permissions (:congregation/permissions congregation)]
     (when-not congregation
       ;; This function must support anonymous access for opened shares.
@@ -218,11 +217,10 @@
                       (loan/enrich-territory-loans!))
               (enrich-congregation-users conn))))))
 
-(defn get-demo-congregation [request]
+(defn get-demo-congregation [_request]
   ;; anonymous access is allowed
   (let [cong-id (:demo-congregation config/env)
-        state (state-for-request request)
-        congregation (dmz/get-demo-congregation state cong-id)]
+        congregation (dmz/get-demo-congregation cong-id)]
     (when-not congregation
       (forbidden! "No demo congregation"))
     (ok congregation)))
@@ -231,8 +229,7 @@
   (db/with-db [conn {}]
     (let [cong-id (get-in request [:path-params :congregation])
           territory-id (get-in request [:path-params :territory])
-          state (state-for-request request)
-          territory (dmz/get-own-territory conn state cong-id territory-id)]
+          territory (dmz/get-own-territory conn cong-id territory-id)]
       (when-not territory
         ;; This function must support anonymous access for opened shares.
         ;; If anonymous user cannot see the congregation, first prompt them
@@ -246,8 +243,7 @@
   ;; anonymous access is allowed
   (let [cong-id (:demo-congregation config/env)
         territory-id (get-in request [:path-params :territory])
-        state (state-for-request request)
-        territory (dmz/get-demo-territory state cong-id territory-id)]
+        territory (dmz/get-demo-territory cong-id territory-id)]
     (when-not territory
       (forbidden! "No demo congregation"))
     (ok (-> territory
@@ -378,9 +374,8 @@
   (if (= "demo" (get-in request [:path-params :congregation]))
     (let [cong-id (:demo-congregation config/env)
           territory-id (get-in request [:path-params :territory])
-          state (state-for-request request)
           share-key (share/demo-share-key territory-id)
-          territory (dmz/get-demo-territory state cong-id territory-id)]
+          territory (dmz/get-demo-territory cong-id territory-id)]
       (ok {:url (share/build-share-url share-key (:territory/number territory))
            :key share-key}))
     (do
@@ -389,7 +384,7 @@
             territory-id (get-in request [:path-params :territory])
             state (state-for-request request)
             share-key (share/generate-share-key)
-            territory (dmz/get-demo-territory state cong-id territory-id)]
+            territory (dmz/get-demo-territory cong-id territory-id)]
         (db/with-db [conn {}]
           (dispatch! conn state {:command/type :share.command/create-share
                                  :share/id (UUID/randomUUID)

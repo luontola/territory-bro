@@ -14,8 +14,7 @@
             [territory-bro.ui.layout :as layout]))
 
 (defn model! [_request]
-  (let [state dmz/*state*
-        congregations (->> (dmz/list-congregations state)
+  (let [congregations (->> (dmz/list-congregations)
                            (mapv #(select-keys % [:congregation/id :congregation/name]))
                            (sort-by (comp str/lower-case :congregation/name)))]
     {:congregations congregations

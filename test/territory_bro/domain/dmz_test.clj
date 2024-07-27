@@ -9,7 +9,6 @@
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
-            [territory-bro.projections :as projections]
             [territory-bro.test.testutil :as testutil])
   (:import (java.time Instant)
            (java.util UUID)))
@@ -98,9 +97,6 @@
    card-minimap-viewport-defined
    share-created])
 
-(defn apply-events [events]
-  (testutil/apply-events projections/projection events))
-
 (def fake-conn ::fake-conn)
 
 (defn fake-get-do-not-calls [conn -cong-id -territory-id]
@@ -117,8 +113,7 @@
 
 
 (deftest test-get-congregation
-  (let [state (apply-events test-events)
-        expected {:congregation/id cong-id
+  (let [expected {:congregation/id cong-id
                   :congregation/name "Cong1 Name"
                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
                   :congregation/permissions {:view-congregation true}
@@ -143,19 +138,18 @@
                                           :region/location testdata/wkt-multi-polygon}]
                   :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
-    (binding [dmz/*state* state]
+    (testutil/with-events test-events
       (auth/with-user-id user-id
         (testing "has view permissions"
-          (is (= expected (dmz/get-own-congregation state cong-id)))))
+          (is (= expected (dmz/get-own-congregation cong-id)))))
 
       (let [user-id (UUID. 0 0x666)]
         (auth/with-user-id user-id
           (testing "no permissions"
-            (is (nil? (dmz/get-own-congregation state cong-id))))
+            (is (nil? (dmz/get-own-congregation cong-id))))
 
           (testing "opened a share"
-            (let [state (share/grant-opened-shares state [share-id] user-id)
-                  expected (assoc expected
+            (let [expected (assoc expected
                                   :congregation/permissions {}
                                   :congregation/users []
                                   :congregation/territories [{:territory/id territory-id
@@ -167,12 +161,11 @@
                                   :congregation/congregation-boundaries []
                                   :congregation/regions []
                                   :congregation/card-minimap-viewports [])]
-              (binding [dmz/*state* state]
-                (is (= expected (dmz/get-own-congregation state cong-id)))))))))))
+              (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
+                (is (= expected (dmz/get-own-congregation cong-id)))))))))))
 
 (deftest test-get-demo-congregation
-  (let [state (apply-events test-events)
-        user-id (UUID. 0 0x666)
+  (let [user-id (UUID. 0 0x666)
         expected {:congregation/id "demo" ; changed
                   :congregation/name "Demo Congregation" ; changed
                   :congregation/loans-csv-url nil ; changed
@@ -198,20 +191,19 @@
                                           :region/location testdata/wkt-multi-polygon}]
                   :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
-    (binding [dmz/*state* state]
+    (testutil/with-events test-events
       (auth/with-user-id user-id
         (testing "no demo congregation"
-          (is (nil? (dmz/get-demo-congregation state nil))))
+          (is (nil? (dmz/get-demo-congregation nil))))
 
         (testing "can see the demo congregation"
-          (is (= expected (dmz/get-demo-congregation state cong-id))))
+          (is (= expected (dmz/get-demo-congregation cong-id))))
 
         (testing "cannot see the demo congregation as own congregation"
-          (is (nil? (dmz/get-own-congregation state cong-id))))))))
+          (is (nil? (dmz/get-own-congregation cong-id))))))))
 
 (deftest test-get-territory
-  (let [state (apply-events test-events)
-        expected {:congregation/id cong-id
+  (let [expected {:congregation/id cong-id
                   :territory/id territory-id
                   :territory/number "123"
                   :territory/addresses "the addresses"
@@ -220,22 +212,22 @@
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-multi-polygon}]
     (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
-      (auth/with-user-id user-id
-        (testing "has view permissions"
-          (is (= expected (dmz/get-own-territory fake-conn state cong-id territory-id)))))
-
-      (let [user-id (UUID. 0 0x666)]
+      (testutil/with-events test-events
         (auth/with-user-id user-id
-          (testing "no permissions"
-            (is (nil? (dmz/get-own-territory fake-conn state cong-id territory-id))))
+          (testing "has view permissions"
+            (is (= expected (dmz/get-own-territory fake-conn cong-id territory-id)))))
 
-          (testing "opened a share"
-            (let [state (share/grant-opened-shares state [share-id] user-id)]
-              (is (= expected (dmz/get-own-territory fake-conn state cong-id territory-id))))))))))
+        (let [user-id (UUID. 0 0x666)]
+          (auth/with-user-id user-id
+            (testing "no permissions"
+              (is (nil? (dmz/get-own-territory fake-conn cong-id territory-id))))
+
+            (testing "opened a share"
+              (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
+                (is (= expected (dmz/get-own-territory fake-conn cong-id territory-id)))))))))))
 
 (deftest test-get-demo-territory
-  (let [state (apply-events test-events)
-        expected {:congregation/id "demo" ; changed
+  (let [expected {:congregation/id "demo" ; changed
                   :territory/id territory-id
                   :territory/number "123"
                   :territory/addresses "the addresses"
@@ -243,19 +235,20 @@
                   ;; no do-not-calls
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-multi-polygon}]
-    (binding [do-not-calls/get-do-not-calls (fn [& _]
-                                              (assert false "should not have been called"))]
-      (testing "no demo congregation"
-        (is (nil? (dmz/get-demo-territory state nil territory-id))))
+    (testutil/with-events test-events
+      (binding [do-not-calls/get-do-not-calls (fn [& _]
+                                                (assert false "should not have been called"))]
+        (testing "no demo congregation"
+          (is (nil? (dmz/get-demo-territory nil territory-id))))
 
-      (testing "can see the demo congregation"
-        (is (= expected (dmz/get-demo-territory state cong-id territory-id))))
+        (testing "can see the demo congregation"
+          (is (= expected (dmz/get-demo-territory cong-id territory-id))))
 
-      (testing "wrong territory ID"
-        (is (nil? (dmz/get-demo-territory state cong-id (UUID. 0 0x666))))))
+        (testing "wrong territory ID"
+          (is (nil? (dmz/get-demo-territory cong-id (UUID. 0 0x666))))))
 
-    (let [user-id (UUID. 0 0x666)]
-      (auth/with-user-id user-id
-        (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
-          (testing "cannot see the demo congregation as own congregation"
-            (is (nil? (dmz/get-own-territory fake-conn state cong-id territory-id)))))))))
+      (let [user-id (UUID. 0 0x666)]
+        (auth/with-user-id user-id
+          (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
+            (testing "cannot see the demo congregation as own congregation"
+              (is (nil? (dmz/get-own-territory fake-conn cong-id territory-id))))))))))

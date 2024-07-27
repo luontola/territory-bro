@@ -34,15 +34,15 @@
      :congregation/regions (sequence (vals (get-in *state* [::region/regions cong-id])))
      :congregation/card-minimap-viewports (sequence (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports cong-id])))}))
 
-(defn- apply-user-permissions-for-congregation [cong state]
+(defn- apply-user-permissions-for-congregation [cong]
   (let [user-id (auth/current-user-id)
         cong-id (:congregation/id cong)
         ;; TODO: move territory fetching to list-territories
-        territory-ids (lazy-seq (for [[_ _ territory-id] (permissions/match state user-id [:view-territory cong-id '*])]
+        territory-ids (lazy-seq (for [[_ _ territory-id] (permissions/match *state* user-id [:view-territory cong-id '*])]
                                   territory-id))]
     (cond
       ;; TODO: deduplicate with congregation/apply-user-permissions
-      (permissions/allowed? state user-id [:view-congregation cong-id])
+      (permissions/allowed? *state* user-id [:view-congregation cong-id])
       cong
 
       ;; TODO: introduce a :view-congregation-temporarily permission when opening shares?
@@ -53,19 +53,19 @@
           (assoc :congregation/regions [])
           (assoc :congregation/card-minimap-viewports [])
           (assoc :congregation/territories (for [territory-id territory-ids]
-                                             (get-in state [::territory/territories cong-id territory-id]))))
+                                             (get-in *state* [::territory/territories cong-id territory-id]))))
 
       :else
       nil)))
 
-(defn get-own-congregation [state cong-id]
-  (some-> (congregation/get-unrestricted-congregation state cong-id)
+(defn get-own-congregation [cong-id]
+  (some-> (congregation/get-unrestricted-congregation *state* cong-id)
           (enrich-congregation)
-          (apply-user-permissions-for-congregation state)))
+          (apply-user-permissions-for-congregation)))
 
-(defn get-demo-congregation [state cong-id]
+(defn get-demo-congregation [cong-id]
   (when cong-id
-    (some-> (congregation/get-unrestricted-congregation state cong-id)
+    (some-> (congregation/get-unrestricted-congregation *state* cong-id)
             (enrich-congregation)
             (assoc :congregation/id "demo")
             (assoc :congregation/name "Demo Congregation")
@@ -74,14 +74,14 @@
                                               :share-territory-link true})
             (assoc :congregation/users []))))
 
-(defn get-congregation [state cong-id]
+(defn get-congregation [cong-id]
   (if (= "demo" cong-id)
-    (get-demo-congregation state (:demo-congregation config/env))
-    (get-own-congregation state cong-id)))
+    (get-demo-congregation (:demo-congregation config/env))
+    (get-own-congregation cong-id)))
 
-(defn list-congregations [state]
+(defn list-congregations []
   (let [user-id (auth/current-user-id)]
-    (congregation/get-my-congregations state user-id)))
+    (congregation/get-my-congregations *state* user-id)))
 
 
 (defn- enrich-do-not-calls [territory conn cong-id territory-id]
@@ -89,35 +89,35 @@
          (-> (do-not-calls/get-do-not-calls conn cong-id territory-id)
              (select-keys [:territory/do-not-calls]))))
 
-(defn- apply-user-permissions-for-territory [territory state]
+(defn- apply-user-permissions-for-territory [territory]
   (let [user-id (auth/current-user-id)
         cong-id (:congregation/id territory)
         territory-id (:territory/id territory)]
-    (when (or (permissions/allowed? state user-id [:view-congregation cong-id])
-              (permissions/allowed? state user-id [:view-territory cong-id territory-id]))
+    (when (or (permissions/allowed? *state* user-id [:view-congregation cong-id])
+              (permissions/allowed? *state* user-id [:view-territory cong-id territory-id]))
       territory)))
 
-(defn get-own-territory [conn state cong-id territory-id]
-  (some-> (territory/get-unrestricted-territory state cong-id territory-id)
+(defn get-own-territory [conn cong-id territory-id]
+  (some-> (territory/get-unrestricted-territory *state* cong-id territory-id)
           (enrich-do-not-calls conn cong-id territory-id)
-          (apply-user-permissions-for-territory state)))
+          (apply-user-permissions-for-territory)))
 
-(defn get-demo-territory [state cong-id territory-id]
+(defn get-demo-territory [cong-id territory-id]
   (when cong-id
-    (some-> (territory/get-unrestricted-territory state cong-id territory-id)
+    (some-> (territory/get-unrestricted-territory *state* cong-id territory-id)
             (assoc :congregation/id "demo"))))
 
-(defn get-territory [conn state cong-id territory-id]
+(defn get-territory [conn cong-id territory-id]
   (if (= "demo" cong-id)
-    (get-demo-territory state (:demo-congregation config/env) territory-id)
-    (get-own-territory conn state cong-id territory-id)))
+    (get-demo-territory (:demo-congregation config/env) territory-id)
+    (get-own-territory conn cong-id territory-id)))
 
-(defn list-territories! [state cong-id {:keys [fetch-loans?]}]
+(defn list-territories! [cong-id {:keys [fetch-loans?]}]
   ;; TODO: inline get-own-congregation and only get the territories instead of everything in the congregation
   (let [user-id (auth/current-user-id)
-        congregation (get-congregation state cong-id)
+        congregation (get-congregation cong-id)
         fetch-loans? (and fetch-loans?
-                          (permissions/allowed? state user-id [:view-congregation cong-id])
+                          (permissions/allowed? *state* user-id [:view-congregation cong-id])
                           (some? (:congregation/loans-csv-url congregation)))]
     (when congregation
       (:congregation/territories (cond-> congregation

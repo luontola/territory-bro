@@ -33,10 +33,8 @@
 
 (defn wrap-current-state [handler]
   (fn [request]
-    (let [state (api/state-for-request request) ; TODO: move to DMZ? depends on session state (sudo & opened shares)
-          request (assoc request :state state)]
-      (binding [dmz/*state* state]
-        (handler request)))))
+    (binding [dmz/*state* (api/state-for-request request)] ; TODO: move state-for-request, or even wrap-current-state, to dmz namespace
+      (handler request))))
 
 (defn- parse-mandatory-uuid [s]
   (or (parse-uuid s)
