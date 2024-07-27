@@ -237,7 +237,7 @@
           territory-id (get-in request [:path-params :territory])
           user-id (current-user-id)
           state (state-for-request request)
-          territory (dmz/get-territory conn state cong-id territory-id user-id)]
+          territory (dmz/get-own-territory conn state cong-id territory-id user-id)]
       (when-not territory
         ;; This function must support anonymous access for opened shares.
         ;; If anonymous user cannot see the congregation, first prompt them

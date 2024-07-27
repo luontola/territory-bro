@@ -9,6 +9,7 @@
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.territory :as territory]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]))
 
 (defn- enrich-congregation [cong state user-id]
@@ -65,6 +66,11 @@
                                               :share-territory-link true})
             (assoc :congregation/users []))))
 
+(defn get-congregation [state cong-id user-id]
+  (if (= "demo" cong-id)
+    (get-demo-congregation state (:demo-congregation config/env) user-id)
+    (get-own-congregation state cong-id user-id)))
+
 
 (defn- enrich-do-not-calls [territory conn cong-id territory-id]
   (merge territory
@@ -78,7 +84,7 @@
               (permissions/allowed? state user-id [:view-territory cong-id territory-id]))
       territory)))
 
-(defn get-territory [conn state cong-id territory-id user-id]
+(defn get-own-territory [conn state cong-id territory-id user-id]
   (some-> (territory/get-unrestricted-territory state cong-id territory-id)
           (enrich-do-not-calls conn cong-id territory-id)
           (apply-user-permissions-for-territory state user-id)))
@@ -87,3 +93,8 @@
   (when cong-id
     (some-> (territory/get-unrestricted-territory state cong-id territory-id)
             (assoc :congregation/id "demo"))))
+
+(defn get-territory [conn state cong-id territory-id user-id]
+  (if (= "demo" cong-id)
+    (get-demo-territory state (:demo-congregation config/env) territory-id)
+    (get-own-territory conn state cong-id territory-id user-id)))
