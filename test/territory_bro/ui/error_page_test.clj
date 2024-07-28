@@ -3,13 +3,10 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.error-page-test
-  (:require [clojure.string :as str]
-            [clojure.test :refer :all]
+  (:require [clojure.test :refer :all]
             [ring.util.http-response :as http-response]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.error-page :as error-page]
-            [territory-bro.ui.html :as html])
-  (:import (java.util UUID)))
+            [territory-bro.ui.html :as html]))
 
 (def layout-header
   "Territory Bro
@@ -86,16 +83,3 @@
               :body "original"
               :headers {}}
              (handle-response (http-response/ok "original")))))))
-
-(deftest authentication-status-test
-  (testing "logged in"
-    (let [request {:session (auth/user-session {:name "John Doe"} (UUID. 0 1))}]
-      (is (str/includes? (-> (error-page/safe-page request nil)
-                             html/visible-text)
-                         "John Doe Logout"))))
-
-  (testing "anonymous user"
-    (let [request {}]
-      (is (str/includes? (-> (error-page/safe-page request nil)
-                             html/visible-text)
-                         "Login")))))

@@ -60,7 +60,8 @@
 (deftest error-reporting-test
   (let [irrelevant-headers {"Cache-Control" "private, no-cache"
                             "X-Content-Type-Options" "nosniff"
-                            "X-Frame-Options" "SAMEORIGIN"}]
+                            "X-Frame-Options" "SAMEORIGIN"
+                            "Set-Cookie" ["lang=en; Max-Age=31536000; Path=/"]}]
     (testing "handler throws arbitrary exception"
       (let [handler (-> (fn [_]
                           (throw (RuntimeException. "dummy")))

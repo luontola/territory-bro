@@ -4,12 +4,10 @@
 
 (ns territory-bro.ui
   (:require [reitit.ring :as ring]
-            [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.util.http-response :as http-response]
             [territory-bro.api :as api]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.congregation-page :as congregation-page]
             [territory-bro.ui.error-page :as error-page]
             [territory-bro.ui.home-page :as home-page]
@@ -24,11 +22,6 @@
             [territory-bro.ui.support-page :as support-page]
             [territory-bro.ui.territory-list-page :as territory-list-page]
             [territory-bro.ui.territory-page :as territory-page]))
-
-(defn wrap-current-user [handler]
-  (fn [request]
-    (auth/with-user-from-session request
-      (handler request))))
 
 (defn wrap-current-state [handler]
   (fn [request]
@@ -55,11 +48,8 @@
 (def routes
   [""
    {:middleware [[html/wrap-page-path nil] ; outermost middleware first
-                 auth0/wrap-redirect-to-login
-                 wrap-current-user
                  wrap-current-state
-                 wrap-parse-path-params
-                 wrap-http-response]}
+                 wrap-parse-path-params]}
    auth0/routes
    congregation-page/routes
    error-page/routes

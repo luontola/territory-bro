@@ -13,6 +13,8 @@
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.util.http-response :refer [internal-server-error]]
             [ring.util.response :as response]
+            [territory-bro.infra.auth0 :as auth0]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :refer [env]]
             [territory-bro.infra.util :as util]
             [territory-bro.projections :as projections]
@@ -107,8 +109,10 @@
       wrap-http-response
       wrap-formats
       wrap-default-content-type
+      auth0/wrap-redirect-to-login
       error-page/wrap-error-pages
       i18n/wrap-current-language
+      auth/wrap-current-user
       (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
       (wrap-defaults (-> site-defaults
                          (assoc :proxy true)

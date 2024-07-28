@@ -375,7 +375,10 @@
         (b/go (str *base-url* "/congregation/" (UUID/randomUUID)))
         (b/wait-visible h1))
       (is (= "Access denied 🛑"
-             (b/get-element-text *driver* h1))))))
+             (b/get-element-text *driver* h1))))
+
+    (testing "error pages show the user's authentication status"
+      (is (b/visible? *driver* :logout-button)))))
 
 (deftest sudo-test
   (with-per-test-postmortem

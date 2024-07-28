@@ -52,3 +52,8 @@
   `(with-user (or (get-in ~request [:session ::user])
                   anonymous-user)
      ~@body))
+
+(defn wrap-current-user [handler]
+  (fn [request]
+    (with-user-from-session request
+      (handler request))))

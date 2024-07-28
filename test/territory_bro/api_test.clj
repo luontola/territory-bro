@@ -84,7 +84,6 @@
                         (route/not-found "Not Found"))
       (wrap-format-for-api) ; avoid the need to change these tests, when we remove format-for-api from the handler functions
       (ui/wrap-current-state)
-      (ui/wrap-current-user)
       (middleware/wrap-base)))
 
 (defn app [request]
@@ -459,7 +458,9 @@
                        app)]
       (is (ok? response))
       (is (= "Logged in" (:body response)))
-      (is (= ["ring-session"] (keys (get-cookies response))))))
+      (is (= ["ring-session"] (-> (get-cookies response)
+                                  (dissoc "lang")
+                                  (keys))))))
 
   (testing "user is saved on login"
     (let [user (db/with-db [conn {}]
@@ -474,7 +475,8 @@
                          app)]
         (is (forbidden? response))
         (is (= "Invalid token" (:body response)))
-        (is (empty? (get-cookies response))))))
+        (is (empty? (-> (get-cookies response)
+                        (dissoc "lang")))))))
 
   (testing "dev login"
     (binding [config/env (assoc config/env :dev true)]
@@ -485,7 +487,9 @@
                          app)]
         (is (ok? response))
         (is (= "Logged in" (:body response)))
-        (is (= ["ring-session"] (keys (get-cookies response)))))))
+        (is (= ["ring-session"] (-> (get-cookies response)
+                                    (dissoc "lang")
+                                    (keys)))))))
 
   (testing "user is saved on dev login"
     (let [user (db/with-db [conn {}]
@@ -501,7 +505,8 @@
                        app)]
       (is (forbidden? response))
       (is (= "Dev mode disabled" (:body response)))
-      (is (empty? (get-cookies response))))))
+      (is (empty? (-> (get-cookies response)
+                      (dissoc "lang")))))))
 
 (deftest dev-login-test
   (testing "authenticates as anybody in dev mode"
@@ -531,7 +536,8 @@
 (deftest authorization-test
   (testing "before login"
     (let [response (try-create-congregation! nil "test1")]
-      (is (unauthorized? response))))
+      #_(is (unauthorized? response))
+      (is (see-other? response))))
 
   (let [session (login! app)]
     (testing "after login"
@@ -541,7 +547,8 @@
     (testing "after logout"
       (logout! app session)
       (let [response (try-create-congregation! session "test3")]
-        (is (unauthorized? response))))))
+        #_(is (unauthorized? response))
+        (is (see-other? response))))))
 
 (deftest super-user-test
   (let [cong-id (create-congregation-without-user! "sudo test")
@@ -597,7 +604,8 @@
 
   (testing "requires login"
     (let [response (try-create-congregation! nil "foo")]
-      (is (unauthorized? response)))))
+      #_(is (unauthorized? response))
+      (is (see-other? response)))))
 
 (deftest list-congregations-test
   (let [session (login! app)
@@ -630,7 +638,8 @@
     (testing "requires login"
       (let [response (-> (request :get (str "/api/congregation/" cong-id))
                          app)]
-        (is (unauthorized? response))))
+        #_(is (unauthorized? response))
+        (is (see-other? response))))
 
     (testing "wrong ID"
       (let [response (-> (request :get (str "/api/congregation/" (UUID/randomUUID)))
@@ -697,7 +706,8 @@
     (testing "requires login"
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/territory/" territory-id))
                          app)]
-        (is (unauthorized? response))))
+        #_(is (unauthorized? response))
+        (is (see-other? response))))
 
     (testing "wrong ID"
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/territory/" (UUID/randomUUID)))
@@ -800,7 +810,8 @@
     (testing "requires login"
       (let [response (-> (request :get (str "/api/congregation/" cong-id "/qgis-project"))
                          app)]
-        (is (unauthorized? response))))
+        #_(is (unauthorized? response))
+        (is (see-other? response))))
 
     (testing "requires GIS access"
       (db/with-db [conn {}]
@@ -980,7 +991,8 @@
 
         (testing "- but cannot edit do-not-calls"
           (let [response (try-edit-do-not-calls! @*session cong-id territory-id)]
-            (is (unauthorized? response))))))
+            #_(is (unauthorized? response))
+            (is (see-other? response))))))
 
     (testing "non-existing share link"
       (let [response (-> (request :get "/api/share/foo")
