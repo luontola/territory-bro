@@ -14,7 +14,6 @@
             [territory-bro.ui.error-page :as error-page]
             [territory-bro.ui.home-page :as home-page]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.join-page :as join-page]
             [territory-bro.ui.open-share-page :as open-share-page]
             [territory-bro.ui.printouts-page :as printouts-page]
@@ -57,7 +56,6 @@
   [""
    {:middleware [[html/wrap-page-path nil] ; outermost middleware first
                  auth0/wrap-redirect-to-login
-                 i18n/wrap-current-language
                  wrap-current-user
                  wrap-current-state
                  wrap-parse-path-params

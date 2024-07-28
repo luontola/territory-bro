@@ -16,7 +16,8 @@
             [territory-bro.infra.config :refer [env]]
             [territory-bro.infra.util :as util]
             [territory-bro.projections :as projections]
-            [territory-bro.ui.error-page :as error-page])
+            [territory-bro.ui.error-page :as error-page]
+            [territory-bro.ui.i18n :as i18n])
   (:import (java.time Duration)))
 
 (defn wrap-internal-error [handler]
@@ -107,6 +108,7 @@
       wrap-formats
       wrap-default-content-type
       error-page/wrap-error-pages
+      i18n/wrap-current-language
       (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
       (wrap-defaults (-> site-defaults
                          (assoc :proxy true)

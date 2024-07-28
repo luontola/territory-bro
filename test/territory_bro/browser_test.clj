@@ -154,18 +154,21 @@
 
 (deftest change-language-test
   (with-per-test-postmortem
-    (doto *driver*
-      (b/go *base-url*)
-      (b/wait-visible :language-selection))
-
     (testing "default language is English"
-      (is (b/visible? *driver* [{:tag :nav} {:tag :a, :fn/has-string "Home"}])))
+      (doto *driver*
+        (b/go *base-url*)
+        (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string "Home"}])))
 
     (testing "user can change the language"
       (doto *driver*
         (wait-and-click :language-selection)
         (wait-and-click [:language-selection {:tag :option, :fn/has-string "suomi - Finnish"}])
-        (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string "Etusivu"}])))))
+        (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string "Etusivu"}])))
+
+    (testing "also error pages are translated"
+      (doto *driver*
+        (b/go (str *base-url* "/foo"))
+        (b/wait-has-text h1 "Sivua ei löytynyt")))))
 
 
 (deftest demo-test
