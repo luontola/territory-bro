@@ -4,14 +4,15 @@
 
 (ns territory-bro.ui.congregation-page-test
   (:require [clojure.test :refer :all]
-            [territory-bro.api-test :as at]
+            [matcher-combinators.test :refer :all]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
-            [territory-bro.test.fixtures :refer :all]
-            [territory-bro.test.testutil :refer [replace-in]]
-            [territory-bro.ui :as ui]
+            [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.congregation-page :as congregation-page]
-            [territory-bro.ui.html :as html]))
+            [territory-bro.ui.html :as html])
+  (:import (clojure.lang ExceptionInfo)
+           (java.util UUID)))
 
 (def model
   {:congregation/name "Example Congregation"
@@ -25,25 +26,44 @@
    :congregation/permissions {:share-territory-link true
                               :view-congregation true}})
 
-(deftest ^:slow model!-test
-  (with-fixtures [db-fixture api-fixture]
-    ;; TODO: decouple this test from the database
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          cong-id (at/create-congregation! session "Example Congregation")
-          request {:path-params {:congregation cong-id}}]
-      (auth/with-user-id user-id
+(deftest model!-test
+  (let [user-id (UUID/randomUUID)
+        cong-id (UUID/randomUUID)
+        request {:path-params {:congregation cong-id}}]
+    (binding [config/env {:demo-congregation cong-id}]
+      (testutil/with-events (flatten [{:event/type :congregation.event/congregation-created
+                                       :congregation/id cong-id
+                                       :congregation/name "Example Congregation"
+                                       :congregation/schema-name "cong1_schema"}
+                                      (congregation/admin-permissions-granted cong-id user-id)])
+        (auth/with-user-id user-id
 
-        (testing "regular congregation"
-          (is (= model ((ui/wrap-current-state congregation-page/model!) request))))
+          (testing "logged in"
+            (is (= model (congregation-page/model! request))))
 
-        (testing "demo congregation"
-          (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+          (testing "logged in, no access"
+            (is (thrown-match? ExceptionInfo
+                               {:type :ring.util.http-response/response
+                                :response {:status 403
+                                           :body "No congregation access"
+                                           :headers {}}}
+                               (congregation-page/model! {:path-params {:congregation (UUID/randomUUID)}}))))
+
+          (testing "anonymous user"
+            (auth/with-anonymous-user
+              (is (thrown-match? ExceptionInfo
+                                 {:type :ring.util.http-response/response
+                                  :response {:status 401
+                                             :body "Not logged in"
+                                             :headers {}}}
+                                 (congregation-page/model! request)))))
+
+          (testing "demo congregation"
             (let [request {:path-params {:congregation "demo"}}]
               (is (= demo-model
-                     ((ui/wrap-current-state congregation-page/model!) request)
+                     (congregation-page/model! request)
                      (auth/with-anonymous-user
-                       ((ui/wrap-current-state congregation-page/model!) request)))))))))))
+                       (congregation-page/model! request)))))))))))
 
 (deftest view-test
   (testing "full permissions"

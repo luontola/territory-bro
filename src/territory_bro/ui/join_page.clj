@@ -4,14 +4,14 @@
 
 (ns territory-bro.ui.join-page
   (:require [hiccup2.core :as h]
-            [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]))
 
 (defn model! [_request]
-  (api/require-logged-in!)
+  (dmz/require-logged-in!)
   {:user-id (:user/id auth/*user*)})
 
 (defn view [{:keys [user-id]}]

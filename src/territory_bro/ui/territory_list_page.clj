@@ -6,7 +6,6 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [ring.util.http-response :as http-response]
-            [territory-bro.api :as api]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
@@ -26,7 +25,7 @@
             ;; This function must support anonymous access for opened shares.
             ;; If anonymous user cannot see the congregation, first prompt them
             ;; to login before giving the forbidden error.
-            (api/require-logged-in!)
+            (dmz/require-logged-in!)
             (http-response/forbidden! "No congregation access"))
         congregation-boundary (->> (:congregation/congregation-boundaries congregation)
                                    (mapv (comp geometry/parse-wkt :congregation-boundary/location))

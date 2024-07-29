@@ -4,17 +4,15 @@
 
 (ns territory-bro.ui.congregation-page
   (:require [hiccup2.core :as h]
-            [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.visible :as visible]))
 
 (defn model! [request]
-  (let [demo? (= "demo" (get-in request [:path-params :congregation]))
-        congregation (if demo?
-                       (:body (api/get-demo-congregation request))
-                       (:body (api/get-congregation request {})))]
+  (let [cong-id (get-in request [:path-params :congregation])
+        congregation (dmz/get-congregation cong-id)]
     (select-keys congregation [:congregation/name :congregation/permissions])))
 
 (defn view [model]

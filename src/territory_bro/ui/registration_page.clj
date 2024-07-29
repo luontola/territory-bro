@@ -6,7 +6,6 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [ring.util.http-response :as http-response]
-            [territory-bro.api :as api]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.db :as db]
             [territory-bro.ui.forms :as forms]
@@ -16,7 +15,7 @@
   (:import (java.util UUID)))
 
 (defn model! [request]
-  (api/require-logged-in!)
+  (dmz/require-logged-in!)
   {:form (:params request)})
 
 (defn view [model]
@@ -54,7 +53,7 @@
   (view (model! request)))
 
 (defn submit! [request]
-  (api/require-logged-in!)
+  (dmz/require-logged-in!)
   (let [cong-name (get-in request [:params :congregationName])
         cong-id (UUID/randomUUID)]
     (try

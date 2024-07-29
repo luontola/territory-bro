@@ -23,6 +23,10 @@
 (def ^:dynamic *state* nil) ; the state starts empty, so nil is a good default for tests
 (def ^:dynamic *conn*) ; unbound var gives a better error message than nil, when forgetting db/with-db
 
+(defn require-logged-in! []
+  (when-not (auth/logged-in?)
+    (http-response/unauthorized! "Not logged in")))
+
 (defn- enrich-command [command]
   (let [user-id (auth/current-user-id)]
     (-> command
@@ -122,8 +126,11 @@
 
 (defn get-congregation [cong-id]
   (if (= "demo" cong-id)
-    (get-demo-congregation (:demo-congregation config/env))
-    (get-own-congregation cong-id)))
+    (or (get-demo-congregation (:demo-congregation config/env))
+        (http-response/not-found! "No demo"))
+    (or (get-own-congregation cong-id)
+        (require-logged-in!)
+        (http-response/forbidden! "No congregation access"))))
 
 (defn list-congregations []
   (let [user-id (auth/current-user-id)]
