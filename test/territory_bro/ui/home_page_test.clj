@@ -4,6 +4,7 @@
 
 (ns territory-bro.ui.home-page-test
   (:require [clojure.test :refer :all]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
@@ -38,13 +39,13 @@
                                      :congregation/id cong-id1
                                      :congregation/name "Congregation 1"
                                      :congregation/schema-name "cong1_schema"}
-                                    (territory-bro.domain.congregation/admin-permissions-granted cong-id1 user-id)
+                                    (congregation/admin-permissions-granted cong-id1 user-id)
 
                                     {:event/type :congregation.event/congregation-created
                                      :congregation/id cong-id2
                                      :congregation/name "Congregation 2"
                                      :congregation/schema-name "cong2_schema"}
-                                    (territory-bro.domain.congregation/admin-permissions-granted cong-id2 user-id)
+                                    (congregation/admin-permissions-granted cong-id2 user-id)
 
                                     {:event/type :congregation.event/congregation-created
                                      :congregation/id (UUID. 0 0x666)

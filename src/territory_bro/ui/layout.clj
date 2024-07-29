@@ -5,7 +5,7 @@
 (ns territory-bro.ui.layout
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
-            [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
@@ -18,11 +18,8 @@
 
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
-        demo? (= "demo" cong-id)
         congregation (when (some? cong-id)
-                       (-> (if demo?
-                             (:body (api/get-demo-congregation request))
-                             (:body (api/get-congregation request {})))
+                       (-> (dmz/get-congregation cong-id)
                            (select-keys [:congregation/id :congregation/name :congregation/permissions])))
         language-selection-width (get-in request [:cookies "languageSelectionWidth" :value])]
     {:congregation congregation
@@ -32,7 +29,7 @@
                   (auth0/login-url request))
      :language-selection-width language-selection-width
      :dev? (:dev config/env)
-     :demo? demo?}))
+     :demo? (= "demo" cong-id)}))
 
 
 (defn- minify-html [html]

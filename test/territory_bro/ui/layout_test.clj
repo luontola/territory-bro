@@ -6,17 +6,18 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [hiccup2.core :as h]
-            [territory-bro.api-test :as at]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
-            [territory-bro.test.testutil :refer [replace-in]]
-            [territory-bro.ui :as ui]
+            [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout])
   (:import (java.util UUID)))
 
+(def cong-id (UUID. 0 1))
+(def user-id (UUID. 0 2))
 (def anonymous-model
   {:congregation nil
    :user nil
@@ -34,21 +35,21 @@
    :demo? false})
 (def logged-in-model
   {:congregation nil
-   :user {:user/id (UUID. 0 2)
+   :user {:user/id user-id
           :name "John Doe"}
    :login-url nil
    :language-selection-width nil
    :dev? false
    :demo? false})
 (def congregation-model
-  {:congregation {:congregation/id (UUID. 0 1)
+  {:congregation {:congregation/id cong-id
                   :congregation/name "the congregation"
                   :congregation/permissions {:configure-congregation true
                                              :edit-do-not-calls true
                                              :gis-access true
                                              :share-territory-link true
                                              :view-congregation true}}
-   :user {:user/id (UUID. 0 2)
+   :user {:user/id user-id
           :name "John Doe"}
    :login-url nil
    :language-selection-width nil
@@ -65,44 +66,41 @@
    :dev? false
    :demo? true})
 
-(deftest ^:slow model!-test
-  (with-fixtures [db-fixture api-fixture]
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          cong-id (at/create-congregation! session "the congregation")
-          user {:user/id user-id
-                :name "John Doe"}]
-      (auth/with-user user
+(deftest model!-test
+  (binding [config/env {:dev false
+                        :demo-congregation nil}]
+    (testutil/with-events (flatten [{:event/type :congregation.event/congregation-created
+                                     :congregation/id cong-id
+                                     :congregation/name "the congregation"
+                                     :congregation/schema-name "cong_schema"}
+                                    (congregation/admin-permissions-granted cong-id user-id)])
+      (auth/with-user {:user/id user-id
+                       :name "John Doe"}
 
         (testing "top level, anonymous"
           (auth/with-anonymous-user
             (let [request {:uri "/some/page"
                            :query-string "foo=bar&gazonk"
                            :cookies {"languageSelectionWidth" {:value "42px"}}}]
-              (is (= anonymous-model ((ui/wrap-current-state layout/model!) request))))))
+              (is (= anonymous-model (layout/model! request))))))
 
         (testing "top level, anonymous, developer mode"
           (auth/with-anonymous-user
             (binding [config/env (replace-in config/env [:dev] false true)]
               (let [request {:uri "/"
                              :query-string nil}]
-                (is (= developer-model ((ui/wrap-current-state layout/model!) request)))))))
+                (is (= developer-model (layout/model! request)))))))
 
         (testing "top level, logged in"
           (let [request {:uri "/"
                          :query-string nil}]
-            (is (= (-> logged-in-model
-                       (replace-in [:user :user/id] (UUID. 0 2) user-id))
-                   ((ui/wrap-current-state layout/model!) request)))))
+            (is (= logged-in-model (layout/model! request)))))
 
         (testing "congregation level"
           (let [request {:uri "/"
                          :query-string nil
                          :path-params {:congregation cong-id}}]
-            (is (= (-> congregation-model
-                       (replace-in [:congregation :congregation/id] (UUID. 0 1) cong-id)
-                       (replace-in [:user :user/id] (UUID. 0 2) user-id))
-                   ((ui/wrap-current-state layout/model!) request)))))
+            (is (= congregation-model (layout/model! request)))))
 
         (testing "demo congregation"
           (auth/with-anonymous-user
@@ -110,7 +108,7 @@
               (let [request {:uri "/congregation/demo"
                              :query-string nil
                              :path-params {:congregation "demo"}}]
-                (is (= demo-congregation-model ((ui/wrap-current-state layout/model!) request)))))))))))
+                (is (= demo-congregation-model (layout/model! request)))))))))))
 
 (deftest page-test
   (testing "minimal data"

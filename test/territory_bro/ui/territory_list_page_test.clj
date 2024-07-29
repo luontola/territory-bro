@@ -6,6 +6,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [reitit.core :as reitit]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.loan :as loan]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.geometry :as geometry]
@@ -52,7 +53,7 @@
                                      :congregation/id cong-id
                                      :congregation/name "Congregation 1"
                                      :congregation/schema-name "cong1_schema"}
-                                    (territory-bro.domain.congregation/admin-permissions-granted cong-id user-id)
+                                    (congregation/admin-permissions-granted cong-id user-id)
                                     {:event/type :congregation-boundary.event/congregation-boundary-defined
                                      :congregation/id cong-id
                                      :congregation-boundary/id (UUID/randomUUID)
