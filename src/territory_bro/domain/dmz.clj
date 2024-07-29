@@ -3,7 +3,10 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.domain.dmz
-  (:require [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
+  (:require [clojure.tools.logging :as log]
+            [ring.util.http-response :as http-response]
+            [territory-bro.dispatcher :as dispatcher]
+            [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.do-not-calls :as do-not-calls]
@@ -12,9 +15,52 @@
             [territory-bro.domain.territory :as territory]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
-            [territory-bro.infra.permissions :as permissions]))
+            [territory-bro.infra.db :as db]
+            [territory-bro.infra.permissions :as permissions])
+  (:import (org.postgresql.util PSQLException)
+           (territory_bro NoPermitException ValidationException WriteConflictException)))
 
-(def ^:dynamic *state* nil)
+(def ^:dynamic *state* nil) ; the state starts empty, so nil is a good default for tests
+(def ^:dynamic *conn*) ; unbound var gives a better error message than nil, when forgetting db/with-db
+
+(defn- enrich-command [command]
+  (let [user-id (auth/current-user-id)]
+    (-> command
+        (assoc :command/time ((:now config/env)))
+        (assoc :command/user user-id))))
+
+(defn dispatch! [command]
+  (let [command (enrich-command command)]
+    (try
+      (dispatcher/command! *conn* *state* command)
+      ;; TODO: catch the exceptions and convert them to http responses at a higher level?
+      (catch ValidationException e
+        (log/warn e "Invalid command:" command)
+        (http-response/bad-request! {:errors (.getErrors e)}))
+      (catch NoPermitException e
+        (log/warn e "Forbidden command:" command)
+        (http-response/forbidden! "Forbidden"))
+      (catch WriteConflictException e
+        (log/warn e "Write conflict:" command)
+        (http-response/conflict! "Conflict"))
+      (catch PSQLException e
+        ;; TODO: consider converting to WriteConflictException inside the event store
+        (when (= db/psql-deadlock-detected (.getSQLState e))
+          (log/warn e "Deadlock detected:" command)
+          (http-response/conflict! "Conflict"))
+        (log/warn e "Database error:" command
+                  "\nErrorCode:" (.getErrorCode e)
+                  "\nSQLState:" (.getSQLState e)
+                  "\nServerErrorMessage:" (.getServerErrorMessage e))
+        (http-response/internal-server-error! "Internal Server Error"))
+      (catch Throwable t
+        ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
+        (log/error t (str "Command failed: "
+                          (pr-str command)
+                          "\n"
+                          (pr-str t)))
+        (http-response/internal-server-error! "Internal Server Error")))))
+
 
 (defn- enrich-congregation [cong]
   (let [user-id (auth/current-user-id)

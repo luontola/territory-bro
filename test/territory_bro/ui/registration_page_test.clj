@@ -6,42 +6,41 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
-            [territory-bro.api-test :as at]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.infra.authentication :as auth]
+            [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.registration-page :as registration-page])
   (:import (clojure.lang ExceptionInfo)
+           (java.time Instant)
+           (java.util UUID)
            (territory_bro ValidationException)))
 
 (def model {:form nil})
 
-(deftest ^:slow model!-test
-  (with-fixtures [db-fixture api-fixture]
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          request {}]
-      (auth/with-user-id user-id
+(deftest model!-test
+  (let [user-id (UUID/randomUUID)
+        request {}]
+    (auth/with-user-id user-id
 
-        (testing "logged in"
-          (is (= model (registration-page/model! request))))
+      (testing "logged in"
+        (is (= model (registration-page/model! request))))
 
-        (testing "anonymous user"
-          (auth/with-anonymous-user
-            (is (thrown-match? ExceptionInfo
-                               {:type :ring.util.http-response/response
-                                :response {:status 401
-                                           :body "Not logged in"
-                                           :headers {}}}
-                               (registration-page/model! request)))))))))
+      (testing "anonymous user"
+        (auth/with-anonymous-user
+          (is (thrown-match? ExceptionInfo
+                             {:type :ring.util.http-response/response
+                              :response {:status 401
+                                         :body "Not logged in"
+                                         :headers {}}}
+                             (registration-page/model! request))))))))
 
-(deftest ^:slow submit!-test
-  (with-fixtures [db-fixture api-fixture]
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          request {:params {:congregationName "the name"}}]
+(deftest submit!-test
+  (let [user-id (UUID/randomUUID)
+        request {:params {:congregationName "the name"}}]
+    (binding [config/env {:now #(Instant/now)}]
       (auth/with-user-id user-id
 
         (testing "logged in"

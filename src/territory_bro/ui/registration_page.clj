@@ -7,10 +7,13 @@
             [hiccup2.core :as h]
             [ring.util.http-response :as http-response]
             [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
+            [territory-bro.infra.db :as db]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
-            [territory-bro.ui.layout :as layout]))
+            [territory-bro.ui.layout :as layout])
+  (:import (java.util UUID)))
 
 (defn model! [request]
   (api/require-logged-in!)
@@ -51,13 +54,16 @@
   (view (model! request)))
 
 (defn submit! [request]
-  (try
-    (let [cong-name (get-in request [:params :congregationName])
-          api-request (assoc request :params {:name cong-name})
-          cong-id (:id (:body (api/create-congregation api-request)))]
-      (http-response/see-other (str "/congregation/" cong-id)))
-    (catch Exception e
-      (forms/validation-error-page-response e request model! view))))
+  (api/require-logged-in!)
+  (let [cong-name (get-in request [:params :congregationName])
+        cong-id (UUID/randomUUID)]
+    (try
+      (dmz/dispatch! {:command/type :congregation.command/create-congregation
+                      :congregation/id cong-id
+                      :congregation/name cong-name})
+      (http-response/see-other (str "/congregation/" cong-id))
+      (catch Exception e
+        (forms/validation-error-page-response e request model! view)))))
 
 (def routes
   ["/register"
@@ -65,4 +71,7 @@
                      (-> (view! request)
                          (layout/page! request)
                          (html/response)))}
-    :post {:handler submit!}}])
+    :post {:handler (fn [request]
+                      (db/with-db [conn {}]
+                        (binding [dmz/*conn* conn]
+                          (submit! request))))}}])
