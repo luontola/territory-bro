@@ -6,6 +6,9 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.do-not-calls :as do-not-calls]
+            [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
+            [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
@@ -15,12 +18,13 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.printouts-page :as printouts-page])
-  (:import (java.time Clock Duration ZoneOffset ZonedDateTime)
+  (:import (java.time Clock Duration Instant ZoneOffset ZonedDateTime)
            (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
 (def region-id (UUID. 0 2))
 (def territory-id (UUID. 0 3))
+(def user-id (UUID/randomUUID))
 (def default-model
   {:congregation {:congregation/id cong-id
                   :congregation/name "Example Congregation"
@@ -59,38 +63,40 @@
       (replace-in [:congregation :congregation/name] "Example Congregation" "Demo Congregation")
       (replace-in [:form :regions] #{cong-id} #{"demo"})))
 
+(def test-events
+  (flatten [{:event/type :congregation.event/congregation-created
+             :congregation/id cong-id
+             :congregation/name "Example Congregation"
+             :congregation/schema-name "cong1_schema"}
+            (congregation/admin-permissions-granted cong-id user-id)
+            {:event/type :congregation-boundary.event/congregation-boundary-defined
+             :gis-change/id 42
+             :congregation/id cong-id
+             :congregation-boundary/id (UUID/randomUUID)
+             :congregation-boundary/location testdata/wkt-helsinki}
+            {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined,
+             :gis-change/id 42
+             :congregation/id cong-id
+             :card-minimap-viewport/id (UUID/randomUUID)
+             :card-minimap-viewport/location testdata/wkt-helsinki}
+            {:event/type :region.event/region-defined
+             :gis-change/id 42
+             :congregation/id cong-id
+             :region/id region-id
+             :region/name "the region"
+             :region/location testdata/wkt-south-helsinki}
+            {:event/type :territory.event/territory-defined
+             :congregation/id cong-id
+             :territory/id territory-id
+             :territory/number "123"
+             :territory/addresses "the addresses"
+             :territory/region "the region"
+             :territory/meta {:foo "bar"}
+             :territory/location testdata/wkt-helsinki-rautatientori}]))
+
 (deftest model!-test
-  (let [user-id (UUID/randomUUID)
-        request {:path-params {:congregation cong-id}}]
-    (testutil/with-events (flatten [{:event/type :congregation.event/congregation-created
-                                     :congregation/id cong-id
-                                     :congregation/name "Example Congregation"
-                                     :congregation/schema-name "cong1_schema"}
-                                    (congregation/admin-permissions-granted cong-id user-id)
-                                    {:event/type :congregation-boundary.event/congregation-boundary-defined
-                                     :gis-change/id 42
-                                     :congregation/id cong-id
-                                     :congregation-boundary/id (UUID/randomUUID)
-                                     :congregation-boundary/location testdata/wkt-helsinki}
-                                    {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined,
-                                     :gis-change/id 42
-                                     :congregation/id cong-id
-                                     :card-minimap-viewport/id (UUID/randomUUID)
-                                     :card-minimap-viewport/location testdata/wkt-helsinki}
-                                    {:event/type :region.event/region-defined
-                                     :gis-change/id 42
-                                     :congregation/id cong-id
-                                     :region/id region-id
-                                     :region/name "the region"
-                                     :region/location testdata/wkt-south-helsinki}
-                                    {:event/type :territory.event/territory-defined
-                                     :congregation/id cong-id
-                                     :territory/id territory-id
-                                     :territory/number "123"
-                                     :territory/addresses "the addresses"
-                                     :territory/region "the region"
-                                     :territory/meta {:foo "bar"}
-                                     :territory/location testdata/wkt-helsinki-rautatientori}])
+  (let [request {:path-params {:congregation cong-id}}]
+    (testutil/with-events test-events
       (auth/with-user-id user-id
 
         (testing "default"
@@ -124,11 +130,6 @@
            (UUID. 0 2)}
          (printouts-page/parse-uuid-multiselect ["00000000-0000-0000-0000-000000000001"
                                                  "00000000-0000-0000-0000-000000000002"]))))
-
-(deftest render-qr-code-svg-test
-  (let [svg (printouts-page/render-qr-code-svg "foo")]
-    (is (str/includes? svg "viewBox=\"0 0 21 21\""))
-    (is (str/includes? svg "M0,0h1v1h-1z M1,0h1v1h-1z"))))
 
 (deftest view-test
   (binding [printouts-page/*clock* (-> (.toInstant (ZonedDateTime/of 2000 12 31 23 59 0 0 testdata/timezone-helsinki))
@@ -177,3 +178,29 @@
         (is (str/includes? (-> (printouts-page/view default-model)
                                html/visible-text)
                            "Printed 2001-01-01"))))))
+
+
+(deftest render-qr-code-svg-test
+  (let [svg (printouts-page/render-qr-code-svg "foo")]
+    (is (str/includes? svg "viewBox=\"0 0 21 21\""))
+    (is (str/includes? svg "M0,0h1v1h-1z M1,0h1v1h-1z"))))
+
+(deftest generate-qr-code!-test
+  (let [request {:path-params {:congregation cong-id
+                               :territory territory-id}}]
+    (testutil/with-events test-events
+      (binding [config/env {:now #(Instant/now)}
+                do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls
+                share/generate-share-key (constantly "abcxyz")]
+        (auth/with-user-id user-id
+          (with-fixtures [fake-dispatcher-fixture]
+
+            (let [html (printouts-page/generate-qr-code! request)]
+              (is (= {:command/type :share.command/create-share
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :territory/id territory-id
+                      :share/type :link
+                      :share/key "abcxyz"}
+                     (dissoc @*last-command :command/time :share/id)))
+              (is (str/includes? html "<svg ")))))))))

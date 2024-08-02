@@ -207,3 +207,9 @@
         share-key (generate-share-key territory)]
     {:url (share/build-share-url share-key (:territory/number territory))
      :key share-key}))
+
+(defn generate-qr-code [cong-id territory-id]
+  (let [territory (get-territory cong-id territory-id)
+        share-key (generate-share-key territory)]
+    {:url (str (:qr-code-base-url config/env) "/" share-key)
+     :key share-key}))
