@@ -12,12 +12,14 @@
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.loan :as loan]
             [territory-bro.domain.region :as region]
+            [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.permissions :as permissions])
-  (:import (org.postgresql.util PSQLException)
+  (:import (java.util UUID)
+           (org.postgresql.util PSQLException)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 (def ^:dynamic *state* nil) ; the state starts empty, so nil is a good default for tests
@@ -178,3 +180,24 @@
     (when congregation
       (:congregation/territories (cond-> congregation
                                    fetch-loans? (loan/enrich-territory-loans!))))))
+
+
+(defn- generate-share-key [territory]
+  (let [cong-id (:congregation/id territory)
+        territory-id (:territory/id territory)]
+    (if (= "demo" cong-id)
+      (share/demo-share-key territory-id)
+      (let [share-key (share/generate-share-key)]
+        (dispatch! {:command/type :share.command/create-share
+                    :share/id (UUID/randomUUID)
+                    :share/key share-key
+                    :share/type :link
+                    :congregation/id cong-id
+                    :territory/id territory-id})
+        share-key))))
+
+(defn share-territory-link [cong-id territory-id]
+  (let [territory (get-territory cong-id territory-id)
+        share-key (generate-share-key territory)]
+    {:url (share/build-share-url share-key (:territory/number territory))
+     :key share-key}))

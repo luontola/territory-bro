@@ -7,6 +7,7 @@
             [clojure.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.do-not-calls :as do-not-calls]
+            [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
@@ -152,14 +153,15 @@
         (auth/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]
 
-            (let [response (territory-page/do-not-calls--save! request)]
+            (let [html (territory-page/do-not-calls--save! request)]
               (is (= {:command/type :do-not-calls.command/save-do-not-calls
                       :command/user user-id
                       :congregation/id cong-id
                       :territory/id territory-id
                       :territory/do-not-calls "the new value"}
                      (dissoc @*last-command :command/time)))
-              (is (str/includes? (str response) ">Edit</button>")))))))))
+              (is (-> (html/visible-text html)
+                      (str/includes? "Edit"))))))))))
 
 (deftest share-link-test
   (testing "closed"
@@ -176,3 +178,24 @@
            (-> (territory-page/share-link {:open? true
                                            :link "https://territorybro.com/link"})
                html/visible-text)))))
+
+(deftest share-link--open!-test
+  (let [request {:path-params {:congregation cong-id
+                               :territory territory-id}}]
+    (testutil/with-events test-events
+      (binding [config/env {:now #(Instant/now)}
+                do-not-calls/get-do-not-calls fake-get-do-not-calls
+                share/generate-share-key (constantly "abcxyz")]
+        (auth/with-user-id user-id
+          (with-fixtures [fake-dispatcher-fixture]
+
+            (let [html (territory-page/share-link--open! request)]
+              (is (= {:command/type :share.command/create-share
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :territory/id territory-id
+                      :share/type :link
+                      :share/key "abcxyz"}
+                     (dissoc @*last-command :command/time :share/id)))
+              (is (-> (html/visible-text html)
+                      (str/includes? "[/share/abcxyz/123] {copy.svg}"))))))))))

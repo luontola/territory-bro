@@ -6,7 +6,6 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [ring.util.response :as response]
-            [territory-bro.api :as api]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.middleware :as middleware]
@@ -109,7 +108,9 @@
            (html/inline-svg "icons/copy.svg")]]])])))
 
 (defn share-link--open! [request]
-  (let [share (:body (api/share-territory-link request))]
+  (let [cong-id (get-in request [:path-params :congregation])
+        territory-id (get-in request [:path-params :territory])
+        share (dmz/share-territory-link cong-id territory-id)]
     (share-link {:open? true
                  :link (:url share)})))
 
@@ -162,11 +163,11 @@
      :conflicting true
      :get {:handler (fn [request]
                       ;; TODO: extract wrap-db-connection middleware
-                      (-> (db/with-db [conn {}]
-                            (binding [dmz/*conn* conn]
-                              (view! request)))
-                          (layout/page! request)
-                          (html/response)))}}]
+                      (db/with-db [conn {}]
+                        (binding [dmz/*conn* conn]
+                          (-> (view! request)
+                              (layout/page! request)
+                              (html/response)))))}}]
 
    ["/do-not-calls/edit"
     {:get {:handler (fn [request]
@@ -185,10 +186,12 @@
    ["/share-link/open"
     {:get {:middleware [middleware/wrap-always-refresh-projections]
            :handler (fn [request]
-                      (-> (share-link--open! request)
-                          (html/response)
-                          ;; avoid creating lots of new shares if the user clicks the share button repeatedly
-                          (response/header "Cache-Control" "private, max-age=300, must-revalidate")))}}]
+                      (db/with-db [conn {}]
+                        (binding [dmz/*conn* conn]
+                          (-> (share-link--open! request)
+                              (html/response)
+                              ;; avoid creating lots of new shares if the user clicks the share button repeatedly
+                              (response/header "Cache-Control" "private, max-age=300, must-revalidate")))))}}]
 
    ["/share-link/close"
     {:get {:handler (fn [_request]
