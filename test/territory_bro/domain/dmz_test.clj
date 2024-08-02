@@ -6,12 +6,12 @@
   (:require [clojure.test :refer :all]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.do-not-calls :as do-not-calls]
+            [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.test.testutil :as testutil])
-  (:import (java.time Instant)
-           (java.util UUID)))
+  (:import (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
@@ -96,20 +96,6 @@
    region-defined
    card-minimap-viewport-defined
    share-created])
-
-(def fake-conn ::fake-conn)
-
-(defn fake-get-do-not-calls [conn -cong-id -territory-id]
-  (is (some? conn)
-      "get-do-not-calls conn")
-  (is (= cong-id -cong-id)
-      "get-do-not-calls cong-id")
-  (is (= territory-id -territory-id)
-      "get-do-not-calls territory-id")
-  {:congregation/id -cong-id
-   :territory/id -territory-id
-   :territory/do-not-calls "the do-not-calls"
-   :do-not-calls/last-modified (Instant/now)})
 
 
 (deftest test-get-congregation
@@ -211,7 +197,7 @@
                   :territory/do-not-calls "the do-not-calls"
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-multi-polygon}]
-    (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
+    (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
       (testutil/with-events test-events
         (auth/with-user-id user-id
           (testing "has view permissions"
@@ -249,6 +235,6 @@
 
       (let [user-id (UUID. 0 0x666)]
         (auth/with-user-id user-id
-          (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
+          (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
             (testing "cannot see the demo congregation as own congregation"
               (is (nil? (dmz/get-own-territory cong-id territory-id))))))))))

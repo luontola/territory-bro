@@ -91,3 +91,9 @@
                                                            (throw (NoPermitException. nil nil))))]
           (is (thrown? NoPermitException
                        (do-not-calls/handle-command create-command state injections))))))))
+
+(defn fake-get-do-not-calls [_conn cong-id territory-id]
+  {:congregation/id cong-id
+   :territory/id territory-id
+   :territory/do-not-calls "the do-not-calls"
+   :do-not-calls/last-modified (Instant/now)})

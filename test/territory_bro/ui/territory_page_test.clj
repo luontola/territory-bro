@@ -7,6 +7,7 @@
             [clojure.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.do-not-calls :as do-not-calls]
+            [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
@@ -58,21 +59,11 @@
              :territory/meta {:foo "bar"}
              :territory/location testdata/wkt-helsinki-rautatientori}]))
 
-(defn fake-get-do-not-calls [_conn -cong-id -territory-id]
-  (is (= cong-id -cong-id)
-      "get-do-not-calls cong-id")
-  (is (= territory-id -territory-id)
-      "get-do-not-calls territory-id")
-  {:congregation/id -cong-id
-   :territory/id -territory-id
-   :territory/do-not-calls "the do-not-calls"
-   :do-not-calls/last-modified (Instant/now)})
-
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id
                                :territory territory-id}}]
     (testutil/with-events test-events
-      (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
+      (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
         (auth/with-user-id user-id
 
           (testing "default"
@@ -149,7 +140,7 @@
                  :params {:do-not-calls "the new value"}}]
     (testutil/with-events test-events
       (binding [config/env {:now #(Instant/now)}
-                do-not-calls/get-do-not-calls fake-get-do-not-calls]
+                do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
         (auth/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]
 
@@ -184,7 +175,7 @@
                                :territory territory-id}}]
     (testutil/with-events test-events
       (binding [config/env {:now #(Instant/now)}
-                do-not-calls/get-do-not-calls fake-get-do-not-calls
+                do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls
                 share/generate-share-key (constantly "abcxyz")]
         (auth/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]
