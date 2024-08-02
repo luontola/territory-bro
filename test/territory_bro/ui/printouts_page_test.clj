@@ -5,30 +5,31 @@
 (ns territory-bro.ui.printouts-page-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
-            [clojure.walk :as walk]
-            [territory-bro.api-test :as at]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
-            [territory-bro.test.testutil :refer [replace-in]]
-            [territory-bro.ui :as ui]
+            [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.printouts-page :as printouts-page])
   (:import (java.time Clock Duration ZoneOffset ZonedDateTime)
            (java.util UUID)))
 
+(def cong-id (UUID. 0 1))
+(def region-id (UUID. 0 2))
+(def territory-id (UUID. 0 3))
 (def default-model
-  {:congregation {:congregation/id (UUID. 0 1)
+  {:congregation {:congregation/id cong-id
                   :congregation/name "Example Congregation"
                   :congregation/location (str (geometry/parse-wkt testdata/wkt-helsinki))
                   :congregation/timezone testdata/timezone-helsinki}
-   :regions [{:region/id (UUID. 0 2)
+   :regions [{:region/id region-id
               :region/name "the region"
               :region/location testdata/wkt-south-helsinki}]
-   :territories [{:territory/id (UUID. 0 3)
+   :territories [{:territory/id territory-id
                   :territory/number "123"
                   :territory/addresses "the addresses"
                   :territory/region "the region"
@@ -38,8 +39,8 @@
    :form {:template "TerritoryCard"
           :language "en"
           :map-raster "osmhd"
-          :regions #{(UUID. 0 1)} ; congregation boundary is shown first in the regions list
-          :territories #{(UUID. 0 3)}}
+          :regions #{cong-id} ; congregation boundary is shown first in the regions list
+          :territories #{territory-id}}
    :mac? false})
 
 (def form-changed-model
@@ -54,48 +55,64 @@
 
 (def demo-model
   (-> default-model
-      (replace-in [:congregation :congregation/id] (UUID. 0 1) "demo")
+      (replace-in [:congregation :congregation/id] cong-id "demo")
       (replace-in [:congregation :congregation/name] "Example Congregation" "Demo Congregation")
-      (replace-in [:form :regions] #{(UUID. 0 1)} #{"demo"})))
+      (replace-in [:form :regions] #{cong-id} #{"demo"})))
 
-(deftest ^:slow model!-test
-  (with-fixtures [db-fixture api-fixture]
-    ;; TODO: decouple this test from the database
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          cong-id (at/create-congregation! session "Example Congregation")
-          _ (at/create-congregation-boundary! cong-id)
-          _ (at/create-card-minimap-viewport! cong-id)
-          region-id (at/create-region! cong-id)
-          territory-id (at/create-territory! cong-id)
-          request {:path-params {:congregation cong-id}}
-          fix (fn [model]
-                (walk/postwalk-replace {(UUID. 0 1) cong-id
-                                        (UUID. 0 2) region-id
-                                        (UUID. 0 3) territory-id}
-                                       model))]
+(deftest model!-test
+  (let [user-id (UUID/randomUUID)
+        request {:path-params {:congregation cong-id}}]
+    (testutil/with-events (flatten [{:event/type :congregation.event/congregation-created
+                                     :congregation/id cong-id
+                                     :congregation/name "Example Congregation"
+                                     :congregation/schema-name "cong1_schema"}
+                                    (congregation/admin-permissions-granted cong-id user-id)
+                                    {:event/type :congregation-boundary.event/congregation-boundary-defined
+                                     :gis-change/id 42
+                                     :congregation/id cong-id
+                                     :congregation-boundary/id (UUID/randomUUID)
+                                     :congregation-boundary/location testdata/wkt-helsinki}
+                                    {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined,
+                                     :gis-change/id 42
+                                     :congregation/id cong-id
+                                     :card-minimap-viewport/id (UUID/randomUUID)
+                                     :card-minimap-viewport/location testdata/wkt-helsinki}
+                                    {:event/type :region.event/region-defined
+                                     :gis-change/id 42
+                                     :congregation/id cong-id
+                                     :region/id region-id
+                                     :region/name "the region"
+                                     :region/location testdata/wkt-south-helsinki}
+                                    {:event/type :territory.event/territory-defined
+                                     :congregation/id cong-id
+                                     :territory/id territory-id
+                                     :territory/number "123"
+                                     :territory/addresses "the addresses"
+                                     :territory/region "the region"
+                                     :territory/meta {:foo "bar"}
+                                     :territory/location testdata/wkt-helsinki-rautatientori}])
       (auth/with-user-id user-id
 
         (testing "default"
-          (is (= (fix default-model)
-                 ((ui/wrap-current-state printouts-page/model!) request))))
+          (is (= default-model (printouts-page/model! request))))
 
         (testing "every form value changed"
-          (let [request (update request :params merge {:template "NeighborhoodCard"
-                                                       :language "fi"
-                                                       :map-raster "mmlTaustakartta"
-                                                       :regions [(str (UUID. 0 4))
-                                                                 (str (UUID. 0 5))]
-                                                       :territories [(str (UUID. 0 6))
-                                                                     (str (UUID. 0 7))]})]
-            (is (= (fix form-changed-model)
-                   ((ui/wrap-current-state printouts-page/model!) request)))))
+          (let [request (assoc request :params {:template "NeighborhoodCard"
+                                                :language "fi"
+                                                :map-raster "mmlTaustakartta"
+                                                :regions [(str (UUID. 0 4))
+                                                          (str (UUID. 0 5))]
+                                                :territories [(str (UUID. 0 6))
+                                                              (str (UUID. 0 7))]})]
+            (is (= form-changed-model (printouts-page/model! request)))))
 
         (testing "demo congregation"
-          (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
+          (binding [config/env {:demo-congregation cong-id}]
             (let [request {:path-params {:congregation "demo"}}]
-              (is (= (fix demo-model)
-                     ((ui/wrap-current-state printouts-page/model!) request))))))))))
+              (is (= demo-model
+                     (printouts-page/model! request)
+                     (auth/with-anonymous-user
+                       (printouts-page/model! request)))))))))))
 
 (deftest parse-uuid-multiselect-test
   (is (= #{} (printouts-page/parse-uuid-multiselect nil)))

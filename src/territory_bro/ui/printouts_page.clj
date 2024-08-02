@@ -8,6 +8,7 @@
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
             [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.json :as json]
             [territory-bro.ui.html :as html]
@@ -57,10 +58,8 @@
           value)))
 
 (defn model! [request]
-  (let [demo? (= "demo" (get-in request [:path-params :congregation]))
-        congregation (if demo?
-                       (:body (api/get-demo-congregation request))
-                       (:body (api/get-congregation request {})))
+  (let [cong-id (get-in request [:path-params :congregation])
+        congregation (dmz/get-congregation cong-id)
         regions (->> (:congregation/regions congregation)
                      (sort-by (comp str :region/name)
                               (CaseInsensitiveSimpleNaturalComparator/getInstance)))
