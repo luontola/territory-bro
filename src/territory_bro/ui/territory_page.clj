@@ -179,13 +179,14 @@
                            (html/response)))}}]
 
    ["/share-link/open"
-    {:get {:middleware [middleware/wrap-always-refresh-projections ; TODO: make it so that we don't need to think about the order of these two middleware
-                        dmz/wrap-db-connection]
+    {:get {:middleware [dmz/wrap-db-connection]
            :handler (fn [request]
                       (-> (share-link--open! request)
                           (html/response)
                           ;; avoid creating lots of new shares if the user clicks the share button repeatedly
-                          (response/header "Cache-Control" "private, max-age=300, must-revalidate")))}}]
+                          (response/header "Cache-Control" "private, max-age=300, must-revalidate")
+                          ;; this is a GET request to enable caching, but it actually writes new events to the database
+                          (assoc ::middleware/mutative-operation? true)))}}]
 
    ["/share-link/close"
     {:get {:handler (fn [_request]

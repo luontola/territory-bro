@@ -59,25 +59,23 @@
 ;; defonce to avoid forgetting sessions every time the code is reloaded in development mode
 (defonce session-store (ttl-session/ttl-memory-store (.toSeconds (Duration/ofHours 4))))
 
-(def ^:private mutative-operation #{:put :post :delete})
 
 (defn- refresh-projections! []
   (projections/refresh-async!)
   ;; TODO: store the observed revision in session and await before the next read if the cache is out of date
   (projections/await-refreshed (Duration/ofSeconds 10)))
 
-(defn wrap-always-refresh-projections [handler]
-  (fn [request]
-    (let [response (handler request)]
-      (refresh-projections!)
-      response)))
+(def ^:private mutative-request-methods #{:post :put :delete :patch})
 
 (defn wrap-auto-refresh-projections [handler]
   (fn [request]
     (let [response (handler request)]
-      (when (contains? mutative-operation (:request-method request))
+      (when (or (contains? mutative-request-methods (:request-method request))
+                (::mutative-operation? response))
+        (log/info "Refreshing projections in response to" (:request-method request) (:uri request))
         (refresh-projections!))
       response)))
+
 
 (defn- static-asset? [path]
   (or (str/starts-with? path "/assets/")
