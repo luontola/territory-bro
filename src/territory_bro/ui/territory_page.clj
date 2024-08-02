@@ -30,8 +30,8 @@
 
 (defn do-not-calls--viewing [{:keys [territory permissions]}]
   (h/html
-   [:div {:hx-target "this"
-          :hx-swap "outerHTML"}
+   [:div#do-not-calls {:hx-target "this"
+                       :hx-swap "outerHTML"}
     (when (:edit-do-not-calls permissions)
       [:button.pure-button {:hx-get (str html/*page-path* "/do-not-calls/edit")
                             :hx-disabled-elt "this"
@@ -43,10 +43,10 @@
 
 (defn do-not-calls--editing [{:keys [territory]}]
   (h/html
-   [:form.do-not-calls.pure-form {:hx-target "this"
+   [:form#do-not-calls.pure-form {:hx-target "this"
                                   :hx-swap "outerHTML"
                                   :hx-post (str html/*page-path* "/do-not-calls/save")
-                                  :hx-disabled-elt ".do-not-calls :is(textarea, button)"}
+                                  :hx-disabled-elt "#do-not-calls :is(textarea, button)"}
     [:textarea.pure-input-1 {:name "do-not-calls"
                              :rows 5
                              :autofocus true}
@@ -58,7 +58,13 @@
   (do-not-calls--editing (model! request)))
 
 (defn do-not-calls--save! [request]
-  (api/edit-do-not-calls request)
+  (let [cong-id (get-in request [:path-params :congregation])
+        territory-id (get-in request [:path-params :territory])
+        do-not-calls (str/trim (str (get-in request [:params :do-not-calls])))]
+    (dmz/dispatch! {:command/type :do-not-calls.command/save-do-not-calls
+                    :congregation/id cong-id
+                    :territory/id territory-id
+                    :territory/do-not-calls do-not-calls}))
   (do-not-calls--viewing (model! request)))
 
 
@@ -164,13 +170,17 @@
 
    ["/do-not-calls/edit"
     {:get {:handler (fn [request]
-                      (-> (do-not-calls--edit! request)
-                          (html/response)))}}]
+                      (db/with-db [conn {}]
+                        (binding [dmz/*conn* conn]
+                          (-> (do-not-calls--edit! request)
+                              (html/response)))))}}]
 
    ["/do-not-calls/save"
     {:post {:handler (fn [request]
-                       (-> (do-not-calls--save! request)
-                           (html/response)))}}]
+                       (db/with-db [conn {}]
+                         (binding [dmz/*conn* conn]
+                           (-> (do-not-calls--save! request)
+                               (html/response)))))}}]
 
    ["/share-link/open"
     {:get {:middleware [middleware/wrap-always-refresh-projections]

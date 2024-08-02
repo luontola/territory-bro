@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.territory-page-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.testdata :as testdata]
@@ -41,6 +42,21 @@
    :permissions {:share-territory-link true}
    :mac? false})
 
+(def test-events
+  (flatten [{:event/type :congregation.event/congregation-created
+             :congregation/id cong-id
+             :congregation/name "Congregation 1"
+             :congregation/schema-name "cong1_schema"}
+            (congregation/admin-permissions-granted cong-id user-id)
+            {:event/type :territory.event/territory-defined
+             :congregation/id cong-id
+             :territory/id territory-id
+             :territory/number "123"
+             :territory/addresses "the addresses"
+             :territory/region "the region"
+             :territory/meta {:foo "bar"}
+             :territory/location testdata/wkt-helsinki-rautatientori}]))
+
 (defn fake-get-do-not-calls [_conn -cong-id -territory-id]
   (is (= cong-id -cong-id)
       "get-do-not-calls cong-id")
@@ -54,19 +70,7 @@
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id
                                :territory territory-id}}]
-    (testutil/with-events (flatten [{:event/type :congregation.event/congregation-created
-                                     :congregation/id cong-id
-                                     :congregation/name "Congregation 1"
-                                     :congregation/schema-name "cong1_schema"}
-                                    (congregation/admin-permissions-granted cong-id user-id)
-                                    {:event/type :territory.event/territory-defined
-                                     :congregation/id cong-id
-                                     :territory/id territory-id
-                                     :territory/number "123"
-                                     :territory/addresses "the addresses"
-                                     :territory/region "the region"
-                                     :territory/meta {:foo "bar"}
-                                     :territory/location testdata/wkt-helsinki-rautatientori}])
+    (testutil/with-events test-events
       (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
         (auth/with-user-id user-id
 
@@ -137,6 +141,25 @@
              Save")
            (-> (territory-page/do-not-calls--editing model)
                html/visible-text)))))
+
+(deftest do-not-calls--save!-test
+  (let [request {:path-params {:congregation cong-id
+                               :territory territory-id}
+                 :params {:do-not-calls "the new value"}}]
+    (testutil/with-events test-events
+      (binding [config/env {:now #(Instant/now)}
+                do-not-calls/get-do-not-calls fake-get-do-not-calls]
+        (auth/with-user-id user-id
+          (with-fixtures [fake-dispatcher-fixture]
+
+            (let [response (territory-page/do-not-calls--save! request)]
+              (is (= {:command/type :do-not-calls.command/save-do-not-calls
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :territory/id territory-id
+                      :territory/do-not-calls "the new value"}
+                     (dissoc @*last-command :command/time)))
+              (is (str/includes? (str response) ">Edit</button>")))))))))
 
 (deftest share-link-test
   (testing "closed"

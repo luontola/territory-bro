@@ -49,9 +49,7 @@
               (is (= {:command/type :congregation.command/create-congregation
                       :command/user user-id
                       :congregation/name "the name"}
-                     (select-keys @*last-command [:command/type
-                                                  :command/user
-                                                  :congregation/name])))
+                     (dissoc @*last-command :command/time :congregation/id)))
               (is (= {:status 303
                       :headers {"Location" (str "/congregation/" (:congregation/id @*last-command))}
                       :body ""}

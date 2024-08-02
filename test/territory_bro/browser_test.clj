@@ -356,6 +356,29 @@
                  (b/get-title *driver*))
               "trying to view an unrelated territory of the same congregation requires logging in"))))))
 
+(deftest edit-do-not-calls-test
+  (with-per-test-postmortem
+    (doto *driver*
+      (b/go *base-url*)
+      (do-dev-login)
+      ;; XXX: this test assumes that the test user already has a congregation and territories
+      ;; TODO: test registration and adding territories; use that as test data for other tests
+      (go-to-any-congregation)
+      (go-to-page "Territories"))
+
+    (testing "can edit do-not-calls"
+      (let [test-content (str "test content " (UUID/randomUUID))
+            input-field [:do-not-calls {:tag :textarea}]]
+        (doto *driver*
+          (wait-and-click [:territory-list {:tag :a}])
+          (wait-and-click [:do-not-calls {:tag :button, :fn/has-string "Edit"}])
+          (b/wait-visible input-field)
+          (b/clear input-field)
+          (b/fill input-field test-content)
+          (wait-and-click [:do-not-calls {:tag :button, :fn/has-string "Save"}])
+          (b/wait-invisible input-field)
+          (b/wait-has-text :do-not-calls test-content))))))
+
 
 (deftest error-pages-test
   (with-per-test-postmortem
