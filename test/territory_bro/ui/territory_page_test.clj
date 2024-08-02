@@ -4,20 +4,24 @@
 
 (ns territory-bro.ui.territory-page-test
   (:require [clojure.test :refer :all]
-            [territory-bro.api-test :as at]
+            [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
-            [territory-bro.test.testutil :refer [replace-in]]
-            [territory-bro.ui :as ui]
+            [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.territory-page :as territory-page])
-  (:import (java.util UUID)))
+  (:import (java.time Instant)
+           (java.util UUID)))
 
+(def cong-id (UUID. 0 1))
+(def territory-id (UUID. 0 2))
+(def user-id (UUID. 0 3))
 (def model
-  {:territory {:territory/id (UUID. 0 1)
+  {:territory {:territory/id territory-id
                :territory/number "123"
                :territory/addresses "the addresses"
                :territory/region "the region"
@@ -28,7 +32,7 @@
                  :share-territory-link true}
    :mac? false})
 (def demo-model ; the important difference is hiding do-not-calls, to avoid accidental PII leaks
-  {:territory {:territory/id (UUID. 0 1)
+  {:territory {:territory/id territory-id
                :territory/number "123"
                :territory/addresses "the addresses"
                :territory/region "the region"
@@ -37,32 +41,45 @@
    :permissions {:share-territory-link true}
    :mac? false})
 
-(deftest ^:slow model!-test
-  (with-fixtures [db-fixture api-fixture]
-    ;; TODO: decouple this test from the database
-    #_(let [state (ft/apply-events [ft/congregation-created
-                                    ft/territory-defined])])
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          cong-id (at/create-congregation! session "foo")
-          territory-id (at/create-territory! cong-id)
-          request {:path-params {:congregation cong-id
-                                 :territory territory-id}}]
-      (auth/with-user-id user-id
+(defn fake-get-do-not-calls [_conn -cong-id -territory-id]
+  (is (= cong-id -cong-id)
+      "get-do-not-calls cong-id")
+  (is (= territory-id -territory-id)
+      "get-do-not-calls territory-id")
+  {:congregation/id -cong-id
+   :territory/id -territory-id
+   :territory/do-not-calls "the do-not-calls"
+   :do-not-calls/last-modified (Instant/now)})
 
-        (testing "default"
-          (is (= (-> model
-                     (replace-in [:territory :territory/id] (UUID. 0 1) territory-id))
-                 ((ui/wrap-current-state territory-page/model!) request))))
+(deftest model!-test
+  (let [request {:path-params {:congregation cong-id
+                               :territory territory-id}}]
+    (testutil/with-events (flatten [{:event/type :congregation.event/congregation-created
+                                     :congregation/id cong-id
+                                     :congregation/name "Congregation 1"
+                                     :congregation/schema-name "cong1_schema"}
+                                    (congregation/admin-permissions-granted cong-id user-id)
+                                    {:event/type :territory.event/territory-defined
+                                     :congregation/id cong-id
+                                     :territory/id territory-id
+                                     :territory/number "123"
+                                     :territory/addresses "the addresses"
+                                     :territory/region "the region"
+                                     :territory/meta {:foo "bar"}
+                                     :territory/location testdata/wkt-helsinki-rautatientori}])
+      (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
+        (auth/with-user-id user-id
 
-        (testing "demo congregation"
-          (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-            (let [request (replace-in request [:path-params :congregation] cong-id "demo")]
-              (is (= (-> demo-model
-                         (replace-in [:territory :territory/id] (UUID. 0 1) territory-id))
-                     ((ui/wrap-current-state territory-page/model!) request)
-                     (auth/with-anonymous-user
-                       ((ui/wrap-current-state territory-page/model!) request)))))))))))
+          (testing "default"
+            (is (= model (territory-page/model! request))))
+
+          (testing "demo congregation"
+            (binding [config/env {:demo-congregation cong-id}]
+              (let [request (replace-in request [:path-params :congregation] cong-id "demo")]
+                (is (= demo-model
+                       (territory-page/model! request)
+                       (auth/with-anonymous-user
+                         (territory-page/model! request))))))))))))
 
 (deftest view-test
   (testing "full permissions"

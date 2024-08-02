@@ -229,7 +229,8 @@
   (db/with-db [conn {}]
     (let [cong-id (get-in request [:path-params :congregation])
           territory-id (get-in request [:path-params :territory])
-          territory (dmz/get-own-territory conn cong-id territory-id)]
+          territory (binding [dmz/*conn* conn]
+                      (dmz/get-own-territory cong-id territory-id))]
       (when-not territory
         ;; This function must support anonymous access for opened shares.
         ;; If anonymous user cannot see the congregation, first prompt them

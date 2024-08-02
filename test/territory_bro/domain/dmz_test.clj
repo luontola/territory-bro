@@ -215,16 +215,16 @@
       (testutil/with-events test-events
         (auth/with-user-id user-id
           (testing "has view permissions"
-            (is (= expected (dmz/get-own-territory fake-conn cong-id territory-id)))))
+            (is (= expected (dmz/get-own-territory cong-id territory-id)))))
 
         (let [user-id (UUID. 0 0x666)]
           (auth/with-user-id user-id
             (testing "no permissions"
-              (is (nil? (dmz/get-own-territory fake-conn cong-id territory-id))))
+              (is (nil? (dmz/get-own-territory cong-id territory-id))))
 
             (testing "opened a share"
               (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
-                (is (= expected (dmz/get-own-territory fake-conn cong-id territory-id)))))))))))
+                (is (= expected (dmz/get-own-territory cong-id territory-id)))))))))))
 
 (deftest test-get-demo-territory
   (let [expected {:congregation/id "demo" ; changed
@@ -251,4 +251,4 @@
         (auth/with-user-id user-id
           (binding [do-not-calls/get-do-not-calls fake-get-do-not-calls]
             (testing "cannot see the demo congregation as own congregation"
-              (is (nil? (dmz/get-own-territory fake-conn cong-id territory-id))))))))))
+              (is (nil? (dmz/get-own-territory cong-id territory-id))))))))))

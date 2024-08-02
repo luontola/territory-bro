@@ -137,9 +137,9 @@
     (congregation/get-my-congregations *state* user-id)))
 
 
-(defn- enrich-do-not-calls [territory conn cong-id territory-id]
+(defn- enrich-do-not-calls [territory cong-id territory-id]
   (merge territory
-         (-> (do-not-calls/get-do-not-calls conn cong-id territory-id)
+         (-> (do-not-calls/get-do-not-calls *conn* cong-id territory-id)
              (select-keys [:territory/do-not-calls]))))
 
 (defn- apply-user-permissions-for-territory [territory]
@@ -150,9 +150,9 @@
               (permissions/allowed? *state* user-id [:view-territory cong-id territory-id]))
       territory)))
 
-(defn get-own-territory [conn cong-id territory-id]
+(defn get-own-territory [cong-id territory-id]
   (some-> (territory/get-unrestricted-territory *state* cong-id territory-id)
-          (enrich-do-not-calls conn cong-id territory-id)
+          (enrich-do-not-calls cong-id territory-id)
           (apply-user-permissions-for-territory)))
 
 (defn get-demo-territory [cong-id territory-id]
@@ -160,10 +160,13 @@
     (some-> (territory/get-unrestricted-territory *state* cong-id territory-id)
             (assoc :congregation/id "demo"))))
 
-(defn get-territory [conn cong-id territory-id]
+(defn get-territory [cong-id territory-id]
   (if (= "demo" cong-id)
-    (get-demo-territory (:demo-congregation config/env) territory-id)
-    (get-own-territory conn cong-id territory-id)))
+    (or (get-demo-territory (:demo-congregation config/env) territory-id)
+        (http-response/not-found! "No demo"))
+    (or (get-own-territory cong-id territory-id)
+        (require-logged-in!)
+        (http-response/forbidden! "No territory access"))))
 
 (defn list-territories! [cong-id {:keys [fetch-loans?]}]
   ;; TODO: inline get-own-congregation and only get the territories instead of everything in the congregation

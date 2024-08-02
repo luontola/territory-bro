@@ -7,6 +7,8 @@
             [hiccup2.core :as h]
             [ring.util.response :as response]
             [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
+            [territory-bro.infra.db :as db]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
@@ -16,14 +18,11 @@
             [territory-bro.ui.maps :as maps]))
 
 (defn model! [request]
-  (let [demo? (= "demo" (get-in request [:path-params :congregation]))
-        congregation (if demo?
-                       (:body (api/get-demo-congregation request))
-                       (:body (api/get-congregation request {})))
-        territory (if demo?
-                    (:body (api/get-demo-territory request))
-                    (:body (api/get-territory request)))]
-    (-> {:territory territory
+  (let [cong-id (get-in request [:path-params :congregation])
+        territory-id (get-in request [:path-params :territory])
+        congregation (dmz/get-congregation cong-id)
+        territory (dmz/get-territory cong-id territory-id)]
+    (-> {:territory (dissoc territory :congregation/id)
          :permissions (-> (:congregation/permissions congregation)
                           (select-keys [:edit-do-not-calls :share-territory-link]))}
         (merge (map-interaction-help/model request)))))
@@ -156,7 +155,10 @@
     {:name ::page
      :conflicting true
      :get {:handler (fn [request]
-                      (-> (view! request)
+                      ;; TODO: extract wrap-db-connection middleware
+                      (-> (db/with-db [conn {}]
+                            (binding [dmz/*conn* conn]
+                              (view! request)))
                           (layout/page! request)
                           (html/response)))}}]
 
