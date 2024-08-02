@@ -25,6 +25,12 @@
 (def ^:dynamic *state* nil) ; the state starts empty, so nil is a good default for tests
 (def ^:dynamic *conn*) ; unbound var gives a better error message than nil, when forgetting db/with-db
 
+(defn wrap-db-connection [handler]
+  (fn [request]
+    (db/with-db [conn {}]
+      (binding [*conn* conn]
+        (handler request)))))
+
 (defn require-logged-in! []
   (when-not (auth/logged-in?)
     (http-response/unauthorized! "Not logged in")))

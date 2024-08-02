@@ -7,7 +7,6 @@
             [hiccup2.core :as h]
             [ring.util.http-response :as http-response]
             [territory-bro.domain.dmz :as dmz]
-            [territory-bro.infra.db :as db]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
@@ -70,7 +69,6 @@
                      (-> (view! request)
                          (layout/page! request)
                          (html/response)))}
-    :post {:handler (fn [request]
-                      (db/with-db [conn {}]
-                        (binding [dmz/*conn* conn]
-                          (submit! request))))}}])
+    :post {:middleware [dmz/wrap-db-connection]
+           :handler (fn [request]
+                      (submit! request))}}])

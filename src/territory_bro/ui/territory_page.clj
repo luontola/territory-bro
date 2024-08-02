@@ -7,7 +7,6 @@
             [hiccup2.core :as h]
             [ring.util.response :as response]
             [territory-bro.domain.dmz :as dmz]
-            [territory-bro.infra.db :as db]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
@@ -161,37 +160,32 @@
    [""
     {:name ::page
      :conflicting true
-     :get {:handler (fn [request]
-                      ;; TODO: extract wrap-db-connection middleware
-                      (db/with-db [conn {}]
-                        (binding [dmz/*conn* conn]
-                          (-> (view! request)
-                              (layout/page! request)
-                              (html/response)))))}}]
+     :get {:middleware [dmz/wrap-db-connection]
+           :handler (fn [request]
+                      (-> (view! request)
+                          (layout/page! request)
+                          (html/response)))}}]
 
    ["/do-not-calls/edit"
-    {:get {:handler (fn [request]
-                      (db/with-db [conn {}]
-                        (binding [dmz/*conn* conn]
-                          (-> (do-not-calls--edit! request)
-                              (html/response)))))}}]
+    {:get {:middleware [dmz/wrap-db-connection]
+           :handler (fn [request]
+                      (-> (do-not-calls--edit! request)
+                          (html/response)))}}]
 
    ["/do-not-calls/save"
-    {:post {:handler (fn [request]
-                       (db/with-db [conn {}]
-                         (binding [dmz/*conn* conn]
-                           (-> (do-not-calls--save! request)
-                               (html/response)))))}}]
+    {:post {:middleware [dmz/wrap-db-connection]
+            :handler (fn [request]
+                       (-> (do-not-calls--save! request)
+                           (html/response)))}}]
 
    ["/share-link/open"
-    {:get {:middleware [middleware/wrap-always-refresh-projections]
+    {:get {:middleware [middleware/wrap-always-refresh-projections ; TODO: make it so that we don't need to think about the order of these two middleware
+                        dmz/wrap-db-connection]
            :handler (fn [request]
-                      (db/with-db [conn {}]
-                        (binding [dmz/*conn* conn]
-                          (-> (share-link--open! request)
-                              (html/response)
-                              ;; avoid creating lots of new shares if the user clicks the share button repeatedly
-                              (response/header "Cache-Control" "private, max-age=300, must-revalidate")))))}}]
+                      (-> (share-link--open! request)
+                          (html/response)
+                          ;; avoid creating lots of new shares if the user clicks the share button repeatedly
+                          (response/header "Cache-Control" "private, max-age=300, must-revalidate")))}}]
 
    ["/share-link/close"
     {:get {:handler (fn [_request]
