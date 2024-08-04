@@ -6,25 +6,28 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
-            [territory-bro.api :as api]
-            [territory-bro.api-test :as at]
             [territory-bro.dispatcher :as dispatcher]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.infra.user :as user]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.test.testutil :as testutil]
             [territory-bro.test.testutil :refer [replace-in]]
-            [territory-bro.ui :as ui]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.settings-page :as settings-page])
   (:import (clojure.lang ExceptionInfo)
+           (java.time Instant)
            (java.util UUID)
            (territory_bro ValidationException)))
 
+(def cong-id (UUID/randomUUID))
+(def user-id (UUID. 0 1))
 (def model
   {:congregation/name "Congregation Name"
    :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
-   :congregation/users [{:id (UUID. 0 1)
+   :congregation/users [{:id user-id
                          :name "Esko Luontola"
                          :nickname "esko.luontola"
                          :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"
@@ -34,58 +37,76 @@
                               :gis-access true}
    :form/user-id nil})
 
-(deftest ^:slow model!-test
-  (with-fixtures [db-fixture api-fixture]
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          cong-id (at/create-congregation! session "Congregation Name")
-          request {:path-params {:congregation cong-id}}
-          model (replace-in model [:congregation/users 0 :id] (UUID. 0 1) user-id)]
-      (at/change-congregation-settings! cong-id "Congregation Name" "https://docs.google.com/spreadsheets/123")
-      (auth/with-user-id user-id
+(def test-events
+  (flatten [{:event/type :congregation.event/congregation-created
+             :congregation/id cong-id
+             :congregation/name "Congregation Name"
+             :congregation/schema-name "cong1_schema"}
+            (congregation/admin-permissions-granted cong-id user-id)
+            {:event/type :congregation.event/settings-updated
+             :congregation/id cong-id
+             :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"}]))
 
-        (testing "logged in"
-          (is (= model ((ui/wrap-current-state settings-page/model!) request))))
+(def fake-get-users
+  (fn [_conn query]
+    (is (= {:ids [user-id]} query)
+        "get-users query")
+    [{:user/id user-id
+      :user/subject "google-oauth2|102883237794451111459"
+      :user/attributes {:sub "google-oauth2|102883237794451111459"
+                        :name "Esko Luontola"
+                        :nickname "esko.luontola"
+                        :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"}}]))
 
-        (testing "demo congregation"
-          (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-            (let [request {:path-params {:congregation "demo"}}]
+(deftest model!-test
+  (let [request {:path-params {:congregation cong-id}}]
+    (testutil/with-events test-events
+      (binding [user/get-users fake-get-users]
+        (auth/with-user-id user-id
+
+          (testing "logged in"
+            (is (= model (settings-page/model! request))))
+
+          (testing "demo congregation"
+            (binding [config/env {:demo-congregation cong-id}]
+              (let [request {:path-params {:congregation "demo"}}]
+                (is (thrown-match? ExceptionInfo
+                                   {:type :ring.util.http-response/response
+                                    :response {:status 404
+                                               :body "Not available in demo"
+                                               :headers {}}}
+                                   (settings-page/model! request))))))
+
+          (testing "anonymous user"
+            (auth/with-anonymous-user
               (is (thrown-match? ExceptionInfo
                                  {:type :ring.util.http-response/response
-                                  :response {:status 404
-                                             :body "Not available in demo"
+                                  :response {:status 401
+                                             :body "Not logged in"
                                              :headers {}}}
-                                 ((ui/wrap-current-state settings-page/model!) request))))))
+                                 (settings-page/model! request)))))
 
-        (testing "anonymous user"
-          (auth/with-anonymous-user
-            (is (thrown-match? ExceptionInfo
-                               {:type :ring.util.http-response/response
-                                :response {:status 401
-                                           :body "Not logged in"
-                                           :headers {}}}
-                               ((ui/wrap-current-state settings-page/model!) request)))))
+          (testing "user was added"
+            (let [request (assoc-in request [:params :new-user] (str user-id))
+                  model (replace-in model [:congregation/users 0 :new?] false true)]
+              (is (= model (settings-page/model! request)))))
 
-        (testing "user was added"
-          (let [request (assoc-in request [:params :new-user] (str user-id))
-                model (replace-in model [:congregation/users 0 :new?] false true)]
-            (is (= model ((ui/wrap-current-state settings-page/model!) request)))))
-
-        (testing "shows new users first, followed by the rest alphabetically"
-          (let [new-user-id (UUID. 0 5)
-                users [;; should be case-insensitive
-                       {:id (UUID. 0 1), :name "a"}
-                       {:id (UUID. 0 2), :name "B"}
-                       ;; new ones should be first
-                       {:id new-user-id, :name "c"}
-                       ;; doesn't sort by ID
-                       {:id (UUID. 0 9), :name "D"}
-                       {:id (UUID. 0 8), :name "e"}]]
-            (binding [api/get-congregation (constantly {:body {:congregation/users (shuffle users)}})]
-              (is (= ["c" "a" "B" "D" "e"]
-                     (->> ((ui/wrap-current-state settings-page/model!) (assoc-in request [:params :new-user] (str new-user-id)))
-                          :congregation/users
-                          (map :name)))))))))))
+          (testing "shows new users first, followed by the rest alphabetically"
+            (let [new-user-id (UUID. 0 5)
+                  request (assoc-in request [:params :new-user] (str new-user-id))
+                  users [;; should be case-insensitive
+                         {:user/id (UUID. 0 1), :user/attributes {:name "a"}}
+                         {:user/id (UUID. 0 2), :user/attributes {:name "B"}}
+                         ;; new ones should be first
+                         {:user/id new-user-id, :user/attributes {:name "c"}}
+                         ;; doesn't sort by ID
+                         {:user/id (UUID. 0 9), :user/attributes {:name "D"}}
+                         {:user/id (UUID. 0 8), :user/attributes {:name "e"}}]]
+              (binding [user/get-users (constantly (shuffle users))]
+                (is (= ["c" "a" "B" "D" "e"]
+                       (->> (settings-page/model! request)
+                            :congregation/users
+                            (map :name))))))))))))
 
 (deftest congregation-settings-section-test
   (testing "requires the configure-congregation permission"
@@ -227,20 +248,19 @@
            (-> (settings-page/view model)
                html/visible-text)))))
 
-(deftest ^:slow save-congregation-settings!-test
-  (with-fixtures [db-fixture api-fixture]
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          cong-id (at/create-congregation! session "foo")
-          request {:path-params {:congregation cong-id}
-                   :params {:congregation-name "new name"
-                            :loans-csv-url "new url"}}]
-      (binding [html/*page-path* "/settings-page-url"]
+(deftest save-congregation-settings!-test
+  (let [request {:path-params {:congregation cong-id}
+                 :params {:congregation-name "new name"
+                          :loans-csv-url "new url"}}]
+    (testutil/with-events test-events
+      (binding [html/*page-path* "/settings-page-url"
+                user/get-users fake-get-users
+                config/env {:now #(Instant/now)}]
         (auth/with-user-id user-id
 
           (testing "save successful: redirects to same page"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [response ((ui/wrap-current-state settings-page/save-congregation-settings!) request)]
+              (let [response (settings-page/save-congregation-settings! request)]
                 (is (= {:status 303
                         :headers {"Location" "/settings-page-url"}
                         :body ""}
@@ -256,7 +276,7 @@
             (binding [dispatcher/command! (fn [& _]
                                             (throw (ValidationException. [[:missing-name]
                                                                           [:disallowed-loans-csv-url]])))]
-              (let [response ((ui/wrap-current-state settings-page/save-congregation-settings!) request)]
+              (let [response (settings-page/save-congregation-settings! request)]
                 (is (= forms/validation-error-http-status (:status response)))
                 (is (str/includes?
                      (html/visible-text (:body response))
@@ -265,20 +285,19 @@
                        Experimental features
                        Territory loans CSV URL (optional) [new url] ⚠️")))))))))))
 
-(deftest ^:slow add-user!-test
-  (with-fixtures [db-fixture api-fixture]
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          new-user-id (UUID. 0 2)
-          cong-id (at/create-congregation! session "foo")
-          request {:path-params {:congregation cong-id}
-                   :params {:user-id (str new-user-id)}}]
-      (binding [html/*page-path* "/settings-page-url"]
+(deftest add-user!-test
+  (let [new-user-id (UUID. 0 2)
+        request {:path-params {:congregation cong-id}
+                 :params {:user-id (str new-user-id)}}]
+    (testutil/with-events test-events
+      (binding [html/*page-path* "/settings-page-url"
+                user/get-users fake-get-users
+                config/env {:now #(Instant/now)}]
         (auth/with-user-id user-id
 
           (testing "add successful: highlights the added user"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [response ((ui/wrap-current-state settings-page/add-user!) request)]
+              (let [response (settings-page/add-user! request)]
                 (is (= {:status 303
                         :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
                         :body ""}
@@ -292,7 +311,7 @@
           (testing "trims the user ID"
             (with-fixtures [fake-dispatcher-fixture]
               (let [request (replace-in request [:params :user-id] (str new-user-id) (str "  " new-user-id "  "))
-                    response ((ui/wrap-current-state settings-page/add-user!) request)]
+                    response (settings-page/add-user! request)]
                 (is (= {:status 303
                         :headers {"Location" "/settings-page-url/users?new-user=00000000-0000-0000-0000-000000000002"}
                         :body ""}
@@ -301,7 +320,7 @@
           (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
             (binding [dispatcher/command! (fn [& _]
                                             (throw (ValidationException. [[:no-such-user new-user-id]])))]
-              (let [response ((ui/wrap-current-state settings-page/add-user!) request)]
+              (let [response (settings-page/add-user! request)]
                 (is (= forms/validation-error-http-status (:status response)))
                 (is (str/includes?
                      (html/visible-text (:body response))
@@ -312,7 +331,7 @@
             (binding [dispatcher/command! (fn [& _]
                                             (throw (ValidationException. [[:invalid-user-id]])))]
               (let [request (replace-in request [:params :user-id] (str new-user-id) "foo")
-                    response ((ui/wrap-current-state settings-page/add-user!) request)]
+                    response (settings-page/add-user! request)]
                 (is (= forms/validation-error-http-status (:status response)))
                 (is (str/includes?
                      (html/visible-text (:body response))
@@ -320,20 +339,19 @@
                       "User ID [foo] ⚠️
                        Add user")))))))))))
 
-(deftest ^:slow remove-user!-test
-  (with-fixtures [db-fixture api-fixture]
-    (let [session (at/login! at/app)
-          current-user-id (at/get-user-id session)
-          other-user-id (UUID. 0 2)
-          cong-id (at/create-congregation! session "foo")
-          request {:path-params {:congregation cong-id}
-                   :params {:user-id (str other-user-id)}}]
-      (binding [html/*page-path* "/settings-page-url"]
+(deftest remove-user!-test
+  (let [current-user-id user-id
+        other-user-id (UUID. 0 2)
+        request {:path-params {:congregation cong-id}
+                 :params {:user-id (str other-user-id)}}]
+    (testutil/with-events test-events
+      (binding [html/*page-path* "/settings-page-url"
+                config/env {:now #(Instant/now)}]
         (auth/with-user-id current-user-id
 
           (testing "removes the user and refreshes the users list"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [response ((ui/wrap-current-state settings-page/remove-user!) request)]
+              (let [response (settings-page/remove-user! request)]
                 (is (= {:status 303
                         :headers {"Location" "/settings-page-url/users"}
                         :body ""}
@@ -347,8 +365,8 @@
 
           (testing "removing the current user will redirect to the front page"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [request (assoc-in request [:params :user-id] (str current-user-id))
-                    response ((ui/wrap-current-state settings-page/remove-user!) request)]
+              (let [request (assoc request :params {:user-id (str current-user-id)})
+                    response (settings-page/remove-user! request)]
                 (is (= {:status 200
                         :headers {"Content-Type" "text/html"
                                   "hx-redirect" "/"}
@@ -360,3 +378,24 @@
                         :user/id current-user-id
                         :permission/ids []}
                        (dissoc @*last-command :command/time)))))))))))
+
+(deftest download-qgis-project-test
+  (let [request {:path-params {:congregation cong-id}}]
+    (testutil/with-events (concat test-events
+                                  [{:event/type :congregation.event/gis-user-created
+                                    :congregation/id cong-id
+                                    :user/id user-id
+                                    :gis-user/username "username123"
+                                    :gis-user/password "password123"}])
+      (binding [config/env {:gis-database-host "gis.example.com"
+                            :gis-database-name "example_db"
+                            :gis-database-ssl-mode "prefer"}]
+        (auth/with-user-id user-id
+
+          (testing "downloads the QGIS project file for the congregation and user"
+            (let [response (settings-page/download-qgis-project request)]
+              (is (= {:status 200
+                      :headers {"Content-Type" "application/octet-stream"
+                                "Content-Disposition" "attachment; filename=\"Congregation Name.qgs\""}}
+                     (dissoc response :body)))
+              (is (str/includes? (:body response) "dbname='example_db' host=gis.example.com port=5432 user='username123'")))))))))

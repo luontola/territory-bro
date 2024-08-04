@@ -14,10 +14,13 @@
             [territory-bro.domain.region :as region]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
+            [territory-bro.gis.gis-user :as gis-user]
+            [territory-bro.gis.qgis :as qgis]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
-            [territory-bro.infra.permissions :as permissions])
+            [territory-bro.infra.permissions :as permissions]
+            [territory-bro.infra.user :as user])
   (:import (java.util UUID)
            (org.postgresql.util PSQLException)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
@@ -77,20 +80,22 @@
 (defn- enrich-congregation [cong]
   (let [user-id (auth/current-user-id)
         cong-id (:congregation/id cong)]
-    {:congregation/id cong-id
-     :congregation/name (:congregation/name cong)
-     :congregation/loans-csv-url (:congregation/loans-csv-url cong)
-     :congregation/permissions (->> (permissions/list-permissions *state* user-id [cong-id])
-                                    (map (fn [permission]
-                                           [permission true]))
-                                    (into {}))
-     :congregation/users (for [user-id (congregation/get-users *state* cong-id)]
-                           {:user/id user-id})
-     ;; TODO: extract query functions
-     :congregation/territories (sequence (vals (get-in *state* [::territory/territories cong-id])))
-     :congregation/congregation-boundaries (sequence (vals (get-in *state* [::congregation-boundary/congregation-boundaries cong-id])))
-     :congregation/regions (sequence (vals (get-in *state* [::region/regions cong-id])))
-     :congregation/card-minimap-viewports (sequence (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports cong-id])))}))
+    (-> cong
+        (dissoc :congregation/user-permissions)
+        (assoc
+         ;; TODO: remove me - query individual permissions as needed
+         :congregation/permissions (->> (permissions/list-permissions *state* user-id [cong-id])
+                                        (map (fn [permission]
+                                               [permission true]))
+                                        (into {}))
+         ;; TODO: remove me - use list-congregation-users instead
+         :congregation/users (for [user-id (congregation/get-users *state* cong-id)]
+                               {:user/id user-id})
+         ;; TODO: extract query functions
+         :congregation/territories (sequence (vals (get-in *state* [::territory/territories cong-id])))
+         :congregation/congregation-boundaries (sequence (vals (get-in *state* [::congregation-boundary/congregation-boundaries cong-id])))
+         :congregation/regions (sequence (vals (get-in *state* [::region/regions cong-id])))
+         :congregation/card-minimap-viewports (sequence (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports cong-id])))))))
 
 (defn- apply-user-permissions-for-congregation [cong]
   (let [user-id (auth/current-user-id)
@@ -130,7 +135,8 @@
             (assoc :congregation/loans-csv-url nil)
             (assoc :congregation/permissions {:view-congregation true
                                               :share-territory-link true})
-            (assoc :congregation/users []))))
+            (assoc :congregation/users [])
+            (dissoc :congregation/schema-name))))
 
 (defn get-congregation [cong-id]
   (if (= "demo" cong-id)
@@ -143,6 +149,27 @@
 (defn list-congregations []
   (let [user-id (auth/current-user-id)]
     (congregation/get-my-congregations *state* user-id)))
+
+(defn list-congregation-users [cong-id]
+  (let [user-ids (congregation/get-users *state* cong-id)]
+    (vec (for [user (user/get-users *conn* {:ids user-ids})]
+           ;; TODO: remove this unnecessary format change, return users as-is
+           (-> (:user/attributes user)
+               (assoc :id (:user/id user))
+               (assoc :sub (:user/subject user)))))))
+
+(defn download-qgis-project [cong-id]
+  (let [congregation (get-congregation cong-id)
+        gis-user (gis-user/get-gis-user *state* cong-id (auth/current-user-id))]
+    (when-not gis-user
+      (http-response/forbidden! "No GIS access"))
+    {:content (qgis/generate-project {:database-host (:gis-database-host config/env)
+                                      :database-name (:gis-database-name config/env)
+                                      :database-schema (:congregation/schema-name congregation)
+                                      :database-username (:gis-user/username gis-user)
+                                      :database-password (:gis-user/password gis-user)
+                                      :database-ssl-mode (:gis-database-ssl-mode config/env)})
+     :filename (qgis/project-file-name (:congregation/name congregation))}))
 
 
 (defn- enrich-do-not-calls [territory cong-id territory-id]

@@ -5,14 +5,18 @@
 (ns ^:e2e territory-bro.browser-test
   (:require [clj-http.client :as http]
             [clojure.java.io :as io]
+            [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.test :refer :all]
             [etaoin.api :as b]
             [etaoin.api2 :as b2]
+            [hikari-cp.core :as hikari-cp]
             [reitit.core :as reitit]
+            [territory-bro.test.testutil :refer [thrown-with-msg?]]
             [territory-bro.ui :as ui])
   (:import (java.util UUID)
-           (org.apache.commons.io FileUtils)))
+           (org.apache.commons.io FileUtils)
+           (org.postgresql.util PSQLException)))
 
 (def ^:dynamic *base-url* (or (System/getenv "BASE_URL") "http://localhost:8080"))
 (def ^:dynamic *driver*)
@@ -20,8 +24,11 @@
 (def auth0-username "browser-test@example.com")
 (def auth0-password "m6ER6MU7bBYEHrByt8lyop3cG1W811r2")
 
-(def browser-config {:size [1920 1080]})
 (def postmortem-dir (io/file "target/etaoin-postmortem"))
+(def download-dir (io/file "target/etaoin-download"))
+(def browser-config
+  {:size [1920 1080]
+   :download-dir download-dir})
 
 (defn per-test-subdir [parent-dir]
   (let [var (first *testing-vars*)]
@@ -44,6 +51,7 @@
 
 (use-fixtures :once (fn [f]
                       (FileUtils/deleteDirectory postmortem-dir)
+                      (FileUtils/deleteDirectory download-dir)
                       (f)))
 
 (use-fixtures :each with-browser)
@@ -293,6 +301,57 @@
           (dev-login-as user2)
           (b/go @*congregation-url)
           (b/wait-has-text h1 "Access denied"))))))
+
+
+(deftest settings-test
+  (with-per-test-postmortem
+    (let [nonce (System/currentTimeMillis)
+          user (str "Test User " nonce)
+          congregation-name (str "Test Congregation " nonce)]
+
+      (testing "register new congregation"
+        (doto *driver*
+          (dev-login-as user)
+          (go-to-page "Register a new congregation")
+
+          (b/fill :congregation-name congregation-name)
+          (wait-and-click {:tag :button, :fn/text "Register"})
+
+          ;; we should arrive at the newly created congregation's front page
+          (b/wait-has-text h1 congregation-name)))
+
+      ;; TODO: extract the above to a shared test setup, so that all tests will use the same congregation as test data
+
+      (let [qgis-project (io/file download-dir (str congregation-name ".qgs"))]
+        (testing "download QGIS project file"
+          (doto *driver*
+            (go-to-page "Settings")
+            (wait-and-click {:tag :a, :fn/text "Download QGIS project file"}))
+          (b/wait-predicate #(.isFile qgis-project)
+                            {:message (str "Wait until file exists: " qgis-project)}))
+
+        (testing "access GIS database"
+          (let [[_ dbname host port user password schema] (re-find #"dbname='(\w+)' host=(\w+) port=(\w+) user='(\w+)' password='(.*?)' .* table=\"(\w+)\"\."
+                                                                   (slurp qgis-project))
+                jdbc-url (str "jdbc:postgresql://" host ":" port "/" dbname "?user=" user "&password=" password)]
+            (is (str/starts-with? user "gis_user_"))
+            (is (str/starts-with? schema "territorybro_"))
+            (with-open [datasource (hikari-cp/make-datasource {:jdbc-url jdbc-url})]
+              (jdbc/with-db-connection [conn {:datasource datasource}]
+                ;; TODO: test writing GIS data
+                (is (= [] (jdbc/query conn [(str "select * from " schema ".territory limit 1")]))
+                    "can access the congregation's schema")
+                (is (thrown-with-msg? PSQLException
+                                      #"ERROR: permission denied for schema territorybro"
+                                      (jdbc/query conn ["select * from territorybro.event limit 1"]))
+                    "cannot access other schemas"))))))
+
+      (testing "edit congregation settings"
+        (doto *driver*
+          (go-to-page "Settings")
+          (b/fill :congregation-name " B")
+          (wait-and-click {:tag :button, :fn/text "Save settings"})
+          (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string (str congregation-name " B")}]))))))
 
 
 (defn- two-random-territories [driver]

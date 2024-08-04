@@ -102,6 +102,7 @@
   (let [expected {:congregation/id cong-id
                   :congregation/name "Cong1 Name"
                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
+                  :congregation/schema-name "cong1_schema"
                   :congregation/permissions {:view-congregation true}
                   :congregation/users [{:user/id user-id}
                                        {:user/id user-id2}]

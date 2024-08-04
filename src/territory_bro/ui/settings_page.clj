@@ -8,7 +8,7 @@
             [ring.util.codec :as codec]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
-            [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.ui.css :as css]
@@ -17,22 +17,23 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]
             [territory-bro.ui.layout :as layout])
-  (:import (java.util UUID)))
+  (:import (territory_bro ValidationException)))
 
 (defn model! [request]
-  (let [demo? (= "demo" (get-in request [:path-params :congregation]))
-        congregation (if demo?
+  (let [cong-id (get-in request [:path-params :congregation])
+        congregation (if (= "demo" cong-id) ; TODO: replace with permission check for editing settings
                        (http-response/not-found! "Not available in demo")
-                       (:body (api/get-congregation request {})))
+                       (dmz/get-congregation cong-id))
+        users (dmz/list-congregation-users cong-id)
         new-user (some-> (get-in request [:params :new-user])
                          (parse-uuid))]
     {:congregation/name (or (get-in request [:params :congregation-name])
                             (:congregation/name congregation))
      :congregation/loans-csv-url (or (get-in request [:params :loans-csv-url])
                                      (:congregation/loans-csv-url congregation))
-     :congregation/users (->> (:congregation/users congregation)
-                              (map (fn [user]
-                                     (assoc user :new? (= new-user (:id user)))))
+     :congregation/users (->> users
+                              (mapv (fn [user]
+                                      (assoc user :new? (= new-user (:id user)))))
                               (sort-by (fn [user]
                                          ;; new user first, then alphabetically by name
                                          [(if (:new? user) 1 2)
@@ -234,55 +235,78 @@
   (view (model! request)))
 
 (defn save-congregation-settings! [request]
-  (try
-    (api/save-congregation-settings request)
-    (http-response/see-other html/*page-path*)
-    (catch Exception e
-      (forms/validation-error-page-response e request model! view))))
+  (let [cong-id (get-in request [:path-params :congregation])
+        name (get-in request [:params :congregation-name])
+        loans-csv-url (get-in request [:params :loans-csv-url])]
+    (try
+      (dmz/dispatch! {:command/type :congregation.command/update-congregation
+                      :congregation/id cong-id
+                      :congregation/name name
+                      :congregation/loans-csv-url loans-csv-url})
+      (http-response/see-other html/*page-path*)
+      (catch Exception e
+        (forms/validation-error-page-response e request model! view)))))
 
 (defn add-user! [request]
-  (try
-    (let [request (update-in request [:params :user-id] str/trim)
-          user-id (parse-uuid (get-in request [:params :user-id]))]
-      (api/add-user request)
-      (http-response/see-other (str html/*page-path* "/users?new-user=" user-id)))
-    (catch Exception e
-      (forms/validation-error-htmx-response e request model! user-management-section))))
+  (let [cong-id (get-in request [:path-params :congregation])
+        user-id (get-in request [:params :user-id])]
+    (try
+      (let [user-id (or (parse-uuid (str/trim (str user-id)))
+                        (throw (ValidationException. [[:invalid-user-id]])))]
+        (dmz/dispatch! {:command/type :congregation.command/add-user
+                        :congregation/id cong-id
+                        :user/id user-id})
+        (http-response/see-other (str html/*page-path* "/users?new-user=" user-id)))
+      (catch Exception e
+        (forms/validation-error-htmx-response e request model! user-management-section)))))
 
 (defn remove-user! [request]
-  (let [request (assoc-in request [:params :permissions] [])
-        user-id (UUID/fromString (get-in request [:params :user-id]))
-        current-user? (= user-id (:user/id auth/*user*))]
-    (api/set-user-permissions request)
-    (if current-user?
+  (let [cong-id (get-in request [:path-params :congregation])
+        user-id (parse-uuid (get-in request [:params :user-id]))]
+    (dmz/dispatch! {:command/type :congregation.command/set-user-permissions
+                    :congregation/id cong-id
+                    :user/id user-id
+                    :permission/ids []})
+    (if (= user-id (auth/current-user-id))
       (-> (html/response "")
           ;; the user can no longer view this congregation, so redirect them to the front page
           (response/header "hx-redirect" "/"))
       (http-response/see-other (str html/*page-path* "/users")))))
 
+(defn download-qgis-project [request]
+  (let [cong-id (get-in request [:path-params :congregation])
+        {:keys [content filename]} (dmz/download-qgis-project cong-id)]
+    (-> (http-response/ok content)
+        (response/content-type "application/octet-stream")
+        (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))
 
 (def routes
   ["/congregation/:congregation/settings"
    {:middleware [[html/wrap-page-path ::page]]}
    [""
     {:name ::page
-     :get {:handler (fn [request]
+     :get {:middleware [dmz/wrap-db-connection]
+           :handler (fn [request]
                       (-> (view! request)
                           (layout/page! request)
                           (html/response)))}
-     :post {:handler (fn [request]
+     :post {:middleware [dmz/wrap-db-connection]
+            :handler (fn [request]
                        (save-congregation-settings! request))}}]
 
    ["/qgis-project"
     {:get {:handler (fn [request]
-                      (api/download-qgis-project request))}}]
+                      (download-qgis-project request))}}]
 
    ["/users"
-    {:get {:handler (fn [request]
+    {:get {:middleware [dmz/wrap-db-connection]
+           :handler (fn [request]
                       (-> (model! request)
                           (user-management-section)
                           (html/response)))}
-     :post {:handler (fn [request]
+     :post {:middleware [dmz/wrap-db-connection]
+            :handler (fn [request]
                        (add-user! request))}
-     :delete {:handler (fn [request]
+     :delete {:middleware [dmz/wrap-db-connection]
+              :handler (fn [request]
                          (remove-user! request))}}]])
