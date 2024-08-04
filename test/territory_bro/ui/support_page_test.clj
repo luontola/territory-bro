@@ -4,24 +4,23 @@
 
 (ns territory-bro.ui.support-page-test
   (:require [clojure.test :refer :all]
-            [territory-bro.api-test :as at]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.support-page :as support-page]))
+            [territory-bro.ui.support-page :as support-page])
+  (:import (java.util UUID)))
 
 (def private-model
   {:support-email "support@example.com"})
 (def public-model
   {:support-email nil})
 
-(deftest ^:slow model!-test
-  (with-fixtures [db-fixture api-fixture]
-    (let [session (at/login! at/app)
-          user-id (at/get-user-id session)
-          request {}]
+(deftest model!-test
+  (let [user-id (UUID/randomUUID)
+        request {}]
+    (binding [config/env {:support-email "support@example.com"}]
       (auth/with-user-id user-id
 
         (testing "logged in"
