@@ -20,9 +20,9 @@
                              ::middleware/mutative-operation? true))))
 
 (def routes
-  [["/share/:share-key"
-    {:get {:middleware [dmz/wrap-db-connection]
-           :handler open-share!}}]
-   ["/share/:share-key/*number"
-    {:get {:middleware [dmz/wrap-db-connection]
-           :handler open-share!}}]])
+  ["/share/:share-key"
+   {:middleware [dmz/wrap-db-connection]}
+   [""
+    {:get {:handler open-share!}}]
+   ["/*number"
+    {:get {:handler open-share!}}]])
