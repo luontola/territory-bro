@@ -38,6 +38,20 @@
   (when-not (auth/logged-in?)
     (http-response/unauthorized! "Not logged in")))
 
+(defn- super-user? []
+  (let [super-users (:super-users config/env)
+        user auth/*user*]
+    (or (contains? super-users (:user/id user))
+        (contains? super-users (:sub user)))))
+
+(defn sudo [session]
+  (require-logged-in!)
+  (when-not (super-user?)
+    (http-response/forbidden! "Not super user"))
+  (log/info "Super user promotion")
+  (assoc session :territory-bro.api/sudo? true))
+
+
 (defn- enrich-command [command]
   (let [user-id (auth/current-user-id)]
     (-> command
