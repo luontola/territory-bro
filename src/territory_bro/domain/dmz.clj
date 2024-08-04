@@ -20,7 +20,8 @@
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.permissions :as permissions]
-            [territory-bro.infra.user :as user])
+            [territory-bro.infra.user :as user]
+            [territory-bro.infra.util :refer [conj-set]])
   (:import (java.util UUID)
            (org.postgresql.util PSQLException)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
@@ -254,3 +255,18 @@
         share-key (generate-share-key territory)]
     {:url (str (:qr-code-base-url config/env) "/" share-key)
      :key share-key}))
+
+(defn open-share! [share-key session]
+  (let [share (share/find-share-by-key *state* share-key)
+        demo-territory (share/demo-share-key->territory-id share-key)]
+    (cond
+      (some? share)
+      (let [session (update session :territory-bro.api/opened-shares conj-set (:share/id share))]
+        (dispatch! {:command/type :share.command/record-share-opened
+                    :share/id (:share/id share)})
+        [share session])
+
+      (some? demo-territory)
+      [{:congregation/id "demo"
+        :territory/id demo-territory}
+       nil])))
