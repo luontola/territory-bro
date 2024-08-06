@@ -21,13 +21,30 @@
             [territory-bro.infra.db :as db]
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.infra.user :as user]
-            [territory-bro.infra.util :refer [conj-set]])
+            [territory-bro.infra.util :refer [conj-set]]
+            [territory-bro.projections :as projections])
   (:import (java.util UUID)
            (org.postgresql.util PSQLException)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 (def ^:dynamic *state* nil) ; the state starts empty, so nil is a good default for tests
 (def ^:dynamic *conn*) ; unbound var gives a better error message than nil, when forgetting db/with-db
+
+(defn enrich-state-for-request [state request]
+  (let [session (:session request)]
+    (cond-> state
+      (::sudo? session) (congregation/sudo (auth/current-user-id))
+      (some? (::opened-shares session)) (share/grant-opened-shares (::opened-shares session)
+                                                                   (auth/current-user-id)))))
+
+(defn- state-for-request [request]
+  (let [state (projections/cached-state)]
+    (enrich-state-for-request state request)))
+
+(defn wrap-current-state [handler]
+  (fn [request]
+    (binding [*state* (state-for-request request)]
+      (handler request))))
 
 (defn wrap-db-connection [handler]
   (fn [request]
@@ -50,7 +67,7 @@
   (when-not (super-user?)
     (http-response/forbidden! "Not super user"))
   (log/info "Super user promotion")
-  (assoc session :territory-bro.api/sudo? true))
+  (assoc session ::sudo? true))
 
 
 (defn- enrich-command [command]
@@ -261,7 +278,7 @@
         demo-territory (share/demo-share-key->territory-id share-key)]
     (cond
       (some? share)
-      (let [session (update session :territory-bro.api/opened-shares conj-set (:share/id share))]
+      (let [session (update session ::opened-shares conj-set (:share/id share))]
         (dispatch! {:command/type :share.command/record-share-opened
                     :share/id (:share/id share)})
         [share session])

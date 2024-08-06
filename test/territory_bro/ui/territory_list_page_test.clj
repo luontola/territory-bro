@@ -7,6 +7,7 @@
             [clojure.test :refer :all]
             [reitit.core :as reitit]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.loan :as loan]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.geometry :as geometry]
@@ -81,7 +82,7 @@
         (testing "anonymous user, has opened a share"
           (auth/with-anonymous-user
             (let [share-id (UUID/randomUUID)
-                  request (assoc request :session {:territory-bro.api/opened-shares #{share-id}})]
+                  request (assoc request :session {::dmz/opened-shares #{share-id}})]
               (testutil/with-events [{:event/type :share.event/share-created
                                       :share/id share-id
                                       :share/key "share123"

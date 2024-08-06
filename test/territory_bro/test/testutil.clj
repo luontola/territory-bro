@@ -4,7 +4,6 @@
 
 (ns territory-bro.test.testutil
   (:require [clojure.test :refer :all]
-            [territory-bro.api :as api]
             [territory-bro.commands :as commands]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.events :as events]
@@ -76,5 +75,5 @@
      ~@body))
 
 (defmacro with-request-state [request & body]
-  `(binding [dmz/*state* (api/enrich-state-for-request dmz/*state* ~request)]
+  `(binding [dmz/*state* (dmz/enrich-state-for-request dmz/*state* ~request)]
      ~@body))

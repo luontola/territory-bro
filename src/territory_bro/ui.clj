@@ -5,7 +5,6 @@
 (ns territory-bro.ui
   (:require [reitit.ring :as ring]
             [ring.util.http-response :as http-response]
-            [territory-bro.api :as api]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.ui.congregation-page :as congregation-page]
@@ -22,11 +21,6 @@
             [territory-bro.ui.support-page :as support-page]
             [territory-bro.ui.territory-list-page :as territory-list-page]
             [territory-bro.ui.territory-page :as territory-page]))
-
-(defn wrap-current-state [handler]
-  (fn [request]
-    (binding [dmz/*state* (api/state-for-request request)] ; TODO: move state-for-request, or even wrap-current-state, to dmz namespace
-      (handler request))))
 
 (defn- parse-mandatory-uuid [s]
   (or (parse-uuid s)
@@ -48,7 +42,7 @@
 (def routes
   [""
    {:middleware [[html/wrap-page-path nil] ; outermost middleware first
-                 wrap-current-state
+                 dmz/wrap-current-state
                  wrap-parse-path-params]}
    auth0/routes
    congregation-page/routes

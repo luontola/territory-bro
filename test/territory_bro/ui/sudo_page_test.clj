@@ -5,6 +5,7 @@
 (ns territory-bro.ui.sudo-page-test
   (:require [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.ui.sudo-page :as sudo-page])
@@ -21,7 +22,7 @@
         (auth/with-user-id super-user-id
           (is (= {:status 303
                   :headers {"Location" "/"}
-                  :session {:territory-bro.api/sudo? true}
+                  :session {::dmz/sudo? true}
                   :body ""}
                  (sudo-page/sudo request)))))
 

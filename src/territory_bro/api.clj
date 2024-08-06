@@ -140,7 +140,7 @@
   (require-logged-in!)
   (if (super-user?)
     (let [session (-> (:session request)
-                      (assoc ::sudo? true))]
+                      (assoc ::dmz/sudo? true))]
       (log/info "Super user promotion")
       (-> (see-other "/")
           (assoc :session session)))
@@ -165,17 +165,17 @@
                  :user (when (auth/logged-in?)
                          (fix-user-for-liberator auth/*user*))})))
 
-(defn current-user-id []
+(defn- current-user-id []
   (auth/current-user-id))
 
-(defn enrich-state-for-request [state request]
+(defn- enrich-state-for-request [state request]
   (let [session (:session request)]
     (cond-> state
-      (::sudo? session) (congregation/sudo (current-user-id))
-      (some? (::opened-shares session)) (share/grant-opened-shares (::opened-shares session)
-                                                                   (current-user-id)))))
+      (::dmz/sudo? session) (congregation/sudo (current-user-id))
+      (some? (::dmz/opened-shares session)) (share/grant-opened-shares (::dmz/opened-shares session)
+                                                                       (current-user-id)))))
 
-(defn state-for-request [request]
+(defn- state-for-request [request]
   (let [state (projections/cached-state)]
     (enrich-state-for-request state request)))
 
@@ -458,7 +458,7 @@
     (cond
       (some? share)
       (let [session (-> (:session request)
-                        (update ::opened-shares conj-set (:share/id share)))]
+                        (update ::dmz/opened-shares conj-set (:share/id share)))]
         (record-share-opened! share state)
         (-> (ok {:congregation (:congregation/id share)
                  :territory (:territory/id share)})

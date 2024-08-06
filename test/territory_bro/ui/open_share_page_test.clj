@@ -6,6 +6,7 @@
   (:require [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [reitit.core :as reitit]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.share :as share]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
@@ -44,7 +45,7 @@
                     "records a history of opening the share")
                 (is (= {:status 303
                         :headers {"Location" "/congregation/00000000-0000-0000-0000-000000000001/territories/00000000-0000-0000-0000-000000000002"}
-                        :session {:territory-bro.api/opened-shares #{share-id}}
+                        :session {::dmz/opened-shares #{share-id}}
                         ::middleware/mutative-operation? true
                         :body ""}
                        response)
@@ -54,11 +55,11 @@
           (auth/with-anonymous-user
             (with-fixtures [fake-dispatcher-fixture]
               (let [another-share-id (UUID/randomUUID)
-                    request (assoc request :session {:territory-bro.api/opened-shares #{another-share-id}
+                    request (assoc request :session {::dmz/opened-shares #{another-share-id}
                                                      :other-session-state "stuff"})
                     response (open-share-page/open-share! request)]
-                (is (= {:territory-bro.api/opened-shares #{share-id
-                                                           another-share-id}
+                (is (= {::dmz/opened-shares #{share-id
+                                              another-share-id}
                         :other-session-state "stuff"}
                        (:session response)))))))
 
