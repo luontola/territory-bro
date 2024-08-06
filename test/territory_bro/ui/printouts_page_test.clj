@@ -6,6 +6,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.share :as share]
@@ -13,6 +14,7 @@
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.infra.permissions :as permissions]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
@@ -40,6 +42,7 @@
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-helsinki-rautatientori}]
    :card-minimap-viewports [testdata/wkt-helsinki]
+   :qr-codes-allowed? true
    :form {:template "TerritoryCard"
           :language "en"
           :map-raster "osmhd"
@@ -56,6 +59,9 @@
                            (UUID. 0 5)}
                 :territories #{(UUID. 0 6)
                                (UUID. 0 7)}}))
+
+(def no-qr-codes-model
+  (replace-in default-model [:qr-codes-allowed?] true false))
 
 (def demo-model
   (-> default-model
@@ -111,6 +117,10 @@
                                                 :territories [(str (UUID. 0 6))
                                                               (str (UUID. 0 7))]})]
             (is (= form-changed-model (printouts-page/model! request)))))
+
+        (testing "no permission to share"
+          (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:share-territory-link cong-id])]
+            (is (= no-qr-codes-model (printouts-page/model! request)))))
 
         (testing "demo congregation"
           (binding [config/env {:demo-congregation cong-id}]
@@ -177,7 +187,12 @@
       (testing "print date uses the congregation timezone"
         (is (str/includes? (-> (printouts-page/view default-model)
                                html/visible-text)
-                           "Printed 2001-01-01"))))))
+                           "Printed 2001-01-01"))))
+
+    (testing "hides the 'QR code only' template if creating QR codes is not allowed"
+      (let [template-name "QR code only"]
+        (is (str/includes? (printouts-page/view default-model) template-name))
+        (is (not (str/includes? (printouts-page/view no-qr-codes-model) template-name)))))))
 
 
 (deftest render-qr-code-svg-test

@@ -51,7 +51,7 @@
           :hx-get (str html/*page-path* "/qr-code/" (:territory/id territory))}]))
 
 
-(defn territory-card [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date]}]
+(defn territory-card [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date qr-codes-allowed?]}]
   (let [styles (:TerritoryCard (css/modules))]
     (crop-marks
      (h/html
@@ -78,12 +78,13 @@
                           :printout true}])]
 
        [:div {:class (:addresses styles)}
-        [:div {:class (:qrCode styles)} (territory-qr-code territory)]
+        (when qr-codes-allowed?
+          [:div {:class (:qrCode styles)} (territory-qr-code territory)])
         (:territory/addresses territory)]
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
 
-(defn territory-card-map-only [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date]}]
+(defn territory-card-map-only [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date qr-codes-allowed?]}]
   ;; TODO: deduplicate with TerritoryCard
   (let [styles (:TerritoryCardMapOnly (css/modules))]
     (crop-marks
@@ -110,11 +111,12 @@
                           :map-raster map-raster
                           :printout true}])]
 
-       [:div {:class (:qrCode styles)} (territory-qr-code territory)]
+       (when qr-codes-allowed?
+         [:div {:class (:qrCode styles)} (territory-qr-code territory)])
 
        [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
 
-(defn rural-territory-card [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date]}]
+(defn rural-territory-card [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date qr-codes-allowed?]}]
   ;; TODO: deduplicate with TerritoryCard
   (let [styles (:RuralTerritoryCard (css/modules))]
     (a5-print-frame
@@ -141,15 +143,18 @@
                           :map-raster map-raster
                           :printout true}])]
 
-       [:div {:class (:qrCode styles)} (territory-qr-code territory)]]))))
+       (when qr-codes-allowed?
+         [:div {:class (:qrCode styles)} (territory-qr-code territory)])]))))
 
-(defn qr-code-only [{:keys [territory]}]
+(defn qr-code-only [{:keys [territory qr-codes-allowed?]}]
   (let [styles (:QrCodeOnly (css/modules))]
     (h/html
      [:div {:class (:cropArea styles)}
       [:div {:class (:root styles)}
        [:div {:class (:number styles)} (:territory/number territory)]
-       [:div {:class (:qrCode styles)} (territory-qr-code territory)]]])))
+       (if qr-codes-allowed?
+         [:div {:class (:qrCode styles)} (territory-qr-code territory)]
+         "QR codes not allowed")]])))
 
 (defn neighborhood-card [{:keys [territory map-raster]}]
   (let [styles (:NeighborhoodCard (css/modules))]

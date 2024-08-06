@@ -82,6 +82,10 @@
          :territories territories
          :card-minimap-viewports (->> (:congregation/card-minimap-viewports congregation)
                                       (mapv :card-minimap-viewport/location))
+         ;; TODO: make it a form option that whether to include QR codes on a printout
+         :qr-codes-allowed? (or (dmz/allowed? [:share-territory-link cong-id])
+                                ;; TODO: give everyone a default :share-territory-link permission to the demo congregation, to avoid this check here?
+                                (= "demo" cong-id))
          :form (-> (merge default-params (:params request))
                    (select-keys [:template :language :map-raster :regions :territories])
                    (update :regions parse-uuid-multiselect)
@@ -89,8 +93,11 @@
         (merge (map-interaction-help/model request)))))
 
 
-(defn view [{:keys [congregation territories regions card-minimap-viewports form] :as model}]
+(defn view [{:keys [congregation territories regions card-minimap-viewports qr-codes-allowed? form] :as model}]
   (let [printout-lang (i18n/validate-lang (keyword (:language form)))
+        templates (if qr-codes-allowed?
+                    templates
+                    (remove #(= "QrCodeOnly" (:id %)) templates))
         template (->> templates
                       (filter #(= (:template form) (:id %)))
                       (first))
@@ -190,7 +197,8 @@
                                  :enclosing-region enclosing-region
                                  :enclosing-minimap-viewport enclosing-minimap-viewport
                                  :map-raster (:map-raster form)
-                                 :print-date print-date}))))
+                                 :print-date print-date
+                                 :qr-codes-allowed? qr-codes-allowed?}))))
 
              :region
              (let [territories (->> territories
@@ -212,8 +220,8 @@
   (view (model! request)))
 
 
-(defn render-qr-code-svg [^String data]
-  (let [qr-code (QrCode/encodeText data QrCode$Ecc/MEDIUM)]
+(defn render-qr-code-svg [text]
+  (let [qr-code (QrCode/encodeText text QrCode$Ecc/MEDIUM)]
     (QrCodeGenerator/toSvgString qr-code 0 "white" "black")))
 
 (defn generate-qr-code! [request]

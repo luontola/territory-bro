@@ -29,7 +29,8 @@
    :enclosing-region "MULTIPOLYGON(region)"
    :enclosing-minimap-viewport "POLYGON(minimap viewport)"
    :map-raster "osmhd"
-   :print-date (LocalDate/of 2024 7 10)})
+   :print-date (LocalDate/of 2024 7 10)
+   :qr-codes-allowed? true})
 
 (def region-printout-model
   {:region {:region/name "The Region"
@@ -130,8 +131,9 @@
 
 (deftest qr-code-only-test
   (testing "no data"
-    (is (= "" (-> (printout-templates/qr-code-only nil)
-                  html/visible-text))))
+    (is (= "QR codes not allowed"
+           (-> (printout-templates/qr-code-only nil)
+               html/visible-text))))
 
   (testing "full data"
     (let [html (printout-templates/qr-code-only territory-printout-model)]
