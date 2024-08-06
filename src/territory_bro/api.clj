@@ -98,10 +98,6 @@
   (if-not (auth/logged-in?)
     (unauthorized! "Not logged in")))
 
-(defn ^:dynamic save-user-from-jwt! [jwt]
-  (db/with-db [conn {}]
-    (user/save-user! conn (:sub jwt) (select-keys jwt auth/user-profile-keys))))
-
 (defn login [request]
   (let [id-token (get-in request [:params :idToken])
         jwt (try
@@ -109,7 +105,7 @@
               (catch JWTVerificationException e
                 (log/info e "Login failed, invalid token")
                 (forbidden! "Invalid token")))
-        user-id (save-user-from-jwt! jwt)
+        user-id (dmz/save-user-from-jwt! jwt)
         session (merge (:session request)
                        (auth/user-session jwt user-id))]
     (log/info "Logged in using JWT" jwt)
@@ -119,7 +115,7 @@
 (defn dev-login [request]
   (if (getx config/env :dev)
     (let [fake-jwt (:params request)
-          user-id (save-user-from-jwt! fake-jwt)
+          user-id (dmz/save-user-from-jwt! fake-jwt)
           session (merge (:session request)
                          (auth/user-session fake-jwt user-id))]
       (log/info "Developer login as" fake-jwt)
@@ -487,9 +483,9 @@
                           (update :territory try-parse-uuid))))
 
 (defroutes api-routes
-  (POST "/api/login" request (login (compat request)))
-  (GET "/api/dev-login" request (dev-login (compat request)))
-  (POST "/api/dev-login" request (dev-login (compat request)))
+  (POST "/api/login" request ((dmz/wrap-db-connection login) (compat request)))
+  (GET "/api/dev-login" request ((dmz/wrap-db-connection dev-login) (compat request)))
+  (POST "/api/dev-login" request ((dmz/wrap-db-connection dev-login) (compat request)))
   (POST "/api/logout" [] (logout))
   (GET "/api/sudo" request (sudo (compat request)))
   (ANY "/api/settings" [] settings)

@@ -11,7 +11,7 @@
             [ring.util.codec :as codec]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
-            [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.json :as json]
@@ -142,7 +142,7 @@
                        (.getPayload)
                        (util/decode-base64url)
                        (json/read-value))
-          user-id (api/save-user-from-jwt! id-token)
+          user-id (dmz/save-user-from-jwt! id-token)
           session (-> (:session @*ring-response)
                       (assoc ::tokens tokens)
                       (merge (auth/user-session id-token user-id)))]
@@ -168,7 +168,7 @@
 (defn dev-login-handler [request]
   (if (getx config/env :dev)
     (let [id-token (build-fake-id-token (:params request))
-          user-id (api/save-user-from-jwt! id-token)
+          user-id (dmz/save-user-from-jwt! id-token)
           session (-> (:session request)
                       (merge (auth/user-session id-token user-id)))]
       (log/info "Logged in using dev login. ID token was" (pr-str id-token))
@@ -191,8 +191,10 @@
   [["/login"
     {:get {:handler login-handler}}]
    ["/login-callback"
-    {:get {:handler login-callback-handler}}]
+    {:get {:middleware [dmz/wrap-db-connection]
+           :handler login-callback-handler}}]
    ["/dev-login"
-    {:get {:handler dev-login-handler}}]
+    {:get {:middleware [dmz/wrap-db-connection]
+           :handler dev-login-handler}}]
    ["/logout"
     {:get {:handler logout-handler}}]])

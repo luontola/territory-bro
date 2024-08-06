@@ -511,7 +511,7 @@
 (deftest dev-login-test
   (testing "authenticates as anybody in dev mode"
     (binding [config/env {:dev true}
-              api/save-user-from-jwt! (fn [_]
+              dmz/save-user-from-jwt! (fn [_]
                                         (UUID. 0 1))]
       (is (= {:status 200,
               :headers {},

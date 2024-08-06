@@ -11,7 +11,7 @@
             [ring.util.codec :as codec]
             [ring.util.http-predicates :as http-predicates]
             [ring.util.response :as response]
-            [territory-bro.api :as api]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
@@ -96,7 +96,7 @@
 
 (deftest login-callback-handler-test
   (binding [auth0/auth-controller (Mockito/mock ^Class AuthenticationController)
-            api/save-user-from-jwt! (fn [jwt]
+            dmz/save-user-from-jwt! (fn [jwt]
                                       (is (= {:name "Esko Luontola"}
                                              (select-keys jwt [:name])))
                                       (UUID. 0 1))]
@@ -147,7 +147,7 @@
 
 
 (deftest dev-login-handler-test
-  (binding [api/save-user-from-jwt! (fn [jwt]
+  (binding [dmz/save-user-from-jwt! (fn [jwt]
                                       (is (= {:sub "developer"
                                               :name "Developer"
                                               :email "dev@example.com"}

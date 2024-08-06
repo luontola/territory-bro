@@ -69,6 +69,9 @@
   (log/info "Super user promotion")
   (assoc session ::sudo? true))
 
+(defn ^:dynamic save-user-from-jwt! [jwt]
+  (user/save-user! *conn* (:sub jwt) (select-keys jwt auth/user-profile-keys)))
+
 
 (defn- enrich-command [command]
   (let [user-id (auth/current-user-id)]
