@@ -4,6 +4,7 @@
 
 (ns territory-bro.ui.layout
   (:require [clojure.string :as str]
+            [hiccup.page :as hiccup.page]
             [hiccup2.core :as h]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
