@@ -20,10 +20,10 @@ import "@fortawesome/fontawesome-free/css/svg-with-js.css"
 import.meta.glob('./**/*.module.css', {eager: true})
 import.meta.glob('./**/*.svg', {eager: true})
 
-function formatXhrError({status, statusText, responseText}) {
-  let message = `${status} ${statusText}`;
-  if (responseText && responseText !== statusText) {
-    message += ` - ${responseText}`;
+function formatXhrError({xhr, pathInfo}) {
+  let message = `${xhr.status} ${xhr.statusText} from ${pathInfo?.requestPath}`;
+  if (xhr.responseText && xhr.responseText !== xhr.statusText) {
+    message += `\n\n${xhr.responseText}`;
   }
   return message;
 }
@@ -55,7 +55,7 @@ document.body.addEventListener('htmx:afterRequest', (event: Event) => {
 
     } else if (event.detail.failed && event.detail.xhr) {
       console.warn("Server error", event.detail);
-      message.innerText = formatXhrError(event.detail.xhr);
+      message.innerText = formatXhrError(event.detail);
       dialog.showModal();
 
     } else {

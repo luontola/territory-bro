@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.error-page
-  (:require [clojure.string :as str]
-            [clojure.tools.logging :as log]
+  (:require [clojure.tools.logging :as log]
             [hiccup2.core :as h]
             [ring.util.response :as response]
             [territory-bro.ui.html :as html]
@@ -31,13 +30,17 @@
 (defn page! [request response]
   (safe-page request (view response)))
 
-(def handled-status-codes #{500 403 404})
+
+(def ^:private handled-status-codes #{500 403 404})
+
+(defn- htmx-request? [request]
+  (= "true" (get-in request [:headers "hx-request"])))
 
 (defn wrap-error-pages [handler]
   (fn [request]
     (let [response (handler request)]
       (if (and (contains? handled-status-codes (:status response))
-               (not (str/starts-with? (:uri request) "/api/"))) ; TODO: remove me after removing API routes
+               (not (htmx-request? request)))
         (-> response
             (assoc :body (page! request response))
             (response/content-type "text/html"))

@@ -23,12 +23,13 @@
    Close ")
 
 (deftest wrap-error-pages-test
-  (let [handle-response (fn [response]
-                          (let [request {:uri "/"}
-                                handler (-> (constantly response)
-                                            error-page/wrap-error-pages)]
-                            (-> (handler request)
-                                (update :body html/visible-text))))]
+  (let [handle-request-response (fn [request response]
+                                  (let [handler (-> (constantly response)
+                                                    error-page/wrap-error-pages)]
+                                    (-> (handler request)
+                                        (update :body html/visible-text))))
+        handle-response (fn [response]
+                          (handle-request-response {:uri "/"} response))]
 
     (testing "500 Internal Server Error"
       (is (= {:status 500
@@ -59,6 +60,14 @@
                            Return to the front page and try again"))
               :headers {"Content-Type" "text/html"}}
              (handle-response (http-response/forbidden)))))
+
+    (testing "ignores htmx requests; the response body will be shown in the error message, so it should not be HTML"
+      (is (= {:status 403
+              :body "original"
+              :headers {}}
+             (handle-request-response {:uri "/"
+                                       :headers {"hx-request" "true"}}
+                                      (http-response/forbidden "original")))))
 
     (testing "ignores 401 Unauthorized; it's handled by territory-bro.infra.auth0/wrap-redirect-to-login"
       (is (= {:status 401
