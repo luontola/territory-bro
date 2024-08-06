@@ -30,7 +30,6 @@ services:
   # https://github.com/postgis/docker-postgis/pull/356
   # https://hub.docker.com/r/imresamu/postgis/tags
   db:
-    #image: postgis/postgis:13-3.1
     image: imresamu/postgis:13-3.4
     environment:
       POSTGRES_USER: territorybro
