@@ -44,36 +44,38 @@ Consider the following territory card. This chapter will explain how the element
 
 ![Example territory card](/examples/card.jpg)
 
-Right in the middle is the territory's map. Each territory can be seen in QGIS as a "feature" on the territory "layer". With QGIS you can draw the territory as a polygon, and then write some "attributes" for the feature. The territory layer's feature attributes correspond to these elements of the territory card:
+Right in the middle is the territory's map. Each territory can be seen in QGIS as a "feature" on the territory "layer". With QGIS, you can draw the territory as a polygon, and then write some "attributes" for the feature. The territory layer's feature attributes correspond to these elements of the territory card:
 
 ![Explanation of QGIS feature attributes on the territory layer](/guide/attributes-explanation.png)
 
-Then let's consider the minimap in the top left corner, since it demonstrates every layer in QGIS:
+Next, let's consider the minimap in the top left corner, since it demonstrates every layer in QGIS:
 
 ![Explanation of QGIS layers](/guide/layers-explanation.png)
 
-The **territory** layer we've already mentioned. The territory's location is also shown in the minimap as a black circle.
+The **territory** layer we've already mentioned. The territory's location is shown in the minimap as a black circle.
 
-The **congregation_boundary** layer is for marking the whole area which is the congregation's responsibility. It is shown as a black line in the minimap.
+The **congregation_boundary** layer is for marking the whole area which is the congregation's responsibility. It is shown in the minimap as a black line.
 
-The **subregion** layer is optional. It can be used to mark city districts or postal code areas, if it makes easier to organize your territories. The minimap shows the current territory's region as a darkened area.
+The **subregion** layer is optional. It can be used to mark city districts or postal code areas, if it makes easier to organize your territories. The current territory's region is shown in the minimap as a darkened area.
 
-The **card_minimap_viewport** layer is optional. It can be used to crop the minimap. The example card's congregation boundary goes far to the east, to the countryside, but the minimap will be easier to see if it's limited to just the city for city territories. That can be done by adding to the minimap viewport a polygon feature which covers just the city portion, and another polygon feature which covers the countryside.
+The **card_minimap_viewport** layer is optional. It can be used to crop the minimap. The above example card's congregation boundary extends far to the east, to the countryside, but the minimap will be easier to see if it's limited to just the city for city territories. That can be done by adding to the card_minimap_viewport layer a polygon feature which covers just the city portion, and another polygon feature which covers the countryside.
 
 > Only the **congregation_boundary** and **territory** layers are mandatory. The other layers can be left empty.
 
-In the layers panel there are also various background maps. The default is **OpenStreetMap**, which has street maps for the whole world, but for some countries there are also additional maps. These same maps can be used for printing the territory cards inside Territory Bro.
+Last in the layers panel are various background maps. The default is **OpenStreetMap**, which has street maps for the whole world, but for some countries there are additional maps. These same maps can be used for printing the territory cards inside Territory Bro.
 
 
 ## Editing the Maps
 
 In QGIS, to draw a feature on one of the layers, first select the layer in the Layers panel (**View \| Panels \| Layers**) and choose **Layer \| Toggle Editing** from the application menus.
 
-Now the layer is editable and you can choose the **Edit \| Add Polygon Feature** tool. Left-click on the map to draw the polygon's corners. Right-click when you're finished, after which you can type the feature's attributes.
+Now the layer is editable, and you can choose the **Edit \| Add Polygon Feature** tool. Left-click on the map to draw the polygon's corners. Right-click when you're finished, after which you can type the feature's attributes.
 
 The feature is saved to the database only after you select **Layer \| Save Layer Edits**. To avoid losing work, it's best to save after each new territory you add, in case QGIS crashes and you need to restart QGIS (it is known to happen).
 
 After you are done editing a layer, you can choose **Layer \| Toggle Editing** again to make the layer read-only. (If there is a problem saving the data, you can typically recover by toggling the editing off and back on, and choosing to discard all unsaved changes.)
+
+View the following videos to see an example and to learn more.
 
 
 ### How to Create Congregation Boundaries
@@ -99,7 +101,7 @@ By default, the background maps from OpenStreetMap are used, but Territory Bro c
 
 You can do minor adjustments to the maps: drag with mouse to move, scroll mouse wheel to zoom, hold `Alt+Shift` while dragging to rotate. These adjustments are lost after you leave the page, so do them right before printing the cards. 
 
-Do a test print with one page, and check if the territory cards come out the right size. You might need to adjust the print scale in your web browser's or printer's settings. If it doesn't allow specifying the scale with an exact percentage, you can first save the page as PDF, and then print the PDF using [Adobe Reader](https://get.adobe.com/reader/). Print one page with 100% scale on paper (one A4 sheet fits 2 cards) and measure the distance between the printed crop marks. Then measure that what the dimensions of the card should really be, so that it would fit inside your protective plastic cases. Calculate the correct scale for printing the cards by dividing those two measures and try printing again.
+Do a test print with one page, and check if the territory cards come out the right size. You might need to adjust the print scale in your web browser's or printer's settings. (If your web browser doesn't allow specifying the scale with an exact percentage, you can first save the page as a PDF, and then print the PDF using [Adobe Reader](https://get.adobe.com/reader/).) Print one page with 100% scale on paper (one A4 sheet fits 2 cards) and measure the distance between the printed crop marks. Then measure that what the dimensions of the card should really be, so that it would fit inside your protective plastic cases. Calculate the correct scale for printing the cards by dividing those two measures, and try printing again.
 
 Print the territory cards with the correct scale on thick paper. Cut the cards along the crop marks using a ruler and a sharp knife. Optionally cover the cards with adhesive book covering film (best done before cutting them out).
 
@@ -119,4 +121,4 @@ You can't edit a layer backed by a KML/KMZ file in QGIS, so you must make a copy
 
 ### Locating Staircase Entrances
 
-Sometimes it's possible to use [OpenStreetMap](https://www.openstreetmap.org/) to find out the staircase entrance letters/numbers easily. On the right side of the map, there is a **Query features** tool (a mouse cursor with a question mark). Click the building with that, and it might show the staircase entrance in the nearby features list. You could also use Google Street View. That can be helpful in drawing the territory maps, so that you don't always need to visit the places physically.
+Sometimes it's possible to use [OpenStreetMap](https://www.openstreetmap.org/) to find out the staircase entrance letters/numbers easily. On the right side of the map, there is a **Query features** tool (its icon is a mouse cursor with a question mark). Click the building with that, and it might show the staircase entrance in the nearby features list. You could also use Google Street View. That can be helpful in drawing the territory boundaries, so that you don't always need to visit the places physically.
