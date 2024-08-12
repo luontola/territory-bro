@@ -193,9 +193,9 @@
 
 (defmacro with-db [binding & body]
   (let [conn (first binding)
-        options (merge {:isolation :serializable}
-                       (second binding))]
-    `(jdbc/with-db-transaction [~conn {:datasource datasource} ~options]
+        options (second binding)]
+    `(jdbc/with-db-transaction [~conn {:datasource datasource} (merge {:isolation :read-committed}
+                                                                      ~options)]
        (use-master-schema ~conn)
        ~@body)))
 
@@ -222,6 +222,9 @@
 
 (defmacro auto-explain [conn min-duration & body]
   `(auto-explain* ~conn ~min-duration (fn [] ~@body)))
+
+(defn log-all-queries-in-this-transaction! [conn]
+  (jdbc/query conn ["SELECT set_config('log_statement', 'all', true)"]))
 
 (defn- explain-query [conn sql params]
   (jdbc/execute! conn ["SAVEPOINT explain_analyze"])

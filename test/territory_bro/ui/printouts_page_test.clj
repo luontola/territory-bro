@@ -14,7 +14,9 @@
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.infra.db :as db]
             [territory-bro.infra.permissions :as permissions]
+            [territory-bro.infra.user :as user]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
@@ -219,3 +221,19 @@
                       :share/key "abcxyz"}
                      (dissoc @*last-command :command/time :share/id)))
               (is (str/includes? html "<svg ")))))))))
+
+(deftest ^:slow parallel-qr-code-generation-test
+  (with-fixtures [db-fixture]
+    (let [request {:path-params {:congregation cong-id
+                                 :territory territory-id}}
+          handler (dmz/wrap-db-connection printouts-page/generate-qr-code!)
+          user-id (db/with-db [conn {}]
+                    (user/save-user! conn "test" {}))]
+      (testutil/with-events (concat test-events
+                                    (congregation/admin-permissions-granted cong-id user-id))
+        (auth/with-user-id user-id
+          (testing "avoids database transaction conflicts when many QR codes are generated in parallel"
+            (is (every? #(str/starts-with? % "<svg")
+                        (->> (repeat 10 #(handler request))
+                             (mapv future-call)
+                             (mapv deref))))))))))

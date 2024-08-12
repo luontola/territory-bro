@@ -71,6 +71,11 @@
         (throw e)))))
 
 (defn save! [conn stream-id stream-revision events]
+  ;; The prepare_new_event trigger already locks the events table, but
+  ;; transaction conflicts still happen when generating multiple QR codes
+  ;; in parallel. Maybe the insert statement acquires a lower level lock
+  ;; before the trigger is executed, and that produces a deadlock?
+  (query! conn :lock-events-table-for-writing)
   (->> events
        (map-indexed
         (fn [idx event]
@@ -85,14 +90,6 @@
                 (assoc :event/global-revision (:global_revision result))
                 (sorted-keys)))))
        (doall)))
-
-(defn acquire-write-lock!
-  "Normally save! already locks the events table, but if a transaction reads from the table before writing to it, that
-   can cause a deadlock when it happens concurrently. For those situations, you can call this method before the first
-   read to acquire the necessary write lock, and to wait for concurrent transactions to finish, avoiding deadlocks."
-  [conn]
-  (query! conn :lock-events-table-for-writing)
-  nil)
 
 (defn stream-info [conn stream-id]
   (first (jdbc/query conn ["select * from stream where stream_id = ?"
