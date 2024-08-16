@@ -46,7 +46,7 @@
 (def anonymous-model
   (assoc model
          :congregation-boundary ""
-         :permissions {}))
+         :permissions {:view-congregation-temporarily true}))
 
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id}}]

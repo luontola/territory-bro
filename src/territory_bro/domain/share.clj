@@ -37,7 +37,9 @@
 
 (defn- grant-opened-share [state share-id user-id]
   (if-some [share (get-in state [::shares share-id])]
-    (permissions/grant state user-id [:view-territory (:congregation/id share) (:territory/id share)])
+    (-> state
+        (permissions/grant user-id [:view-congregation-temporarily (:congregation/id share)])
+        (permissions/grant user-id [:view-territory (:congregation/id share) (:territory/id share)]))
     state))
 
 (defn grant-opened-shares [state share-ids user-id]

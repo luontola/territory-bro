@@ -36,7 +36,7 @@
     {:congregation-boundary congregation-boundary
      :territories territories
      :has-loans? (some? (:congregation/loans-csv-url congregation))
-     :permissions (select-keys (:congregation/permissions congregation) [:view-congregation])}))
+     :permissions (select-keys (:congregation/permissions congregation) [:view-congregation :view-congregation-temporarily])}))
 
 
 (defn limited-visibility-help []
@@ -79,7 +79,7 @@
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
      [:h1 (i18n/t "TerritoryListPage.title")]
-     (when-not (:view-congregation permissions)
+     (when (:view-congregation-temporarily permissions)
        (limited-visibility-help))
 
      [:div {:class (:map styles)}

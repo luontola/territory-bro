@@ -10,7 +10,7 @@
   (:import (territory_bro ValidationException)))
 
 (def all-permissions
-  [:view-congregation
+  [:view-congregation ; implies :view-territory
    :configure-congregation
    :gis-access
    :share-territory-link

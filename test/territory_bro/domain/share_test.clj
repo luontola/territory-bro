@@ -69,21 +69,25 @@
 (deftest grant-opened-shares-test
   (let [state (apply-events [share-created
                              share-created2])
-        permit1 [:view-territory cong-id territory-id]
-        permit2 [:view-territory cong-id territory-id2]]
+        permit-cong [:view-congregation-temporarily cong-id]
+        permit-t1 [:view-territory cong-id territory-id]
+        permit-t2 [:view-territory cong-id territory-id2]]
     (testing "no shares opened"
-      (is (not (permissions/allowed? state user-id permit1)))
-      (is (not (permissions/allowed? state user-id permit2))))
+      (is (not (permissions/allowed? state user-id permit-cong)))
+      (is (not (permissions/allowed? state user-id permit-t1)))
+      (is (not (permissions/allowed? state user-id permit-t2))))
 
     (testing "one share opened"
       (let [state (share/grant-opened-shares state [share-id] user-id)]
-        (is (permissions/allowed? state user-id permit1))
-        (is (not (permissions/allowed? state user-id permit2)))))
+        (is (permissions/allowed? state user-id permit-cong))
+        (is (permissions/allowed? state user-id permit-t1))
+        (is (not (permissions/allowed? state user-id permit-t2)))))
 
     (testing "many shares opened"
       (let [state (share/grant-opened-shares state [share-id share-id2] user-id)]
-        (is (permissions/allowed? state user-id permit1))
-        (is (permissions/allowed? state user-id permit2))))))
+        (is (permissions/allowed? state user-id permit-cong))
+        (is (permissions/allowed? state user-id permit-t1))
+        (is (permissions/allowed? state user-id permit-t2))))))
 
 
 ;;;; Queries

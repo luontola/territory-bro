@@ -137,7 +137,7 @@
 
           (testing "opened a share"
             (let [expected (assoc expected
-                                  :congregation/permissions {}
+                                  :congregation/permissions {:view-congregation-temporarily true}
                                   :congregation/users []
                                   :congregation/territories [{:territory/id territory-id
                                                               :territory/number "123"

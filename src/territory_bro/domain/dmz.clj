@@ -137,23 +137,20 @@
 
 (defn- apply-user-permissions-for-congregation [cong]
   (let [user-id (auth/current-user-id)
-        cong-id (:congregation/id cong)
-        ;; TODO: move territory fetching to list-territories
-        territory-ids (lazy-seq (for [[_ _ territory-id] (permissions/match *state* user-id [:view-territory cong-id '*])]
-                                  territory-id))]
+        cong-id (:congregation/id cong)]
     (cond
       ;; TODO: deduplicate with congregation/apply-user-permissions
       (permissions/allowed? *state* user-id [:view-congregation cong-id])
       cong
 
-      ;; TODO: introduce a :view-congregation-temporarily permission when opening shares?
-      (not (empty? territory-ids))
+      (permissions/allowed? *state* user-id [:view-congregation-temporarily cong-id])
       (-> cong
           (assoc :congregation/users [])
           (assoc :congregation/congregation-boundaries [])
           (assoc :congregation/regions [])
           (assoc :congregation/card-minimap-viewports [])
-          (assoc :congregation/territories (for [territory-id territory-ids]
+          ;; TODO: move territory fetching to list-territories
+          (assoc :congregation/territories (for [[_ _ territory-id] (permissions/match *state* user-id [:view-territory cong-id '*])]
                                              (get-in *state* [::territory/territories cong-id territory-id]))))
 
       :else
@@ -219,6 +216,7 @@
   (let [user-id (auth/current-user-id)
         cong-id (:congregation/id territory)
         territory-id (:territory/id territory)]
+    ;; TODO: :view-congregation implies every :view-territory - should the permits be decoupled?
     (when (or (permissions/allowed? *state* user-id [:view-congregation cong-id])
               (permissions/allowed? *state* user-id [:view-territory cong-id territory-id]))
       territory)))
