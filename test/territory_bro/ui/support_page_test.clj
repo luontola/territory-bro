@@ -4,9 +4,9 @@
 
 (ns territory-bro.ui.support-page-test
   (:require [clojure.test :refer :all]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.test.testutil :as testutil]
             [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.support-page :as support-page])
@@ -21,13 +21,13 @@
   (let [user-id (UUID/randomUUID)
         request {}]
     (binding [config/env {:support-email "support@example.com"}]
-      (auth/with-user-id user-id
+      (testutil/with-user-id user-id
 
         (testing "logged in"
           (is (= private-model (support-page/model! request))))
 
         (testing "anonymous user"
-          (auth/with-anonymous-user
+          (testutil/with-anonymous-user
             (is (= public-model (support-page/model! request)))))
 
         (testing "no support email configured"

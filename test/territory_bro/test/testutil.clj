@@ -7,6 +7,7 @@
             [territory-bro.commands :as commands]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.events :as events]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.foreign-key :as foreign-key]
             [territory-bro.projections :as projections])
   (:import (java.util.regex Pattern)))
@@ -77,3 +78,13 @@
 (defmacro with-request-state [request & body]
   `(binding [dmz/*state* (dmz/enrich-state-for-request dmz/*state* ~request)]
      ~@body))
+
+(defmacro with-user-id [user-id & body]
+  `(auth/with-user-id ~user-id
+     (with-request-state nil
+       ~@body)))
+
+(defmacro with-anonymous-user [& body]
+  `(auth/with-anonymous-user
+     (with-request-state nil
+       ~@body)))

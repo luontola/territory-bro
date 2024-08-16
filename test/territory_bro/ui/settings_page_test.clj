@@ -33,8 +33,8 @@
             :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"
             :sub "google-oauth2|102883237794451111459"
             :new? false}]
-   :congregation/permissions {:configure-congregation true
-                              :gis-access true}
+   :permissions {:configure-congregation true
+                 :gis-access true}
    :form/user-id nil})
 
 (def test-events
@@ -62,7 +62,7 @@
   (let [request {:path-params {:congregation cong-id}}]
     (testutil/with-events test-events
       (binding [user/get-users fake-get-users]
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
 
           (testing "logged in"
             (is (= model (settings-page/model! request))))
@@ -78,7 +78,7 @@
                                    (settings-page/model! request))))))
 
           (testing "anonymous user"
-            (auth/with-anonymous-user
+            (testutil/with-anonymous-user
               (is (thrown-match? ExceptionInfo
                                  {:type :ring.util.http-response/response
                                   :response {:status 401
@@ -110,12 +110,12 @@
 
 (deftest congregation-settings-section-test
   (testing "requires the configure-congregation permission"
-    (let [model (replace-in model [:congregation/permissions :configure-congregation] true false)]
+    (let [model (replace-in model [:permissions :configure-congregation] true false)]
       (is (nil? (settings-page/congregation-settings-section model))))))
 
 (deftest editing-maps-section-test
   (testing "requires the gis-access permission"
-    (let [model (replace-in model [:congregation/permissions :gis-access] true false)]
+    (let [model (replace-in model [:permissions :gis-access] true false)]
       (is (nil? (settings-page/editing-maps-section model))))))
 
 
@@ -182,7 +182,7 @@
 
 (deftest user-management-section-test
   (testing "requires the configure-congregation permission"
-    (let [model (replace-in model [:congregation/permissions :configure-congregation] true false)]
+    (let [model (replace-in model [:permissions :configure-congregation] true false)]
       (is (nil? (settings-page/user-management-section model))))))
 
 
@@ -256,7 +256,7 @@
       (binding [html/*page-path* "/settings-page-url"
                 user/get-users fake-get-users
                 config/env {:now #(Instant/now)}]
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
 
           (testing "save successful: redirects to same page"
             (with-fixtures [fake-dispatcher-fixture]
@@ -293,7 +293,7 @@
       (binding [html/*page-path* "/settings-page-url"
                 user/get-users fake-get-users
                 config/env {:now #(Instant/now)}]
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
 
           (testing "add successful: highlights the added user"
             (with-fixtures [fake-dispatcher-fixture]
@@ -347,7 +347,7 @@
     (testutil/with-events test-events
       (binding [html/*page-path* "/settings-page-url"
                 config/env {:now #(Instant/now)}]
-        (auth/with-user-id current-user-id
+        (testutil/with-user-id current-user-id
 
           (testing "removes the user and refreshes the users list"
             (with-fixtures [fake-dispatcher-fixture]
@@ -390,7 +390,7 @@
       (binding [config/env {:gis-database-host "gis.example.com"
                             :gis-database-name "example_db"
                             :gis-database-ssl-mode "prefer"}]
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
 
           (testing "downloads the QGIS project file for the congregation and user"
             (let [response (settings-page/download-qgis-project request)]

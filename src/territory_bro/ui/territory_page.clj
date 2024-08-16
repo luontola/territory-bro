@@ -18,11 +18,10 @@
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
         territory-id (get-in request [:path-params :territory])
-        congregation (dmz/get-congregation cong-id)
         territory (dmz/get-territory cong-id territory-id)]
     (-> {:territory (dissoc territory :congregation/id)
-         :permissions (-> (:congregation/permissions congregation)
-                          (select-keys [:edit-do-not-calls :share-territory-link]))}
+         :permissions {:edit-do-not-calls (dmz/allowed? [:edit-do-not-calls cong-id territory-id])
+                       :share-territory-link (dmz/allowed? [:share-territory-link cong-id territory-id])}}
         (merge (map-interaction-help/model request)))))
 
 

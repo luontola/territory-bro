@@ -7,9 +7,9 @@
             [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [territory-bro.dispatcher :as dispatcher]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.registration-page :as registration-page])
@@ -23,13 +23,13 @@
 (deftest model!-test
   (let [user-id (UUID/randomUUID)
         request {}]
-    (auth/with-user-id user-id
+    (testutil/with-user-id user-id
 
       (testing "logged in"
         (is (= model (registration-page/model! request))))
 
       (testing "anonymous user"
-        (auth/with-anonymous-user
+        (testutil/with-anonymous-user
           (is (thrown-match? ExceptionInfo
                              {:type :ring.util.http-response/response
                               :response {:status 401
@@ -41,7 +41,7 @@
   (let [user-id (UUID/randomUUID)
         request {:params {:congregationName "the name"}}]
     (binding [config/env {:now #(Instant/now)}]
-      (auth/with-user-id user-id
+      (testutil/with-user-id user-id
 
         (testing "logged in"
           (with-fixtures [fake-dispatcher-fixture]
@@ -56,7 +56,7 @@
                      response)))))
 
         (testing "anonymous user"
-          (auth/with-anonymous-user
+          (testutil/with-anonymous-user
             (with-fixtures [fake-dispatcher-fixture]
               (is (thrown-match? ExceptionInfo
                                  {:type :ring.util.http-response/response

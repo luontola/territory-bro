@@ -36,7 +36,7 @@
     {:congregation-boundary congregation-boundary
      :territories territories
      :has-loans? (some? (:congregation/loans-csv-url congregation))
-     :permissions (select-keys (:congregation/permissions congregation) [:view-congregation :view-congregation-temporarily])}))
+     :permissions {:view-congregation-temporarily (dmz/allowed? [:view-congregation-temporarily cong-id])}}))
 
 
 (defn limited-visibility-help []

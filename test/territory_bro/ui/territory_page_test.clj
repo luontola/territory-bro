@@ -10,7 +10,6 @@
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil :refer [replace-in]]
@@ -41,7 +40,8 @@
                :territory/region "the region"
                :territory/meta {:foo "bar"}
                :territory/location testdata/wkt-helsinki-rautatientori}
-   :permissions {:share-territory-link true}
+   :permissions {:edit-do-not-calls false
+                 :share-territory-link true}
    :mac? false})
 
 (def test-events
@@ -64,7 +64,7 @@
                                :territory territory-id}}]
     (testutil/with-events test-events
       (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
 
           (testing "default"
             (is (= model (territory-page/model! request))))
@@ -74,7 +74,7 @@
               (let [request (replace-in request [:path-params :congregation] cong-id "demo")]
                 (is (= demo-model
                        (territory-page/model! request)
-                       (auth/with-anonymous-user
+                       (testutil/with-anonymous-user
                          (territory-page/model! request))))))))))))
 
 (deftest view-test
@@ -141,7 +141,7 @@
     (testutil/with-events test-events
       (binding [config/env {:now #(Instant/now)}
                 do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]
 
             (let [html (territory-page/do-not-calls--save! request)]
@@ -177,7 +177,7 @@
       (binding [config/env {:now #(Instant/now)}
                 do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls
                 share/generate-share-key (constantly "abcxyz")]
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]
 
             (let [html (territory-page/share-link--open! request)]

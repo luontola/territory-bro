@@ -9,7 +9,6 @@
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.test.testutil :as testutil])
   (:import (java.util UUID)))
 
@@ -103,7 +102,6 @@
                   :congregation/name "Cong1 Name"
                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
                   :congregation/schema-name "cong1_schema"
-                  :congregation/permissions {:view-congregation true}
                   :congregation/territories [{:territory/id territory-id
                                               :territory/number "123"
                                               :territory/addresses "the addresses"
@@ -124,18 +122,17 @@
                   :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
     (testutil/with-events test-events
-      (auth/with-user-id user-id
+      (testutil/with-user-id user-id
         (testing "has view permissions"
           (is (= expected (dmz/get-own-congregation cong-id)))))
 
       (let [user-id (UUID. 0 0x666)]
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
           (testing "no permissions"
             (is (nil? (dmz/get-own-congregation cong-id))))
 
           (testing "opened a share"
             (let [expected (assoc expected
-                                  :congregation/permissions {:view-congregation-temporarily true}
                                   :congregation/territories [{:territory/id territory-id
                                                               :territory/number "123"
                                                               :territory/addresses "the addresses"
@@ -152,9 +149,8 @@
   (let [user-id (UUID. 0 0x666)
         expected {:congregation/id "demo" ; changed
                   :congregation/name "Demo Congregation" ; changed
-                  :congregation/loans-csv-url nil ; changed
-                  :congregation/permissions {:view-congregation true
-                                             :share-territory-link true} ; changed
+                  ;; removed :congregation/loans-csv-url
+                  ;; removed :congregation/schema-name
                   :congregation/territories [{:territory/id territory-id
                                               :territory/number "123"
                                               :territory/addresses "the addresses"
@@ -175,7 +171,7 @@
                   :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
     (testutil/with-events test-events
-      (auth/with-user-id user-id
+      (testutil/with-user-id user-id
         (testing "no demo congregation"
           (is (nil? (dmz/get-demo-congregation nil))))
 
@@ -196,12 +192,12 @@
                   :territory/location testdata/wkt-multi-polygon}]
     (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
       (testutil/with-events test-events
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
           (testing "has view permissions"
             (is (= expected (dmz/get-own-territory cong-id territory-id)))))
 
         (let [user-id (UUID. 0 0x666)]
-          (auth/with-user-id user-id
+          (testutil/with-user-id user-id
             (testing "no permissions"
               (is (nil? (dmz/get-own-territory cong-id territory-id))))
 
@@ -231,7 +227,7 @@
           (is (nil? (dmz/get-demo-territory cong-id (UUID. 0 0x666))))))
 
       (let [user-id (UUID. 0 0x666)]
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
           (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
             (testing "cannot see the demo congregation as own congregation"
               (is (nil? (dmz/get-own-territory cong-id territory-id))))))))))

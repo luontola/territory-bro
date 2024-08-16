@@ -6,8 +6,8 @@
   (:require [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [territory-bro.domain.dmz :as dmz]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.sudo-page :as sudo-page])
   (:import (clojure.lang ExceptionInfo)
            (java.util UUID)))
@@ -19,7 +19,7 @@
     (binding [config/env {:super-users #{super-user-id}}]
 
       (testing "super user is allowed"
-        (auth/with-user-id super-user-id
+        (testutil/with-user-id super-user-id
           (is (= {:status 303
                   :headers {"Location" "/"}
                   :session {::dmz/sudo? true}
@@ -27,7 +27,7 @@
                  (sudo-page/sudo request)))))
 
       (testing "regular user is denied"
-        (auth/with-user-id regular-user-id
+        (testutil/with-user-id regular-user-id
           (is (thrown-match? ExceptionInfo
                              {:type :ring.util.http-response/response
                               :response {:status 403
@@ -36,7 +36,7 @@
                              (sudo-page/sudo request)))))
 
       (testing "anonymous user is denied"
-        (auth/with-anonymous-user
+        (testutil/with-anonymous-user
           (is (thrown-match? ExceptionInfo
                              {:type :ring.util.http-response/response
                               :response {:status 401

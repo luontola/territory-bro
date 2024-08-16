@@ -5,8 +5,8 @@
 (ns territory-bro.ui.join-page-test
   (:require [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.test.fixtures :refer :all]
+            [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.join-page :as join-page])
   (:import (clojure.lang ExceptionInfo)
@@ -19,11 +19,11 @@
   (let [request {}]
 
     (testing "logged in"
-      (auth/with-user-id user-id
+      (testutil/with-user-id user-id
         (is (= model (join-page/model! request)))))
 
     (testing "anonymous user"
-      (auth/with-anonymous-user
+      (testutil/with-anonymous-user
         (is (thrown-match? ExceptionInfo
                            {:type :ring.util.http-response/response
                             :response {:status 401

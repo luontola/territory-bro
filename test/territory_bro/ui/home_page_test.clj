@@ -5,7 +5,6 @@
 (ns territory-bro.ui.home-page-test
   (:require [clojure.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil]
@@ -53,19 +52,19 @@
                                      :congregation/schema-name "cong3_schema"}])
       (binding [config/env {:demo-congregation (UUID/randomUUID)}]
         (testing "logged in, with congregations"
-          (auth/with-user-id user-id
+          (testutil/with-user-id user-id
             (is (= (-> model
                        (replace-in [:congregations 0 :congregation/id] (UUID. 0 1) cong-id1)
                        (replace-in [:congregations 1 :congregation/id] (UUID. 0 2) cong-id2))
                    (home-page/model! request)))))
 
         (testing "anonymous user"
-          (auth/with-anonymous-user
+          (testutil/with-anonymous-user
             (is (= anonymous-model (home-page/model! request))))))
 
       (binding [config/env {:demo-congregation nil}]
         (testing "anonymous user, no demo"
-          (auth/with-anonymous-user
+          (testutil/with-anonymous-user
             (is (= no-demo-model (home-page/model! request)))))))))
 
 (deftest view-test

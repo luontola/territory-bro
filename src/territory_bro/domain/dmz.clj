@@ -31,15 +31,20 @@
 (def ^:dynamic *conn*) ; unbound var gives a better error message than nil, when forgetting db/with-db
 
 (defn enrich-state-for-request [state request]
-  (let [session (:session request)]
-    (cond-> state
-      (::sudo? session) (congregation/sudo (auth/current-user-id))
-      (some? (::opened-shares session)) (share/grant-opened-shares (::opened-shares session)
-                                                                   (auth/current-user-id)))))
+  (let [session (:session request)
+        user-id (auth/current-user-id)]
+    (-> state
+        ;; default permissions for all users
+        (permissions/grant user-id [:view-congregation "demo"])
+        (permissions/grant user-id [:share-territory-link "demo"])
+        ;; custom permissions based on user session
+        (cond->
+          (::sudo? session) (congregation/sudo user-id)
+          (some? (::opened-shares session)) (share/grant-opened-shares (::opened-shares session) user-id)))))
 
 (defn- state-for-request [request]
-  (let [state (projections/cached-state)]
-    (enrich-state-for-request state request)))
+  (-> (projections/cached-state)
+      (enrich-state-for-request request)))
 
 (defn wrap-current-state [handler]
   (fn [request]
@@ -74,6 +79,13 @@
 
 (defn allowed? [permit]
   (permissions/allowed? *state* (auth/current-user-id) permit))
+
+(defn view-printouts-page? [cong-id]
+  (allowed? [:view-congregation cong-id]))
+
+(defn view-settings-page? [cong-id]
+  (or (allowed? [:configure-congregation cong-id])
+      (allowed? [:gis-access cong-id])))
 
 
 (defn- enrich-command [command]
@@ -116,16 +128,10 @@
 
 
 (defn- enrich-congregation [cong]
-  (let [user-id (auth/current-user-id)
-        cong-id (:congregation/id cong)]
+  (let [cong-id (:congregation/id cong)]
     (-> cong
         (dissoc :congregation/user-permissions)
         (assoc
-         ;; TODO: remove me - query individual permissions as needed
-         :congregation/permissions (->> (permissions/list-permissions *state* user-id [cong-id])
-                                        (map (fn [permission]
-                                               [permission true]))
-                                        (into {}))
          ;; TODO: extract query functions
          :congregation/territories (sequence (vals (get-in *state* [::territory/territories cong-id])))
          :congregation/congregation-boundaries (sequence (vals (get-in *state* [::congregation-boundary/congregation-boundaries cong-id])))
@@ -163,9 +169,7 @@
             (enrich-congregation)
             (assoc :congregation/id "demo")
             (assoc :congregation/name "Demo Congregation")
-            (assoc :congregation/loans-csv-url nil)
-            (assoc :congregation/permissions {:view-congregation true
-                                              :share-territory-link true})
+            (dissoc :congregation/loans-csv-url)
             (dissoc :congregation/schema-name))))
 
 (defn get-congregation [cong-id]

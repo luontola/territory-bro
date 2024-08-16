@@ -8,7 +8,6 @@
             [reitit.core :as reitit]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.share :as share]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.test.fixtures :refer :all]
@@ -35,7 +34,7 @@
       (binding [config/env {:now #(Instant/now)}]
 
         (testing "open regular share"
-          (auth/with-user-id user-id
+          (testutil/with-user-id user-id
             (with-fixtures [fake-dispatcher-fixture]
               (let [response (open-share-page/open-share! request)]
                 (is (= {:command/type :share.command/record-share-opened
@@ -52,7 +51,7 @@
                     "stores in session which shares the user has opened")))))
 
         (testing "keeps existing session state, supports opening multiple shares"
-          (auth/with-anonymous-user
+          (testutil/with-anonymous-user
             (with-fixtures [fake-dispatcher-fixture]
               (let [another-share-id (UUID/randomUUID)
                     request (assoc request :session {::dmz/opened-shares #{another-share-id}
@@ -65,7 +64,7 @@
 
         (testing "open demo share"
           (let [request {:path-params {:share-key demo-share-key}}]
-            (auth/with-anonymous-user
+            (testutil/with-anonymous-user
               (with-fixtures [fake-dispatcher-fixture]
                 (let [response (open-share-page/open-share! request)]
                   (is (= {:status 303
@@ -78,7 +77,7 @@
 
         (testing "share not found"
           (let [request {:path-params {:share-key "bad key"}}]
-            (auth/with-anonymous-user
+            (testutil/with-anonymous-user
               (with-fixtures [fake-dispatcher-fixture]
                 (is (thrown-match? ExceptionInfo
                                    {:type :ring.util.http-response/response

@@ -27,6 +27,7 @@
         users (dmz/list-congregation-users cong-id)
         new-user (some-> (get-in request [:params :new-user])
                          (parse-uuid))]
+    ;; TODO: wrap the name, loans-csv-url and user-id into a :form map, since they are user input?
     {:congregation/name (or (get-in request [:params :congregation-name])
                             (:congregation/name congregation))
      :congregation/loans-csv-url (or (get-in request [:params :loans-csv-url])
@@ -38,7 +39,8 @@
                             ;; new user first, then alphabetically by name
                             [(if (:new? user) 1 2)
                              (str/lower-case (str (:name user)))])))
-     :congregation/permissions (select-keys (:congregation/permissions congregation) [:configure-congregation :gis-access])
+     :permissions {:configure-congregation (dmz/allowed? [:configure-congregation cong-id])
+                   :gis-access (dmz/allowed? [:gis-access cong-id])}
      :form/user-id (get-in request [:params :user-id])}))
 
 
@@ -72,11 +74,10 @@
       [:p "After you have such a sheet, you can expose it to the Internet through " [:tt "File | Share | Publish to web"] ". "
        "Publish that sheet as a CSV file and enter its URL to the above field on this settings page."]))))
 
-(defn congregation-settings-section [model]
-  (when (-> model :congregation/permissions :configure-congregation)
+(defn congregation-settings-section [{:keys [permissions errors] :as model}]
+  (when (:configure-congregation permissions)
     (let [styles (:CongregationSettings (css/modules))
-          errors (->> (:errors model)
-                      (group-by first))]
+          errors (group-by first errors)]
       (h/html
        [:section
         [:form.pure-form.pure-form-aligned {:method "post"}
@@ -118,8 +119,8 @@
             (i18n/t "CongregationSettings.save")]]]]]))))
 
 
-(defn editing-maps-section [model]
-  (when (-> model :congregation/permissions :gis-access)
+(defn editing-maps-section [{:keys [permissions]}]
+  (when (:gis-access permissions)
     (h/html
      [:section
       [:h2 (i18n/t "EditingMaps.title")]
@@ -171,9 +172,9 @@
                                                    (str/replace "{{congregation}}" (:congregation/name model))))}
             (i18n/t "UserManagement.removeUser")]]])))
 
-(defn user-management-section [model]
-  (when (-> model :congregation/permissions :configure-congregation)
-    (let [errors (group-by first (:errors model))]
+(defn user-management-section [{:keys [permissions errors] :as model}]
+  (when (:configure-congregation permissions)
+    (let [errors (group-by first errors)]
       (h/html
        [:section#users-section {:hx-target "this"
                                 :hx-swap "outerHTML"}

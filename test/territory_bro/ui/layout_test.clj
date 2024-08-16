@@ -20,6 +20,7 @@
 (def user-id (UUID. 0 2))
 (def anonymous-model
   {:congregation nil
+   :permissions nil
    :user nil
    ;; the page path and query string should both be included in the return-to-url
    :login-url "/login?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk"
@@ -28,6 +29,7 @@
    :demo? false})
 (def developer-model
   {:congregation nil
+   :permissions nil
    :user nil
    :login-url "/login?return-to-url=%2F"
    :language-selection-width nil
@@ -35,6 +37,7 @@
    :demo? false})
 (def logged-in-model
   {:congregation nil
+   :permissions nil
    :user {:user/id user-id
           :name "John Doe"}
    :login-url nil
@@ -43,12 +46,9 @@
    :demo? false})
 (def congregation-model
   {:congregation {:congregation/id cong-id
-                  :congregation/name "the congregation"
-                  :congregation/permissions {:configure-congregation true
-                                             :edit-do-not-calls true
-                                             :gis-access true
-                                             :share-territory-link true
-                                             :view-congregation true}}
+                  :congregation/name "the congregation"}
+   :permissions {:view-printouts-page true
+                 :view-settings-page true}
    :user {:user/id user-id
           :name "John Doe"}
    :login-url nil
@@ -57,9 +57,9 @@
    :demo? false})
 (def demo-congregation-model
   {:congregation {:congregation/id "demo"
-                  :congregation/name "Demo Congregation"
-                  :congregation/permissions {:share-territory-link true
-                                             :view-congregation true}}
+                  :congregation/name "Demo Congregation"}
+   :permissions {:view-printouts-page true
+                 :view-settings-page false}
    :user nil
    :login-url "/login?return-to-url=%2Fcongregation%2Fdemo"
    :language-selection-width nil
@@ -78,14 +78,14 @@
                        :name "John Doe"}
 
         (testing "top level, anonymous"
-          (auth/with-anonymous-user
+          (testutil/with-anonymous-user
             (let [request {:uri "/some/page"
                            :query-string "foo=bar&gazonk"
                            :cookies {"languageSelectionWidth" {:value "42px"}}}]
               (is (= anonymous-model (layout/model! request))))))
 
         (testing "top level, anonymous, developer mode"
-          (auth/with-anonymous-user
+          (testutil/with-anonymous-user
             (binding [config/env (replace-in config/env [:dev] false true)]
               (let [request {:uri "/"
                              :query-string nil}]
@@ -103,7 +103,7 @@
             (is (= congregation-model (layout/model! request)))))
 
         (testing "demo congregation"
-          (auth/with-anonymous-user
+          (testutil/with-anonymous-user
             (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
               (let [request {:uri "/congregation/demo"
                              :query-string nil
@@ -196,7 +196,7 @@
                the content")
              (-> (h/html [:h1 "the title"]
                          [:p "the content"])
-                 (layout/page (assoc-in congregation-model [:congregation :congregation/permissions] {}))
+                 (layout/page (dissoc congregation-model :permissions))
                  (html/visible-text))))))
 
   (testing "demo congregation"

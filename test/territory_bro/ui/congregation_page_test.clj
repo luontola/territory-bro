@@ -6,7 +6,6 @@
   (:require [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.congregation-page :as congregation-page]
@@ -15,16 +14,13 @@
            (java.util UUID)))
 
 (def model
-  {:congregation/name "Example Congregation"
-   :congregation/permissions {:configure-congregation true
-                              :edit-do-not-calls true
-                              :gis-access true
-                              :share-territory-link true
-                              :view-congregation true}})
+  {:congregation {:congregation/name "Example Congregation"}
+   :permissions {:view-printouts-page true
+                 :view-settings-page true}})
 (def demo-model
-  {:congregation/name "Demo Congregation"
-   :congregation/permissions {:share-territory-link true
-                              :view-congregation true}})
+  {:congregation {:congregation/name "Demo Congregation"}
+   :permissions {:view-printouts-page true
+                 :view-settings-page false}})
 
 (deftest model!-test
   (let [user-id (UUID/randomUUID)
@@ -36,7 +32,7 @@
                                        :congregation/name "Example Congregation"
                                        :congregation/schema-name "cong1_schema"}
                                       (congregation/admin-permissions-granted cong-id user-id)])
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
 
           (testing "logged in"
             (is (= model (congregation-page/model! request))))
@@ -50,7 +46,7 @@
                                (congregation-page/model! {:path-params {:congregation (UUID/randomUUID)}}))))
 
           (testing "anonymous user"
-            (auth/with-anonymous-user
+            (testutil/with-anonymous-user
               (is (thrown-match? ExceptionInfo
                                  {:type :ring.util.http-response/response
                                   :response {:status 401
@@ -62,7 +58,7 @@
             (let [request {:path-params {:congregation "demo"}}]
               (is (= demo-model
                      (congregation-page/model! request)
-                     (auth/with-anonymous-user
+                     (testutil/with-anonymous-user
                        (congregation-page/model! request)))))))))))
 
 (deftest view-test
@@ -79,5 +75,5 @@
     (is (= (html/normalize-whitespace
             "Example Congregation
              Territories")
-           (-> (congregation-page/view (dissoc model :congregation/permissions))
+           (-> (congregation-page/view (dissoc model :permissions))
                html/visible-text)))))

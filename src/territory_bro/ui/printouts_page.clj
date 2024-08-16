@@ -83,9 +83,7 @@
          :card-minimap-viewports (->> (:congregation/card-minimap-viewports congregation)
                                       (mapv :card-minimap-viewport/location))
          ;; TODO: make it a form option that whether to include QR codes on a printout
-         :qr-codes-allowed? (or (dmz/allowed? [:share-territory-link cong-id])
-                                ;; TODO: give everyone a default :share-territory-link permission to the demo congregation, to avoid this check here?
-                                (= "demo" cong-id))
+         :qr-codes-allowed? (dmz/allowed? [:share-territory-link cong-id])
          :form (-> (merge default-params (:params request))
                    (select-keys [:template :language :map-raster :regions :territories])
                    (update :regions parse-uuid-multiselect)

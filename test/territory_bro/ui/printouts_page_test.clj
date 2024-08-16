@@ -12,7 +12,6 @@
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.geometry :as geometry]
-            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.permissions :as permissions]
@@ -105,7 +104,7 @@
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id}}]
     (testutil/with-events test-events
-      (auth/with-user-id user-id
+      (testutil/with-user-id user-id
 
         (testing "default"
           (is (= default-model (printouts-page/model! request))))
@@ -129,7 +128,7 @@
             (let [request {:path-params {:congregation "demo"}}]
               (is (= demo-model
                      (printouts-page/model! request)
-                     (auth/with-anonymous-user
+                     (testutil/with-anonymous-user
                        (printouts-page/model! request)))))))))))
 
 (deftest parse-uuid-multiselect-test
@@ -209,7 +208,7 @@
       (binding [config/env {:now #(Instant/now)}
                 do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls
                 share/generate-share-key (constantly "abcxyz")]
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]
 
             (let [html (printouts-page/generate-qr-code! request)]
@@ -231,7 +230,7 @@
                     (user/save-user! conn "test" {}))]
       (testutil/with-events (concat test-events
                                     (congregation/admin-permissions-granted cong-id user-id))
-        (auth/with-user-id user-id
+        (testutil/with-user-id user-id
           (testing "avoids database transaction conflicts when many QR codes are generated in parallel"
             (is (every? #(str/starts-with? % "<svg")
                         (->> (repeat 10 #(handler request))

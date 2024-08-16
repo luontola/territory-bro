@@ -34,7 +34,7 @@
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-helsinki-rautatientori}]
    :has-loans? false
-   :permissions {:view-congregation true}})
+   :permissions {:view-congregation-temporarily false}})
 (def model-loans-enabled
   (replace-in model [:has-loans?] false true))
 (def model-loans-fetched
@@ -42,7 +42,7 @@
                                                          :territory/staleness 7}))
 (def demo-model
   (assoc model
-         :permissions {:view-congregation true}))
+         :permissions {:view-congregation-temporarily false}))
 (def anonymous-model
   (assoc model
          :congregation-boundary ""
@@ -67,7 +67,7 @@
                                      :territory/region "the region"
                                      :territory/meta {:foo "bar"}
                                      :territory/location testdata/wkt-helsinki-rautatientori}])
-      (auth/with-user-id user-id
+      (testutil/with-user-id user-id
         (testing "default"
           (is (= model (territory-list-page/model! request {}))))
 
@@ -76,11 +76,11 @@
             (let [request {:path-params {:congregation "demo"}}]
               (is (= demo-model
                      (territory-list-page/model! request {})
-                     (auth/with-anonymous-user
+                     (testutil/with-anonymous-user
                        (territory-list-page/model! request {})))))))
 
         (testing "anonymous user, has opened a share"
-          (auth/with-anonymous-user
+          (testutil/with-anonymous-user
             (let [share-id (UUID/randomUUID)
                   request (assoc request :session {::dmz/opened-shares #{share-id}})]
               (testutil/with-events [{:event/type :share.event/share-created
