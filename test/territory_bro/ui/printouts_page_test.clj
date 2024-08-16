@@ -217,7 +217,7 @@
                       :command/user user-id
                       :congregation/id cong-id
                       :territory/id territory-id
-                      :share/type :link
+                      :share/type :qr-code
                       :share/key "abcxyz"}
                      (dissoc @*last-command :command/time :share/id)))
               (is (str/includes? html "<svg ")))))))))

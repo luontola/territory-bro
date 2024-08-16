@@ -253,7 +253,7 @@
                                    fetch-loans? (loan/enrich-territory-loans!))))))
 
 
-(defn- generate-share-key [territory]
+(defn- generate-share-key [territory share-type]
   (let [cong-id (:congregation/id territory)
         territory-id (:territory/id territory)]
     (if (= "demo" cong-id)
@@ -262,20 +262,20 @@
         (dispatch! {:command/type :share.command/create-share
                     :share/id (UUID/randomUUID)
                     :share/key share-key
-                    :share/type :link
+                    :share/type share-type
                     :congregation/id cong-id
                     :territory/id territory-id})
         share-key))))
 
 (defn share-territory-link [cong-id territory-id]
   (let [territory (get-territory cong-id territory-id)
-        share-key (generate-share-key territory)]
+        share-key (generate-share-key territory :link)]
     {:url (share/build-share-url share-key (:territory/number territory))
      :key share-key}))
 
 (defn generate-qr-code [cong-id territory-id]
   (let [territory (get-territory cong-id territory-id)
-        share-key (generate-share-key territory)]
+        share-key (generate-share-key territory :qr-code)]
     {:url (str (:qr-code-base-url config/env) "/" share-key)
      :key share-key}))
 
