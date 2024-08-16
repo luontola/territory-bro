@@ -31,13 +31,13 @@
                             (:congregation/name congregation))
      :congregation/loans-csv-url (or (get-in request [:params :loans-csv-url])
                                      (:congregation/loans-csv-url congregation))
-     :congregation/users (->> users
-                              (mapv (fn [user]
-                                      (assoc user :new? (= new-user (:id user)))))
-                              (sort-by (fn [user]
-                                         ;; new user first, then alphabetically by name
-                                         [(if (:new? user) 1 2)
-                                          (str/lower-case (str (:name user)))])))
+     :users (->> users
+                 (mapv (fn [user]
+                         (assoc user :new? (= new-user (:id user)))))
+                 (sort-by (fn [user]
+                            ;; new user first, then alphabetically by name
+                            [(if (:new? user) 1 2)
+                             (str/lower-case (str (:name user)))])))
      :congregation/permissions (select-keys (:congregation/permissions congregation) [:configure-congregation :gis-access])
      :form/user-id (get-in request [:params :user-id])}))
 
@@ -218,7 +218,7 @@
            [:th (i18n/t "UserManagement.loginMethod")]
            [:th (i18n/t "UserManagement.actions")]]]
          [:tbody
-          (for [user (:congregation/users model)]
+          (for [user (:users model)]
             (users-table-row user model))]]]))))
 
 

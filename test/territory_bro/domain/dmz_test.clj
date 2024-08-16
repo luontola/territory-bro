@@ -104,8 +104,6 @@
                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
                   :congregation/schema-name "cong1_schema"
                   :congregation/permissions {:view-congregation true}
-                  :congregation/users [{:user/id user-id}
-                                       {:user/id user-id2}]
                   :congregation/territories [{:territory/id territory-id
                                               :territory/number "123"
                                               :territory/addresses "the addresses"
@@ -138,7 +136,6 @@
           (testing "opened a share"
             (let [expected (assoc expected
                                   :congregation/permissions {:view-congregation-temporarily true}
-                                  :congregation/users []
                                   :congregation/territories [{:territory/id territory-id
                                                               :territory/number "123"
                                                               :territory/addresses "the addresses"
@@ -158,7 +155,6 @@
                   :congregation/loans-csv-url nil ; changed
                   :congregation/permissions {:view-congregation true
                                              :share-territory-link true} ; changed
-                  :congregation/users [] ; changed
                   :congregation/territories [{:territory/id territory-id
                                               :territory/number "123"
                                               :territory/addresses "the addresses"

@@ -126,9 +126,6 @@
                                         (map (fn [permission]
                                                [permission true]))
                                         (into {}))
-         ;; TODO: remove me - use list-congregation-users instead
-         :congregation/users (for [user-id (congregation/get-users *state* cong-id)]
-                               {:user/id user-id})
          ;; TODO: extract query functions
          :congregation/territories (sequence (vals (get-in *state* [::territory/territories cong-id])))
          :congregation/congregation-boundaries (sequence (vals (get-in *state* [::congregation-boundary/congregation-boundaries cong-id])))
@@ -145,7 +142,6 @@
 
       (permissions/allowed? *state* user-id [:view-congregation-temporarily cong-id])
       (-> cong
-          (assoc :congregation/users [])
           (assoc :congregation/congregation-boundaries [])
           (assoc :congregation/regions [])
           (assoc :congregation/card-minimap-viewports [])
@@ -170,7 +166,6 @@
             (assoc :congregation/loans-csv-url nil)
             (assoc :congregation/permissions {:view-congregation true
                                               :share-territory-link true})
-            (assoc :congregation/users [])
             (dissoc :congregation/schema-name))))
 
 (defn get-congregation [cong-id]

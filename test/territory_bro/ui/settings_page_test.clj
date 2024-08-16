@@ -27,12 +27,12 @@
 (def model
   {:congregation/name "Congregation Name"
    :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
-   :congregation/users [{:id user-id
-                         :name "Esko Luontola"
-                         :nickname "esko.luontola"
-                         :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"
-                         :sub "google-oauth2|102883237794451111459"
-                         :new? false}]
+   :users [{:id user-id
+            :name "Esko Luontola"
+            :nickname "esko.luontola"
+            :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"
+            :sub "google-oauth2|102883237794451111459"
+            :new? false}]
    :congregation/permissions {:configure-congregation true
                               :gis-access true}
    :form/user-id nil})
@@ -88,7 +88,7 @@
 
           (testing "user was added"
             (let [request (assoc-in request [:params :new-user] (str user-id))
-                  model (replace-in model [:congregation/users 0 :new?] false true)]
+                  model (replace-in model [:users 0 :new?] false true)]
               (is (= model (settings-page/model! request)))))
 
           (testing "shows new users first, followed by the rest alphabetically"
@@ -105,7 +105,7 @@
               (binding [user/get-users (constantly (shuffle users))]
                 (is (= ["c" "a" "B" "D" "e"]
                        (->> (settings-page/model! request)
-                            :congregation/users
+                            :users
                             (map :name))))))))))))
 
 (deftest congregation-settings-section-test
