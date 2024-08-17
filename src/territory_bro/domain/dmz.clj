@@ -156,23 +156,22 @@
           (apply-user-permissions-for-congregation)))
 
 (defn get-demo-congregation [cong-id]
-  (when cong-id
-    (some-> (congregation/get-unrestricted-congregation *state* cong-id)
-            (enrich-congregation)
-            (assoc :congregation/id "demo")
-            (assoc :congregation/name "Demo Congregation")
-            (dissoc :congregation/loans-csv-url)
-            (dissoc :congregation/schema-name))))
+  (some-> (congregation/get-unrestricted-congregation *state* cong-id)
+          (enrich-congregation)
+          (assoc :congregation/id "demo")
+          (assoc :congregation/name "Demo Congregation")
+          (dissoc :congregation/loans-csv-url)
+          (dissoc :congregation/schema-name)))
 
 (defn- coerce-demo-cong-id [cong-id]
   (if (= "demo" cong-id)
-    (:demo-congregation config/env)
+    (or (:demo-congregation config/env)
+        (http-response/not-found! "No demo"))
     cong-id))
 
 (defn get-congregation [cong-id]
   (if (= "demo" cong-id)
-    (or (get-demo-congregation (coerce-demo-cong-id cong-id))
-        (http-response/not-found! "No demo"))
+    (get-demo-congregation (coerce-demo-cong-id cong-id))
     (or (get-own-congregation cong-id)
         (require-logged-in!)
         (http-response/forbidden! "No congregation access"))))
@@ -222,14 +221,12 @@
           (apply-user-permissions-for-territory)))
 
 (defn get-demo-territory [cong-id territory-id]
-  (when cong-id
-    (some-> (territory/get-unrestricted-territory *state* cong-id territory-id)
-            (assoc :congregation/id "demo"))))
+  (some-> (territory/get-unrestricted-territory *state* cong-id territory-id)
+          (assoc :congregation/id "demo")))
 
 (defn get-territory [cong-id territory-id]
   (if (= "demo" cong-id)
-    (or (get-demo-territory (coerce-demo-cong-id cong-id) territory-id)
-        (http-response/not-found! "No demo"))
+    (get-demo-territory (coerce-demo-cong-id cong-id) territory-id)
     (or (get-own-territory cong-id territory-id)
         (require-logged-in!)
         (http-response/forbidden! "No territory access"))))
