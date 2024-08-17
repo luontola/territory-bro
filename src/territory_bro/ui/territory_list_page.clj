@@ -32,7 +32,7 @@
                                    ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
                                    (geometry/union)
                                    (str))
-        territories (dmz/list-territories! cong-id {:fetch-loans? fetch-loans?})]
+        territories (dmz/list-territories cong-id {:fetch-loans? fetch-loans?})]
     {:congregation-boundary congregation-boundary
      :territories territories
      :has-loans? (some? (:congregation/loans-csv-url congregation))

@@ -42,16 +42,16 @@
                     (catch Exception e
                       (log/warn e "Failed to parse loans CSV row" (pr-str row))))))))))
 
-(defn enrich-territory-loans! [congregation]
+(defn enrich-territory-loans! [territories loans-csv-url]
   (try
-    (let [loans (-> (download! (:congregation/loans-csv-url congregation))
+    (let [loans (-> (download! loans-csv-url)
                     (parse-loans-csv))
           number->loan (->> loans
                             (group-by :territory/number)
-                            (map-vals first))
-          with-loan (fn [territory]
-                      (merge territory (number->loan (:territory/number territory))))]
-      (update congregation :congregation/territories #(map with-loan %)))
+                            (map-vals first))]
+      (mapv (fn [territory]
+              (merge territory (number->loan (:territory/number territory))))
+            territories))
     (catch Throwable t
-      (log/error t "Failed to enrich congregation with territory loans" (:congregation/id congregation))
-      congregation)))
+      (log/error t "Failed to enrich territories with loans from" loans-csv-url)
+      territories)))

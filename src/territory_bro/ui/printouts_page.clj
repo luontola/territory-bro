@@ -62,7 +62,7 @@
         regions (->> (:congregation/regions congregation)
                      (sort-by (comp str :region/name)
                               (CaseInsensitiveSimpleNaturalComparator/getInstance)))
-        territories (->> (:congregation/territories congregation)
+        territories (->> (dmz/list-territories cong-id nil)
                          (sort-by (comp str :territory/number)
                                   (CaseInsensitiveSimpleNaturalComparator/getInstance)))
         default-params {:template (:id (first templates))

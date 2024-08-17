@@ -9,6 +9,7 @@
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
+            [territory-bro.infra.config :as config]
             [territory-bro.test.testutil :as testutil])
   (:import (java.util UUID)))
 
@@ -97,23 +98,11 @@
    share-created])
 
 
-(deftest test-get-congregation
+(deftest get-congregation-test
   (let [expected {:congregation/id cong-id
                   :congregation/name "Cong1 Name"
                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
                   :congregation/schema-name "cong1_schema"
-                  :congregation/territories [{:territory/id territory-id
-                                              :territory/number "123"
-                                              :territory/addresses "the addresses"
-                                              :territory/region "the region"
-                                              :territory/meta {:foo "bar"}
-                                              :territory/location testdata/wkt-multi-polygon}
-                                             {:territory/id territory-id2
-                                              :territory/number "456"
-                                              :territory/addresses "the addresses"
-                                              :territory/region "the region"
-                                              :territory/meta {:foo "bar"}
-                                              :territory/location testdata/wkt-multi-polygon}]
                   :congregation/congregation-boundaries [{:congregation-boundary/id congregation-boundary-id
                                                           :congregation-boundary/location testdata/wkt-multi-polygon}]
                   :congregation/regions [{:region/id region-id
@@ -133,36 +122,18 @@
 
           (testing "opened a share"
             (let [expected (assoc expected
-                                  :congregation/territories [{:territory/id territory-id
-                                                              :territory/number "123"
-                                                              :territory/addresses "the addresses"
-                                                              :territory/region "the region"
-                                                              :territory/meta {:foo "bar"}
-                                                              :territory/location testdata/wkt-multi-polygon}]
                                   :congregation/congregation-boundaries []
                                   :congregation/regions []
                                   :congregation/card-minimap-viewports [])]
               (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
                 (is (= expected (dmz/get-own-congregation cong-id)))))))))))
 
-(deftest test-get-demo-congregation
+(deftest get-demo-congregation-test ; TODO: merge with get-congregation-test, make get-demo-congregation private
   (let [user-id (UUID. 0 0x666)
         expected {:congregation/id "demo" ; changed
                   :congregation/name "Demo Congregation" ; changed
                   ;; removed :congregation/loans-csv-url
                   ;; removed :congregation/schema-name
-                  :congregation/territories [{:territory/id territory-id
-                                              :territory/number "123"
-                                              :territory/addresses "the addresses"
-                                              :territory/region "the region"
-                                              :territory/meta {:foo "bar"}
-                                              :territory/location testdata/wkt-multi-polygon}
-                                             {:territory/id territory-id2
-                                              :territory/number "456"
-                                              :territory/addresses "the addresses"
-                                              :territory/region "the region"
-                                              :territory/meta {:foo "bar"}
-                                              :territory/location testdata/wkt-multi-polygon}]
                   :congregation/congregation-boundaries [{:congregation-boundary/id congregation-boundary-id
                                                           :congregation-boundary/location testdata/wkt-multi-polygon}]
                   :congregation/regions [{:region/id region-id
@@ -181,7 +152,7 @@
         (testing "cannot see the demo congregation as own congregation"
           (is (nil? (dmz/get-own-congregation cong-id))))))))
 
-(deftest test-get-territory
+(deftest get-territory-test
   (let [expected {:congregation/id cong-id
                   :territory/id territory-id
                   :territory/number "123"
@@ -205,7 +176,7 @@
               (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
                 (is (= expected (dmz/get-own-territory cong-id territory-id)))))))))))
 
-(deftest test-get-demo-territory
+(deftest get-demo-territory-test ; TODO: merge with get-territory-test, make get-demo-territory private
   (let [expected {:congregation/id "demo" ; changed
                   :territory/id territory-id
                   :territory/number "123"
@@ -231,3 +202,34 @@
           (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
             (testing "cannot see the demo congregation as own congregation"
               (is (nil? (dmz/get-own-territory cong-id territory-id))))))))))
+
+(deftest list-territories-test
+  (let [all-territories [{:territory/id territory-id
+                          :territory/number "123"
+                          :territory/addresses "the addresses"
+                          :territory/region "the region"
+                          :territory/meta {:foo "bar"}
+                          :territory/location testdata/wkt-multi-polygon}
+                         {:territory/id territory-id2
+                          :territory/number "456"
+                          :territory/addresses "the addresses"
+                          :territory/region "the region"
+                          :territory/meta {:foo "bar"}
+                          :territory/location testdata/wkt-multi-polygon}]]
+    (testutil/with-events test-events
+      (testutil/with-user-id user-id
+        (testing "has view permissions"
+          (is (= all-territories (dmz/list-territories cong-id nil)))))
+
+      (let [user-id (UUID. 0 0x666)]
+        (testutil/with-user-id user-id
+          (testing "no permissions"
+            (is (nil? (dmz/list-territories cong-id nil))))
+
+          (testing "demo congregation"
+            (binding [config/env {:demo-congregation cong-id}]
+              (is (= all-territories (dmz/list-territories "demo" nil)))))
+
+          (testing "opened a share"
+            (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
+              (is (= (take 1 all-territories) (dmz/list-territories cong-id nil))))))))))

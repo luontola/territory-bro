@@ -133,30 +133,22 @@
         (dissoc :congregation/user-permissions)
         (assoc
          ;; TODO: extract query functions
-         :congregation/territories (sequence (vals (get-in *state* [::territory/territories cong-id])))
          :congregation/congregation-boundaries (sequence (vals (get-in *state* [::congregation-boundary/congregation-boundaries cong-id])))
          :congregation/regions (sequence (vals (get-in *state* [::region/regions cong-id])))
          :congregation/card-minimap-viewports (sequence (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports cong-id])))))))
 
 (defn- apply-user-permissions-for-congregation [cong]
-  (let [user-id (auth/current-user-id)
-        cong-id (:congregation/id cong)]
+  (let [cong-id (:congregation/id cong)]
     (cond
       ;; TODO: deduplicate with congregation/apply-user-permissions
-      (permissions/allowed? *state* user-id [:view-congregation cong-id])
+      (allowed? [:view-congregation cong-id])
       cong
 
-      (permissions/allowed? *state* user-id [:view-congregation-temporarily cong-id])
+      (allowed? [:view-congregation-temporarily cong-id])
       (-> cong
           (assoc :congregation/congregation-boundaries [])
           (assoc :congregation/regions [])
-          (assoc :congregation/card-minimap-viewports [])
-          ;; TODO: move territory fetching to list-territories
-          (assoc :congregation/territories (for [[_ _ territory-id] (permissions/match *state* user-id [:view-territory cong-id '*])]
-                                             (get-in *state* [::territory/territories cong-id territory-id]))))
-
-      :else
-      nil)))
+          (assoc :congregation/card-minimap-viewports [])))))
 
 (defn get-own-congregation [cong-id]
   (some-> (congregation/get-unrestricted-congregation *state* cong-id)
@@ -172,9 +164,14 @@
             (dissoc :congregation/loans-csv-url)
             (dissoc :congregation/schema-name))))
 
+(defn- coerce-demo-cong-id [cong-id]
+  (if (= "demo" cong-id)
+    (:demo-congregation config/env)
+    cong-id))
+
 (defn get-congregation [cong-id]
   (if (= "demo" cong-id)
-    (or (get-demo-congregation (:demo-congregation config/env))
+    (or (get-demo-congregation (coerce-demo-cong-id cong-id))
         (http-response/not-found! "No demo"))
     (or (get-own-congregation cong-id)
         (require-logged-in!)
@@ -212,12 +209,11 @@
              (select-keys [:territory/do-not-calls]))))
 
 (defn- apply-user-permissions-for-territory [territory]
-  (let [user-id (auth/current-user-id)
-        cong-id (:congregation/id territory)
+  (let [cong-id (:congregation/id territory)
         territory-id (:territory/id territory)]
     ;; TODO: :view-congregation implies every :view-territory - should the permits be decoupled?
-    (when (or (permissions/allowed? *state* user-id [:view-congregation cong-id])
-              (permissions/allowed? *state* user-id [:view-territory cong-id territory-id]))
+    (when (or (allowed? [:view-congregation cong-id])
+              (allowed? [:view-territory cong-id territory-id]))
       territory)))
 
 (defn get-own-territory [cong-id territory-id]
@@ -232,22 +228,25 @@
 
 (defn get-territory [cong-id territory-id]
   (if (= "demo" cong-id)
-    (or (get-demo-territory (:demo-congregation config/env) territory-id)
+    (or (get-demo-territory (coerce-demo-cong-id cong-id) territory-id)
         (http-response/not-found! "No demo"))
     (or (get-own-territory cong-id territory-id)
         (require-logged-in!)
         (http-response/forbidden! "No territory access"))))
 
-(defn list-territories! [cong-id {:keys [fetch-loans?]}]
-  ;; TODO: inline get-own-congregation and only get the territories instead of everything in the congregation
-  (let [user-id (auth/current-user-id)
-        congregation (get-congregation cong-id)
-        fetch-loans? (and fetch-loans?
-                          (permissions/allowed? *state* user-id [:view-congregation cong-id])
-                          (some? (:congregation/loans-csv-url congregation)))]
-    (when congregation
-      (:congregation/territories (cond-> congregation
-                                   fetch-loans? (loan/enrich-territory-loans!))))))
+(defn list-territories [cong-id {:keys [fetch-loans?]}]
+  (cond
+    (allowed? [:view-congregation cong-id])
+    (let [congregation (get-congregation cong-id)
+          loans-csv-url (:congregation/loans-csv-url congregation)
+          territories (vals (get-in *state* [::territory/territories (coerce-demo-cong-id cong-id)]))]
+      (if (and fetch-loans? (some? loans-csv-url))
+        (loan/enrich-territory-loans! territories loans-csv-url)
+        territories))
+
+    (allowed? [:view-congregation-temporarily cong-id])
+    (for [[_ _ territory-id] (permissions/match *state* (auth/current-user-id) [:view-territory cong-id '*])]
+      (get-in *state* [::territory/territories cong-id territory-id]))))
 
 
 (defn- generate-share-key [territory share-type]

@@ -6,8 +6,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [territory-bro.domain.loan :as loan]
-            [territory-bro.test.testutil :refer [re-equals thrown-with-msg?]])
-  (:import (java.util UUID)))
+            [territory-bro.test.testutil :refer [re-equals thrown-with-msg?]]))
 
 (deftest ^:slow download-test
   (testing "no url"
@@ -81,22 +80,20 @@
                  "101,,FALSE,,,,4"))))))
 
 (deftest enrich-territory-loans!-test
-  (let [congregation {:congregation/id (UUID. 0 1)
-                      :congregation/territories [{:territory/number "101"}
-                                                 {:territory/number "102"}
-                                                 {:territory/number "103"}]}
+  (let [territories [{:territory/number "101"}
+                     {:territory/number "102"}
+                     {:territory/number "103"}]
         loans-csv (str "Number,Loaned,Staleness\n"
                        "101,TRUE,1\n"
                        ",,\n" ; CSV has no data for 102 -> don't add loans data for 102
                        "103,FALSE,3\n"
                        "104,FALSE,4\n")] ; CSV has data for 104, which doesn't exist -> ignore silently
-    (is (= {:congregation/id (UUID. 0 1)
-            :congregation/territories [{:territory/number "101"
-                                        :territory/loaned? true
-                                        :territory/staleness 1}
-                                       {:territory/number "102"}
-                                       {:territory/number "103"
-                                        :territory/loaned? false
-                                        :territory/staleness 3}]}
-           (binding [loan/download! (constantly loans-csv)]
-             (loan/enrich-territory-loans! congregation))))))
+    (is (= [{:territory/number "101"
+             :territory/loaned? true
+             :territory/staleness 1}
+            {:territory/number "102"}
+            {:territory/number "103"
+             :territory/loaned? false
+             :territory/staleness 3}]
+           (binding [loan/download! {"https://example.com" loans-csv}]
+             (loan/enrich-territory-loans! territories "https://example.com"))))))
