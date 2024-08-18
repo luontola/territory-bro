@@ -4,12 +4,13 @@
 
 (ns territory-bro.domain.congregation-boundary-test
   (:require [clojure.test :refer :all]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.events :as events]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.test.testutil :as testutil :refer [re-equals replace-in thrown-with-msg? thrown?]])
-  (:import (java.time Instant)
+  (:import (java.time Instant ZoneId)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException)))
 
@@ -48,7 +49,8 @@
           expected {::congregation-boundary/congregation-boundaries
                     {cong-id {congregation-boundary-id {:congregation-boundary/id congregation-boundary-id
                                                         :congregation-boundary/location testdata/wkt-multi-polygon}}}
-                    ::congregation-boundary/congregation-boundary {cong-id testdata/wkt-multi-polygon}}]
+                    ::congregation-boundary/congregation-boundary {cong-id testdata/wkt-multi-polygon}
+                    ::congregation/congregations {cong-id {:congregation/timezone (ZoneId/of "Africa/Cairo")}}}]
       (is (= expected (apply-events events)))
 
       (testing "> updated"
@@ -60,12 +62,16 @@
                                        testdata/wkt-multi-polygon2)
                            (replace-in [::congregation-boundary/congregation-boundary cong-id]
                                        testdata/wkt-multi-polygon
-                                       testdata/wkt-multi-polygon2))]
+                                       testdata/wkt-multi-polygon2)
+                           (replace-in [::congregation/congregations cong-id :congregation/timezone]
+                                       (ZoneId/of "Africa/Cairo")
+                                       (ZoneId/of "Africa/Niamey")))]
           (is (= expected (apply-events events)))))
 
       (testing "> deleted"
         (let [events (conj events congregation-boundary-deleted)
-              expected {}]
+              ;; remember the last known timezone - the congregation itself is not deleted, but only its borders are
+              expected {::congregation/congregations {cong-id {:congregation/timezone (ZoneId/of "Africa/Cairo")}}}]
           (is (= expected (apply-events events)))))))
 
   (testing "union of multiple boundaries"

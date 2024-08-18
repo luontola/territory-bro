@@ -3,7 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis.geometry
-  (:require [clojure.string :as str])
+  (:require [clojure.tools.logging :as log])
   (:import (java.time ZoneId ZoneOffset)
            (net.iakovlev.timeshape TimeZoneEngine)
            (org.locationtech.jts.geom Coordinate Geometry GeometryFactory Polygon)
@@ -16,9 +16,13 @@
   @*timezone-engine)
 
 (defn parse-wkt ^Geometry [^String wkt]
-  (when-not (str/blank? wkt)
-    (-> (WKTReader. geometry-factory)
-        (.read wkt))))
+  (when (some? wkt)
+    (try
+      (-> (WKTReader. geometry-factory)
+          (.read wkt))
+      (catch Exception e
+        (log/warn e "Failed to parse WKT" (pr-str wkt))
+        nil))))
 
 (defn timezone ^ZoneId [^Geometry location]
   (try

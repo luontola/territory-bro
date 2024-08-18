@@ -4,6 +4,7 @@
 
 (ns territory-bro.domain.congregation-boundary
   (:require [medley.core :refer [dissoc-in]]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.gis.gis-change :as gis-change])
   (:import (territory_bro ValidationException)))
@@ -21,11 +22,16 @@
                         (mapv :congregation-boundary/location))]
     (case (count boundaries)
       0 (dissoc-in state [::congregation-boundary cong-id])
-      1 (assoc-in state [::congregation-boundary cong-id] (first boundaries))
-      (assoc-in state [::congregation-boundary cong-id] (->> boundaries
-                                                             (mapv geometry/parse-wkt)
-                                                             (geometry/union)
-                                                             (str))))))
+      1 (let [boundary (first boundaries)]
+          (-> state
+              (assoc-in [::congregation-boundary cong-id] boundary)
+              (assoc-in [::congregation/congregations cong-id :congregation/timezone] (geometry/timezone (geometry/parse-wkt boundary)))))
+      (let [boundary (->> boundaries
+                          (mapv geometry/parse-wkt)
+                          (geometry/union))]
+        (-> state
+            (assoc-in [::congregation-boundary cong-id] (str boundary))
+            (assoc-in [::congregation/congregations cong-id :congregation/timezone] (geometry/timezone boundary)))))))
 
 (defmethod projection :congregation-boundary.event/congregation-boundary-defined
   [state event]

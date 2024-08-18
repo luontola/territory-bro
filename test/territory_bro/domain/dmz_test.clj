@@ -52,24 +52,25 @@
    :territory/addresses "the addresses"
    :territory/region "the region"
    :territory/meta {:foo "bar"}
-   :territory/location testdata/wkt-multi-polygon})
+   :territory/location testdata/wkt-helsinki-rautatientori})
 (def territory-defined2
   (assoc territory-defined
          :territory/id territory-id2
-         :territory/number "456"))
+         :territory/number "456"
+         :territory/location testdata/wkt-helsinki-kauppatori))
 
 (def congregation-boundary-defined
   {:event/type :congregation-boundary.event/congregation-boundary-defined
    :congregation/id cong-id
    :congregation-boundary/id congregation-boundary-id
-   :congregation-boundary/location testdata/wkt-multi-polygon})
+   :congregation-boundary/location testdata/wkt-helsinki})
 
 (def region-defined
   {:event/type :region.event/region-defined
    :congregation/id cong-id
    :region/id region-id
    :region/name "the name"
-   :region/location testdata/wkt-multi-polygon})
+   :region/location testdata/wkt-south-helsinki})
 
 (def card-minimap-viewport-defined
   {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined
@@ -101,11 +102,12 @@
 (deftest get-congregation-test
   (let [expected {:congregation/id cong-id
                   :congregation/name "Cong1 Name"
+                  :congregation/timezone testdata/timezone-helsinki
                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
                   :congregation/schema-name "cong1_schema"
                   :congregation/regions [{:region/id region-id
                                           :region/name "the name"
-                                          :region/location testdata/wkt-multi-polygon}]
+                                          :region/location testdata/wkt-south-helsinki}]
                   :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
     (testutil/with-events test-events
@@ -129,11 +131,12 @@
   (let [user-id (UUID. 0 0x666)
         expected {:congregation/id "demo" ; changed
                   :congregation/name "Demo Congregation" ; changed
+                  :congregation/timezone testdata/timezone-helsinki
                   ;; removed :congregation/loans-csv-url
                   ;; removed :congregation/schema-name
                   :congregation/regions [{:region/id region-id
                                           :region/name "the name"
-                                          :region/location testdata/wkt-multi-polygon}]
+                                          :region/location testdata/wkt-south-helsinki}]
                   :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
     (testutil/with-events test-events
@@ -155,7 +158,7 @@
                   :territory/region "the region"
                   :territory/do-not-calls "the do-not-calls"
                   :territory/meta {:foo "bar"}
-                  :territory/location testdata/wkt-multi-polygon}]
+                  :territory/location testdata/wkt-helsinki-rautatientori}]
     (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
       (testutil/with-events test-events
         (testutil/with-user-id user-id
@@ -179,7 +182,7 @@
                   :territory/region "the region"
                   ;; no do-not-calls
                   :territory/meta {:foo "bar"}
-                  :territory/location testdata/wkt-multi-polygon}]
+                  :territory/location testdata/wkt-helsinki-rautatientori}]
     (testutil/with-events test-events
       (binding [do-not-calls/get-do-not-calls (fn [& _]
                                                 (assert false "should not have been called"))]
@@ -204,13 +207,13 @@
                           :territory/addresses "the addresses"
                           :territory/region "the region"
                           :territory/meta {:foo "bar"}
-                          :territory/location testdata/wkt-multi-polygon}
+                          :territory/location testdata/wkt-helsinki-rautatientori}
                          {:territory/id territory-id2
                           :territory/number "456"
                           :territory/addresses "the addresses"
                           :territory/region "the region"
                           :territory/meta {:foo "bar"}
-                          :territory/location testdata/wkt-multi-polygon}]]
+                          :territory/location testdata/wkt-helsinki-kauppatori}]]
     (testutil/with-events test-events
       (testutil/with-user-id user-id
         (testing "has view permissions"
@@ -230,7 +233,7 @@
               (is (= (take 1 all-territories) (dmz/list-territories cong-id nil))))))))))
 
 (deftest get-congregation-boundary-test
-  (let [expected testdata/wkt-multi-polygon]
+  (let [expected testdata/wkt-helsinki]
     (testutil/with-events test-events
       (testutil/with-user-id user-id
         (testing "has view permissions"

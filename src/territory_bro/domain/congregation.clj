@@ -7,7 +7,8 @@
             [clojure.string :as str]
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.infra.util :refer [conj-set]])
-  (:import (territory_bro ValidationException)))
+  (:import (java.time ZoneOffset)
+           (territory_bro ValidationException)))
 
 (def all-permissions
   [:view-congregation ; implies :view-territory
@@ -34,7 +35,9 @@
                            (-> congregation
                                (assoc :congregation/id (:congregation/id event))
                                (assoc :congregation/name (:congregation/name event))
-                               (assoc :congregation/schema-name (:congregation/schema-name event)))))))
+                               (assoc :congregation/schema-name (:congregation/schema-name event))
+                               ;; set default timezone - the correct timezone will be set by territory-bro.domain.congregation-boundary
+                               (update :congregation/timezone #(or % ZoneOffset/UTC)))))))
 
 (defmethod projection :congregation.event/congregation-renamed
   [state event]

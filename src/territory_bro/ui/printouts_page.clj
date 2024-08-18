@@ -71,10 +71,8 @@
                         :regions (str (:congregation/id congregation)) ; congregation boundary is shown first in the regions list
                         :territories (str (:territory/id (first territories)))}
         congregation-boundary (dmz/get-congregation-boundary cong-id)]
-    (-> {:congregation (-> (select-keys congregation [:congregation/id :congregation/name])
-                           (assoc :congregation/location congregation-boundary)
-                           ;; TODO: the timezone could be already precalculated in the state (when it's needed elsewhere, e.g. when recording loans)
-                           (assoc :congregation/timezone (geometry/timezone (geometry/parse-wkt congregation-boundary))))
+    (-> {:congregation (-> (select-keys congregation [:congregation/id :congregation/name :congregation/timezone])
+                           (assoc :congregation/location congregation-boundary))
          :regions regions
          :territories territories
          :card-minimap-viewports (->> (:congregation/card-minimap-viewports congregation)

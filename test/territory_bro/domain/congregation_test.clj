@@ -8,7 +8,7 @@
             [territory-bro.events :as events]
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.test.testutil :as testutil :refer [re-equals thrown-with-msg? thrown?]])
-  (:import (java.time Instant)
+  (:import (java.time Instant ZoneOffset)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException)))
 
@@ -31,7 +31,8 @@
           expected {::congregation/congregations
                     {cong-id {:congregation/id cong-id
                               :congregation/name "Cong1 Name"
-                              :congregation/schema-name "cong1_schema"}}}]
+                              :congregation/schema-name "cong1_schema"
+                              :congregation/timezone ZoneOffset/UTC}}}]
       (is (= expected (apply-events events)))
 
       (testing "> view permission granted"
