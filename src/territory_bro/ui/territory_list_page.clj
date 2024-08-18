@@ -5,9 +5,7 @@
 (ns territory-bro.ui.territory-list-page
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
-            [ring.util.http-response :as http-response]
             [territory-bro.domain.dmz :as dmz]
-            [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.json :as json]
             [territory-bro.ui.css :as css]
@@ -21,17 +19,7 @@
 (defn model! [request {:keys [fetch-loans?]}]
   (let [cong-id (get-in request [:path-params :congregation])
         congregation (dmz/get-congregation cong-id)
-        _ (when-not congregation
-            ;; This function must support anonymous access for opened shares.
-            ;; If anonymous user cannot see the congregation, first prompt them
-            ;; to login before giving the forbidden error.
-            (dmz/require-logged-in!)
-            (http-response/forbidden! "No congregation access"))
-        congregation-boundary (->> (:congregation/congregation-boundaries congregation)
-                                   (mapv (comp geometry/parse-wkt :congregation-boundary/location))
-                                   ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
-                                   (geometry/union)
-                                   (str))
+        congregation-boundary (dmz/get-congregation-boundary cong-id)
         territories (dmz/list-territories cong-id {:fetch-loans? fetch-loans?})]
     {:congregation-boundary congregation-boundary
      :territories territories

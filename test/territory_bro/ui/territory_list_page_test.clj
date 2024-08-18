@@ -10,7 +10,6 @@
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.loan :as loan]
             [territory-bro.domain.testdata :as testdata]
-            [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
@@ -26,7 +25,7 @@
 (def cong-id (UUID/randomUUID))
 (def territory-id (UUID. 0 1))
 (def model
-  {:congregation-boundary (str (geometry/parse-wkt testdata/wkt-helsinki))
+  {:congregation-boundary testdata/wkt-helsinki
    :territories [{:territory/id territory-id
                   :territory/number "123"
                   :territory/addresses "the addresses"
@@ -45,7 +44,7 @@
          :permissions {:view-congregation-temporarily false}))
 (def anonymous-model
   (assoc model
-         :congregation-boundary ""
+         :congregation-boundary nil
          :permissions {:view-congregation-temporarily true}))
 
 (deftest model!-test

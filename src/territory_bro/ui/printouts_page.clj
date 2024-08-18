@@ -70,14 +70,11 @@
                         :map-raster maps/default-for-quality
                         :regions (str (:congregation/id congregation)) ; congregation boundary is shown first in the regions list
                         :territories (str (:territory/id (first territories)))}
-        congregation-boundary (->> (:congregation/congregation-boundaries congregation)
-                                   (mapv (comp geometry/parse-wkt :congregation-boundary/location))
-                                   ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
-                                   (geometry/union))]
+        congregation-boundary (dmz/get-congregation-boundary cong-id)]
     (-> {:congregation (-> (select-keys congregation [:congregation/id :congregation/name])
-                           (assoc :congregation/location (str congregation-boundary))
+                           (assoc :congregation/location congregation-boundary)
                            ;; TODO: the timezone could be already precalculated in the state (when it's needed elsewhere, e.g. when recording loans)
-                           (assoc :congregation/timezone (geometry/timezone congregation-boundary)))
+                           (assoc :congregation/timezone (geometry/timezone (geometry/parse-wkt congregation-boundary))))
          :regions regions
          :territories territories
          :card-minimap-viewports (->> (:congregation/card-minimap-viewports congregation)

@@ -14,6 +14,7 @@
             [territory-bro.domain.region :as region]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
+            [territory-bro.gis.geometry :as geometry]
             [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.gis.qgis :as qgis]
             [territory-bro.infra.authentication :as auth]
@@ -127,13 +128,14 @@
         (http-response/internal-server-error! "Internal Server Error")))))
 
 
+;;;; Congregations
+
 (defn- enrich-congregation [cong]
   (let [cong-id (:congregation/id cong)]
     (-> cong
         (dissoc :congregation/user-permissions)
         (assoc
          ;; TODO: extract query functions
-         :congregation/congregation-boundaries (sequence (vals (get-in *state* [::congregation-boundary/congregation-boundaries cong-id])))
          :congregation/regions (sequence (vals (get-in *state* [::region/regions cong-id])))
          :congregation/card-minimap-viewports (sequence (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports cong-id])))))))
 
@@ -146,7 +148,6 @@
 
       (allowed? [:view-congregation-temporarily cong-id])
       (-> cong
-          (assoc :congregation/congregation-boundaries [])
           (assoc :congregation/regions [])
           (assoc :congregation/card-minimap-viewports [])))))
 
@@ -180,6 +181,9 @@
   (let [user-id (auth/current-user-id)]
     (congregation/get-my-congregations *state* user-id)))
 
+
+;;;; Settings
+
 (defn list-congregation-users [cong-id]
   (let [user-ids (congregation/get-users *state* cong-id)]
     (vec (for [user (user/get-users *conn* {:ids user-ids})]
@@ -201,6 +205,8 @@
                                       :database-ssl-mode (:gis-database-ssl-mode config/env)})
      :filename (qgis/project-file-name (:congregation/name congregation))}))
 
+
+;;;; Territories
 
 (defn- enrich-do-not-calls [territory cong-id territory-id]
   (merge territory
@@ -246,6 +252,8 @@
       (get-in *state* [::territory/territories cong-id territory-id]))))
 
 
+;;;; Shares
+
 (defn- generate-share-key [territory share-type]
   (let [cong-id (:congregation/id territory)
         territory-id (:territory/id territory)]
@@ -286,3 +294,20 @@
       [{:congregation/id "demo"
         :territory/id demo-territory}
        nil])))
+
+
+;;;; Congregation boundaries
+
+(defn get-congregation-boundary [cong-id]
+  (when (allowed? [:view-congregation cong-id])
+    (let [boundaries (->> (vals (get-in *state* [::congregation-boundary/congregation-boundaries (coerce-demo-cong-id cong-id)]))
+                          (mapv :congregation-boundary/location))]
+      (case (count boundaries)
+        0 nil
+        1 (first boundaries)
+        ;; TODO: not tested
+        (->> boundaries
+             (mapv geometry/parse-wkt)
+             ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
+             (geometry/union)
+             (str))))))

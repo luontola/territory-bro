@@ -103,8 +103,6 @@
                   :congregation/name "Cong1 Name"
                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
                   :congregation/schema-name "cong1_schema"
-                  :congregation/congregation-boundaries [{:congregation-boundary/id congregation-boundary-id
-                                                          :congregation-boundary/location testdata/wkt-multi-polygon}]
                   :congregation/regions [{:region/id region-id
                                           :region/name "the name"
                                           :region/location testdata/wkt-multi-polygon}]
@@ -122,7 +120,6 @@
 
           (testing "opened a share"
             (let [expected (assoc expected
-                                  :congregation/congregation-boundaries []
                                   :congregation/regions []
                                   :congregation/card-minimap-viewports [])]
               (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
@@ -134,8 +131,6 @@
                   :congregation/name "Demo Congregation" ; changed
                   ;; removed :congregation/loans-csv-url
                   ;; removed :congregation/schema-name
-                  :congregation/congregation-boundaries [{:congregation-boundary/id congregation-boundary-id
-                                                          :congregation-boundary/location testdata/wkt-multi-polygon}]
                   :congregation/regions [{:region/id region-id
                                           :region/name "the name"
                                           :region/location testdata/wkt-multi-polygon}]
@@ -233,3 +228,23 @@
           (testing "opened a share"
             (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
               (is (= (take 1 all-territories) (dmz/list-territories cong-id nil))))))))))
+
+(deftest get-congregation-boundary-test
+  (let [expected testdata/wkt-multi-polygon]
+    (testutil/with-events test-events
+      (testutil/with-user-id user-id
+        (testing "has view permissions"
+          (is (= expected (dmz/get-congregation-boundary cong-id)))))
+
+      (let [user-id (UUID. 0 0x666)]
+        (testutil/with-user-id user-id
+          (testing "no permissions"
+            (is (nil? (dmz/get-congregation-boundary cong-id))))
+
+          (testing "demo congregation"
+            (binding [config/env {:demo-congregation cong-id}]
+              (is (= expected (dmz/get-congregation-boundary "demo")))))
+
+          (testing "opened a share"
+            (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
+              (is (nil? (dmz/get-congregation-boundary cong-id))))))))))

@@ -11,7 +11,6 @@
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
-            [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.permissions :as permissions]
@@ -31,7 +30,7 @@
 (def default-model
   {:congregation {:congregation/id cong-id
                   :congregation/name "Example Congregation"
-                  :congregation/location (str (geometry/parse-wkt testdata/wkt-helsinki))
+                  :congregation/location testdata/wkt-helsinki
                   :congregation/timezone testdata/timezone-helsinki}
    :regions [{:region/id region-id
               :region/name "the region"
@@ -49,6 +48,21 @@
           :map-raster "osmhd"
           :regions #{cong-id} ; congregation boundary is shown first in the regions list
           :territories #{territory-id}}
+   :mac? false})
+(def minimal-model
+  {:congregation {:congregation/id cong-id
+                  :congregation/name "Example Congregation"
+                  :congregation/location nil
+                  :congregation/timezone ZoneOffset/UTC}
+   :regions []
+   :territories []
+   :card-minimap-viewports []
+   :qr-codes-allowed? true
+   :form {:template "TerritoryCard"
+          :language "en"
+          :map-raster "osmhd"
+          :regions #{cong-id} ; congregation boundary is shown first in the regions list
+          :territories #{}}
    :mac? false})
 
 (def form-changed-model
@@ -70,36 +84,38 @@
       (replace-in [:congregation :congregation/name] "Example Congregation" "Demo Congregation")
       (replace-in [:form :regions] #{cong-id} #{"demo"})))
 
-(def test-events
+(def test-minimal-events
   (flatten [{:event/type :congregation.event/congregation-created
              :congregation/id cong-id
              :congregation/name "Example Congregation"
              :congregation/schema-name "cong1_schema"}
-            (congregation/admin-permissions-granted cong-id user-id)
-            {:event/type :congregation-boundary.event/congregation-boundary-defined
-             :gis-change/id 42
-             :congregation/id cong-id
-             :congregation-boundary/id (UUID/randomUUID)
-             :congregation-boundary/location testdata/wkt-helsinki}
-            {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined,
-             :gis-change/id 42
-             :congregation/id cong-id
-             :card-minimap-viewport/id (UUID/randomUUID)
-             :card-minimap-viewport/location testdata/wkt-helsinki}
-            {:event/type :region.event/region-defined
-             :gis-change/id 42
-             :congregation/id cong-id
-             :region/id region-id
-             :region/name "the region"
-             :region/location testdata/wkt-south-helsinki}
-            {:event/type :territory.event/territory-defined
-             :congregation/id cong-id
-             :territory/id territory-id
-             :territory/number "123"
-             :territory/addresses "the addresses"
-             :territory/region "the region"
-             :territory/meta {:foo "bar"}
-             :territory/location testdata/wkt-helsinki-rautatientori}]))
+            (congregation/admin-permissions-granted cong-id user-id)]))
+(def test-events
+  (concat test-minimal-events
+          [{:event/type :congregation-boundary.event/congregation-boundary-defined
+            :gis-change/id 42
+            :congregation/id cong-id
+            :congregation-boundary/id (UUID/randomUUID)
+            :congregation-boundary/location testdata/wkt-helsinki}
+           {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined,
+            :gis-change/id 42
+            :congregation/id cong-id
+            :card-minimap-viewport/id (UUID/randomUUID)
+            :card-minimap-viewport/location testdata/wkt-helsinki}
+           {:event/type :region.event/region-defined
+            :gis-change/id 42
+            :congregation/id cong-id
+            :region/id region-id
+            :region/name "the region"
+            :region/location testdata/wkt-south-helsinki}
+           {:event/type :territory.event/territory-defined
+            :congregation/id cong-id
+            :territory/id territory-id
+            :territory/number "123"
+            :territory/addresses "the addresses"
+            :territory/region "the region"
+            :territory/meta {:foo "bar"}
+            :territory/location testdata/wkt-helsinki-rautatientori}]))
 
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id}}]
@@ -129,7 +145,12 @@
               (is (= demo-model
                      (printouts-page/model! request)
                      (testutil/with-anonymous-user
-                       (printouts-page/model! request)))))))))))
+                       (printouts-page/model! request)))))))))
+
+    (testing "minimal data"
+      (testutil/with-events test-minimal-events
+        (testutil/with-user-id user-id
+          (is (= minimal-model (printouts-page/model! request))))))))
 
 (deftest parse-uuid-multiselect-test
   (is (= #{} (printouts-page/parse-uuid-multiselect nil)))
