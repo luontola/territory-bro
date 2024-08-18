@@ -65,7 +65,7 @@
                                        testdata/wkt-multi-polygon2)
                            (replace-in [::congregation/congregations cong-id :congregation/timezone]
                                        (ZoneId/of "Africa/Cairo")
-                                       (ZoneId/of "Africa/Niamey")))]
+                                       (ZoneId/of "Africa/Tripoli")))]
           (is (= expected (apply-events events)))))
 
       (testing "> deleted"

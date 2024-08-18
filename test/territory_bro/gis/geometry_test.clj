@@ -64,6 +64,20 @@
     (is (= area-1 (geometry/union [area-1])))
     (is (geometry/equals? area-1+2 (geometry/union [area-1 area-2])))))
 
+(deftest fix-invalid-geometries
+  (testing "fix TopologyException: found non-noded intersection between LINESTRING and LINESTRING"
+    (let [bad-polygon "POLYGON((0 0, 1 1, 1 0, 0 1, 0 0)))" ; ▷◁ (intersects with itself)
+          good-polygon "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0)))"] ; □
+      ;; Problem: https://github.com/locationtech/jts/issues/657
+      ;; Solution: use GeometryFixer, https://github.com/locationtech/jts/issues/652
+      (is (= "POLYGON ((1 1, 1 0, 0 0, 0 1, 1 1))"
+             (->> [bad-polygon good-polygon]
+                  (mapv geometry/parse-wkt)
+                  (geometry/union)
+                  (str))))
+      (is (= "MULTIPOLYGON (((0.5 0.5, 1 1, 1 0, 0.5 0.5)), ((0 0, 0 1, 0.5 0.5, 0 0)))"
+             (str (geometry/parse-wkt bad-polygon)))))))
+
 (deftest equals?-test
   (let [area-1a (geometry/square [0 0] [1 1])
         area-1b (geometry/square [1 1] [0 0])

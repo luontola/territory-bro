@@ -7,6 +7,7 @@
   (:import (java.time ZoneId ZoneOffset)
            (net.iakovlev.timeshape TimeZoneEngine)
            (org.locationtech.jts.geom Coordinate Geometry GeometryFactory Polygon)
+           (org.locationtech.jts.geom.util GeometryFixer)
            (org.locationtech.jts.io WKTReader)))
 
 (def ^GeometryFactory geometry-factory (GeometryFactory.))
@@ -18,8 +19,11 @@
 (defn parse-wkt ^Geometry [^String wkt]
   (when (some? wkt)
     (try
-      (-> (WKTReader. geometry-factory)
-          (.read wkt))
+      (let [geom (-> (WKTReader. geometry-factory)
+                     (.read wkt))]
+        (if (.isValid geom)
+          geom
+          (GeometryFixer/fix geom)))
       (catch Exception e
         (log/warn e "Failed to parse WKT" (pr-str wkt))
         nil))))

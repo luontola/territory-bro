@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -33,17 +33,21 @@
                 :state nil}))
 
 (defn projection [state event]
-  (-> state
-      (card-minimap-viewport/projection event)
-      (congregation-boundary/projection event)
-      (congregation/projection event)
-      (db-admin/projection event)
-      (gis-change/projection event)
-      (gis-user-process/projection event)
-      (gis-user/projection event)
-      (region/projection event)
-      (share/projection event)
-      (territory/projection event)))
+  (try
+    (-> state
+        (card-minimap-viewport/projection event)
+        (congregation-boundary/projection event)
+        (congregation/projection event)
+        (db-admin/projection event)
+        (gis-change/projection event)
+        (gis-user-process/projection event)
+        (gis-user/projection event)
+        (region/projection event)
+        (share/projection event)
+        (territory/projection event))
+    (catch Throwable t
+      (log/error t "Failed to process event" (pr-str event))
+      (throw t))))
 
 (defn- apply-events [cache events]
   (update cache :state #(reduce projection % events)))
