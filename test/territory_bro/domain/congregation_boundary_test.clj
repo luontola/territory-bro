@@ -7,14 +7,16 @@
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.events :as events]
-            [territory-bro.test.testutil :as testutil :refer [re-equals thrown-with-msg? thrown?]])
+            [territory-bro.gis.geometry :as geometry]
+            [territory-bro.test.testutil :as testutil :refer [re-equals replace-in thrown-with-msg? thrown?]])
   (:import (java.time Instant)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException)))
 
 (def cong-id (UUID. 0 1))
 (def congregation-boundary-id (UUID. 0 2))
-(def user-id (UUID. 0 3))
+(def congregation-boundary-id2 (UUID. 0 3))
+(def user-id (UUID. 0 4))
 (def gis-change-id 42)
 (def congregation-boundary-defined
   {:event/type :congregation-boundary.event/congregation-boundary-defined
@@ -45,20 +47,38 @@
     (let [events [congregation-boundary-defined]
           expected {::congregation-boundary/congregation-boundaries
                     {cong-id {congregation-boundary-id {:congregation-boundary/id congregation-boundary-id
-                                                        :congregation-boundary/location testdata/wkt-multi-polygon}}}}]
+                                                        :congregation-boundary/location testdata/wkt-multi-polygon}}}
+                    ::congregation-boundary/congregation-boundary {cong-id testdata/wkt-multi-polygon}}]
       (is (= expected (apply-events events)))
 
       (testing "> updated"
         (let [events (conj events (assoc congregation-boundary-defined
-                                         :congregation-boundary/location "new location"))
-              expected (assoc-in expected [::congregation-boundary/congregation-boundaries cong-id congregation-boundary-id
-                                           :congregation-boundary/location] "new location")]
+                                         :congregation-boundary/location testdata/wkt-multi-polygon2))
+              expected (-> expected
+                           (replace-in [::congregation-boundary/congregation-boundaries cong-id congregation-boundary-id :congregation-boundary/location]
+                                       testdata/wkt-multi-polygon
+                                       testdata/wkt-multi-polygon2)
+                           (replace-in [::congregation-boundary/congregation-boundary cong-id]
+                                       testdata/wkt-multi-polygon
+                                       testdata/wkt-multi-polygon2))]
           (is (= expected (apply-events events)))))
 
       (testing "> deleted"
         (let [events (conj events congregation-boundary-deleted)
               expected {}]
-          (is (= expected (apply-events events))))))))
+          (is (= expected (apply-events events)))))))
+
+  (testing "union of multiple boundaries"
+    (let [area-1 (geometry/square [0 0] [10 10])
+          area-2 (geometry/square [10 0] [20 10])
+          area-1+2 (geometry/square [0 0] [20 10])
+          events [(assoc congregation-boundary-defined
+                         :congregation-boundary/location (str area-1))
+                  (assoc congregation-boundary-defined
+                         :congregation-boundary/id congregation-boundary-id2
+                         :congregation-boundary/location (str area-2))]
+          state (apply-events events)]
+      (is (geometry/equals? area-1+2 (geometry/parse-wkt (get-in state [::congregation-boundary/congregation-boundary cong-id])))))))
 
 
 ;;;; Queries

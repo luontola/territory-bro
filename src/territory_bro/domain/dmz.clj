@@ -14,7 +14,6 @@
             [territory-bro.domain.region :as region]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
-            [territory-bro.gis.geometry :as geometry]
             [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.gis.qgis :as qgis]
             [territory-bro.infra.authentication :as auth]
@@ -300,14 +299,4 @@
 
 (defn get-congregation-boundary [cong-id]
   (when (allowed? [:view-congregation cong-id])
-    (let [boundaries (->> (vals (get-in *state* [::congregation-boundary/congregation-boundaries (coerce-demo-cong-id cong-id)]))
-                          (mapv :congregation-boundary/location))]
-      (case (count boundaries)
-        0 nil
-        1 (first boundaries)
-        ;; TODO: not tested
-        (->> boundaries
-             (mapv geometry/parse-wkt)
-             ;; TODO: precompute the union in the state - there are very few places where the boundaries are handled by ID
-             (geometry/union)
-             (str))))))
+    (get-in *state* [::congregation-boundary/congregation-boundary (coerce-demo-cong-id cong-id)])))

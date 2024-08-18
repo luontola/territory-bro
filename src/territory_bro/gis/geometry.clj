@@ -52,3 +52,7 @@
                                           (Coordinate. end-x end-y)
                                           (Coordinate. start-x end-y)
                                           (Coordinate. start-x start-y)])))
+
+(defn equals? [^Geometry a ^Geometry b]
+  (and (.covers a b)
+       (.covers b a)))

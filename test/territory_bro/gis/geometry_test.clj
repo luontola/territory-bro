@@ -62,4 +62,15 @@
     (is (nil? (geometry/union nil)))
     (is (nil? (geometry/union [])))
     (is (= area-1 (geometry/union [area-1])))
-    (is (.isEmpty (.difference area-1+2 (geometry/union [area-1 area-2]))))))
+    (is (geometry/equals? area-1+2 (geometry/union [area-1 area-2])))))
+
+(deftest equals?-test
+  (let [area-1a (geometry/square [0 0] [1 1])
+        area-1b (geometry/square [1 1] [0 0])
+        area-2 (geometry/square [0 0] [1 2])]
+    (is (not= area-1a area-1b))
+    (is (true? (geometry/equals? area-1a area-1b)))
+    (is (true? (geometry/equals? area-1b area-1a)))
+    (is (false? (geometry/equals? area-1a area-2)))
+    (is (false? (geometry/equals? area-2 area-1a)))
+    (is (true? (geometry/equals? area-2 area-2)))))

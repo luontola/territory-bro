@@ -1,9 +1,10 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.domain.congregation-boundary
   (:require [medley.core :refer [dissoc-in]]
+            [territory-bro.gis.geometry :as geometry]
             [territory-bro.gis.gis-change :as gis-change])
   (:import (territory_bro ValidationException)))
 
@@ -15,17 +16,32 @@
 (defmethod projection :default [state _event]
   state)
 
+(defn- update-precomputed-state [state cong-id]
+  (let [boundaries (->> (vals (get-in state [::congregation-boundaries cong-id]))
+                        (mapv :congregation-boundary/location))]
+    (case (count boundaries)
+      0 (dissoc-in state [::congregation-boundary cong-id])
+      1 (assoc-in state [::congregation-boundary cong-id] (first boundaries))
+      (assoc-in state [::congregation-boundary cong-id] (->> boundaries
+                                                             (mapv geometry/parse-wkt)
+                                                             (geometry/union)
+                                                             (str))))))
+
 (defmethod projection :congregation-boundary.event/congregation-boundary-defined
   [state event]
-  (update-in state [::congregation-boundaries (:congregation/id event) (:congregation-boundary/id event)]
-             (fn [congregation-boundary]
-               (-> congregation-boundary
-                   (assoc :congregation-boundary/id (:congregation-boundary/id event))
-                   (assoc :congregation-boundary/location (:congregation-boundary/location event))))))
+  (-> state
+      (update-in [::congregation-boundaries (:congregation/id event) (:congregation-boundary/id event)]
+                 (fn [congregation-boundary]
+                   (-> congregation-boundary
+                       (assoc :congregation-boundary/id (:congregation-boundary/id event))
+                       (assoc :congregation-boundary/location (:congregation-boundary/location event)))))
+      (update-precomputed-state (:congregation/id event))))
 
 (defmethod projection :congregation-boundary.event/congregation-boundary-deleted
   [state event]
-  (dissoc-in state [::congregation-boundaries (:congregation/id event) (:congregation-boundary/id event)]))
+  (-> state
+      (dissoc-in [::congregation-boundaries (:congregation/id event) (:congregation-boundary/id event)])
+      (update-precomputed-state (:congregation/id event))))
 
 
 ;;;; Queries
