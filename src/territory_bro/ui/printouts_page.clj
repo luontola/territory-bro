@@ -59,7 +59,7 @@
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
         congregation (dmz/get-congregation cong-id)
-        regions (->> (:congregation/regions congregation)
+        regions (->> (dmz/list-regions cong-id)
                      (sort-by (comp str :region/name)
                               (CaseInsensitiveSimpleNaturalComparator/getInstance)))
         territories (->> (dmz/list-territories cong-id nil)

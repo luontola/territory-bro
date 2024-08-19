@@ -9,6 +9,7 @@
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.testutil :as testutil])
   (:import (java.util UUID)))
@@ -98,6 +99,9 @@
    card-minimap-viewport-defined
    share-created])
 
+(defn- apply-share-opened [state]
+  (share/grant-opened-shares state [share-id] (auth/current-user-id)))
+
 
 (deftest get-congregation-test
   (let [expected {:congregation/id cong-id
@@ -105,9 +109,6 @@
                   :congregation/timezone testdata/timezone-helsinki
                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
                   :congregation/schema-name "cong1_schema"
-                  :congregation/regions [{:region/id region-id
-                                          :region/name "the name"
-                                          :region/location testdata/wkt-south-helsinki}]
                   :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
     (testutil/with-events test-events
@@ -122,9 +123,8 @@
 
           (testing "opened a share"
             (let [expected (assoc expected
-                                  :congregation/regions []
                                   :congregation/card-minimap-viewports [])]
-              (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
+              (binding [dmz/*state* (apply-share-opened dmz/*state*)]
                 (is (= expected (dmz/get-own-congregation cong-id)))))))))))
 
 (deftest get-demo-congregation-test ; TODO: merge with get-congregation-test, make get-demo-congregation private
@@ -132,11 +132,8 @@
         expected {:congregation/id "demo" ; changed
                   :congregation/name "Demo Congregation" ; changed
                   :congregation/timezone testdata/timezone-helsinki
-                  ;; removed :congregation/loans-csv-url
-                  ;; removed :congregation/schema-name
-                  :congregation/regions [{:region/id region-id
-                                          :region/name "the name"
-                                          :region/location testdata/wkt-south-helsinki}]
+                  #_:congregation/loans-csv-url ; removed
+                  #_:congregation/schema-name ; removed
                   :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
                                                          :card-minimap-viewport/location testdata/wkt-polygon}]}]
     (testutil/with-events test-events
@@ -171,7 +168,7 @@
               (is (nil? (dmz/get-own-territory cong-id territory-id))))
 
             (testing "opened a share"
-              (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
+              (binding [dmz/*state* (apply-share-opened dmz/*state*)]
                 (is (= expected (dmz/get-own-territory cong-id territory-id)))))))))))
 
 (deftest get-demo-territory-test ; TODO: merge with get-territory-test, make get-demo-territory private
@@ -229,7 +226,7 @@
               (is (= all-territories (dmz/list-territories "demo" nil)))))
 
           (testing "opened a share"
-            (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
+            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
               (is (= (take 1 all-territories) (dmz/list-territories cong-id nil))))))))))
 
 (deftest get-congregation-boundary-test
@@ -249,5 +246,27 @@
               (is (= expected (dmz/get-congregation-boundary "demo")))))
 
           (testing "opened a share"
-            (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
+            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
               (is (nil? (dmz/get-congregation-boundary cong-id))))))))))
+
+(deftest list-regions-test
+  (let [expected [{:region/id region-id
+                   :region/name "the name"
+                   :region/location testdata/wkt-south-helsinki}]]
+    (testutil/with-events test-events
+      (testutil/with-user-id user-id
+        (testing "has view permissions"
+          (is (= expected (dmz/list-regions cong-id)))))
+
+      (let [user-id (UUID. 0 0x666)]
+        (testutil/with-user-id user-id
+          (testing "no permissions"
+            (is (nil? (dmz/list-regions cong-id))))
+
+          (testing "demo congregation"
+            (binding [config/env {:demo-congregation cong-id}]
+              (is (= expected (dmz/list-regions "demo")))))
+
+          (testing "opened a share"
+            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+              (is (nil? (dmz/list-regions cong-id))))))))))

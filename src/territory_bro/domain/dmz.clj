@@ -135,7 +135,6 @@
         (dissoc :congregation/user-permissions)
         (assoc
          ;; TODO: extract query functions
-         :congregation/regions (sequence (vals (get-in *state* [::region/regions cong-id])))
          :congregation/card-minimap-viewports (sequence (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports cong-id])))))))
 
 (defn- apply-user-permissions-for-congregation [cong]
@@ -147,7 +146,6 @@
 
       (allowed? [:view-congregation-temporarily cong-id])
       (-> cong
-          (assoc :congregation/regions [])
           (assoc :congregation/card-minimap-viewports [])))))
 
 (defn get-own-congregation [cong-id]
@@ -295,8 +293,12 @@
        nil])))
 
 
-;;;; Congregation boundaries
+;;;; Other geometries
 
 (defn get-congregation-boundary [cong-id]
   (when (allowed? [:view-congregation cong-id])
     (get-in *state* [::congregation-boundary/congregation-boundary (coerce-demo-cong-id cong-id)])))
+
+(defn list-regions [cong-id]
+  (when (allowed? [:view-congregation cong-id])
+    (vals (get-in *state* [::region/regions (coerce-demo-cong-id cong-id)]))))
