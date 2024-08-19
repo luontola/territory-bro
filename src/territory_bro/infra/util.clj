@@ -5,7 +5,8 @@
 (ns territory-bro.infra.util
   (:import (java.nio.charset StandardCharsets)
            (java.sql SQLException)
-           (java.util Base64)))
+           (java.util Base64)
+           (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
 (defn fix-sqlexception-chain [^Throwable e]
   (when (instance? SQLException e)
@@ -31,3 +32,8 @@
   (-> (Base64/getUrlDecoder)
       (.decode base64-str)
       (String. StandardCharsets/UTF_8)))
+
+(defn natural-sort-by [keyfn coll]
+  (sort-by (comp str keyfn)
+           (CaseInsensitiveSimpleNaturalComparator/getInstance)
+           coll))

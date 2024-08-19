@@ -21,6 +21,7 @@
             [territory-bro.infra.db :as db]
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.infra.user :as user]
+            [territory-bro.infra.util :as util]
             [territory-bro.infra.util :refer [conj-set]]
             [territory-bro.projections :as projections])
   (:import (java.util UUID)
@@ -155,7 +156,8 @@
 (defn list-congregations []
   (let [user-id (auth/current-user-id)]
     ;; TODO: inline get-my-congregations to DMZ to centralize all access controls
-    (congregation/get-my-congregations *state* user-id)))
+    (->> (congregation/get-my-congregations *state* user-id)
+         (util/natural-sort-by :congregation/name))))
 
 
 ;;;; Settings
@@ -203,7 +205,8 @@
     (allowed? [:view-congregation cong-id])
     (let [congregation (get-congregation cong-id)
           loans-csv-url (:congregation/loans-csv-url congregation)
-          territories (vals (get-in *state* [::territory/territories (coerce-demo-cong-id cong-id)]))]
+          territories (->> (vals (get-in *state* [::territory/territories (coerce-demo-cong-id cong-id)]))
+                           (util/natural-sort-by :territory/number))]
       (if (and fetch-loans? (some? loans-csv-url))
         (loan/enrich-territory-loans! territories loans-csv-url)
         territories))
@@ -265,7 +268,8 @@
 
 (defn list-regions [cong-id]
   (when (allowed? [:view-congregation cong-id])
-    (vals (get-in *state* [::region/regions (coerce-demo-cong-id cong-id)]))))
+    (->> (vals (get-in *state* [::region/regions (coerce-demo-cong-id cong-id)]))
+         (util/natural-sort-by :region/name))))
 
 (defn list-card-minimap-viewports [cong-id]
   (when (allowed? [:view-congregation cong-id])

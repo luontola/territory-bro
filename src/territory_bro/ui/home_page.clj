@@ -15,8 +15,7 @@
 
 (defn model! [_request]
   (let [congregations (->> (dmz/list-congregations)
-                           (mapv #(select-keys % [:congregation/id :congregation/name]))
-                           (sort-by (comp str/lower-case :congregation/name)))]
+                           (mapv #(select-keys % [:congregation/id :congregation/name])))]
     {:congregations congregations
      :logged-in? (auth/logged-in?)
      :demo-available? (some? (:demo-congregation config/env))}))

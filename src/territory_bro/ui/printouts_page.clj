@@ -18,7 +18,6 @@
             [territory-bro.ui.printout-templates :as printout-templates])
   (:import (io.nayuki.qrcodegen QrCode QrCode$Ecc)
            (java.time Clock Duration LocalDate)
-           (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)
            (territory_bro QrCodeGenerator)))
 
 (def ^:dynamic ^Clock *clock* (Clock/systemUTC))
@@ -61,12 +60,8 @@
         _ (when-not (dmz/view-printouts-page? cong-id)
             (dmz/access-denied!))
         congregation (dmz/get-congregation cong-id)
-        regions (->> (dmz/list-regions cong-id)
-                     (sort-by (comp str :region/name)
-                              (CaseInsensitiveSimpleNaturalComparator/getInstance)))
-        territories (->> (dmz/list-territories cong-id nil)
-                         (sort-by (comp str :territory/number)
-                                  (CaseInsensitiveSimpleNaturalComparator/getInstance)))
+        regions (dmz/list-regions cong-id)
+        territories (dmz/list-territories cong-id nil)
         default-params {:template (:id (first templates))
                         :language (name i18n/*lang*)
                         :map-raster maps/default-for-quality

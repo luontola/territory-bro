@@ -4,6 +4,7 @@
 
 (ns territory-bro.infra.util-test
   (:require [clojure.test :refer :all]
+            [territory-bro.infra.util :as util]
             [territory-bro.infra.util :refer [fix-sqlexception-chain getx]]
             [territory-bro.test.testutil :refer [re-equals thrown-with-msg?]])
   (:import (java.sql SQLException)))
@@ -66,3 +67,19 @@
   (testing "throws an exception when the value is nil"
     (is (thrown-with-msg? IllegalArgumentException (re-equals "key :some-key is missing")
                           (getx {:some-key nil} :some-key)))))
+
+(deftest natural-sort-by-test
+  (let [expected [{:value ""}
+                  {:value "1"}
+                  {:value "2"} ; basic string sort would put this after "10"
+                  {:value "10"}
+                  {:value "10A"}
+                  {:value "10b"} ; sorting should be case-insensitive
+                  {:value "10C"}]]
+    (is (= expected (util/natural-sort-by :value (shuffle expected)))))
+
+  (testing "nil should not crash, but be treated the same as an empty string"
+    (let [expected [{:value ""}
+                    {:value nil} ; due to stable sort, should stay here in the middle
+                    {:value ""}]]
+      (is (= expected (util/natural-sort-by :value expected))))))

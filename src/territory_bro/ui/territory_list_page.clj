@@ -13,8 +13,7 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]
             [territory-bro.ui.layout :as layout]
-            [territory-bro.ui.maps :as maps])
-  (:import (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
+            [territory-bro.ui.maps :as maps]))
 
 (defn model! [request {:keys [fetch-loans?]}]
   (let [cong-id (get-in request [:path-params :congregation])
@@ -100,9 +99,7 @@
         [:th (i18n/t "Territory.region")]
         [:th (i18n/t "Territory.addresses")]]]
       [:tbody
-       (for [territory (sort-by (comp str :territory/number)
-                                (CaseInsensitiveSimpleNaturalComparator/getInstance)
-                                territories)]
+       (for [territory territories]
          [:tr {:data-territory-id (:territory/id territory)
                :data-searchable (-> (str/join "\n" [(:territory/number territory)
                                                     (:territory/region territory)

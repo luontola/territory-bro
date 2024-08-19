@@ -140,31 +140,6 @@
            (-> (territory-list-page/view (replace-in model [:territories 0 :territory/number] "123" ""))
                html/visible-text))))
 
-  (testing "territory numbers are sorted naturally"
-    (let [territories (shuffle [{:territory/number ""}
-                                {:territory/number nil} ; nil should not crash, but be treated same as ""
-                                {:territory/number "1"}
-                                {:territory/number "2"} ; basic string sort would put this after "10"
-                                {:territory/number "10"}
-                                {:territory/number "10A"}
-                                {:territory/number "10b"} ; sorting should be case-insensitive
-                                {:territory/number "10C"}])]
-      (is (= (html/normalize-whitespace
-              "Territories
-
-               Search [] Clear
-               Number   Region       Addresses
-               -
-               -
-               1
-               2
-               10
-               10A
-               10b
-               10C")
-             (-> (territory-list-page/view (assoc model :territories territories))
-                 html/visible-text)))))
-
   (testing "territory-list-map's JSON data is guarded against XSS"
     ;; If we used a <script type="application/json"> element, we would need to
     ;; guard against "</script>" strings. By using a <template> element, we can
