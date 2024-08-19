@@ -75,7 +75,7 @@
                            (assoc :congregation/location congregation-boundary))
          :regions regions
          :territories territories
-         :card-minimap-viewports (->> (:congregation/card-minimap-viewports congregation)
+         :card-minimap-viewports (->> (dmz/list-card-minimap-viewports cong-id)
                                       (mapv :card-minimap-viewport/location))
          ;; TODO: make it a form option that whether to include QR codes on a printout
          :qr-codes-allowed? (dmz/allowed? [:share-territory-link cong-id])

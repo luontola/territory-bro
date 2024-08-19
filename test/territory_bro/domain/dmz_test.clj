@@ -108,9 +108,7 @@
                   :congregation/name "Cong1 Name"
                   :congregation/timezone testdata/timezone-helsinki
                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
-                  :congregation/schema-name "cong1_schema"
-                  :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
-                                                         :card-minimap-viewport/location testdata/wkt-polygon}]}]
+                  :congregation/schema-name "cong1_schema"}]
     (testutil/with-events test-events
       (testutil/with-user-id user-id
         (testing "has view permissions"
@@ -122,10 +120,8 @@
             (is (nil? (dmz/get-own-congregation cong-id))))
 
           (testing "opened a share"
-            (let [expected (assoc expected
-                                  :congregation/card-minimap-viewports [])]
-              (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-                (is (= expected (dmz/get-own-congregation cong-id)))))))))))
+            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+              (is (= expected (dmz/get-own-congregation cong-id))))))))))
 
 (deftest get-demo-congregation-test ; TODO: merge with get-congregation-test, make get-demo-congregation private
   (let [user-id (UUID. 0 0x666)
@@ -133,9 +129,7 @@
                   :congregation/name "Demo Congregation" ; changed
                   :congregation/timezone testdata/timezone-helsinki
                   #_:congregation/loans-csv-url ; removed
-                  #_:congregation/schema-name ; removed
-                  :congregation/card-minimap-viewports [{:card-minimap-viewport/id card-minimap-viewport-id
-                                                         :card-minimap-viewport/location testdata/wkt-polygon}]}]
+                  #_:congregation/schema-name}] ; removed
     (testutil/with-events test-events
       (testutil/with-user-id user-id
         (testing "no demo congregation"
@@ -270,3 +264,24 @@
           (testing "opened a share"
             (binding [dmz/*state* (apply-share-opened dmz/*state*)]
               (is (nil? (dmz/list-regions cong-id))))))))))
+
+(deftest list-card-minimap-viewports-test
+  (let [expected [{:card-minimap-viewport/id card-minimap-viewport-id
+                   :card-minimap-viewport/location testdata/wkt-polygon}]]
+    (testutil/with-events test-events
+      (testutil/with-user-id user-id
+        (testing "has view permissions"
+          (is (= expected (dmz/list-card-minimap-viewports cong-id)))))
+
+      (let [user-id (UUID. 0 0x666)]
+        (testutil/with-user-id user-id
+          (testing "no permissions"
+            (is (nil? (dmz/list-card-minimap-viewports cong-id))))
+
+          (testing "demo congregation"
+            (binding [config/env {:demo-congregation cong-id}]
+              (is (= expected (dmz/list-card-minimap-viewports "demo")))))
+
+          (testing "opened a share"
+            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+              (is (nil? (dmz/list-card-minimap-viewports cong-id))))))))))

@@ -130,12 +130,7 @@
 ;;;; Congregations
 
 (defn- enrich-congregation [cong]
-  (let [cong-id (:congregation/id cong)]
-    (-> cong
-        (dissoc :congregation/user-permissions)
-        (assoc
-         ;; TODO: extract query functions
-         :congregation/card-minimap-viewports (sequence (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports cong-id])))))))
+  (dissoc cong :congregation/user-permissions))
 
 (defn- apply-user-permissions-for-congregation [cong]
   (let [cong-id (:congregation/id cong)]
@@ -145,8 +140,7 @@
       cong
 
       (allowed? [:view-congregation-temporarily cong-id])
-      (-> cong
-          (assoc :congregation/card-minimap-viewports [])))))
+      cong)))
 
 (defn get-own-congregation [cong-id]
   (some-> (congregation/get-unrestricted-congregation *state* cong-id)
@@ -302,3 +296,7 @@
 (defn list-regions [cong-id]
   (when (allowed? [:view-congregation cong-id])
     (vals (get-in *state* [::region/regions (coerce-demo-cong-id cong-id)]))))
+
+(defn list-card-minimap-viewports [cong-id]
+  (when (allowed? [:view-congregation cong-id])
+    (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports (coerce-demo-cong-id cong-id)]))))
