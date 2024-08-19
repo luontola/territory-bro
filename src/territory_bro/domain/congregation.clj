@@ -11,7 +11,7 @@
            (territory_bro ValidationException)))
 
 (def all-permissions
-  [:view-congregation ; implies :view-territory
+  [:view-congregation ; :view-congregation implies :view-territory for all territories
    :configure-congregation
    :gis-access
    :share-territory-link

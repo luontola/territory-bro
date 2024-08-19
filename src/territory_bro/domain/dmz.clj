@@ -129,32 +129,6 @@
 
 ;;;; Congregations
 
-(defn- enrich-congregation [cong]
-  (dissoc cong :congregation/user-permissions))
-
-(defn- apply-user-permissions-for-congregation [cong]
-  (let [cong-id (:congregation/id cong)]
-    (cond
-      ;; TODO: deduplicate with congregation/apply-user-permissions
-      (allowed? [:view-congregation cong-id])
-      cong
-
-      (allowed? [:view-congregation-temporarily cong-id])
-      cong)))
-
-(defn get-own-congregation [cong-id]
-  (some-> (congregation/get-unrestricted-congregation *state* cong-id)
-          (enrich-congregation)
-          (apply-user-permissions-for-congregation)))
-
-(defn get-demo-congregation [cong-id]
-  (some-> (congregation/get-unrestricted-congregation *state* cong-id)
-          (enrich-congregation)
-          (assoc :congregation/id "demo")
-          (assoc :congregation/name "Demo Congregation")
-          (dissoc :congregation/loans-csv-url)
-          (dissoc :congregation/schema-name)))
-
 (defn- coerce-demo-cong-id [cong-id]
   (if (= "demo" cong-id)
     (or (:demo-congregation config/env)
@@ -162,14 +136,24 @@
     cong-id))
 
 (defn get-congregation [cong-id]
-  (if (= "demo" cong-id)
-    (get-demo-congregation (coerce-demo-cong-id cong-id))
-    (or (get-own-congregation cong-id)
-        (require-logged-in!)
-        (http-response/forbidden! "No congregation access"))))
+  (if (or (allowed? [:view-congregation cong-id])
+          (allowed? [:view-congregation-temporarily cong-id]))
+    (let [congregation (-> (congregation/get-unrestricted-congregation *state* (coerce-demo-cong-id cong-id))
+                           (dissoc :congregation/user-permissions))]
+      (if (= "demo" cong-id)
+        (-> congregation
+            (assoc :congregation/id "demo")
+            (assoc :congregation/name "Demo Congregation")
+            (dissoc :congregation/loans-csv-url)
+            (dissoc :congregation/schema-name))
+        congregation))
+    (do
+      (require-logged-in!)
+      (http-response/forbidden! "No congregation access"))))
 
 (defn list-congregations []
   (let [user-id (auth/current-user-id)]
+    ;; TODO: inline get-my-congregations to DMZ to centralize all access controls
     (congregation/get-my-congregations *state* user-id)))
 
 
@@ -199,34 +183,21 @@
 
 ;;;; Territories
 
-(defn- enrich-do-not-calls [territory cong-id territory-id]
+(defn- enrich-do-not-calls [territory]
   (merge territory
-         (-> (do-not-calls/get-do-not-calls *conn* cong-id territory-id)
+         (-> (do-not-calls/get-do-not-calls *conn* (:congregation/id territory) (:territory/id territory))
              (select-keys [:territory/do-not-calls]))))
 
-(defn- apply-user-permissions-for-territory [territory]
-  (let [cong-id (:congregation/id territory)
-        territory-id (:territory/id territory)]
-    ;; TODO: :view-congregation implies every :view-territory - should the permits be decoupled?
-    (when (or (allowed? [:view-congregation cong-id])
-              (allowed? [:view-territory cong-id territory-id]))
-      territory)))
-
-(defn get-own-territory [cong-id territory-id]
-  (some-> (territory/get-unrestricted-territory *state* cong-id territory-id)
-          (enrich-do-not-calls cong-id territory-id)
-          (apply-user-permissions-for-territory)))
-
-(defn get-demo-territory [cong-id territory-id]
-  (some-> (territory/get-unrestricted-territory *state* cong-id territory-id)
-          (assoc :congregation/id "demo")))
-
 (defn get-territory [cong-id territory-id]
-  (if (= "demo" cong-id)
-    (get-demo-territory (coerce-demo-cong-id cong-id) territory-id)
-    (or (get-own-territory cong-id territory-id)
-        (require-logged-in!)
-        (http-response/forbidden! "No territory access"))))
+  (if (or (allowed? [:view-congregation cong-id]) ; :view-congregation implies :view-territory for all territories
+          (allowed? [:view-territory cong-id territory-id]))
+    (let [territory (territory/get-unrestricted-territory *state* (coerce-demo-cong-id cong-id) territory-id)]
+      (if (= "demo" cong-id)
+        (assoc territory :congregation/id "demo")
+        (enrich-do-not-calls territory)))
+    (do
+      (require-logged-in!)
+      (http-response/forbidden! "No territory access"))))
 
 (defn list-territories [cong-id {:keys [fetch-loans?]}]
   (cond

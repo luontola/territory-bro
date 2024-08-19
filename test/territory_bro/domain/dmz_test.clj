@@ -4,6 +4,7 @@
 
 (ns territory-bro.domain.dmz-test
   (:require [clojure.test :refer :all]
+            [matcher-combinators.test :refer :all]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
@@ -12,7 +13,8 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.testutil :as testutil])
-  (:import (java.util UUID)))
+  (:import (clojure.lang ExceptionInfo)
+           (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
@@ -108,38 +110,35 @@
                   :congregation/name "Cong1 Name"
                   :congregation/timezone testdata/timezone-helsinki
                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
-                  :congregation/schema-name "cong1_schema"}]
+                  :congregation/schema-name "cong1_schema"}
+        demo-expected {:congregation/id "demo" ; changed
+                       :congregation/name "Demo Congregation" ; changed
+                       :congregation/timezone testdata/timezone-helsinki
+                       #_:congregation/loans-csv-url ; removed
+                       #_:congregation/schema-name}] ; removed
+
     (testutil/with-events test-events
       (testutil/with-user-id user-id
         (testing "has view permissions"
-          (is (= expected (dmz/get-own-congregation cong-id)))))
+          (is (= expected (dmz/get-congregation cong-id)))))
 
       (let [user-id (UUID. 0 0x666)]
         (testutil/with-user-id user-id
           (testing "no permissions"
-            (is (nil? (dmz/get-own-congregation cong-id))))
+            (is (thrown-match? ExceptionInfo
+                               {:type :ring.util.http-response/response
+                                :response {:status 403
+                                           :body "No congregation access"
+                                           :headers {}}}
+                               (dmz/get-congregation cong-id))))
+
+          (testing "demo congregation"
+            (binding [config/env {:demo-congregation cong-id}]
+              (is (= demo-expected (dmz/get-congregation "demo")))))
 
           (testing "opened a share"
             (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-              (is (= expected (dmz/get-own-congregation cong-id))))))))))
-
-(deftest get-demo-congregation-test ; TODO: merge with get-congregation-test, make get-demo-congregation private
-  (let [user-id (UUID. 0 0x666)
-        expected {:congregation/id "demo" ; changed
-                  :congregation/name "Demo Congregation" ; changed
-                  :congregation/timezone testdata/timezone-helsinki
-                  #_:congregation/loans-csv-url ; removed
-                  #_:congregation/schema-name}] ; removed
-    (testutil/with-events test-events
-      (testutil/with-user-id user-id
-        (testing "no demo congregation"
-          (is (nil? (dmz/get-demo-congregation nil))))
-
-        (testing "can see the demo congregation"
-          (is (= expected (dmz/get-demo-congregation cong-id))))
-
-        (testing "cannot see the demo congregation as own congregation"
-          (is (nil? (dmz/get-own-congregation cong-id))))))))
+              (is (= expected (dmz/get-congregation cong-id))))))))))
 
 (deftest get-territory-test
   (let [expected {:congregation/id cong-id
@@ -149,66 +148,58 @@
                   :territory/region "the region"
                   :territory/do-not-calls "the do-not-calls"
                   :territory/meta {:foo "bar"}
-                  :territory/location testdata/wkt-helsinki-rautatientori}]
+                  :territory/location testdata/wkt-helsinki-rautatientori}
+        demo-expected {:congregation/id "demo" ; changed
+                       :territory/id territory-id
+                       :territory/number "123"
+                       :territory/addresses "the addresses"
+                       :territory/region "the region"
+                       #_:territory/do-not-calls ; removed
+                       :territory/meta {:foo "bar"}
+                       :territory/location testdata/wkt-helsinki-rautatientori}]
+
     (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
       (testutil/with-events test-events
         (testutil/with-user-id user-id
           (testing "has view permissions"
-            (is (= expected (dmz/get-own-territory cong-id territory-id)))))
+            (is (= expected (dmz/get-territory cong-id territory-id)))))
 
         (let [user-id (UUID. 0 0x666)]
           (testutil/with-user-id user-id
             (testing "no permissions"
-              (is (nil? (dmz/get-own-territory cong-id territory-id))))
+              (is (thrown-match? ExceptionInfo
+                                 {:type :ring.util.http-response/response
+                                  :response {:status 403
+                                             :body "No territory access"
+                                             :headers {}}}
+                                 (dmz/get-territory cong-id territory-id))))
+
+            (testing "demo congregation"
+              (binding [config/env {:demo-congregation cong-id}]
+                (is (= demo-expected (dmz/get-territory "demo" territory-id)))))
 
             (testing "opened a share"
               (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-                (is (= expected (dmz/get-own-territory cong-id territory-id)))))))))))
-
-(deftest get-demo-territory-test ; TODO: merge with get-territory-test, make get-demo-territory private
-  (let [expected {:congregation/id "demo" ; changed
-                  :territory/id territory-id
-                  :territory/number "123"
-                  :territory/addresses "the addresses"
-                  :territory/region "the region"
-                  ;; no do-not-calls
-                  :territory/meta {:foo "bar"}
-                  :territory/location testdata/wkt-helsinki-rautatientori}]
-    (testutil/with-events test-events
-      (binding [do-not-calls/get-do-not-calls (fn [& _]
-                                                (assert false "should not have been called"))]
-        (testing "no demo congregation"
-          (is (nil? (dmz/get-demo-territory nil territory-id))))
-
-        (testing "can see the demo congregation"
-          (is (= expected (dmz/get-demo-territory cong-id territory-id))))
-
-        (testing "wrong territory ID"
-          (is (nil? (dmz/get-demo-territory cong-id (UUID. 0 0x666))))))
-
-      (let [user-id (UUID. 0 0x666)]
-        (testutil/with-user-id user-id
-          (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
-            (testing "cannot see the demo congregation as own congregation"
-              (is (nil? (dmz/get-own-territory cong-id territory-id))))))))))
+                (is (= expected (dmz/get-territory cong-id territory-id)))))))))))
 
 (deftest list-territories-test
-  (let [all-territories [{:territory/id territory-id
-                          :territory/number "123"
-                          :territory/addresses "the addresses"
-                          :territory/region "the region"
-                          :territory/meta {:foo "bar"}
-                          :territory/location testdata/wkt-helsinki-rautatientori}
-                         {:territory/id territory-id2
-                          :territory/number "456"
-                          :territory/addresses "the addresses"
-                          :territory/region "the region"
-                          :territory/meta {:foo "bar"}
-                          :territory/location testdata/wkt-helsinki-kauppatori}]]
+  (let [expected [{:territory/id territory-id
+                   :territory/number "123"
+                   :territory/addresses "the addresses"
+                   :territory/region "the region"
+                   :territory/meta {:foo "bar"}
+                   :territory/location testdata/wkt-helsinki-rautatientori}
+                  {:territory/id territory-id2
+                   :territory/number "456"
+                   :territory/addresses "the addresses"
+                   :territory/region "the region"
+                   :territory/meta {:foo "bar"}
+                   :territory/location testdata/wkt-helsinki-kauppatori}]]
+
     (testutil/with-events test-events
       (testutil/with-user-id user-id
         (testing "has view permissions"
-          (is (= all-territories (dmz/list-territories cong-id nil)))))
+          (is (= expected (dmz/list-territories cong-id nil)))))
 
       (let [user-id (UUID. 0 0x666)]
         (testutil/with-user-id user-id
@@ -217,14 +208,15 @@
 
           (testing "demo congregation"
             (binding [config/env {:demo-congregation cong-id}]
-              (is (= all-territories (dmz/list-territories "demo" nil)))))
+              (is (= expected (dmz/list-territories "demo" nil)))))
 
           (testing "opened a share"
             (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-              (is (= (take 1 all-territories) (dmz/list-territories cong-id nil))))))))))
+              (is (= (take 1 expected) (dmz/list-territories cong-id nil))))))))))
 
 (deftest get-congregation-boundary-test
   (let [expected testdata/wkt-helsinki]
+
     (testutil/with-events test-events
       (testutil/with-user-id user-id
         (testing "has view permissions"
@@ -247,6 +239,7 @@
   (let [expected [{:region/id region-id
                    :region/name "the name"
                    :region/location testdata/wkt-south-helsinki}]]
+
     (testutil/with-events test-events
       (testutil/with-user-id user-id
         (testing "has view permissions"
@@ -268,6 +261,7 @@
 (deftest list-card-minimap-viewports-test
   (let [expected [{:card-minimap-viewport/id card-minimap-viewport-id
                    :card-minimap-viewport/location testdata/wkt-polygon}]]
+
     (testutil/with-events test-events
       (testutil/with-user-id user-id
         (testing "has view permissions"
