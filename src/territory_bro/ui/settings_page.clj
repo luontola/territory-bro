@@ -21,9 +21,9 @@
 
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
-        congregation (if (= "demo" cong-id) ; TODO: replace with permission check for editing settings
-                       (http-response/not-found! "Not available in demo")
-                       (dmz/get-congregation cong-id))
+        _ (when-not (dmz/view-settings-page? cong-id)
+            (dmz/access-denied!))
+        congregation (dmz/get-congregation cong-id)
         users (dmz/list-congregation-users cong-id)
         new-user (some-> (get-in request [:params :new-user])
                          (parse-uuid))]

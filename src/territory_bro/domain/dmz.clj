@@ -61,6 +61,10 @@
   (when-not (auth/logged-in?)
     (http-response/unauthorized! "Not logged in")))
 
+(defn access-denied! []
+  (require-logged-in!) ; if the user is not logged in, first prompt them to log in - they might have access after logging in
+  (http-response/forbidden! "Access denied"))
+
 (defn- super-user? []
   (let [super-users (:super-users config/env)
         user auth/*user*]
@@ -68,9 +72,8 @@
         (contains? super-users (:sub user)))))
 
 (defn sudo [session]
-  (require-logged-in!)
   (when-not (super-user?)
-    (http-response/forbidden! "Not super user"))
+    (access-denied!))
   (log/info "Super user promotion")
   (assoc session ::sudo? true))
 
@@ -147,9 +150,7 @@
             (dissoc :congregation/loans-csv-url)
             (dissoc :congregation/schema-name))
         congregation))
-    (do
-      (require-logged-in!)
-      (http-response/forbidden! "No congregation access"))))
+    (access-denied!)))
 
 (defn list-congregations []
   (let [user-id (auth/current-user-id)]
@@ -195,9 +196,7 @@
       (if (= "demo" cong-id)
         (assoc territory :congregation/id "demo")
         (enrich-do-not-calls territory)))
-    (do
-      (require-logged-in!)
-      (http-response/forbidden! "No territory access"))))
+    (access-denied!)))
 
 (defn list-territories [cong-id {:keys [fetch-loans?]}]
   (cond

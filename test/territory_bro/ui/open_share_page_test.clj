@@ -8,6 +8,7 @@
             [reitit.core :as reitit]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.share :as share]
+            [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.test.fixtures :refer :all]
@@ -23,7 +24,6 @@
         share-id (UUID. 0 3)
         share-key "abc123"
         demo-share-key (share/demo-share-key territory-id)
-        user-id (UUID. 0 0x10)
         request {:path-params {:share-key share-key}}]
     (testutil/with-events [{:event/type :share.event/share-created
                             :congregation/id cong-id
@@ -32,13 +32,13 @@
                             :share/key share-key
                             :share/type :link}]
       (binding [config/env {:now #(Instant/now)}]
+        (testutil/with-anonymous-user
 
-        (testing "open regular share"
-          (testutil/with-user-id user-id
+          (testing "open regular share"
             (with-fixtures [fake-dispatcher-fixture]
               (let [response (open-share-page/open-share! request)]
                 (is (= {:command/type :share.command/record-share-opened
-                        :command/user user-id
+                        :command/user auth/anonymous-user-id
                         :share/id share-id}
                        (dissoc @*last-command :command/time))
                     "records a history of opening the share")
@@ -48,10 +48,9 @@
                         ::middleware/mutative-operation? true
                         :body ""}
                        response)
-                    "stores in session which shares the user has opened")))))
+                    "stores in session which shares the user has opened"))))
 
-        (testing "keeps existing session state, supports opening multiple shares"
-          (testutil/with-anonymous-user
+          (testing "keeps existing session state, supports opening multiple shares"
             (with-fixtures [fake-dispatcher-fixture]
               (let [another-share-id (UUID/randomUUID)
                     request (assoc request :session {::dmz/opened-shares #{another-share-id}
@@ -60,11 +59,10 @@
                 (is (= {::dmz/opened-shares #{share-id
                                               another-share-id}
                         :other-session-state "stuff"}
-                       (:session response)))))))
+                       (:session response))))))
 
-        (testing "open demo share"
-          (let [request {:path-params {:share-key demo-share-key}}]
-            (testutil/with-anonymous-user
+          (testing "open demo share"
+            (let [request {:path-params {:share-key demo-share-key}}]
               (with-fixtures [fake-dispatcher-fixture]
                 (let [response (open-share-page/open-share! request)]
                   (is (= {:status 303
@@ -73,11 +71,10 @@
                          response)
                       "redirects to demo, without touching session state")
                   (is (nil? @*last-command)
-                      "does not record that a demo share was opened"))))))
+                      "does not record that a demo share was opened")))))
 
-        (testing "share not found"
-          (let [request {:path-params {:share-key "bad key"}}]
-            (testutil/with-anonymous-user
+          (testing "share not found"
+            (let [request {:path-params {:share-key "bad key"}}]
               (with-fixtures [fake-dispatcher-fixture]
                 (is (thrown-match? ExceptionInfo
                                    {:type :ring.util.http-response/response

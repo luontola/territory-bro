@@ -9,6 +9,12 @@
   (:import (clojure.lang ExceptionInfo)
            (java.util UUID)))
 
+(def not-found
+  {:type :ring.util.http-response/response
+   :response {:status 404
+              :body "Not found"
+              :headers {}}})
+
 (deftest wrap-parse-path-params-test
   (let [handle (ui/wrap-parse-path-params identity)]
     (testing "no path params - no changes"
@@ -28,23 +34,11 @@
              (handle {:path-params {:congregation "demo"}}))))
 
     (testing "'demo' works only for the congregation"
-      (is (thrown-match?
-           ExceptionInfo {:type :ring.util.http-response/response
-                          :response {:status 404
-                                     :body "Not found"
-                                     :headers {}}}
-           (handle {:path-params {:territory "demo"}}))))
+      (is (thrown-match? ExceptionInfo not-found
+                         (handle {:path-params {:territory "demo"}}))))
 
     (testing "disallow non-UUID parameters"
-      (is (thrown-match?
-           ExceptionInfo {:type :ring.util.http-response/response
-                          :response {:status 404
-                                     :body "Not found"
-                                     :headers {}}}
-           (handle {:path-params {:congregation "foo"}})))
-      (is (thrown-match?
-           ExceptionInfo {:type :ring.util.http-response/response
-                          :response {:status 404
-                                     :body "Not found"
-                                     :headers {}}}
-           (handle {:path-params {:territory "foo"}}))))))
+      (is (thrown-match? ExceptionInfo not-found
+                         (handle {:path-params {:congregation "foo"}})))
+      (is (thrown-match? ExceptionInfo not-found
+                         (handle {:path-params {:territory "foo"}}))))))

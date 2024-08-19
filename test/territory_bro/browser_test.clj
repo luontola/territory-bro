@@ -231,7 +231,8 @@
         (is (= "/congregation/demo/settings" settings-path))
         (doto *driver*
           (b/go (str *base-url* settings-path))
-          (b/wait-has-text h1 "Page not found"))))))
+          (b/wait-has-text h1 "Welcome")) ; access denied, so redirects the anonymous user to Auth0 login screen
+        (is (str/includes? (b/get-url *driver*) ".auth0.com/"))))))
 
 
 (deftest registration-test

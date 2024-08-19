@@ -58,6 +58,8 @@
 
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
+        _ (when-not (dmz/view-printouts-page? cong-id)
+            (dmz/access-denied!))
         congregation (dmz/get-congregation cong-id)
         regions (->> (dmz/list-regions cong-id)
                      (sort-by (comp str :region/name)

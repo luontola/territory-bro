@@ -10,8 +10,7 @@
             [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.congregation-page :as congregation-page]
             [territory-bro.ui.html :as html])
-  (:import (clojure.lang ExceptionInfo)
-           (java.util UUID)))
+  (:import (java.util UUID)))
 
 (def model
   {:congregation {:congregation/name "Example Congregation"}
@@ -34,32 +33,12 @@
                                       (congregation/admin-permissions-granted cong-id user-id)])
         (testutil/with-user-id user-id
 
-          (testing "logged in"
+          (testing "default"
             (is (= model (congregation-page/model! request))))
-
-          (testing "logged in, no access"
-            (is (thrown-match? ExceptionInfo
-                               {:type :ring.util.http-response/response
-                                :response {:status 403
-                                           :body "No congregation access"
-                                           :headers {}}}
-                               (congregation-page/model! {:path-params {:congregation (UUID/randomUUID)}}))))
-
-          (testing "anonymous user"
-            (testutil/with-anonymous-user
-              (is (thrown-match? ExceptionInfo
-                                 {:type :ring.util.http-response/response
-                                  :response {:status 401
-                                             :body "Not logged in"
-                                             :headers {}}}
-                                 (congregation-page/model! request)))))
 
           (testing "demo congregation"
             (let [request {:path-params {:congregation "demo"}}]
-              (is (= demo-model
-                     (congregation-page/model! request)
-                     (testutil/with-anonymous-user
-                       (congregation-page/model! request)))))))))))
+              (is (= demo-model (congregation-page/model! request))))))))))
 
 (deftest view-test
   (testing "full permissions"

@@ -5,6 +5,7 @@
 (ns territory-bro.ui.join-page-test
   (:require [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
+            [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.html :as html]
@@ -22,13 +23,9 @@
       (testutil/with-user-id user-id
         (is (= model (join-page/model! request)))))
 
-    (testing "anonymous user"
+    (testing "anonymous"
       (testutil/with-anonymous-user
-        (is (thrown-match? ExceptionInfo
-                           {:type :ring.util.http-response/response
-                            :response {:status 401
-                                       :body "Not logged in"
-                                       :headers {}}}
+        (is (thrown-match? ExceptionInfo dmz-test/not-logged-in
                            (join-page/model! request)))))))
 
 (deftest view-test

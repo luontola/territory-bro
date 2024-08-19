@@ -58,12 +58,12 @@
                        (replace-in [:congregations 1 :congregation/id] (UUID. 0 2) cong-id2))
                    (home-page/model! request)))))
 
-        (testing "anonymous user"
+        (testing "anonymous"
           (testutil/with-anonymous-user
             (is (= anonymous-model (home-page/model! request))))))
 
       (binding [config/env {:demo-congregation nil}]
-        (testing "anonymous user, no demo"
+        (testing "anonymous, no demo"
           (testutil/with-anonymous-user
             (is (= no-demo-model (home-page/model! request)))))))))
 
@@ -102,7 +102,7 @@
                                      (replace-in [:demo-available?] true false)))
                  html/visible-text))))
 
-    (testing "anonymous user"
+    (testing "anonymous"
       (is (= (html/normalize-whitespace
               (str introduction
                    "Login
@@ -112,7 +112,7 @@
              (-> (home-page/view anonymous-model)
                  html/visible-text))))
 
-    (testing "anonymous user, no demo"
+    (testing "anonymous, no demo"
       (is (= (html/normalize-whitespace
               (str introduction
                    "Login

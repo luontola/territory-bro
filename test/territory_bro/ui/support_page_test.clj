@@ -26,7 +26,7 @@
         (testing "logged in"
           (is (= private-model (support-page/model! request))))
 
-        (testing "anonymous user"
+        (testing "anonymous"
           (testutil/with-anonymous-user
             (is (= public-model (support-page/model! request)))))
 
@@ -47,7 +47,7 @@
            (-> (support-page/view private-model)
                html/visible-text))))
 
-  (testing "anonymous user"
+  (testing "anonymous"
     (is (= (html/normalize-whitespace
             "Support
              Territory Bro is an open source project developed by Esko Luontola.

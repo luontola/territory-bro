@@ -78,7 +78,7 @@
                      (testutil/with-anonymous-user
                        (territory-list-page/model! request {})))))))
 
-        (testing "anonymous user, has opened a share"
+        (testing "anonymous, has opened a share"
           (testutil/with-anonymous-user
             (let [share-id (UUID/randomUUID)
                   request (assoc request :session {::dmz/opened-shares #{share-id}})]
@@ -188,7 +188,7 @@
           (is (str/includes? (html/visible-text rendered) placeholder-icon))))))
 
   (testing "limited visibility disclaimer:"
-    (testing "anonymous user, has opened a share"
+    (testing "anonymous, has opened a share"
       (is (= (html/normalize-whitespace
               "Territories
 
@@ -202,7 +202,7 @@
              (-> (territory-list-page/view anonymous-model)
                  html/visible-text))))
 
-    (testing "logged-in user without congregation access, has opened a share"
+    (testing "logged in without congregation access, has opened a share"
       (is (= (html/normalize-whitespace
               "Territories
 

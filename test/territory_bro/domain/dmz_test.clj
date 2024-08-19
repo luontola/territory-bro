@@ -109,15 +109,10 @@
    :response {:status 401
               :body "Not logged in"
               :headers {}}})
-(def no-congregation-access
+(def access-denied
   {:type :ring.util.http-response/response
    :response {:status 403
-              :body "No congregation access"
-              :headers {}}})
-(def no-territory-access
-  {:type :ring.util.http-response/response
-   :response {:status 403
-              :body "No territory access"
+              :body "Access denied"
               :headers {}}})
 
 
@@ -140,7 +135,7 @@
 
       (testutil/with-user-id (UUID. 0 0x666)
         (testing "no permissions"
-          (is (thrown-match? ExceptionInfo no-congregation-access
+          (is (thrown-match? ExceptionInfo access-denied
                              (dmz/get-congregation cong-id)))))
 
       (testutil/with-anonymous-user
@@ -182,7 +177,7 @@
 
         (testutil/with-user-id (UUID. 0 0x666)
           (testing "no permissions"
-            (is (thrown-match? ExceptionInfo no-territory-access
+            (is (thrown-match? ExceptionInfo access-denied
                                (dmz/get-territory cong-id territory-id)))))
 
         (testutil/with-anonymous-user

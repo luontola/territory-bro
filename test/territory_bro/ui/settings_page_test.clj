@@ -8,8 +8,11 @@
             [matcher-combinators.test :refer :all]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.dmz :as dmz]
+            [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.infra.permissions :as permissions]
             [territory-bro.infra.user :as user]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil]
@@ -67,23 +70,22 @@
           (testing "logged in"
             (is (= model (settings-page/model! request))))
 
+          (testing "only view permissions, not an admin"
+            (binding [dmz/*state* (-> dmz/*state*
+                                      (permissions/revoke user-id [:configure-congregation cong-id])
+                                      (permissions/revoke user-id [:gis-access cong-id]))]
+              (is (thrown-match? ExceptionInfo dmz-test/access-denied
+                                 (settings-page/model! request)))))
+
           (testing "demo congregation"
             (binding [config/env {:demo-congregation cong-id}]
               (let [request {:path-params {:congregation "demo"}}]
-                (is (thrown-match? ExceptionInfo
-                                   {:type :ring.util.http-response/response
-                                    :response {:status 404
-                                               :body "Not available in demo"
-                                               :headers {}}}
+                (is (thrown-match? ExceptionInfo dmz-test/access-denied
                                    (settings-page/model! request))))))
 
-          (testing "anonymous user"
+          (testing "anonymous"
             (testutil/with-anonymous-user
-              (is (thrown-match? ExceptionInfo
-                                 {:type :ring.util.http-response/response
-                                  :response {:status 401
-                                             :body "Not logged in"
-                                             :headers {}}}
+              (is (thrown-match? ExceptionInfo dmz-test/not-logged-in
                                  (settings-page/model! request)))))
 
           (testing "user was added"

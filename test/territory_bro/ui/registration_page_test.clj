@@ -7,6 +7,7 @@
             [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [territory-bro.dispatcher :as dispatcher]
+            [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil]
@@ -23,27 +24,22 @@
 (deftest model!-test
   (let [user-id (UUID/randomUUID)
         request {}]
-    (testutil/with-user-id user-id
 
-      (testing "logged in"
-        (is (= model (registration-page/model! request))))
+    (testing "logged in"
+      (testutil/with-user-id user-id
+        (is (= model (registration-page/model! request)))))
 
-      (testing "anonymous user"
-        (testutil/with-anonymous-user
-          (is (thrown-match? ExceptionInfo
-                             {:type :ring.util.http-response/response
-                              :response {:status 401
-                                         :body "Not logged in"
-                                         :headers {}}}
-                             (registration-page/model! request))))))))
+    (testing "anonymous"
+      (testutil/with-anonymous-user
+        (is (thrown-match? ExceptionInfo dmz-test/not-logged-in
+                           (registration-page/model! request)))))))
 
 (deftest submit!-test
   (let [user-id (UUID/randomUUID)
         request {:params {:congregationName "the name"}}]
     (binding [config/env {:now #(Instant/now)}]
       (testutil/with-user-id user-id
-
-        (testing "logged in"
+        (testing "registration ok"
           (with-fixtures [fake-dispatcher-fixture]
             (let [response (registration-page/submit! request)]
               (is (= {:command/type :congregation.command/create-congregation
@@ -55,17 +51,7 @@
                       :body ""}
                      response)))))
 
-        (testing "anonymous user"
-          (testutil/with-anonymous-user
-            (with-fixtures [fake-dispatcher-fixture]
-              (is (thrown-match? ExceptionInfo
-                                 {:type :ring.util.http-response/response
-                                  :response {:status 401
-                                             :body "Not logged in"
-                                             :headers {}}}
-                                 (registration-page/submit! request))))))
-
-        (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
+        (testing "registration failed: highlights erroneous form fields, doesn't forget invalid user input"
           (binding [dispatcher/command! (fn [& _]
                                           (throw (ValidationException. [[:missing-name]])))]
             (let [response (registration-page/submit! request)]
@@ -74,7 +60,12 @@
                    (html/visible-text (:body response))
                    (html/normalize-whitespace
                     "Congregation name [the name] ⚠️
-                     Register"))))))))))
+                     Register")))))))
+
+      (testutil/with-anonymous-user
+        (testing "anonymous"
+          (is (thrown-match? ExceptionInfo dmz-test/not-logged-in
+                             (registration-page/submit! request))))))))
 
 (deftest view-test
   (is (= (html/normalize-whitespace

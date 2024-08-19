@@ -6,6 +6,7 @@
   (:require [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [territory-bro.domain.dmz :as dmz]
+            [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.infra.config :as config]
             [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.sudo-page :as sudo-page])
@@ -28,18 +29,10 @@
 
       (testing "regular user is denied"
         (testutil/with-user-id regular-user-id
-          (is (thrown-match? ExceptionInfo
-                             {:type :ring.util.http-response/response
-                              :response {:status 403
-                                         :body "Not super user"
-                                         :headers {}}}
+          (is (thrown-match? ExceptionInfo dmz-test/access-denied
                              (sudo-page/sudo request)))))
 
       (testing "anonymous user is denied"
         (testutil/with-anonymous-user
-          (is (thrown-match? ExceptionInfo
-                             {:type :ring.util.http-response/response
-                              :response {:status 401
-                                         :body "Not logged in"
-                                         :headers {}}}
+          (is (thrown-match? ExceptionInfo dmz-test/not-logged-in
                              (sudo-page/sudo request))))))))

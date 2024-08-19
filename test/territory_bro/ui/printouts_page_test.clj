@@ -5,8 +5,10 @@
 (ns territory-bro.ui.printouts-page-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
+            [matcher-combinators.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
+            [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.share :as share]
@@ -20,7 +22,8 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.printouts-page :as printouts-page])
-  (:import (java.time Clock Duration Instant ZoneOffset ZonedDateTime)
+  (:import (clojure.lang ExceptionInfo)
+           (java.time Clock Duration Instant ZoneOffset ZonedDateTime)
            (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
@@ -138,6 +141,14 @@
         (testing "no permission to share"
           (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:share-territory-link cong-id])]
             (is (= no-qr-codes-model (printouts-page/model! request)))))
+
+        (testing "has opened a share, cannot see all territories"
+          (let [user-id (UUID/randomUUID)
+                share-id (UUID/randomUUID)]
+            (testutil/with-user-id user-id
+              (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
+                (is (thrown-match? ExceptionInfo dmz-test/access-denied
+                                   (printouts-page/model! request)))))))
 
         (testing "demo congregation"
           (binding [config/env {:demo-congregation cong-id}]
