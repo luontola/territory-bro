@@ -116,6 +116,8 @@
               :headers {}}})
 
 
+;;;; Congregations
+
 (deftest get-congregation-test
   (let [expected {:congregation/id cong-id
                   :congregation/name "Cong1 Name"
@@ -178,6 +180,18 @@
         (testing "opened a share"
           (binding [dmz/*state* (apply-share-opened dmz/*state*)]
             (is (empty? (dmz/list-congregations)))))))))
+
+
+;;;; Settings
+
+(deftest list-congregation-users-test
+  (is true)) ; TODO
+
+(deftest download-qgis-project-test
+  (is true)) ; TODO
+
+
+;;;; Territories
 
 (deftest get-territory-test
   (let [expected {:congregation/id cong-id
@@ -278,6 +292,21 @@
         (testing "opened a share"
           (binding [dmz/*state* (apply-share-opened dmz/*state*)]
             (is (= (take 1 expected) (dmz/list-territories cong-id nil)))))))))
+
+
+;;;; Shares
+
+(deftest share-territory-link-test
+  (is true)) ; TODO
+
+(deftest generate-qr-code-test
+  (is true)) ; TODO
+
+(deftest open-share!-test
+  (is true)) ; TODO
+
+
+;;;; Other geometries
 
 (deftest get-congregation-boundary-test
   (let [expected testdata/wkt-helsinki]
