@@ -99,7 +99,7 @@
 
              :dev {:dependencies [[com.github.kyleburton/clj-xpath "1.4.13"]
                                   [criterium "0.4.6"]
-                                  [etaoin "1.0.40"]
+                                  [etaoin "1.1.41"]
                                   [lambdaisland/kaocha "1.91.1392"]
                                   [nubank/matcher-combinators "3.9.1"]
                                   [org.clojure/test.check "1.1.1"]

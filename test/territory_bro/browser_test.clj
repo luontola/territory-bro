@@ -376,7 +376,8 @@
       (go-to-any-congregation)
       (go-to-page "Territories"))
 
-    (let [[shared-territory unrelated-territory] (two-random-territories *driver*)]
+    (let [[shared-territory unrelated-territory] (two-random-territories *driver*)
+          unrelated-territory-url (str *base-url* (:link unrelated-territory))]
       (is (not (str/blank? (:number shared-territory))))
       (is (not (str/blank? (:number unrelated-territory))))
       (go-to-territory *driver* (:number shared-territory))
@@ -408,11 +409,11 @@
                  (->> (b/query-all *driver* [:territory-list {:tag :a}])
                       (map #(b/get-element-text-el *driver* %))))
               "page lists only the shared territory")
-          (is (nil? (b/wait-has-text-everywhere *driver* "Only those territories which have been shared with you are currently shown."))
+          (is (b/wait-has-text-everywhere *driver* "Only those territories which have been shared with you are currently shown.")
               "page contains a disclaimer")
 
           (doto *driver*
-            (b/go (:link unrelated-territory))
+            (b/go unrelated-territory-url)
             (b/wait-visible :username))
           (is (= "Log in | Territory Bro (Dev)"
                  (b/get-title *driver*))

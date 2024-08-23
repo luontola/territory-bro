@@ -23,8 +23,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Leiningen: aero:1.1.6" level="project" />
-    <orderEntry type="library" name="Leiningen: babashka/fs:0.2.12" level="project" />
-    <orderEntry type="library" name="Leiningen: babashka/process:0.3.11" level="project" />
+    <orderEntry type="library" name="Leiningen: babashka/fs:0.5.22" level="project" />
+    <orderEntry type="library" name="Leiningen: babashka/process:0.5.22" level="project" />
     <orderEntry type="library" name="Leiningen: borkdude/dynaload:0.3.5" level="project" />
     <orderEntry type="library" name="Leiningen: borkdude/edamame:1.4.25" level="project" />
     <orderEntry type="library" name="Leiningen: camel-snake-kebab:0.4.3" level="project" />
@@ -83,7 +83,7 @@
     <orderEntry type="library" name="Leiningen: crypto-equality:1.0.1" level="project" />
     <orderEntry type="library" name="Leiningen: crypto-random:1.2.1" level="project" />
     <orderEntry type="library" name="Leiningen: enlive:1.1.6" level="project" />
-    <orderEntry type="library" name="Leiningen: etaoin:1.0.40" level="project" />
+    <orderEntry type="library" name="Leiningen: etaoin:1.1.41" level="project" />
     <orderEntry type="library" name="Leiningen: expiring-map:0.1.8" level="project" />
     <orderEntry type="library" name="Leiningen: expound:0.9.0" level="project" />
     <orderEntry type="library" name="Leiningen: fi.metosin/reitit-openapi:0.7.1" level="project" />
@@ -102,6 +102,7 @@
     <orderEntry type="library" name="Leiningen: lambdaisland/deep-diff:0.0-47" level="project" />
     <orderEntry type="library" name="Leiningen: lambdaisland/kaocha:1.91.1392" level="project" />
     <orderEntry type="library" name="Leiningen: lambdaisland/tools.namespace:0.3.256" level="project" />
+    <orderEntry type="library" name="Leiningen: lambdaisland/uri:1.19.155" level="project" />
     <orderEntry type="library" name="Leiningen: liberator:0.15.3" level="project" />
     <orderEntry type="library" name="Leiningen: medley:1.4.0" level="project" />
     <orderEntry type="library" name="Leiningen: meta-merge:1.0.0" level="project" />
@@ -151,9 +152,9 @@
     <orderEntry type="library" name="Leiningen: org.apache.httpcomponents/httpcore-nio:4.4.15" level="project" />
     <orderEntry type="library" name="Leiningen: org.apache.httpcomponents/httpcore:4.4.16" level="project" />
     <orderEntry type="library" name="Leiningen: org.apache.httpcomponents/httpmime:4.5.14" level="project" />
+    <orderEntry type="library" name="Leiningen: org.babashka/http-client:0.4.20" level="project" />
     <orderEntry type="library" name="Leiningen: org.ccil.cowan.tagsoup/tagsoup:1.2.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.checkerframework/checker-qual:3.42.0" level="project" />
-    <orderEntry type="library" name="Leiningen: org.clj-commons/clj-http-lite:1.0.13" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojars.luontola/ns-tracker:0.3.1-patch1" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/clojure:1.12.0-beta1" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/core.cache:0.6.5" level="project" />
