@@ -39,7 +39,8 @@
                :territory/addresses "the addresses"
                :territory/region "the region"
                :territory/meta {:foo "bar"}
-               :territory/location testdata/wkt-helsinki-rautatientori}
+               :territory/location testdata/wkt-helsinki-rautatientori
+               :territory/do-not-calls nil}
    :permissions {:edit-do-not-calls false
                  :share-territory-link true}
    :mac? false})
@@ -175,7 +176,6 @@
                                :territory territory-id}}]
     (testutil/with-events test-events
       (binding [config/env {:now #(Instant/now)}
-                do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls
                 share/generate-share-key (constantly "abcxyz")]
         (testutil/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]

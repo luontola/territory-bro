@@ -157,7 +157,6 @@
                   :territory/number "123"
                   :territory/addresses "the addresses"
                   :territory/region "the region"
-                  :territory/do-not-calls "the do-not-calls"
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-helsinki-rautatientori}
         demo-expected {:congregation/id "demo" ; changed
@@ -165,33 +164,56 @@
                        :territory/number "123"
                        :territory/addresses "the addresses"
                        :territory/region "the region"
-                       #_:territory/do-not-calls ; removed
                        :territory/meta {:foo "bar"}
                        :territory/location testdata/wkt-helsinki-rautatientori}]
+
+    (testutil/with-events test-events
+      (testutil/with-user-id user-id
+        (testing "full permissions"
+          (is (= expected (dmz/get-territory cong-id territory-id)))))
+
+      (testutil/with-user-id (UUID. 0 0x666)
+        (testing "no permissions"
+          (is (thrown-match? ExceptionInfo access-denied
+                             (dmz/get-territory cong-id territory-id)))))
+
+      (testutil/with-anonymous-user
+        (testing "anonymous"
+          (is (thrown-match? ExceptionInfo not-logged-in
+                             (dmz/get-territory cong-id territory-id))))
+
+        (testing "demo congregation"
+          (binding [config/env {:demo-congregation cong-id}]
+            (is (= demo-expected (dmz/get-territory "demo" territory-id)))))
+
+        (testing "opened a share"
+          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+            (is (= expected (dmz/get-territory cong-id territory-id)))))))))
+
+(deftest get-do-not-calls-test
+  (let [expected "the do-not-calls"]
 
     (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
       (testutil/with-events test-events
         (testutil/with-user-id user-id
           (testing "full permissions"
-            (is (= expected (dmz/get-territory cong-id territory-id)))))
+            (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))
 
         (testutil/with-user-id (UUID. 0 0x666)
           (testing "no permissions"
-            (is (thrown-match? ExceptionInfo access-denied
-                               (dmz/get-territory cong-id territory-id)))))
+            (is (nil? (dmz/get-do-not-calls cong-id territory-id)))))
 
         (testutil/with-anonymous-user
           (testing "anonymous"
-            (is (thrown-match? ExceptionInfo not-logged-in
-                               (dmz/get-territory cong-id territory-id))))
+            (is (nil? (dmz/get-do-not-calls cong-id territory-id))))
 
           (testing "demo congregation"
             (binding [config/env {:demo-congregation cong-id}]
-              (is (= demo-expected (dmz/get-territory "demo" territory-id)))))
+              (is (nil? (dmz/get-do-not-calls "demo" territory-id)))))
 
           (testing "opened a share"
             (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-              (is (= expected (dmz/get-territory cong-id territory-id))))))))))
+              (is (= expected (dmz/get-do-not-calls cong-id territory-id))))))))))
 
 (deftest list-territories-test
   (let [expected [{:territory/id territory-id

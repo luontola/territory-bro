@@ -9,8 +9,6 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.dmz-test :as dmz-test]
-            [territory-bro.domain.do-not-calls :as do-not-calls]
-            [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.config :as config]
@@ -238,7 +236,6 @@
                                :territory territory-id}}]
     (testutil/with-events test-events
       (binding [config/env {:now #(Instant/now)}
-                do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls
                 share/generate-share-key (constantly "abcxyz")]
         (testutil/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]

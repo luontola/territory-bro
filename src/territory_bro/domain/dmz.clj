@@ -84,6 +84,10 @@
 (defn allowed? [permit]
   (permissions/allowed? *state* (auth/current-user-id) permit))
 
+(defn view-territory? [cong-id territory-id]
+  (or (allowed? [:view-congregation cong-id]) ; :view-congregation implies :view-territory for all territories
+      (allowed? [:view-territory cong-id territory-id])))
+
 (defn view-printouts-page? [cong-id]
   (allowed? [:view-congregation cong-id]))
 
@@ -186,19 +190,18 @@
 
 ;;;; Territories
 
-(defn- enrich-do-not-calls [territory]
-  (merge territory
-         (-> (do-not-calls/get-do-not-calls *conn* (:congregation/id territory) (:territory/id territory))
-             (select-keys [:territory/do-not-calls]))))
-
 (defn get-territory [cong-id territory-id]
-  (if (or (allowed? [:view-congregation cong-id]) ; :view-congregation implies :view-territory for all territories
-          (allowed? [:view-territory cong-id territory-id]))
+  (if (view-territory? cong-id territory-id)
     (let [territory (territory/get-unrestricted-territory *state* (coerce-demo-cong-id cong-id) territory-id)]
       (if (= "demo" cong-id)
         (assoc territory :congregation/id "demo")
-        (enrich-do-not-calls territory)))
+        territory))
     (access-denied!)))
+
+(defn get-do-not-calls [cong-id territory-id]
+  (when (and (view-territory? cong-id territory-id)
+             (not= "demo" cong-id))
+    (:territory/do-not-calls (do-not-calls/get-do-not-calls *conn* cong-id territory-id))))
 
 (defn list-territories [cong-id {:keys [fetch-loans?]}]
   (cond
