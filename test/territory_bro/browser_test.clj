@@ -14,7 +14,8 @@
             [reitit.core :as reitit]
             [territory-bro.test.testutil :refer [thrown-with-msg?]]
             [territory-bro.ui :as ui])
-  (:import (java.util UUID)
+  (:import (java.io File)
+           (java.util UUID)
            (org.apache.commons.io FileUtils)
            (org.postgresql.util PSQLException)))
 
@@ -24,11 +25,12 @@
 (def auth0-username "browser-test@example.com")
 (def auth0-password "m6ER6MU7bBYEHrByt8lyop3cG1W811r2")
 
-(def postmortem-dir (io/file "target/etaoin-postmortem"))
-(def download-dir (io/file "target/etaoin-download"))
+(def ^File postmortem-dir (io/file "target/etaoin-postmortem"))
+(def ^File download-dir (io/file "target/etaoin-download"))
 (def browser-config
   {:size [1920 1080]
-   :download-dir download-dir})
+   :prefs {:download.default_directory (.getAbsolutePath download-dir)}
+   :args ["--disable-search-engine-choice-screen"]})
 
 (defn per-test-subdir [parent-dir]
   (let [var (first *testing-vars*)]
