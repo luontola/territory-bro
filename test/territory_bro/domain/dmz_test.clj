@@ -151,6 +151,34 @@
           (binding [dmz/*state* (apply-share-opened dmz/*state*)]
             (is (= expected (dmz/get-congregation cong-id)))))))))
 
+(deftest list-congregations-test
+  (let [expected [{:congregation/id cong-id
+                   :congregation/name "Cong1 Name"
+                   :congregation/timezone testdata/timezone-helsinki
+                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
+                   :congregation/schema-name "cong1_schema"}]]
+
+    (testutil/with-events test-events
+      (testutil/with-user-id user-id
+        (testing "full permissions"
+          (is (= expected (dmz/list-congregations)))))
+
+      (testutil/with-user-id (UUID. 0 0x666)
+        (testing "no permissions"
+          (is (empty? (dmz/list-congregations)))))
+
+      (testutil/with-anonymous-user
+        (testing "anonymous"
+          (is (empty? (dmz/list-congregations))))
+
+        (testing "demo congregation"
+          (binding [config/env {:demo-congregation cong-id}]
+            (is (empty? (dmz/list-congregations)))))
+
+        (testing "opened a share"
+          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+            (is (empty? (dmz/list-congregations)))))))))
+
 (deftest get-territory-test
   (let [expected {:congregation/id cong-id
                   :territory/id territory-id

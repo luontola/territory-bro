@@ -143,11 +143,14 @@
         (http-response/not-found! "No demo"))
     cong-id))
 
+(defn- filter-congregation [congregation]
+  (dissoc congregation :congregation/user-permissions))
+
 (defn get-congregation [cong-id]
   (if (or (allowed? [:view-congregation cong-id])
           (allowed? [:view-congregation-temporarily cong-id]))
     (let [congregation (-> (congregation/get-unrestricted-congregation *state* (coerce-demo-cong-id cong-id))
-                           (dissoc :congregation/user-permissions))]
+                           (filter-congregation))]
       (if (= "demo" cong-id)
         (-> congregation
             (assoc :congregation/id "demo")
@@ -158,10 +161,9 @@
     (access-denied!)))
 
 (defn list-congregations []
-  (let [user-id (auth/current-user-id)]
-    ;; TODO: inline get-my-congregations to DMZ to centralize all access controls
-    (->> (congregation/get-my-congregations *state* user-id)
-         (util/natural-sort-by :congregation/name))))
+  (->> (congregation/get-my-congregations *state* (auth/current-user-id))
+       (mapv filter-congregation)
+       (util/natural-sort-by :congregation/name)))
 
 
 ;;;; Settings
