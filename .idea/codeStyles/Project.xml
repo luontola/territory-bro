@@ -18,6 +18,7 @@
           <entry key="clojure.core/assoc" value="1000" />
           <entry key="clojure.core/comment" value="0" />
           <entry key="clojure.core/cond-&gt;" value="1" />
+          <entry key="clojure.core/cond-&gt;&gt;" value="1" />
           <entry key="clojure.core/defonce" value="1" />
           <entry key="conman.core/with-transaction" value="1" />
           <entry key="etaoin.api/with-postmortem" value="2" />

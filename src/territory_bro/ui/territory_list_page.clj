@@ -19,7 +19,8 @@
   (let [cong-id (get-in request [:path-params :congregation])
         congregation (dmz/get-congregation cong-id)
         congregation-boundary (dmz/get-congregation-boundary cong-id)
-        territories (dmz/list-territories cong-id {:fetch-loans? fetch-loans?})]
+        territories (cond->> (dmz/list-territories cong-id)
+                      fetch-loans? (dmz/enrich-territory-loans cong-id))]
     {:congregation-boundary congregation-boundary
      :territories territories
      :has-loans? (some? (:congregation/loans-csv-url congregation))

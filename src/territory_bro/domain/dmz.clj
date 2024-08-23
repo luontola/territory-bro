@@ -205,20 +205,22 @@
              (not= "demo" cong-id))
     (:territory/do-not-calls (do-not-calls/get-do-not-calls *conn* cong-id territory-id))))
 
-(defn list-territories [cong-id {:keys [fetch-loans?]}]
-  (cond
-    (allowed? [:view-congregation cong-id])
-    (let [congregation (get-congregation cong-id)
-          loans-csv-url (:congregation/loans-csv-url congregation)
-          territories (->> (vals (get-in *state* [::territory/territories (coerce-demo-cong-id cong-id)]))
-                           (util/natural-sort-by :territory/number))]
-      (if (and fetch-loans? (some? loans-csv-url))
-        (loan/enrich-territory-loans! territories loans-csv-url)
-        territories))
+(defn list-territories [cong-id]
+  (->> (cond
+         (allowed? [:view-congregation cong-id])
+         (vals (get-in *state* [::territory/territories (coerce-demo-cong-id cong-id)]))
 
-    (allowed? [:view-congregation-temporarily cong-id])
-    (for [[_ _ territory-id] (permissions/match *state* (auth/current-user-id) [:view-territory cong-id '*])]
-      (get-in *state* [::territory/territories cong-id territory-id]))))
+         (allowed? [:view-congregation-temporarily cong-id])
+         (for [[_ _ territory-id] (permissions/match *state* (auth/current-user-id) [:view-territory cong-id '*])]
+           (get-in *state* [::territory/territories cong-id territory-id])))
+       (util/natural-sort-by :territory/number)))
+
+(defn enrich-territory-loans [cong-id territories]
+  (if (allowed? [:view-congregation cong-id])
+    (if-some [loans-csv-url (:congregation/loans-csv-url (get-congregation cong-id))]
+      (loan/enrich-territory-loans! territories loans-csv-url)
+      territories)
+    territories))
 
 
 ;;;; Shares

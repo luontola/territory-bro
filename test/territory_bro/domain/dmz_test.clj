@@ -8,6 +8,7 @@
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
+            [territory-bro.domain.loan :as loan]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
@@ -270,28 +271,65 @@
                    :territory/region "the region"
                    :territory/meta {:foo "bar"}
                    :territory/location testdata/wkt-helsinki-kauppatori}]]
-    ;; TODO: fetching loans not tested - extract it out of list-territories
 
     (testutil/with-events test-events
       (testutil/with-user-id user-id
         (testing "full permissions"
-          (is (= expected (dmz/list-territories cong-id nil)))))
+          (is (= expected (dmz/list-territories cong-id)))))
 
       (testutil/with-user-id (UUID. 0 0x666)
         (testing "no permissions"
-          (is (nil? (dmz/list-territories cong-id nil)))))
+          (is (empty? (dmz/list-territories cong-id)))))
 
       (testutil/with-anonymous-user
         (testing "anonymous"
-          (is (nil? (dmz/list-territories cong-id nil))))
+          (is (empty? (dmz/list-territories cong-id))))
 
         (testing "demo congregation"
           (binding [config/env {:demo-congregation cong-id}]
-            (is (= expected (dmz/list-territories "demo" nil)))))
+            (is (= expected (dmz/list-territories "demo")))))
 
         (testing "opened a share"
           (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (= (take 1 expected) (dmz/list-territories cong-id nil)))))))))
+            (is (= (take 1 expected) (dmz/list-territories cong-id)))))))))
+
+(deftest enrich-territory-loans-test
+  (let [territories [{:territory/id territory-id
+                      :territory/number "123"}
+                     {:territory/id territory-id2
+                      :territory/number "456"}]
+        expected [{:territory/id territory-id
+                   :territory/number "123"
+                   :territory/loaned? true
+                   :territory/staleness 7}
+                  {:territory/id territory-id2
+                   :territory/number "456"
+                   :territory/loaned? false
+                   :territory/staleness 8}]]
+
+    (binding [loan/download! (constantly (str "Number,Loaned,Staleness\n"
+                                              "123,TRUE,7\n"
+                                              "456,FALSE,8\n"))]
+      (testutil/with-events test-events
+        (testutil/with-user-id user-id
+          (testing "full permissions"
+            (is (= expected (dmz/enrich-territory-loans cong-id territories)))))
+
+        (testutil/with-user-id (UUID. 0 0x666)
+          (testing "no permissions"
+            (is (= territories (dmz/enrich-territory-loans cong-id territories)))))
+
+        (testutil/with-anonymous-user
+          (testing "anonymous"
+            (is (= territories (dmz/enrich-territory-loans cong-id territories))))
+
+          (testing "demo congregation"
+            (binding [config/env {:demo-congregation cong-id}]
+              (is (= territories (dmz/enrich-territory-loans "demo" territories)))))
+
+          (testing "opened a share"
+            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+              (is (= territories (dmz/enrich-territory-loans cong-id territories))))))))))
 
 
 ;;;; Shares

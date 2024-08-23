@@ -61,7 +61,7 @@
             (dmz/access-denied!))
         congregation (dmz/get-congregation cong-id)
         regions (dmz/list-regions cong-id)
-        territories (dmz/list-territories cong-id nil)
+        territories (dmz/list-territories cong-id)
         default-params {:template (:id (first templates))
                         :language (name i18n/*lang*)
                         :map-raster maps/default-for-quality
