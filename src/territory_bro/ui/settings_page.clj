@@ -34,11 +34,11 @@
                                      (:congregation/loans-csv-url congregation))
      :users (->> users
                  (mapv (fn [user]
-                         (assoc user :new? (= new-user (:id user)))))
+                         (assoc user :new? (= new-user (:user/id user)))))
                  (sort-by (fn [user]
                             ;; new user first, then alphabetically by name
                             [(if (:new? user) 1 2)
-                             (str/lower-case (str (:name user)))])))
+                             (-> user :user/attributes :name str str/lower-case)])))
      :permissions {:configure-congregation (dmz/allowed? [:configure-congregation cong-id])
                    :gis-access (dmz/allowed? [:gis-access cong-id])}
      :form/user-id (get-in request [:params :user-id])}))
@@ -135,7 +135,7 @@
 
 
 (defn identity-provider [user]
-  (let [sub (or (:sub user) "")]
+  (let [sub (str (:user/subject user))]
     (cond
       (str/starts-with? sub "google-oauth2|") "Google"
       (str/starts-with? sub "facebook|") "Facebook"
@@ -143,30 +143,31 @@
 
 (defn users-table-row [user model]
   (let [styles (:UserManagement (css/modules))
-        current-user? (= (:id user)
-                         (:user/id auth/*user*))]
+        current-user? (= (:user/id user)
+                         (:user/id auth/*user*))
+        {:keys [name email email_verified picture]} (:user/attributes user)]
     (h/html
      [:tr {:class (when (:new? user)
                     (:newUser styles))}
       [:td {:class (:profilePicture styles)}
-       (when (some? (:picture user))
-         [:img {:src (:picture user)
+       (when (some? picture)
+         [:img {:src picture
                 :alt ""}])]
       [:td
-       (if (str/blank? (:name user))
-         (:id user)
-         (:name user))
+       (if (str/blank? name)
+         (:user/id user)
+         name)
        (when current-user?
          (h/html " " [:em "(" (i18n/t "UserManagement.you") ")"]))]
       [:td
-       (:email user)
-       (when (and (some? (:email user))
-                  (not (:emailVerified user)))
+       email
+       (when (and (some? email)
+                  (not email_verified))
          (h/html " " [:em "(" (i18n/t "UserManagement.unverified") ")"]))]
       [:td (identity-provider user)]
       [:td [:button.pure-button {:type "button"
                                  :class (:removeUser styles)
-                                 :hx-delete (str html/*page-path* "/users?user-id=" (codec/url-encode (:id user)))
+                                 :hx-delete (str html/*page-path* "/users?user-id=" (codec/url-encode (:user/id user)))
                                  :hx-confirm (when current-user?
                                                (-> (i18n/t "UserManagement.removeYourselfWarning")
                                                    (str/replace "{{congregation}}" (:congregation/name model))))}

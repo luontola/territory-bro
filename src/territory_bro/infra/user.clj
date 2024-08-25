@@ -12,7 +12,9 @@
 (defn- format-user [user]
   {:user/id (:id user)
    :user/subject (:subject user)
-   :user/attributes (:attributes user)})
+   :user/attributes (-> (:attributes user)
+                        ;; avoid repeating the subject needlessly - the canonical value is the one in :user/subject
+                        (dissoc :sub))})
 
 (defn ^:dynamic get-users
   ([conn]

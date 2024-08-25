@@ -171,11 +171,7 @@
 (defn list-congregation-users [cong-id]
   (when (allowed? [:view-congregation cong-id])
     (let [user-ids (congregation/get-users *state* cong-id)]
-      (vec (for [user (user/get-users *conn* {:ids user-ids})]
-             ;; TODO: remove this unnecessary format change, return users as-is
-             (-> (:user/attributes user)
-                 (assoc :id (:user/id user))
-                 (assoc :sub (:user/subject user))))))))
+      (user/get-users *conn* {:ids user-ids}))))
 
 (defn download-qgis-project [cong-id]
   (let [congregation (get-congregation cong-id)

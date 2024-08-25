@@ -186,23 +186,18 @@
 ;;;; Settings
 
 (deftest list-congregation-users-test
-  (let [expected [{:id user-id
-                   :sub "user1"
-                   :name "User One"}
-                  {:id user-id2
-                   :sub "user2"
-                   :name "User Two"}]
+  (let [expected [{:user/id user-id
+                   :user/subject "user1"
+                   :user/attributes {:name "User One"
+                                     :email "user1@example.com"}}
+                  {:user/id user-id2
+                   :user/subject "user2"
+                   :user/attributes {:name "User Two"
+                                     :email "user2@example.com"}}]
         fake-get-users (fn [_conn query]
                          (is (= {:ids [user-id user-id2]} query)
                              "get-users query")
-                         [{:user/id user-id
-                           :user/subject "user1"
-                           :user/attributes {:sub "user1"
-                                             :name "User One"}}
-                          {:user/id user-id2
-                           :user/subject "user2"
-                           :user/attributes {:sub "user2"
-                                             :name "User Two"}}])]
+                         expected)]
 
     (binding [territory-bro.infra.user/get-users fake-get-users]
       (testutil/with-events test-events

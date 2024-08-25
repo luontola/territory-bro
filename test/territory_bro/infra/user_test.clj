@@ -44,8 +44,19 @@
                (user/get-by-id conn user-id))
             "should update attributes"))
 
-      (testing "list users"
-        (is (= ["user1" "user2"]
+      (testing "subject is not repeated in the user attributes, but all other attributes are kept"
+        (let [user3 {:sub "user3"
+                     :name "User 3"
+                     :stuff "another attribute"}
+              user-id3 (user/save-user! conn (:sub user3) user3)]
+          (is (= {:user/id user-id3
+                  :user/subject "user3"
+                  :user/attributes {:name "User 3"
+                                    :stuff "another attribute"}}
+                 (user/get-by-id conn user-id3)))))
+
+      (testing "list all users"
+        (is (= ["user1" "user2" "user3"]
                (subjects (user/get-users conn)))))
 
       (testing "find users by IDs"

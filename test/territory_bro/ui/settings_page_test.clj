@@ -30,11 +30,11 @@
 (def model
   {:congregation/name "Congregation Name"
    :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
-   :users [{:id user-id
-            :name "Esko Luontola"
-            :nickname "esko.luontola"
-            :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"
-            :sub "google-oauth2|102883237794451111459"
+   :users [{:user/id user-id
+            :user/subject "google-oauth2|102883237794451111459"
+            :user/attributes {:name "Esko Luontola"
+                              :nickname "esko.luontola"
+                              :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"}
             :new? false}]
    :permissions {:configure-congregation true
                  :gis-access true}
@@ -56,8 +56,7 @@
         "get-users query")
     [{:user/id user-id
       :user/subject "google-oauth2|102883237794451111459"
-      :user/attributes {:sub "google-oauth2|102883237794451111459"
-                        :name "Esko Luontola"
+      :user/attributes {:name "Esko Luontola"
                         :nickname "esko.luontola"
                         :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"}}]))
 
@@ -108,7 +107,7 @@
                 (is (= ["c" "a" "B" "D" "e"]
                        (->> (settings-page/model! request)
                             :users
-                            (map :name))))))))))))
+                            (mapv (comp :name :user/attributes)))))))))))))
 
 (deftest congregation-settings-section-test
   (testing "requires the configure-congregation permission"
@@ -123,19 +122,19 @@
 
 (deftest identity-provider-test
   (is (= "" (settings-page/identity-provider nil)))
-  (is (= "Google" (settings-page/identity-provider {:sub "google-oauth2|123456789"})))
-  (is (= "Facebook" (settings-page/identity-provider {:sub "facebook|10224970701722883"})))
-  (is (= "developer" (settings-page/identity-provider {:sub "developer"}))))
+  (is (= "Google" (settings-page/identity-provider {:user/subject "google-oauth2|123456789"})))
+  (is (= "Facebook" (settings-page/identity-provider {:user/subject "facebook|10224970701722883"})))
+  (is (= "developer" (settings-page/identity-provider {:user/subject "developer"}))))
 
 (deftest users-table-row-test
   (let [user-id (UUID. 0 1)
         current-user-id (UUID. 0 2)
-        user {:id user-id
-              :name "John Doe"
-              :picture "http://example.com/picture.jpg"
-              :email "john.doe@example.com"
-              :emailVerified true
-              :sub "google-oauth2|123456789"
+        user {:user/id user-id
+              :user/subject "google-oauth2|123456789"
+              :user/attributes {:name "John Doe"
+                                :picture "http://example.com/picture.jpg"
+                                :email "john.doe@example.com"
+                                :email_verified true}
               :new? false}
         self-delete-confirmation "hx-confirm=\"Are you sure you want to REMOVE YOURSELF from Congregation Name? You will not be able to add yourself back.\""]
     (binding [auth/*user* {:user/id current-user-id}]
@@ -153,7 +152,7 @@
             "no delete confirmation"))
 
       (testing "highlights the current user"
-        (let [current-user (assoc user :id current-user-id)]
+        (let [current-user (replace-in user [:user/id] user-id current-user-id)]
           (is (= (html/normalize-whitespace
                   "John Doe (You)   john.doe@example.com   Google   Remove user")
                  (-> (settings-page/users-table-row current-user model)
@@ -173,13 +172,13 @@
       (testing "highlights unverified emails"
         (is (= (html/normalize-whitespace
                 "John Doe   john.doe@example.com (Unverified)   Google   Remove user")
-               (-> (settings-page/users-table-row (assoc user :emailVerified false) model)
+               (-> (settings-page/users-table-row (replace-in user [:user/attributes :email_verified] true false) model)
                    html/visible-text))))
 
       (testing "user data missing, show ID as placeholder"
         (is (= (html/normalize-whitespace
                 "00000000-0000-0000-0000-000000000001   Remove user")
-               (-> (settings-page/users-table-row {:id user-id} model)
+               (-> (settings-page/users-table-row (select-keys user [:user/id]) model)
                    html/visible-text)))))))
 
 (deftest user-management-section-test
