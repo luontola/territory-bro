@@ -186,7 +186,45 @@
 ;;;; Settings
 
 (deftest list-congregation-users-test
-  (is true)) ; TODO
+  (let [expected [{:id user-id
+                   :sub "user1"
+                   :name "User One"}
+                  {:id user-id2
+                   :sub "user2"
+                   :name "User Two"}]
+        fake-get-users (fn [_conn query]
+                         (is (= {:ids [user-id user-id2]} query)
+                             "get-users query")
+                         [{:user/id user-id
+                           :user/subject "user1"
+                           :user/attributes {:sub "user1"
+                                             :name "User One"}}
+                          {:user/id user-id2
+                           :user/subject "user2"
+                           :user/attributes {:sub "user2"
+                                             :name "User Two"}}])]
+
+    (binding [territory-bro.infra.user/get-users fake-get-users]
+      (testutil/with-events test-events
+        (testutil/with-user-id user-id
+          (testing "full permissions"
+            (is (= expected (dmz/list-congregation-users cong-id)))))
+
+        (testutil/with-user-id (UUID. 0 0x666)
+          (testing "no permissions"
+            (is (empty? (dmz/list-congregation-users cong-id)))))
+
+        (testutil/with-anonymous-user
+          (testing "anonymous"
+            (is (empty? (dmz/list-congregation-users cong-id))))
+
+          (testing "demo congregation"
+            (binding [config/env {:demo-congregation cong-id}]
+              (is (empty? (dmz/list-congregation-users cong-id)))))
+
+          (testing "opened a share"
+            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+              (is (empty? (dmz/list-congregation-users cong-id))))))))))
 
 (deftest download-qgis-project-test
   (is true)) ; TODO
