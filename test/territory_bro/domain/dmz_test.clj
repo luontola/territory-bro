@@ -4,7 +4,9 @@
 
 (ns territory-bro.domain.dmz-test
   (:require [clojure.test :refer :all]
+            [matcher-combinators.matchers :as m]
             [matcher-combinators.test :refer :all]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
@@ -13,6 +15,7 @@
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.infra.permissions :as permissions]
             [territory-bro.test.testutil :as testutil])
   (:import (clojure.lang ExceptionInfo)
            (java.util UUID)))
@@ -39,14 +42,12 @@
    :congregation/id cong-id
    :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"})
 
-(def view-congregation-granted
-  {:event/type :congregation.event/permission-granted
+(def gis-user-created
+  {:event/type :congregation.event/gis-user-created
    :congregation/id cong-id
    :user/id user-id
-   :permission/id :view-congregation})
-(def view-congregation-granted2
-  (assoc view-congregation-granted
-         :user/id user-id2))
+   :gis-user/username "username123"
+   :gis-user/password "password123"})
 
 (def territory-defined
   {:event/type :territory.event/territory-defined
@@ -91,16 +92,17 @@
    :territory/id territory-id})
 
 (def test-events
-  [congregation-created
-   settings-updated
-   view-congregation-granted
-   view-congregation-granted2
-   territory-defined
-   territory-defined2
-   congregation-boundary-defined
-   region-defined
-   card-minimap-viewport-defined
-   share-created])
+  (flatten [congregation-created
+            settings-updated
+            (congregation/admin-permissions-granted cong-id user-id)
+            (congregation/admin-permissions-granted cong-id user-id2)
+            gis-user-created
+            territory-defined
+            territory-defined2
+            congregation-boundary-defined
+            region-defined
+            card-minimap-viewport-defined
+            share-created]))
 
 (defn- apply-share-opened [state]
   (share/grant-opened-shares state [share-id] (auth/current-user-id)))
@@ -222,7 +224,46 @@
               (is (empty? (dmz/list-congregation-users cong-id))))))))))
 
 (deftest download-qgis-project-test
-  (is true)) ; TODO
+  (let [expected {:filename "Cong1 Name.qgs"
+                  :content (m/all-of #"dbname='gis-db'"
+                                     #"host=gis\.example\.com"
+                                     #"user='username123'"
+                                     #"password='password123'"
+                                     #"sslmode=required"
+                                     #"table=\"cong1_schema\"\.\"territory\"")}]
+
+    (binding [config/env {:gis-database-host "gis.example.com"
+                          :gis-database-name "gis-db"
+                          :gis-database-ssl-mode "required"}]
+      (testutil/with-events test-events
+        (testutil/with-user-id user-id
+          (testing "full permissions"
+            (is (match? expected (dmz/download-qgis-project cong-id))))
+
+          (testing "without GIS access"
+            (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:gis-access cong-id])]
+              (is (thrown-match? ExceptionInfo access-denied
+                                 (dmz/download-qgis-project cong-id))))))
+
+        (testutil/with-user-id (UUID. 0 0x666)
+          (testing "no permissions"
+            (is (thrown-match? ExceptionInfo access-denied
+                               (dmz/download-qgis-project cong-id)))))
+
+        (testutil/with-anonymous-user
+          (testing "anonymous"
+            (is (thrown-match? ExceptionInfo not-logged-in
+                               (dmz/download-qgis-project cong-id))))
+
+          (testing "demo congregation"
+            (binding [config/env (assoc config/env :demo-congregation cong-id)]
+              (is (thrown-match? ExceptionInfo not-logged-in
+                                 (dmz/download-qgis-project cong-id)))))
+
+          (testing "opened a share"
+            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+              (is (thrown-match? ExceptionInfo not-logged-in
+                                 (dmz/download-qgis-project cong-id))))))))))
 
 
 ;;;; Territories

@@ -174,10 +174,10 @@
       (user/get-users *conn* {:ids user-ids}))))
 
 (defn download-qgis-project [cong-id]
+  (when-not (allowed? [:gis-access cong-id])
+    (access-denied!))
   (let [congregation (get-congregation cong-id)
         gis-user (gis-user/get-gis-user *state* cong-id (auth/current-user-id))]
-    (when-not gis-user
-      (http-response/forbidden! "No GIS access"))
     {:content (qgis/generate-project {:database-host (:gis-database-host config/env)
                                       :database-name (:gis-database-name config/env)
                                       :database-schema (:congregation/schema-name congregation)
