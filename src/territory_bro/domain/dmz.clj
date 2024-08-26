@@ -147,18 +147,18 @@
   (dissoc congregation :congregation/user-permissions))
 
 (defn get-congregation [cong-id]
-  (if (or (allowed? [:view-congregation cong-id])
-          (allowed? [:view-congregation-temporarily cong-id]))
-    (let [congregation (-> (congregation/get-unrestricted-congregation *state* (coerce-demo-cong-id cong-id))
-                           (filter-congregation))]
-      (if (= "demo" cong-id)
-        (-> congregation
-            (assoc :congregation/id "demo")
-            (assoc :congregation/name "Demo Congregation")
-            (dissoc :congregation/loans-csv-url)
-            (dissoc :congregation/schema-name))
-        congregation))
-    (access-denied!)))
+  (when-not (or (allowed? [:view-congregation cong-id])
+                (allowed? [:view-congregation-temporarily cong-id]))
+    (access-denied!))
+  (let [congregation (-> (congregation/get-unrestricted-congregation *state* (coerce-demo-cong-id cong-id))
+                         (filter-congregation))]
+    (if (= "demo" cong-id)
+      (-> congregation
+          (assoc :congregation/id "demo")
+          (assoc :congregation/name "Demo Congregation")
+          (dissoc :congregation/loans-csv-url)
+          (dissoc :congregation/schema-name))
+      congregation)))
 
 (defn list-congregations []
   (->> (congregation/get-my-congregations *state* (auth/current-user-id))
@@ -190,12 +190,12 @@
 ;;;; Territories
 
 (defn get-territory [cong-id territory-id]
-  (if (view-territory? cong-id territory-id)
-    (let [territory (territory/get-unrestricted-territory *state* (coerce-demo-cong-id cong-id) territory-id)]
-      (if (= "demo" cong-id)
-        (assoc territory :congregation/id "demo")
-        territory))
-    (access-denied!)))
+  (when-not (view-territory? cong-id territory-id)
+    (access-denied!))
+  (let [territory (territory/get-unrestricted-territory *state* (coerce-demo-cong-id cong-id) territory-id)]
+    (if (= "demo" cong-id)
+      (assoc territory :congregation/id "demo")
+      territory)))
 
 (defn get-do-not-calls [cong-id territory-id]
   (when (and (view-territory? cong-id territory-id)
