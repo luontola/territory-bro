@@ -245,9 +245,11 @@
      :key share-key}))
 
 (defn generate-qr-code [cong-id territory-id]
+  (when-not (allowed? [:share-territory-link cong-id territory-id])
+    (access-denied!))
   (let [territory (get-territory cong-id territory-id)
         share-key (generate-share-key territory :qr-code)]
-    {:url (str (:qr-code-base-url config/env) "/" share-key)
+    {:url (share/build-qr-code-url share-key)
      :key share-key}))
 
 (defn open-share! [share-key session]

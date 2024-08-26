@@ -122,6 +122,8 @@
 
 (def env
   {:now #(Instant/now)
+   :public-url "https://example.com"
+   :qr-code-base-url "https://qr.example.com"
    :gis-database-host "gis.example.com"
    :gis-database-name "gis-db"
    :gis-database-ssl-mode "required"})
@@ -411,52 +413,88 @@
 
 ;;;; Shares
 
-(deftest share-territory-link-test
-  (let [share-key "wLeJ4QEsH6U"
-        expected {:key share-key
-                  :url "/share/wLeJ4QEsH6U/123"}
-        expected-demo {:key "demo-AAAAAAAAAAAAAAAAAAAABA"
-                       :url "/share/demo-AAAAAAAAAAAAAAAAAAAABA/123"}]
+(def create-share-command
+  {:command/type :share.command/create-share
+   :command/user user-id
+   :congregation/id cong-id
+   :territory/id territory-id
+   :share/key share-key})
 
-    (binding [share/generate-share-key (constantly share-key)]
-      (testutil/with-user-id user-id
-        (testing "full permissions"
+(deftest share-territory-link-test
+  (let [expected {:key share-key
+                  :url "https://example.com/share/abc123/123"}
+        expected-command (assoc create-share-command :share/type :link)
+        expected-demo {:key "demo-AAAAAAAAAAAAAAAAAAAABA"
+                       :url "https://example.com/share/demo-AAAAAAAAAAAAAAAAAAAABA/123"}]
+
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (binding [share/generate-share-key (constantly share-key)]
           (with-fixtures [fake-dispatcher-fixture]
             (is (= expected (dmz/share-territory-link cong-id territory-id)))
-            (is (= {:command/type :share.command/create-share
-                    :command/user user-id
-                    :congregation/id cong-id
-                    :territory/id territory-id
-                    :share/key share-key
-                    :share/type :link}
-                   (dissoc @*last-command :command/time :share/id)))))
+            (is (= expected-command (dissoc @*last-command :command/time :share/id))))))
 
-        (testing "without share permission"
-          (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:share-territory-link cong-id])]
-            (is (thrown-match? ExceptionInfo access-denied
-                               (dmz/share-territory-link cong-id territory-id))))))
-
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
+      (testing "without share permission"
+        (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:share-territory-link cong-id])]
           (is (thrown-match? ExceptionInfo access-denied
-                             (dmz/share-territory-link cong-id territory-id)))))
+                             (dmz/share-territory-link cong-id territory-id))))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (thrown-match? ExceptionInfo access-denied
+                           (dmz/share-territory-link cong-id territory-id)))))
+
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (thrown-match? ExceptionInfo not-logged-in
+                           (dmz/share-territory-link cong-id territory-id))))
+
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= expected-demo (dmz/share-territory-link "demo" territory-id)))))
+
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
           (is (thrown-match? ExceptionInfo not-logged-in
-                             (dmz/share-territory-link cong-id territory-id))))
-
-        (testing "demo congregation"
-          (binding [config/env env-with-demo]
-            (is (= expected-demo (dmz/share-territory-link "demo" territory-id)))))
-
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (thrown-match? ExceptionInfo not-logged-in
-                               (dmz/share-territory-link cong-id territory-id)))))))))
+                             (dmz/share-territory-link cong-id territory-id))))))))
 
 (deftest generate-qr-code-test
-  (is true)) ; TODO
+  (let [expected {:key share-key
+                  :url "https://qr.example.com/abc123"}
+        expected-command (assoc create-share-command :share/type :qr-code)
+        expected-demo {:key "demo-AAAAAAAAAAAAAAAAAAAABA"
+                       :url "https://qr.example.com/demo-AAAAAAAAAAAAAAAAAAAABA"}]
+
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (binding [share/generate-share-key (constantly share-key)]
+          (with-fixtures [fake-dispatcher-fixture]
+            (is (= expected (dmz/generate-qr-code cong-id territory-id)))
+            (is (= expected-command (dissoc @*last-command :command/time :share/id))))))
+
+      (testing "without share permission"
+        (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:share-territory-link cong-id])]
+          (is (thrown-match? ExceptionInfo access-denied
+                             (dmz/generate-qr-code cong-id territory-id))))))
+
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (thrown-match? ExceptionInfo access-denied
+                           (dmz/generate-qr-code cong-id territory-id)))))
+
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (thrown-match? ExceptionInfo not-logged-in
+                           (dmz/generate-qr-code cong-id territory-id))))
+
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= expected-demo (dmz/generate-qr-code "demo" territory-id)))))
+
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (thrown-match? ExceptionInfo not-logged-in
+                             (dmz/generate-qr-code cong-id territory-id))))))))
 
 (deftest open-share!-test
   (is true)) ; TODO

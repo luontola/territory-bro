@@ -87,6 +87,9 @@
                         (str/replace #"_+" "_"))]
     (str (:public-url config/env) "/share/" share-key "/" safe-number)))
 
+(defn build-qr-code-url [share-key]
+  (str (:qr-code-base-url config/env) "/" share-key))
+
 
 (defn- uuid->bytes ^bytes [^UUID uuid]
   (let [bs (ByteBuffer/allocate 16)]

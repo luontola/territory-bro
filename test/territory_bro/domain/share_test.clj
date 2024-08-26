@@ -127,8 +127,12 @@
     (let [keys (repeatedly 10 share/generate-share-key)]
       (is (= (distinct keys) keys)))))
 
+(def test-env
+  {:public-url "https://example.com"
+   :qr-code-base-url "https://qr.example.com"})
+
 (deftest build-share-url-test
-  (binding [config/env {:public-url "https://example.com"}]
+  (binding [config/env test-env]
     (testing "contains public URL, share key and territory number"
       (is (= "https://example.com/share/key/123" (share/build-share-url "key" "123"))))
 
@@ -141,6 +145,11 @@
           "sanitize space (URL encodes as '+')")
       (is (= "https://example.com/share/key/1_2" (share/build-share-url "key" "1, 2"))
           "join multiple consecutive sanitized characters "))))
+
+(deftest build-qr-code-url-test
+  (binding [config/env test-env]
+    (testing "QR codes use a different subdomain and shorter URL path"
+      (is (= "https://qr.example.com/key" (share/build-qr-code-url "key"))))))
 
 (deftest demo-share-key-test
   (testing "key format"
