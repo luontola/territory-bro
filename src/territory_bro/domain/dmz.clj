@@ -237,6 +237,8 @@
         share-key))))
 
 (defn share-territory-link [cong-id territory-id]
+  (when-not (allowed? [:share-territory-link cong-id territory-id])
+    (access-denied!))
   (let [territory (get-territory cong-id territory-id)
         share-key (generate-share-key territory :link)]
     {:url (share/build-share-url share-key (:territory/number territory))

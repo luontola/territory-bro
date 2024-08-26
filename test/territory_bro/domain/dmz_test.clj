@@ -16,8 +16,10 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]
+            [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil])
   (:import (clojure.lang ExceptionInfo)
+           (java.time Instant)
            (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
@@ -409,7 +411,50 @@
 ;;;; Shares
 
 (deftest share-territory-link-test
-  (is true)) ; TODO
+  (let [share-key "wLeJ4QEsH6U"
+        expected {:key share-key
+                  :url "/share/wLeJ4QEsH6U/123"}
+        expected-demo {:key "demo-AAAAAAAAAAAAAAAAAAAABA"
+                       :url "/share/demo-AAAAAAAAAAAAAAAAAAAABA/123"}]
+
+    (binding [config/env {:now #(Instant/now)}
+              share/generate-share-key (constantly share-key)]
+      (testutil/with-events test-events
+        (testutil/with-user-id user-id
+          (testing "full permissions"
+            (with-fixtures [fake-dispatcher-fixture]
+              (is (= expected (dmz/share-territory-link cong-id territory-id)))
+              (is (= {:command/type :share.command/create-share
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :territory/id territory-id
+                      :share/key share-key
+                      :share/type :link}
+                     (dissoc @*last-command :command/time :share/id)))))
+
+          (testing "without share permission"
+            (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:share-territory-link cong-id])]
+              (is (thrown-match? ExceptionInfo access-denied
+                                 (dmz/share-territory-link cong-id territory-id))))))
+
+        (testutil/with-user-id (UUID. 0 0x666)
+          (testing "no permissions"
+            (is (thrown-match? ExceptionInfo access-denied
+                               (dmz/share-territory-link cong-id territory-id)))))
+
+        (testutil/with-anonymous-user
+          (testing "anonymous"
+            (is (thrown-match? ExceptionInfo not-logged-in
+                               (dmz/share-territory-link cong-id territory-id))))
+
+          (testing "demo congregation"
+            (binding [config/env {:demo-congregation cong-id}]
+              (is (= expected-demo (dmz/share-territory-link "demo" territory-id)))))
+
+          (testing "opened a share"
+            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+              (is (thrown-match? ExceptionInfo not-logged-in
+                                 (dmz/share-territory-link cong-id territory-id))))))))))
 
 (deftest generate-qr-code-test
   (is true)) ; TODO
