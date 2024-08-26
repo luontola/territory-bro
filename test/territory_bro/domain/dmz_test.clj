@@ -120,6 +120,18 @@
               :body "Access denied"
               :headers {}}})
 
+(def env
+  {:now #(Instant/now)
+   :gis-database-host "gis.example.com"
+   :gis-database-name "gis-db"
+   :gis-database-ssl-mode "required"})
+(def env-with-demo (assoc env :demo-congregation cong-id))
+
+(use-fixtures :once (fn [f]
+                      (binding [config/env env]
+                        (testutil/with-events test-events
+                          (f)))))
+
 
 ;;;; Congregations
 
@@ -135,28 +147,27 @@
                        #_:congregation/loans-csv-url ; removed
                        #_:congregation/schema-name}] ; removed
 
-    (testutil/with-events test-events
-      (testutil/with-user-id user-id
-        (testing "full permissions"
-          (is (= expected (dmz/get-congregation cong-id)))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/get-congregation cong-id)))))
 
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
-          (is (thrown-match? ExceptionInfo access-denied
-                             (dmz/get-congregation cong-id)))))
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (thrown-match? ExceptionInfo access-denied
+                           (dmz/get-congregation cong-id)))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (thrown-match? ExceptionInfo not-logged-in
-                             (dmz/get-congregation cong-id))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (thrown-match? ExceptionInfo not-logged-in
+                           (dmz/get-congregation cong-id))))
 
-        (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (is (= demo-expected (dmz/get-congregation "demo")))))
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= demo-expected (dmz/get-congregation "demo")))))
 
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (= expected (dmz/get-congregation cong-id)))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (= expected (dmz/get-congregation cong-id))))))))
 
 (deftest list-congregations-test
   (let [expected [{:congregation/id cong-id
@@ -165,26 +176,25 @@
                    :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
                    :congregation/schema-name "cong1_schema"}]]
 
-    (testutil/with-events test-events
-      (testutil/with-user-id user-id
-        (testing "full permissions"
-          (is (= expected (dmz/list-congregations)))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/list-congregations)))))
 
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (empty? (dmz/list-congregations)))))
+
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (empty? (dmz/list-congregations))))
+
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
           (is (empty? (dmz/list-congregations)))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (empty? (dmz/list-congregations))))
-
-        (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (is (empty? (dmz/list-congregations)))))
-
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (empty? (dmz/list-congregations)))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (empty? (dmz/list-congregations))))))))
 
 
 ;;;; Settings
@@ -204,26 +214,25 @@
                          expected)]
 
     (binding [territory-bro.infra.user/get-users fake-get-users]
-      (testutil/with-events test-events
-        (testutil/with-user-id user-id
-          (testing "full permissions"
-            (is (= expected (dmz/list-congregation-users cong-id)))))
+      (testutil/with-user-id user-id
+        (testing "full permissions"
+          (is (= expected (dmz/list-congregation-users cong-id)))))
 
-        (testutil/with-user-id (UUID. 0 0x666)
-          (testing "no permissions"
+      (testutil/with-user-id (UUID. 0 0x666)
+        (testing "no permissions"
+          (is (empty? (dmz/list-congregation-users cong-id)))))
+
+      (testutil/with-anonymous-user
+        (testing "anonymous"
+          (is (empty? (dmz/list-congregation-users cong-id))))
+
+        (testing "demo congregation"
+          (binding [config/env env-with-demo]
             (is (empty? (dmz/list-congregation-users cong-id)))))
 
-        (testutil/with-anonymous-user
-          (testing "anonymous"
-            (is (empty? (dmz/list-congregation-users cong-id))))
-
-          (testing "demo congregation"
-            (binding [config/env {:demo-congregation cong-id}]
-              (is (empty? (dmz/list-congregation-users cong-id)))))
-
-          (testing "opened a share"
-            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-              (is (empty? (dmz/list-congregation-users cong-id))))))))))
+        (testing "opened a share"
+          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+            (is (empty? (dmz/list-congregation-users cong-id)))))))))
 
 (deftest download-qgis-project-test
   (let [expected {:filename "Cong1 Name.qgs"
@@ -234,38 +243,34 @@
                                      #"sslmode=required"
                                      #"table=\"cong1_schema\"\.\"territory\"")}]
 
-    (binding [config/env {:gis-database-host "gis.example.com"
-                          :gis-database-name "gis-db"
-                          :gis-database-ssl-mode "required"}]
-      (testutil/with-events test-events
-        (testutil/with-user-id user-id
-          (testing "full permissions"
-            (is (match? expected (dmz/download-qgis-project cong-id))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (match? expected (dmz/download-qgis-project cong-id))))
 
-          (testing "without GIS access"
-            (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:gis-access cong-id])]
-              (is (thrown-match? ExceptionInfo access-denied
-                                 (dmz/download-qgis-project cong-id))))))
+      (testing "without GIS access"
+        (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:gis-access cong-id])]
+          (is (thrown-match? ExceptionInfo access-denied
+                             (dmz/download-qgis-project cong-id))))))
 
-        (testutil/with-user-id (UUID. 0 0x666)
-          (testing "no permissions"
-            (is (thrown-match? ExceptionInfo access-denied
-                               (dmz/download-qgis-project cong-id)))))
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (thrown-match? ExceptionInfo access-denied
+                           (dmz/download-qgis-project cong-id)))))
 
-        (testutil/with-anonymous-user
-          (testing "anonymous"
-            (is (thrown-match? ExceptionInfo not-logged-in
-                               (dmz/download-qgis-project cong-id))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (thrown-match? ExceptionInfo not-logged-in
+                           (dmz/download-qgis-project cong-id))))
 
-          (testing "demo congregation"
-            (binding [config/env (assoc config/env :demo-congregation cong-id)]
-              (is (thrown-match? ExceptionInfo not-logged-in
-                                 (dmz/download-qgis-project cong-id)))))
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (thrown-match? ExceptionInfo not-logged-in
+                             (dmz/download-qgis-project cong-id)))))
 
-          (testing "opened a share"
-            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-              (is (thrown-match? ExceptionInfo not-logged-in
-                                 (dmz/download-qgis-project cong-id))))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (thrown-match? ExceptionInfo not-logged-in
+                             (dmz/download-qgis-project cong-id))))))))
 
 
 ;;;; Territories
@@ -286,53 +291,51 @@
                        :territory/meta {:foo "bar"}
                        :territory/location testdata/wkt-helsinki-rautatientori}]
 
-    (testutil/with-events test-events
-      (testutil/with-user-id user-id
-        (testing "full permissions"
-          (is (= expected (dmz/get-territory cong-id territory-id)))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/get-territory cong-id territory-id)))))
 
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
-          (is (thrown-match? ExceptionInfo access-denied
-                             (dmz/get-territory cong-id territory-id)))))
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (thrown-match? ExceptionInfo access-denied
+                           (dmz/get-territory cong-id territory-id)))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (thrown-match? ExceptionInfo not-logged-in
-                             (dmz/get-territory cong-id territory-id))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (thrown-match? ExceptionInfo not-logged-in
+                           (dmz/get-territory cong-id territory-id))))
 
-        (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (is (= demo-expected (dmz/get-territory "demo" territory-id)))))
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= demo-expected (dmz/get-territory "demo" territory-id)))))
 
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (= expected (dmz/get-territory cong-id territory-id)))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (= expected (dmz/get-territory cong-id territory-id))))))))
 
 (deftest get-do-not-calls-test
   (let [expected "the do-not-calls"]
 
     (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
-      (testutil/with-events test-events
-        (testutil/with-user-id user-id
-          (testing "full permissions"
-            (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))
+      (testutil/with-user-id user-id
+        (testing "full permissions"
+          (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))
 
-        (testutil/with-user-id (UUID. 0 0x666)
-          (testing "no permissions"
-            (is (nil? (dmz/get-do-not-calls cong-id territory-id)))))
+      (testutil/with-user-id (UUID. 0 0x666)
+        (testing "no permissions"
+          (is (nil? (dmz/get-do-not-calls cong-id territory-id)))))
 
-        (testutil/with-anonymous-user
-          (testing "anonymous"
-            (is (nil? (dmz/get-do-not-calls cong-id territory-id))))
+      (testutil/with-anonymous-user
+        (testing "anonymous"
+          (is (nil? (dmz/get-do-not-calls cong-id territory-id))))
 
-          (testing "demo congregation"
-            (binding [config/env {:demo-congregation cong-id}]
-              (is (nil? (dmz/get-do-not-calls "demo" territory-id)))))
+        (testing "demo congregation"
+          (binding [config/env env-with-demo]
+            (is (nil? (dmz/get-do-not-calls "demo" territory-id)))))
 
-          (testing "opened a share"
-            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-              (is (= expected (dmz/get-do-not-calls cong-id territory-id))))))))))
+        (testing "opened a share"
+          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+            (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))))))
 
 (deftest list-territories-test
   (let [expected [{:territory/id territory-id
@@ -348,26 +351,25 @@
                    :territory/meta {:foo "bar"}
                    :territory/location testdata/wkt-helsinki-kauppatori}]]
 
-    (testutil/with-events test-events
-      (testutil/with-user-id user-id
-        (testing "full permissions"
-          (is (= expected (dmz/list-territories cong-id)))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/list-territories cong-id)))))
 
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
-          (is (empty? (dmz/list-territories cong-id)))))
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (empty? (dmz/list-territories cong-id)))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (empty? (dmz/list-territories cong-id))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (empty? (dmz/list-territories cong-id))))
 
-        (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (is (= expected (dmz/list-territories "demo")))))
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= expected (dmz/list-territories "demo")))))
 
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (= (take 1 expected) (dmz/list-territories cong-id)))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (= (take 1 expected) (dmz/list-territories cong-id))))))))
 
 (deftest enrich-territory-loans-test
   (let [territories [{:territory/id territory-id
@@ -386,26 +388,25 @@
     (binding [loan/download! (constantly (str "Number,Loaned,Staleness\n"
                                               "123,TRUE,7\n"
                                               "456,FALSE,8\n"))]
-      (testutil/with-events test-events
-        (testutil/with-user-id user-id
-          (testing "full permissions"
-            (is (= expected (dmz/enrich-territory-loans cong-id territories)))))
+      (testutil/with-user-id user-id
+        (testing "full permissions"
+          (is (= expected (dmz/enrich-territory-loans cong-id territories)))))
 
-        (testutil/with-user-id (UUID. 0 0x666)
-          (testing "no permissions"
-            (is (= territories (dmz/enrich-territory-loans cong-id territories)))))
+      (testutil/with-user-id (UUID. 0 0x666)
+        (testing "no permissions"
+          (is (= territories (dmz/enrich-territory-loans cong-id territories)))))
 
-        (testutil/with-anonymous-user
-          (testing "anonymous"
-            (is (= territories (dmz/enrich-territory-loans cong-id territories))))
+      (testutil/with-anonymous-user
+        (testing "anonymous"
+          (is (= territories (dmz/enrich-territory-loans cong-id territories))))
 
-          (testing "demo congregation"
-            (binding [config/env {:demo-congregation cong-id}]
-              (is (= territories (dmz/enrich-territory-loans "demo" territories)))))
+        (testing "demo congregation"
+          (binding [config/env env-with-demo]
+            (is (= territories (dmz/enrich-territory-loans "demo" territories)))))
 
-          (testing "opened a share"
-            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-              (is (= territories (dmz/enrich-territory-loans cong-id territories))))))))))
+        (testing "opened a share"
+          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+            (is (= territories (dmz/enrich-territory-loans cong-id territories)))))))))
 
 
 ;;;; Shares
@@ -417,44 +418,42 @@
         expected-demo {:key "demo-AAAAAAAAAAAAAAAAAAAABA"
                        :url "/share/demo-AAAAAAAAAAAAAAAAAAAABA/123"}]
 
-    (binding [config/env {:now #(Instant/now)}
-              share/generate-share-key (constantly share-key)]
-      (testutil/with-events test-events
-        (testutil/with-user-id user-id
-          (testing "full permissions"
-            (with-fixtures [fake-dispatcher-fixture]
-              (is (= expected (dmz/share-territory-link cong-id territory-id)))
-              (is (= {:command/type :share.command/create-share
-                      :command/user user-id
-                      :congregation/id cong-id
-                      :territory/id territory-id
-                      :share/key share-key
-                      :share/type :link}
-                     (dissoc @*last-command :command/time :share/id)))))
+    (binding [share/generate-share-key (constantly share-key)]
+      (testutil/with-user-id user-id
+        (testing "full permissions"
+          (with-fixtures [fake-dispatcher-fixture]
+            (is (= expected (dmz/share-territory-link cong-id territory-id)))
+            (is (= {:command/type :share.command/create-share
+                    :command/user user-id
+                    :congregation/id cong-id
+                    :territory/id territory-id
+                    :share/key share-key
+                    :share/type :link}
+                   (dissoc @*last-command :command/time :share/id)))))
 
-          (testing "without share permission"
-            (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:share-territory-link cong-id])]
-              (is (thrown-match? ExceptionInfo access-denied
-                                 (dmz/share-territory-link cong-id territory-id))))))
-
-        (testutil/with-user-id (UUID. 0 0x666)
-          (testing "no permissions"
+        (testing "without share permission"
+          (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:share-territory-link cong-id])]
             (is (thrown-match? ExceptionInfo access-denied
-                               (dmz/share-territory-link cong-id territory-id)))))
+                               (dmz/share-territory-link cong-id territory-id))))))
 
-        (testutil/with-anonymous-user
-          (testing "anonymous"
+      (testutil/with-user-id (UUID. 0 0x666)
+        (testing "no permissions"
+          (is (thrown-match? ExceptionInfo access-denied
+                             (dmz/share-territory-link cong-id territory-id)))))
+
+      (testutil/with-anonymous-user
+        (testing "anonymous"
+          (is (thrown-match? ExceptionInfo not-logged-in
+                             (dmz/share-territory-link cong-id territory-id))))
+
+        (testing "demo congregation"
+          (binding [config/env env-with-demo]
+            (is (= expected-demo (dmz/share-territory-link "demo" territory-id)))))
+
+        (testing "opened a share"
+          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
             (is (thrown-match? ExceptionInfo not-logged-in
-                               (dmz/share-territory-link cong-id territory-id))))
-
-          (testing "demo congregation"
-            (binding [config/env {:demo-congregation cong-id}]
-              (is (= expected-demo (dmz/share-territory-link "demo" territory-id)))))
-
-          (testing "opened a share"
-            (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-              (is (thrown-match? ExceptionInfo not-logged-in
-                                 (dmz/share-territory-link cong-id territory-id))))))))))
+                               (dmz/share-territory-link cong-id territory-id)))))))))
 
 (deftest generate-qr-code-test
   (is true)) ; TODO
@@ -468,74 +467,71 @@
 (deftest get-congregation-boundary-test
   (let [expected testdata/wkt-helsinki]
 
-    (testutil/with-events test-events
-      (testutil/with-user-id user-id
-        (testing "full permissions"
-          (is (= expected (dmz/get-congregation-boundary cong-id)))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/get-congregation-boundary cong-id)))))
 
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
-          (is (nil? (dmz/get-congregation-boundary cong-id)))))
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (nil? (dmz/get-congregation-boundary cong-id)))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (nil? (dmz/get-congregation-boundary cong-id))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (nil? (dmz/get-congregation-boundary cong-id))))
 
-        (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (is (= expected (dmz/get-congregation-boundary "demo")))))
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= expected (dmz/get-congregation-boundary "demo")))))
 
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (nil? (dmz/get-congregation-boundary cong-id)))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (nil? (dmz/get-congregation-boundary cong-id))))))))
 
 (deftest list-regions-test
   (let [expected [{:region/id region-id
                    :region/name "the name"
                    :region/location testdata/wkt-south-helsinki}]]
 
-    (testutil/with-events test-events
-      (testutil/with-user-id user-id
-        (testing "full permissions"
-          (is (= expected (dmz/list-regions cong-id)))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/list-regions cong-id)))))
 
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
-          (is (nil? (dmz/list-regions cong-id)))))
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (nil? (dmz/list-regions cong-id)))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (nil? (dmz/list-regions cong-id))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (nil? (dmz/list-regions cong-id))))
 
-        (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (is (= expected (dmz/list-regions "demo")))))
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= expected (dmz/list-regions "demo")))))
 
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (nil? (dmz/list-regions cong-id)))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (nil? (dmz/list-regions cong-id))))))))
 
 (deftest list-card-minimap-viewports-test
   (let [expected [{:card-minimap-viewport/id card-minimap-viewport-id
                    :card-minimap-viewport/location testdata/wkt-polygon}]]
 
-    (testutil/with-events test-events
-      (testutil/with-user-id user-id
-        (testing "full permissions"
-          (is (= expected (dmz/list-card-minimap-viewports cong-id)))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/list-card-minimap-viewports cong-id)))))
 
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
-          (is (nil? (dmz/list-card-minimap-viewports cong-id)))))
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (nil? (dmz/list-card-minimap-viewports cong-id)))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (nil? (dmz/list-card-minimap-viewports cong-id))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (nil? (dmz/list-card-minimap-viewports cong-id))))
 
-        (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (is (= expected (dmz/list-card-minimap-viewports "demo")))))
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= expected (dmz/list-card-minimap-viewports "demo")))))
 
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (nil? (dmz/list-card-minimap-viewports cong-id)))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (nil? (dmz/list-card-minimap-viewports cong-id))))))))
