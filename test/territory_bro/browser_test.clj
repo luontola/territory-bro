@@ -12,6 +12,7 @@
             [etaoin.api2 :as b2]
             [hikari-cp.core :as hikari-cp]
             [reitit.core :as reitit]
+            [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [thrown-with-msg?]]
             [territory-bro.ui :as ui])
   (:import (java.io File)
@@ -38,25 +39,26 @@
       (io/file parent-dir (name (symbol var)))
       parent-dir)))
 
-(defmacro with-per-test-postmortem [& body]
-  `(let [opts# {:dir (per-test-subdir postmortem-dir)}]
-     (b/with-postmortem *driver* opts#
-       ~@body
-       ;; take a screenshot at the end, even when the test succeeds
-       (b/postmortem-handler *driver* opts#))))
+(defn with-per-test-postmortem [f]
+  (let [opts {:dir (per-test-subdir postmortem-dir)}]
+    (b/with-postmortem *driver* opts
+      (f)
+      ;; take a screenshot at the end, even when the test succeeds
+      (b/postmortem-handler *driver* opts))))
 
-(defn with-browser [f]
+(defn with-browser-config [config f]
   (is true) ; disable Kaocha's warning about missing `is` - Etaoin's waits are like assertions without an `is`
-  (b2/with-chrome-headless [driver browser-config]
+  (b2/with-chrome-headless [driver config]
     (binding [*driver* driver]
       (f))))
+
+(defn with-browser [f]
+  (with-browser-config browser-config f))
 
 (use-fixtures :once (fn [f]
                       (FileUtils/deleteDirectory postmortem-dir)
                       (FileUtils/deleteDirectory download-dir)
                       (f)))
-
-(use-fixtures :each with-browser)
 
 
 (def h1 {:tag :h1})
@@ -122,7 +124,7 @@
 
 
 (deftest login-and-logout-test
-  (with-per-test-postmortem
+  (with-fixtures [with-browser with-per-test-postmortem]
     (let [original-page-url (str *base-url* "/support?foo=bar&gazonk")] ; also query string should be restored
 
       (testing "login with Auth0"
@@ -147,7 +149,7 @@
 
 
 (deftest login-via-entering-restricted-page-test
-  (with-per-test-postmortem
+  (with-fixtures [with-browser with-per-test-postmortem]
     (let [restricted-page-url (str *base-url* "/congregation/" (UUID/randomUUID) "?foo=bar&gazonk")] ; also query string should be restored
 
       (testing "enter restricted page, redirects to login"
@@ -162,9 +164,20 @@
         (is (= restricted-page-url (b/get-url *driver*)))))))
 
 
+(defn- accept-languages [languages]
+  (assoc-in browser-config [:prefs :intl.accept_languages] languages))
+
 (deftest change-language-test
-  (with-per-test-postmortem
-    (testing "default language is English"
+  (with-fixtures [(partial with-browser-config (accept-languages "es-419,fi-FI,en-US"))
+                  with-per-test-postmortem]
+    (testing "chooses the language automatically based on browser preferences"
+      (doto *driver*
+        (b/go *base-url*)
+        (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string "Inicio"}]))))
+
+  (with-fixtures [(partial with-browser-config (accept-languages "xx"))
+                  with-per-test-postmortem]
+    (testing "the default language is English"
       (doto *driver*
         (b/go *base-url*)
         (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string "Home"}])))
@@ -182,7 +195,7 @@
 
 
 (deftest demo-test
-  (with-per-test-postmortem
+  (with-fixtures [with-browser with-per-test-postmortem]
     (testing "view demo congregation"
       (doto *driver*
         (b/go *base-url*)
@@ -238,7 +251,7 @@
 
 
 (deftest registration-test
-  (with-per-test-postmortem
+  (with-fixtures [with-browser with-per-test-postmortem]
     (let [nonce (System/currentTimeMillis)
           user1 (str "Test User1 " nonce)
           user2 (str "Test User2 " nonce)
@@ -307,7 +320,7 @@
 
 
 (deftest settings-test
-  (with-per-test-postmortem
+  (with-fixtures [with-browser with-per-test-postmortem]
     (let [nonce (System/currentTimeMillis)
           user (str "Test User " nonce)
           congregation-name (str "Test Congregation " nonce)]
@@ -367,7 +380,7 @@
        (take 2)))
 
 (deftest share-territory-link-test
-  (with-per-test-postmortem
+  (with-fixtures [with-browser with-per-test-postmortem]
     (doto *driver*
       (b/go *base-url*)
       (do-dev-login)
@@ -420,7 +433,7 @@
               "trying to view an unrelated territory of the same congregation requires logging in"))))))
 
 (deftest edit-do-not-calls-test
-  (with-per-test-postmortem
+  (with-fixtures [with-browser with-per-test-postmortem]
     (doto *driver*
       (b/go *base-url*)
       (do-dev-login)
@@ -444,7 +457,7 @@
 
 
 (deftest error-pages-test
-  (with-per-test-postmortem
+  (with-fixtures [with-browser with-per-test-postmortem]
     (doto *driver*
       (b/go *base-url*)
       (do-dev-login)) ; login to avoid 401 Unauthorized when testing for 403 Forbidden
@@ -467,7 +480,7 @@
       (is (b/visible? *driver* :logout-button)))))
 
 (deftest sudo-test
-  (with-per-test-postmortem
+  (with-fixtures [with-browser with-per-test-postmortem]
     (testing "regular users cannot use sudo"
       (doto *driver*
         (b/go *base-url*)
