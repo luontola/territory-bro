@@ -4,10 +4,15 @@
 
 (ns territory-bro.domain.share-test
   (:require [clojure.test :refer :all]
+            [territory-bro.dispatcher :as dispatcher]
+            [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.domain.share :as share]
             [territory-bro.events :as events]
             [territory-bro.infra.config :as config]
+            [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.permissions :as permissions]
+            [territory-bro.infra.user :as user]
+            [territory-bro.projections :as projections]
             [territory-bro.test.testutil :as testutil :refer [re-equals thrown-with-msg? thrown?]])
   (:import (java.time Instant)
            (java.util UUID)
@@ -203,7 +208,28 @@
                                         (is (= [:share-territory-link cong-id territory-id] permit))
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
-                     (handle-command create-command [] injections)))))))
+                     (handle-command create-command [] injections)))))
+
+    (testing "the share's territory must belong to the specified congregation, to prevent insecure direct object references"
+      (let [cong-id2 (UUID. 0 0x6661)
+            territory-id2 (UUID. 0 0x6662)
+            bad-command (assoc create-command :territory/id territory-id2)
+            events [(assoc dmz-test/congregation-created
+                           :congregation/id cong-id)
+                    (assoc dmz-test/territory-defined
+                           :congregation/id cong-id
+                           :territory/id territory-id)
+                    (assoc dmz-test/congregation-created
+                           :congregation/id cong-id2)
+                    (assoc dmz-test/territory-defined
+                           :congregation/id cong-id2
+                           :territory/id territory-id2)]
+            state (testutil/apply-events projections/projection events)]
+        (binding [event-store/check-new-stream (constantly nil)
+                  user/check-user-exists (constantly nil)]
+          (is (thrown-with-msg?
+               ValidationException (re-equals "[[:no-such-territory #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000006662\"]]")
+               (dispatcher/validate-command bad-command nil state))))))))
 
 (deftest record-share-opened-test
   (let [injections {}

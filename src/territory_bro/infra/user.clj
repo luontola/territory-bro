@@ -34,6 +34,6 @@
                                        :subject subject
                                        :attributes attributes}))))
 
-(defn check-user-exists [conn user-id]
+(defn ^:dynamic check-user-exists [conn user-id]
   (when (nil? (get-by-id conn user-id))
     (throw (ValidationException. [[:no-such-user user-id]]))))

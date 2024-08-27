@@ -52,7 +52,7 @@
 (defn stream-exists? [conn stream-id]
   (not (empty? (query! conn :find-stream {:stream stream-id}))))
 
-(defn check-new-stream [conn stream-id]
+(defn ^:dynamic check-new-stream [conn stream-id]
   (when (stream-exists? conn stream-id)
     (throw (WriteConflictException. (str "Event stream " stream-id " already exists")))))
 

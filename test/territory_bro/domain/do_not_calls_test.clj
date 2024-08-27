@@ -53,8 +53,6 @@
                 :do-not-calls/last-modified (Instant/ofEpochSecond 1)}
                (do-not-calls/get-do-not-calls conn cong-id territory-id))))
 
-      (testing "cannot read do-not-calls when the user lacks read permission") ; TODO
-
       (testing "update do-not-calls"
         (let [update-command (assoc create-command
                                     :command/time (Instant/ofEpochSecond 2)

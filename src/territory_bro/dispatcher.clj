@@ -65,7 +65,7 @@
    :unsafe (fn [stream-id]
              (some? stream-id))})
 
-(defn- validate-command [command conn state]
+(defn validate-command [command conn state]
   (binding [foreign-key/*reference-checkers* (reference-checkers command conn state)]
     (commands/validate-command command)))
 
