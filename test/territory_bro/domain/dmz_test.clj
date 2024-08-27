@@ -32,6 +32,7 @@
 (def card-minimap-viewport-id (UUID. 0 8))
 (def share-id (UUID. 0 9))
 (def share-key "abc123")
+(def demo-share-key "demo-AAAAAAAAAAAAAAAAAAAABA")
 
 (def congregation-created
   {:event/type :congregation.event/congregation-created
@@ -371,7 +372,8 @@
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-          (is (= (take 1 expected) (dmz/list-territories cong-id))))))))
+          (is (= (take 1 expected) (dmz/list-territories cong-id))
+              "can view only the shared territory, and no others"))))))
 
 (deftest enrich-territory-loans-test
   (let [territories [{:territory/id territory-id
@@ -424,7 +426,7 @@
   (let [expected {:key share-key
                   :url "https://example.com/share/abc123/123"}
         expected-command (assoc create-share-command :share/type :link)
-        expected-demo {:key "demo-AAAAAAAAAAAAAAAAAAAABA"
+        expected-demo {:key demo-share-key
                        :url "https://example.com/share/demo-AAAAAAAAAAAAAAAAAAAABA/123"}]
 
     (testutil/with-user-id user-id
@@ -462,7 +464,7 @@
   (let [expected {:key share-key
                   :url "https://qr.example.com/abc123"}
         expected-command (assoc create-share-command :share/type :qr-code)
-        expected-demo {:key "demo-AAAAAAAAAAAAAAAAAAAABA"
+        expected-demo {:key demo-share-key
                        :url "https://qr.example.com/demo-AAAAAAAAAAAAAAAAAAAABA"}]
 
     (testutil/with-user-id user-id
@@ -497,7 +499,31 @@
                              (dmz/generate-qr-code cong-id territory-id))))))))
 
 (deftest open-share!-test
-  (is true)) ; TODO
+  (let [session {::unrelated "session data"}
+        expected [{:share/id share-id
+                   :congregation/id cong-id
+                   :territory/id territory-id}
+                  {::dmz/opened-shares #{share-id}
+                   ::unrelated "session data"}]
+        expected-command {:command/type :share.command/record-share-opened
+                          :command/user auth/anonymous-user-id
+                          :share/id share-id}
+        demo-expected [{:congregation/id "demo"
+                        :territory/id territory-id}
+                       nil]]
+
+    (testutil/with-anonymous-user
+      (testing "open normal share"
+        (with-fixtures [fake-dispatcher-fixture]
+          (is (= expected (dmz/open-share! share-key session)))
+          (is (= expected-command (dissoc @*last-command :command/time))
+              "records that the share was opened")))
+
+      (testing "open demo share"
+        (is (= demo-expected (dmz/open-share! demo-share-key session))))
+
+      (testing "invalid link"
+        (is (nil? (dmz/open-share! "xyz" session)))))))
 
 
 ;;;; Other geometries
