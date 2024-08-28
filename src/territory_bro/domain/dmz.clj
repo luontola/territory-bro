@@ -28,8 +28,9 @@
            (org.postgresql.util PSQLException)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
+;;;; State
+
 (def ^:dynamic *state* nil) ; the state starts empty, so nil is a good default for tests
-(def ^:dynamic *conn*) ; unbound var gives a better error message than nil, when forgetting db/with-db
 
 (defn enrich-state-for-request [state request]
   (let [session (:session request)
@@ -52,11 +53,19 @@
     (binding [*state* (state-for-request request)]
       (handler request))))
 
+
+;;;; Database connection
+
+(def ^:dynamic *conn*) ; unbound var gives a better error message than nil, when forgetting db/with-db
+
 (defn wrap-db-connection [handler]
   (fn [request]
     (db/with-db [conn {}]
       (binding [*conn* conn]
         (handler request)))))
+
+
+;;;; Authorization
 
 (defn require-logged-in! []
   (when-not (auth/logged-in?)
@@ -73,6 +82,23 @@
         (access-denied!))
       (handler request))))
 
+(defn allowed? [permit]
+  (permissions/allowed? *state* (auth/current-user-id) permit))
+
+(defn view-territory? [cong-id territory-id]
+  (or (allowed? [:view-congregation cong-id]) ; :view-congregation implies :view-territory for all territories
+      (allowed? [:view-territory cong-id territory-id])))
+
+(defn view-printouts-page? [cong-id]
+  (allowed? [:view-congregation cong-id]))
+
+(defn view-settings-page? [cong-id]
+  (or (allowed? [:configure-congregation cong-id])
+      (allowed? [:gis-access cong-id])))
+
+
+;;;; Authentication
+
 (defn- super-user? []
   (let [super-users (:super-users config/env)
         user auth/*user*]
@@ -88,20 +114,8 @@
 (defn ^:dynamic save-user-from-jwt! [jwt]
   (user/save-user! *conn* (:sub jwt) (select-keys jwt auth/user-profile-keys)))
 
-(defn allowed? [permit]
-  (permissions/allowed? *state* (auth/current-user-id) permit))
 
-(defn view-territory? [cong-id territory-id]
-  (or (allowed? [:view-congregation cong-id]) ; :view-congregation implies :view-territory for all territories
-      (allowed? [:view-territory cong-id territory-id])))
-
-(defn view-printouts-page? [cong-id]
-  (allowed? [:view-congregation cong-id]))
-
-(defn view-settings-page? [cong-id]
-  (or (allowed? [:configure-congregation cong-id])
-      (allowed? [:gis-access cong-id])))
-
+;;;; Commands
 
 (defn- enrich-command [command]
   (let [user-id (auth/current-user-id)]
