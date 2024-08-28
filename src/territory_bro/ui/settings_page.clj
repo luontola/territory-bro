@@ -27,11 +27,7 @@
         users (dmz/list-congregation-users cong-id)
         new-user (some-> (get-in request [:params :new-user])
                          (parse-uuid))]
-    ;; TODO: wrap the name, loans-csv-url and user-id into a :form map, since they are user input?
-    {:congregation/name (or (get-in request [:params :congregation-name])
-                            (:congregation/name congregation))
-     :congregation/loans-csv-url (or (get-in request [:params :loans-csv-url])
-                                     (:congregation/loans-csv-url congregation))
+    {:congregation (select-keys congregation [:congregation/name])
      :users (->> users
                  (mapv (fn [user]
                          (assoc user :new? (= new-user (:user/id user)))))
@@ -41,8 +37,11 @@
                              (-> user :user/attributes :name str str/lower-case)])))
      :permissions {:configure-congregation (dmz/allowed? [:configure-congregation cong-id])
                    :gis-access (dmz/allowed? [:gis-access cong-id])}
-     :form/user-id (get-in request [:params :user-id])}))
-
+     :form {:congregation-name (or (get-in request [:params :congregation-name])
+                                   (:congregation/name congregation))
+            :loans-csv-url (or (get-in request [:params :loans-csv-url])
+                               (:congregation/loans-csv-url congregation))
+            :user-id (get-in request [:params :user-id])}}))
 
 (defn loans-csv-url-info []
   (let [styles (:CongregationSettings (css/modules))]
@@ -74,7 +73,7 @@
       [:p "After you have such a sheet, you can expose it to the Internet through " [:tt "File | Share | Publish to web"] ". "
        "Publish that sheet as a CSV file and enter its URL to the above field on this settings page."]))))
 
-(defn congregation-settings-section [{:keys [permissions errors] :as model}]
+(defn congregation-settings-section [{:keys [permissions form errors]}]
   (when (:configure-congregation permissions)
     (let [styles (:CongregationSettings (css/modules))
           errors (group-by first errors)]
@@ -87,7 +86,7 @@
              [:label {:for "congregation-name"}
               (i18n/t "CongregationSettings.congregationName")]
              [:input#congregation-name {:name "congregation-name"
-                                        :value (:congregation/name model)
+                                        :value (:congregation-name form)
                                         :type "text"
                                         :required true
                                         :aria-invalid (when error? "true")}]
@@ -95,7 +94,7 @@
                " ⚠️ ")])
 
           [:details {:class (:experimentalFeatures styles)
-                     :open (not (str/blank? (:congregation/loans-csv-url model)))}
+                     :open (not (str/blank? (:loans-csv-url form)))}
            [:summary (i18n/t "CongregationSettings.experimentalFeatures")]
 
            [:div {:lang "en"}
@@ -104,7 +103,7 @@
                [:label {:for "loans-csv-url"}
                 "Territory loans CSV URL (optional)"]
                [:input#loans-csv-url {:name "loans-csv-url"
-                                      :value (:congregation/loans-csv-url model)
+                                      :value (:loans-csv-url form)
                                       :type "text"
                                       :size "50"
                                       :pattern "https://docs\\.google\\.com/.*"
@@ -141,7 +140,7 @@
       (str/starts-with? sub "facebook|") "Facebook"
       :else sub)))
 
-(defn users-table-row [user model]
+(defn users-table-row [user {:keys [congregation]}]
   (let [styles (:UserManagement (css/modules))
         current-user? (= (:user/id user)
                          (:user/id auth/*user*))
@@ -170,10 +169,10 @@
                                  :hx-delete (str html/*page-path* "/users?user-id=" (codec/url-encode (:user/id user)))
                                  :hx-confirm (when current-user?
                                                (-> (i18n/t "UserManagement.removeYourselfWarning")
-                                                   (str/replace "{{congregation}}" (:congregation/name model))))}
+                                                   (str/replace "{{congregation}}" (:congregation/name congregation))))}
             (i18n/t "UserManagement.removeUser")]]])))
 
-(defn user-management-section [{:keys [permissions errors] :as model}]
+(defn user-management-section [{:keys [users permissions form errors] :as model}]
   (when (:configure-congregation permissions)
     (let [errors (group-by first errors)]
       (h/html
@@ -201,7 +200,7 @@
                               :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
                               :required true
                               :pattern "\\s*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\s*"
-                              :value (:form/user-id model)
+                              :value (:user-id form)
                               :aria-invalid (when error? "true")}]
              (when error?
                " ⚠️ ")
@@ -220,7 +219,7 @@
            [:th (i18n/t "UserManagement.loginMethod")]
            [:th (i18n/t "UserManagement.actions")]]]
          [:tbody
-          (for [user (:users model)]
+          (for [user users]
             (users-table-row user model))]]]))))
 
 

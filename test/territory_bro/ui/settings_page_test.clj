@@ -28,8 +28,7 @@
 (def cong-id (UUID/randomUUID))
 (def user-id (UUID. 0 1))
 (def model
-  {:congregation/name "Congregation Name"
-   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"
+  {:congregation {:congregation/name "Congregation Name"}
    :users [{:user/id user-id
             :user/subject "google-oauth2|102883237794451111459"
             :user/attributes {:name "Esko Luontola"
@@ -38,7 +37,9 @@
             :new? false}]
    :permissions {:configure-congregation true
                  :gis-access true}
-   :form/user-id nil})
+   :form {:congregation-name "Congregation Name"
+          :loans-csv-url "https://docs.google.com/spreadsheets/123"
+          :user-id nil}})
 
 (def test-events
   (flatten [{:event/type :congregation.event/congregation-created
