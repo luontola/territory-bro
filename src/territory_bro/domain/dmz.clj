@@ -66,6 +66,13 @@
   (require-logged-in!) ; if the user is not logged in, first prompt them to log in - they might have access after logging in
   (http-response/forbidden! "Access denied"))
 
+(defn wrap-access-check [handler pred]
+  (fn [request]
+    (let [cong-id (get-in request [:path-params :congregation])]
+      (when-not (pred cong-id)
+        (access-denied!))
+      (handler request))))
+
 (defn- super-user? []
   (let [super-users (:super-users config/env)
         user auth/*user*]

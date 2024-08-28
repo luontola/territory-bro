@@ -283,7 +283,8 @@
 
 (def routes
   ["/congregation/:congregation/settings"
-   {:middleware [[html/wrap-page-path ::page]]}
+   {:middleware [[html/wrap-page-path ::page]
+                 [dmz/wrap-access-check dmz/view-settings-page?]]}
    [""
     {:name ::page
      :get {:middleware [dmz/wrap-db-connection]

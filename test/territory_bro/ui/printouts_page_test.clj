@@ -6,6 +6,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
+            [reitit.ring :as ring]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.dmz-test :as dmz-test]
@@ -265,3 +266,17 @@
                         (->> (repeat 10 #(handler request))
                              (mapv future-call)
                              (mapv deref))))))))))
+
+(deftest routes-test
+  (let [handler (ring/ring-handler (ring/router printouts-page/routes))
+        page-path (str "/congregation/" cong-id "/printouts")]
+    (testutil/with-events test-events
+
+      (testing "all the routes are guarded by access checks"
+        (testutil/with-user-id (UUID. 0 0x666)
+          (is (thrown-match? ExceptionInfo dmz-test/access-denied
+                             (handler {:request-method :get
+                                       :uri page-path})))
+          (is (thrown-match? ExceptionInfo dmz-test/access-denied
+                             (handler {:request-method :get
+                                       :uri (str page-path "/qr-code/" territory-id)}))))))))

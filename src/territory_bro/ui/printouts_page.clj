@@ -223,7 +223,8 @@
 
 (def routes
   ["/congregation/:congregation/printouts"
-   {:middleware [[html/wrap-page-path ::page]]}
+   {:middleware [[html/wrap-page-path ::page]
+                 [dmz/wrap-access-check dmz/view-printouts-page?]]}
    [""
     {:name ::page
      :get {:handler (fn [request]

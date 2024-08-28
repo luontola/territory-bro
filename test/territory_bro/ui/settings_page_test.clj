@@ -6,6 +6,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
+            [reitit.ring :as ring]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
@@ -401,3 +402,20 @@
                                 "Content-Disposition" "attachment; filename=\"Congregation Name.qgs\""}}
                      (dissoc response :body)))
               (is (str/includes? (:body response) "dbname='example_db' host=gis.example.com port=5432 user='username123'")))))))))
+
+(deftest routes-test
+  (let [handler (ring/ring-handler (ring/router settings-page/routes))
+        page-path (str "/congregation/" cong-id "/settings")]
+    (testutil/with-events test-events
+
+      (testing "all the routes are guarded by access checks"
+        (testutil/with-user-id (UUID. 0 0x666)
+          (is (thrown-match? ExceptionInfo dmz-test/access-denied
+                             (handler {:request-method :get
+                                       :uri page-path})))
+          (is (thrown-match? ExceptionInfo dmz-test/access-denied
+                             (handler {:request-method :get
+                                       :uri (str page-path "/qgis-project")})))
+          (is (thrown-match? ExceptionInfo dmz-test/access-denied
+                             (handler {:request-method :get
+                                       :uri (str page-path "/users")}))))))))
