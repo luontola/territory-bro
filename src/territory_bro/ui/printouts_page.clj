@@ -100,8 +100,7 @@
      [:div.no-print
       [:h1 (i18n/t "PrintoutPage.title")]
 
-      [:form#print-options.pure-form.pure-form-stacked {:method "post"
-                                                        :hx-post html/*page-path*
+      [:form#print-options.pure-form.pure-form-stacked {:hx-post html/*page-path*
                                                         :hx-trigger "load delay:1ms, change delay:250ms"
                                                         :hx-sync "#print-options:replace"
                                                         ;; morph the form to keep form element focus and scroll state

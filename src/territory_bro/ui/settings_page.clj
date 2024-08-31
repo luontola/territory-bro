@@ -80,6 +80,7 @@
       (h/html
        [:section
         [:form.pure-form.pure-form-aligned {:method "post"}
+         (html/anti-forgery-field)
          [:fieldset
           (let [error? (contains? errors :missing-name)]
             [:div.pure-control-group

@@ -22,7 +22,9 @@
     (is (= "x [stuff] y" (html/visible-text "x<input type=\"search\" value=\"stuff\">y"))
         "spacing before and after element")
     (is (= "[]" (html/visible-text "<input>"))
-        "type and value attributes are optional"))
+        "type and value attributes are optional")
+    (is (= "" (html/visible-text "<input type=\"hidden\" name=\"foo\" value=\"bar\">"))
+        "hidden fields are hidden"))
 
   (testing "select elements are replaced with the selected option's visible text"
     (testing "- single select"

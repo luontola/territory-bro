@@ -10,14 +10,19 @@
             [hiccup2.core :as h]
             [net.cgrand.enlive-html :as en]
             [reitit.core :as reitit]
+            [ring.middleware.anti-forgery :as anti-forgery]
             [ring.util.http-response :as http-response]
-            [ring.util.response :as response])
+            [ring.util.response :as response]
+            [territory-bro.infra.json :as json])
   (:import (org.reflections Reflections)
            (org.reflections.scanners Scanners)))
 
 (alter-var-root #'hiccup.util/*html-mode* (constantly :html)) ; change default from :xhtml to :html
 
 (def ^:dynamic *page-path*)
+
+
+;;;; Test helpers
 
 (defn normalize-whitespace
   ([s]
@@ -33,7 +38,8 @@
   ((en/substitute " " (:data-test-icon (:attrs node)) " " (:content node) " ")))
 
 (defn- visualize-input-element [node]
-  ((en/substitute " [" (:value (:attrs node)) "] ")))
+  (when-not (= "hidden" (:type (:attrs node)))
+    ((en/substitute " [" (:value (:attrs node)) "] "))))
 
 (defn- visualize-select-element [node]
   (let [options (:content node)
@@ -82,6 +88,9 @@
         (str/replace #"&\w+;" html-character-entities)
         (normalize-whitespace))))
 
+
+;;;; Common helpers
+
 (defn response [html]
   (when (some? html)
     (-> (http-response/ok (str html))
@@ -106,6 +115,24 @@
                       wildcard-url (str/replace url #"-[0-9a-f]{8}\." "-*.")] ; mapping for content-hashed filenames
                   [wildcard-url url])))
          (into {}))))
+
+
+;;;; CSRF protection
+
+(defn anti-forgery-token []
+  (when (bound? #'anti-forgery/*anti-forgery-token*) ; might not be bound in tests
+    (force anti-forgery/*anti-forgery-token*))) ; force may be necessary depending on session strategy
+
+(defn anti-forgery-field []
+  (h/html [:input {:type "hidden"
+                   :name "__anti-forgery-token"
+                   :value (anti-forgery-token)}]))
+
+(defn anti-forgery-headers-json []
+  (json/write-value-as-string {:x-csrf-token (anti-forgery-token)}))
+
+
+;;;; Inline SVG
 
 ;; XXX: Enlive always generates HTML and doesn't have a parameter for producing XML (SVG).
 ;;      Couldn't get clojure.xml/emit-element to work with Enlive's nodes.

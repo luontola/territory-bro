@@ -23,6 +23,7 @@
      [:h1 (i18n/t "RegistrationPage.title")]
 
      [:form.pure-form.pure-form-aligned {:method "post"}
+      (html/anti-forgery-field)
       [:fieldset
        ;; congregation name field
        (let [error? (contains? errors :missing-name)]

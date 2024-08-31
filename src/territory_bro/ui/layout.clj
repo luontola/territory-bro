@@ -183,7 +183,7 @@
              "Territory Bro"]
             [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
             (head-injections)]
-           [:body
+           [:body {:hx-headers (html/anti-forgery-headers-json)}
             [:nav.no-print {:class (:navbar styles)}
              (if (some? (:congregation model))
                (congregation-navigation model)

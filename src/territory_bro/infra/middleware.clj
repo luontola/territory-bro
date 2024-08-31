@@ -139,7 +139,6 @@
       (wrap-defaults (-> site-defaults
                          (assoc :proxy true)
                          (dissoc :static)
-                         (assoc-in [:security :anti-forgery] false) ; TODO: enable CSRF, create a custom error page for it
                          (assoc-in [:session :store] session-store)
                          (assoc-in [:session :flash] false)))
       wrap-cache-control

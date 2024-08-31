@@ -99,10 +99,12 @@
              (handler (mock/request :get "/assets/style-4da573e6.css")))))))
 
 (deftest error-reporting-test
-  (let [irrelevant-headers {"Cache-Control" "private, no-cache"
-                            "X-Content-Type-Options" "nosniff"
-                            "X-Frame-Options" "SAMEORIGIN"
-                            "Set-Cookie" ["lang=en; Max-Age=31536000; Path=/"]}]
+  (let [simplify (fn [response]
+                   (update response :headers dissoc
+                           "Cache-Control"
+                           "X-Content-Type-Options"
+                           "X-Frame-Options"
+                           "Set-Cookie"))]
     (testing "handler throws arbitrary exception"
       (let [handler (-> (fn [_]
                           (throw (RuntimeException. "dummy")))
@@ -118,9 +120,9 @@
                         middleware/wrap-base)]
         (is (= {:status 409
                 :body "dummy"
-                :headers (assoc irrelevant-headers
-                                "Content-Type" "text/plain; charset=utf-8")}
-               (handler (mock/request :get "/some/page"))))))
+                :headers {"Content-Type" "text/plain; charset=utf-8"}}
+               (-> (handler (mock/request :get "/some/page"))
+                   (simplify))))))
 
     (testing "handler throws http-response with map body"
       (let [handler (-> (fn [_]
@@ -128,8 +130,8 @@
                         middleware/wrap-base)]
         (is (= {:status 409
                 :body "{\"message\":\"dummy\"}"
-                :headers (assoc irrelevant-headers
-                                "Content-Type" "application/json; charset=utf-8"
-                                "Content-Length" "19")}
+                :headers {"Content-Type" "application/json; charset=utf-8"
+                          "Content-Length" "19"}}
                (-> (handler (mock/request :get "/some/page"))
-                   (update :body slurp))))))))
+                   (update :body slurp)
+                   (simplify))))))))
