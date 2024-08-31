@@ -3,11 +3,52 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.middleware-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer :all]
             [ring.mock.request :as mock]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
             [territory-bro.infra.middleware :as middleware]))
+
+(deftest wrap-compressed-resources-test
+  (let [handler (-> (constantly ::handler-response)
+                    (middleware/wrap-compressed-resources "/public"))
+        simplify (fn [response]
+                   (update response :headers dissoc "Last-Modified"))]
+
+    (testing "delegates to handler if resource is not found"
+      (is (= ::handler-response
+             (handler (mock/request :get "/some/page")))))
+
+    (testing "returns smallest compressed resource"
+      (is (= {:status 200
+              :body (.getAbsoluteFile (io/file "test-resources/public/testfile.txt.br"))
+              :headers {"Content-Encoding" "br"
+                        "Content-Length" "101"}}
+             (simplify (handler (-> (mock/request :get "/testfile.txt")
+                                    (mock/header "accept-encoding" "gzip, deflate, br, zstd")))))))
+
+    (testing "returns only encodings listed in the accept-encoding header"
+      (is (= {:status 200
+              :body (.getAbsoluteFile (io/file "test-resources/public/testfile.txt.gz"))
+              :headers {"Content-Encoding" "gzip"
+                        "Content-Length" "111"}}
+             (simplify (handler (-> (mock/request :get "/testfile.txt")
+                                    ;; weighted values should work too, though their weights are ignored
+                                    (mock/header "accept-encoding" "deflate, gzip;q=1.0, *;q=0.5")))))))
+
+    (testing "returns the uncompressed resource if there is no accept-encoding header"
+      (is (= {:status 200
+              :body (.getAbsoluteFile (io/file "test-resources/public/testfile.txt"))
+              :headers {"Content-Length" "124"}}
+             (simplify (handler (mock/request :get "/testfile.txt"))))))
+
+    (testing "returns the uncompressed resource if it's not pre-compressed"
+      (is (= {:status 200
+              :body (.getAbsoluteFile (io/file "target/web-dist/public/favicon.ico"))
+              :headers {"Content-Length" "0"}}
+             (simplify (handler (-> (mock/request :get "/favicon.ico")
+                                    (mock/header "accept-encoding" "gzip, deflate, br, zstd")))))))))
 
 (deftest wrap-cache-control-test
   (testing "SSR pages are not cached"

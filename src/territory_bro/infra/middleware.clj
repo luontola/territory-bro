@@ -11,6 +11,7 @@
             [ring.middleware.format :refer [wrap-restful-format]]
             [ring.middleware.http-response :refer [wrap-http-response]]
             [ring.middleware.reload :refer [wrap-reload]]
+            [ring.middleware.resource :as resource]
             [ring.util.http-response :refer [internal-server-error]]
             [ring.util.response :as response]
             [territory-bro.infra.auth0 :as auth0]
@@ -77,6 +78,28 @@
       response)))
 
 
+(defn- find-compressed-resource [request root-path]
+  (when-some [uncompressed (resource/resource-request request root-path)]
+    (let [accept-encoding (str (get-in request [:headers "accept-encoding"]))
+          accept-encoding? (set (str/split accept-encoding #"[^a-z]+"))
+          compressed-resource (fn [encoding suffix]
+                                (when (accept-encoding? encoding)
+                                  (some-> (resource/resource-request (update request :uri #(str % suffix)) root-path)
+                                          (response/header "Content-Encoding" encoding))))
+          content-length #(parse-long (or (response/get-header % "Content-Length") "0"))]
+      (->> [(compressed-resource "br" ".br")
+            (compressed-resource "gzip" ".gz")
+            uncompressed]
+           (filterv some?)
+           (sort-by content-length) ; the candidates should already be smallest first, but in rare cases brotli might not be the smallest
+           (first)))))
+
+(defn wrap-compressed-resources [handler root-path]
+  (fn [request]
+    (or (find-compressed-resource request root-path)
+        (handler request))))
+
+
 (defn- static-asset? [path]
   (or (str/starts-with? path "/assets/")
       (= "/favicon.ico" path)))
@@ -112,8 +135,10 @@
       i18n/wrap-current-language
       auth/wrap-current-user
       (logger/wrap-with-logger {:request-keys (conj logger/default-request-keys :remote-addr)})
+      (wrap-compressed-resources "/public") ; XXX: this would belong between the middleware stack of wrap-defaults (no cookies), consider inlining wrap-defaults or moving middleware to reitit
       (wrap-defaults (-> site-defaults
                          (assoc :proxy true)
+                         (dissoc :static)
                          (assoc-in [:security :anti-forgery] false) ; TODO: enable CSRF, create a custom error page for it
                          (assoc-in [:session :store] session-store)
                          (assoc-in [:session :flash] false)))

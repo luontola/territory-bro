@@ -109,7 +109,8 @@
                                   [ring/ring-mock "0.4.0"]]
                    :jvm-opts ^:replace ["-Dconf=dev-config.edn"
                                         "-XX:-OmitStackTraceInFastThrow"]
-                   :repl-options {:init-ns territory-bro.repl}}
+                   :repl-options {:init-ns territory-bro.repl}
+                   :resource-paths ["test-resources"]}
 
              :test [:dev :test0]
              :test0 {:jvm-opts ^:replace ["-Dconf=test-config.edn"
