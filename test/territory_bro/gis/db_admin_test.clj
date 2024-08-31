@@ -6,6 +6,7 @@
   (:require [clojure.test :refer :all]
             [territory-bro.events :as events]
             [territory-bro.gis.db-admin :as db-admin]
+            [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.spy :as spy]
             [territory-bro.test.testutil :as testutil :refer [thrown?]])
   (:import (java.time Instant)
@@ -47,8 +48,7 @@
   (testutil/apply-events db-admin/projection events))
 
 (defn- generate-commands [events]
-  (->> (db-admin/generate-commands (apply-events events)
-                                   {:now (fn [] test-time)})
+  (->> (db-admin/generate-commands (apply-events events))
        (testutil/validate-commands)))
 
 (defn- handle-command [command state injections]
@@ -56,6 +56,9 @@
                                 state
                                 injections)
        (events/validate-events)))
+
+(use-fixtures :once (fixed-clock-fixture test-time))
+
 
 (deftest generate-commands-test
   (testing "congregation created"

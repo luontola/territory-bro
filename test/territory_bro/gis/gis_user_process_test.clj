@@ -1,10 +1,11 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis.gis-user-process-test
   (:require [clojure.test :refer :all]
             [territory-bro.gis.gis-user-process :as gis-user-process]
+            [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil])
   (:import (java.time Instant)
            (java.util UUID)))
@@ -17,9 +18,11 @@
   (testutil/apply-events gis-user-process/projection events))
 
 (defn- generate-commands [events]
-  (->> (gis-user-process/generate-commands (apply-events events)
-                                           {:now (fn [] test-time)})
+  (->> (gis-user-process/generate-commands (apply-events events))
        (testutil/validate-commands)))
+
+(use-fixtures :once (fixed-clock-fixture test-time))
+
 
 (deftest generate-commands-test
   (let [events []]

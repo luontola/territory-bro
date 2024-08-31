@@ -22,7 +22,7 @@
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.printouts-page :as printouts-page])
   (:import (clojure.lang ExceptionInfo)
-           (java.time Clock Duration Instant ZoneOffset ZonedDateTime)
+           (java.time Clock Duration ZoneOffset ZonedDateTime)
            (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
@@ -236,8 +236,7 @@
   (let [request {:path-params {:congregation cong-id
                                :territory territory-id}}]
     (testutil/with-events test-events
-      (binding [config/env {:now #(Instant/now)}
-                share/generate-share-key (constantly "abcxyz")]
+      (binding [share/generate-share-key (constantly "abcxyz")]
         (testutil/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]
 

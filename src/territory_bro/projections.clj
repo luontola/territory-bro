@@ -17,7 +17,6 @@
             [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.gis.gis-user-process :as gis-user-process]
-            [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.executors :as executors]
@@ -84,10 +83,9 @@
                 "to" (:event/global-revision (:last-event new))))))
 
 (defn- run-process-managers! [state]
-  (let [injections {:now (:now config/env)}
-        commands (concat
-                  (gis-user-process/generate-commands state injections)
-                  (db-admin/generate-commands state injections))
+  (let [commands (concat
+                  (gis-user-process/generate-commands state)
+                  (db-admin/generate-commands state))
         new-events (->> commands
                         (mapcat (fn [command]
                                   (db/with-db [conn {}]

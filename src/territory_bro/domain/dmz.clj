@@ -120,7 +120,7 @@
 (defn- enrich-command [command]
   (let [user-id (auth/current-user-id)]
     (-> command
-        (assoc :command/time ((:now config/env)))
+        (assoc :command/time (config/now))
         (assoc :command/user user-id))))
 
 (defn dispatch! [command]

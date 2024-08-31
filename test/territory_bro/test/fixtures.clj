@@ -10,10 +10,8 @@
             [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
-            [territory-bro.infra.jwt :as jwt]
-            [territory-bro.infra.jwt-test :as jwt-test]
-            [territory-bro.infra.router :as router]
-            [territory-bro.projections :as projections]))
+            [territory-bro.projections :as projections])
+  (:import (java.time Clock Instant ZoneOffset)))
 
 (defn- delete-schemas-starting-with! [conn prefix]
   (doseq [schema (db/get-schemas conn)
@@ -43,12 +41,10 @@
   (mount/stop))
 
 
-(defn api-fixture [f]
-  (binding [config/env (merge config/env jwt-test/env)]
-    (mount/start-with {#'jwt/jwk-provider jwt-test/fake-jwk-provider})
-    (mount/start #'router/app)
-    (f))
-  (mount/stop))
+(defn fixed-clock-fixture [^Instant fixed-time]
+  (fn [f]
+    (binding [config/*clock* (Clock/fixed fixed-time ZoneOffset/UTC)]
+      (f))))
 
 
 (def *last-command (atom nil))

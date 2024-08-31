@@ -19,7 +19,6 @@
             [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.infra.authentication :as auth]
-            [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.foreign-key :as foreign-key]
@@ -28,8 +27,7 @@
 ;;;; Helpers
 
 (defn- default-injections [command state]
-  {:now (:now config/env)
-   :check-permit #(commands/check-permit state command %)})
+  {:check-permit #(commands/check-permit state command %)})
 
 (defn- reference-checkers [command conn state]
   {:card-minimap-viewport (fn [card-minimap-viewport-id]
@@ -83,8 +81,8 @@
 
 (defn- call! [command-handler command state-or-old-events injections]
   (->> (command-handler command state-or-old-events injections)
-       (events/enrich-events command injections)
-       (map events/sorted-keys)
+       (events/enrich-events command)
+       (mapv events/sorted-keys)
        (events/strict-validate-events)))
 
 

@@ -9,41 +9,45 @@
             [schema-generators.generators :as sg]
             [schema.core :as s]
             [territory-bro.events :as events]
+            [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [re-contains re-equals thrown-with-msg? thrown?]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
            (java.util UUID)))
 
+(def test-time (Instant/now))
+
+(use-fixtures :once (fixed-clock-fixture test-time))
+
+
 (deftest enrich-events-test
-  (let [time (Instant/now)
-        injections {:now (constantly time)}
-        user (UUID/randomUUID)
+  (let [user-id (UUID/randomUUID)
         system "some-subsystem"
         events [{:extra-keys :foo}]]
 
     (testing "no context (not really allowed)"
-      (is (= [{:event/time time
+      (is (= [{:event/time test-time
                :extra-keys :foo}]
-             (events/enrich-events {} injections events))))
+             (events/enrich-events {} events))))
 
     (testing "user context"
-      (is (= [{:event/time time
-               :event/user user
+      (is (= [{:event/time test-time
+               :event/user user-id
                :extra-keys :foo}]
-             (events/enrich-events {:command/user user} injections events))))
+             (events/enrich-events {:command/user user-id} events))))
 
     (testing "system context"
-      (is (= [{:event/time time
+      (is (= [{:event/time test-time
                :event/system system
                :extra-keys :foo}]
-             (events/enrich-events {:command/system system} injections events))))
+             (events/enrich-events {:command/system system} events))))
 
     (testing "user and system context (not really allowed)"
-      (is (= [{:event/time time
-               :event/user user
+      (is (= [{:event/time test-time
+               :event/user user-id
                :event/system system
                :extra-keys :foo}]
-             (events/enrich-events {:command/system system, :command/user user} injections events))))))
+             (events/enrich-events {:command/system system, :command/user user-id} events))))))
 
 (def valid-event {:event/type :congregation.event/congregation-created
                   :event/time (Instant/now)

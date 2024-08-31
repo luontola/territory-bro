@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,9 +7,10 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.migration :as migration]
             [territory-bro.projections :as projections]
+            [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil])
-  (:import (java.util UUID)
-           (java.time Instant)))
+  (:import (java.time Instant)
+           (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
 (def user-id (UUID. 0 2))
@@ -30,9 +31,11 @@
   (testutil/apply-events projections/projection events))
 
 (defn- generate-commands [events]
-  (->> (migration/generate-commands (apply-events events)
-                                    {:now (fn [] test-time)})
+  (->> (migration/generate-commands (apply-events events))
        (testutil/validate-commands)))
+
+(use-fixtures :once (fixed-clock-fixture test-time))
+
 
 (deftest add-missing-admin-permissions-test
   (testing "non-admin users"

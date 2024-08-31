@@ -30,10 +30,9 @@
   (.stop ^Server http-server))
 
 (defn- migrate-application-state! []
-  (let [injections {:now (:now config/env)}
-        state (projections/cached-state)]
+  (let [state (projections/cached-state)]
     (db/with-db [conn {}]
-      (doseq [command (migration/generate-commands state injections)]
+      (doseq [command (migration/generate-commands state)]
         (dispatcher/command! conn state command)))))
 
 (defn migrate-database! []

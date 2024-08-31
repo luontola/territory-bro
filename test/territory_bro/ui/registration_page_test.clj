@@ -8,14 +8,12 @@
             [matcher-combinators.test :refer :all]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.dmz-test :as dmz-test]
-            [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.registration-page :as registration-page])
   (:import (clojure.lang ExceptionInfo)
-           (java.time Instant)
            (java.util UUID)
            (territory_bro ValidationException)))
 
@@ -37,35 +35,34 @@
 (deftest submit!-test
   (let [user-id (UUID/randomUUID)
         request {:params {:congregationName "the name"}}]
-    (binding [config/env {:now #(Instant/now)}]
-      (testutil/with-user-id user-id
-        (testing "registration ok"
-          (with-fixtures [fake-dispatcher-fixture]
-            (let [response (registration-page/submit! request)]
-              (is (= {:command/type :congregation.command/create-congregation
-                      :command/user user-id
-                      :congregation/name "the name"}
-                     (dissoc @*last-command :command/time :congregation/id)))
-              (is (= {:status 303
-                      :headers {"Location" (str "/congregation/" (:congregation/id @*last-command))}
-                      :body ""}
-                     response)))))
+    (testutil/with-user-id user-id
+      (testing "registration ok"
+        (with-fixtures [fake-dispatcher-fixture]
+          (let [response (registration-page/submit! request)]
+            (is (= {:command/type :congregation.command/create-congregation
+                    :command/user user-id
+                    :congregation/name "the name"}
+                   (dissoc @*last-command :command/time :congregation/id)))
+            (is (= {:status 303
+                    :headers {"Location" (str "/congregation/" (:congregation/id @*last-command))}
+                    :body ""}
+                   response)))))
 
-        (testing "registration failed: highlights erroneous form fields, doesn't forget invalid user input"
-          (binding [dispatcher/command! (fn [& _]
-                                          (throw (ValidationException. [[:missing-name]])))]
-            (let [response (registration-page/submit! request)]
-              (is (= forms/validation-error-http-status (:status response)))
-              (is (str/includes?
-                   (html/visible-text (:body response))
-                   (html/normalize-whitespace
-                    "Congregation name [the name] ⚠️
-                     Register")))))))
+      (testing "registration failed: highlights erroneous form fields, doesn't forget invalid user input"
+        (binding [dispatcher/command! (fn [& _]
+                                        (throw (ValidationException. [[:missing-name]])))]
+          (let [response (registration-page/submit! request)]
+            (is (= forms/validation-error-http-status (:status response)))
+            (is (str/includes?
+                 (html/visible-text (:body response))
+                 (html/normalize-whitespace
+                  "Congregation name [the name] ⚠️
+                   Register")))))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (thrown-match? ExceptionInfo dmz-test/not-logged-in
-                             (registration-page/submit! request))))))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (thrown-match? ExceptionInfo dmz-test/not-logged-in
+                           (registration-page/submit! request)))))))
 
 (deftest view-test
   (is (= (html/normalize-whitespace

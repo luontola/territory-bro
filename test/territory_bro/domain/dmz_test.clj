@@ -19,7 +19,6 @@
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil])
   (:import (clojure.lang ExceptionInfo)
-           (java.time Instant)
            (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
@@ -122,8 +121,7 @@
               :headers {}}})
 
 (def env
-  {:now #(Instant/now)
-   :public-url "https://example.com"
+  {:public-url "https://example.com"
    :qr-code-base-url "https://qr.example.com"
    :gis-database-host "gis.example.com"
    :gis-database-name "gis-db"

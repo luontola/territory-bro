@@ -1,9 +1,10 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis.db-admin
-  (:require [territory-bro.infra.presence-tracker :as presence-tracker]))
+  (:require [territory-bro.infra.config :as config]
+            [territory-bro.infra.presence-tracker :as presence-tracker]))
 
 (defmulti projection (fn [_state event] (:event/type event)))
 (defmethod projection :default [state _event] state)
@@ -62,12 +63,12 @@
 
 (def ^:private system (str (ns-name *ns*)))
 
-(defn generate-commands [state {:keys [now]}]
+(defn generate-commands [state]
   (concat
    (for [tenant (->> (presence-tracker/creatable state ::tracked-congregations)
                      (map #(get-in state [::congregations %])))]
      {:command/type :db-admin.command/migrate-tenant-schema
-      :command/time (now)
+      :command/time (config/now)
       :command/system system
       :congregation/id (:congregation/id tenant)
       :congregation/schema-name (:congregation/schema-name tenant)})
@@ -75,7 +76,7 @@
    (for [gis-user (->> (presence-tracker/creatable state ::tracked-gis-users)
                        (map #(get-in state [::gis-users %])))]
      {:command/type :db-admin.command/ensure-gis-user-present
-      :command/time (now)
+      :command/time (config/now)
       :command/system system
       :user/id (:user/id gis-user)
       :gis-user/username (:gis-user/username gis-user)
@@ -86,7 +87,7 @@
    (for [gis-user (->> (presence-tracker/deletable state ::tracked-gis-users)
                        (map #(get-in state [::gis-users %])))]
      {:command/type :db-admin.command/ensure-gis-user-absent
-      :command/time (now)
+      :command/time (config/now)
       :command/system system
       :user/id (:user/id gis-user)
       :gis-user/username (:gis-user/username gis-user)

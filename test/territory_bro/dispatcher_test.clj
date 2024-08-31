@@ -7,6 +7,7 @@
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.user :as user]
+            [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [re-contains re-equals thrown-with-msg?]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant)
@@ -17,12 +18,15 @@
 (def user-id (UUID. 0 2))
 (def test-time (Instant/ofEpochSecond 1))
 
+(use-fixtures :once (fixed-clock-fixture test-time))
+
+
 (deftest call-command-handler-test
   (let [call! #'dispatcher/call!
         command {:command/type :dummy-command
                  :command/user user-id}
         state :dummy-state
-        injections {:now (constantly test-time)}]
+        injections {}]
 
     (testing "calls the command handler"
       (let [*command-handler-args (atom nil)]

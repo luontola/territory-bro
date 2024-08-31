@@ -8,8 +8,13 @@
             [mount.core :as mount]
             [schema.core :as s]
             [territory-bro.infra.util :refer [getx]])
-  (:import (java.time Instant)
+  (:import (java.time Clock Instant)
            (java.util UUID)))
+
+(def ^:dynamic ^Clock *clock* (Clock/systemUTC))
+
+(defn now ^Instant []
+  (Instant/now *clock*))
 
 (s/set-max-value-length! 50)
 
@@ -32,7 +37,6 @@
    :gis-database-ssl-mode s/Str
    :jwt-audience s/Str
    :jwt-issuer s/Str
-   :now (s/pred fn?)
    :port s/Int
    :super-users #{(s/cond-pre s/Str s/Uuid)}
    :support-email s/Str})
@@ -47,7 +51,6 @@
 
 (defn enrich-env [env]
   (assoc env
-         :now #(Instant/now)
          :jwt-issuer (str "https://" (getx env :auth0-domain) "/")
          :jwt-audience (getx env :auth0-client-id)
          :super-users (->> (str/split (or (:super-users env) "")

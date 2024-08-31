@@ -1,4 +1,4 @@
-;; Copyright © 2015-2022 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -9,6 +9,7 @@
             [schema.coerce :as coerce]
             [schema.core :as s]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.json :as json])
   (:import (java.time Instant)
            (java.util UUID)))
@@ -21,10 +22,9 @@
           user (assoc :event/user user)
           system (assoc :event/system system)))))
 
-(defn enrich-events [command {:keys [now]} events]
-  (assert (some? now))
-  (let [current-time (now)]
-    (map #(enrich-event % command current-time) events)))
+(defn enrich-events [command events]
+  (let [current-time (config/now)] ; guarantee the same timestamp for all events
+    (mapv #(enrich-event % command current-time) events)))
 
 
 (def ^:private key-order

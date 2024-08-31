@@ -4,6 +4,7 @@
 
 (ns territory-bro.infra.jwt
   (:require [mount.core :as mount]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.config :refer [env]]
             [territory-bro.infra.json :as json]
             [territory-bro.infra.util :as util]
@@ -11,7 +12,7 @@
   (:import (com.auth0.jwk JwkProvider JwkProviderBuilder)
            (com.auth0.jwt JWT JWTVerifier$BaseVerification)
            (com.auth0.jwt.algorithms Algorithm)
-           (java.time Clock Instant ZoneOffset)))
+           (java.time Instant)))
 
 (mount/defstate ^:dynamic ^JwkProvider jwk-provider
   :start (-> (JwkProviderBuilder. ^String (getx env :auth0-domain))
@@ -27,13 +28,12 @@
 (defn validate [^String jwt env]
   (let [public-key (fetch-public-key jwt)
         algorithm (Algorithm/RSA256 public-key nil)
-        clock (Clock/fixed ((getx env :now)) ZoneOffset/UTC)
         verifier (-> (JWT/require algorithm)
                      (.withIssuer (strings (getx env :jwt-issuer)))
                      (.withAudience (strings (getx env :jwt-audience)))
                      (.acceptLeeway 60)
                      (->> ^JWTVerifier$BaseVerification (cast JWTVerifier$BaseVerification))
-                     (.build clock))]
+                     (.build config/*clock*))]
     (-> (.verify verifier jwt)
         (.getPayload)
         (util/decode-base64url)

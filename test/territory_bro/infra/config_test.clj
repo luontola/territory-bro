@@ -8,7 +8,6 @@
             [territory-bro.infra.util :refer [getx]]
             [territory-bro.test.testutil :refer [re-contains thrown-with-msg?]])
   (:import (clojure.lang ExceptionInfo)
-           (java.time Instant)
            (java.util UUID)))
 
 (deftest enrich-env-test
@@ -19,13 +18,6 @@
                        :demo-congregation "7df983b1-6be6-42a4-b3b7-75b165005b03")
                 (config/enrich-env)
                 (config/validate-env))]
-
-    (testing ":now is a function which returns current time"
-      (let [result ((getx env :now))]
-        (is (instance? Instant result))
-        (is (< (- (System/currentTimeMillis)
-                  (.toEpochMilli ^Instant result))
-               100))))
 
     (testing ":jwt-issuer is https://YOUR_AUTH0_DOMAIN/"
       (is (= "https://example.eu.auth0.com/"

@@ -22,7 +22,6 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.settings-page :as settings-page])
   (:import (clojure.lang ExceptionInfo)
-           (java.time Instant)
            (java.util UUID)
            (territory_bro ValidationException)))
 
@@ -257,8 +256,7 @@
                           :loans-csv-url "new url"}}]
     (testutil/with-events test-events
       (binding [html/*page-path* "/settings-page-url"
-                user/get-users fake-get-users
-                config/env {:now #(Instant/now)}]
+                user/get-users fake-get-users]
         (testutil/with-user-id user-id
 
           (testing "save successful: redirects to same page"
@@ -294,8 +292,7 @@
                  :params {:user-id (str new-user-id)}}]
     (testutil/with-events test-events
       (binding [html/*page-path* "/settings-page-url"
-                user/get-users fake-get-users
-                config/env {:now #(Instant/now)}]
+                user/get-users fake-get-users]
         (testutil/with-user-id user-id
 
           (testing "add successful: highlights the added user"
@@ -348,8 +345,7 @@
         request {:path-params {:congregation cong-id}
                  :params {:user-id (str other-user-id)}}]
     (testutil/with-events test-events
-      (binding [html/*page-path* "/settings-page-url"
-                config/env {:now #(Instant/now)}]
+      (binding [html/*page-path* "/settings-page-url"]
         (testutil/with-user-id current-user-id
 
           (testing "removes the user and refreshes the users list"

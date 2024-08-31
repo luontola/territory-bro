@@ -16,8 +16,7 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.territory-page :as territory-page])
-  (:import (java.time Instant)
-           (java.util UUID)))
+  (:import (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
 (def territory-id (UUID. 0 2))
@@ -140,8 +139,7 @@
                                :territory territory-id}
                  :params {:do-not-calls "the new value"}}]
     (testutil/with-events test-events
-      (binding [config/env {:now #(Instant/now)}
-                do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
+      (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
         (testutil/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]
 
@@ -175,8 +173,7 @@
   (let [request {:path-params {:congregation cong-id
                                :territory territory-id}}]
     (testutil/with-events test-events
-      (binding [config/env {:now #(Instant/now)}
-                share/generate-share-key (constantly "abcxyz")]
+      (binding [share/generate-share-key (constantly "abcxyz")]
         (testutil/with-user-id user-id
           (with-fixtures [fake-dispatcher-fixture]
 
