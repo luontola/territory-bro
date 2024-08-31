@@ -38,6 +38,7 @@
           <entry key="territory-bro.test.testutil/with-anonymous-user" value="0" />
           <entry key="territory-bro.test.testutil/with-events" value="1" />
           <entry key="territory-bro.test.testutil/with-request-state" value="1" />
+          <entry key="territory-bro.test.testutil/with-super-user" value="0" />
           <entry key="territory-bro.test.testutil/with-user-id" value="1" />
         </map>
       </option>

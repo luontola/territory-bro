@@ -181,9 +181,17 @@
           (dissoc :congregation/schema-name))
       congregation)))
 
+(def ^:private permits->congregations
+  (let [permits->cong-ids (comp (map (fn [[_ cong-id]] cong-id))
+                                (filter #(not= "demo" %))) ; everybody has demo permissions by default
+        cong-ids->congregations (comp (map #(congregation/get-unrestricted-congregation *state* %))
+                                      (map filter-congregation))]
+    (comp permits->cong-ids
+          cong-ids->congregations)))
+
 (defn list-congregations []
-  (->> (congregation/get-my-congregations *state* (auth/current-user-id))
-       (mapv filter-congregation)
+  (->> (permissions/match *state* (auth/current-user-id) [:view-congregation '*])
+       (into [] permits->congregations)
        (util/natural-sort-by :congregation/name)))
 
 

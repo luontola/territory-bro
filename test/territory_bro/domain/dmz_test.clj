@@ -154,6 +154,10 @@
       (testing "full permissions"
         (is (= expected (dmz/get-congregation cong-id)))))
 
+    (testutil/with-super-user
+      (testing "super user"
+        (is (= expected (dmz/get-congregation cong-id)))))
+
     (testutil/with-user-id (UUID. 0 0x666)
       (testing "no permissions"
         (is (thrown-match? ExceptionInfo access-denied
@@ -181,6 +185,10 @@
 
     (testutil/with-user-id user-id
       (testing "full permissions"
+        (is (= expected (dmz/list-congregations)))))
+
+    (testutil/with-super-user
+      (testing "super user"
         (is (= expected (dmz/list-congregations)))))
 
     (testutil/with-user-id (UUID. 0 0x666)
@@ -221,6 +229,10 @@
         (testing "full permissions"
           (is (= expected (dmz/list-congregation-users cong-id)))))
 
+      (testutil/with-super-user
+        (testing "super user"
+          (is (= expected (dmz/list-congregation-users cong-id)))))
+
       (testutil/with-user-id (UUID. 0 0x666)
         (testing "no permissions"
           (is (empty? (dmz/list-congregation-users cong-id)))))
@@ -254,6 +266,11 @@
         (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:gis-access cong-id])]
           (is (thrown-match? ExceptionInfo access-denied
                              (dmz/download-qgis-project cong-id))))))
+
+    (testutil/with-super-user
+      (testing "super user"
+        (is (thrown-match? ExceptionInfo access-denied
+                           (dmz/download-qgis-project cong-id)))))
 
     (testutil/with-user-id (UUID. 0 0x666)
       (testing "no permissions"
@@ -298,6 +315,10 @@
       (testing "full permissions"
         (is (= expected (dmz/get-territory cong-id territory-id)))))
 
+    (testutil/with-super-user
+      (testing "super user"
+        (is (= expected (dmz/get-territory cong-id territory-id)))))
+
     (testutil/with-user-id (UUID. 0 0x666)
       (testing "no permissions"
         (is (thrown-match? ExceptionInfo access-denied
@@ -322,6 +343,10 @@
     (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
       (testutil/with-user-id user-id
         (testing "full permissions"
+          (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))
+
+      (testutil/with-super-user
+        (testing "super user"
           (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))
 
       (testutil/with-user-id (UUID. 0 0x666)
@@ -356,6 +381,10 @@
 
     (testutil/with-user-id user-id
       (testing "full permissions"
+        (is (= expected (dmz/list-territories cong-id)))))
+
+    (testutil/with-super-user
+      (testing "super user"
         (is (= expected (dmz/list-territories cong-id)))))
 
     (testutil/with-user-id (UUID. 0 0x666)
@@ -394,6 +423,10 @@
                                               "456,FALSE,8\n"))]
       (testutil/with-user-id user-id
         (testing "full permissions"
+          (is (= expected (dmz/enrich-territory-loans cong-id territories)))))
+
+      (testutil/with-super-user
+        (testing "super user"
           (is (= expected (dmz/enrich-territory-loans cong-id territories)))))
 
       (testutil/with-user-id (UUID. 0 0x666)
@@ -441,6 +474,11 @@
           (is (thrown-match? ExceptionInfo access-denied
                              (dmz/share-territory-link cong-id territory-id))))))
 
+    (testutil/with-super-user
+      (testing "super user"
+        (is (thrown-match? ExceptionInfo access-denied
+                           (dmz/share-territory-link cong-id territory-id)))))
+
     (testutil/with-user-id (UUID. 0 0x666)
       (testing "no permissions"
         (is (thrown-match? ExceptionInfo access-denied
@@ -478,6 +516,11 @@
         (binding [dmz/*state* (permissions/revoke dmz/*state* user-id [:share-territory-link cong-id])]
           (is (thrown-match? ExceptionInfo access-denied
                              (dmz/generate-qr-code cong-id territory-id))))))
+
+    (testutil/with-super-user
+      (testing "super user"
+        (is (thrown-match? ExceptionInfo access-denied
+                           (dmz/generate-qr-code cong-id territory-id)))))
 
     (testutil/with-user-id (UUID. 0 0x666)
       (testing "no permissions"
@@ -535,6 +578,10 @@
       (testing "full permissions"
         (is (= expected (dmz/get-congregation-boundary cong-id)))))
 
+    (testutil/with-super-user
+      (testing "super user"
+        (is (= expected (dmz/get-congregation-boundary cong-id)))))
+
     (testutil/with-user-id (UUID. 0 0x666)
       (testing "no permissions"
         (is (nil? (dmz/get-congregation-boundary cong-id)))))
@@ -560,6 +607,10 @@
       (testing "full permissions"
         (is (= expected (dmz/list-regions cong-id)))))
 
+    (testutil/with-super-user
+      (testing "super user"
+        (is (= expected (dmz/list-regions cong-id)))))
+
     (testutil/with-user-id (UUID. 0 0x666)
       (testing "no permissions"
         (is (nil? (dmz/list-regions cong-id)))))
@@ -582,6 +633,10 @@
 
     (testutil/with-user-id user-id
       (testing "full permissions"
+        (is (= expected (dmz/list-card-minimap-viewports cong-id)))))
+
+    (testutil/with-super-user
+      (testing "super user"
         (is (= expected (dmz/list-card-minimap-viewports cong-id)))))
 
     (testutil/with-user-id (UUID. 0 0x666)

@@ -44,26 +44,22 @@
               expected (-> expected
                            (assoc-in [::congregation/congregations cong-id :congregation/user-permissions user-id]
                                      #{:view-congregation})
-                           (assoc-in [::congregation/user->cong-ids user-id]
-                                     #{cong-id})
                            (assoc-in [::permissions/permissions user-id cong-id]
                                      {:view-congregation true}))]
           (is (= expected (apply-events events)))
 
-          (testing "> view permissing revoked"
+          (testing "> view permission revoked"
             (let [events (conj events {:event/type :congregation.event/permission-revoked
                                        :congregation/id cong-id
                                        :user/id user-id
                                        :permission/id :view-congregation})
                   expected (-> expected
-                               (assoc-in [::congregation/user->cong-ids user-id]
-                                         #{})
                                (assoc-in [::congregation/congregations cong-id :congregation/user-permissions]
                                          {})
                                (dissoc ::permissions/permissions))]
               (is (= expected (apply-events events)))))
 
-          (testing "> other permission granted"
+          (testing "> another permission granted"
             (let [events (conj events {:event/type :congregation.event/permission-granted
                                        :congregation/id cong-id
                                        :user/id user-id
@@ -77,7 +73,7 @@
                                           :configure-congregation true}))]
               (is (= expected (apply-events events)))
 
-              (testing "> other permissing revoked"
+              (testing "> another permission revoked"
                 (let [events (conj events {:event/type :congregation.event/permission-revoked
                                            :congregation/id cong-id
                                            :user/id user-id
@@ -112,22 +108,23 @@
         state (apply-events events)]
 
     (testing "cannot see congregations by default"
-      (is (nil? (congregation/get-my-congregation state cong-id user-id)))
-      (is (empty? (congregation/get-my-congregations state user-id))))
+      (is (not (permissions/allowed? state user-id [:view-congregation cong-id])))
+      (is (not (permissions/allowed? state user-id [:view-congregation unrelated-cong-id]))
+          "unrelated congregation"))
 
     (let [events (conj events {:event/type :congregation.event/permission-granted
                                :congregation/id cong-id
                                :user/id user-id
                                :permission/id :view-congregation})
           state (apply-events events)]
-      (testing "can see congregations after granting access"
-        (is (= cong-id (:congregation/id (congregation/get-my-congregation state cong-id user-id))))
-        (is (= [cong-id] (->> (congregation/get-my-congregations state user-id)
-                              (map :congregation/id)))))
-
-      (testing "list users"
+      (testing "user was added to congregation"
         (is (= [user-id] (congregation/get-users state cong-id)))
         (is (empty? (congregation/get-users state unrelated-cong-id))
+            "unrelated congregation"))
+
+      (testing "can see congregation after granting access"
+        (is (permissions/allowed? state user-id [:view-congregation cong-id]))
+        (is (not (permissions/allowed? state user-id [:view-congregation unrelated-cong-id]))
             "unrelated congregation"))
 
       (let [events (conj events {:event/type :congregation.event/permission-revoked
@@ -135,21 +132,21 @@
                                  :user/id user-id
                                  :permission/id :view-congregation})
             state (apply-events events)]
-        (testing "cannot see congregations after revoking access"
-          (is (nil? (congregation/get-my-congregation state cong-id user-id)))
-          (is (empty? (congregation/get-my-congregations state user-id))))
-
-        (testing "list users"
+        (testing "user was removed from congregation"
           (is (empty? (congregation/get-users state cong-id)))
           (is (empty? (congregation/get-users state unrelated-cong-id))
+              "unrelated congregation"))
+
+        (testing "cannot see congregation after revoking access"
+          (is (not (permissions/allowed? state user-id [:view-congregation cong-id])))
+          (is (not (permissions/allowed? state user-id [:view-congregation unrelated-cong-id]))
               "unrelated congregation"))))
 
-    (testing "superadmin can access all congregations"
+    (testing "super user can view and configure all congregations"
       (let [state (congregation/sudo state user-id)]
-        (is (= #{cong-id unrelated-cong-id}
-               (->> (congregation/get-my-congregations state user-id)
-                    (map :congregation/id)
-                    (set))))))))
+        (is (= #{:view-congregation :configure-congregation}
+               (permissions/list-permissions state user-id [cong-id])
+               (permissions/list-permissions state user-id [unrelated-cong-id])))))))
 
 (deftest check-congregation-exists-test
   (let [cong-id (UUID. 0 1)

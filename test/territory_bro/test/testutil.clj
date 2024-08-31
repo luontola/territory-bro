@@ -10,7 +10,8 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.foreign-key :as foreign-key]
             [territory-bro.projections :as projections])
-  (:import (java.util.regex Pattern)))
+  (:import (java.util UUID)
+           (java.util.regex Pattern)))
 
 ;; these can be required to avoid IDE warnings about the built-in clojure.test/is macro special forms
 (declare ^{:arglists '([exception-class body])}
@@ -87,4 +88,9 @@
 (defmacro with-anonymous-user [& body]
   `(auth/with-anonymous-user
      (with-request-state nil
+       ~@body)))
+
+(defmacro with-super-user [& body]
+  `(with-user-id (UUID/randomUUID)
+     (with-request-state {:session {::dmz/sudo? true}}
        ~@body)))
