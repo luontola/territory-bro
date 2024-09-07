@@ -8,7 +8,8 @@
             [ring.mock.request :as mock]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
-            [territory-bro.infra.middleware :as middleware]))
+            [territory-bro.infra.middleware :as middleware])
+  (:import (java.time Duration)))
 
 (deftest wrap-compressed-resources-test
   (let [handler (-> (constantly ::handler-response)
@@ -74,7 +75,8 @@
     (let [handler (-> (constantly (http-response/ok ""))
                       middleware/wrap-cache-control)]
       (is (= {:status 200
-              :headers {"Cache-Control" "public, max-age=3600, stale-while-revalidate=86400"}
+              :headers {"Cache-Control" (str "public, max-age=" (.toSeconds (Duration/ofHours 1))
+                                             ", stale-while-revalidate=" (.toSeconds (Duration/ofHours 24)))}
               :body ""}
              (handler (mock/request :get "/favicon.ico"))
              (handler (mock/request :get "/assets/style.css"))))))
@@ -83,7 +85,7 @@
     (let [handler (-> (constantly (http-response/ok ""))
                       middleware/wrap-cache-control)]
       (is (= {:status 200
-              :headers {"Cache-Control" "public, max-age=2592000, immutable"}
+              :headers {"Cache-Control" (str "public, max-age=" (.toSeconds (Duration/ofDays 365)) ", immutable")}
               :body ""}
              (handler (mock/request :get "/assets/style-4da573e6.css"))
              (handler (mock/request :get "/assets/image-28ead48996a4ca92f07ee100313e57355dbbcbf2.svg"))))))

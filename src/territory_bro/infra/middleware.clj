@@ -117,8 +117,8 @@
                          (if (and (= 200 (:status response))
                                   (static-asset? path))
                            (if (content-hashed? path)
-                             "public, max-age=2592000, immutable"
-                             "public, max-age=3600, stale-while-revalidate=86400")
+                             "public, max-age=31536000, immutable" ; max-age=365d
+                             "public, max-age=3600, stale-while-revalidate=86400") ; max-age=1h, stale-while-revalidate=24h
                            "private, no-cache"))))))
 
 (defn wrap-base [handler]
