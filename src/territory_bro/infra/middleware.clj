@@ -45,8 +45,7 @@
         (throw (util/fix-sqlexception-chain t))))))
 
 (defn wrap-formats [handler]
-  ;; TODO: is this needed or is liberator self-sufficient?
-  (wrap-restful-format handler {:formats [:json-kw :transit-json :transit-msgpack]}))
+  (wrap-restful-format handler {:formats [:json-kw]}))
 
 (defn wrap-default-content-type [handler]
   ;; Chrome gives an ERR_INVALID_RESPONSE error about 4xx pages

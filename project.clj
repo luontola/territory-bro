@@ -7,22 +7,18 @@
   :description "Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses."
   :url "https://territorybro.com"
 
-  :dependencies [[camel-snake-kebab "0.4.3"]
-                 [ch.qos.logback/logback-classic "1.5.6"]
+  :dependencies [[ch.qos.logback/logback-classic "1.5.6"]
                  [ch.qos.logback/logback-core "1.5.6"]
-                 [clj-http "3.13.0"]
                  [com.attendify/schema-refined "0.3.0-alpha4"]
                  [com.auth0/java-jwt "4.4.0"]
                  [com.auth0/jwks-rsa "0.22.1"]
                  [com.auth0/mvc-auth-commons "1.11.0"]
                  [com.layerware/hugsql "0.5.3"]
-                 [compojure "1.7.1"]
                  [cprop "0.1.20"]
                  [enlive "1.1.6"]
                  [hiccup "2.0.0-RC3"]
                  [hikari-cp "3.1.0"]
                  [io.nayuki/qrcodegen "1.8.0"]
-                 [liberator "0.15.3"]
                  [medley "1.4.0"]
                  [metosin/jsonista "0.3.9"]
                  [metosin/reitit "0.7.1"]
@@ -33,7 +29,6 @@
                  [net.grey-panther/natural-comparator "1.1"]
                  [net.iakovlev/timeshape "2023b.21"]
                  [org.apache.commons/commons-lang3 "3.14.0"]
-                 [org.clojars.luontola/ns-tracker "0.3.1-patch1"]
                  [org.clojure/clojure "1.12.0-beta1"]
                  [org.clojure/data.csv "1.1.0"]
                  [org.clojure/tools.logging "1.3.0"] ; TODO: find out what logging framework we use, move to SLF4J if necessary, preferably something that logs ex-data by default (avoid Timbre, it has a bad track record of slow updates)
@@ -67,10 +62,10 @@
                          [org.jetbrains.kotlin/kotlin-stdlib "2.0.0"]
                          [org.jetbrains.kotlin/kotlin-stdlib-jdk8 "2.0.0"]
                          [org.slf4j/slf4j-api "2.0.13"]
+                         [potemkin "0.4.7"]
                          [ring/ring-codec "1.2.0"]
                          [ring/ring-core "1.12.2"]
                          [seancorfield/next.jdbc "1.2.659"]]
-  :exclusions [ns-tracker]
   :pedantic? :warn
   :min-lein-version "2.9.0"
 
@@ -97,7 +92,7 @@
                        :aot :all
                        :uberjar-name "territory-bro.jar"}
 
-             :dev {:dependencies [[com.github.kyleburton/clj-xpath "1.4.13"]
+             :dev {:dependencies [[clj-http "3.13.0"]
                                   [criterium "0.4.6"]
                                   [etaoin "1.1.41"]
                                   [lambdaisland/kaocha "1.91.1392"]
