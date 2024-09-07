@@ -38,6 +38,12 @@ export default defineConfig(({command}) => ({
     outDir: "../target/web-dist/public",
     emptyOutDir: true,
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        entryFileNames: "assets/[name].[hash].js",
+        assetFileNames: "assets/[name].[hash][extname]",
+      },
+    },
   },
   css: {
     modules: {

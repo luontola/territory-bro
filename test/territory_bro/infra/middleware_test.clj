@@ -71,24 +71,36 @@
              (handler (mock/request :get "/"))
              (handler (mock/request :get "/some/page"))))))
 
-  (testing "static assets are cached for one hour"
-    (let [handler (-> (constantly (http-response/ok ""))
-                      middleware/wrap-cache-control)]
-      (is (= {:status 200
-              :headers {"Cache-Control" (str "public, max-age=" (.toSeconds (Duration/ofHours 1))
-                                             ", stale-while-revalidate=" (.toSeconds (Duration/ofHours 24)))}
-              :body ""}
-             (handler (mock/request :get "/favicon.ico"))
-             (handler (mock/request :get "/assets/style.css"))))))
+  (let [cache-for-1-hour (str "public, max-age=" (.toSeconds (Duration/ofHours 1))
+                              ", stale-while-revalidate=" (.toSeconds (Duration/ofHours 24)))
+        cache-indefinitely (str "public, max-age=" (.toSeconds (Duration/ofDays 365)) ", immutable")]
+    (testing "static assets are cached for one hour"
+      (let [handler (-> (constantly (http-response/ok ""))
+                        middleware/wrap-cache-control)]
+        (is (= {:status 200
+                :headers {"Cache-Control" cache-for-1-hour}
+                :body ""}
+               (handler (mock/request :get "/favicon.ico"))
+               (handler (mock/request :get "/assets/style.css"))))))
 
-  (testing "static assets with a content hash are cached indefinitely"
-    (let [handler (-> (constantly (http-response/ok ""))
-                      middleware/wrap-cache-control)]
-      (is (= {:status 200
-              :headers {"Cache-Control" (str "public, max-age=" (.toSeconds (Duration/ofDays 365)) ", immutable")}
-              :body ""}
-             (handler (mock/request :get "/assets/style-4da573e6.css"))
-             (handler (mock/request :get "/assets/image-28ead48996a4ca92f07ee100313e57355dbbcbf2.svg"))))))
+    (testing "static assets with a content hash are cached indefinitely"
+      (let [handler (-> (constantly (http-response/ok ""))
+                        middleware/wrap-cache-control)]
+        (is (= {:status 200
+                :headers {"Cache-Control" cache-indefinitely}
+                :body ""}
+               (handler (mock/request :get "/assets/style.4da573e6.css"))
+               (handler (mock/request :get "/assets/image.28ead48996a4ca92f07ee100313e57355dbbcbf2.svg"))))))
+
+    (testing "content-hashed filename format tries to avoid conflicts with real words"
+      (let [handler (-> (constantly (http-response/ok ""))
+                        middleware/wrap-cache-control)]
+        (is (= {:status 200
+                :headers {"Cache-Control" cache-for-1-hour}
+                :body ""}
+               ;; Using "." as the content hash separator is better than using "-",
+               ;; which is also used as a word separator and can be ambiguous.
+               (handler (mock/request :get "/assets/style-cafebabe.css")))))))
 
   (testing "error responses are not cached"
     (let [handler (-> (constantly (http-response/not-found ""))
@@ -98,7 +110,7 @@
               :body ""}
              (handler (mock/request :get "/some/page"))
              (handler (mock/request :get "/assets/style.css"))
-             (handler (mock/request :get "/assets/style-4da573e6.css")))))))
+             (handler (mock/request :get "/assets/style.4da573e6.css")))))))
 
 (deftest error-reporting-test
   (let [simplify (fn [response]

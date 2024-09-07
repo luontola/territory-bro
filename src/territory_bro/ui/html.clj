@@ -107,12 +107,14 @@
       (binding [*page-path* page-path]
         (handler request)))))
 
+(def content-hashed-filename #"\.[0-9a-f]{8,40}\.(\w+)$")
+
 (def public-resources
   (let [reflections (Reflections. "public" (into-array [Scanners/Resources]))]
     (->> (.getResources reflections #".*")
          (map (fn [resource-path]
                 (let [url (str/replace resource-path #"^public/" "/") ; resource path -> absolute URL
-                      wildcard-url (str/replace url #"-[0-9a-f]{8}\." "-*.")] ; mapping for content-hashed filenames
+                      wildcard-url (str/replace url content-hashed-filename ".*.$1")] ; "file.hash.ext" -> "file.*.ext"
                   [wildcard-url url])))
          (into {}))))
 

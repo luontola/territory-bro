@@ -11,7 +11,7 @@
 
 (defn crop-marks [content]
   (let [styles (:CropMarks (css/modules))
-        image (h/html [:img {:src (get html/public-resources "/assets/crop-mark-*.svg")
+        image (h/html [:img {:src (get html/public-resources "/assets/crop-mark.*.svg")
                              :alt ""}])]
     (h/html
      [:div {:class (:root styles)}

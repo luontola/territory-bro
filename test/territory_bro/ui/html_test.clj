@@ -91,7 +91,7 @@
     (is (= "/index.html" (get html/public-resources "/index.html"))))
 
   (testing "content-hashed files are mapped using a wildcard"
-    (let [path (get html/public-resources "/assets/crop-mark-*.svg")]
+    (let [path (get html/public-resources "/assets/crop-mark.*.svg")]
       (is (some? path))
       (is (some? (io/resource (str "public" path)))))))
 

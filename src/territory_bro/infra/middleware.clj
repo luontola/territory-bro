@@ -20,6 +20,7 @@
             [territory-bro.infra.util :as util]
             [territory-bro.projections :as projections]
             [territory-bro.ui.error-page :as error-page]
+            [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n])
   (:import (java.time Duration)))
 
@@ -105,7 +106,7 @@
       (= "/favicon.ico" path)))
 
 (defn- content-hashed? [path]
-  (some? (re-find #"-[0-9a-f]{8,40}\.\w+$" path)))
+  (some? (re-find html/content-hashed-filename path)))
 
 (defn wrap-cache-control [handler]
   (fn [request]
