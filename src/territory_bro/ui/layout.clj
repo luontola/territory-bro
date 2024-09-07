@@ -181,7 +181,12 @@
                         (not= "Territory Bro" title))
                (str title " - "))
              "Territory Bro"]
-            [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+            [:meta {:name "viewport"
+                    :content "width=device-width, initial-scale=1"}]
+            [:link {:rel "stylesheet"
+                    :href "https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
+                    :crossorigin "anonymous"
+                    :referrerpolicy "no-referrer"}]
             (head-injections)]
            [:body {:hx-headers (html/anti-forgery-headers-json)}
             [:nav.no-print {:class (:navbar styles)}
