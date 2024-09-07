@@ -22,11 +22,8 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
-    "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "@typescript-eslint/parser": "^7.16.1",
     "chai": "^5.1.1",
     "crypto-js": "^4.2.0",
-    "eslint": "^8.56.0",
     "jsdom": "^24.1.0",
     "npm-check-updates": "^16.14.20",
     "typescript": "^5.5.3",
@@ -50,7 +47,7 @@
     "autobuild": "vite build --watch",
     "server-export": "vite-node web/src/server-export.ts",
     "analyze": "vite-bundle-visualizer --sourcemap",
-    "lint": "tsc && eslint . --ext ts --report-unused-disable-directives --max-warnings 0",
+    "lint": "tsc",
     "browserslist": "browserslist",
     "outdated": "npm-check-updates",
     "upgrade": "npm-check-updates --interactive"
