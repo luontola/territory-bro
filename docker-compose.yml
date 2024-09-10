@@ -30,15 +30,18 @@ services:
   # https://github.com/postgis/docker-postgis/pull/356
   # https://hub.docker.com/r/imresamu/postgis/tags
   db:
-    image: imresamu/postgis:13-3.4
+    image: imresamu/postgis:16-3.4
     environment:
       POSTGRES_USER: territorybro
       POSTGRES_PASSWORD: territorybro
     volumes:
       - postgres-storage:/var/lib/postgresql/data
       - ./postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql
+    # Shared memory limit 128MB as recommended in https://registry.hub.docker.com/_/postgres
+    # and matching the default shared_buffers in https://www.postgresql.org/docs/current/runtime-config-resource.html#RUNTIME-CONFIG-RESOURCE-MEMORY
+    shm_size: 128mb
+    # Not setting mem_limit, to avoid Docker killing the process unnecessarily
     mem_reservation: 250m
-    mem_limit: 500m
     ports:
       - "127.0.0.1:5432:5432"
 

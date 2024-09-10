@@ -27,13 +27,13 @@
 (deftest check-database-version-test
   (let [current-version db/expected-postgresql-version]
     (is (nil? (db/check-database-version (dec current-version)))
-        "newer than expected")
+        "allow newer than expected")
     (is (nil? (db/check-database-version current-version))
-        "same as expected")
+        "allow same as expected")
     (is (thrown-with-msg?
-         AssertionError (re-contains "Expected the database to be PostgreSQL 14 but it was PostgreSQL 13")
+         AssertionError (re-contains "Expected the database to be PostgreSQL 17 but it was PostgreSQL 16")
          (db/check-database-version (inc current-version)))
-        "older than expected")))
+        "error if older than expected")))
 
 (deftest sql-type-conversions-test
   (db/with-db [conn {:read-only? true}]

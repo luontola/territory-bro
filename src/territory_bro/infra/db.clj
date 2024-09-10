@@ -25,7 +25,7 @@
            (org.flywaydb.core.api FlywayException)
            (org.postgresql.util PGobject)))
 
-(def expected-postgresql-version 13)
+(def expected-postgresql-version 16)
 (def ^:dynamic *explain* false)
 
 ;; PostgreSQL error codes
