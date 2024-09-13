@@ -264,7 +264,25 @@
             (is (every? #(str/starts-with? % "<svg")
                         (->> (repeat 10 #(handler request))
                              (mapv future-call)
-                             (mapv deref))))))))))
+                             (mapv deref)))))
+
+          (testing "in the unlikely event of a duplicate share key, the database will guarantee for uniqueness"
+            (let [internal-server-error {:type :ring.util.http-response/response
+                                         :response {:status 500
+                                                    :body "Internal Server Error"
+                                                    :headers {}}}
+                  create-dupe (dmz/wrap-db-connection
+                               (fn [_]
+                                 (dmz/dispatch! {:command/type :share.command/create-share
+                                                 :share/id (UUID/randomUUID)
+                                                 :share/key "dupe"
+                                                 :share/type :link
+                                                 :congregation/id cong-id
+                                                 :territory/id territory-id})))]
+              (create-dupe nil)
+              ;; TODO: check that the database error message mentions the event_share_key_u index
+              (is (thrown-match? ExceptionInfo internal-server-error
+                                 (create-dupe nil))))))))))
 
 (deftest routes-test
   (let [handler (ring/ring-handler (ring/router printouts-page/routes))
