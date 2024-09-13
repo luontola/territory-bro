@@ -19,11 +19,27 @@ import {defaults as interactionDefaults} from "ol/interaction";
 import DragPan from "ol/interaction/DragPan";
 import MouseWheelZoom from "ol/interaction/MouseWheelZoom";
 import {platformModifierKeyOnly} from "ol/events/condition";
-import {fromLonLat} from "ol/proj";
+import {fromLonLat, Projection} from "ol/proj";
 import ResetZoom from "./ResetZoom.ts";
 import ShowMyLocation from "./ShowMyLocation.ts";
 import i18n from "../i18n.ts";
 import Geolocation from "ol/Geolocation";
+import proj4 from 'proj4';
+import {register} from 'ol/proj/proj4';
+
+proj4.defs(
+  'EPSG:3067',
+  '+proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs',
+);
+register(proj4);
+
+const WEB_MERCATOR = 'EPSG:3857'; // OpenLayers default projection
+const WGS84 = 'EPSG:4326'; // used in GPS
+const EPSG3067 = new Projection({
+  code: 'EPSG:3067',
+  extent: [-548576, 6291456, 1548576, 8388608],
+  units: 'm'
+});
 
 export type LocationOnly = {
   location: string | null;
@@ -71,6 +87,17 @@ export const mapRasters: MapRaster[] = [{
     transition,
   })
 }, {
+  id: 'mmlTaustakartta3067',
+  name: "Finland - Maanmittauslaitoksen taustakarttasarja (backup)",
+  makeSource: () => new XYZ({
+    url: 'https://tiles.kartat.kapsi.fi/taustakartta_3067/{z}/{x}/{y}.jpg',
+    projection: EPSG3067,
+    tileSize: [128, 128],
+    tilePixelRatio: 2,
+    attributions: '&copy; Maanmittauslaitos',
+    transition,
+  })
+}, {
   id: 'vantaaKaupunkikartta',
   name: "Finland - Vantaan kaupunkikartta",
   makeSource: () => new TileWMS({
@@ -93,7 +120,7 @@ export function findMapRasterById(mapRasterId: string) {
 
 export function wktToFeature(wkt: string): Feature {
   const feature = new WKT().readFeature(wkt);
-  feature.getGeometry()!.transform('EPSG:4326', 'EPSG:3857');
+  feature.getGeometry()!.transform(WGS84, WEB_MERCATOR);
   return feature;
 }
 

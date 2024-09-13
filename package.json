@@ -18,6 +18,7 @@
     "idiomorph": "^0.3.0",
     "lodash-es": "^4.17.21",
     "ol": "^10.1.0",
+    "proj4": "^2.12.1",
     "purecss": "^3.0.0"
   },
   "devDependencies": {
