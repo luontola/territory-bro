@@ -22,7 +22,6 @@ import {platformModifierKeyOnly} from "ol/events/condition";
 import {fromLonLat} from "ol/proj";
 import ResetZoom from "./ResetZoom.ts";
 import ShowMyLocation from "./ShowMyLocation.ts";
-import {createXYZ} from "ol/tilegrid";
 import i18n from "../i18n.ts";
 import Geolocation from "ol/Geolocation";
 
@@ -50,8 +49,8 @@ export const mapRasters: MapRaster[] = [{
   name: "World - OpenStreetMap (RRZE server, high DPI)",
   makeSource: () => new XYZ({
     url: 'https://{a-c}.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
-    tileSize: [512, 512],
-    tileGrid: createXYZ({tileSize: [256, 256]}),
+    tileSize: [256, 256],
+    tilePixelRatio: 2,
     attributions: OSM_ATTRIBUTION,
     transition,
   })
@@ -66,8 +65,8 @@ export const mapRasters: MapRaster[] = [{
   name: "Finland - Maanmittauslaitoksen taustakarttasarja",
   makeSource: () => new XYZ({
     url: 'https://tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
-    tileSize: [256, 256],
-    tileGrid: createXYZ({tileSize: [128, 128]}),
+    tileSize: [128, 128],
+    tilePixelRatio: 2,
     attributions: '&copy; Maanmittauslaitos',
     transition,
   })
