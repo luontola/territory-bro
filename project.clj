@@ -13,6 +13,7 @@
                  [com.auth0/java-jwt "4.4.0"]
                  [com.auth0/jwks-rsa "0.22.1"]
                  [com.auth0/mvc-auth-commons "1.11.0"]
+                 [com.github.seancorfield/next.jdbc "1.3.939"]
                  [com.layerware/hugsql "0.5.3"]
                  [cprop "0.1.20"]
                  [enlive "1.1.6"]
@@ -20,7 +21,7 @@
                  [hikari-cp "3.1.0"]
                  [io.nayuki/qrcodegen "1.8.0"]
                  [medley "1.4.0"]
-                 [metosin/jsonista "0.3.10"]
+                 [metosin/jsonista "0.3.11"]
                  [metosin/reitit "0.7.2"]
                  [metosin/ring-http-response "0.9.4"]
                  [metosin/ring-middleware-format "0.6.0"] ; TODO: replace with newer library
@@ -32,8 +33,8 @@
                  [org.clojure/clojure "1.12.0"]
                  [org.clojure/data.csv "1.1.0"]
                  [org.clojure/tools.logging "1.3.0"] ; TODO: find out what logging framework we use, move to SLF4J if necessary, preferably something that logs ex-data by default (avoid Timbre, it has a bad track record of slow updates)
-                 [org.flywaydb/flyway-core "10.17.3"]
-                 [org.flywaydb/flyway-database-postgresql "10.17.3"]
+                 [org.flywaydb/flyway-core "10.18.0"]
+                 [org.flywaydb/flyway-database-postgresql "10.18.0"]
                  [org.locationtech.jts/jts-core "1.20.0"]
                  [org.postgresql/postgresql "42.7.4"]
                  [org.reflections/reflections "0.10.2"]
@@ -52,7 +53,7 @@
                          [com.fasterxml.jackson.datatype/jackson-datatype-json-org "2.17.2"]
                          [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.17.2"]
                          [commons-codec "1.17.1"]
-                         [commons-io "2.16.1"]
+                         [commons-io "2.17.0"]
                          [org.clojure/core.rrb-vector "0.2.0"]
                          [org.clojure/java.classpath "1.1.0"]
                          [org.clojure/java.jdbc "0.7.12"]
@@ -64,8 +65,7 @@
                          [org.slf4j/slf4j-api "2.0.16"]
                          [potemkin "0.4.7"]
                          [ring/ring-codec "1.2.0"]
-                         [ring/ring-core "1.12.2"]
-                         [seancorfield/next.jdbc "1.2.659"]]
+                         [ring/ring-core "1.12.2"]]
   :pedantic? :warn
   :min-lein-version "2.9.0"
 
