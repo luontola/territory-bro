@@ -77,6 +77,15 @@
         (refresh-projections!))
       response)))
 
+(defn wrap-wait-reload [handler]
+  (fn [request]
+    (when (nil? (projections/cached-state))
+      ;; When wrap-reload detects code changes and reloads the code,
+      ;; it typically will restart and clear the projection cache state.
+      ;; Wait for the projection to be refreshed to avoid errors on the
+      ;; first page load because of empty state.
+      (projections/await-refreshed (Duration/ofSeconds 30)))
+    (handler request)))
 
 (defn- find-compressed-resource [request root-path]
   (when-some [uncompressed (resource/resource-request request root-path)]
@@ -125,7 +134,8 @@
   (-> handler
       wrap-auto-refresh-projections
       (cond->
-        (:dev env) (wrap-reload {:dirs ["src" "resources"]}))
+        (:dev env) (-> (wrap-wait-reload)
+                       (wrap-reload {:dirs ["src" "resources"]})))
       wrap-sqlexception-chain
       wrap-http-response
       wrap-formats
