@@ -19,7 +19,7 @@
             [territory-bro.infra.util :refer [getx]])
   (:import (clojure.lang IPersistentMap IPersistentVector)
            (com.zaxxer.hikari HikariDataSource)
-           (java.net URL)
+           (java.net URI)
            (java.nio.file Paths)
            (java.sql Array Connection Date PreparedStatement Timestamp)
            (java.time Instant ZoneOffset)
@@ -264,14 +264,15 @@
 
 (defn- query! [conn queries-cache query-name params]
   (let [queries (queries-cache)
-        query-fn (get-in queries [:db-fns query-name :fn])]
-    (assert query-fn (str "Query not found: " query-name))
+        query-fn (or (get-in queries [:db-fns query-name :fn])
+                     (throw (IllegalArgumentException. (str "Query not found: " query-name))))]
     (when *explain*
-      (let [filename (.getFileName (Paths/get (.toURI ^URL (:resource queries))))
-            sqlvec-fn (get-in queries [:sqlvec-fns query-name :fn])
+      (let [query (get-in queries [:sqlvec-fns query-name])
+            filename (.getFileName (Paths/get (URI. (-> query :meta :file))))
+            sqlvec-fn (:fn query)
             [sql & params] (apply sqlvec-fn params)
             query-plan (explain-query conn sql params)]
-        (log/debug (str "SQL query " (name query-name) " in " filename ":\n"
+        (log/debug (str "Explain SQL query " (name query-name) " in " filename ":\n"
                         sql
                         (when (not (empty? params))
                           (str "\n-- Parameters:"
