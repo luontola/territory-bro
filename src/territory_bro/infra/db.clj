@@ -251,9 +251,13 @@
 (defn- explain-query [conn sql params]
   (execute-one! conn ["SAVEPOINT explain_analyze"])
   (try
-    ;; TODO: upgrade to PostgreSQL 12 and add SETTINGS to the options
-    (->> (execute! conn (cons (str "EXPLAIN (ANALYZE, VERBOSE, BUFFERS) " sql) params))
-         (map (keyword "query plan")))
+    (->> (execute! conn (cons (str "EXPLAIN (ANALYZE, VERBOSE, SETTINGS, WAL, BUFFERS"
+                                   (when (<= 17 expected-postgresql-version)
+                                     ", MEMORY")
+                                   ") "
+                                   sql)
+                              params))
+         (mapv (keyword "query plan")))
     (finally
       ;; ANALYZE will actually execute the query, so any side effects
       ;; must be rolled back to avoid executing them twice
