@@ -3,9 +3,9 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis.gis-sync
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :as log]
+  (:require [clojure.tools.logging :as log]
             [mount.core :as mount]
+            [next.jdbc :as jdbc]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.gis.gis-change :as gis-change]
             [territory-bro.gis.gis-db :as gis-db]
@@ -65,12 +65,11 @@
 
 
 (defn listen-for-gis-changes [notify]
-  (jdbc/with-db-connection [conn {:datasource db/datasource} {}]
+  (with-open [conn (jdbc/get-connection db/datasource)]
     (db/use-master-schema conn)
-    (jdbc/execute! conn ["LISTEN gis_change"])
+    (db/execute-one! conn ["LISTEN gis_change"])
     (let [timeout (Duration/ofSeconds 30)
-          ^PGConnection pg-conn (-> (jdbc/db-connection conn)
-                                    (.unwrap PGConnection))]
+          ^PGConnection pg-conn (.unwrap conn PGConnection)]
       (log/info "Started listening for GIS changes")
       (notify)
       (loop []

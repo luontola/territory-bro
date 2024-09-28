@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.event-store
-  (:require [clojure.java.jdbc :as jdbc]
-            [territory-bro.events :as events]
+  (:require [territory-bro.events :as events]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db])
   (:import (java.util UUID)
@@ -92,8 +91,8 @@
        (doall)))
 
 (defn stream-info [conn stream-id]
-  (first (jdbc/query conn ["select * from stream where stream_id = ?"
-                           stream-id])))
+  (db/execute-one! conn ["select * from stream where stream_id = ?"
+                         stream-id]))
 
 (comment
   (db/with-db [conn {:read-only? true}]

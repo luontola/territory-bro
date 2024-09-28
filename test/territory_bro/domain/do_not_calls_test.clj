@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns ^:slow territory-bro.domain.do-not-calls-test
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.test :refer :all]
+  (:require [clojure.test :refer :all]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.infra.db :as db]
             [territory-bro.test.fixtures :refer [db-fixture]]
@@ -19,8 +18,7 @@
 (def territory-id (UUID. 0 2))
 
 (deftest do-not-calls-test
-  (db/with-db [conn {}]
-    (jdbc/db-set-rollback-only! conn)
+  (db/with-db [conn {:rollback-only true}]
     (let [injections {:conn conn
                       :check-permit (fn [_permit])}
           state {}

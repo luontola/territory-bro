@@ -4,13 +4,15 @@
 
 (ns territory-bro.infra.db
   (:require [clojure.java.io :as io]
-            [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [hikari-cp.core :as hikari-cp]
-            [hugsql.adapter.clojure-java-jdbc] ; for hugsql.core/get-adapter to not crash on first usage
+            [hugsql.adapter.next-jdbc :as next-adapter]
             [hugsql.core :as hugsql]
             [mount.core :as mount]
+            [next.jdbc :as jdbc]
+            [next.jdbc.prepare :as prepare]
+            [next.jdbc.result-set :as result-set]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.json :as json]
             [territory-bro.infra.resources :as resources]
@@ -19,11 +21,22 @@
            (com.zaxxer.hikari HikariDataSource)
            (java.net URL)
            (java.nio.file Paths)
-           (java.sql Array Date PreparedStatement Timestamp)
-           (java.time Instant)
+           (java.sql Array Connection Date PreparedStatement Timestamp)
+           (java.time Instant ZoneOffset)
            (org.flywaydb.core Flyway)
            (org.flywaydb.core.api FlywayException)
+           (org.postgresql.jdbc PgResultSetMetaData)
            (org.postgresql.util PGobject)))
+
+(def jdbc-opts {:builder-fn result-set/as-unqualified-lower-maps})
+(hugsql/set-adapter! (next-adapter/hugsql-adapter-next-jdbc jdbc-opts))
+
+(defn execute! [connectable sql-params]
+  (jdbc/execute! connectable sql-params jdbc-opts))
+
+(defn execute-one! [connectable sql-params]
+  (jdbc/execute-one! connectable sql-params jdbc-opts))
+
 
 (def expected-postgresql-version 16)
 (def ^:dynamic *explain* false)
@@ -54,63 +67,72 @@
 (defn- array? [obj]
   (.isArray (class obj)))
 
-(defn- array-to-vec
-  "Converts multi-dimensional arrays to nested vectors."
+(defn- array->vector
+  "Converts multidimensional arrays to nested vectors."
   [obj]
   (if (array? obj)
-    (mapv array-to-vec obj)
+    (mapv array->vector obj)
     obj))
 
-(extend-protocol jdbc/IResultSetReadColumn
-  Date
-  (result-set-read-column [v _ _]
-    (.toLocalDate v))
+(defn- pg-json->clj [^PGobject val]
+  (let [type (.getType val)
+        value (.getValue val)]
+    (case type
+      "json" (json/read-value value)
+      "jsonb" (json/read-value value)
+      value)))
 
-  Timestamp
-  (result-set-read-column [v _ _]
-    (.toInstant v))
-
-  Array
-  (result-set-read-column [v _ _]
-    (array-to-vec (.getArray v)))
-
-  PGobject
-  (result-set-read-column [pgobj _metadata _index]
-    (let [type (.getType pgobj)
-          value (.getValue pgobj)]
-      (case type
-        "json" (json/read-value value)
-        "jsonb" (json/read-value value)
-        "citext" (str value)
-        value))))
-
-(extend-type Instant
-  jdbc/ISQLParameter
-  (set-parameter [v ^PreparedStatement stmt idx]
-    (.setTimestamp stmt idx (Timestamp/from v))))
-
-(defn to-pg-json [value]
+(defn clj->pg-json [value]
   (doto (PGobject.)
     (.setType "jsonb")
     (.setValue (json/write-value-as-string value))))
 
-(extend-type IPersistentVector
-  jdbc/ISQLParameter
-  (set-parameter [v ^PreparedStatement stmt ^long idx]
-    (let [conn (.getConnection stmt)
-          meta (.getParameterMetaData stmt)
-          type-name (.getParameterTypeName meta idx)]
-      (if-let [elem-type (when (= \_ (first type-name))
-                           (apply str (rest type-name)))]
-        (.setObject stmt idx (.createArrayOf conn elem-type (to-array v)))
-        (.setObject stmt idx (to-pg-json v))))))
+(extend-protocol result-set/ReadableColumn
+  Date
+  (read-column-by-index [val ^PgResultSetMetaData _rsmeta _idx]
+    (.toLocalDate val))
+  (read-column-by-label [val _label]
+    (result-set/read-column-by-index val nil nil))
 
-(extend-protocol jdbc/ISQLValue
+  Timestamp
+  (read-column-by-index [val ^PgResultSetMetaData _rsmeta _idx]
+    (.toInstant val))
+  (read-column-by-label [val _label]
+    (result-set/read-column-by-index val nil nil))
+
+  Array
+  (read-column-by-index [val ^PgResultSetMetaData _rsmeta _idx]
+    (array->vector (.getArray val)))
+  (read-column-by-label [val _label]
+    (result-set/read-column-by-index val nil nil))
+
+  PGobject
+  (read-column-by-index [val ^PgResultSetMetaData _rsmeta _idx]
+    (pg-json->clj val))
+  (read-column-by-label [val _label]
+    (result-set/read-column-by-index val nil nil)))
+
+(defn- pg-array-parameter-element-type [^PreparedStatement stmt idx]
+  (let [meta (.getParameterMetaData stmt)
+        type-name (.getParameterTypeName meta idx)]
+    (when (str/starts-with? type-name "_")
+      (subs type-name 1))))
+
+(extend-protocol prepare/SettableParameter
+  Instant
+  (set-parameter [val ^PreparedStatement stmt idx]
+    (.setObject stmt idx (.atOffset val ZoneOffset/UTC)))
+
   IPersistentMap
-  (sql-value [value] (to-pg-json value))
-  IPersistentVector
-  (sql-value [value] (to-pg-json value)))
+  (set-parameter [val ^PreparedStatement stmt idx]
+    (.setObject stmt idx (clj->pg-json val)))
 
+  IPersistentVector
+  (set-parameter [val ^PreparedStatement stmt idx]
+    (if-let [element-type (pg-array-parameter-element-type stmt idx)]
+      (.setObject stmt idx (-> (.getConnection stmt)
+                               (.createArrayOf element-type (to-array val))))
+      (.setObject stmt idx (clj->pg-json val)))))
 
 ;;;; Database schemas
 
@@ -157,7 +179,7 @@
       false)))
 
 (defn get-schemas [conn]
-  (->> (jdbc/query conn ["select schema_name from information_schema.schemata"])
+  (->> (execute! conn ["select schema_name from information_schema.schemata"])
        (map :schema_name)
        (doall)))
 
@@ -175,7 +197,7 @@
   (doseq [schema schemas]
     (assert (and schema (re-matches #"^[a-zA-Z0-9_]+$" schema))
             {:schema schema}))
-  (jdbc/execute! conn [(str "set search_path to " (str/join "," schemas))]))
+  (execute-one! conn [(str "set search_path to " (str/join "," schemas))]))
 
 (def ^:private public-schema "public") ; contains PostGIS types
 
@@ -194,48 +216,48 @@
 (defmacro with-db [binding & body]
   (let [conn (first binding)
         options (second binding)]
-    `(jdbc/with-db-transaction [~conn {:datasource datasource} (merge {:isolation :read-committed}
-                                                                      ~options)]
+    `(jdbc/with-transaction [~conn datasource (merge {:isolation :read-committed}
+                                                     ~options)]
        (use-master-schema ~conn)
        ~@body)))
 
 (defn check-database-version [minimum-version]
   (with-db [conn {:read-only? true}]
-    (let [metadata (-> (jdbc/db-connection conn) .getMetaData)
+    (let [metadata (.getMetaData ^Connection conn)
           version (.getDatabaseMajorVersion metadata)]
       (assert (>= version minimum-version)
               (str "Expected the database to be PostgreSQL " minimum-version " but it was "
                    (.getDatabaseProductName metadata) " " (.getDatabaseProductVersion metadata))))))
 
 (defn auto-explain* [conn min-duration f]
-  (jdbc/execute! conn ["LOAD 'auto_explain'"])
-  (jdbc/execute! conn [(str "SET auto_explain.log_min_duration = " (int min-duration))])
-  (jdbc/execute! conn ["SET auto_explain.log_analyze = true"])
-  (jdbc/execute! conn ["SET auto_explain.log_buffers = true"])
-  (jdbc/execute! conn ["SET auto_explain.log_triggers = true"])
-  (jdbc/execute! conn ["SET auto_explain.log_verbose = true"])
+  (execute-one! conn ["LOAD 'auto_explain'"])
+  (execute-one! conn [(str "SET auto_explain.log_min_duration = " (int min-duration))])
+  (execute-one! conn ["SET auto_explain.log_analyze = true"])
+  (execute-one! conn ["SET auto_explain.log_buffers = true"])
+  (execute-one! conn ["SET auto_explain.log_triggers = true"])
+  (execute-one! conn ["SET auto_explain.log_verbose = true"])
   ;; will explain also the queries inside triggers, which territory-bro.infra.db/explain-query cannot do
-  (jdbc/execute! conn ["SET auto_explain.log_nested_statements = true"])
+  (execute-one! conn ["SET auto_explain.log_nested_statements = true"])
   (let [result (f)]
-    (jdbc/execute! conn ["SET auto_explain.log_min_duration = -1"])
+    (execute-one! conn ["SET auto_explain.log_min_duration = -1"])
     result))
 
 (defmacro auto-explain [conn min-duration & body]
   `(auto-explain* ~conn ~min-duration (fn [] ~@body)))
 
 (defn log-all-queries-in-this-transaction! [conn]
-  (jdbc/query conn ["SELECT set_config('log_statement', 'all', true)"]))
+  (execute-one! conn ["SELECT set_config('log_statement', 'all', true)"]))
 
 (defn- explain-query [conn sql params]
-  (jdbc/execute! conn ["SAVEPOINT explain_analyze"])
+  (execute-one! conn ["SAVEPOINT explain_analyze"])
   (try
     ;; TODO: upgrade to PostgreSQL 12 and add SETTINGS to the options
-    (->> (jdbc/query conn (cons (str "EXPLAIN (ANALYZE, VERBOSE, BUFFERS) " sql) params))
+    (->> (execute! conn (cons (str "EXPLAIN (ANALYZE, VERBOSE, BUFFERS) " sql) params))
          (map (keyword "query plan")))
     (finally
       ;; ANALYZE will actually execute the query, so any side effects
       ;; must be rolled back to avoid executing them twice
-      (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT explain_analyze"]))))
+      (execute-one! conn ["ROLLBACK TO SAVEPOINT explain_analyze"]))))
 
 (defn- prefix-join [prefix ss]
   (str prefix (str/join prefix ss)))

@@ -5,13 +5,13 @@
 (ns ^:e2e territory-bro.browser-test
   (:require [clj-http.client :as http]
             [clojure.java.io :as io]
-            [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.test :refer :all]
             [etaoin.api :as b]
             [etaoin.api2 :as b2]
-            [hikari-cp.core :as hikari-cp]
+            [next.jdbc :as jdbc]
             [reitit.core :as reitit]
+            [territory-bro.infra.db :as db]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [thrown-with-msg?]]
             [territory-bro.ui :as ui])
@@ -352,15 +352,14 @@
                 jdbc-url (str "jdbc:postgresql://" host ":" port "/" dbname "?user=" user "&password=" password)]
             (is (str/starts-with? user "gis_user_"))
             (is (str/starts-with? schema "territorybro_"))
-            (with-open [datasource (hikari-cp/make-datasource {:jdbc-url jdbc-url})]
-              (jdbc/with-db-connection [conn {:datasource datasource}]
-                ;; TODO: test writing GIS data
-                (is (= [] (jdbc/query conn [(str "select * from " schema ".territory limit 1")]))
-                    "can access the congregation's schema")
-                (is (thrown-with-msg? PSQLException
-                                      #"ERROR: permission denied for schema territorybro"
-                                      (jdbc/query conn ["select * from territorybro.event limit 1"]))
-                    "cannot access other schemas"))))))
+            (with-open [conn (jdbc/get-connection {:connection-uri jdbc-url})]
+              ;; TODO: test writing GIS data
+              (is (= [] (db/execute! conn [(str "select * from " schema ".territory limit 1")]))
+                  "can access the congregation's schema")
+              (is (thrown-with-msg? PSQLException
+                                    #"ERROR: permission denied for schema territorybro"
+                                    (db/execute! conn ["select * from territorybro.event limit 1"]))
+                  "cannot access other schemas")))))
 
       (testing "edit congregation settings"
         (doto *driver*

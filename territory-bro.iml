@@ -64,6 +64,7 @@
     <orderEntry type="library" name="Leiningen: com.googlecode.json-simple/json-simple:1.1.1" level="project" />
     <orderEntry type="library" name="Leiningen: com.ibm.icu/icu4j:54.1.1" level="project" />
     <orderEntry type="library" name="Leiningen: com.layerware/hugsql-adapter-clojure-java-jdbc:0.5.3" level="project" />
+    <orderEntry type="library" name="Leiningen: com.layerware/hugsql-adapter-next-jdbc:0.5.3" level="project" />
     <orderEntry type="library" name="Leiningen: com.layerware/hugsql-adapter:0.5.3" level="project" />
     <orderEntry type="library" name="Leiningen: com.layerware/hugsql-core:0.5.3" level="project" />
     <orderEntry type="library" name="Leiningen: com.layerware/hugsql:0.5.3" level="project" />

@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.test.fixtures
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [mount.core :as mount]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.gis.gis-db :as gis-db]
@@ -17,10 +16,10 @@
   (doseq [schema (db/get-schemas conn)
           :when (str/starts-with? schema prefix)]
     ;; TODO: there is no more gis_user table
-    (when (:exists (first (jdbc/query conn ["SELECT to_regclass(?) AS exists" (str schema ".gis_user")])))
-      (doseq [gis-user (jdbc/query conn [(str "SELECT username FROM " schema ".gis_user")])]
+    (when (:exists (db/execute-one! conn ["SELECT to_regclass(?) AS exists" (str schema ".gis_user")]))
+      (doseq [gis-user (db/execute! conn [(str "SELECT username FROM " schema ".gis_user")])]
         (gis-db/drop-role-cascade! conn (:username gis-user) (db/get-schemas conn))))
-    (jdbc/execute! conn [(str "DROP SCHEMA " schema " CASCADE")])))
+    (db/execute-one! conn [(str "DROP SCHEMA " schema " CASCADE")])))
 
 (defn db-fixture [f]
   (mount/start #'config/env

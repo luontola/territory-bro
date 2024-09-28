@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns ^:slow territory-bro.infra.event-store-test
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
@@ -29,9 +28,7 @@
   ;; bypass validating serializers
   (binding [event-store/*event->json* event->json-no-validate
             event-store/*json->event* json->event-no-validate]
-    (db/with-db [conn {}]
-      (jdbc/db-set-rollback-only! conn)
-
+    (db/with-db [conn {:rollback-only true}]
       (let [stream-1 (UUID/randomUUID)
             stream-2 (UUID/randomUUID)
             events [{:event/type :event-1
@@ -148,8 +145,7 @@
                    :stuff "gazonk"}]
                  (event-store/read-stream conn stream-1 {:since 2}))))))
 
-    (db/with-db [conn {}]
-      (jdbc/db-set-rollback-only! conn)
+    (db/with-db [conn {:rollback-only true}]
       (let [dummy-event {:event/type :event-1
                          :stuff "foo"}
             cong (UUID. 0 1)
@@ -181,8 +177,8 @@
         (testing "the stream table row may exist before events are saved,"
           (testing "dummy event"
             (let [stream (UUID/randomUUID)]
-              (jdbc/execute! conn ["insert into stream (stream_id, gis_schema, gis_table) values (?, ?, ?)"
-                                   stream "the_schema" "the_table"])
+              (db/execute-one! conn ["insert into stream (stream_id, gis_schema, gis_table) values (?, ?, ?)"
+                                     stream "the_schema" "the_table"])
               (event-store/save! conn stream 0 [dummy-event])
               (is (= {:stream_id stream
                       :entity_type nil
@@ -193,8 +189,8 @@
 
           (testing "congregation event"
             (let [stream (UUID/randomUUID)]
-              (jdbc/execute! conn ["insert into stream (stream_id, gis_schema, gis_table) values (?, ?, ?)"
-                                   stream "the_schema" "the_table"])
+              (db/execute-one! conn ["insert into stream (stream_id, gis_schema, gis_table) values (?, ?, ?)"
+                                     stream "the_schema" "the_table"])
               (event-store/save! conn stream 0 [cong-event])
               (is (= {:stream_id stream
                       :entity_type "territory"
@@ -223,10 +219,7 @@
                     :gis_table nil}
                    (event-store/stream-info conn stream)))))))
 
-
-    (db/with-db [conn {}]
-      (jdbc/db-set-rollback-only! conn)
-
+    (db/with-db [conn {:rollback-only true}]
       (testing "error: expected revision too low"
         (let [stream-id (UUID. 0 0x123)]
           (event-store/save! conn stream-id 0 [{:event/type :event-1}])
@@ -246,9 +239,7 @@
                           "  Hint: The transaction might succeed if retried.")))
                 (is (= db/psql-serialization-failure (.getSQLState cause)))))))))
 
-    (db/with-db [conn {}]
-      (jdbc/db-set-rollback-only! conn)
-
+    (db/with-db [conn {:rollback-only true}]
       (testing "error: expected revision too high"
         (let [stream-id (UUID. 0 0x123)]
           (event-store/save! conn stream-id 0 [{:event/type :event-1}])
@@ -269,8 +260,7 @@
                 (is (= db/psql-serialization-failure (.getSQLState cause)))))))))))
 
 (deftest event-validation-test
-  (db/with-db [conn {}]
-    (jdbc/db-set-rollback-only! conn)
+  (db/with-db [conn {:rollback-only true}]
     (let [stream-id (UUID/randomUUID)]
 
       (testing "validates events on write"
@@ -293,8 +283,7 @@
   ;; bypass validating serializers
   (binding [event-store/*event->json* event->json-no-validate
             event-store/*json->event* json->event-no-validate]
-    (db/with-db [conn {}]
-      (jdbc/db-set-rollback-only! conn)
+    (db/with-db [conn {:rollback-only true}]
       (let [existing-stream-id (UUID. 0 1)
             non-existing-stream-id (UUID. 0 2)]
         (event-store/save! conn existing-stream-id 0 [{:event/type :dummy-event}])

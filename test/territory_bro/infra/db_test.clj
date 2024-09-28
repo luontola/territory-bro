@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns ^:slow territory-bro.infra.db-test
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.test :refer :all]
+  (:require [clojure.test :refer :all]
             [territory-bro.infra.db :as db]
             [territory-bro.test.fixtures :refer [db-fixture]]
             [territory-bro.test.testutil :refer [re-contains thrown-with-msg?]])
@@ -38,37 +37,55 @@
 (deftest sql-type-conversions-test
   (db/with-db [conn {:read-only? true}]
 
-    (testing "timestamp (with time zone)"
-      (is (= [{:value (Instant/ofEpochSecond 2)}]
-             (jdbc/query conn ["SELECT (?::timestamptz + interval '1 second')::timestamptz AS value"
-                               (Instant/ofEpochSecond 1)]))))
+    (testing "timestamptz"
+      (is (= {:value (Instant/ofEpochSecond 2)}
+             (db/execute-one! conn ["SELECT (?::timestamptz + interval '1 second')::timestamptz AS value"
+                                    (Instant/ofEpochSecond 1)]))))
 
     (testing "date"
-      (is (= [{:value (LocalDate/of 2001 1 1)}]
-             (jdbc/query conn ["SELECT (?::date + interval '1 day')::date AS value"
-                               (LocalDate/of 2000 12 31)]))))
+      (is (= {:value (LocalDate/of 2001 1 1)}
+             (db/execute-one! conn ["SELECT (?::date + interval '1 day')::date AS value"
+                                    (LocalDate/of 2000 12 31)]))))
 
     (testing "json"
-      (is (= [{:value {:foo "bar"}}]
-             (jdbc/query conn ["SELECT ?::json AS value"
-                               {:foo "bar"}]))))
+      (is (= {:value {:foo "bar"}}
+             (db/execute-one! conn ["SELECT ?::json AS value"
+                                    {:foo "bar"}]))
+          "map")
+      (is (= {:value ["foo" 123]}
+             (db/execute-one! conn ["SELECT ?::json AS value"
+                                    ["foo" 123]]))
+          "vector")
+      (is (= {:value "foo"}
+             (db/execute-one! conn ["SELECT ?::json AS value"
+                                    "\"foo\""]))
+          "string"))
 
     (testing "jsonb"
-      (is (= [{:value {:foo "bar"}}]
-             (jdbc/query conn ["SELECT ?::jsonb AS value"
-                               {:foo "bar"}]))))
+      (is (= {:value {:foo "bar"}}
+             (db/execute-one! conn ["SELECT ?::jsonb AS value"
+                                    {:foo "bar"}]))
+          "map")
+      (is (= {:value ["foo" 123]}
+             (db/execute-one! conn ["SELECT ?::jsonb AS value"
+                                    ["foo" 123]]))
+          "vector")
+      (is (= {:value "foo"}
+             (db/execute-one! conn ["SELECT ?::jsonb AS value"
+                                    "\"foo\""]))
+          "string"))
 
     (testing "array"
-      (is (= [{:value [1 2 3]}]
-             (jdbc/query conn ["SELECT '{1,2,3}'::integer[] AS value"]))
+      (is (= {:value [1 2 3]}
+             (db/execute-one! conn ["SELECT '{1,2,3}'::integer[] AS value"]))
           "one way")
-      (is (= [{:value [1 2 3]}]
-             (jdbc/query conn ["SELECT ?::integer[] AS value"
-                               [1 2 3]]))
+      (is (= {:value [1 2 3]}
+             (db/execute-one! conn ["SELECT ?::integer[] AS value"
+                                    [1 2 3]]))
           "round trip"))
 
-    (testing "multi-dimensional array"
+    (testing "multidimensional array"
       ;; TODO: support for input parameters?
-      (is (= [{:value [[1 2 3] [4 5 6]]}]
-             (jdbc/query conn ["SELECT '{{1,2,3},{4,5,6}}'::integer[][] AS value"]))
+      (is (= {:value [[1 2 3] [4 5 6]]}
+             (db/execute-one! conn ["SELECT '{{1,2,3},{4,5,6}}'::integer[][] AS value"]))
           "one way"))))

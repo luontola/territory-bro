@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.gis.gis-db
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [clojure.tools.logging :as log]
             [medley.core :refer [map-keys]]
             [schema.coerce :as coerce]
@@ -142,7 +141,7 @@
 ;;;; Database users
 
 (defn user-exists? [conn username]
-  (not (empty? (jdbc/query conn ["SELECT 1 FROM pg_roles WHERE rolname = ?" username]))))
+  (not (empty? (db/execute! conn ["SELECT 1 FROM pg_roles WHERE rolname = ?" username]))))
 
 (defn ensure-user-present! [conn {:keys [username password schema]}]
   (log/info "Creating GIS user:" username)
@@ -150,26 +149,26 @@
   (assert password)
   (assert schema)
   (try
-    (jdbc/execute! conn ["SAVEPOINT create_role"])
-    (jdbc/execute! conn [(str "CREATE ROLE " username " WITH LOGIN")])
-    (jdbc/execute! conn ["RELEASE SAVEPOINT create_role"])
+    (db/execute-one! conn ["SAVEPOINT create_role"])
+    (db/execute-one! conn [(str "CREATE ROLE " username " WITH LOGIN")])
+    (db/execute-one! conn ["RELEASE SAVEPOINT create_role"])
     (catch PSQLException e
       ;; ignore error if role already exists
       (if (= db/psql-duplicate-object (.getSQLState e))
         (do
           (log/info "GIS user already present:" username)
-          (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT create_role"]))
+          (db/execute-one! conn ["ROLLBACK TO SAVEPOINT create_role"]))
         (throw e))))
-  (jdbc/execute! conn [(str "ALTER ROLE " username " WITH PASSWORD '" password "'")])
-  (jdbc/execute! conn [(str "ALTER ROLE " username " VALID UNTIL 'infinity'")])
+  (db/execute-one! conn [(str "ALTER ROLE " username " WITH PASSWORD '" password "'")])
+  (db/execute-one! conn [(str "ALTER ROLE " username " VALID UNTIL 'infinity'")])
   ;; TODO: move detailed permissions to schema specific role
-  (jdbc/execute! conn [(str "GRANT USAGE ON SCHEMA " schema " TO " username)])
-  (jdbc/execute! conn [(str "GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "
-                            schema ".territory, "
-                            schema ".congregation_boundary, "
-                            schema ".subregion, "
-                            schema ".card_minimap_viewport "
-                            "TO " username)])
+  (db/execute-one! conn [(str "GRANT USAGE ON SCHEMA " schema " TO " username)])
+  (db/execute-one! conn [(str "GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "
+                              schema ".territory, "
+                              schema ".congregation_boundary, "
+                              schema ".subregion, "
+                              schema ".card_minimap_viewport "
+                              "TO " username)])
   nil)
 
 (defn drop-role-cascade! [conn role schemas]
@@ -177,18 +176,18 @@
   (try
     (doseq [schema schemas]
       (assert schema)
-      (jdbc/execute! conn ["SAVEPOINT revoke_privileges"])
-      (jdbc/execute! conn [(str "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA " schema " FROM " role)])
-      (jdbc/execute! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " role)])
-      (jdbc/execute! conn ["RELEASE SAVEPOINT revoke_privileges"]))
+      (db/execute-one! conn ["SAVEPOINT revoke_privileges"])
+      (db/execute-one! conn [(str "REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA " schema " FROM " role)])
+      (db/execute-one! conn [(str "REVOKE USAGE ON SCHEMA " schema " FROM " role)])
+      (db/execute-one! conn ["RELEASE SAVEPOINT revoke_privileges"]))
     (catch PSQLException e
       ;; ignore error if role already does not exist
       (if (= db/psql-undefined-object (.getSQLState e))
         (do
           (log/info "GIS user already absent:" role)
-          (jdbc/execute! conn ["ROLLBACK TO SAVEPOINT revoke_privileges"]))
+          (db/execute-one! conn ["ROLLBACK TO SAVEPOINT revoke_privileges"]))
         (throw e))))
-  (jdbc/execute! conn [(str "DROP ROLE IF EXISTS " role)])
+  (db/execute-one! conn [(str "DROP ROLE IF EXISTS " role)])
   nil)
 
 (defn ensure-user-absent! [conn {:keys [username schema]}]
@@ -243,10 +242,10 @@
                               (filter db/tenant-schema-up-to-date?)
                               (first))]
     (when reference-schema
-      (let [reference-history (simplify-schema-history (jdbc/query conn [(schema-history-query reference-schema)]))]
-        (->> (jdbc/query conn [(->> schemas
-                                    (map schema-history-query)
-                                    (str/join " UNION ALL "))])
+      (let [reference-history (simplify-schema-history (db/execute! conn [(schema-history-query reference-schema)]))]
+        (->> (db/execute! conn [(->> schemas
+                                     (map schema-history-query)
+                                     (str/join " UNION ALL "))])
              (group-by :schema)
              (filter (fn [[_schema history]]
                        (= reference-history (simplify-schema-history history))))

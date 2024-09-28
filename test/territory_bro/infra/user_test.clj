@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns ^:slow territory-bro.infra.user-test
-  (:require [clojure.java.jdbc :as jdbc]
-            [clojure.test :refer :all]
+  (:require [clojure.test :refer :all]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.user :as user]
             [territory-bro.test.fixtures :refer [db-fixture]]
@@ -20,9 +19,7 @@
        (sort)))
 
 (deftest users-test
-  (db/with-db [conn {}]
-    (jdbc/db-set-rollback-only! conn)
-
+  (db/with-db [conn {:rollback-only true}]
     (let [user-id (user/save-user! conn "user1" {:name "User 1"})
           unrelated-user-id (user/save-user! conn "user2" {:name "User 2"})
           unrelated-user (user/get-by-id conn unrelated-user-id)]
@@ -93,9 +90,7 @@
         (is (= unrelated-user (user/get-by-id conn unrelated-user-id)))))))
 
 (deftest check-user-exists-test
-  (db/with-db [conn {}]
-    (jdbc/db-set-rollback-only! conn)
-
+  (db/with-db [conn {:rollback-only true}]
     (let [user-id (user/save-user! conn "user1" {:name "User 1"})]
 
       (testing "exists"
