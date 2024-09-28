@@ -26,8 +26,7 @@
 ;; TODO: not used in production code; remove?
 (defn get-congregation-boundaries [conn]
   (->> (query! conn :get-congregation-boundaries)
-       (map format-feature)
-       (doall)))
+       (mapv format-feature)))
 
 (defn create-congregation-boundary! [conn location]
   (:id (query! conn :create-congregation-boundary {:id (UUID/randomUUID)
@@ -37,8 +36,7 @@
 ;; TODO: not used in production code; remove?
 (defn get-regions [conn]
   (->> (query! conn :get-regions)
-       (map format-feature)
-       (doall)))
+       (mapv format-feature)))
 
 (defn create-region-with-id! [conn id name location]
   (:id (query! conn :create-region {:id id
@@ -52,8 +50,7 @@
 ;; TODO: not used in production code; remove?
 (defn get-card-minimap-viewports [conn]
   (->> (query! conn :get-card-minimap-viewports)
-       (map format-feature)
-       (doall)))
+       (mapv format-feature)))
 
 (defn create-card-minimap-viewport! [conn location]
   (:id (query! conn :create-card-minimap-viewport {:id (UUID/randomUUID)
@@ -66,8 +63,7 @@
    (get-territories conn {}))
   ([conn search]
    (->> (query! conn :get-territories search)
-        (map format-feature)
-        (doall))))
+        (mapv format-feature))))
 
 (defn get-territory-by-id [conn id]
   (first (get-territories conn {:ids [id]})))
@@ -127,8 +123,7 @@
    (get-changes conn {}))
   ([conn search]
    (->> (query! conn :get-gis-changes search)
-        (map format-gis-change)
-        (doall))))
+        (mapv format-gis-change))))
 
 (defn next-unprocessed-change [conn]
   (first (get-changes conn {:processed? false
@@ -218,9 +213,8 @@
                                  :schema (str schema-prefix "%")})
        (group-by (juxt :grantee :table_schema))
        (vals)
-       (map validate-grants)
-       (filter some?)
-       (doall)))
+       (mapv validate-grants)
+       (filterv some?)))
 
 
 ;;;; Tenant schemas
@@ -249,5 +243,4 @@
              (group-by :schema)
              (filter (fn [[_schema history]]
                        (= reference-history (simplify-schema-history history))))
-             (keys)
-             (doall))))))
+             (keys))))))

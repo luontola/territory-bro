@@ -180,8 +180,7 @@
 
 (defn get-schemas [conn]
   (->> (execute! conn ["select schema_name from information_schema.schemata"])
-       (map :schema_name)
-       (doall)))
+       (mapv :schema_name)))
 
 (defn generate-tenant-schema-name [conn cong-id]
   (let [master-schema (:database-schema config/env)

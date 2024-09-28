@@ -37,16 +37,14 @@
    (assert (some? stream-id))
    (->> (query! conn :read-stream {:stream stream-id
                                    :since (or since 0)})
-        (map parse-db-row)
-        (doall))))
+        (mapv parse-db-row))))
 
 (defn read-all-events
   ([conn]
    (read-all-events conn {}))
   ([conn {:keys [since]}]
    (->> (query! conn :read-all-events {:since (or since 0)})
-        (map parse-db-row)
-        (doall))))
+        (mapv parse-db-row))))
 
 (defn stream-exists? [conn stream-id]
   (not (empty? (query! conn :find-stream {:stream stream-id}))))
