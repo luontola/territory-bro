@@ -48,16 +48,17 @@
       (log/error t "Failed to process event" (pr-str event))
       (throw t))))
 
-(defn- apply-events [cache events]
+(defn- apply-transient-events [cache events]
   (update cache :state #(reduce projection % events)))
 
 (defn- apply-new-events [cache conn]
   (let [new-events (event-store/read-all-events conn {:since (:event/global-revision (:last-event cache))})]
-    (if (empty? new-events)
-      cache
-      (-> cache
-          (apply-events new-events)
-          (assoc :last-event (last new-events))))))
+    (reduce (fn [cache event]
+              (-> cache
+                  (update :state projection event)
+                  (assoc :last-event event)))
+            cache
+            new-events)))
 
 (defn cached-state []
   (:state @*cache))
@@ -95,7 +96,7 @@
 
 (defn- update-with-transient-events! [new-events]
   (when-some [transient-events (seq (filter :event/transient? new-events))]
-    (swap! *cache apply-events transient-events)
+    (swap! *cache apply-transient-events transient-events)
     (log/info "Updated with" (count transient-events) "transient events")))
 
 (defn- refresh-process-managers! []

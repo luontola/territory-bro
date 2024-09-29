@@ -35,6 +35,7 @@
    (read-stream conn stream-id {}))
   ([conn stream-id {:keys [since]}]
    (assert (some? stream-id))
+   ;; TODO: to use db/plan-query here, we'd need to change dispatcher/write-stream! to count the events while reducing; count doesn't support Eduction
    (->> (db/query! conn queries :read-stream {:stream stream-id
                                               :since (or since 0)})
         (mapv parse-db-row))))
@@ -43,8 +44,8 @@
   ([conn]
    (read-all-events conn {}))
   ([conn {:keys [since]}]
-   (->> (db/query! conn queries :read-all-events {:since (or since 0)})
-        (mapv parse-db-row))))
+   (->> (db/plan-query conn queries :read-all-events {:since (or since 0)})
+        (eduction (map parse-db-row))))) ;; TODO: do we not need next.jdbc.result-set/datafiable-row to realize the row, to manipulate it as a map?
 
 (defn stream-exists? [conn stream-id]
   (not (empty? (db/query! conn queries :find-stream {:stream stream-id}))))
@@ -96,4 +97,4 @@
   (db/with-db [conn {:read-only? true}]
     (read-stream conn (UUID/fromString "61e51981-bbd3-4298-a7a6-46109e39dd52")))
   (db/with-db [conn {:read-only? true}]
-    (take-last 10 (read-all-events conn))))
+    (take-last 10 (into [] (read-all-events conn)))))

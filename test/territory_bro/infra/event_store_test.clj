@@ -104,9 +104,9 @@
                    :event/global-revision 4
                    :event/type :event-2
                    :stuff "bar"}]
-                 (event-store/read-all-events conn)
-                 (event-store/read-all-events conn {:since 0})
-                 (event-store/read-all-events conn {:since nil}))))
+                 (into [] (event-store/read-all-events conn))
+                 (into [] (event-store/read-all-events conn {:since 0}))
+                 (into [] (event-store/read-all-events conn {:since nil})))))
 
         (testing "read all events since revision"
           (is (= [{:event/stream-id stream-2
@@ -114,7 +114,7 @@
                    :event/global-revision 4
                    :event/type :event-2
                    :stuff "bar"}]
-                 (event-store/read-all-events conn {:since 3}))))
+                 (into [] (event-store/read-all-events conn {:since 3})))))
 
         (testing "append to stream"
           (testing "with concurrency check"
@@ -277,7 +277,7 @@
 
       (testing "validates events on reading all events"
         (is (thrown-with-msg? ExceptionInfo (re-contains "Value cannot be coerced to match schema")
-                              (event-store/read-all-events conn stream-id)))))))
+                              (into [] (event-store/read-all-events conn stream-id))))))))
 
 (deftest check-event-stream-does-not-exist-test
   ;; bypass validating serializers

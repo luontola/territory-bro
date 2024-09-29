@@ -265,24 +265,35 @@
 (defn- prefix-join [prefix ss]
   (str prefix (str/join prefix ss)))
 
+(defn- log-query [conn queries query-name params]
+  (when *explain*
+    (let [query (get-in queries [:sqlvec-fns query-name])
+          filename (.getFileName (Paths/get (URI. (-> query :meta :file))))
+          sqlvec-fn (:fn query)
+          [sql & params] (apply sqlvec-fn params)
+          query-plan (explain-query conn sql params)]
+      (log/debug (str "Explain SQL query " (name query-name) " in " filename ":\n"
+                      sql
+                      (when (not (empty? params))
+                        (str "\n-- Parameters:"
+                             (prefix-join "\n--\t" (map pr-str params))))
+                      "\n-- Query plan:"
+                      (prefix-join "\n--\t" query-plan))))))
+
+
 (defn query! [conn queries-cache query-name & params]
   (let [queries (queries-cache)
         query-fn (or (get-in queries [:db-fns query-name :fn])
                      (throw (IllegalArgumentException. (str "Query not found: " query-name))))]
-    (when *explain*
-      (let [query (get-in queries [:sqlvec-fns query-name])
-            filename (.getFileName (Paths/get (URI. (-> query :meta :file))))
-            sqlvec-fn (:fn query)
-            [sql & params] (apply sqlvec-fn params)
-            query-plan (explain-query conn sql params)]
-        (log/debug (str "Explain SQL query " (name query-name) " in " filename ":\n"
-                        sql
-                        (when (not (empty? params))
-                          (str "\n-- Parameters:"
-                               (prefix-join "\n--\t" (map pr-str params))))
-                        "\n-- Query plan:"
-                        (prefix-join "\n--\t" query-plan)))))
+    (log-query conn queries query-name params)
     (apply query-fn conn params)))
+
+(defn plan-query [conn queries-cache query-name & params]
+  (let [queries (queries-cache)
+        sqlvec-fn (or (get-in queries [:sqlvec-fns query-name :fn])
+                      (throw (IllegalArgumentException. (str "Query not found: " query-name))))]
+    (log-query conn queries query-name params)
+    (jdbc/plan conn (apply sqlvec-fn params) jdbc-opts)))
 
 (defn- load-queries [resource]
   {:db-fns (hugsql/map-of-db-fns resource {:quoting :ansi})
