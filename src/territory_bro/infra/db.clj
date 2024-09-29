@@ -265,7 +265,7 @@
 (defn- prefix-join [prefix ss]
   (str prefix (str/join prefix ss)))
 
-(defn- query! [conn queries-cache query-name params]
+(defn query! [conn queries-cache query-name & params]
   (let [queries (queries-cache)
         query-fn (or (get-in queries [:db-fns query-name :fn])
                      (throw (IllegalArgumentException. (str "Query not found: " query-name))))]
@@ -290,6 +290,4 @@
                                                    :fn-suffix ""})})
 
 (defn compile-queries [path]
-  (let [queries-cache (resources/auto-refresher (io/resource path) load-queries)]
-    (fn [conn name & params]
-      (query! conn queries-cache name params))))
+  (resources/auto-refresher (io/resource path) load-queries))

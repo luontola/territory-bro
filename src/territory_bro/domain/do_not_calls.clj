@@ -6,7 +6,7 @@
   (:require [clojure.string :as str]
             [territory-bro.infra.db :as db]))
 
-(def ^:private query! (db/compile-queries "db/hugsql/do-not-calls.sql"))
+(def ^:private queries (db/compile-queries "db/hugsql/do-not-calls.sql"))
 
 
 ;;;; Queries
@@ -19,8 +19,8 @@
      :do-not-calls/last-modified (:last_modified row)}))
 
 (defn ^:dynamic get-do-not-calls [conn cong-id territory-id]
-  (-> (query! conn :get-do-not-calls {:congregation cong-id
-                                      :territory territory-id})
+  (-> (db/query! conn queries :get-do-not-calls {:congregation cong-id
+                                                 :territory territory-id})
       (parse-db-row)))
 
 
@@ -36,12 +36,12 @@
         do-not-calls (:territory/do-not-calls command)]
     (check-permit [:edit-do-not-calls cong-id territory-id])
     (if (str/blank? do-not-calls)
-      (query! conn :delete-do-not-calls {:congregation cong-id
-                                         :territory territory-id})
-      (query! conn :save-do-not-calls {:congregation cong-id
-                                       :territory territory-id
-                                       :do_not_calls do-not-calls
-                                       :last_modified (:command/time command)})))
+      (db/query! conn queries :delete-do-not-calls {:congregation cong-id
+                                                    :territory territory-id})
+      (db/query! conn queries :save-do-not-calls {:congregation cong-id
+                                                  :territory territory-id
+                                                  :do_not_calls do-not-calls
+                                                  :last_modified (:command/time command)})))
   nil)
 
 (defn handle-command [command state injections]

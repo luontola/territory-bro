@@ -7,7 +7,7 @@
   (:import (java.util UUID)
            (territory_bro ValidationException)))
 
-(def ^:private query! (db/compile-queries "db/hugsql/user.sql"))
+(def ^:private queries (db/compile-queries "db/hugsql/user.sql"))
 
 (defn- format-user [user]
   {:user/id (:id user)
@@ -20,7 +20,7 @@
   ([conn]
    (get-users conn {}))
   ([conn search]
-   (->> (query! conn :get-users search)
+   (->> (db/query! conn queries :get-users search)
         (mapv format-user))))
 
 (defn get-by-id [conn user-id]
@@ -30,9 +30,9 @@
   (first (get-users conn {:subjects [subject]})))
 
 (defn save-user! [conn subject attributes]
-  (:id (first (query! conn :save-user {:id (UUID/randomUUID)
-                                       :subject subject
-                                       :attributes attributes}))))
+  (:id (first (db/query! conn queries :save-user {:id (UUID/randomUUID)
+                                                  :subject subject
+                                                  :attributes attributes}))))
 
 (defn ^:dynamic check-user-exists [conn user-id]
   (when (nil? (get-by-id conn user-id))

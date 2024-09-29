@@ -13,7 +13,7 @@
 (def ^:dynamic *event->json* events/event->json)
 (def ^:dynamic *json->event* events/json->event)
 
-(def ^:private query! (db/compile-queries "db/hugsql/event-store.sql"))
+(def ^:private queries (db/compile-queries "db/hugsql/event-store.sql"))
 
 (defn- sorted-keys [event]
   ;; sorted maps are slower to access than hash maps,
@@ -35,19 +35,19 @@
    (read-stream conn stream-id {}))
   ([conn stream-id {:keys [since]}]
    (assert (some? stream-id))
-   (->> (query! conn :read-stream {:stream stream-id
-                                   :since (or since 0)})
+   (->> (db/query! conn queries :read-stream {:stream stream-id
+                                              :since (or since 0)})
         (mapv parse-db-row))))
 
 (defn read-all-events
   ([conn]
    (read-all-events conn {}))
   ([conn {:keys [since]}]
-   (->> (query! conn :read-all-events {:since (or since 0)})
+   (->> (db/query! conn queries :read-all-events {:since (or since 0)})
         (mapv parse-db-row))))
 
 (defn stream-exists? [conn stream-id]
-  (not (empty? (query! conn :find-stream {:stream stream-id}))))
+  (not (empty? (db/query! conn queries :find-stream {:stream stream-id}))))
 
 (defn ^:dynamic check-new-stream [conn stream-id]
   (when (stream-exists? conn stream-id)
@@ -55,9 +55,9 @@
 
 (defn- save-event! [conn stream-id stream-revision event]
   (try
-    (query! conn :save-event {:stream stream-id
-                              :stream_revision stream-revision
-                              :data (-> event *event->json*)})
+    (db/query! conn queries :save-event {:stream stream-id
+                                         :stream_revision stream-revision
+                                         :data (-> event *event->json*)})
     (catch PSQLException e
       (if (= db/psql-serialization-failure (.getSQLState e))
         (throw (WriteConflictException.
@@ -72,7 +72,7 @@
   ;; transaction conflicts still happen when generating multiple QR codes
   ;; in parallel. Maybe the insert statement acquires a lower level lock
   ;; before the trigger is executed, and that produces a deadlock?
-  (query! conn :lock-events-table-for-writing)
+  (db/query! conn queries :lock-events-table-for-writing)
   (->> events
        (map-indexed
         (fn [idx event]

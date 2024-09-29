@@ -13,7 +13,7 @@
            (java.util UUID)
            (org.postgresql.util PSQLException)))
 
-(def ^:private query! (db/compile-queries "db/hugsql/gis.sql"))
+(def ^:private queries (db/compile-queries "db/hugsql/gis.sql"))
 
 
 ;;;; Features
@@ -25,23 +25,23 @@
 
 ;; TODO: not used in production code; remove?
 (defn get-congregation-boundaries [conn]
-  (->> (query! conn :get-congregation-boundaries)
+  (->> (db/query! conn queries :get-congregation-boundaries)
        (mapv format-feature)))
 
 (defn create-congregation-boundary! [conn location]
-  (:id (query! conn :create-congregation-boundary {:id (UUID/randomUUID)
-                                                   :location location})))
+  (:id (db/query! conn queries :create-congregation-boundary {:id (UUID/randomUUID)
+                                                              :location location})))
 
 
 ;; TODO: not used in production code; remove?
 (defn get-regions [conn]
-  (->> (query! conn :get-regions)
+  (->> (db/query! conn queries :get-regions)
        (mapv format-feature)))
 
 (defn create-region-with-id! [conn id name location]
-  (:id (query! conn :create-region {:id id
-                                    :name name
-                                    :location location})))
+  (:id (db/query! conn queries :create-region {:id id
+                                               :name name
+                                               :location location})))
 
 (defn create-region! [conn name location]
   (create-region-with-id! conn (UUID/randomUUID) name location))
@@ -49,12 +49,12 @@
 
 ;; TODO: not used in production code; remove?
 (defn get-card-minimap-viewports [conn]
-  (->> (query! conn :get-card-minimap-viewports)
+  (->> (db/query! conn queries :get-card-minimap-viewports)
        (mapv format-feature)))
 
 (defn create-card-minimap-viewport! [conn location]
-  (:id (query! conn :create-card-minimap-viewport {:id (UUID/randomUUID)
-                                                   :location location})))
+  (:id (db/query! conn queries :create-card-minimap-viewport {:id (UUID/randomUUID)
+                                                              :location location})))
 
 
 ;; TODO: not used in production code; remove?
@@ -62,19 +62,19 @@
   ([conn]
    (get-territories conn {}))
   ([conn search]
-   (->> (query! conn :get-territories search)
+   (->> (db/query! conn queries :get-territories search)
         (mapv format-feature))))
 
 (defn get-territory-by-id [conn id]
   (first (get-territories conn {:ids [id]})))
 
 (defn create-territory! [conn territory]
-  (:id (query! conn :create-territory {:id (UUID/randomUUID)
-                                       :number (:territory/number territory)
-                                       :addresses (:territory/addresses territory)
-                                       :subregion (:territory/region territory)
-                                       :meta (:territory/meta territory)
-                                       :location (:territory/location territory)})))
+  (:id (db/query! conn queries :create-territory {:id (UUID/randomUUID)
+                                                  :number (:territory/number territory)
+                                                  :addresses (:territory/addresses territory)
+                                                  :subregion (:territory/region territory)
+                                                  :meta (:territory/meta territory)
+                                                  :location (:territory/location territory)})))
 
 
 ;;;; Changes
@@ -122,7 +122,7 @@
   ([conn]
    (get-changes conn {}))
   ([conn search]
-   (->> (query! conn :get-gis-changes search)
+   (->> (db/query! conn queries :get-gis-changes search)
         (mapv format-gis-change))))
 
 (defn next-unprocessed-change [conn]
@@ -130,7 +130,7 @@
                             :limit 1})))
 
 (defn mark-changes-processed! [conn ids]
-  (query! conn :mark-changes-processed {:ids ids}))
+  (db/query! conn queries :mark-changes-processed {:ids ids}))
 
 
 ;;;; Database users
@@ -209,8 +209,8 @@
        :schema table_schema})))
 
 (defn get-present-users [conn {:keys [username-prefix schema-prefix]}]
-  (->> (query! conn :find-roles {:role (str username-prefix "%")
-                                 :schema (str schema-prefix "%")})
+  (->> (db/query! conn queries :find-roles {:role (str username-prefix "%")
+                                            :schema (str schema-prefix "%")})
        (group-by (juxt :grantee :table_schema))
        (vals)
        (mapv validate-grants)
@@ -229,7 +229,7 @@
        (map #(select-keys % [:version :type :script :checksum]))))
 
 (defn get-present-schemas [conn {:keys [schema-prefix]}]
-  (let [schemas (->> (query! conn :find-flyway-managed-schemas {:schema (str schema-prefix "%")})
+  (let [schemas (->> (db/query! conn queries :find-flyway-managed-schemas {:schema (str schema-prefix "%")})
                      (map :table_schema))
         reference-schema (->> schemas
                               (take 10) ; short-cut in case all tenant schemas are out of date
