@@ -8,7 +8,7 @@
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.json :as json]
-            [territory-bro.test.fixtures :refer [db-fixture]]
+            [territory-bro.test.fixtures :refer [db-fixture with-fixtures]]
             [territory-bro.test.testutil :refer [grab-exception re-contains re-equals thrown-with-msg?]])
   (:import (clojure.lang ExceptionInfo)
            (java.util UUID)
@@ -24,10 +24,13 @@
   (-> (json/read-value json)
       (update :event/type keyword)))
 
-(deftest event-store-test
-  ;; bypass validating serializers
+(defn bypass-validating-serializers [f]
   (binding [event-store/*event->json* event->json-no-validate
             event-store/*json->event* json->event-no-validate]
+    (f)))
+
+(deftest event-store-test
+  (with-fixtures [bypass-validating-serializers]
     (db/with-db [conn {:rollback-only true}]
       (let [stream-1 (UUID/randomUUID)
             stream-2 (UUID/randomUUID)
@@ -71,9 +74,9 @@
                    :event/global-revision 2
                    :event/type :event-2
                    :stuff "bar"}]
-                 (event-store/read-stream conn stream-1)
-                 (event-store/read-stream conn stream-1 {:since 0})
-                 (event-store/read-stream conn stream-1 {:since nil}))))
+                 (into [] (event-store/read-stream conn stream-1))
+                 (into [] (event-store/read-stream conn stream-1 {:since 0}))
+                 (into [] (event-store/read-stream conn stream-1 {:since nil})))))
 
         (testing "read stream since revision"
           (is (= [{:event/stream-id stream-1
@@ -81,7 +84,7 @@
                    :event/global-revision 2
                    :event/type :event-2
                    :stuff "bar"}]
-                 (event-store/read-stream conn stream-1 {:since 1}))))
+                 (into [] (event-store/read-stream conn stream-1 {:since 1})))))
 
         (testing "read all events"
           (is (= [{:event/stream-id stream-1
@@ -143,7 +146,7 @@
                    :event/global-revision 6
                    :event/type :event-4
                    :stuff "gazonk"}]
-                 (event-store/read-stream conn stream-1 {:since 2}))))))
+                 (into [] (event-store/read-stream conn stream-1 {:since 2})))))))
 
     (db/with-db [conn {:rollback-only true}]
       (let [dummy-event {:event/type :event-1
@@ -273,7 +276,7 @@
 
       (testing "validates events on reading a stream"
         (is (thrown-with-msg? ExceptionInfo (re-contains "Value cannot be coerced to match schema")
-                              (event-store/read-stream conn stream-id))))
+                              (into [] (event-store/read-stream conn stream-id)))))
 
       (testing "validates events on reading all events"
         (is (thrown-with-msg? ExceptionInfo (re-contains "Value cannot be coerced to match schema")

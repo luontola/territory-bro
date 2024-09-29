@@ -70,9 +70,13 @@
 (defn- write-stream!
   "Appends events to a stream with optimistic concurrency control."
   [conn stream-id f]
-  (let [old-events (event-store/read-stream conn stream-id)
+  (let [*count (volatile! 0)
+        old-events (->> (event-store/read-stream conn stream-id)
+                        (eduction (map (fn [v]
+                                         (vswap! *count inc)
+                                         v))))
         new-events (f old-events)]
-    (event-store/save! conn stream-id (count old-events) new-events)))
+    (event-store/save! conn stream-id @*count new-events)))
 
 (defn- append-stream!
   "Appends events to a stream unconditionally."

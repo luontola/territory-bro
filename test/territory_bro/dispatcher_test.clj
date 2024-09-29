@@ -5,7 +5,9 @@
 (ns territory-bro.dispatcher-test
   (:require [clojure.test :refer :all]
             [territory-bro.dispatcher :as dispatcher]
+            [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
+            [territory-bro.infra.event-store-test :as event-store-test]
             [territory-bro.infra.user :as user]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [re-contains re-equals thrown-with-msg?]])
@@ -20,6 +22,43 @@
 
 (use-fixtures :once (fixed-clock-fixture test-time))
 
+(deftest ^:slow write-stream!-test
+  (with-fixtures [db-fixture event-store-test/bypass-validating-serializers]
+    (let [write-stream! #'dispatcher/write-stream!
+          append-stream! #'dispatcher/append-stream!
+          stream-id (UUID/randomUUID)]
+
+      (testing "appends events to the stream"
+        (db/with-db [conn {}]
+          (write-stream! conn stream-id (fn [old-events]
+                                          (into [] old-events)
+                                          [{:event/type :event-1
+                                            :stuff "foo"}]))
+          (write-stream! conn stream-id (fn [old-events]
+                                          (into [] old-events) ; must read all events, or stream revision calculation will break
+                                          [{:event/type :event-2
+                                            :stuff "bar"}]))
+          (is (= [:event-1 :event-2]
+                 (into []
+                       (map :event/type)
+                       (event-store/read-stream conn stream-id))))))
+
+      (testing "uses optimistic concurrency control to detect concurrent writes to the same stream"
+        (db/with-db [conn {}]
+          (is (thrown-with-msg?
+               WriteConflictException #"Failed to save stream .*? revision 3: \{:event/type :event-4, :stuff \"conflicts\"\}"
+               (write-stream! conn stream-id (fn [old-events]
+                                               (into [] old-events)
+                                               (db/with-db [conn {}]
+                                                 (append-stream! conn stream-id [{:event/type :event-3
+                                                                                  :stuff "concurrent write"}]))
+                                               [{:event/type :event-4
+                                                 :stuff "conflicts"}])))))
+        (db/with-db [conn {}]
+          (is (= [:event-1 :event-2 :event-3]
+                 (into []
+                       (map :event/type)
+                       (event-store/read-stream conn stream-id)))))))))
 
 (deftest call-command-handler-test
   (let [call! #'dispatcher/call!
