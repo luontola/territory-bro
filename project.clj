@@ -9,6 +9,7 @@
 
   :dependencies [[ch.qos.logback/logback-classic "1.5.8"]
                  [ch.qos.logback/logback-core "1.5.8"]
+                 [clj-http "3.13.0"]
                  [com.attendify/schema-refined "0.3.0-alpha4"]
                  [com.auth0/java-jwt "4.4.0"]
                  [com.auth0/jwks-rsa "0.22.1"]
@@ -92,8 +93,7 @@
                        :aot :all
                        :uberjar-name "territory-bro.jar"}
 
-             :dev {:dependencies [[clj-http "3.13.0"]
-                                  [criterium "0.4.6"]
+             :dev {:dependencies [[criterium "0.4.6"]
                                   [etaoin "1.1.41"]
                                   [lambdaisland/kaocha "1.91.1392"]
                                   [nubank/matcher-combinators "3.9.1"]
