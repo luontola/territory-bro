@@ -1,4 +1,4 @@
-;; Copyright © 2015-2020 Esko Luontola
+;; Copyright © 2015-2024 Esko Luontola
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -10,7 +10,7 @@
             [territory-bro.gis.gis-sync :as gis-sync]
             [territory-bro.infra.db :as db]
             [territory-bro.test.fixtures :refer [db-fixture]])
-  (:import (java.util.concurrent TimeUnit SynchronousQueue)))
+  (:import (java.util.concurrent SynchronousQueue TimeUnit)))
 
 (use-fixtures :each (join-fixtures [db-fixture test-schema-fixture]))
 
@@ -29,7 +29,7 @@
       (testing "notifies when there are GIS changes"
         (is (nil? (.poll notifications 1 TimeUnit/MILLISECONDS))
             "before change")
-        (db/with-db [conn {}]
+        (db/with-transaction [conn {}]
           (db/use-tenant-schema conn test-schema)
           (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon))
         (is (some? (.poll notifications 1 TimeUnit/SECONDS))

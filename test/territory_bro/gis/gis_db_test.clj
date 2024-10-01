@@ -30,7 +30,7 @@
         (.migrate schema)
         (f)
         (finally
-          (db/with-db [conn {}]
+          (db/with-transaction [conn {}]
             (db/execute-one! conn ["DELETE FROM gis_change_log"]))
           (.clean schema))))))
 
@@ -47,7 +47,7 @@
    :territory/location testdata/wkt-multi-polygon})
 
 (deftest regions-test
-  (db/with-db [conn {:rollback-only true}]
+  (db/with-transaction [conn {:rollback-only true}]
     (db/use-tenant-schema conn test-schema)
 
     (testing "create & list congregation boundaries"
@@ -70,7 +70,7 @@
                (gis-db/get-card-minimap-viewports conn)))))))
 
 (deftest territories-test
-  (db/with-db [conn {:rollback-only true}]
+  (db/with-transaction [conn {:rollback-only true}]
     (db/use-tenant-schema conn test-schema)
 
     (let [territory-id (gis-db/create-territory! conn example-territory)]
@@ -110,7 +110,7 @@
   id)
 
 (deftest validate-gis-change-test
-  (db/with-db [conn {:rollback-only true}]
+  (db/with-transaction [conn {:rollback-only true}]
     (db/use-tenant-schema conn test-schema)
 
     (testing "populates the stream table on insert"
@@ -204,7 +204,7 @@
                                     new-id]))))))))
 
 (deftest gis-change-log-test
-  (db/with-db [conn {:rollback-only true}]
+  (db/with-transaction [conn {:rollback-only true}]
     (db/use-tenant-schema conn test-schema)
 
     (testing "before making changes"
@@ -373,7 +373,7 @@
 
 (deftest ensure-gis-user-present-or-absent-test
   (testing "create account"
-    (db/with-db [conn {}]
+    (db/with-transaction [conn {}]
       (is (false? (gis-db/user-exists? conn test-username)))
       (gis-db/ensure-user-present! conn {:username test-username
                                          :password "password1"
@@ -382,20 +382,20 @@
     (is (login-as test-username "password1")))
 
   (testing "update account / create is idempotent"
-    (db/with-db [conn {}]
+    (db/with-transaction [conn {}]
       (gis-db/ensure-user-present! conn {:username test-username
                                          :password "password2"
                                          :schema test-schema}))
     (is (login-as test-username "password2")))
 
   (testing "delete account"
-    (db/with-db [conn {}]
+    (db/with-transaction [conn {}]
       (gis-db/ensure-user-absent! conn {:username test-username
                                         :schema test-schema}))
     (is (thrown? PSQLException (login-as test-username "password2"))))
 
   (testing "delete is idempotent"
-    (db/with-db [conn {}]
+    (db/with-transaction [conn {}]
       (gis-db/ensure-user-absent! conn {:username test-username
                                         :schema test-schema}))
     (is (thrown? PSQLException (login-as test-username "password2")))))
@@ -403,7 +403,7 @@
 (deftest gis-user-database-access-test
   (let [password "password123"
         user-db-spec (gis-db-spec test-username password)]
-    (db/with-db [admin-conn {}]
+    (db/with-transaction [admin-conn {}]
       (gis-db/ensure-user-present! admin-conn {:username test-username
                                                :password password
                                                :schema test-schema}))
@@ -443,7 +443,7 @@
                  :gis-change/schema test-schema
                  :gis-change/table "card_minimap_viewport"
                  :gis-change/user test-username}]
-               (->> (db/with-db [admin-conn {}]
+               (->> (db/with-transaction [admin-conn {}]
                       (gis-db/get-changes admin-conn))
                     (map #(select-keys % [:gis-change/op :gis-change/schema :gis-change/table :gis-change/user]))))))
 
@@ -456,7 +456,7 @@
                               (db/execute-one! user-conn ["create table public.foo (id serial primary key)"])))))
 
     (testing "cannot login to database after user is deleted"
-      (db/with-db [admin-conn {}]
+      (db/with-transaction [admin-conn {}]
         (gis-db/ensure-user-absent! admin-conn {:username test-username
                                                 :schema test-schema}))
       (is (thrown-with-msg? PSQLException (re-equals "FATAL: password authentication failed for user \"test_gis_user\"")
@@ -493,7 +493,7 @@
   (with-tenant-schema test-schema2
     (fn []
       (testing "lists GIS users present in the database"
-        (db/with-db [conn {:rollback-only true}]
+        (db/with-transaction [conn {:rollback-only true}]
           (gis-db/ensure-user-present! conn {:username test-username
                                              :password "password"
                                              :schema test-schema})
@@ -510,7 +510,7 @@
                                                       :schema-prefix test-schema}))))))
 
       (testing "doesn't list GIS users with missing grants"
-        (db/with-db [conn {:rollback-only true}]
+        (db/with-transaction [conn {:rollback-only true}]
           (gis-db/ensure-user-present! conn {:username test-username
                                              :password "password"
                                              :schema test-schema})
@@ -523,12 +523,12 @@
   (with-tenant-schema test-schema2
     (fn []
       (testing "lists tenant schemas present in the database"
-        (db/with-db [conn {}]
+        (db/with-transaction [conn {}]
           (is (= [test-schema test-schema2]
                  (sort (gis-db/get-present-schemas conn {:schema-prefix test-schema}))))))
 
       (testing "doesn't list tenant schemas whose migrations are not up to date"
-        (db/with-db [conn {}]
+        (db/with-transaction [conn {}]
           (db/execute-one! conn [(format "UPDATE %s.flyway_schema_history SET checksum = 42 WHERE version = '1'" test-schema2)])
           (.commit ^Connection conn) ; commit so that Flyway will see the changes, since it uses a new DB connection
           (is (= [test-schema]

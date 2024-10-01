@@ -19,7 +19,7 @@
        (sort)))
 
 (deftest users-test
-  (db/with-db [conn {:rollback-only true}]
+  (db/with-transaction [conn {:rollback-only true}]
     (let [user-id (user/save-user! conn "user1" {:name "User 1"})
           unrelated-user-id (user/save-user! conn "user2" {:name "User 2"})
           unrelated-user (user/get-by-id conn unrelated-user-id)]
@@ -90,7 +90,7 @@
         (is (= unrelated-user (user/get-by-id conn unrelated-user-id)))))))
 
 (deftest check-user-exists-test
-  (db/with-db [conn {:rollback-only true}]
+  (db/with-transaction [conn {:rollback-only true}]
     (let [user-id (user/save-user! conn "user1" {:name "User 1"})]
 
       (testing "exists"

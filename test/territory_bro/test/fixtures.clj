@@ -24,7 +24,7 @@
     (assert (= "test_territorybro" schema)
             (str "Not the test database: " (pr-str schema)))
     ;; cleanup
-    (db/with-db [conn {}]
+    (db/with-transaction [conn {}]
       (delete-schemas-starting-with! conn schema))
     ;; setup
     (-> (db/master-schema schema)

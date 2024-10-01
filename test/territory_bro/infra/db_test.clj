@@ -13,13 +13,13 @@
 (use-fixtures :once db-fixture)
 
 (deftest get-schemas-test
-  (db/with-db [conn {:read-only? true}]
+  (db/with-transaction [conn {:read-only? true}]
     (is (= ["test_territorybro"]
            (->> (db/get-schemas conn)
                 (filter #{"test_territorybro"}))))))
 
 (deftest generate-tenant-schema-name-test
-  (db/with-db [conn {:read-only? true}]
+  (db/with-transaction [conn {:read-only? true}]
     (is (= "test_territorybro_00000000000000000000000000000001"
            (db/generate-tenant-schema-name conn (UUID. 0 1))))))
 
@@ -35,7 +35,7 @@
         "error if older than expected")))
 
 (deftest sql-type-conversions-test
-  (db/with-db [conn {:read-only? true}]
+  (db/with-transaction [conn {:read-only? true}]
 
     (testing "timestamptz"
       (is (= {:value (Instant/ofEpochSecond 2)}

@@ -31,7 +31,7 @@
 
 (defn- migrate-application-state! []
   (let [state (projections/cached-state)]
-    (db/with-db [conn {}]
+    (db/with-transaction [conn {}]
       (doseq [command (migration/generate-commands state)]
         (dispatcher/command! conn state command)))))
 

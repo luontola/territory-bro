@@ -18,7 +18,7 @@
 (def territory-id (UUID. 0 2))
 
 (deftest do-not-calls-test
-  (db/with-db [conn {:rollback-only true}]
+  (db/with-transaction [conn {:rollback-only true}]
     (let [injections {:conn conn
                       :check-permit (fn [_permit])}
           state {}

@@ -13,6 +13,7 @@
             [next.jdbc :as jdbc]
             [next.jdbc.prepare :as prepare]
             [next.jdbc.result-set :as result-set]
+            [next.jdbc.transaction :as transaction]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.json :as json]
             [territory-bro.infra.resources :as resources]
@@ -27,6 +28,8 @@
            (org.flywaydb.core.api FlywayException)
            (org.postgresql.jdbc PgResultSetMetaData)
            (org.postgresql.util PGobject)))
+
+(alter-var-root #'transaction/*nested-tx* (constantly :prohibit))
 
 (def jdbc-opts {:builder-fn result-set/as-unqualified-lower-maps})
 (hugsql/set-adapter! (next-adapter/hugsql-adapter-next-jdbc jdbc-opts))
@@ -212,16 +215,21 @@
 
 ;;;; Queries
 
-(defmacro with-db [binding & body]
+(defn get-connection ^Connection []
+  (let [conn (jdbc/get-connection datasource)]
+    (use-master-schema conn)
+    conn))
+
+(defmacro with-transaction [binding & body]
   (let [conn (first binding)
         options (second binding)]
-    `(jdbc/with-transaction [~conn datasource (merge {:isolation :read-committed}
-                                                     ~options)]
-       (use-master-schema ~conn)
-       ~@body)))
+    `(with-open [conn# (get-connection)]
+       (jdbc/with-transaction [~conn conn# (merge {:isolation :read-committed}
+                                                  ~options)]
+         ~@body))))
 
 (defn check-database-version [minimum-version]
-  (with-db [conn {:read-only? true}]
+  (with-transaction [conn {:read-only? true}]
     (let [metadata (.getMetaData ^Connection conn)
           version (.getDatabaseMajorVersion metadata)]
       (assert (>= version minimum-version)

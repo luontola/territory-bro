@@ -31,7 +31,7 @@
 
 (deftest event-store-test
   (with-fixtures [bypass-validating-serializers]
-    (db/with-db [conn {:rollback-only true}]
+    (db/with-transaction [conn {:rollback-only true}]
       (let [stream-1 (UUID/randomUUID)
             stream-2 (UUID/randomUUID)
             events [{:event/type :event-1
@@ -148,7 +148,7 @@
                    :stuff "gazonk"}]
                  (into [] (event-store/read-stream conn stream-1 {:since 2})))))))
 
-    (db/with-db [conn {:rollback-only true}]
+    (db/with-transaction [conn {:rollback-only true}]
       (let [dummy-event {:event/type :event-1
                          :stuff "foo"}
             cong (UUID. 0 1)
@@ -222,7 +222,7 @@
                     :gis_table nil}
                    (event-store/stream-info conn stream)))))))
 
-    (db/with-db [conn {:rollback-only true}]
+    (db/with-transaction [conn {:rollback-only true}]
       (testing "error: expected revision too low"
         (let [stream-id (UUID. 0 0x123)]
           (event-store/save! conn stream-id 0 [{:event/type :event-1}])
@@ -242,7 +242,7 @@
                           "  Hint: The transaction might succeed if retried.")))
                 (is (= db/psql-serialization-failure (.getSQLState cause)))))))))
 
-    (db/with-db [conn {:rollback-only true}]
+    (db/with-transaction [conn {:rollback-only true}]
       (testing "error: expected revision too high"
         (let [stream-id (UUID. 0 0x123)]
           (event-store/save! conn stream-id 0 [{:event/type :event-1}])
@@ -263,7 +263,7 @@
                 (is (= db/psql-serialization-failure (.getSQLState cause)))))))))))
 
 (deftest event-validation-test
-  (db/with-db [conn {:rollback-only true}]
+  (db/with-transaction [conn {:rollback-only true}]
     (let [stream-id (UUID/randomUUID)]
 
       (testing "validates events on write"
@@ -286,7 +286,7 @@
   ;; bypass validating serializers
   (binding [event-store/*event->json* event->json-no-validate
             event-store/*json->event* json->event-no-validate]
-    (db/with-db [conn {:rollback-only true}]
+    (db/with-transaction [conn {:rollback-only true}]
       (let [existing-stream-id (UUID. 0 1)
             non-existing-stream-id (UUID. 0 2)]
         (event-store/save! conn existing-stream-id 0 [{:event/type :dummy-event}])

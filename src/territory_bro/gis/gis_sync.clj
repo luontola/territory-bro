@@ -5,7 +5,6 @@
 (ns territory-bro.gis.gis-sync
   (:require [clojure.tools.logging :as log]
             [mount.core :as mount]
-            [next.jdbc :as jdbc]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.gis.gis-change :as gis-change]
             [territory-bro.gis.gis-db :as gis-db]
@@ -35,7 +34,7 @@
 
 (defn refresh! []
   (log/info "Refreshing GIS changes")
-  (when (db/with-db [conn {}]
+  (when (db/with-transaction [conn {}]
           (process-changes! conn (projections/cached-state) false))
     (projections/refresh-async!)))
 
@@ -65,8 +64,7 @@
 
 
 (defn listen-for-gis-changes [notify]
-  (with-open [conn (jdbc/get-connection db/datasource)]
-    (db/use-master-schema conn)
+  (with-open [conn (db/get-connection)]
     (db/execute-one! conn ["LISTEN gis_change"])
     (let [timeout (Duration/ofSeconds 30)
           ^PGConnection pg-conn (.unwrap conn PGConnection)]

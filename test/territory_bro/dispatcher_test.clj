@@ -4,6 +4,8 @@
 
 (ns territory-bro.dispatcher-test
   (:require [clojure.test :refer :all]
+            [next.jdbc :as jdbc]
+            [next.jdbc.transaction :as transaction]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
@@ -24,37 +26,38 @@
 
 (deftest ^:slow write-stream!-test
   (with-fixtures [db-fixture event-store-test/bypass-validating-serializers]
-    (let [write-stream! #'dispatcher/write-stream!
-          append-stream! #'dispatcher/append-stream!
-          stream-id (UUID/randomUUID)]
+    (with-open [conn (db/get-connection)]
+      (let [write-stream! #'dispatcher/write-stream!
+            append-stream! #'dispatcher/append-stream!
+            stream-id (UUID/randomUUID)]
 
-      (testing "appends events to the stream"
-        (db/with-db [conn {}]
-          (write-stream! conn stream-id (fn [old-events]
-                                          (into [] old-events)
-                                          [{:event/type :event-1
-                                            :stuff "foo"}]))
-          (write-stream! conn stream-id (fn [old-events]
-                                          (into [] old-events) ; must read all events, or stream revision calculation will break
-                                          [{:event/type :event-2
-                                            :stuff "bar"}]))
+        (testing "appends events to the stream"
+          (jdbc/with-transaction [conn conn]
+            (write-stream! conn stream-id (fn [old-events]
+                                            (into [] old-events)
+                                            [{:event/type :event-1
+                                              :stuff "foo"}]))
+            (write-stream! conn stream-id (fn [old-events]
+                                            (into [] old-events) ; must read all events, or stream revision calculation will break
+                                            [{:event/type :event-2
+                                              :stuff "bar"}])))
           (is (= [:event-1 :event-2]
                  (into []
                        (map :event/type)
-                       (event-store/read-stream conn stream-id))))))
+                       (event-store/read-stream conn stream-id)))))
 
-      (testing "uses optimistic concurrency control to detect concurrent writes to the same stream"
-        (db/with-db [conn {}]
+        (testing "uses optimistic concurrency control to detect concurrent writes to the same stream"
           (is (thrown-with-msg?
                WriteConflictException #"Failed to save stream .*? revision 3: \{:event/type :event-4, :stuff \"conflicts\"\}"
-               (write-stream! conn stream-id (fn [old-events]
-                                               (into [] old-events)
-                                               (db/with-db [conn {}]
-                                                 (append-stream! conn stream-id [{:event/type :event-3
-                                                                                  :stuff "concurrent write"}]))
-                                               [{:event/type :event-4
-                                                 :stuff "conflicts"}])))))
-        (db/with-db [conn {}]
+               (jdbc/with-transaction [conn conn]
+                 (write-stream! conn stream-id (fn [old-events]
+                                                 (into [] old-events)
+                                                 (binding [transaction/*nested-tx* :allow] ; avoid false warning about nested transactions - conn2 is a different connection
+                                                   (db/with-transaction [conn2 {}]
+                                                     (append-stream! conn2 stream-id [{:event/type :event-3
+                                                                                       :stuff "concurrent write"}])))
+                                                 [{:event/type :event-4
+                                                   :stuff "conflicts"}])))))
           (is (= [:event-1 :event-2 :event-3]
                  (into []
                        (map :event/type)

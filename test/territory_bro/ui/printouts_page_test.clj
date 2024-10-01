@@ -255,7 +255,7 @@
     (let [request {:path-params {:congregation cong-id
                                  :territory territory-id}}
           handler (dmz/wrap-db-connection printouts-page/generate-qr-code!)
-          user-id (db/with-db [conn {}]
+          user-id (db/with-transaction [conn {}]
                     (user/save-user! conn "test" {}))]
       (testutil/with-events (concat test-events
                                     (congregation/admin-permissions-granted cong-id user-id))

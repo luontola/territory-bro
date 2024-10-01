@@ -77,22 +77,22 @@
                                        ;; Though this reads the database and is thus a slow
                                        ;; operation, retries on updating the atom should not
                                        ;; happen because it's called from a single thread.
-                                       (db/with-db [conn {:read-only? true}]
+                                       (db/with-transaction [conn {:read-only? true}]
                                          (apply-new-events cached conn))))]
     (when-not (identical? old new)
       (log/info "Updated from revision" (:event/global-revision (:last-event old))
                 "to" (:event/global-revision (:last-event new))))))
 
 (defn- run-process-managers! [state]
-  (let [commands (concat
-                  (gis-user-process/generate-commands state)
-                  (db-admin/generate-commands state))
-        new-events (->> commands
-                        (mapcat (fn [command]
-                                  (db/with-db [conn {}]
-                                    (dispatcher/command! conn state command))))
-                        (doall))]
-    (seq new-events)))
+  (db/with-transaction [conn {}]
+    (let [commands (concat
+                    (gis-user-process/generate-commands state)
+                    (db-admin/generate-commands state))
+          new-events (->> commands
+                          (mapcat (fn [command]
+                                    (dispatcher/command! conn state command)))
+                          (doall))]
+      (seq new-events))))
 
 (defn- update-with-transient-events! [new-events]
   (when-some [transient-events (seq (filter :event/transient? new-events))]
@@ -110,7 +110,7 @@
     (recur)))
 
 (defn- startup-optimizations []
-  (db/with-db [conn {:read-only? true}]
+  (db/with-transaction [conn {:read-only? true}]
     (let [state (cached-state)
           injections {:get-present-schemas (fn []
                                              (gis-db/get-present-schemas conn {:schema-prefix ""}))

@@ -60,7 +60,7 @@
 
 (defn wrap-db-connection [handler]
   (fn [request]
-    (db/with-db [conn {}]
+    (db/with-transaction [conn {}]
       (binding [*conn* conn]
         (handler request)))))
 
