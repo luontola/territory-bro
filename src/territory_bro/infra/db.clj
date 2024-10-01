@@ -24,6 +24,7 @@
            (java.nio.file Paths)
            (java.sql Array Connection Date PreparedStatement Timestamp)
            (java.time Instant ZoneOffset)
+           (org.apache.http.client.utils URIBuilder)
            (org.flywaydb.core Flyway)
            (org.flywaydb.core.api FlywayException)
            (org.postgresql.jdbc PgResultSetMetaData)
@@ -33,13 +34,6 @@
 
 (def jdbc-opts {:builder-fn result-set/as-unqualified-lower-maps})
 (hugsql/set-adapter! (next-adapter/hugsql-adapter-next-jdbc jdbc-opts))
-
-(defn execute! [connectable sql-params]
-  (jdbc/execute! connectable sql-params jdbc-opts))
-
-(defn execute-one! [connectable sql-params]
-  (jdbc/execute-one! connectable sql-params jdbc-opts))
-
 
 (def expected-postgresql-version 16)
 (def ^:dynamic *explain* false)
@@ -52,6 +46,21 @@
 (def psql-undefined-object "42704")
 (def psql-duplicate-object "42710")
 
+(def ^:private public-schema "public") ; contains PostGIS types
+
+(defn master-search-path []
+  (str/join "," [(:database-schema config/env)
+                 public-schema]))
+
+(defn tenant-search-path [tenant-schema]
+  (str/join "," [tenant-schema
+                 (:database-schema config/env)
+                 public-schema]))
+
+(defn alter-jdbc-url [url f]
+  (let [url (str/replace-first url "jdbc:" "")]
+    (str "jdbc:" (f (URIBuilder. url)))))
+
 (defn connect! ^HikariDataSource [database-url]
   (log/info "Connect" database-url)
   (hikari-cp/make-datasource {:jdbc-url database-url}))
@@ -61,8 +70,33 @@
   (.close datasource))
 
 (mount/defstate ^HikariDataSource datasource
-  :start (connect! (getx config/env :database-url))
+  :start (connect! (-> (getx config/env :database-url)
+                       (alter-jdbc-url #(-> ^URIBuilder %
+                                            (.setParameter "currentSchema" (master-search-path))))))
   :stop (disconnect! datasource))
+
+(defn get-connection ^Connection []
+  (jdbc/get-connection datasource))
+
+(defn get-tenant-connection ^Connection [schema]
+  (let [url (-> (getx config/env :database-url)
+                (alter-jdbc-url #(-> ^URIBuilder %
+                                     (.setParameter "currentSchema" (tenant-search-path schema)))))]
+    (jdbc/get-connection {:connection-uri url})))
+
+(defmacro with-transaction [binding & body]
+  (let [conn (first binding)
+        options (second binding)]
+    `(with-open [conn# (get-connection)]
+       (jdbc/with-transaction [~conn conn# (merge {:isolation :read-committed}
+                                                  ~options)]
+         ~@body))))
+
+(defn execute! [connectable sql-params]
+  (jdbc/execute! connectable sql-params jdbc-opts))
+
+(defn execute-one! [connectable sql-params]
+  (jdbc/execute-one! connectable sql-params jdbc-opts))
 
 
 ;;;; SQL type conversions
@@ -137,6 +171,7 @@
                                (.createArrayOf element-type (to-array val))))
       (.setObject stmt idx (clj->pg-json val)))))
 
+
 ;;;; Database schemas
 
 (def ^:dynamic *clean-disabled* true)
@@ -195,38 +230,8 @@
             {:schema-name tenant-schema})
     tenant-schema))
 
-(defn set-search-path [conn schemas]
-  (doseq [schema schemas]
-    (assert (and schema (re-matches #"^[a-zA-Z0-9_]+$" schema))
-            {:schema schema}))
-  (execute-one! conn [(str "set search_path to " (str/join "," schemas))]))
-
-(def ^:private public-schema "public") ; contains PostGIS types
-
-(defn use-master-schema [conn]
-  (set-search-path conn [(:database-schema config/env)
-                         public-schema]))
-
-(defn use-tenant-schema [conn tenant-schema]
-  (set-search-path conn [(:database-schema config/env)
-                         tenant-schema
-                         public-schema]))
-
 
 ;;;; Queries
-
-(defn get-connection ^Connection []
-  (let [conn (jdbc/get-connection datasource)]
-    (use-master-schema conn)
-    conn))
-
-(defmacro with-transaction [binding & body]
-  (let [conn (first binding)
-        options (second binding)]
-    `(with-open [conn# (get-connection)]
-       (jdbc/with-transaction [~conn conn# (merge {:isolation :read-committed}
-                                                  ~options)]
-         ~@body))))
 
 (defn check-database-version [minimum-version]
   (with-transaction [conn {:read-only? true}]

@@ -29,8 +29,7 @@
       (testing "notifies when there are GIS changes"
         (is (nil? (.poll notifications 1 TimeUnit/MILLISECONDS))
             "before change")
-        (db/with-transaction [conn {}]
-          (db/use-tenant-schema conn test-schema)
+        (with-open [conn (db/get-tenant-connection test-schema)]
           (gis-db/create-region! conn "Somewhere" testdata/wkt-multi-polygon))
         (is (some? (.poll notifications 1 TimeUnit/SECONDS))
             "after change"))
