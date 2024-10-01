@@ -6,7 +6,6 @@
   (:require [clojure.string :as str]
             [mount.core :as mount]
             [territory-bro.dispatcher :as dispatcher]
-            [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.projections :as projections])
@@ -15,10 +14,6 @@
 (defn- delete-schemas-starting-with! [conn prefix]
   (doseq [schema (db/get-schemas conn)
           :when (str/starts-with? schema prefix)]
-    ;; TODO: there is no more gis_user table
-    (when (:exists (db/execute-one! conn ["SELECT to_regclass(?) AS exists" (str schema ".gis_user")]))
-      (doseq [gis-user (db/execute! conn [(str "SELECT username FROM " schema ".gis_user")])]
-        (gis-db/drop-role-cascade! conn (:username gis-user) (db/get-schemas conn))))
     (db/execute-one! conn [(str "DROP SCHEMA " schema " CASCADE")])))
 
 (defn db-fixture [f]
