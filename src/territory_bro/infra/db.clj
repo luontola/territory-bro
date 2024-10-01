@@ -61,12 +61,15 @@
   (let [url (str/replace-first url "jdbc:" "")]
     (str "jdbc:" (f (URIBuilder. url)))))
 
+(defn- hide-password [url]
+  (str/replace url #"password=\w+" "password=******"))
+
 (defn connect! ^HikariDataSource [database-url]
-  (log/info "Connect" database-url)
+  (log/info "Connect" (hide-password database-url))
   (hikari-cp/make-datasource {:jdbc-url database-url}))
 
 (defn disconnect! [^HikariDataSource datasource]
-  (log/info "Disconnect" (.getJdbcUrl datasource))
+  (log/info "Disconnect" (hide-password (.getJdbcUrl datasource)))
   (.close datasource))
 
 (mount/defstate ^HikariDataSource datasource
