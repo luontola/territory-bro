@@ -24,6 +24,8 @@
 
 (def ^:dynamic *base-url* (or (System/getenv "BASE_URL") "http://localhost:8080"))
 (def ^:dynamic *driver*)
+(def ^:dynamic *user*)
+(def ^:dynamic *congregation-name*)
 
 (def auth0-username "browser-test@example.com")
 (def auth0-password "m6ER6MU7bBYEHrByt8lyop3cG1W811r2")
@@ -60,7 +62,11 @@
 (use-fixtures :once (fn [f]
                       (FileUtils/deleteDirectory postmortem-dir)
                       (FileUtils/deleteDirectory download-dir)
-                      (f)))
+                      ;; XXX: because of unique nonce for each test run, tests will break if skipping test data setup and running only one test
+                      (let [nonce (System/currentTimeMillis)]
+                        (binding [*user* (str "Test User " nonce)
+                                  *congregation-name* (str "Test Congregation " nonce)]
+                          (f)))))
 
 
 (def h1 {:tag :h1})
@@ -113,6 +119,11 @@
       (wait-and-click link)
       (b/wait-has-text h1 congregation-name))))
 
+(defn go-to-congregation [driver congregation-name]
+  (doto driver
+    (wait-and-click [:congregation-list {:tag :a, :fn/has-string congregation-name}])
+    (b/wait-has-text h1 congregation-name)))
+
 (defn go-to-page [driver title]
   (let [link {:tag :a, :fn/has-string title}]
     (doto driver
@@ -124,6 +135,24 @@
     (wait-and-click [:territory-list {:tag :a, :fn/text territory-number}])
     (b/wait-has-text h1 (str "Territory " territory-number))))
 
+
+;;;; SHARED TEST DATA SETUP
+
+(deftest ^{:order -1} registration-test
+  (with-fixtures [with-browser with-per-test-postmortem]
+    (testing "register new congregation"
+      (doto *driver*
+        (dev-login-as *user*)
+        (go-to-page "Register a new congregation")
+
+        (b/fill :congregation-name *congregation-name*)
+        (wait-and-click {:tag :button, :fn/text "Register"})
+
+        ;; we should arrive at the newly created congregation's front page
+        (b/wait-has-text h1 *congregation-name*)))))
+
+
+;; NORMAL TESTS
 
 (deftest login-and-logout-test
   (with-fixtures [with-browser with-per-test-postmortem]
@@ -252,29 +281,14 @@
         (is (str/includes? (b/get-url *driver*) ".auth0.com/"))))))
 
 
-(deftest registration-test
+(deftest user-management-test
   (with-fixtures [with-browser with-per-test-postmortem]
-    (let [nonce (System/currentTimeMillis)
-          user1 (str "Test User1 " nonce)
-          user2 (str "Test User2 " nonce)
-          *user2-id (atom nil)
-          congregation-name (str "Test Congregation " nonce)
-          *congregation-url (atom nil)]
-
-      (testing "register new congregation"
-        (doto *driver*
-          (dev-login-as user1)
-          (go-to-page "Register a new congregation")
-
-          (b/fill :congregation-name congregation-name)
-          (wait-and-click {:tag :button, :fn/text "Register"})
-
-          ;; we should arrive at the newly created congregation's front page
-          (b/wait-has-text h1 congregation-name))
-        (reset! *congregation-url (b/get-url *driver*)))
-
-      ;; TODO: extract the above to a shared test setup, so that all tests will use the same congregation as test data
-      ;; TODO: extract the below as user-management-test?
+    (doto *driver*
+      (dev-login-as *user*)
+      (go-to-congregation *congregation-name*))
+    (let [congregation-url (b/get-url *driver*)
+          user2 (str "Test User2 " (System/currentTimeMillis))
+          *user2-id (atom nil)]
 
       (testing "find out user2's ID"
         (doto *driver*
@@ -289,9 +303,9 @@
 
       (testing "add user2 to congregation"
         (doto *driver*
-          (dev-login-as user1)
-          (b/go @*congregation-url)
-          (b/wait-has-text h1 congregation-name)
+          (dev-login-as *user*)
+          (b/go congregation-url)
+          (b/wait-has-text h1 *congregation-name*)
           (go-to-page "Settings")
 
           (b/fill [:users-section :user-id] @*user2-id)
@@ -301,14 +315,14 @@
       (testing "user2 can view congregation after being added"
         (doto *driver*
           (dev-login-as user2)
-          (b/go @*congregation-url)
-          (b/wait-has-text h1 congregation-name)))
+          (b/go congregation-url)
+          (b/wait-has-text h1 *congregation-name*)))
 
       (testing "remove user2 from congregation"
         (doto *driver*
-          (dev-login-as user1)
-          (b/go @*congregation-url)
-          (b/wait-has-text h1 congregation-name)
+          (dev-login-as *user*)
+          (b/go congregation-url)
+          (b/wait-has-text h1 *congregation-name*)
           (go-to-page "Settings")
 
           (wait-and-click [:users-section {:tag :tr, :fn/has-string user2} {:tag :button, :fn/text "Remove user"}])
@@ -317,35 +331,21 @@
       (testing "user2 cannot view congregation after being removed"
         (doto *driver*
           (dev-login-as user2)
-          (b/go @*congregation-url)
+          (b/go congregation-url)
           (b/wait-has-text h1 "Access denied"))))))
-
 
 (deftest settings-test
   (with-fixtures [with-browser with-per-test-postmortem]
-    (let [nonce (System/currentTimeMillis)
-          user (str "Test User " nonce)
-          congregation-name (str "Test Congregation " nonce)]
+    (doto *driver*
+      (dev-login-as *user*)
+      (go-to-congregation *congregation-name*))
 
-      (testing "register new congregation"
-        (doto *driver*
-          (dev-login-as user)
-          (go-to-page "Register a new congregation")
-
-          (b/fill :congregation-name congregation-name)
-          (wait-and-click {:tag :button, :fn/text "Register"})
-
-          ;; we should arrive at the newly created congregation's front page
-          (b/wait-has-text h1 congregation-name)))
-
-      ;; TODO: extract the above to a shared test setup, so that all tests will use the same congregation as test data
-
-      (testing "edit congregation settings"
-        (doto *driver*
-          (go-to-page "Settings")
-          (b/fill :congregation-name " B")
-          (wait-and-click {:tag :button, :fn/text "Save settings"})
-          (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string (str congregation-name " B")}]))))))
+    (testing "edit congregation settings"
+      (doto *driver*
+        (go-to-page "Settings")
+        (b/fill :congregation-name " B") ; adding text to the end should not break go-to-congregation for other tests
+        (wait-and-click {:tag :button, :fn/text "Save settings"})
+        (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string (str *congregation-name* " B")}])))))
 
 (deftest gis-access-test
   (with-fixtures [with-browser with-per-test-postmortem]
