@@ -107,7 +107,7 @@ function initTerritoryMiniMap(element: HTMLElement,
   });
 
   return {
-    setStreetsLayerRaster(mapRaster: MapRaster): void {
+    setStreetsLayerRaster(mapRaster: MapRaster) {
       streetsLayer.setSource(mapRaster.makeSource());
     },
     unmount() {

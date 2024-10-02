@@ -6,7 +6,7 @@ import styles from "./OpenLayersMap.module.css";
 import {findMapRasterById, MapRaster, mapRasters} from "./mapOptions.ts";
 
 export abstract class OpenLayersMapElement extends HTMLElement {
-  map;
+  map?: { unmount(): void };
 
   connectedCallback() {
     const mapRaster = findMapRasterById(this.getAttribute("map-raster") ?? mapRasters[0].id) ?? mapRasters[0];
@@ -35,7 +35,7 @@ export abstract class OpenLayersMapElement extends HTMLElement {
     mapRaster: MapRaster,
     printout: boolean,
     settingsKey: string | null
-  });
+  }): { unmount(): void } | undefined;
 
   disconnectedCallback() {
     this.map?.unmount();

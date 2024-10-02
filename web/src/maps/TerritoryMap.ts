@@ -115,7 +115,7 @@ function initTerritoryMap(element: HTMLDivElement,
   rememberViewAdjustments(map, settingsKey);
 
   return {
-    setStreetsLayerRaster(mapRaster: MapRaster): void {
+    setStreetsLayerRaster(mapRaster: MapRaster) {
       streetsLayer.setSource(mapRaster.makeSource());
     },
     unmount() {

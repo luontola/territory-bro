@@ -99,7 +99,7 @@ function initMap(element: HTMLDivElement,
                  congregation: LocationOnly,
                  territories: TerritoryPlus[],
                  visibleTerritories: string[],
-                 onClick: (string) => void): any {
+                 onClick: (string) => void) {
   const congregationLayer = new VectorLayer({
     source: new VectorSource({
       features: wktToFeatures(congregation.location)
@@ -209,7 +209,7 @@ function initMap(element: HTMLDivElement,
   });
 
   return {
-    setStreetsLayerRaster(mapRaster: MapRaster): void {
+    setStreetsLayerRaster(mapRaster: MapRaster) {
       streetsLayer.setSource(mapRaster.makeSource());
     },
     updateVisibleTerritories(territoryIds: string[]) {
