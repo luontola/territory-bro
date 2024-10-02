@@ -11,10 +11,12 @@
             [etaoin.api2 :as b2]
             [next.jdbc :as jdbc]
             [reitit.core :as reitit]
+            [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.db :as db]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [thrown-with-msg?]]
-            [territory-bro.ui :as ui])
+            [territory-bro.ui :as ui]
+            [territory-bro.ui.html :as html])
   (:import (java.io File)
            (java.util UUID)
            (org.apache.commons.io FileUtils)
@@ -338,6 +340,32 @@
 
       ;; TODO: extract the above to a shared test setup, so that all tests will use the same congregation as test data
 
+      (testing "edit congregation settings"
+        (doto *driver*
+          (go-to-page "Settings")
+          (b/fill :congregation-name " B")
+          (wait-and-click {:tag :button, :fn/text "Save settings"})
+          (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string (str congregation-name " B")}]))))))
+
+(deftest gis-access-test
+  (with-fixtures [with-browser with-per-test-postmortem]
+    (let [nonce (System/currentTimeMillis)
+          user (str "Test User " nonce)
+          congregation-name (str "Test Congregation " nonce)]
+
+      (testing "register new congregation"
+        (doto *driver*
+          (dev-login-as user)
+          (go-to-page "Register a new congregation")
+
+          (b/fill :congregation-name congregation-name)
+          (wait-and-click {:tag :button, :fn/text "Register"})
+
+          ;; we should arrive at the newly created congregation's front page
+          (b/wait-has-text h1 congregation-name)))
+
+      ;; TODO: extract the above to a shared test setup, so that all tests will use the same congregation as test data
+
       (let [qgis-project (io/file download-dir (str congregation-name ".qgs"))]
         (testing "download QGIS project file"
           (doto *driver*
@@ -346,28 +374,51 @@
           (b/wait-predicate #(.isFile qgis-project)
                             {:message (str "Wait until file exists: " qgis-project)}))
 
-        (testing "access GIS database"
-          (let [[_ dbname host port user password schema] (re-find #"dbname='(\w+)' host=(\w+) port=(\w+) user='(\w+)' password='(.*?)' .* table=\"(\w+)\"\."
-                                                                   (slurp qgis-project))
-                jdbc-url (str "jdbc:postgresql://" host ":" port "/" dbname "?user=" user "&password=" password)]
+        (let [[_ dbname host port user password schema] (re-find #"dbname='(\w+)' host=(\w+) port=(\w+) user='(\w+)' password='(.*?)' .* table=\"(\w+)\"\."
+                                                                 (slurp qgis-project))
+              jdbc-url (str "jdbc:postgresql://" host ":" port "/" dbname "?user=" user "&password=" password "&currentSchema=" schema ",public")
+              congregation-boundary-id (UUID/randomUUID)
+              region-id (UUID/randomUUID)
+              territory-id1 (UUID/randomUUID)
+              territory-id2 (UUID/randomUUID)
+              territory-id3 (UUID/randomUUID)]
+
+          (testing "access GIS database"
             (is (str/starts-with? user "gis_user_"))
             (is (str/starts-with? schema "territorybro_"))
             (with-open [conn (jdbc/get-connection {:connection-uri jdbc-url})]
-              ;; TODO: test writing GIS data
               (is (= [] (db/execute! conn [(str "select * from " schema ".territory limit 1")]))
                   "can access the congregation's schema")
               (is (thrown-with-msg? PSQLException
                                     #"ERROR: permission denied for schema territorybro"
                                     (db/execute! conn ["select * from territorybro.event limit 1"]))
-                  "cannot access other schemas")))))
+                  "cannot access other schemas")
+              (db/execute-one! conn ["insert into congregation_boundary (id, location) values (?, ?::geography)"
+                                     congregation-boundary-id testdata/wkt-helsinki])
+              (db/execute-one! conn ["insert into subregion (id, name, location) values (?, ?, ?::geography)"
+                                     region-id "South Helsinki" testdata/wkt-south-helsinki])
+              (db/execute-one! conn ["insert into territory (id, number, addresses, subregion, location) values (?, ?, ?, ?, ?::geography)"
+                                     territory-id1 "101" "Rautatientori" "South Helsinki" testdata/wkt-helsinki-rautatientori])
+              (db/execute-one! conn ["insert into territory (id, number, addresses, subregion, location) values (?, ?, ?, ?, ?::geography)"
+                                     territory-id2 "102" "Kauppatori" "South Helsinki" testdata/wkt-helsinki-kauppatori])
+              (db/execute-one! conn ["insert into territory (id, number, addresses, subregion, location) values (?, ?, ?, ?, ?::geography)"
+                                     territory-id3 "103" "Narinkkatori" "South Helsinki" testdata/wkt-helsinki-narinkkatori])))
 
-      (testing "edit congregation settings"
-        (doto *driver*
-          (go-to-page "Settings")
-          (b/fill :congregation-name " B")
-          (wait-and-click {:tag :button, :fn/text "Save settings"})
-          (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string (str congregation-name " B")}]))))))
-
+          (testing "GIS data is synced to the web app"
+            (doto *driver*
+              (go-to-page "Territories"))
+            (when-not (b/has-text? *driver* "101")
+              (doto *driver*
+                (b/wait 1) ; it shouldn't take longer than this for the changes to be synced
+                (b/refresh)
+                (b/wait-has-text h1 "Territories")))
+            (is (= (html/normalize-whitespace
+                    "Number  Region          Addresses
+                     101     South Helsinki  Rautatientori
+                     102     South Helsinki  Kauppatori
+                     103     South Helsinki  Narinkkatori")
+                   (html/normalize-whitespace
+                    (b/get-element-text *driver* :territory-list))))))))))
 
 (defn- two-random-territories [driver]
   (->> (b/query-all driver [:territory-list {:tag :a}])
