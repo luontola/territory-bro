@@ -22,6 +22,7 @@
           <entry key="clojure.core/defonce" value="1" />
           <entry key="conman.core/with-transaction" value="1" />
           <entry key="etaoin.api/with-postmortem" value="2" />
+          <entry key="kaocha.plugin/defplugin" value="1" />
           <entry key="re-frame.core/reg-event-db" value="1000" />
           <entry key="re-frame.core/reg-sub" value="1000" />
           <entry key="secretary.core/defroute" value="-1" />
