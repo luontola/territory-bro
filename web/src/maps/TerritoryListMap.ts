@@ -177,6 +177,11 @@ function initMap(element: HTMLDivElement,
   });
   resetZoom(map, {});
 
+  // This seemingly duplicates rememberViewAdjustments, but a big
+  // difference is that this is stored in history API instead of
+  // session storage. When a user arrives to this page through
+  // the navigation menu instead of back button, then the map zoom
+  // should be reset.
   const mapState = getPageState('map');
   if (mapState) {
     map.getView().setCenter(mapState.center)

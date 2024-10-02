@@ -14,6 +14,7 @@ import {
   makePrintoutView,
   makeStreetsLayer,
   MapRaster,
+  rememberViewAdjustments,
   Territory,
   territoryStrokeStyle,
   territoryTextStyle,
@@ -23,18 +24,21 @@ import {
 import {OpenLayersMapElement} from "./OpenLayersMap.ts";
 
 export class RegionMapElement extends OpenLayersMapElement {
-  createMap({root, mapRaster}) {
+  createMap({root, mapRaster, settingsKey}) {
     const region = {
       location: this.getAttribute("region-location")
     };
     const territories = JSON.parse(this.getAttribute("territories") ?? "[]");
-    const map = initRegionMap(root, region, territories);
+    const map = initRegionMap(root, region, territories, settingsKey);
     map.setStreetsLayerRaster(mapRaster);
     return map
   }
 }
 
-function initRegionMap(element: HTMLDivElement, region: LocationOnly, territories: Territory[]): any {
+function initRegionMap(element: HTMLDivElement,
+                       region: LocationOnly,
+                       territories: Territory[],
+                       settingsKey: string | null) {
   const regionLayer = new VectorLayer({
     source: new VectorSource({
       features: wktToFeatures(region.location)
@@ -83,6 +87,7 @@ function initRegionMap(element: HTMLDivElement, region: LocationOnly, territorie
     view: makePrintoutView(),
   });
   resetZoom(map, {});
+  rememberViewAdjustments(map, settingsKey);
 
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {

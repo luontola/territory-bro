@@ -14,6 +14,7 @@ import {
   makeStreetsLayer,
   makeView,
   MapRaster,
+  rememberViewAdjustments,
   territoryFillStyle,
   territoryStrokeStyle,
   wktToFeatures
@@ -25,11 +26,11 @@ import Point from "ol/geom/Point";
 import {Circle as CircleStyle, Fill, Stroke} from "ol/style";
 
 export class TerritoryMapElement extends OpenLayersMapElement {
-  createMap({root, mapRaster, printout}) {
+  createMap({root, mapRaster, printout, settingsKey}) {
     const territory = {
       location: this.getAttribute("territory-location")
     };
-    const map = initTerritoryMap(root, territory, printout)
+    const map = initTerritoryMap(root, territory, printout, settingsKey)
     map.setStreetsLayerRaster(mapRaster);
     return map
   }
@@ -76,7 +77,10 @@ function startGeolocation(map) {
   return geolocation;
 }
 
-function initTerritoryMap(element: HTMLDivElement, territory: LocationOnly, printout: boolean): any {
+function initTerritoryMap(element: HTMLDivElement,
+                          territory: LocationOnly,
+                          printout: boolean,
+                          settingsKey: string | null) {
   const territoryWkt = territory.location;
 
   const territoryLayer = new VectorLayer({
@@ -108,6 +112,7 @@ function initTerritoryMap(element: HTMLDivElement, territory: LocationOnly, prin
     view: printout ? makePrintoutView() : makeView({}),
   });
   resetZoom(map, {});
+  rememberViewAdjustments(map, settingsKey);
 
   return {
     setStreetsLayerRaster(mapRaster: MapRaster): void {

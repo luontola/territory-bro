@@ -74,6 +74,7 @@
         (print-date-notice
          print-date
          [:territory-map {:territory-location (:territory/location territory)
+                          :settings-key (str "printout/territory-card/" (:territory/id territory))
                           :map-raster map-raster
                           :printout true}])]
 
@@ -108,6 +109,7 @@
         (print-date-notice
          print-date
          [:territory-map {:territory-location (:territory/location territory)
+                          :settings-key (str "printout/territory-card-map-only/" (:territory/id territory))
                           :map-raster map-raster
                           :printout true}])]
 
@@ -140,6 +142,7 @@
         (print-date-notice
          print-date
          [:territory-map {:territory-location (:territory/location territory)
+                          :settings-key (str "printout/rural-territory-card/" (:territory/id territory))
                           :map-raster map-raster
                           :printout true}])]
 
@@ -163,6 +166,7 @@
       [:div {:class (:root styles)}
        [:neighborhood-map {:territory-number (:territory/number territory)
                            :territory-location (:territory/location territory)
+                           :settings-key (str "printout/neighborhood-card/" (:territory/id territory))
                            :map-raster map-raster
                            :printout true}]]))))
 
@@ -177,5 +181,6 @@
          print-date
          [:region-map {:region-location (:region/location region)
                        :territories territories
+                       :settings-key (str "printout/region-printout/" (:region/id region))
                        :map-raster map-raster
                        :printout true}])]]))))

@@ -11,6 +11,7 @@ export abstract class OpenLayersMapElement extends HTMLElement {
   connectedCallback() {
     const mapRaster = findMapRasterById(this.getAttribute("map-raster") ?? mapRasters[0].id) ?? mapRasters[0];
     const printout = this.getAttribute("printout") !== null;
+    const settingsKey = this.getAttribute("settings-key");
 
     let className = styles.root;
     if (printout) {
@@ -25,11 +26,16 @@ export abstract class OpenLayersMapElement extends HTMLElement {
     // avoids that. It's not known if there is some event we could await instead.
     // Maybe the browser's layout engine hasn't yet determined the div's size?
     setTimeout(() => {
-      this.map = this.createMap({root, mapRaster, printout})
+      this.map = this.createMap({root, mapRaster, printout, settingsKey})
     }, 20);
   }
 
-  abstract createMap(opts: { root: HTMLDivElement, mapRaster: MapRaster, printout: boolean });
+  abstract createMap(opts: {
+    root: HTMLDivElement,
+    mapRaster: MapRaster,
+    printout: boolean,
+    settingsKey: string | null
+  });
 
   disconnectedCallback() {
     this.map?.unmount();

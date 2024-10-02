@@ -26,6 +26,7 @@ import i18n from "../i18n.ts";
 import Geolocation from "ol/Geolocation";
 import proj4 from 'proj4';
 import {register} from 'ol/proj/proj4';
+import Map from "ol/Map";
 
 proj4.defs(
   'EPSG:3067',
@@ -190,6 +191,39 @@ export function makeView(opts: {}) {
     ...opts,
   });
 }
+
+export function rememberViewAdjustments(map: Map, settingsKey: string | null) {
+
+  function restoreSettings(settingsKey: string) {
+    const settings = sessionStorage.getItem(settingsKey);
+    if (!settings) {
+      return;
+    }
+    try {
+      const {resolution, center, rotation} = JSON.parse(settings);
+      const view = map.getView();
+      view.setResolution(resolution);
+      view.setCenter(center);
+      view.setRotation(rotation);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function saveSettings(settingsKey: string) {
+    const view = map.getView();
+    const resolution = view.getResolution();
+    const center = view.getCenter();
+    const rotation = view.getRotation();
+    sessionStorage.setItem(settingsKey, JSON.stringify({resolution, center, rotation}));
+  }
+
+  if (settingsKey) {
+    restoreSettings(settingsKey);
+    map.on('moveend', () => saveSettings(settingsKey));
+  }
+}
+
 
 // visual style
 
