@@ -26,6 +26,7 @@
 (def ^:dynamic *driver*)
 (def ^:dynamic *user*)
 (def ^:dynamic *congregation-name*)
+(def *congregation-url (atom nil))
 
 (def auth0-username "browser-test@example.com")
 (def auth0-password "m6ER6MU7bBYEHrByt8lyop3cG1W811r2")
@@ -66,6 +67,7 @@
                       (let [nonce (System/currentTimeMillis)]
                         (binding [*user* (str "Test User " nonce)
                                   *congregation-name* (str "Test Congregation " nonce)]
+                          (reset! *congregation-url nil)
                           (f)))))
 
 
@@ -111,14 +113,6 @@
       (b/go (str *base-url* (str "/dev-login?" params)))
       (b/wait-visible :logout-button))))
 
-(defn go-to-any-congregation [driver]
-  (let [link [:congregation-list {:tag :a}]
-        _ (b/wait-visible driver link)
-        congregation-name (b/get-element-text driver link)]
-    (doto driver
-      (wait-and-click link)
-      (b/wait-has-text h1 congregation-name))))
-
 (defn go-to-congregation [driver congregation-name]
   (doto driver
     (wait-and-click [:congregation-list {:tag :a, :fn/has-string congregation-name}])
@@ -138,7 +132,7 @@
 
 ;;;; SHARED TEST DATA SETUP
 
-(deftest ^{:order -1} registration-test
+(deftest ^{:order -2} registration-test
   (with-fixtures [with-browser with-per-test-postmortem]
     (testing "register new congregation"
       (doto *driver*
@@ -149,7 +143,69 @@
         (wait-and-click {:tag :button, :fn/text "Register"})
 
         ;; we should arrive at the newly created congregation's front page
-        (b/wait-has-text h1 *congregation-name*)))))
+        (b/wait-has-text h1 *congregation-name*))
+      (reset! *congregation-url (b/get-url *driver*)))))
+
+
+(deftest ^{:order -1} gis-access-test
+  (with-fixtures [with-browser with-per-test-postmortem]
+    (doto *driver*
+      (dev-login-as *user*)
+      (go-to-congregation *congregation-name*))
+
+    (let [qgis-project (io/file download-dir (str *congregation-name* ".qgs"))]
+      (testing "download QGIS project file"
+        (doto *driver*
+          (go-to-page "Settings")
+          (wait-and-click {:tag :a, :fn/text "Download QGIS project file"}))
+        (b/wait-predicate #(.isFile qgis-project)
+                          {:message (str "Wait until file exists: " qgis-project)}))
+
+      (let [[_ dbname host port user password schema] (re-find #"dbname='(\w+)' host=(\w+) port=(\w+) user='(\w+)' password='(.*?)' .* table=\"(\w+)\"\."
+                                                               (slurp qgis-project))
+            jdbc-url (str "jdbc:postgresql://" host ":" port "/" dbname "?user=" user "&password=" password "&currentSchema=" schema ",public")
+            congregation-boundary-id (UUID/randomUUID)
+            region-id (UUID/randomUUID)
+            territory-id1 (UUID/randomUUID)
+            territory-id2 (UUID/randomUUID)
+            territory-id3 (UUID/randomUUID)]
+
+        (testing "access GIS database"
+          (is (str/starts-with? user "gis_user_"))
+          (is (str/starts-with? schema "territorybro_"))
+          (with-open [conn (jdbc/get-connection {:connection-uri jdbc-url})]
+            (is (= [] (db/execute! conn [(str "select * from " schema ".territory limit 1")]))
+                "can access the congregation's schema")
+            (is (thrown-with-msg? PSQLException
+                                  #"ERROR: permission denied for schema territorybro"
+                                  (db/execute! conn ["select * from territorybro.event limit 1"]))
+                "cannot access other schemas")
+            (db/execute-one! conn ["insert into congregation_boundary (id, location) values (?, ?::geography)"
+                                   congregation-boundary-id testdata/wkt-helsinki])
+            (db/execute-one! conn ["insert into subregion (id, name, location) values (?, ?, ?::geography)"
+                                   region-id "South Helsinki" testdata/wkt-south-helsinki])
+            (db/execute-one! conn ["insert into territory (id, number, addresses, subregion, location) values (?, ?, ?, ?, ?::geography)"
+                                   territory-id1 "101" "Rautatientori" "South Helsinki" testdata/wkt-helsinki-rautatientori])
+            (db/execute-one! conn ["insert into territory (id, number, addresses, subregion, location) values (?, ?, ?, ?, ?::geography)"
+                                   territory-id2 "102" "Kauppatori" "South Helsinki" testdata/wkt-helsinki-kauppatori])
+            (db/execute-one! conn ["insert into territory (id, number, addresses, subregion, location) values (?, ?, ?, ?, ?::geography)"
+                                   territory-id3 "103" "Narinkkatori" "South Helsinki" testdata/wkt-helsinki-narinkkatori])))
+
+        (testing "GIS data is synced to the web app"
+          (doto *driver*
+            (go-to-page "Territories"))
+          (when-not (b/has-text? *driver* "101")
+            (doto *driver*
+              (b/wait 1) ; it shouldn't take longer than this for the changes to be synced
+              (b/refresh)
+              (b/wait-has-text h1 "Territories")))
+          (is (= (html/normalize-whitespace
+                  "Number  Region          Addresses
+                   101     South Helsinki  Rautatientori
+                   102     South Helsinki  Kauppatori
+                   103     South Helsinki  Narinkkatori")
+                 (html/normalize-whitespace
+                  (b/get-element-text *driver* :territory-list)))))))))
 
 
 ;; NORMAL TESTS
@@ -181,14 +237,14 @@
 
 (deftest login-via-entering-restricted-page-test
   (with-fixtures [with-browser with-per-test-postmortem]
-    (let [restricted-page-url (str *base-url* "/congregation/" (UUID/randomUUID) "?foo=bar&gazonk")] ; also query string should be restored
+    (let [restricted-page-url (str @*congregation-url "?foo=bar&gazonk")] ; also query string should be restored
 
       (testing "enter restricted page, redirects to login"
         (doto *driver*
           (b/go restricted-page-url)
           (submit-auth0-login-form)))
 
-      ;; TODO: don't use a random congregation ID, but open an existing congregation for a more common use case
+      ;; TODO: open a congregation which the user can access, for a more common use case
       (b/wait-has-text *driver* h1 "Access denied")
 
       (testing "after login, redirects to the page which the user originally entered"
@@ -334,6 +390,7 @@
           (b/go congregation-url)
           (b/wait-has-text h1 "Access denied"))))))
 
+
 (deftest settings-test
   (with-fixtures [with-browser with-per-test-postmortem]
     (doto *driver*
@@ -347,103 +404,23 @@
         (wait-and-click {:tag :button, :fn/text "Save settings"})
         (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string (str *congregation-name* " B")}])))))
 
-(deftest gis-access-test
-  (with-fixtures [with-browser with-per-test-postmortem]
-    (let [nonce (System/currentTimeMillis)
-          user (str "Test User " nonce)
-          congregation-name (str "Test Congregation " nonce)]
 
-      (testing "register new congregation"
-        (doto *driver*
-          (dev-login-as user)
-          (go-to-page "Register a new congregation")
-
-          (b/fill :congregation-name congregation-name)
-          (wait-and-click {:tag :button, :fn/text "Register"})
-
-          ;; we should arrive at the newly created congregation's front page
-          (b/wait-has-text h1 congregation-name)))
-
-      ;; TODO: extract the above to a shared test setup, so that all tests will use the same congregation as test data
-
-      (let [qgis-project (io/file download-dir (str congregation-name ".qgs"))]
-        (testing "download QGIS project file"
-          (doto *driver*
-            (go-to-page "Settings")
-            (wait-and-click {:tag :a, :fn/text "Download QGIS project file"}))
-          (b/wait-predicate #(.isFile qgis-project)
-                            {:message (str "Wait until file exists: " qgis-project)}))
-
-        (let [[_ dbname host port user password schema] (re-find #"dbname='(\w+)' host=(\w+) port=(\w+) user='(\w+)' password='(.*?)' .* table=\"(\w+)\"\."
-                                                                 (slurp qgis-project))
-              jdbc-url (str "jdbc:postgresql://" host ":" port "/" dbname "?user=" user "&password=" password "&currentSchema=" schema ",public")
-              congregation-boundary-id (UUID/randomUUID)
-              region-id (UUID/randomUUID)
-              territory-id1 (UUID/randomUUID)
-              territory-id2 (UUID/randomUUID)
-              territory-id3 (UUID/randomUUID)]
-
-          (testing "access GIS database"
-            (is (str/starts-with? user "gis_user_"))
-            (is (str/starts-with? schema "territorybro_"))
-            (with-open [conn (jdbc/get-connection {:connection-uri jdbc-url})]
-              (is (= [] (db/execute! conn [(str "select * from " schema ".territory limit 1")]))
-                  "can access the congregation's schema")
-              (is (thrown-with-msg? PSQLException
-                                    #"ERROR: permission denied for schema territorybro"
-                                    (db/execute! conn ["select * from territorybro.event limit 1"]))
-                  "cannot access other schemas")
-              (db/execute-one! conn ["insert into congregation_boundary (id, location) values (?, ?::geography)"
-                                     congregation-boundary-id testdata/wkt-helsinki])
-              (db/execute-one! conn ["insert into subregion (id, name, location) values (?, ?, ?::geography)"
-                                     region-id "South Helsinki" testdata/wkt-south-helsinki])
-              (db/execute-one! conn ["insert into territory (id, number, addresses, subregion, location) values (?, ?, ?, ?, ?::geography)"
-                                     territory-id1 "101" "Rautatientori" "South Helsinki" testdata/wkt-helsinki-rautatientori])
-              (db/execute-one! conn ["insert into territory (id, number, addresses, subregion, location) values (?, ?, ?, ?, ?::geography)"
-                                     territory-id2 "102" "Kauppatori" "South Helsinki" testdata/wkt-helsinki-kauppatori])
-              (db/execute-one! conn ["insert into territory (id, number, addresses, subregion, location) values (?, ?, ?, ?, ?::geography)"
-                                     territory-id3 "103" "Narinkkatori" "South Helsinki" testdata/wkt-helsinki-narinkkatori])))
-
-          (testing "GIS data is synced to the web app"
-            (doto *driver*
-              (go-to-page "Territories"))
-            (when-not (b/has-text? *driver* "101")
-              (doto *driver*
-                (b/wait 1) ; it shouldn't take longer than this for the changes to be synced
-                (b/refresh)
-                (b/wait-has-text h1 "Territories")))
-            (is (= (html/normalize-whitespace
-                    "Number  Region          Addresses
-                     101     South Helsinki  Rautatientori
-                     102     South Helsinki  Kauppatori
-                     103     South Helsinki  Narinkkatori")
-                   (html/normalize-whitespace
-                    (b/get-element-text *driver* :territory-list))))))))))
-
-(defn- two-random-territories [driver]
-  (->> (b/query-all driver [:territory-list {:tag :a}])
-       (shuffle) ; pick the territories randomly
-       (into nil) ; de-chunk to avoid calling get-element-text-el more than twice
-       (map (fn [el]
-              {:number (b/get-element-text-el driver el)
-               :link (b/get-element-attr-el driver el :href)}))
-       (take 2)))
+(defn- get-territory-url [territory-number]
+  (let [el (b/query *driver* [:territory-list {:tag :a, :fn/text (str territory-number)}])
+        href (b/get-element-attr-el *driver* el :href)]
+    (is (not (str/blank? href)))
+    (str *base-url* href)))
 
 (deftest share-territory-link-test
   (with-fixtures [with-browser with-per-test-postmortem]
     (doto *driver*
-      (b/go *base-url*)
-      (do-dev-login)
-      ;; XXX: this test assumes that the test user already has a congregation and territories
-      ;; TODO: test registration and adding territories; use that as test data for other tests
-      (go-to-any-congregation)
+      (dev-login-as *user*)
+      (go-to-congregation *congregation-name*)
       (go-to-page "Territories"))
 
-    (let [[shared-territory unrelated-territory] (two-random-territories *driver*)
-          unrelated-territory-url (str *base-url* (:link unrelated-territory))]
-      (is (not (str/blank? (:number shared-territory))))
-      (is (not (str/blank? (:number unrelated-territory))))
-      (go-to-territory *driver* (:number shared-territory))
+    (let [shared-territory-number "101"
+          not-shared-territory-url (get-territory-url "102")]
+      (go-to-territory *driver* shared-territory-number)
 
       (doto *driver*
         (wait-and-click {:tag :button, :fn/has-string "Share a link"})
@@ -460,7 +437,7 @@
             (b/delete-cookies)
             (b/go share-link)
             (b/wait-has-text h1 "Territory"))
-          (is (= (str "Territory " (:number shared-territory))
+          (is (= (str "Territory " shared-territory-number)
                  (b/get-element-text *driver* h1))
               "user can view the shared territory")
           (is (b/visible? *driver* :login-button)
@@ -468,7 +445,7 @@
 
         (testing "cannot see territories which were not shared"
           (go-to-page *driver* "Territories")
-          (is (= [(:number shared-territory)]
+          (is (= [shared-territory-number]
                  (->> (b/query-all *driver* [:territory-list {:tag :a}])
                       (map #(b/get-element-text-el *driver* %))))
               "page lists only the shared territory")
@@ -476,27 +453,25 @@
               "page contains a disclaimer")
 
           (doto *driver*
-            (b/go unrelated-territory-url)
+            (b/go not-shared-territory-url)
             (b/wait-visible :username))
           (is (= "Log in | Territory Bro (Dev)"
                  (b/get-title *driver*))
-              "trying to view an unrelated territory of the same congregation requires logging in"))))))
+              "trying to view a not shared territory of the same congregation requires logging in"))))))
+
 
 (deftest edit-do-not-calls-test
   (with-fixtures [with-browser with-per-test-postmortem]
     (doto *driver*
-      (b/go *base-url*)
-      (do-dev-login)
-      ;; XXX: this test assumes that the test user already has a congregation and territories
-      ;; TODO: test registration and adding territories; use that as test data for other tests
-      (go-to-any-congregation)
+      (dev-login-as *user*)
+      (go-to-congregation *congregation-name*)
       (go-to-page "Territories"))
 
     (testing "can edit do-not-calls"
       (let [test-content (str "test content " (UUID/randomUUID))
             input-field [:do-not-calls {:tag :textarea}]]
         (doto *driver*
-          (wait-and-click [:territory-list {:tag :a}])
+          (go-to-territory "101")
           (wait-and-click [:do-not-calls {:tag :button, :fn/has-string "Edit"}])
           (b/wait-visible input-field)
           (b/clear input-field)
@@ -510,7 +485,7 @@
   (with-fixtures [with-browser with-per-test-postmortem]
     (doto *driver*
       (b/go *base-url*)
-      (do-dev-login)) ; login to avoid 401 Unauthorized when testing for 403 Forbidden
+      (do-dev-login)) ; login to avoid 401 Unauthorized (or redirect to login) when testing for 403 Forbidden
 
     (testing "404 Not Found"
       (doto *driver*
@@ -521,13 +496,14 @@
 
     (testing "403 Forbidden"
       (doto *driver*
-        (b/go (str *base-url* "/congregation/" (UUID/randomUUID)))
+        (b/go @*congregation-url)
         (b/wait-visible h1))
       (is (= "Access denied 🛑"
              (b/get-element-text *driver* h1))))
 
     (testing "error pages show the user's authentication status"
       (is (b/visible? *driver* :logout-button)))))
+
 
 (deftest sudo-test
   (with-fixtures [with-browser with-per-test-postmortem]
@@ -547,4 +523,7 @@
         (b/go (str *base-url* "/sudo"))
         (b/wait-visible h1))
       (is (= "Territory Bro"
-             (b/get-element-text *driver* h1))))))
+             (b/get-element-text *driver* h1))))
+
+    (testing "after sudo, can access every congregation"
+      (go-to-congregation *driver* *congregation-name*))))
