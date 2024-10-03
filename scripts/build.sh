@@ -29,6 +29,7 @@ java -XX:DumpLoadedClassList=target/uberjar/classes.list -Dconf=dev-config.edn -
 
 export GIT_COMMIT=$(git rev-parse HEAD)
 export BUILD_TIMESTAMP=$(date -Iseconds)
+export BUILDKIT_PROGRESS=plain
 docker compose build --pull app
 
 docker compose up -d app
