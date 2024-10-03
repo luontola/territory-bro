@@ -144,7 +144,13 @@
 
         ;; we should arrive at the newly created congregation's front page
         (b/wait-has-text h1 *congregation-name*))
-      (reset! *congregation-url (b/get-url *driver*)))))
+      (reset! *congregation-url (b/get-url *driver*)))
+
+    (testing "none of the pages crash even when there is no data"
+      (doto *driver*
+        (go-to-page "Territories")
+        (go-to-page "Printouts")
+        (go-to-page "Settings")))))
 
 
 (deftest ^{:order -1} gis-access-test
