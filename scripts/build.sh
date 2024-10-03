@@ -30,3 +30,7 @@ java -XX:DumpLoadedClassList=target/uberjar/classes.list -Dconf=dev-config.edn -
 export GIT_COMMIT=$(git rev-parse HEAD)
 export BUILD_TIMESTAMP=$(date -Iseconds)
 docker compose build --pull app
+
+docker compose up -d app
+timeout 1m bash -c 'until curl --silent --fail http://localhost:8080/status; do sleep 5; done; echo'
+lein kaocha e2e --skip territory-bro.browser-test/demo-test
