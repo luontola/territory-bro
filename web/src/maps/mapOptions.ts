@@ -81,7 +81,7 @@ export const mapRasters: MapRaster[] = [{
   id: 'mmlTaustakartta',
   name: "Finland - Maanmittauslaitoksen taustakarttasarja",
   makeSource: () => new XYZ({
-    url: 'https://tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.jpg',
+    url: 'https://tiles.kartat.kapsi.fi/taustakartta/{z}/{x}/{y}.png',
     tileSize: [128, 128],
     tilePixelRatio: 2,
     attributions: '&copy; Maanmittauslaitos',
