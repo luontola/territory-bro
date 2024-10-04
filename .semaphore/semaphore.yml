@@ -20,6 +20,7 @@ blocks:
         - name: Build
           commands:
             - cache restore
+            - cache restore nvm-$(checksum .tool-versions)
             - cache restore m2-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
             - cache restore lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj)
             - sem-version java 17
@@ -33,6 +34,7 @@ blocks:
             - docker push luontola/territory-bro:ci
 
             - cache store
+            - cache store nvm-$(checksum .tool-versions) ~/.nvm/.cache
             - cache store m2-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.m2
             - cache store lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.lein/self-installs
 
