@@ -72,7 +72,7 @@
 
   :source-paths ["src"]
   :java-source-paths ["src-java"]
-  :javac-options ["--release" "17"]
+  :javac-options ["--release" "21"]
   :test-paths ["test"]
   :resource-paths ["resources" "target/web-dist"]
   :target-path "target/%s/"
