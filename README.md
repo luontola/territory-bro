@@ -77,6 +77,14 @@ Upgrade dependencies
     lein ancient upgrade :all :check-clojure :no-tests
     npm run upgrade
 
+    asdf install java latest:temurin-21
+    asdf local java latest:temurin-21
+    asdf global java latest:temurin-21
+
+    asdf install nodejs latest
+    asdf local nodejs latest
+    asdf global nodejs latest
+
 Download dependency sources
 
     lein pom
