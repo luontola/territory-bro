@@ -2,7 +2,7 @@
 ;; This software is released under the Apache License 2.0.
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-(ns kaocha.plugin.order
+(ns territory-bro.test.kaocha-plugin.order
   (:require [clojure.test :refer :all]
             [kaocha.plugin :refer [defplugin]]))
 
@@ -77,6 +77,6 @@
                                                :kaocha.testable/skip true}]}]
       (is (= test-plan (custom-order-sort test-plan))))))
 
-(defplugin kaocha.plugin/order
+(defplugin territory-bro.test.kaocha-plugin/order
   (post-load [test-plan]
              (custom-order-sort test-plan)))

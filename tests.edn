@@ -16,6 +16,6 @@
           :ns-patterns ["^territory-bro"]}]
  :reporter [kaocha.report.progress/report]
  :plugins [:kaocha.plugin/profiling
-           :kaocha.plugin/order]
+           :territory-bro.test.kaocha-plugin/order]
  :kaocha.plugin.profiling/count 3
  :capture-output? true}
