@@ -40,3 +40,6 @@ blocks:
         always:
           commands:
             - artifact push job target/uberjar/warmup.log
+            - artifact push job target/etaoin-postmortem
+            - docker compose logs > containers.log
+            - artifact push job containers.log
