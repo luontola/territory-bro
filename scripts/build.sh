@@ -42,6 +42,7 @@ export BUILD_TIMESTAMP=$(date -Iseconds)
 export BUILDKIT_PROGRESS=plain
 docker compose build --pull app
 
+export DEMO_CONGREGATION=$(cat target/test-congregation-id)
 docker compose up -d app
 timeout 1m bash -c 'until curl --silent --fail http://localhost:8080/status; do sleep 5; done; echo'
-lein kaocha e2e --skip territory-bro.browser-test/demo-test
+lein kaocha e2e
