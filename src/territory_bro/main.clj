@@ -13,9 +13,7 @@
             [territory-bro.infra.router :as router]
             [territory-bro.migration :as migration]
             [territory-bro.projections :as projections])
-  (:import (java.net URI)
-           (java.net.http HttpClient HttpRequest HttpResponse$BodyHandlers)
-           (org.eclipse.jetty.server Server)
+  (:import (org.eclipse.jetty.server Server)
            (org.eclipse.jetty.server.handler.gzip GzipHandler))
   (:gen-class))
 
@@ -67,23 +65,10 @@
     (.addShutdownHook (Thread. ^Runnable stop-app)))
   (log/info "Started"))
 
-(defn -main [& args]
+(defn -main [& _args]
   (try
     (start-app)
     (catch Throwable t
       ;; XXX: clojure.tools.logging/error does not log the ex-data by default https://clojure.atlassian.net/browse/TLOG-17
       (log/error t (str "Failed to start\n" (pr-str t)))
-      (System/exit 1)))
-
-  ;; Helper for Application Class-Data Sharing (AppCDS)
-  ;; See https://docs.oracle.com/en/java/javase/11/vm/class-data-sharing.html
-  (when (= "app-cds-setup" (first args))
-    ;; do one API request to force more classes to be loaded
-    (let [client (-> (HttpClient/newBuilder)
-                     (.build))
-          request (-> (HttpRequest/newBuilder)
-                      (.uri (URI. (str "http://localhost:" (:port config/env))))
-                      (.build))]
-      (.send client request (HttpResponse$BodyHandlers/ofString)))
-    (stop-app)
-    (System/exit 0)))
+      (System/exit 1))))

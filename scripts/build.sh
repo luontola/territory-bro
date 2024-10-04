@@ -25,7 +25,17 @@ fi
 
 lein do kaocha fast slow, uberjar
 
-java -XX:DumpLoadedClassList=target/uberjar/classes.list -Dconf=dev-config.edn -jar "target/uberjar/territory-bro.jar" app-cds-setup
+# AppCDS preparation: dump list of loaded classes during e2e test run
+java -XX:DumpLoadedClassList=target/uberjar/classes.list -Dconf=dev-config.edn -jar "target/uberjar/territory-bro.jar" &> target/uberjar/warmup.log &
+warmup=$!
+timeout 1m bash -c 'until curl --silent --fail http://localhost:8080/status; do sleep 5; done; echo'
+# Gives the best coverage in the least time:
+# - registration-test visits nearly every page
+# - gis-access-test syncs GIS data and projects the events
+# - login-and-logout-test goes through the Auth0 OIDC login flow
+lein kaocha e2e --focus territory-bro.browser-test/login-and-logout-test
+kill $warmup
+wait $warmup || true
 
 export GIT_COMMIT=$(git rev-parse HEAD)
 export BUILD_TIMESTAMP=$(date -Iseconds)

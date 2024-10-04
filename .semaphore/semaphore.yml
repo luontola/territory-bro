@@ -35,3 +35,8 @@ blocks:
             - cache store
             - cache store m2-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.m2
             - cache store lein-$SEMAPHORE_GIT_BRANCH-revision-$(checksum project.clj) ~/.lein/self-installs
+
+      epilogue:
+        always:
+          commands:
+            - artifact push job target/uberjar/warmup.log
