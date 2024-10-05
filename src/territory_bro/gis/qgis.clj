@@ -15,7 +15,7 @@
   (assert database-username "username is missing")
   (assert database-password "password is missing")
   (assert database-ssl-mode "ssl mode is missing")
-  (-> (slurp project-template :encoding "UTF-8")
+  (-> (slurp project-template)
       (str/replace "HOST_GOES_HERE" database-host)
       (str/replace "DBNAME_GOES_HERE" database-name)
       (str/replace "SCHEMA_GOES_HERE" database-schema)

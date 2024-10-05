@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.infra.util
-  (:import (java.nio.charset StandardCharsets)
-           (java.sql SQLException)
+  (:import (java.sql SQLException)
            (java.util Base64)
            (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
@@ -31,7 +30,7 @@
 (defn decode-base64url [^String base64-str]
   (-> (Base64/getUrlDecoder)
       (.decode base64-str)
-      (String. StandardCharsets/UTF_8)))
+      (String.)))
 
 (defn natural-sort-by [keyfn coll]
   (sort-by (comp str keyfn)

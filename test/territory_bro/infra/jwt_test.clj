@@ -10,7 +10,6 @@
             [territory-bro.test.testutil :refer [thrown-with-msg?]])
   (:import (com.auth0.jwk Jwk JwkProvider)
            (com.auth0.jwt.exceptions InvalidClaimException SignatureVerificationException TokenExpiredException)
-           (java.nio.charset StandardCharsets)
            (java.time Instant)
            (java.util Base64 Map)))
 
@@ -47,9 +46,9 @@
   (let [[header payload signature] (str/split token #"\.")
         mutated-payload (-> payload
                             (base64-url-decode)
-                            (String. StandardCharsets/UTF_8)
+                            (String.)
                             ^String (mutation)
-                            (.getBytes StandardCharsets/UTF_8)
+                            (.getBytes)
                             (base64-url-encode))]
     (str header "." mutated-payload "." signature)))
 
