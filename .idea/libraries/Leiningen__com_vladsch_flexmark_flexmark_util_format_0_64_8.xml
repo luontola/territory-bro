@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: com.vladsch.flexmark/flexmark-util-format:0.64.8">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/vladsch/flexmark/flexmark-util-format/0.64.8/flexmark-util-format-0.64.8.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

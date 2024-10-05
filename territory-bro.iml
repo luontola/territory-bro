@@ -20,6 +20,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.clj-kondo" />
       <excludeFolder url="file://$MODULE_DIR$/.lsp" />
       <excludeFolder url="file://$MODULE_DIR$/.yarn" />
+      <excludeFolder url="file://$MODULE_DIR$/do-not-commit" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -73,6 +74,20 @@
     <orderEntry type="library" name="Leiningen: com.squareup.okhttp3/okhttp:4.11.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.squareup.okio/okio-jvm:3.5.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.squareup.okio/okio:3.5.0" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-ext-anchorlink:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-ast:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-builder:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-collection:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-data:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-dependency:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-format:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-html:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-misc:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-options:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-sequence:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util-visitor:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark-util:0.64.8" level="project" />
+    <orderEntry type="library" name="Leiningen: com.vladsch.flexmark/flexmark:0.64.8" level="project" />
     <orderEntry type="library" name="Leiningen: com.zaxxer/HikariCP:5.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: commons-codec:1.17.1" level="project" />
     <orderEntry type="library" name="Leiningen: commons-io:2.17.0" level="project" />
@@ -192,7 +207,7 @@
     <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-jdk7:2.0.20" level="project" />
     <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-jdk8:2.0.20" level="project" />
     <orderEntry type="library" name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib:2.0.20" level="project" />
-    <orderEntry type="library" name="Leiningen: org.jetbrains/annotations:13.0" level="project" />
+    <orderEntry type="library" name="Leiningen: org.jetbrains/annotations:24.0.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.jsoup/jsoup:1.7.2" level="project" />
     <orderEntry type="library" name="Leiningen: org.locationtech.jts/jts-core:1.20.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.mockito/mockito-core:5.13.0" level="project" />

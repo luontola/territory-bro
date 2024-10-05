@@ -17,6 +17,8 @@
                  [com.github.seancorfield/next.jdbc "1.3.939"]
                  [com.layerware/hugsql "0.5.3"]
                  [com.layerware/hugsql-adapter-next-jdbc "0.5.3"]
+                 [com.vladsch.flexmark/flexmark "0.64.8"]
+                 [com.vladsch.flexmark/flexmark-ext-anchorlink "0.64.8"]
                  [cprop "0.1.20"]
                  [enlive "1.1.6"]
                  [hiccup "2.0.0-RC3"]
