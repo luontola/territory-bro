@@ -116,7 +116,7 @@
             "Territory Bro
 
              🏠 Home
-             User guide {external-link.svg}
+             📖 Documentation
              News {external-link.svg}
              🛟 Support
 
@@ -133,7 +133,7 @@
             "the title - Territory Bro
 
              🏠 Home
-             User guide {external-link.svg}
+             📖 Documentation
              News {external-link.svg}
              🛟 Support
 

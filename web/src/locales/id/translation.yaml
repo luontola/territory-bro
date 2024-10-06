@@ -6,7 +6,6 @@ Navigation:
   logout: Keluar
   news: Berita
   opensInNewWindow: Dibuka di jendela baru
-  userGuide: Panduan pengguna
 HomePage:
   title: Beranda
   introduction: Territory Bro adalah alat untuk mengelola kartu wilayah di kongregasi Saksi-Saksi Yehuwa. Lihat <0>territorybro.com</0> untuk informasi lebih lanjut.
@@ -84,6 +83,8 @@ UserManagement:
   unverified: Belum diverifikasi
   removeUser: Hapus pengguna
   removeYourselfWarning: Apakah Anda yakin ingin MENGHAPUS DIRI dari {{congregation}}? Anda tidak akan dapat menambahkan diri Anda kembali.
+DocumentationPage:
+  title: Dokumentasi
 SupportPage:
   title: Dukungan
   introduction: Territory Bro adalah proyek sumber terbuka yang dikembangkan oleh <0>Esko Luontola</0>.

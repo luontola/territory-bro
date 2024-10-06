@@ -8,6 +8,7 @@
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.ui.congregation-page :as congregation-page]
+            [territory-bro.ui.documentation-page :as documentation-page]
             [territory-bro.ui.error-page :as error-page]
             [territory-bro.ui.home-page :as home-page]
             [territory-bro.ui.html :as html]
@@ -46,6 +47,7 @@
                  wrap-parse-path-params]}
    auth0/routes
    congregation-page/routes
+   documentation-page/routes
    error-page/routes
    home-page/routes
    join-page/routes

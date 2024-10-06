@@ -6,7 +6,6 @@ Navigation:
   logout: Uitloggen
   news: Nieuws
   opensInNewWindow: Opent in nieuw venster
-  userGuide: Gebruikershandleiding
 HomePage:
   title: Home
   introduction: Territory Bro is een tool voor het beheren van territoriumkaarten in de gemeenschappen van Jehovah's Getuigen. Zie <0>territorybro.com</0> voor meer informatie.
@@ -84,6 +83,8 @@ UserManagement:
   unverified: Niet geverifieerd
   removeUser: Gebruiker verwijderen
   removeYourselfWarning: Weet je zeker dat je JEZELF wilt VERWIJDEREN uit {{congregation}}? Je kunt jezelf dan niet meer toevoegen.
+DocumentationPage:
+  title: Documentatie
 SupportPage:
   title: Ondersteuning
   introduction: Territory Bro is een open source project ontwikkeld door <0>Esko Luontola</0>.

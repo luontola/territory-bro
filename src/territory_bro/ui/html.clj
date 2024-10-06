@@ -118,6 +118,11 @@
                   [wildcard-url url])))
          (into {}))))
 
+(defn classes [& ss]
+  (->> ss
+       (filterv some?)
+       (str/join " ")))
+
 
 ;;;; CSRF protection
 

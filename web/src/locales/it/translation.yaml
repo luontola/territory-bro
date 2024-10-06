@@ -6,7 +6,6 @@ Navigation:
   logout: Esci
   news: Notizie
   opensInNewWindow: Si apre in una nuova finestra
-  userGuide: Guida dell'utente
 HomePage:
   title: Home
   introduction: Territory Bro è uno strumento per gestire le schede di territorio nelle congregazioni dei Testimoni di Geova. Per ulteriori informazioni, visita <0>territorybro.com</0>.
@@ -84,6 +83,8 @@ UserManagement:
   unverified: Non verificato
   removeUser: Rimuovi utente
   removeYourselfWarning: Sei sicuro di voler RIMUOVERTI da {{congregation}}? Non sarai in grado di aggiungerti di nuovo.
+DocumentationPage:
+  title: Documentazione
 SupportPage:
   title: Supporto
   introduction: Territory Bro è un progetto open source sviluppato da <0>Esko Luontola</0>.

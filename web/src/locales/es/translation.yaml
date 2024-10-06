@@ -6,7 +6,6 @@ Navigation:
   logout: Cerrar sesión
   news: Noticias
   opensInNewWindow: Abre en una ventana nueva
-  userGuide: Guía del usuario
 HomePage:
   title: Inicio
   introduction: Territory Bro es una herramienta para gestionar tarjetas de territorio en las congregaciones de los Testigos de Jehová. Visita <0>territorybro.com</0> para obtener más información.
@@ -84,6 +83,8 @@ UserManagement:
   unverified: No verificado
   removeUser: Eliminar usuario
   removeYourselfWarning: ¿Estás seguro de que quieres ELIMINARTE de {{congregation}}? No podrás añadirte nuevamente.
+DocumentationPage:
+  title: Documentación
 SupportPage:
   title: Soporte
   introduction: Territory Bro es un proyecto de código abierto desarrollado por <0>Esko Luontola</0>.

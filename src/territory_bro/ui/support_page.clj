@@ -27,7 +27,7 @@
            (str/replace "</0>" "</a>")
            (h/raw))]
    [:p (-> (i18n/t "SupportPage.userGuideAd")
-           (str/replace "<0>" "<a href=\"https://territorybro.com/guide/\" target=\"_blank\">")
+           (str/replace "<0>" "<a href=\"/documentation\">")
            (str/replace "</0>" "</a>")
            (h/raw))]
    (when (some? support-email)

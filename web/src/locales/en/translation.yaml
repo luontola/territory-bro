@@ -6,7 +6,6 @@ Navigation:
   logout: Logout
   news: News
   opensInNewWindow: Opens in new window
-  userGuide: User guide
 HomePage:
   title: Home
   introduction: Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses. See <0>territorybro.com</0> for more information.
@@ -84,6 +83,8 @@ UserManagement:
   unverified: Unverified
   removeUser: Remove user
   removeYourselfWarning: Are you sure you want to REMOVE YOURSELF from {{congregation}}? You will not be able to add yourself back.
+DocumentationPage:
+  title: Documentation
 SupportPage:
   title: Support
   introduction: Territory Bro is an open source project developed by <0>Esko Luontola</0>.

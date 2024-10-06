@@ -77,8 +77,9 @@
       [:li (nav-link {:href "/"
                       :icon "🏠"
                       :title (i18n/t "HomePage.title")})]
-      [:li (external-link {:href "https://territorybro.com/guide/"
-                           :title (i18n/t "Navigation.userGuide")})]
+      [:li (nav-link {:href "/documentation"
+                      :icon "📖"
+                      :title (i18n/t "DocumentationPage.title")})]
       [:li (external-link {:href "https://groups.google.com/g/territory-bro-announcements"
                            :title (i18n/t "Navigation.news")})]
       [:li (nav-link {:href "/support"
@@ -205,10 +206,13 @@
               [:button.pure-button.pure-button-primary {:type "submit"}
                (i18n/t "Errors.closeDialog")]]]
 
-            [:main {:class (:content styles)}
+            [:main {:class (html/classes (:content styles) (get styles (:main-content-class model)))}
              (when (:demo? model)
                (demo-disclaimer))
              view]]]))))
 
-(defn page! [view request]
-  (page view (model! request)))
+(defn page!
+  ([view request]
+   (page! view request nil))
+  ([view request opts]
+   (page view (merge (model! request) opts))))

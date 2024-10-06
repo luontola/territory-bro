@@ -6,7 +6,6 @@ Navigation:
   logout: Kirjaudu ulos
   news: Uutiset
   opensInNewWindow: Aukeaa uudessa ikkunassa
-  userGuide: Käyttöopas
 HomePage:
   title: Etusivu
   introduction: Territory Bro on työkalu Jehovan todistajien seurakuntien aluekorttien hallintaan. Katso lisätietoja osoitteesta <0>territorybro.com</0>.
@@ -84,6 +83,8 @@ UserManagement:
   unverified: Vahvistamaton
   removeUser: Poista käyttäjä
   removeYourselfWarning: Oletko varma, että haluat POISTAA ITSESI {{congregation}}:sta? Et voi lisätä itseäsi takaisin.
+DocumentationPage:
+  title: Ohjeet
 SupportPage:
   title: Tuki ja ohjeet
   introduction: Territory Bro on avoimen lähdekoodin projekti, jota kehittää <0>Esko Luontola</0>.

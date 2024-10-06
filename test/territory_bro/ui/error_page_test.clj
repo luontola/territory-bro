@@ -12,7 +12,7 @@
   "Territory Bro
 
    🏠 Home
-   User guide {external-link.svg}
+   📖 Documentation
    News {external-link.svg}
    🛟 Support
 

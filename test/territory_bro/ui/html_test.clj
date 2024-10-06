@@ -7,7 +7,10 @@
             [clojure.string :as str]
             [clojure.test :refer :all]
             [hiccup2.core :as h]
-            [territory-bro.ui.html :as html]))
+            [territory-bro.ui.html :as html])
+  (:import (java.io File)
+           (org.apache.commons.codec.digest DigestUtils)
+           (org.apache.commons.io FileUtils)))
 
 (deftest visible-text-test
   (testing "empty input"
@@ -93,7 +96,16 @@
   (testing "content-hashed files are mapped using a wildcard"
     (let [path (get html/public-resources "/assets/crop-mark.*.svg")]
       (is (some? path))
-      (is (some? (io/resource (str "public" path)))))))
+      (is (some? (io/resource (str "public" path))))))
+
+  (testing "static resources in the /public/assets directory should be content-hashed"
+    (doall (for [^File file (file-seq (io/file "resources/public/assets"))
+                 :when (.isFile file)]
+             (let [hash (-> (FileUtils/readFileToByteArray file)
+                            (DigestUtils/sha256Hex)
+                            (subs 0 8))]
+               (is (str/includes? (.getName file) (str "." hash "."))
+                   (str file " had the wrong name")))))))
 
 (deftest inline-svg-test
   (testing "returns the SVG image"

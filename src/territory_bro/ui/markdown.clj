@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.markdown
-  (:require [clojure.java.io :as io]
-            [hiccup2.core :as h]
+  (:require [hiccup2.core :as h]
             [ring.util.http-response :as http-response])
   (:import (com.vladsch.flexmark.ext.anchorlink AnchorLinkExtension)
            (com.vladsch.flexmark.html HtmlRenderer)
@@ -19,7 +18,7 @@
         document (.parse parser markdown)]
     (h/raw (.render renderer document))))
 
-(defn render-resource [resource-path]
-  (if-some [resource (io/resource resource-path)]
+(defn render-resource [resource]
+  (if (some? resource)
     (render (slurp resource))
     (http-response/not-found! "Not found")))

@@ -125,7 +125,7 @@
      [:section
       [:h2 (i18n/t "EditingMaps.title")]
       [:p (-> (i18n/t "EditingMaps.introduction")
-              (str/replace "<0>" "<a href=\"https://territorybro.com/guide/\" target=\"_blank\">")
+              (str/replace "<0>" "<a href=\"/documentation\">")
               (str/replace "</0>" "</a>")
               (str/replace "<1>" "<a href=\"https://www.qgis.org/\" target=\"_blank\">")
               (str/replace "</1>" "</a>")
