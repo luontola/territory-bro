@@ -3,15 +3,17 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.home-page
-  (:require [clojure.string :as str]
+  (:require [clojure.java.io :as io]
             [hiccup2.core :as h]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.infra.resources :as resources]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
-            [territory-bro.ui.layout :as layout]))
+            [territory-bro.ui.layout :as layout]
+            [territory-bro.ui.markdown :as markdown]))
 
 (defn model! [_request]
   (let [congregations (->> (dmz/list-congregations)
@@ -36,17 +38,11 @@
   (h/html [:a.pure-button {:href "/join"}
            (i18n/t "JoinPage.title")]))
 
-(defn view [{:keys [congregations logged-in? demo-available?]}]
+(defn my-congregations-sidebar [{:keys [congregations logged-in? demo-available?]}]
   (let [styles (:HomePage (css/modules))]
     (h/html
-     [:h1 "Territory Bro"]
-     [:p (-> (i18n/t "HomePage.introduction")
-             (str/replace "<0>" "<a href=\"https://territorybro.com\">")
-             (str/replace "</0>" "</a>")
-             (h/raw))]
-
      (if (empty? congregations)
-       [:div {:class (:bigActions styles)}
+       [:div {:class (html/classes (:sidebar styles) (:bigActions styles))}
         (when-not logged-in?
           [:p (login-button)])
         (when demo-available?
@@ -54,8 +50,7 @@
         [:p (register-button)]
         [:p (join-button)]]
 
-       ; TODO: use h/html instead of :div after fixing https://github.com/weavejester/hiccup/issues/210
-       [:div
+       [:div {:class (:sidebar styles)}
         [:h2 (i18n/t "HomePage.yourCongregations")]
         [:ul#congregation-list {:class (:congregationList styles)}
          (for [congregation congregations]
@@ -69,6 +64,16 @@
          " "
          (join-button)]]))))
 
+(def home-html
+  (resources/auto-refresher (io/resource "public/home.md")
+                            markdown/render-resource))
+
+(defn view [model]
+  (h/html
+   [:h1 "Territory Bro"]
+   (my-congregations-sidebar model)
+   (home-html)))
+
 (defn view! [request]
   (view (model! request)))
 
@@ -76,5 +81,5 @@
   ["/"
    {:get {:handler (fn [request]
                      (-> (view! request)
-                         (layout/page! request)
+                         (layout/page! request {:main-content-variant :narrow})
                          (html/response)))}}])

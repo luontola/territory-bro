@@ -206,7 +206,7 @@
               [:button.pure-button.pure-button-primary {:type "submit"}
                (i18n/t "Errors.closeDialog")]]]
 
-            [:main {:class (html/classes (:content styles) (get styles (:main-content-class model)))}
+            [:main {:class (html/classes (:content styles) (get styles (:main-content-variant model)))}
              (when (:demo? model)
                (demo-disclaimer))
              view]]]))))

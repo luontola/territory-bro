@@ -25,5 +25,5 @@
   ["/documentation"
    {:get {:handler (fn [request]
                      (-> (view)
-                         (layout/page! request {:main-content-class :narrow-content})
+                         (layout/page! request {:main-content-variant :narrow})
                          (html/response)))}}])

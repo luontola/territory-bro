@@ -1,14 +1,27 @@
 
+.sidebar {
+    background: #f9f9f9;
+    padding: 0 1.5rem;
+    border: 1px solid #ccc;
+    border-radius: 1rem;
+}
+
+@media screen and (min-width: 64rem) {
+    .sidebar {
+        float: right;
+        max-width: 25rem;
+    }
+}
+
 .congregationList {
-    font-size: 150%;
+    font-size: 1.35rem;
 }
 
 .bigActions {
-    font-size: 150%;
-    max-width: 20em;
+    font-size: 1.2rem;
     text-align: center;
 }
 
 .smallActions {
-    padding-top: 1.5em;
+    line-height: 2.5em;
 }

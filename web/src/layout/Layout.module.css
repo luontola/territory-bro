@@ -114,7 +114,7 @@ select.languageSelection:not(:focus):hover {
     position: relative;
     padding: 1em 1.5em;
 
-    &.narrow-content {
+    &.narrow {
         max-width: 60rem;
     }
 

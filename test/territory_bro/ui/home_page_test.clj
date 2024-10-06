@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.home-page-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
@@ -67,56 +68,53 @@
           (testutil/with-anonymous-user
             (is (= no-demo-model (home-page/model! request)))))))))
 
+(deftest my-congregations-sidebar-test
+  (testing "logged in, some congregations"
+    (is (= (html/normalize-whitespace
+            "Your congregations
+               Congregation 1
+               Congregation 2
+
+             View a demo
+             Register a new congregation
+             Join an existing congregation")
+           (-> (home-page/my-congregations-sidebar model)
+               html/visible-text))))
+
+  (testing "logged in, zero congregations"
+    (is (= (html/normalize-whitespace
+            "View a demo
+             Register a new congregation
+             Join an existing congregation")
+           (-> (home-page/my-congregations-sidebar (dissoc model :congregations))
+               html/visible-text))))
+
+  (testing "logged in, zero congregations, no demo"
+    (is (= (html/normalize-whitespace
+            "Register a new congregation
+             Join an existing congregation")
+           (-> (home-page/my-congregations-sidebar (-> (dissoc model :congregations)
+                                                       (replace-in [:demo-available?] true false)))
+               html/visible-text))))
+
+  (testing "anonymous"
+    (is (= (html/normalize-whitespace
+            "Login
+             View a demo
+             Register a new congregation
+             Join an existing congregation")
+           (-> (home-page/my-congregations-sidebar anonymous-model)
+               html/visible-text))))
+
+  (testing "anonymous, no demo"
+    (is (= (html/normalize-whitespace
+            "Login
+             Register a new congregation
+             Join an existing congregation")
+           (-> (home-page/my-congregations-sidebar no-demo-model)
+               html/visible-text)))))
+
 (deftest view-test
-  (let [introduction "Territory Bro
-                      Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.
-                      See territorybro.com for more information. "]
-    (testing "logged in, some congregations"
-      (is (= (html/normalize-whitespace
-              (str introduction
-                   "Your congregations
-                      Congregation 1
-                      Congregation 2
-
-                    View a demo
-                    Register a new congregation
-                    Join an existing congregation"))
-             (-> (home-page/view model)
-                 html/visible-text))))
-
-    (testing "logged in, zero congregations"
-      (is (= (html/normalize-whitespace
-              (str introduction
-                   "View a demo
-                    Register a new congregation
-                    Join an existing congregation"))
-             (-> (home-page/view (dissoc model :congregations))
-                 html/visible-text))))
-
-    (testing "logged in, zero congregations, no demo"
-      (is (= (html/normalize-whitespace
-              (str introduction
-                   "Register a new congregation
-                    Join an existing congregation"))
-             (-> (home-page/view (-> (dissoc model :congregations)
-                                     (replace-in [:demo-available?] true false)))
-                 html/visible-text))))
-
-    (testing "anonymous"
-      (is (= (html/normalize-whitespace
-              (str introduction
-                   "Login
-                    View a demo
-                    Register a new congregation
-                    Join an existing congregation"))
-             (-> (home-page/view anonymous-model)
-                 html/visible-text))))
-
-    (testing "anonymous, no demo"
-      (is (= (html/normalize-whitespace
-              (str introduction
-                   "Login
-                    Register a new congregation
-                    Join an existing congregation"))
-             (-> (home-page/view no-demo-model)
-                 html/visible-text))))))
+  (testing "renders markdown content"
+    (is (str/includes? (home-page/view anonymous-model)
+                       "<p>Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.</p>"))))
