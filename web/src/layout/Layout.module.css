@@ -44,6 +44,16 @@ kbd {
     --menu-bg-color-level2: hsl(0, 0%, 95%);
     --menu-item-border-shadow: 1px solid hsl(0, 0%, 70%);
     --menu-item-border-highlight: 1px solid hsl(0, 0%, 100%);
+
+    @media (width >= 768px) {
+        padding: 0 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+
+        --menu-item-padding: 2px 12px 2px 8px; /* more padding on right, to balance the emoji on left */
+        --menu-item-height: 2.5rem;
+    }
 }
 
 .nav-menu,
@@ -57,38 +67,8 @@ kbd {
         padding: var(--menu-item-padding);
         white-space: nowrap;
     }
-}
 
-.nav-submenu > li {
-    /* indentation */
-    padding-left: calc(16px + 2ch);
-}
-
-.nav-menu > li:has(> .active),
-.nav-submenu > li {
-    background-color: var(--menu-bg-color-level2);
-}
-
-.active {
-    font-weight: bold;
-}
-
-.nav-end {
-    padding: 0 16px 4px;
-}
-
-@media screen and (min-width: 768px) {
-    .navbar {
-        padding: 0 0.5rem;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: stretch;
-
-        --menu-item-padding: 2px 12px 2px 8px; /* more padding on right, to balance the emoji on left */
-        --menu-item-height: 2.5rem;
-    }
-
-    .nav-menu, .nav-submenu {
+    @media (width >= 768px) {
         /* each <li> should partake in the .navbar's flexbox */
         display: contents;
 
@@ -96,17 +76,29 @@ kbd {
             align-content: center;
             height: var(--menu-item-height);
         }
-
-        li:not(:has(.active)) + li:has(.active) {
-        }
     }
+}
 
-    .nav-submenu > li {
-        /* reset indentation from mobile layout */
+.nav-submenu > li {
+    /* indentation */
+    padding-left: calc(16px + 2ch);
+
+    @media (width >= 768px) {
         padding: var(--menu-item-padding);
     }
+}
 
-    /* borders to make the selected item or submenu look 3-dimensional */
+.active {
+    font-weight: bold;
+}
+
+.nav-menu > li:has(> .active),
+.nav-submenu > li {
+    background-color: var(--menu-bg-color-level2);
+}
+
+@media (width >= 768px) {
+    /* borders to make the active item (or whole submenu) look 3-dimensional */
     .nav-menu > li:has(> .active),
     .nav-submenu > li {
         border-top: var(--menu-item-border-shadow);
@@ -121,8 +113,12 @@ kbd {
     .nav-menu > li:has(.active):not(:has(+ .nav-submenu)) {
         border-right: var(--menu-item-border-highlight);
     }
+}
 
-    .nav-end {
+.nav-end {
+    padding: 0 16px 4px;
+
+    @media (width >= 768px) {
         flex-grow: 1;
         display: flex;
         justify-content: flex-end;
@@ -135,7 +131,7 @@ kbd {
         }
 
         .lang {
-            min-width: 10rem; /* avoid layout movement when the language selector is opened */
+            min-width: 10rem; /* avoid layout shift when the language selector is opened */
             text-align: right;
         }
     }
