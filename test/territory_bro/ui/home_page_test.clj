@@ -8,7 +8,6 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil]
-            [territory-bro.test.testutil :refer [replace-in]]
             [territory-bro.ui.home-page :as home-page]
             [territory-bro.ui.html :as html])
   (:import (java.util UUID)))
@@ -46,10 +45,7 @@
                                      :congregation/schema-name "cong3_schema"}])
       (testing "logged in, with congregations"
         (testutil/with-user-id user-id
-          (is (= (-> model
-                     (replace-in [:congregations 0 :congregation/id] (UUID. 0 1) cong-id1)
-                     (replace-in [:congregations 1 :congregation/id] (UUID. 0 2) cong-id2))
-                 (home-page/model! request)))))
+          (is (= model (home-page/model! request)))))
 
       (testing "anonymous"
         (testutil/with-anonymous-user
