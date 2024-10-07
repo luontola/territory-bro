@@ -3,8 +3,7 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.registration-page
-  (:require [clojure.string :as str]
-            [hiccup2.core :as h]
+  (:require [hiccup2.core :as h]
             [ring.util.http-response :as http-response]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.ui.forms :as forms]
@@ -21,7 +20,7 @@
   (h/html
    [:div {:style {:border-bottom "2px solid black"
                   :text-align "center"
-                  :margin-top "2em"
+                  :margin-top "1em"
                   :margin-bottom "2.5em"}}
     [:span {:style {:position "relative"
                     :top "0.7em"
@@ -61,11 +60,6 @@
        [:div.pure-controls
         [:button.pure-button.pure-button-primary {:type "submit"}
          (i18n/t "RegistrationPage.register")]]]]
-
-     [:p (-> (i18n/t "SupportPage.mailingListAd")
-             (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")
-             (str/replace "</0>" "</a>")
-             (h/raw))]
 
      (or-divider)
      [:div {:style {:text-align "center"}}

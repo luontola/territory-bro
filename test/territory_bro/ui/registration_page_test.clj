@@ -71,7 +71,6 @@
            Congregation name []
            Register
 
-           We recommend subscribing to our mailing list to be notified about important Territory Bro updates.
            or
            Join an existing congregation")
          (-> (registration-page/view model)
