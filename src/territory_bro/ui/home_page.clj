@@ -7,7 +7,6 @@
             [hiccup2.core :as h]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.authentication :as auth]
-            [territory-bro.infra.config :as config]
             [territory-bro.infra.resources :as resources]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
@@ -19,16 +18,11 @@
   (let [congregations (->> (dmz/list-congregations)
                            (mapv #(select-keys % [:congregation/id :congregation/name])))]
     {:congregations congregations
-     :logged-in? (auth/logged-in?)
-     :demo-available? (some? (:demo-congregation config/env))}))
+     :logged-in? (auth/logged-in?)}))
 
 (defn login-button []
   (h/html [:a.pure-button {:href "/login"}
            (i18n/t "Navigation.login")]))
-
-(defn view-demo-button []
-  (h/html [:a.pure-button {:href "/congregation/demo"}
-           (i18n/t "HomePage.viewDemo")]))
 
 (defn register-button []
   (h/html [:a.pure-button {:href "/register"}
@@ -38,15 +32,13 @@
   (h/html [:a.pure-button {:href "/join"}
            (i18n/t "JoinPage.title")]))
 
-(defn my-congregations-sidebar [{:keys [congregations logged-in? demo-available?]}]
+(defn my-congregations-sidebar [{:keys [congregations logged-in?]}]
   (let [styles (:HomePage (css/modules))]
     (h/html
      (if (empty? congregations)
        [:div {:class (html/classes (:sidebar styles) (:bigActions styles))}
         (when-not logged-in?
           [:p (login-button)])
-        (when demo-available?
-          [:p (view-demo-button)])
         [:p (register-button)]
         [:p (join-button)]]
 
@@ -57,9 +49,6 @@
            [:li [:a {:href (str "/congregation/" (:congregation/id congregation))}
                  (:congregation/name congregation)]])]
         [:p {:class (:smallActions styles)}
-         (when demo-available?
-           (view-demo-button))
-         " "
          (register-button)
          " "
          (join-button)]]))))

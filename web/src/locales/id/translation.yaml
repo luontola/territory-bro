@@ -4,12 +4,12 @@ Navigation:
   changeLanguage: Ubah bahasa
   login: Masuk
   logout: Keluar
+  demo: Demo
   news: Berita
   opensInNewWindow: Dibuka di jendela baru
 HomePage:
   title: Beranda
   yourCongregations: Kongregasi Anda
-  viewDemo: Lihat demo
 RegistrationPage:
   title: Daftar kongregasi baru
   register: Daftar

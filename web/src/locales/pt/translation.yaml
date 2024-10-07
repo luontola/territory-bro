@@ -4,12 +4,12 @@ Navigation:
   changeLanguage: Mudar idioma
   login: Entrar
   logout: Sair
+  demo: Demonstração
   news: Notícias
   opensInNewWindow: Abre em nova janela
 HomePage:
   title: Página inicial
   yourCongregations: Suas congregações
-  viewDemo: Ver demonstração
 RegistrationPage:
   title: Registrar uma nova congregação
   register: Registrar

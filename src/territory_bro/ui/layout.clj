@@ -31,6 +31,7 @@
                   (auth0/login-url request))
      :language-selection-width language-selection-width
      :dev? (:dev config/env)
+     :demo-available? (some? (:demo-congregation config/env))
      :demo? (= "demo" cong-id)}))
 
 
@@ -70,13 +71,17 @@
     " "
     (html/inline-svg "icons/external-link.svg")]))
 
-(defn home-navigation []
+(defn home-navigation [{:keys [demo-available?]}]
   (let [styles (:Layout (css/modules))]
     (h/html
      [:ul {:class (:nav styles)}
       [:li (nav-link {:href "/"
                       :icon "🏠"
                       :title (i18n/t "HomePage.title")})]
+      (when demo-available?
+        [:li (nav-link {:href "/congregation/demo"
+                        :icon "🔍"
+                        :title (i18n/t "Navigation.demo")})])
       [:li (nav-link {:href "/documentation"
                       :icon "📖"
                       :title (i18n/t "DocumentationPage.title")})]
@@ -193,7 +198,7 @@
             [:nav.no-print {:class (:navbar styles)}
              (if (some? (:congregation model))
                (congregation-navigation model)
-               (home-navigation))
+               (home-navigation model))
              [:div {:class (:lang styles)}
               (language-selection model)]
              [:div {:class (:auth styles)}

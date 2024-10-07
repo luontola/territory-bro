@@ -294,7 +294,7 @@
     (testing "view demo congregation"
       (doto *driver*
         (b/go *base-url*)
-        (wait-and-click {:tag :a, :fn/has-string "View a demo"})
+        (wait-and-click [{:tag :nav} {:tag :a, :fn/has-string "Demo"}])
         (b/wait-has-text h1 "Demo Congregation")))
 
     (testing "view territories list"

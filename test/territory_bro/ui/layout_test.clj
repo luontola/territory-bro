@@ -26,6 +26,16 @@
    :login-url "/login?return-to-url=%2Fsome%2Fpage%3Ffoo%3Dbar%26gazonk"
    :language-selection-width "42px"
    :dev? false
+   :demo-available? true
+   :demo? false})
+(def no-demo-model
+  {:congregation nil
+   :permissions nil
+   :user nil
+   :login-url "/login?return-to-url=%2F"
+   :language-selection-width nil
+   :dev? false
+   :demo-available? false
    :demo? false})
 (def developer-model
   {:congregation nil
@@ -34,6 +44,7 @@
    :login-url "/login?return-to-url=%2F"
    :language-selection-width nil
    :dev? true
+   :demo-available? true
    :demo? false})
 (def logged-in-model
   {:congregation nil
@@ -43,6 +54,7 @@
    :login-url nil
    :language-selection-width nil
    :dev? false
+   :demo-available? true
    :demo? false})
 (def congregation-model
   {:congregation {:congregation/id cong-id
@@ -54,6 +66,7 @@
    :login-url nil
    :language-selection-width nil
    :dev? false
+   :demo-available? true
    :demo? false})
 (def demo-congregation-model
   {:congregation {:congregation/id "demo"
@@ -64,51 +77,59 @@
    :login-url "/login?return-to-url=%2Fcongregation%2Fdemo"
    :language-selection-width nil
    :dev? false
+   :demo-available? true
    :demo? true})
 
 (deftest model!-test
   (binding [config/env {:dev false
-                        :demo-congregation nil}]
+                        :demo-congregation cong-id}]
     (testutil/with-events (flatten [{:event/type :congregation.event/congregation-created
                                      :congregation/id cong-id
                                      :congregation/name "the congregation"
                                      :congregation/schema-name "cong_schema"}
                                     (congregation/admin-permissions-granted cong-id user-id)])
-      (auth/with-user {:user/id user-id
-                       :name "John Doe"}
+      (testing "top level, anonymous"
+        (testutil/with-anonymous-user
+          (let [request {:uri "/some/page"
+                         :query-string "foo=bar&gazonk"
+                         :cookies {"languageSelectionWidth" {:value "42px"}}}]
+            (is (= anonymous-model (layout/model! request))))))
 
-        (testing "top level, anonymous"
+      (testing "top level, anonymous, no demo"
+        (binding [config/env (replace-in config/env [:demo-congregation] cong-id nil)]
           (testutil/with-anonymous-user
-            (let [request {:uri "/some/page"
-                           :query-string "foo=bar&gazonk"
-                           :cookies {"languageSelectionWidth" {:value "42px"}}}]
-              (is (= anonymous-model (layout/model! request))))))
+            (let [request {:uri "/"
+                           :query-string nil}]
+              (is (= no-demo-model (layout/model! request)))))))
 
-        (testing "top level, anonymous, developer mode"
-          (testutil/with-anonymous-user
-            (binding [config/env (replace-in config/env [:dev] false true)]
-              (let [request {:uri "/"
-                             :query-string nil}]
-                (is (= developer-model (layout/model! request)))))))
+      (testing "top level, anonymous, developer mode"
+        (testutil/with-anonymous-user
+          (binding [config/env (replace-in config/env [:dev] false true)]
+            (let [request {:uri "/"
+                           :query-string nil}]
+              (is (= developer-model (layout/model! request)))))))
 
-        (testing "top level, logged in"
+      (testing "top level, logged in"
+        (auth/with-user {:user/id user-id
+                         :name "John Doe"}
           (let [request {:uri "/"
                          :query-string nil}]
-            (is (= logged-in-model (layout/model! request)))))
+            (is (= logged-in-model (layout/model! request))))))
 
-        (testing "congregation level"
+      (testing "congregation level"
+        (auth/with-user {:user/id user-id
+                         :name "John Doe"}
           (let [request {:uri "/"
                          :query-string nil
                          :path-params {:congregation cong-id}}]
-            (is (= congregation-model (layout/model! request)))))
+            (is (= congregation-model (layout/model! request))))))
 
-        (testing "demo congregation"
-          (testutil/with-anonymous-user
-            (binding [config/env (replace-in config/env [:demo-congregation] nil cong-id)]
-              (let [request {:uri "/congregation/demo"
-                             :query-string nil
-                             :path-params {:congregation "demo"}}]
-                (is (= demo-congregation-model (layout/model! request)))))))))))
+      (testing "demo congregation"
+        (testutil/with-anonymous-user
+          (let [request {:uri "/congregation/demo"
+                         :query-string nil
+                         :path-params {:congregation "demo"}}]
+            (is (= demo-congregation-model (layout/model! request)))))))))
 
 (deftest page-test
   (testing "minimal data"
@@ -133,6 +154,7 @@
             "the title - Territory Bro
 
              🏠 Home
+             🔍 Demo
              📖 Documentation
              News {external-link.svg}
              🛟 Support

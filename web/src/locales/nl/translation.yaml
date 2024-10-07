@@ -4,12 +4,12 @@ Navigation:
   changeLanguage: Taal wijzigen
   login: Inloggen
   logout: Uitloggen
+  demo: Demo
   news: Nieuws
   opensInNewWindow: Opent in nieuw venster
 HomePage:
   title: Home
   yourCongregations: Uw gemeenschappen
-  viewDemo: Bekijk een demo
 RegistrationPage:
   title: Registreer een nieuwe gemeenschap
   register: Registreren

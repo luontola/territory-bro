@@ -4,12 +4,12 @@ Navigation:
   changeLanguage: Vaihda kieltä
   login: Kirjaudu sisään
   logout: Kirjaudu ulos
+  demo: Demo
   news: Uutiset
   opensInNewWindow: Aukeaa uudessa ikkunassa
 HomePage:
   title: Etusivu
   yourCongregations: Sinun seurakuntasi
-  viewDemo: Katso demo
 RegistrationPage:
   title: Rekisteröi uusi seurakunta
   register: Rekisteröi
