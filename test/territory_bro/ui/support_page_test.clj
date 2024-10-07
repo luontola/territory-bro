@@ -6,8 +6,7 @@
   (:require [clojure.test :refer :all]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
-            [territory-bro.test.testutil :as testutil]
-            [territory-bro.test.testutil :refer [replace-in]]
+            [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.support-page :as support-page])
   (:import (java.util UUID)))

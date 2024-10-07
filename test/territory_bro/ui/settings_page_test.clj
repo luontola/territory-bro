@@ -16,8 +16,7 @@
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.infra.user :as user]
             [territory-bro.test.fixtures :refer :all]
-            [territory-bro.test.testutil :as testutil]
-            [territory-bro.test.testutil :refer [replace-in]]
+            [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.settings-page :as settings-page])
