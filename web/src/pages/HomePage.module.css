@@ -10,18 +10,10 @@
     .sidebar {
         float: right;
         max-width: 25rem;
+        margin-left: 1rem;
     }
 }
 
 .congregationList {
     font-size: 1.35rem;
-}
-
-.bigActions {
-    font-size: 1.2rem;
-    text-align: center;
-}
-
-.smallActions {
-    line-height: 2.5em;
 }

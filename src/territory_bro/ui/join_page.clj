@@ -34,5 +34,5 @@
   ["/join"
    {:get {:handler (fn [request]
                      (-> (view! request)
-                         (layout/page! request)
+                         (layout/page! request {:main-content-variant :narrow})
                          (html/response)))}}])

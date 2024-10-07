@@ -85,6 +85,9 @@
       [:li (nav-link {:href "/documentation"
                       :icon "📖"
                       :title (i18n/t "DocumentationPage.title")})]
+      [:li (nav-link {:href "/register"
+                      :icon "✍️"
+                      :title (i18n/t "Navigation.registration")})]
       [:li (external-link {:href "https://groups.google.com/g/territory-bro-announcements"
                            :title (i18n/t "Navigation.news")})]
       [:li (nav-link {:href "/support"

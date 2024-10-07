@@ -13,6 +13,7 @@
 
    🏠 Home
    📖 Documentation
+   ✍️ Registration
    News {external-link.svg}
    🛟 Support
 

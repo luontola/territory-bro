@@ -5,6 +5,7 @@ Navigation:
   login: Login
   logout: Logout
   demo: Demo
+  registration: Registration
   news: News
   opensInNewWindow: Opens in new window
 HomePage:
@@ -13,6 +14,7 @@ HomePage:
 RegistrationPage:
   title: Register a new congregation
   register: Register
+  or: or
 JoinPage:
   title: Join an existing congregation
   introduction: To access a congregation in Territory Bro, you will need to tell your <em>User ID</em> to your congregation's territory servant, so that he can give you access.

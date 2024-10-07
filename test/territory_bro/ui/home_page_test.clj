@@ -19,11 +19,9 @@
   {:congregations [{:congregation/id cong-id1
                     :congregation/name "Congregation 1"}
                    {:congregation/id cong-id2
-                    :congregation/name "Congregation 2"}]
-   :logged-in? true})
-(def anonymous-model
-  {:congregations []
-   :logged-in? false})
+                    :congregation/name "Congregation 2"}]})
+(def empty-model
+  {:congregations []})
 
 (deftest model!-test
   (let [request {}]
@@ -47,38 +45,25 @@
         (testutil/with-user-id user-id
           (is (= model (home-page/model! request)))))
 
-      (testing "anonymous"
+      (testing "anonymous or no congregations"
         (testutil/with-anonymous-user
-          (is (= anonymous-model (home-page/model! request))))))))
+          (is (= empty-model (home-page/model! request))))))))
 
 (deftest my-congregations-sidebar-test
-  (testing "logged in, some congregations"
+  (testing "logged in, with congregations"
     (is (= (html/normalize-whitespace
             "Your congregations
                Congregation 1
-               Congregation 2
-
-             Register a new congregation
-             Join an existing congregation")
+               Congregation 2")
            (-> (home-page/my-congregations-sidebar model)
                html/visible-text))))
 
-  (testing "logged in, zero congregations"
-    (is (= (html/normalize-whitespace
-            "Register a new congregation
-             Join an existing congregation")
-           (-> (home-page/my-congregations-sidebar (dissoc model :congregations))
-               html/visible-text))))
-
-  (testing "anonymous"
-    (is (= (html/normalize-whitespace
-            "Login
-             Register a new congregation
-             Join an existing congregation")
-           (-> (home-page/my-congregations-sidebar anonymous-model)
+  (testing "anonymous or no congregations"
+    (is (= ""
+           (-> (home-page/my-congregations-sidebar empty-model)
                html/visible-text)))))
 
 (deftest view-test
   (testing "renders markdown content"
-    (is (str/includes? (home-page/view anonymous-model)
+    (is (str/includes? (home-page/view empty-model)
                        "<p>Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.</p>"))))

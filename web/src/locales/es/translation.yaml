@@ -5,6 +5,7 @@ Navigation:
   login: Iniciar sesión
   logout: Cerrar sesión
   demo: Demostración
+  registration: Registro
   news: Noticias
   opensInNewWindow: Abre en una ventana nueva
 HomePage:
@@ -13,6 +14,7 @@ HomePage:
 RegistrationPage:
   title: Registrar una nueva congregación
   register: Registrar
+  or: o
 JoinPage:
   title: Unirse a una congregación existente
   introduction: Para acceder a una congregación en Territory Bro, deberás proporcionar tu <em>ID de usuario</em> al encargado del territorio de tu congregación, para que pueda darte acceso.

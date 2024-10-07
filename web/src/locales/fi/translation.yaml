@@ -5,6 +5,7 @@ Navigation:
   login: Kirjaudu sisään
   logout: Kirjaudu ulos
   demo: Demo
+  registration: Rekisteröinti
   news: Uutiset
   opensInNewWindow: Aukeaa uudessa ikkunassa
 HomePage:
@@ -13,6 +14,7 @@ HomePage:
 RegistrationPage:
   title: Rekisteröi uusi seurakunta
   register: Rekisteröi
+  or: tai
 JoinPage:
   title: Liity olemassa olevaan seurakuntaan
   introduction: Jotta pääsisit käsiksi seurakuntaan Territory Brossa, sinun tulee kertoa <em>käyttäjätunnuksesi</em> seurakuntasi aluepalvelijalle, jotta hän voi antaa sinulle pääsyn.

@@ -5,6 +5,7 @@ Navigation:
   login: Inloggen
   logout: Uitloggen
   demo: Demo
+  registration: Registratie
   news: Nieuws
   opensInNewWindow: Opent in nieuw venster
 HomePage:
@@ -13,6 +14,7 @@ HomePage:
 RegistrationPage:
   title: Registreer een nieuwe gemeenschap
   register: Registreren
+  or: of
 JoinPage:
   title: Sluit je aan bij een bestaande gemeenschap
   introduction: Om toegang te krijgen tot een gemeenschap in Territory Bro, moet je je <em>Gebruikers-ID</em> aan de territoriumdienaar van je gemeenschap vertellen, zodat hij je toegang kan geven.

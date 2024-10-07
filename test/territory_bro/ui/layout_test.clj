@@ -138,6 +138,7 @@
 
              🏠 Home
              📖 Documentation
+             ✍️ Registration
              News {external-link.svg}
              🛟 Support
 
@@ -156,6 +157,7 @@
              🏠 Home
              🔍 Demo
              📖 Documentation
+             ✍️ Registration
              News {external-link.svg}
              🛟 Support
 

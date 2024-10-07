@@ -118,11 +118,11 @@
     (wait-and-click [:congregation-list {:tag :a, :fn/has-string congregation-name}])
     (b/wait-has-text h1 congregation-name)))
 
-(defn go-to-page [driver title]
+(defn go-to-page [driver title & [h1-title]]
   (let [link {:tag :a, :fn/has-string title}]
     (doto driver
       (wait-and-click link)
-      (b/wait-has-text h1 title))))
+      (b/wait-has-text h1 (or h1-title title)))))
 
 (defn go-to-territory [driver territory-number]
   (doto driver
@@ -137,7 +137,7 @@
     (testing "register new congregation"
       (doto *driver*
         (dev-login-as *user*)
-        (go-to-page "Register a new congregation")
+        (go-to-page "Registration" "Register a new congregation")
 
         (b/fill :congregation-name *congregation-name*)
         (wait-and-click {:tag :button, :fn/text "Register"})
@@ -357,6 +357,7 @@
       (testing "find out user2's ID"
         (doto *driver*
           (dev-login-as user2)
+          (go-to-page "Registration" "Register a new congregation")
           (go-to-page "Join an existing congregation")
           (wait-and-click :copy-your-user-id))
         (let [user2-id (reset! *user2-id (b/get-element-text *driver* :your-user-id))]

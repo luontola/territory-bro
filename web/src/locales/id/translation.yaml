@@ -5,6 +5,7 @@ Navigation:
   login: Masuk
   logout: Keluar
   demo: Demo
+  registration: Pendaftaran
   news: Berita
   opensInNewWindow: Dibuka di jendela baru
 HomePage:
@@ -13,6 +14,7 @@ HomePage:
 RegistrationPage:
   title: Daftar kongregasi baru
   register: Daftar
+  or: atau
 JoinPage:
   title: Bergabung dengan kongregasi yang ada
   introduction: Untuk mengakses kongregasi di Territory Bro, Anda perlu memberitahu <em>ID Pengguna</em> Anda kepada penyelenggara wilayah kongregasi Anda, sehingga dia bisa memberikan akses kepada Anda.

@@ -17,6 +17,24 @@
   (dmz/require-logged-in!)
   {:form (:params request)})
 
+(defn or-divider []
+  (h/html
+   [:div {:style {:border-bottom "2px solid black"
+                  :text-align "center"
+                  :margin-top "2em"
+                  :margin-bottom "2.5em"}}
+    [:span {:style {:position "relative"
+                    :top "0.7em"
+                    :height "1.5em"
+                    :background-color "white"
+                    :padding "0 0.5em"
+                    :text-transform "uppercase"}}
+     (i18n/t "RegistrationPage.or")]]))
+
+(defn join-button []
+  (h/html [:a.pure-button {:href "/join"}
+           (i18n/t "JoinPage.title")]))
+
 (defn view [model]
   (let [errors (group-by first (:errors model))]
     (h/html
@@ -47,7 +65,11 @@
      [:p (-> (i18n/t "SupportPage.mailingListAd")
              (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")
              (str/replace "</0>" "</a>")
-             (h/raw))])))
+             (h/raw))]
+
+     (or-divider)
+     [:div {:style {:text-align "center"}}
+      (join-button)])))
 
 (defn view! [request]
   (view (model! request)))
@@ -68,7 +90,7 @@
   ["/register"
    {:get {:handler (fn [request]
                      (-> (view! request)
-                         (layout/page! request)
+                         (layout/page! request {:main-content-variant :narrow})
                          (html/response)))}
     :post {:middleware [dmz/wrap-db-connection]
            :handler (fn [request]
