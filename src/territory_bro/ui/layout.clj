@@ -62,48 +62,26 @@
       " "
       title])))
 
-(defn external-link [{:keys [href title]}]
+(defn external-link [{:keys [href icon title]}]
   (h/html
    [:a {:href href
         :target "_blank"
         :title (i18n/t "Navigation.opensInNewWindow")}
+    [:span {:aria-hidden true} icon]
+    " "
     title
     " "
     (html/inline-svg "icons/external-link.svg")]))
 
-(defn home-navigation [{:keys [demo-available?]}]
-  (let [styles (:Layout (css/modules))]
-    (h/html
-     [:ul {:class (:nav styles)}
-      [:li (nav-link {:href "/"
-                      :icon "🏠"
-                      :title (i18n/t "HomePage.title")})]
-      (when demo-available?
-        [:li (nav-link {:href "/congregation/demo"
-                        :icon "🔍"
-                        :title (i18n/t "Navigation.demo")})])
-      [:li (nav-link {:href "/documentation"
-                      :icon "📖"
-                      :title (i18n/t "DocumentationPage.title")})]
-      [:li (nav-link {:href "/register"
-                      :icon "✍️"
-                      :title (i18n/t "Navigation.registration")})]
-      [:li (external-link {:href "https://groups.google.com/g/territory-bro-announcements"
-                           :title (i18n/t "Navigation.news")})]
-      [:li (nav-link {:href "/support"
-                      :icon "🛟"
-                      :title (i18n/t "SupportPage.title")})]])))
-
-(defn congregation-navigation [{:keys [congregation permissions]}]
+(defn congregation-navigation [{:keys [congregation permissions demo?]}]
   (let [cong-id (:congregation/id congregation)
         styles (:Layout (css/modules))]
     (h/html
-     [:ul {:class (:nav styles)}
-      [:li (nav-link {:href "/"
-                      :icon "🏠"
-                      :title (i18n/t "HomePage.title")})]
-      [:li (nav-link {:href (str "/congregation/" cong-id)
-                      :title (:congregation/name congregation)})]
+     [:li (nav-link {:href (str "/congregation/" cong-id)
+                     :title (if demo?
+                              (str "🔍 " (i18n/t "Navigation.demo"))
+                              (:congregation/name congregation))})]
+     [:ul {:class (:nav-submenu styles)}
       [:li (nav-link {:href (str "/congregation/" cong-id "/territories")
                       :icon "📍"
                       :title (i18n/t "TerritoryListPage.title")})]
@@ -114,10 +92,34 @@
       (when (:view-settings-page permissions)
         [:li (nav-link {:href (str "/congregation/" cong-id "/settings")
                         :icon "⚙️"
-                        :title (i18n/t "SettingsPage.title")})])
-      [:li (nav-link {:href (str "/congregation/" cong-id "/support")
+                        :title (i18n/t "SettingsPage.title")})])])))
+
+(defn navigation [{:keys [congregation demo-available? demo?] :as model}]
+  (let [styles (:Layout (css/modules))]
+    (h/html
+     [:ul {:class (:nav-menu styles)}
+      [:li (nav-link {:href "/"
+                      :icon "🏠"
+                      :title (i18n/t "HomePage.title")})]
+      (when (some? congregation)
+        (congregation-navigation model))
+      (when (and demo-available? (not demo?))
+        [:li (nav-link {:href "/congregation/demo"
+                        :icon "🔍"
+                        :title (i18n/t "Navigation.demo")})])
+      [:li (nav-link {:href "/documentation"
+                      :icon "📖"
+                      :title (i18n/t "DocumentationPage.title")})]
+      [:li (nav-link {:href "/register"
+                      :icon "✍️"
+                      :title (i18n/t "Navigation.registration")})]
+      [:li (external-link {:href "https://groups.google.com/g/territory-bro-announcements"
+                           :icon "📢"
+                           :title (i18n/t "Navigation.news")})]
+      [:li (nav-link {:href "/support"
                       :icon "🛟"
                       :title (i18n/t "SupportPage.title")})]])))
+
 
 (defn- format-language-name [{:keys [code englishName nativeName]} current-language]
   (cond
@@ -199,13 +201,12 @@
             (head-injections)]
            [:body {:hx-headers (html/anti-forgery-headers-json)}
             [:nav.no-print {:class (:navbar styles)}
-             (if (some? (:congregation model))
-               (congregation-navigation model)
-               (home-navigation model))
-             [:div {:class (:lang styles)}
-              (language-selection model)]
-             [:div {:class (:auth styles)}
-              (authentication-panel model)]]
+             (navigation model)
+             [:div {:class (:nav-end styles)}
+              [:div {:class (:lang styles)}
+               (language-selection model)]
+              [:div {:class (:auth styles)}
+               (authentication-panel model)]]]
 
             [:dialog#htmx-error-dialog
              [:h2 (i18n/t "Errors.unknownError")]

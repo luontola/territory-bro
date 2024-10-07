@@ -139,7 +139,7 @@
              🏠 Home
              📖 Documentation
              ✍️ Registration
-             News {external-link.svg}
+             📢 News {external-link.svg}
              🛟 Support
 
              {language.svg} Change language [English]
@@ -158,7 +158,7 @@
              🔍 Demo
              📖 Documentation
              ✍️ Registration
-             News {external-link.svg}
+             📢 News {external-link.svg}
              🛟 Support
 
              {language.svg} Change language [English]
@@ -181,9 +181,13 @@
 
              🏠 Home
              the congregation
-             📍 Territories
-             🖨️ Printouts
-             ⚙️ Settings
+               📍 Territories
+               🖨️ Printouts
+               ⚙️ Settings
+             🔍 Demo
+             📖 Documentation
+             ✍️ Registration
+             📢 News {external-link.svg}
              🛟 Support
 
              {language.svg} Change language [English]
@@ -206,7 +210,11 @@
 
                🏠 Home
                the congregation
-               📍 Territories
+                 📍 Territories
+               🔍 Demo
+               📖 Documentation
+               ✍️ Registration
+               📢 News {external-link.svg}
                🛟 Support
 
                {language.svg} Change language [English]
@@ -228,9 +236,12 @@
             "the title - Territory Bro
 
              🏠 Home
-             Demo Congregation
-             📍 Territories
-             🖨️ Printouts
+             🔍 Demo
+               📍 Territories
+               🖨️ Printouts
+             📖 Documentation
+             ✍️ Registration
+             📢 News {external-link.svg}
              🛟 Support
 
              {language.svg} Change language [English]

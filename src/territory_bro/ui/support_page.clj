@@ -48,14 +48,8 @@
   (view (model! request)))
 
 (def routes
-  [["/support"
-    {:get {:handler (fn [request]
-                      (-> (view! request)
-                          (layout/page! request)
-                          (html/response)))}}]
-
-   ["/congregation/:congregation/support"
-    {:get {:handler (fn [request]
-                      (-> (view! request)
-                          (layout/page! request)
-                          (html/response)))}}]])
+  ["/support"
+   {:get {:handler (fn [request]
+                     (-> (view! request)
+                         (layout/page! request)
+                         (html/response)))}}])

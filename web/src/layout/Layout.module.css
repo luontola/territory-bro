@@ -36,35 +36,109 @@ kbd {
 /* layout */
 
 .navbar {
-    position: relative;
-    padding: 0.5em 0.5em;
-    background-color: #fcfcfc;
-    border-bottom: 2px solid #f0f0f0;
+    background-color: var(--menu-bg-color-level1);
+    border-bottom: var(--menu-item-border-shadow);
+
+    --menu-item-padding: 8px 16px;
+    --menu-bg-color-level1: hsl(0, 0%, 97%);
+    --menu-bg-color-level2: hsl(0, 0%, 95%);
+    --menu-item-border-shadow: 1px solid hsl(0, 0%, 70%);
+    --menu-item-border-highlight: 1px solid hsl(0, 0%, 100%);
 }
 
-.nav {
+.nav-menu,
+.nav-submenu {
     margin: 0;
     padding: 0;
     list-style-type: none;
     font-size: 18px;
+
+    li {
+        padding: var(--menu-item-padding);
+        white-space: nowrap;
+    }
 }
 
-.nav li {
-    text-align: center;
-    margin: 8px auto;
-    padding: 0 1em;
-    white-space: nowrap;
+.nav-submenu > li {
+    /* indentation */
+    padding-left: calc(16px + 2ch);
+}
+
+.nav-menu > li:has(> .active),
+.nav-submenu > li {
+    background-color: var(--menu-bg-color-level2);
 }
 
 .active {
     font-weight: bold;
 }
 
-.lang, .auth {
-    text-align: center;
-    margin: 4px auto;
-    padding-right: 1em;
-    font-size: 16px;
+.nav-end {
+    padding: 0 16px 4px;
+}
+
+@media screen and (min-width: 768px) {
+    .navbar {
+        padding: 0 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+
+        --menu-item-padding: 2px 12px 2px 8px; /* more padding on right, to balance the emoji on left */
+        --menu-item-height: 2.5rem;
+    }
+
+    .nav-menu, .nav-submenu {
+        /* each <li> should partake in the .navbar's flexbox */
+        display: contents;
+
+        li {
+            align-content: center;
+            height: var(--menu-item-height);
+        }
+
+        li:not(:has(.active)) + li:has(.active) {
+        }
+    }
+
+    .nav-submenu > li {
+        /* reset indentation from mobile layout */
+        padding: var(--menu-item-padding);
+    }
+
+    /* borders to make the selected item or submenu look 3-dimensional */
+    .nav-menu > li:has(> .active),
+    .nav-submenu > li {
+        border-top: var(--menu-item-border-shadow);
+        border-bottom: var(--menu-item-border-highlight);
+    }
+
+    .nav-menu > li:has(.active) {
+        border-left: var(--menu-item-border-shadow);
+    }
+
+    .nav-submenu > li:last-of-type,
+    .nav-menu > li:has(.active):not(:has(+ .nav-submenu)) {
+        border-right: var(--menu-item-border-highlight);
+    }
+
+    .nav-end {
+        flex-grow: 1;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        gap: 1rem;
+        padding: 0;
+
+        .lang, .auth {
+            height: var(--menu-item-height);
+        }
+
+        .lang {
+            min-width: 10rem; /* avoid layout movement when the language selector is opened */
+            text-align: right;
+        }
+    }
 }
 
 select.languageSelection:not(:focus) {
@@ -163,32 +237,6 @@ select.languageSelection:not(:focus):hover {
         margin-left: 0;
         color: hsl(from var(--font-color) h s calc(l + 40));
         border-left: 0.3rem solid currentcolor;
-    }
-}
-
-@media screen and (min-width: 768px) {
-    .navbar {
-        display: flex;
-        flex-wrap: wrap;
-    }
-
-    .nav {
-        display: flex;
-        justify-content: center;
-        flex: auto;
-    }
-
-    .nav li {
-        flex: auto;
-        border-right: 1px solid #ccc;
-    }
-
-    .nav li:last-of-type {
-        border-right: none;
-    }
-
-    .lang, .auth {
-        flex: none;
     }
 }
 

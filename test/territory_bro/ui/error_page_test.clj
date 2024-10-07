@@ -14,7 +14,7 @@
    🏠 Home
    📖 Documentation
    ✍️ Registration
-   News {external-link.svg}
+   📢 News {external-link.svg}
    🛟 Support
 
    {language.svg} Change language [English]
