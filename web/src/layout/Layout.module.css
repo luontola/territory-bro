@@ -118,6 +118,11 @@ kbd {
 .nav-end {
     padding: 0 16px 4px;
 
+    :global .pure-form label {
+        /* prevent layout shift caused by Pure CSS's breakpoint at 480px width */
+        display: inline;
+    }
+
     @media (width >= 768px) {
         flex-grow: 1;
         display: flex;
