@@ -37,7 +37,8 @@
   (h/html
    [:h1 "Territory Bro"]
    (my-congregations-sidebar model)
-   (home-html)))
+   [:div {:lang "en"}
+    (home-html)]))
 
 (defn view! [request]
   (view (model! request)))
