@@ -19,8 +19,10 @@
   (h/html
    [:h1 (i18n/t "SupportPage.title")]
    [:p (-> (i18n/t "SupportPage.introduction")
-           (str/replace "<0>" "<a href=\"https://www.luontola.fi/about\" target=\"_blank\">")
+           (str/replace "<0>" "<a href=\"https://github.com/luontola/territory-bro\" target=\"_blank\">")
            (str/replace "</0>" "</a>")
+           (str/replace "<1>" "<a href=\"https://www.luontola.fi/about\" target=\"_blank\">")
+           (str/replace "</1>" "</a>")
            (h/raw))]
    [:p (-> (i18n/t "SupportPage.mailingListAd")
            (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")

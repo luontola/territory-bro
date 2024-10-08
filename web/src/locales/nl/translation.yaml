@@ -88,7 +88,7 @@ DocumentationPage:
   title: Documentatie
 SupportPage:
   title: Ondersteuning
-  introduction: Territory Bro is een open source project ontwikkeld door <0>Esko Luontola</0>.
+  introduction: Territory Bro is een <0>open source project</0> ontwikkeld door <1>Esko Luontola</1>.
   mailingListAd: We raden aan om <0>je aan te melden voor onze mailinglijst</0> om op de hoogte te blijven van belangrijke updates van Territory Bro.
   userGuideAd: De <0>gebruikershandleiding</0> bevat antwoorden op de meest gestelde vragen met betrekking tot het maken van territoriumkaarten.
   emailAd: Als dat niet voldoende is, kun je een e-mail sturen naar <0>{{email}}</0> om hulp te vragen bij het gebruik van Territory Bro.

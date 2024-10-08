@@ -88,7 +88,7 @@ DocumentationPage:
   title: Documentação
 SupportPage:
   title: Suporte
-  introduction: Territory Bro é um projeto de código aberto desenvolvido por <0>Esko Luontola</0>.
+  introduction: Territory Bro é um <0>projeto de código aberto</0> desenvolvido por <1>Esko Luontola</1>.
   mailingListAd: Recomendamos <0>inscrever-se em nossa lista de emails</0> para ser notificado sobre atualizações importantes do Territory Bro.
   userGuideAd: O <0>guia do usuário</0> deve responder às perguntas mais comuns relacionadas à criação de mapas de território.
   emailAd: Se isso não for suficiente, você pode enviar um email para <0>{{email}}</0> para pedir ajuda com o uso do Territory Bro.

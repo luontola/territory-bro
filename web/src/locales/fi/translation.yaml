@@ -88,7 +88,7 @@ DocumentationPage:
   title: Ohjeet
 SupportPage:
   title: Tuki
-  introduction: Territory Bro on avoimen lähdekoodin projekti, jota kehittää <0>Esko Luontola</0>.
+  introduction: Territory Bro on <0>avoimen lähdekoodin projekti</0>, jota kehittää <1>Esko Luontola</1>.
   mailingListAd: Suosittelemme <0>liittymään postituslistallemme</0> saadaksesi tiedon tärkeistä Territory Bro -päivityksistä.
   userGuideAd: <0>Käyttöoppaan</0> pitäisi vastata yleisimpiin kysymyksiin, jotka liittyvät aluekarttojen luomiseen.
   emailAd: Jos se ei riitä, niin voit lähettää sähköpostia osoitteeseen <0>{{email}}</0> saadaksesi apua Territory Bron käyttöön.
