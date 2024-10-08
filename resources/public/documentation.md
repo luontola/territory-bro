@@ -13,17 +13,17 @@
 
 ## Getting Started
 
-1. Visit <https://beta.territorybro.com> and register a new congregation in Territory Bro. You will need to login using
-   your Google or Facebook account.
+1. [Register a new congregation](/register) in Territory Bro. You will need to login using your Google or Facebook
+   account.
     * If somebody has already registered your congregation to Territory Bro, they can give you access to it if you:
-        1. Visit <https://beta.territorybro.com/join> to find out your User ID code (it's made of 36 random numbers,
-           letters and dashes).
+        1. Visit the [Join an existing congregation](/join) page to find out your User ID code (it's made of 36 random
+           numbers, letters and dashes).
         2. Send the User ID to the person who already can access your congregation in Territory Bro.
         3. They will need to visit the congregation's settings page in Territory Bro, and add you there using your User
            ID.
 
-2. After registering the congregation, in the congregation's *Settings* page there is a button to download a *QGIS
-   project file*. Save the project file on your computer.
+2. After registering the congregation, in the congregation's **Settings** page there is a button to download a **QGIS
+   project file**. Save the project file on your computer.
 
 3. Download and install the latest [QGIS 3.x LTR (Long Term Release)](https://www.qgis.org/). This program will be used
    to edit the territory maps.
@@ -102,9 +102,9 @@ View the following videos to see an example and to learn more.
 
 ## Printing Territory Cards
 
-Log in to <https://beta.territorybro.com>, choose your congregation and go to the *Printouts* page. You should see your
-territories ready to be printed using various card templates. You can print multiple territories at once by holding down
-`Ctrl` or `Shift` to select them from the territories list.
+Go to your congregation's **Printouts** page. You should see your territories ready to be printed using various card
+templates. You can print multiple territories at once by holding down `Ctrl` or `Shift` to select them from the
+territory list.
 
 By default, the background maps from OpenStreetMap are used, but Territory Bro can support also other freely available
 maps. [Create an issue](https://github.com/luontola/territory-bro/issues) if you know about a map you wish to use. (Note

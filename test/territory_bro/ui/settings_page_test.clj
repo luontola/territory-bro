@@ -237,7 +237,7 @@
 
           Users
 
-          To add users to this congregation, ask them to visit https://beta.territorybro.com/join and copy their User ID
+          To add users to this congregation, ask them to visit https://territorybro.com/join and copy their User ID
           from that page and send it to you.
 
           User ID []
@@ -245,7 +245,7 @@
 
           Name              Email       Login method   Actions
           Esko Luontola                 Google         Remove user")
-         (binding [config/env {:public-url "https://beta.territorybro.com"}]
+         (binding [config/env {:public-url "https://territorybro.com"}]
            (-> (settings-page/view model)
                html/visible-text)))))
 

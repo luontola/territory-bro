@@ -3,9 +3,9 @@ Territory Bro is a tool for managing territory cards in the congregations of Jeh
 * [Print new territory cards](#2-print-and-cut) with up-to-date street maps
 * Store do-not-calls
 * Share links to a territory, so that the publisher can see only that territory and its
-  do-not-calls ([example link](https://beta.territorybro.com/share/5jsrmZQ3zgE/123))
+  do-not-calls ([example link](https://territorybro.com/share/5jsrmZQ3zgE/123))
 
-<a href="https://beta.territorybro.com/share/5jsrmZQ3zgE/123"><img src="assets/examples/share.7108d0b1.png" alt="Sharing a link to a territory" style="width: 100%; max-width: 500px;"></a>
+<a href="https://territorybro.com/share/5jsrmZQ3zgE/123"><img src="assets/examples/share.7108d0b1.png" alt="Sharing a link to a territory" style="width: 100%; max-width: 500px;"></a>
 
 Someday in the future, Territory Bro will also keep track of assigned and returned territories, and produce statistics
 of covered territories.
