@@ -6,7 +6,7 @@
     border-radius: 1rem;
 }
 
-@media screen and (min-width: 64rem) {
+@media screen and (min-width: 55rem) {
     .sidebar {
         float: right;
         max-width: 25rem;
@@ -16,4 +16,58 @@
 
 .congregationList {
     font-size: 1.35rem;
+}
+
+:global .sms-discussion {
+    display: flex;
+    flex-direction: column;
+    max-width: 20rem;
+    margin: 0 var(--sms-bubble-tail-width);
+    gap: 0.8rem;
+    --sms-bubble-tail-width: 10px;
+
+    :global .sms-message {
+        position: relative;
+        max-width: calc(100% - 4rem);
+        margin: 0;
+        padding: 8px 12px;
+        border-radius: 15px;
+        font-size: 1.2rem;
+
+        a {
+            color: unset;
+            text-decoration: underline;
+        }
+
+        &:after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            bottom: 0;
+            z-index: -1;
+        }
+
+        :global &.incoming {
+            align-self: flex-start;
+            color: #000000;
+            background-color: #e9e9eb;
+
+            &:after {
+                background-image: url("sms-tail-incoming.svg");
+                left: calc(-1 * var(--sms-bubble-tail-width));
+            }
+        }
+
+        :global &.outgoing {
+            align-self: flex-end;
+            color: #ffffff;
+            background-color: #518fff;
+
+            &:after {
+                background-image: url("sms-tail-outgoing.svg");
+                right: calc(-1 * var(--sms-bubble-tail-width));
+            }
+        }
+    }
 }

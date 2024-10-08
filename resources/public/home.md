@@ -5,7 +5,11 @@ Territory Bro is a tool for managing territory cards in the congregations of Jeh
 * Share links to a territory, so that the publisher can see only that territory and its
   do-not-calls ([example link](https://territorybro.com/share/5jsrmZQ3zgE/123))
 
-<a href="https://territorybro.com/share/5jsrmZQ3zgE/123"><img src="assets/examples/share.7108d0b1.png" alt="Sharing a link to a territory" style="width: 100%; max-width: 500px;"></a>
+<div class="sms-discussion" aria-description="Example SMS discussion">
+<p class="sms-message incoming">May I get a new territory?</p>
+<p class="sms-message outgoing">Sure. Here you go: <a href="https://territorybro.com/share/5jsrmZQ3zgE/123">https://territorybro.com<wbr>/share<wbr>/5jsrmZQ3zgE<wbr>/123</a></p>
+<p class="sms-message incoming">Thanks!</p>
+</div>
 
 Someday in the future, Territory Bro will also keep track of assigned and returned territories, and produce statistics
 of covered territories.
