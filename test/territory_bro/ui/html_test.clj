@@ -100,7 +100,8 @@
 
   (testing "static resources in the /public/assets directory should be content-hashed"
     (doall (for [^File file (file-seq (io/file "resources/public/assets"))
-                 :when (.isFile file)]
+                 :when (and (.isFile file)
+                            (not= ".DS_Store" (.getName file)))]
              (let [hash (-> (FileUtils/readFileToByteArray file)
                             (DigestUtils/sha256Hex)
                             (subs 0 8))]
