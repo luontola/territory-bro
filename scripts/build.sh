@@ -28,7 +28,6 @@ lein do kaocha fast slow, uberjar
 # AppCDS preparation: dump list of loaded classes during e2e test run
 java -XX:DumpLoadedClassList=target/uberjar/classes.list -Dconf=dev-config.edn -jar "target/uberjar/territory-bro.jar" &> target/uberjar/warmup.log &
 warmup=$!
-timeout 1m bash -c 'until curl --silent --fail http://localhost:8080/status; do sleep 1; done; echo'
 # Gives the best coverage in the least time:
 # - registration-test visits nearly every page
 # - gis-access-test syncs GIS data and projects the events
@@ -44,5 +43,4 @@ docker compose build --pull app
 
 export DEMO_CONGREGATION=$(cat target/test-congregation-id)
 docker compose up -d app
-timeout 1m bash -c 'until curl --silent --fail http://localhost:8080/status; do sleep 1; done; echo'
 lein kaocha e2e
