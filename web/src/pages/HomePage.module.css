@@ -34,7 +34,7 @@
         border-radius: 15px;
         font-size: 1.2rem;
 
-        a {
+        :is(a) {
             color: unset;
             text-decoration: underline;
         }
