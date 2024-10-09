@@ -5,7 +5,6 @@
 (ns territory-bro.ui.html
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.tools.logging :as log]
             [hiccup.util :as hiccup.util]
             [hiccup2.core :as h]
             [net.cgrand.enlive-html :as en]
@@ -156,7 +155,7 @@
 (defn inline-svg* [svg-path args]
   {:pre [(string? svg-path)
          (or (nil? args) (map? args))]}
-  (if-some [svg-resource (io/resource svg-path)]
+  (when-some [svg-resource (io/resource svg-path)]
     (let [{:keys [class style title]} args
           other-attrs (dissoc args :class :style :title)
           set-data-test-icon-attr (en/set-attr :data-test-icon (str "{" (.getName (io/file svg-path)) "}"))
@@ -179,8 +178,7 @@
                                      set-style-attr
                                      set-class-attr
                                      set-data-test-icon-attr))
-          (emit-xml)))
-    (log/warn "territory-bro.ui.html/inline-svg: Resource not found:" svg-path)))
+          (emit-xml)))))
 
 (defmacro inline-svg
   ([path]
