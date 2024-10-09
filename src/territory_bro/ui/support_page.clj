@@ -44,7 +44,9 @@
    [:p (-> (i18n/t "SupportPage.issueTrackerAd")
            (str/replace "<0>" "<a href=\"https://github.com/luontola/territory-bro/issues\" target=\"_blank\">")
            (str/replace "</0>" "</a>")
-           (h/raw))]))
+           (h/raw))]
+   [:p [:a {:href "/privacy-policy"}
+        "Privacy policy"]]))
 
 (defn view! [request]
   (view (model! request)))

@@ -42,7 +42,8 @@
              The user guide should answer the most common questions related to creating territory maps.
              If that is not enough, you may email support@example.com to ask for help with using Territory Bro.
              See the translation instructions if you would like to help improve the current translations or add new languages.
-             Bugs and feature requests may also be reported to this project's issue tracker.")
+             Bugs and feature requests may also be reported to this project's issue tracker.
+             Privacy policy")
            (-> (support-page/view private-model)
                html/visible-text))))
 
@@ -53,6 +54,7 @@
              We recommend subscribing to our mailing list to be notified about important Territory Bro updates.
              The user guide should answer the most common questions related to creating territory maps.
              See the translation instructions if you would like to help improve the current translations or add new languages.
-             Bugs and feature requests may also be reported to this project's issue tracker.")
+             Bugs and feature requests may also be reported to this project's issue tracker.
+             Privacy policy")
            (-> (support-page/view public-model)
                html/visible-text)))))

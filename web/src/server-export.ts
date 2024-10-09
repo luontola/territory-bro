@@ -17,6 +17,7 @@ import languageSvg from "@fortawesome/fontawesome-free/svgs/solid/language.svg?r
 import mapLocationSvg from "@fortawesome/fontawesome-free/svgs/solid/map-location-dot.svg?raw";
 import shareSvg from "@fortawesome/fontawesome-free/svgs/solid/share-nodes.svg?raw";
 import userSvg from "@fortawesome/fontawesome-free/svgs/solid/user-large.svg?raw";
+import atSvg from "@fortawesome/fontawesome-free/svgs/solid/at.svg?raw";
 
 function exportFile(filename: string, content: string) {
   const file = "target/web-dist/" + filename;
@@ -47,3 +48,4 @@ exportFile("icons/language.svg", parseFontAwesomeIcon(languageSvg).outerHTML);
 exportFile("icons/map-location.svg", parseFontAwesomeIcon(mapLocationSvg).outerHTML);
 exportFile("icons/share.svg", parseFontAwesomeIcon(shareSvg).outerHTML);
 exportFile("icons/user.svg", parseFontAwesomeIcon(userSvg).outerHTML);
+exportFile("icons/at.svg", parseFontAwesomeIcon(atSvg).outerHTML);

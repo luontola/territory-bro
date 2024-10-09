@@ -15,6 +15,7 @@
             [territory-bro.ui.join-page :as join-page]
             [territory-bro.ui.open-share-page :as open-share-page]
             [territory-bro.ui.printouts-page :as printouts-page]
+            [territory-bro.ui.privacy-policy-page :as privacy-policy-page]
             [territory-bro.ui.registration-page :as registration-page]
             [territory-bro.ui.settings-page :as settings-page]
             [territory-bro.ui.status-page :as status-page]
@@ -53,6 +54,7 @@
    join-page/routes
    open-share-page/routes
    printouts-page/routes
+   privacy-policy-page/routes
    registration-page/routes
    settings-page/routes
    status-page/routes
