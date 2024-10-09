@@ -198,9 +198,14 @@
                     :href "https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
                     :crossorigin "anonymous"
                     :referrerpolicy "no-referrer"}]
+            [:link {:rel "icon"
+                    :href (get html/public-resources "/assets/logo-small.*.svg")}]
             (head-injections)]
            [:body {:hx-headers (html/anti-forgery-headers-json)}
             [:nav.no-print {:class (:navbar styles)}
+             [:img {:class (:logo styles)
+                    :src (get html/public-resources "/assets/logo-big.*.svg")
+                    :alt "Territory Bro logo"}]
              (navigation model)
              [:div {:class (:nav-end styles)}
               [:div {:class (:lang styles)}

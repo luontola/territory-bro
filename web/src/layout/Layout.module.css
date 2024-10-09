@@ -56,6 +56,18 @@ kbd {
     }
 }
 
+.logo {
+    display: none;
+
+    @media (width >= 768px) {
+        display: initial;
+        align-self: center;
+        width: 2rem;
+        height: 2rem;
+        margin-right: 8px;
+    }
+}
+
 .nav-menu,
 .nav-submenu {
     margin: 0;

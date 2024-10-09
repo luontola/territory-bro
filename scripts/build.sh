@@ -11,17 +11,22 @@ npm run build
 
 # macOS find doesn't support -regextype, and GNU find doesn't support -E
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  find -E target/web-dist/public \
+  find -E target/web-dist/public resources/public/assets \
     -type f \
     -iregex '.*\.(html|js|map|css|svg|otf|ttf|txt|json)' \
     -print -exec zopfli '{}' \; -exec brotli -f '{}' \;
 else
-  find target/web-dist/public \
+  find target/web-dist/public resources/public/assets \
     -type f \
     -regextype posix-extended \
     -iregex '.*\.(html|js|map|css|svg|otf|ttf|txt|json)' \
     -print -exec zopfli '{}' \; -exec brotli -f '{}' \;
 fi
+# don't create compressed files under the source tree, but move them away
+# to avoid breaking some tests and leaving around files that shouldn't be committed
+find resources/public/assets \
+  -type f \( -name "*.gz" -o -name "*.br" \) \
+  -exec bash -c 'mv "$1" "target/web-dist/public/${1#resources/public/assets/}"' _ {} \;
 
 lein do kaocha fast slow, uberjar
 

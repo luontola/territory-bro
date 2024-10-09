@@ -46,9 +46,9 @@
 
     (testing "returns the uncompressed resource if it's not pre-compressed"
       (is (= {:status 200
-              :body (.getAbsoluteFile (io/file "target/web-dist/public/favicon.ico"))
-              :headers {"Content-Length" "0"}}
-             (simplify (handler (-> (mock/request :get "/favicon.ico")
+              :body (.getAbsoluteFile (io/file "resources/public/assets/examples/card.fef9840a.jpg"))
+              :headers {"Content-Length" "217134"}}
+             (simplify (handler (-> (mock/request :get "/assets/examples/card.fef9840a.jpg")
                                     (mock/header "accept-encoding" "gzip, deflate, br, zstd")))))))))
 
 (deftest wrap-cache-control-test
