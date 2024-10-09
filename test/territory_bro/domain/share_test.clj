@@ -74,25 +74,39 @@
 (deftest grant-opened-shares-test
   (let [state (apply-events [share-created
                              share-created2])
-        permit-cong [:view-congregation-temporarily cong-id]
+        permit-cong [:view-congregation cong-id]
+        permit-cong-temp [:view-congregation-temporarily cong-id]
         permit-t1 [:view-territory cong-id territory-id]
         permit-t2 [:view-territory cong-id territory-id2]]
     (testing "no shares opened"
       (is (not (permissions/allowed? state user-id permit-cong)))
+      (is (not (permissions/allowed? state user-id permit-cong-temp)))
       (is (not (permissions/allowed? state user-id permit-t1)))
       (is (not (permissions/allowed? state user-id permit-t2))))
 
     (testing "one share opened"
       (let [state (share/grant-opened-shares state [share-id] user-id)]
-        (is (permissions/allowed? state user-id permit-cong))
+        (is (not (permissions/allowed? state user-id permit-cong)))
+        (is (permissions/allowed? state user-id permit-cong-temp))
         (is (permissions/allowed? state user-id permit-t1))
         (is (not (permissions/allowed? state user-id permit-t2)))))
 
     (testing "many shares opened"
       (let [state (share/grant-opened-shares state [share-id share-id2] user-id)]
-        (is (permissions/allowed? state user-id permit-cong))
+        (is (not (permissions/allowed? state user-id permit-cong)))
+        (is (permissions/allowed? state user-id permit-cong-temp))
         (is (permissions/allowed? state user-id permit-t1))
-        (is (permissions/allowed? state user-id permit-t2))))))
+        (is (permissions/allowed? state user-id permit-t2))))
+
+    (testing "if the user already has the :view-congregation permission, will not grant also :view-congregation-temporarily"
+      (let [state (permissions/grant state user-id permit-cong)]
+        (is (permissions/allowed? state user-id permit-cong))
+        (is (not (permissions/allowed? state user-id permit-cong-temp)))
+        (is (not (permissions/allowed? state user-id permit-t1)))
+        (is (not (permissions/allowed? state user-id permit-t2)))))
+
+    (testing "non-existing shares are ignored silently"
+      (is (= state (share/grant-opened-shares state [(UUID. 0 0x666)] user-id))))))
 
 
 ;;;; Queries

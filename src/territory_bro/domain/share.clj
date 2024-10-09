@@ -36,11 +36,14 @@
       (assoc-in [::shares (:share/id event) :share/last-opened] (:event/time event))))
 
 (defn- grant-opened-share [state share-id user-id]
-  (if-some [share (get-in state [::shares share-id])]
-    (-> state
-        (permissions/grant user-id [:view-congregation-temporarily (:congregation/id share)])
-        (permissions/grant user-id [:view-territory (:congregation/id share) (:territory/id share)]))
-    state))
+  (let [share (get-in state [::shares share-id])
+        cong-id (:congregation/id share)]
+    (if (and (some? share)
+             (not (permissions/allowed? state user-id [:view-congregation cong-id])))
+      (-> state
+          (permissions/grant user-id [:view-congregation-temporarily cong-id])
+          (permissions/grant user-id [:view-territory cong-id (:territory/id share)]))
+      state)))
 
 (defn grant-opened-shares [state share-ids user-id]
   (reduce #(grant-opened-share %1 %2 user-id) state share-ids))
