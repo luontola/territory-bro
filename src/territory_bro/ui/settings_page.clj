@@ -137,6 +137,7 @@
 (defn identity-provider [user]
   (let [sub (str (:user/subject user))]
     (cond
+      (str/starts-with? sub "auth0|") "Auth0"
       (str/starts-with? sub "google-oauth2|") "Google"
       (str/starts-with? sub "facebook|") "Facebook"
       :else sub)))

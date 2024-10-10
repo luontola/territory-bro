@@ -122,6 +122,7 @@
 
 (deftest identity-provider-test
   (is (= "" (settings-page/identity-provider nil)))
+  (is (= "Auth0" (settings-page/identity-provider {:user/subject "auth0|500fb0b853ad664d1a50c227"})))
   (is (= "Google" (settings-page/identity-provider {:user/subject "google-oauth2|123456789"})))
   (is (= "Facebook" (settings-page/identity-provider {:user/subject "facebook|10224970701722883"})))
   (is (= "developer" (settings-page/identity-provider {:user/subject "developer"}))))
