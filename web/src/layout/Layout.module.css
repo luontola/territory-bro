@@ -62,9 +62,13 @@ kbd {
     @media (width >= 768px) {
         display: initial;
         align-self: center;
-        width: 2rem;
-        height: 2rem;
         margin-right: 8px;
+
+        :is(img) {
+            width: 2rem;
+            height: 2rem;
+            vertical-align: bottom;
+        }
     }
 }
 
