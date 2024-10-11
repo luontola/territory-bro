@@ -222,8 +222,8 @@ select.languageSelection:not(:focus):hover {
         filter: grayscale(1);
     }
 
-    :is(img) {
-        max-width: 100%;
+    :is(p) img {
+        max-width: 100%; /* fit to content, only for Markdown */
     }
 
     :is(li) > p:last-of-type {
