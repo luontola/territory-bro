@@ -13,8 +13,7 @@
 
 ## Getting Started
 
-1. [Register a new congregation](/register) in Territory Bro. You will need to login using your Google or Facebook
-   account.
+1. [Register a new congregation](/register) in Territory Bro.
     * If somebody has already registered your congregation to Territory Bro, they can give you access to it if you:
         1. Visit the [Join an existing congregation](/join) page to find out your User ID code (it's made of 36 random
            numbers, letters and dashes).
