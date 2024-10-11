@@ -22,7 +22,7 @@ RUN java -Xshare:dump \
 USER app
 ENTRYPOINT ["java", \
             "-Xshare:on", "-XX:SharedArchiveFile=classes.jsa", \
-            "-XX:InitialRAMPercentage=70", "-XX:MaxRAMPercentage=70", \
+            "-XX:MaxRAMPercentage=70", \
             "-XX:+PrintCommandLineFlags", \
             "-jar", "territory-bro.jar"]
 
