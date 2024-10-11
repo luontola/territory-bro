@@ -205,8 +205,11 @@
             [:nav.no-print {:class (:navbar styles)}
              [:div {:class (:logo styles)}
               [:a {:href "/"}
-               [:img {:src (get html/public-resources "/assets/logo-big.*.svg")
-                      :alt "Territory Bro logo"}]]]
+               [:picture
+                [:source {:type "image/svg+xml"
+                          :srcset (get html/public-resources "/assets/logo-big.*.svg")}]
+                [:img {:src (get html/public-resources "/assets/logo-big.*.png")
+                       :alt "Territory Bro logo"}]]]]
              (navigation model)
              [:div {:class (:nav-end styles)}
               [:div {:class (:lang styles)}
