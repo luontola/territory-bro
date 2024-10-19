@@ -32,5 +32,8 @@
   (let [view (fn [model]
                (-> model
                    (view)
+                   ;; TODO: Doesn't support {:main-content-variant :full-width}, but it's fine for now, because this
+                   ;;       function is not used on any of the full-width pages. Consider passing main-content-variant
+                   ;;       via a dynamic binding and setting it in the router to affect all places.
                    (layout/page! request)))]
     (validation-error-htmx-response e request model! view)))

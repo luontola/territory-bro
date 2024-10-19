@@ -228,7 +228,7 @@
     {:name ::page
      :get {:handler (fn [request]
                       (-> (view! request)
-                          (layout/page! request)
+                          (layout/page! request {:main-content-variant :full-width})
                           (html/response)))}
      :post {:handler (fn [request]
                        (-> (view! request)

@@ -165,7 +165,7 @@
      :get {:middleware [dmz/wrap-db-connection]
            :handler (fn [request]
                       (-> (view! request)
-                          (layout/page! request)
+                          (layout/page! request {:main-content-variant :full-width})
                           (html/response)))}}]
 
    ["/do-not-calls/edit"

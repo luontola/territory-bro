@@ -84,7 +84,7 @@
   ["/register"
    {:get {:handler (fn [request]
                      (-> (view! request)
-                         (layout/page! request {:main-content-variant :narrow})
+                         (layout/page! request)
                          (html/response)))}
     :post {:middleware [dmz/wrap-db-connection]
            :handler (fn [request]

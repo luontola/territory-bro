@@ -209,6 +209,10 @@ select.languageSelection:not(:focus):hover {
         max-width: 60rem;
     }
 
+    &.full-width {
+        max-width: 100%;
+    }
+
     :is(h1) {
         margin-top: 0;
     }

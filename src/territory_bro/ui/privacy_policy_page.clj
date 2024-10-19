@@ -32,5 +32,5 @@
   ["/privacy-policy"
    {:get {:handler (fn [request]
                      (-> (view)
-                         (layout/page! request {:main-content-variant :narrow})
+                         (layout/page! request)
                          (html/response)))}}])
