@@ -7,7 +7,7 @@ Navigation:
   demo: Demo
   registration: Rekisteröinti
   news: Uutiset
-  opensInNewWindow: Aukeaa uudessa ikkunassa
+  opensInNewWindow: Aukeaa uuteen ikkunaan
 HomePage:
   title: Etusivu
   yourCongregations: Sinun seurakuntasi
@@ -17,12 +17,12 @@ RegistrationPage:
   or: tai
 JoinPage:
   title: Liity olemassa olevaan seurakuntaan
-  introduction: Jotta pääsisit käsiksi seurakuntaan Territory Brossa, sinun tulee kertoa <em>käyttäjätunnuksesi</em> seurakuntasi aluepalvelijalle, jotta hän voi antaa sinulle pääsyn.
+  introduction: Päästäksesi käsiksi seurakuntaan Territory Brossa, sinun tulee kertoa <em>käyttäjätunnuksesi</em> seurakunnan aluepalvelijalle, jotta hän voi antaa sinulle pääsyn.
   yourUserId: "Käyttäjätunnuksesi on:"
   copy: Kopioi leikepöydälle
 DemoDisclaimer:
   welcome: Tervetuloa demoon
-  introduction: Tämä demo rajoittuu vain seurakunnan tarkasteluun. Joitain ominaisuuksia on rajoitettu.
+  introduction: Tämä demo rajoittuu vain seurakunnan katseluun. Joitain ominaisuuksia on rajoitettu.
 GettingStarted:
   title: Aloittaminen
   congregationBoundary: Määritä seurakunnan rajat
@@ -33,7 +33,7 @@ TerritoryListPage:
   clear: Tyhjennä
   limitedVisibility:
     title: Miksi niin vähän alueita?
-    explanation: Vain ne alueet, jotka on jaettu kanssasi, näytetään tällä hetkellä.
+    explanation: Näkyvissä ovat vain ne alueet, jotka on jaettu sinulle.
     needToRequestAccess: Sinun tulee <0>pyytää pääsyä</0> nähdäksesi loput.
     needToLogin: Sinun tulee <0>kirjautua sisään</0> nähdäksesi loput.
 TerritoryPage:
@@ -44,7 +44,7 @@ TerritoryPage:
   shareLink:
     button: Jaa linkki
     closePopup: Sulje
-    description: "Tämän linkin avulla ihmiset voivat tarkastella tätä aluekarttaa kirjautumatta sisään:"
+    description: "Linkin kautta voi katsoa tätä aluekarttaa ilman sisäänkirjautumista:"
     copy: Kopioi leikepöydälle
 PrintoutPage:
   title: Tulosteet
@@ -59,7 +59,7 @@ PrintoutPage:
     TerritoryCardMapOnly: Aluekortti, vain kartta
     NeighborhoodCard: Alueen lähiseutu
     RuralTerritoryCard: Maaseutualueen kortti
-    QrCodeOnly: Vain QR-koodi (tulosta tarroina ja lisää vanhoille korteille)
+    QrCodeOnly: Vain QR-koodi (lisättäväksi vanhoihin kortteihin tarrana)
     RegionPrintout: Seutukartta
 SettingsPage:
   title: Asetukset
@@ -70,15 +70,15 @@ CongregationSettings:
   save: Tallenna asetukset
 EditingMaps:
   title: Karttojen muokkaus
-  introduction: Ohjeet karttojen muokkaamiseen löytyvät <0>käyttöoppaasta</0>. Voit muokata karttoja käyttämällä <1>QGIS-sovellusta</1>, jota varten tarvitset seuraavan QGIS-projektitiedoston.
+  introduction: Ohjeet karttojen muokkaukseen ovat <0>käyttöoppaassa</0>. Voit muokata karttoja käyttämällä <1>QGIS-sovellusta</1>, mihin tarvitset seuraavan QGIS-projektitiedoston.
   downloadQgisProject: Lataa QGIS-projektitiedosto
 UserManagement:
   title: Käyttäjät
   userId: Käyttäjätunnus
-  userIdRequired: Käyttäjätunnus vaaditaan.
-  userIdWrongFormat: "Tämä ei näytä käyttäjätunnukselta. Sen tulisi näyttää joltakin tällaiselta: 01234567-89ab-cdef-0123-456789abcdef"
+  userIdRequired: Käyttäjätunnus on pakollinen.
+  userIdWrongFormat: "Tämä ei näytä käyttäjätunnukselta. Sen tulisi näyttää esimerkiksi tältä: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "Käyttäjää ei ole olemassa"
-  addUserInstructions: Lisätäksesi käyttäjiä tähän seurakuntaan, pyydä heitä käymään osoitteessa <0>{{joinPageUrl}}</0> ja kopioimaan heidän <em>käyttäjätunnuksensa</em> tuolta sivulta ja lähettämään sen sinulle.
+  addUserInstructions: Lisätäksesi käyttäjiä tähän seurakuntaan, pyydä heitä käymään <0>{{joinPageUrl}}</0> ja kopioimaan <em>käyttäjätunnuksensa</em> siltä sivulta ja lähettämään sen sinulle.
   addUser: Lisää käyttäjä
   name: Nimi
   email: Sähköposti
@@ -94,16 +94,16 @@ SupportPage:
   title: Tuki
   introduction: Territory Bro on <0>avoimen lähdekoodin projekti</0>, jota kehittää <1>Esko Luontola</1>.
   mailingListAd: Suosittelemme <0>liittymään postituslistallemme</0> saadaksesi tiedon tärkeistä Territory Bro -päivityksistä.
-  userGuideAd: <0>Käyttöoppaan</0> pitäisi vastata yleisimpiin kysymyksiin, jotka liittyvät aluekarttojen luomiseen.
-  emailAd: Jos se ei riitä, niin voit lähettää sähköpostia osoitteeseen <0>{{email}}</0> saadaksesi apua Territory Bron käyttöön.
+  userGuideAd: <0>Käyttöopas</0> vastaa yleisimpiin kysymyksiin aluekarttojen luomisesta.
+  emailAd: Jos se ei riitä, voit lähettää sähköpostia osoitteeseen <0>{{email}}</0> saadaksesi apua Territory Bron käyttöön.
   translationAd: Katso <0>käännösohjeet</0>, jos haluat auttaa parantamaan nykyisiä käännöksiä tai lisätä uusia kieliä.
   issueTrackerAd: Virheitä ja ominaisuuspyyntöjä voi myös raportoida <0>tämän projektin virheenseurantatyökaluun</0>.
 Errors:
   pleaseWait: Odota hetki...
-  pageNotFound: Sivua ei löytynyt 😵
+  pageNotFound: Sivua ei löydy 😵
   linkNotFound:
-    title: Linkkiä ei löytynyt 😵
-    description: Avaamasi linkki saattaa olla virheellinen tai se on vanhentunut.
+    title: Linkkiä ei löydy 😵
+    description: Avaamasi linkki voi olla virheellinen tai se on vanhentunut.
   accessDenied: Pääsy kielletty 🛑
   unknownError: Pahoittelut, jotain meni pieleen 🥺
   returnToFrontPage: Palaa etusivulle ja yritä uudelleen
@@ -116,9 +116,9 @@ Map:
   showMyLocation: Näytä sijaintini
 MapInteractionHelp:
   title: Kuinka käyttää karttaa?
-  move: <b>Liikuta:</b> raahaa kahta sormea / raahaa hiiren vasemmalla painikkeella
-  zoom: <b>Suurenna/pienennä:</b> nipistä tai levitä kahta sormea / pidä <kbd>{{ctrl}}</kbd> pohjassa ja vieritä hiiren pyörällä
-  rotate: <b>Pyöritä:</b> kierrä kahta sormea / pidä <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> pohjassa ja raahaa hiiren vasemmalla painikkeella
+  move: <b>Liikuta:</b> vedä kahdella sormella / vedä hiiren vasemmalla painikkeella
+  zoom: <b>Suurenna/pienennä:</b> nipistä tai levitä kahdella sormella / pidä <kbd>{{ctrl}}</kbd> pohjassa ja vieritä hiiren rullalla
+  rotate: <b>Pyöritä:</b> kierrä kahdella sormella / pidä <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> pohjassa ja vedä hiiren vasemmalla painikkeella
 Territory:
   number: Numero
   region: Seutu

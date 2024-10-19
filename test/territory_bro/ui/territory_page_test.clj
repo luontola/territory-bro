@@ -88,7 +88,7 @@
                the region
              Addresses
                the addresses
-             Do not contact
+             Do-not-calls
                Edit
                the do-not-calls
 
@@ -110,7 +110,7 @@
                  the region
                Addresses
                  the addresses
-               Do not contact
+               Do-not-calls
                  the do-not-calls"
               map-interaction-help-test/default-visible-text)
              (-> (territory-page/view model)

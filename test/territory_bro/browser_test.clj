@@ -302,7 +302,7 @@
     (testing "also error pages are translated"
       (doto *driver*
         (b/go (str *base-url* "/foo"))
-        (b/wait-has-text h1 "Sivua ei löytynyt")))))
+        (b/wait-has-text h1 "Sivua ei löydy")))))
 
 
 (deftest demo-test

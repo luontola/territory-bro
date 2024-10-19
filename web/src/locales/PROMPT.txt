@@ -1,0 +1,25 @@
+Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.
+Here is some terminology of key terms for different languages:
+
+- An area used for door-to-door witnessing
+English: territory
+Finnish: alue
+
+- A city suburb or similar area which contains many territories
+English: region
+Finnish: seutu
+
+- Addresses which should not be visited
+English: do-not-calls
+Finnish: kieltopaikat
+
+- A person who does witnessing
+English: publisher
+Finnish: julistaja
+
+- The person coordinating territory assignments
+English: territory servant
+Finnish: aluepalvelija
+
+Translate the following YAML translation file to LANGUAGE. One file per language. Do not change the translation keys.
+Use the established terminology when known. Otherwise, translate the meaning, instead of translating word-for-word from English.
