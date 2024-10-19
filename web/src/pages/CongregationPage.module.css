@@ -5,20 +5,16 @@
 }
 
 ul.checklist {
-    list-style: none;
-    padding-left: 0;
+    /* alternatives: ⏳ 🕑 ⬜ 🔲 */
+    list-style-type: "⏳ ";
+    padding-left: 1.7rem;
     font-size: 1.1rem;
 
     :is(li) {
         margin-bottom: 0.5rem;
-    }
 
-    li::before {
-        /* alternatives: 🕑 ⬜️ 🔲 ⏳ */
-        content: "⏳ ";
-    }
-
-    li.completed::before {
-        content: "✅ ";
+        &.completed {
+            list-style-type: "✅ ";
+        }
     }
 }
