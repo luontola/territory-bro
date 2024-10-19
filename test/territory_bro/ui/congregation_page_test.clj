@@ -64,7 +64,7 @@
 
              {info.svg} Getting started
              ⏳ Define the congregation boundary
-             ⏳ Create some territories
+             ⏳ Add some territories
              We recommend subscribing to our mailing list to be notified about important Territory Bro updates.
 
              Territories
@@ -88,7 +88,7 @@
     (is (= (html/normalize-whitespace
             "{info.svg} Getting started
              ⏳ Define the congregation boundary
-             ⏳ Create some territories
+             ⏳ Add some territories
              We recommend subscribing to our mailing list to be notified about important Territory Bro updates.")
            (-> (congregation-page/getting-started model)
                html/visible-text))))
@@ -97,7 +97,7 @@
     (is (= (html/normalize-whitespace
             "{info.svg} Getting started
              ✅ Define the congregation boundary
-             ⏳ Create some territories
+             ⏳ Add some territories
              We recommend subscribing to our mailing list to be notified about important Territory Bro updates.")
            (-> (congregation-page/getting-started model-with-congregation-boundary)
                html/visible-text))))
@@ -106,7 +106,7 @@
     (is (= (html/normalize-whitespace
             "{info.svg} Getting started
              ⏳ Define the congregation boundary
-             ✅ Create some territories
+             ✅ Add some territories
              We recommend subscribing to our mailing list to be notified about important Territory Bro updates.")
            (-> (congregation-page/getting-started model-with-territories)
                html/visible-text)))))

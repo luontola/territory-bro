@@ -23,6 +23,10 @@ JoinPage:
 DemoDisclaimer:
   welcome: Selamat datang di demo
   introduction: Demo ini terbatas hanya untuk melihat kongregasi. Beberapa fitur dibatasi.
+GettingStarted:
+  title: Memulai
+  congregationBoundary: Tentukan batas jemaat
+  territories: Tambahkan beberapa wilayah
 TerritoryListPage:
   title: Wilayah
   search: Cari

@@ -23,6 +23,10 @@ JoinPage:
 DemoDisclaimer:
   welcome: Bienvenido a la demostración
   introduction: Esta demostración está limitada a la visualización de una congregación. Algunas funciones están restringidas.
+GettingStarted:
+  title: Comenzando
+  congregationBoundary: Definir los límites de la congregación
+  territories: Agregar algunos territorios
 TerritoryListPage:
   title: Territorios
   search: Buscar

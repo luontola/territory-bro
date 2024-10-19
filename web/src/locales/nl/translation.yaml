@@ -23,6 +23,10 @@ JoinPage:
 DemoDisclaimer:
   welcome: Welkom bij de demo
   introduction: Deze demo is beperkt tot het bekijken van een gemeenschap. Sommige functies zijn beperkt.
+GettingStarted:
+  title: Aan de slag
+  congregationBoundary: Definieer de grenzen van de gemeente
+  territories: Voeg enkele territoria toe
 TerritoryListPage:
   title: Territoria
   search: Zoeken

@@ -36,10 +36,10 @@
                    [:ul {:class (:checklist styles)}
                     [:li (checklist-item-status (:congregation-boundary? statistics))
                      [:a {:href "/documentation#how-to-create-congregation-boundaries"}
-                      "Define the congregation boundary"]] ; TODO: i18n
+                      (i18n/t "GettingStarted.congregationBoundary")]]
                     [:li (checklist-item-status (pos? (:territories statistics)))
                      [:a {:href "/documentation#how-to-create-and-edit-territories"}
-                      "Create some territories"]]] ; TODO: i18n
+                      (i18n/t "GettingStarted.territories")]]]
                    [:p (-> (i18n/t "SupportPage.mailingListAd")
                            (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")
                            (str/replace "</0>" "</a>")
@@ -47,7 +47,7 @@
       (h/html
        [:aside {:class (:getting-started styles)}
         (info-box/view
-         {:title "Getting started"} ; TODO: i18n
+         {:title (i18n/t "GettingStarted.title")}
          content)]))))
 
 (defn view [{:keys [congregation permissions] :as model}]

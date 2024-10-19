@@ -23,6 +23,10 @@ JoinPage:
 DemoDisclaimer:
   welcome: Tervetuloa demoon
   introduction: Tämä demo rajoittuu vain seurakunnan tarkasteluun. Joitain ominaisuuksia on rajoitettu.
+GettingStarted:
+  title: Aloittaminen
+  congregationBoundary: Määritä seurakunnan rajat
+  territories: Lisää joitakin alueita
 TerritoryListPage:
   title: Alueet
   search: Hae
