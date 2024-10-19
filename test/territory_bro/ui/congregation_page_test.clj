@@ -15,11 +15,13 @@
 (def model
   {:congregation {:congregation/name "Example Congregation"}
    :permissions {:view-printouts-page true
-                 :view-settings-page true}})
+                 :view-settings-page true
+                 :gis-access true}})
 (def demo-model
   {:congregation {:congregation/name "Demo Congregation"}
    :permissions {:view-printouts-page true
-                 :view-settings-page false}})
+                 :view-settings-page false
+                 :gis-access false}})
 
 (deftest model!-test
   (let [user-id (UUID/randomUUID)

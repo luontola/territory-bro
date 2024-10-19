@@ -1,0 +1,24 @@
+.getting-started {
+    float: right;
+    width: min(100%, 30rem);
+    margin-bottom: 1rem;
+}
+
+ul.checklist {
+    list-style: none;
+    padding-left: 0;
+    font-size: 1.1rem;
+
+    li {
+        margin-bottom: 0.5rem;
+    }
+
+    li::before {
+        /* alternatives: 🕑 ⬜️ 🔲 ⏳ */
+        content: "⏳ ";
+    }
+
+    li.completed::before {
+        content: "✅ ";
+    }
+}
