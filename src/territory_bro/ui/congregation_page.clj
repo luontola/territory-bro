@@ -6,7 +6,6 @@
   (:require [clojure.string :as str]
             [hiccup2.core :as h]
             [territory-bro.domain.dmz :as dmz]
-            [territory-bro.infra.config :as config]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
@@ -17,35 +16,44 @@
   (let [cong-id (get-in request [:path-params :congregation])
         congregation (dmz/get-congregation cong-id)]
     {:congregation (select-keys congregation [:congregation/name])
+     :statistics {:congregation-boundary? (some? (dmz/get-congregation-boundary cong-id))
+                  :territories (count (dmz/list-territories cong-id))}
      :permissions {:view-printouts-page (dmz/view-printouts-page? cong-id)
                    :view-settings-page (dmz/view-settings-page? cong-id)
                    :gis-access (dmz/allowed? [:gis-access cong-id])}}))
 
-(defn getting-started [{:keys [permissions]}]
+(defn- checklist-item-status [completed?]
   (let [styles (:CongregationPage (css/modules))]
-    (when (:gis-access permissions)
+    (if completed?
+      {:class (:completed styles)
+       :data-test-icon "✅"}
+      {:data-test-icon "⏳"})))
+
+(defn getting-started [{:keys [statistics permissions]}]
+  (when (:gis-access permissions)
+    (let [styles (:CongregationPage (css/modules))
+          content (h/html
+                   [:ul {:class (:checklist styles)}
+                    [:li (checklist-item-status (:congregation-boundary? statistics))
+                     [:a {:href "/documentation#how-to-create-congregation-boundaries"}
+                      "Define the congregation boundary"]] ; TODO: i18n
+                    [:li (checklist-item-status (pos? (:territories statistics)))
+                     [:a {:href "/documentation#how-to-create-and-edit-territories"}
+                      "Create some territories"]]] ; TODO: i18n
+                   [:p (-> (i18n/t "SupportPage.mailingListAd")
+                           (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")
+                           (str/replace "</0>" "</a>")
+                           (h/raw))])]
       (h/html
        [:aside {:class (:getting-started styles)}
         (info-box/view
-         {:title "Getting started checklist"} ; TODO: i18n
-         (h/html
-          [:ul {:class (:checklist styles)}
-           [:li {:class (:completed styles)}
-            [:a {:href "/documentation#how-to-create-congregation-boundaries"}
-             "Define the congregation boundary"]] ; TODO: i18n
-           [:li
-            [:a {:href "/documentation#how-to-create-and-edit-territories"}
-             "Create some territories"]]] ; TODO: i18n
-          [:p (-> (i18n/t "SupportPage.mailingListAd")
-                  (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")
-                  (str/replace "</0>" "</a>")
-                  (h/raw))]))]))))
+         {:title "Getting started"} ; TODO: i18n
+         content)]))))
 
 (defn view [{:keys [congregation permissions] :as model}]
   (h/html
    [:h1 (:congregation/name congregation)]
-   (when (:dev config/env) ; TODO: remove feature toggle
-     (getting-started model))
+   (getting-started model)
    [:p [:a {:href (str html/*page-path* "/territories")}
         (i18n/t "TerritoryListPage.title")]]
    (when (:view-printouts-page permissions)

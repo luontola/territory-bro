@@ -9,7 +9,7 @@ ul.checklist {
     padding-left: 0;
     font-size: 1.1rem;
 
-    li {
+    :is(li) {
         margin-bottom: 0.5rem;
     }
 
