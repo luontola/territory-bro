@@ -56,7 +56,7 @@
             :target "_blank"}
         "example spreadsheet"]
        " that you can use as a starting point. Also please "
-       [:a {:href (str html/*page-path* "/../support")}
+       [:a {:href "/support"}
         "contact me"]
        " for assistance and so that I will know to help you later with migration to full accounting support."]
       [:p "You'll need to create a sheet with the following structure:"]
