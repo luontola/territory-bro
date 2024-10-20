@@ -15,7 +15,6 @@
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/test-resources" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
-      <excludeFolder url="file://$MODULE_DIR$/target/default" />
       <excludeFolder url="file://$MODULE_DIR$/.clj-kondo" />
       <excludeFolder url="file://$MODULE_DIR$/.lsp" />
       <excludeFolder url="file://$MODULE_DIR$/.yarn" />

@@ -76,7 +76,7 @@
   :java-source-paths ["src-java"]
   :javac-options ["--release" "21"]
   :test-paths ["test"]
-  :resource-paths ["resources" "target/web-dist"]
+  :resource-paths ^:replace ["resources" "target/web-dist"]
   :target-path "target/%s/"
   :main ^:skip-aot territory-bro.main
   :global-vars {*warn-on-reflection* true
