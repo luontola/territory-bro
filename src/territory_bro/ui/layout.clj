@@ -200,6 +200,8 @@
                     :referrerpolicy "no-referrer"}]
             [:link {:rel "icon"
                     :href (get html/public-resources "/assets/logo-small.*.svg")}]
+            [:link {:rel "canonical"
+                    :href (str (:public-url config/env) html/*page-path*)}]
             (head-injections)
             (:head model)]
            [:body {:hx-headers (html/anti-forgery-headers-json)}

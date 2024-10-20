@@ -5,6 +5,7 @@
 (ns territory-bro.ui.territory-page-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
+            [net.cgrand.enlive-html :as en]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
@@ -22,7 +23,8 @@
 (def territory-id (UUID. 0 2))
 (def user-id (UUID. 0 3))
 (def model
-  {:territory {:territory/id territory-id
+  {:congregation {:congregation/name "Congregation 1"}
+   :territory {:territory/id territory-id
                :territory/number "123"
                :territory/addresses "the addresses"
                :territory/region "the region"
@@ -33,7 +35,8 @@
                  :share-territory-link true}
    :mac? false})
 (def demo-model ; the important difference is hiding do-not-calls, to avoid accidental PII leaks
-  {:territory {:territory/id territory-id
+  {:congregation {:congregation/name "Demo Congregation"}
+   :territory {:territory/id territory-id
                :territory/number "123"
                :territory/addresses "the addresses"
                :territory/region "the region"
@@ -115,6 +118,34 @@
               map-interaction-help-test/default-visible-text)
              (-> (territory-page/view model)
                  html/visible-text))))))
+
+(defn parse-open-graph-tags [html]
+  (->> (en/select (en/html-snippet (str html)) [:meta])
+       (map :attrs)
+       (reduce (fn [m {:keys [property content]}]
+                 (assoc m property content))
+               {})))
+
+(deftest head-test
+  (testing "has Open Graph tags for shared link preview"
+    (is (= {"og:type" "website"
+            "og:title" "Territory 123 - the region - Congregation 1"
+            "og:description" "the addresses"
+            "og:image" "/assets/logo-big.4ee06ab5.svg"}
+           (-> (territory-page/head model)
+               (parse-open-graph-tags)))))
+
+  (testing "region is optional"
+    (is (= "Territory 123 - Congregation 1"
+           (-> (territory-page/head (replace-in model [:territory :territory/region] "the region" ""))
+               (parse-open-graph-tags)
+               (get "og:title")))))
+
+  (testing "formats addresses into one line" ; WhatsApp shows only the first line and truncates the rest
+    (is (= "A, B, C"
+           (-> (territory-page/head (replace-in model [:territory :territory/addresses] "the addresses" "A \n B\n\nC\n"))
+               (parse-open-graph-tags)
+               (get "og:description"))))))
 
 
 ;;;; Components and helpers

@@ -16,7 +16,8 @@
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [thrown-with-msg?]]
             [territory-bro.ui :as ui]
-            [territory-bro.ui.html :as html])
+            [territory-bro.ui.html :as html]
+            [territory-bro.ui.territory-page-test :refer [parse-open-graph-tags]])
   (:import (java.io File)
            (java.time Instant)
            (java.util UUID)
@@ -460,7 +461,10 @@
         (testing "instant messenger app creates a preview of the shared link"
           (let [response (http/get share-link)]
             (is (= 200 (:status response)))
-            (is (str/includes? (:body response) (str "<h1>Territory " shared-territory-number "</h1>")))))
+            (is (str/starts-with?
+                 (-> (parse-open-graph-tags (:body response))
+                     (get "og:title"))
+                 (str "Territory " shared-territory-number " - South Helsinki - " *congregation-name*)))))
 
         (testing "open shared link as anonymous user"
           (doto *driver*

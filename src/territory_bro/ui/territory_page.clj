@@ -7,6 +7,7 @@
             [hiccup2.core :as h]
             [ring.util.response :as response]
             [territory-bro.domain.dmz :as dmz]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
@@ -18,9 +19,11 @@
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
         territory-id (get-in request [:path-params :territory])
+        congregation (dmz/get-congregation cong-id)
         territory (dmz/get-territory cong-id territory-id)
         do-not-calls (dmz/get-do-not-calls cong-id territory-id)]
-    (-> {:territory (-> territory
+    (-> {:congregation (select-keys congregation [:congregation/name])
+         :territory (-> territory
                         (dissoc :congregation/id)
                         (assoc :territory/do-not-calls do-not-calls))
          :permissions {:edit-do-not-calls (dmz/allowed? [:edit-do-not-calls cong-id territory-id])
@@ -153,9 +156,6 @@
        [:div.no-print
         (map-interaction-help/view model)]]])))
 
-(defn view! [request]
-  (view (model! request)))
-
 (def share-key-cleanup-js
   (h/raw "
 const url = new URL(document.location.href);
@@ -164,6 +164,31 @@ if (url.searchParams.has('share-key')) {
   history.replaceState(null, '', url)
 }
 "))
+
+(defn head [{:keys [congregation territory]}]
+  (h/html
+   [:meta {:property "og:type"
+           :content "website"}]
+   [:meta {:property "og:title"
+           :content (->> [(-> (i18n/t "TerritoryPage.title")
+                              (str/replace "{{number}}" (:territory/number territory)))
+                          (:territory/region territory)
+                          (:congregation/name congregation)]
+                         (mapv str/trim)
+                         (remove str/blank?)
+                         (interpose " - ")
+                         (apply str))}]
+   [:meta {:property "og:description"
+           :content (->> (str/split (:territory/addresses territory) #"\n")
+                         (mapv str/trim)
+                         (remove str/blank?)
+                         (interpose ", ")
+                         (apply str))}]
+   ;; TODO: show a territory map, e.g. the closest OpenLayers TMS tile which contains the territory
+   [:meta {:property "og:image"
+           :content (str (:public-url config/env) (get html/public-resources "/assets/logo-big.*.svg"))}]
+   [:script {:type "module"}
+    share-key-cleanup-js]))
 
 (def routes
   ["/congregation/:congregation/territories/:territory"
@@ -182,10 +207,11 @@ if (url.searchParams.has('share-key')) {
                                                                             (get-in request [:path-params :congregation])
                                                                             (get-in request [:path-params :territory])
                                                                             (get-in request [:params :share-key]))]
-                        (-> (view! request)
-                            (layout/page! request {:main-content-variant :full-width
-                                                   :head (h/html [:script {:type "module"} share-key-cleanup-js])})
-                            (html/response))))}}]
+                        (let [model (model! request)]
+                          (-> (view model)
+                              (layout/page! request {:main-content-variant :full-width
+                                                     :head (head model)})
+                              (html/response)))))}}]
 
    ["/do-not-calls/edit"
     {:get {:middleware [dmz/wrap-db-connection]
