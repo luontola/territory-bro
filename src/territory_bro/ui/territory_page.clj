@@ -7,7 +7,7 @@
             [hiccup2.core :as h]
             [ring.util.response :as response]
             [territory-bro.domain.dmz :as dmz]
-            [territory-bro.infra.config :as config]
+            [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
@@ -184,9 +184,10 @@ if (url.searchParams.has('share-key')) {
                          (remove str/blank?)
                          (interpose ", ")
                          (apply str))}]
-   ;; TODO: show a territory map, e.g. the closest OpenLayers TMS tile which contains the territory
    [:meta {:property "og:image"
-           :content (str (:public-url config/env) (get html/public-resources "/assets/logo-big.*.svg"))}]
+           :content (-> (geometry/parse-wkt (:territory/location territory))
+                        (geometry/enclosing-tms-tile)
+                        (geometry/openstreetmap-tms-url))}]
    [:script {:type "module"}
     share-key-cleanup-js]))
 

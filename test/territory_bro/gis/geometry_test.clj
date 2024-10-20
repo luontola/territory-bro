@@ -4,6 +4,7 @@
 
 (ns territory-bro.gis.geometry-test
   (:require [clojure.test :refer :all]
+            [territory-bro.domain.testdata :as testdata]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.test.fixtures :refer :all])
   (:import (java.time ZoneId ZoneOffset)))
@@ -54,6 +55,14 @@
 
     (testing "when overlaps multiple areas, returns the smallest enclosing area"
       (is (= area-1 (geometry/find-enclosing enclosed-by-1 (shuffle [area-1 big-area-1])))))))
+
+(deftest enclosing-tms-tile-test
+  (let [geom (geometry/parse-wkt testdata/wkt-helsinki-rautatientori)
+        tile (geometry/enclosing-tms-tile geom)]
+    (is (= 17 (geometry/fit-tms-zoom-level geom)))
+    (is (= {:x 37308, :y 18969, :zoom 16} tile))
+    (is (= "https://tile.openstreetmap.org/16/37308/18969.png"
+           (geometry/openstreetmap-tms-url tile)))))
 
 (deftest union-test
   (let [area-1 (geometry/square [0 0] [10 10])

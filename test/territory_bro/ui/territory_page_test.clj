@@ -131,7 +131,7 @@
     (is (= {"og:type" "website"
             "og:title" "Territory 123 - the region - Congregation 1"
             "og:description" "the addresses"
-            "og:image" "/assets/logo-big.4ee06ab5.svg"}
+            "og:image" "https://tile.openstreetmap.org/16/37308/18969.png"}
            (-> (territory-page/head model)
                (parse-open-graph-tags)))))
 

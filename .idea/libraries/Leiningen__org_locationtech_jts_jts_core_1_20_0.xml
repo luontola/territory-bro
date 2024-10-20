@@ -4,6 +4,8 @@
       <root url="jar://$MAVEN_REPOSITORY$/org/locationtech/jts/jts-core/1.20.0/jts-core-1.20.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/locationtech/jts/jts-core/1.20.0/jts-core-1.20.0-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
