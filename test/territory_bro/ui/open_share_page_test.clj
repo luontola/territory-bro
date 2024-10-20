@@ -40,7 +40,7 @@
                      (dissoc @*last-command :command/time))
                   "records a history of opening the share")
               (is (= {:status 303
-                      :headers {"Location" "/congregation/00000000-0000-0000-0000-000000000001/territories/00000000-0000-0000-0000-000000000002"}
+                      :headers {"Location" "/congregation/00000000-0000-0000-0000-000000000001/territories/00000000-0000-0000-0000-000000000002?share-key=abc123"}
                       :session {::dmz/opened-shares #{share-id}}
                       ::middleware/mutative-operation? true
                       :body ""}
@@ -63,7 +63,7 @@
             (with-fixtures [fake-dispatcher-fixture]
               (let [response (open-share-page/open-share! request)]
                 (is (= {:status 303
-                        :headers {"Location" "/congregation/demo/territories/00000000-0000-0000-0000-000000000002"}
+                        :headers {"Location" "/congregation/demo/territories/00000000-0000-0000-0000-000000000002?share-key=demo-AAAAAAAAAAAAAAAAAAAAAg"}
                         :body ""}
                        response)
                     "redirects to demo, without touching session state")

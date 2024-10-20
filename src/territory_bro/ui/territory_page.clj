@@ -156,6 +156,15 @@
 (defn view! [request]
   (view (model! request)))
 
+(def share-key-cleanup-js
+  (h/raw "
+const url = new URL(document.location.href);
+if (url.searchParams.has('share-key')) {
+  url.searchParams.delete('share-key');
+  history.replaceState(null, '', url)
+}
+"))
+
 (def routes
   ["/congregation/:congregation/territories/:territory"
    {:middleware [[html/wrap-page-path ::page]]}
@@ -164,9 +173,19 @@
      :conflicting true
      :get {:middleware [dmz/wrap-db-connection]
            :handler (fn [request]
-                      (-> (view! request)
-                          (layout/page! request {:main-content-variant :full-width})
-                          (html/response)))}}]
+                      ;; When a share is opened by an instant messenger app such as WhatsApp,
+                      ;; the HTTP client may not have cookies enabled.
+                      ;; Passing the share-key as a query parameter enables opening the share without cookies.
+                      ;; To avoid somebody copy-pasting the non-share URL, and to clean up the URL,
+                      ;; the query parameter is removed with JavaScript when the page is opened.
+                      (binding [dmz/*state* (dmz/open-share-without-cookies dmz/*state*
+                                                                            (get-in request [:path-params :congregation])
+                                                                            (get-in request [:path-params :territory])
+                                                                            (get-in request [:params :share-key]))]
+                        (-> (view! request)
+                            (layout/page! request {:main-content-variant :full-width
+                                                   :head (h/html [:script {:type "module"} share-key-cleanup-js])})
+                            (html/response))))}}]
 
    ["/do-not-calls/edit"
     {:get {:middleware [dmz/wrap-db-connection]

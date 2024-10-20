@@ -457,6 +457,11 @@
           (is (= share-link (clipboard-content *driver*))
               "can copy to clipboard"))
 
+        (testing "instant messenger app creates a preview of the shared link"
+          (let [response (http/get share-link)]
+            (is (= 200 (:status response)))
+            (is (str/includes? (:body response) (str "<h1>Territory " shared-territory-number "</h1>")))))
+
         (testing "open shared link as anonymous user"
           (doto *driver*
             (b/delete-cookies)
@@ -466,7 +471,9 @@
                  (b/get-element-text *driver* h1))
               "user can view the shared territory")
           (is (b/visible? *driver* :login-button)
-              "user is not logged in"))
+              "user is not logged in")
+          (is (not (str/includes? (b/get-url *driver*) "?"))
+              "the share-key is automatically cleaned up from the query parameters"))
 
         (testing "cannot see territories which were not shared"
           (go-to-page *driver* "Territories")

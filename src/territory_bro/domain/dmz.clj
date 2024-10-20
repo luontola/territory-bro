@@ -296,6 +296,14 @@
         :territory/id demo-territory}
        nil])))
 
+(defn open-share-without-cookies [state cong-id territory-id share-key]
+  (let [share (share/find-share-by-key *state* share-key)]
+    (if (and (some? share)
+             (= cong-id (:congregation/id share))
+             (= territory-id (:territory/id share)))
+      (share/grant-opened-shares state [(:share/id share)] (auth/current-user-id))
+      state)))
+
 
 ;;;; Other geometries
 

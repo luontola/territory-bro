@@ -566,6 +566,26 @@
       (testing "invalid link"
         (is (nil? (dmz/open-share! "xyz" session)))))))
 
+(deftest open-share-without-cookies-test
+  (testutil/with-anonymous-user
+    (is (not (dmz/allowed? [:view-congregation-temporarily cong-id])))
+    (is (not (dmz/allowed? [:view-territory cong-id territory-id])))
+
+    (testing "grants permission when share exists"
+      (binding [dmz/*state* (dmz/open-share-without-cookies dmz/*state* cong-id territory-id share-key)]
+        (is (dmz/allowed? [:view-congregation-temporarily cong-id]))
+        (is (dmz/allowed? [:view-territory cong-id territory-id]))))
+
+    (let [original dmz/*state*]
+      (testing "ignored if cong-id is wrong"
+        (is (= original (dmz/open-share-without-cookies original (UUID. 0 0x666) territory-id share-key))))
+
+      (testing "ignored if territory-id is wrong"
+        (is (= original (dmz/open-share-without-cookies original cong-id (UUID. 0 0x666) share-key))))
+
+      (testing "ignored if share-key is wrong"
+        (is (= original (dmz/open-share-without-cookies original cong-id territory-id "666")))))))
+
 
 ;;;; Other geometries
 

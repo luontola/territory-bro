@@ -200,7 +200,8 @@
                     :referrerpolicy "no-referrer"}]
             [:link {:rel "icon"
                     :href (get html/public-resources "/assets/logo-small.*.svg")}]
-            (head-injections)]
+            (head-injections)
+            (:head model)]
            [:body {:hx-headers (html/anti-forgery-headers-json)}
             [:nav.no-print {:class (:navbar styles)}
              [:div {:class (:logo styles)}

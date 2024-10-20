@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.open-share-page
-  (:require [ring.util.http-response :as http-response]
+  (:require [clj-http.util :refer [url-encode]]
+            [ring.util.http-response :as http-response]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.middleware :as middleware]))
 
@@ -12,7 +13,7 @@
         [share session] (dmz/open-share! share-key (:session request))]
     (when-not (some? share)
       (http-response/not-found! "Share not found"))
-    (cond-> (http-response/see-other (str "/congregation/" (:congregation/id share) "/territories/" (:territory/id share)))
+    (cond-> (http-response/see-other (str "/congregation/" (:congregation/id share) "/territories/" (:territory/id share) "?share-key=" (url-encode share-key)))
       ;; demo shares don't update the session
       (some? session) (assoc :session session
                              ;; Since share URLs are entrypoints to the app, we must use GET instead of POST,
