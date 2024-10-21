@@ -100,7 +100,7 @@
      (.setSize diameter)
      (.setNumPoints num-points))))
 
-(defn square ^Polygon [[start-x start-y] [end-x end-y]]
+(defn rectangle ^Polygon [[start-x start-y] [end-x end-y]]
   (.createPolygon geometry-factory
                   ^Coordinate/1
                   (into-array Coordinate [(Coordinate. start-x start-y)

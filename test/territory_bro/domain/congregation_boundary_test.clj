@@ -75,9 +75,9 @@
           (is (= expected (apply-events events)))))))
 
   (testing "union of multiple boundaries"
-    (let [area-1 (geometry/square [0 0] [10 10])
-          area-2 (geometry/square [10 0] [20 10])
-          area-1+2 (geometry/square [0 0] [20 10])
+    (let [area-1 (geometry/rectangle [0 0] [10 10])
+          area-2 (geometry/rectangle [10 0] [20 10])
+          area-1+2 (geometry/rectangle [0 0] [20 10])
           events [(assoc congregation-boundary-defined
                          :congregation-boundary/location (str area-1))
                   (assoc congregation-boundary-defined

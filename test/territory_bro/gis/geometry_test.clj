@@ -33,12 +33,12 @@
            (geometry/timezone (geometry/parse-wkt "MULTIPOLYGON(((-58.445267316446234 -34.604002458035154,-58.45017281675289 -34.60971073580903,-58.43545631583296 -34.610685280599476,-58.445267316446234 -34.604002458035154)))"))))))
 
 (deftest find-enclosing-test
-  (let [area-1 (geometry/square [0 0] [10 10])
-        area-2 (geometry/square [10 0] [20 10])
-        big-area-1 (geometry/square [0 0] [20 20])
-        enclosed-by-1 (geometry/square [5 5] [6 6])
-        enclosed-by-2 (geometry/square [15 5] [16 6])
-        overlaps-more-by-1 (geometry/square [8 5] [11 6])]
+  (let [area-1 (geometry/rectangle [0 0] [10 10])
+        area-2 (geometry/rectangle [10 0] [20 10])
+        big-area-1 (geometry/rectangle [0 0] [20 20])
+        enclosed-by-1 (geometry/rectangle [5 5] [6 6])
+        enclosed-by-2 (geometry/rectangle [15 5] [16 6])
+        overlaps-more-by-1 (geometry/rectangle [8 5] [11 6])]
 
     (testing "returns nil when nothing was found"
       (is (nil? (geometry/find-enclosing enclosed-by-1 nil)))
@@ -65,9 +65,9 @@
            (geometry/openstreetmap-tms-url tile)))))
 
 (deftest union-test
-  (let [area-1 (geometry/square [0 0] [10 10])
-        area-2 (geometry/square [10 0] [20 10])
-        area-1+2 (geometry/square [0 0] [20 10])]
+  (let [area-1 (geometry/rectangle [0 0] [10 10])
+        area-2 (geometry/rectangle [10 0] [20 10])
+        area-1+2 (geometry/rectangle [0 0] [20 10])]
     (is (nil? (geometry/union nil)))
     (is (nil? (geometry/union [])))
     (is (= area-1 (geometry/union [area-1])))
@@ -88,9 +88,9 @@
              (str (geometry/parse-wkt bad-polygon)))))))
 
 (deftest equals?-test
-  (let [area-1a (geometry/square [0 0] [1 1])
-        area-1b (geometry/square [1 1] [0 0])
-        area-2 (geometry/square [0 0] [1 2])]
+  (let [area-1a (geometry/rectangle [0 0] [1 1])
+        area-1b (geometry/rectangle [1 1] [0 0])
+        area-2 (geometry/rectangle [0 0] [1 2])]
     (is (not= area-1a area-1b))
     (is (true? (geometry/equals? area-1a area-1b)))
     (is (true? (geometry/equals? area-1b area-1a)))
