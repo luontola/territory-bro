@@ -501,7 +501,7 @@
     (let [response (http/get "https://territorybro.com/share/demo-5qs_xGRJTciwVAVkvuUX8A/1")]
       (is (= 200 (:status response)))
       (is (str/includes? (:body response) "Territory 1 - Territory Bro"))
-      (is (= ["https://territorybro.com/congregation/demo/territories/e6ab3fc4-6449-4dc8-b054-0564bee517f0"]
+      (is (= ["https://territorybro.com/congregation/demo/territories/e6ab3fc4-6449-4dc8-b054-0564bee517f0?share-key=demo-5qs_xGRJTciwVAVkvuUX8A"]
              (:trace-redirects response)))))
 
   (testing "shared link, old beta.territorybro.com domain"
@@ -509,7 +509,7 @@
       (is (= 200 (:status response)))
       (is (str/includes? (:body response) "Territory 1 - Territory Bro"))
       (is (= ["https://territorybro.com/share/demo-5qs_xGRJTciwVAVkvuUX8A/1"
-              "https://territorybro.com/congregation/demo/territories/e6ab3fc4-6449-4dc8-b054-0564bee517f0"]
+              "https://territorybro.com/congregation/demo/territories/e6ab3fc4-6449-4dc8-b054-0564bee517f0?share-key=demo-5qs_xGRJTciwVAVkvuUX8A"]
              (:trace-redirects response)))))
 
   (testing "QR code"
@@ -517,7 +517,7 @@
       (is (= 200 (:status response)))
       (is (str/includes? (:body response) "Territory 1 - Territory Bro"))
       (is (= ["https://territorybro.com/share/demo-5qs_xGRJTciwVAVkvuUX8A"
-              "https://territorybro.com/congregation/demo/territories/e6ab3fc4-6449-4dc8-b054-0564bee517f0"]
+              "https://territorybro.com/congregation/demo/territories/e6ab3fc4-6449-4dc8-b054-0564bee517f0?share-key=demo-5qs_xGRJTciwVAVkvuUX8A"]
              (:trace-redirects response))))))
 
 
