@@ -33,6 +33,10 @@
                                  " but it was " (pr-str value)))
                     new-value)))
 
+(defn close-to? [a b]
+  (< (abs (- a b))
+     0.00001))
+
 (defmacro grab-exception [& body]
   `(try
      (let [result# (do ~@body)]

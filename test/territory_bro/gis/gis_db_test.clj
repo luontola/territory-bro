@@ -7,11 +7,13 @@
             [clojure.test :refer :all]
             [next.jdbc :as jdbc]
             [territory-bro.domain.testdata :as testdata]
+            [territory-bro.gis.geometry :as geometry]
             [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
             [territory-bro.test.fixtures :refer [db-fixture]]
+            [territory-bro.test.testutil :as testutil]
             [territory-bro.test.testutil :refer [re-equals thrown-with-msg? thrown?]])
   (:import (java.sql Connection)
            (java.util UUID)
@@ -201,6 +203,49 @@
             (is (= [{:name "reused"}]
                    (db/execute! conn ["SELECT name FROM subregion WHERE id = ?"
                                       new-id])))))))))
+
+(deftest simplify-too-large-geometries-test
+  (with-open [conn (db/get-tenant-connection test-schema)]
+    (jdbc/with-transaction [conn conn {:rollback-only true}]
+      (let [before (geometry/circle [0 0] 1.0 10000)
+            before-wkt (str before)]
+        (doseq [[table round-trip!] [["territory"
+                                      (fn [conn wkt]
+                                        (let [id (gis-db/create-territory! conn (assoc example-territory :territory/location wkt))]
+                                          (:gis-feature/location (gis-db/get-territory-by-id conn id))))]
+                                     ["congregation_boundary"
+                                      (fn [conn wkt]
+                                        (let [id (gis-db/create-congregation-boundary! conn wkt)]
+                                          (->> (gis-db/get-congregation-boundaries conn)
+                                               (filterv #(= id (:gis-feature/id %)))
+                                               (first)
+                                               :gis-feature/location)))]
+                                     ["subregion"
+                                      (fn [conn wkt]
+                                        (let [id (gis-db/create-region! conn "" wkt)]
+                                          (->> (gis-db/get-regions conn)
+                                               (filterv #(= id (:gis-feature/id %)))
+                                               (first)
+                                               :gis-feature/location)))]
+                                     ["card_minimap_viewport"
+                                      (fn [conn wkt]
+                                        (let [id (gis-db/create-card-minimap-viewport! conn wkt)]
+                                          (->> (gis-db/get-card-minimap-viewports conn)
+                                               (filterv #(= id (:gis-feature/id %)))
+                                               (first)
+                                               :gis-feature/location)))]]]
+          (testing (str table ":")
+            (testing "simplifies very large geometries to be near a target size"
+              (let [after-wkt (round-trip! conn before-wkt)
+                    after (geometry/parse-wkt after-wkt)]
+                (is (< 100000 (count before-wkt))
+                    "WKT size before")
+                (is (< 20000 (count after-wkt) 40000)
+                    "WKT size after")
+                ;; to see what the result looks like, use https://wktmap.com
+                (is (testutil/close-to? (.getArea before)
+                                        (.getArea after))
+                    "the geometry's shape stays roughly the same")))))))))
 
 (deftest gis-change-log-test
   (with-open [conn (db/get-tenant-connection test-schema)]

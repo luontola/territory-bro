@@ -8,7 +8,8 @@
            (net.iakovlev.timeshape TimeZoneEngine)
            (org.locationtech.jts.geom Coordinate Geometry GeometryFactory Polygon)
            (org.locationtech.jts.geom.util GeometryFixer)
-           (org.locationtech.jts.io WKTReader)))
+           (org.locationtech.jts.io WKTReader)
+           (org.locationtech.jts.util GeometricShapeFactory)))
 
 (def ^GeometryFactory geometry-factory (GeometryFactory.))
 
@@ -91,6 +92,13 @@
 
 
 ;;;; Helpers for tests
+
+(defn circle ^Polygon [[center-x center-y] diameter num-points]
+  (.createCircle
+   (doto (GeometricShapeFactory. geometry-factory)
+     (.setCentre (Coordinate. center-x center-y))
+     (.setSize diameter)
+     (.setNumPoints num-points))))
 
 (defn square ^Polygon [[start-x start-y] [end-x end-y]]
   (.createPolygon geometry-factory

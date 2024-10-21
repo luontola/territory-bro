@@ -1,3 +1,51 @@
+create or replace function simplify_large_geometry() returns trigger as
+$$
+declare
+    TOLERANCE_1m constant double precision := 0.000009; -- about 1 meter in degrees
+    TOLERANCE_100km constant double precision := 1.0; -- 111 km in degrees (at the equator)
+    EPSILON constant double precision := TOLERANCE_1m / 1000;
+    min_tolerance double precision := EPSILON;
+    max_tolerance double precision := TOLERANCE_100km;
+    tolerance double precision;
+    TARGET_SIZE constant integer := 20000;
+    geom_size integer;
+    simplified_geom geometry;
+begin
+    geom_size := public.ST_MemSize(new.location::geometry);
+--     RAISE WARNING 'start geom_size: %', geom_size;
+
+    if geom_size > TARGET_SIZE then
+        -- binary search for the optimal simplification tolerance
+        -- to produce a geometry slightly smaller than target_size
+        while (max_tolerance - min_tolerance > EPSILON) and
+              (geom_size > TARGET_SIZE or geom_size < TARGET_SIZE * 0.95)
+            loop
+                if tolerance is null then
+                    tolerance = TOLERANCE_1m; -- optimistically assume that only a little simplification is needed
+                else
+                    tolerance := (min_tolerance + max_tolerance) / 2;
+                end if;
+
+                simplified_geom := public.ST_SimplifyVW(new.location::geometry, tolerance);
+                geom_size := public.ST_MemSize(simplified_geom);
+--                 RAISE WARNING 'try geom_size: %, tolerance: %', geom_size, tolerance;
+
+                if geom_size > TARGET_SIZE then
+                    min_tolerance := tolerance;
+                else
+                    max_tolerance := tolerance;
+                end if;
+            end loop;
+
+        new.location := public.ST_MakeValid(simplified_geom);
+--         RAISE WARNING 'final geom_size: %', geom_size;
+    end if;
+
+    return new;
+end;
+$$ language plpgsql security definer;
+
+
 create or replace function validate_gis_change() returns trigger as
 $$
 declare
@@ -29,6 +77,7 @@ begin
     end loop;
 end
 $$ language plpgsql security definer;
+
 
 create or replace function append_gis_change_log() returns trigger as
 $$
@@ -62,6 +111,7 @@ begin
     return null;
 end
 $$ language plpgsql security definer;
+
 
 create or replace function prepare_new_event() returns trigger as
 $$
