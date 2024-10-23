@@ -220,27 +220,35 @@
 ;;;; Tenant schemas
 
 (defn- schema-history-query [schema]
-  (format "SELECT '%s' AS schema, * FROM %s.flyway_schema_history" schema schema))
-
-(defn- simplify-schema-history [rows]
-  (->> rows
-       (sort-by :installed_rank)
-       (remove #(= "SCHEMA" (:type %)))
-       (map #(select-keys % [:version :type :script :checksum]))))
+  (format "(select '%s' AS schema, version, type, script, checksum
+            from %s.flyway_schema_history
+            where type != 'SCHEMA'
+            order by installed_rank)"
+          schema schema))
 
 (defn get-present-schemas [conn {:keys [schema-prefix]}]
+  ;; Not all the schemas will be tenant schemas. That is, however, fine,
+  ;; because db/tenant-schema-up-to-date? will just return false for them.
   (let [schemas (->> (db/query! conn queries :find-flyway-managed-schemas {:schema (str schema-prefix "%")})
                      (map :table_schema))
-        reference-schema (->> schemas
-                              (take 10) ; short-cut in case all tenant schemas are out of date
-                              (filter db/tenant-schema-up-to-date?)
-                              (first))]
-    (when reference-schema
-      (let [reference-history (simplify-schema-history (db/execute! conn [(schema-history-query reference-schema)]))]
-        (->> (db/execute! conn [(->> schemas
-                                     (map schema-history-query)
-                                     (str/join " UNION ALL "))])
-             (group-by :schema)
-             (filter (fn [[_schema history]]
-                       (= reference-history (simplify-schema-history history))))
-             (keys))))))
+        all-schema-histories (db/execute! conn [(->> schemas
+                                                     (mapv schema-history-query)
+                                                     (str/join "\nUNION ALL\n"))])
+        schema->history (-> (group-by :schema all-schema-histories)
+                            (update-vals (fn [history]
+                                           (mapv #(dissoc % :schema) history))))
+        ;; Due to repeatable migration scripts, the flyway schema histories
+        ;; may differ based on how old the schema is. There will, however,
+        ;; be only a few history variants. By caching which history variants
+        ;; have been validated, we can avoid slow db/tenant-schema-up-to-date? calls.
+        *validated-histories (atom #{})]
+    (->> (for [[schema history] schema->history]
+           (cond
+             (contains? @*validated-histories history)
+             schema
+
+             (db/tenant-schema-up-to-date? schema)
+             (do
+               (swap! *validated-histories conj history)
+               schema)))
+         (filterv some?))))
