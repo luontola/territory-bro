@@ -77,22 +77,3 @@ create or replace trigger card_minimap_viewport_3_change_log
     on card_minimap_viewport
     for each row
 execute function ${masterSchema}.append_gis_change_log();
-
--- XXX: temporary data migration code, to be run only once,
---      and upgraded to next application version which removes this code
-
-update territory
-set location = location
-where public.ST_MemSize(location::geometry) > 20000;
-
-update congregation_boundary
-set location = location
-where public.ST_MemSize(location::geometry) > 20000;
-
-update subregion
-set location = location
-where public.ST_MemSize(location::geometry) > 20000;
-
-update card_minimap_viewport
-set location = location
-where public.ST_MemSize(location::geometry) > 20000;
