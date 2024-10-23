@@ -175,7 +175,9 @@
             (is (= old-id new-id))
             (is (= [{:name "reused"}]
                    (db/execute! conn ["SELECT name FROM subregion WHERE id = ?"
-                                      new-id])))))
+                                      new-id])))
+            (is (= new-id (-> (gis-db/get-changes conn) last :gis-change/new :id))
+                "the validation happens before appending to gis_change_log")))
 
         (testing "stream ID is used by another schema -> replaces ID"
           (let [old-id (init-stream! conn (UUID/randomUUID) "another_schema" "subregion")
@@ -184,7 +186,9 @@
             (is (not= old-id new-id))
             (is (= [{:name "reused"}]
                    (db/execute! conn ["SELECT name FROM subregion WHERE id = ?"
-                                      new-id])))))
+                                      new-id])))
+            (is (= new-id (-> (gis-db/get-changes conn) last :gis-change/new :id))
+                "the validation happens before appending to gis_change_log")))
 
         (testing "stream ID is used by another table -> replaces ID"
           (let [old-id (init-stream! conn (UUID/randomUUID) test-schema "territory")
@@ -193,7 +197,9 @@
             (is (not= old-id new-id))
             (is (= [{:name "reused"}]
                    (db/execute! conn ["SELECT name FROM subregion WHERE id = ?"
-                                      new-id])))))
+                                      new-id])))
+            (is (= new-id (-> (gis-db/get-changes conn) last :gis-change/new :id))
+                "the validation happens before appending to gis_change_log")))
 
         (testing "stream ID is used by non-GIS entity -> replaces ID"
           (let [old-id (init-stream! conn (UUID/randomUUID) nil nil)
@@ -202,7 +208,9 @@
             (is (not= old-id new-id))
             (is (= [{:name "reused"}]
                    (db/execute! conn ["SELECT name FROM subregion WHERE id = ?"
-                                      new-id])))))))))
+                                      new-id])))
+            (is (= new-id (-> (gis-db/get-changes conn) last :gis-change/new :id))
+                "the validation happens before appending to gis_change_log")))))))
 
 (deftest simplify-too-large-geometries-test
   (with-open [conn (db/get-tenant-connection test-schema)]
@@ -245,7 +253,9 @@
                 ;; to see what the result looks like, use https://wktmap.com
                 (is (testutil/close-to? (.getArea before)
                                         (.getArea after))
-                    "the geometry's shape stays roughly the same")))))))))
+                    "the geometry's shape stays roughly the same")
+                (is (= after-wkt (-> (gis-db/get-changes conn) last :gis-change/new :location))
+                    "the simplification happens before appending to gis_change_log")))))))))
 
 (deftest gis-change-log-test
   (with-open [conn (db/get-tenant-connection test-schema)]
