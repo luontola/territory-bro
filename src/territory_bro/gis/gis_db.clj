@@ -241,14 +241,14 @@
         ;; may differ based on how old the schema is. There will, however,
         ;; be only a few history variants. By caching which history variants
         ;; have been validated, we can avoid slow db/tenant-schema-up-to-date? calls.
-        *validated-histories (atom #{})]
+        *validation-cache (atom {})]
     (->> (for [[schema history] schema->history]
-           (cond
-             (contains? @*validated-histories history)
-             schema
-
-             (db/tenant-schema-up-to-date? schema)
-             (do
-               (swap! *validated-histories conj history)
+           (let [validity (get @*validation-cache history)
+                 validity (if (some? validity)
+                            validity
+                            (let [validity (db/tenant-schema-up-to-date? schema)]
+                              (swap! *validation-cache assoc history validity)
+                              validity))]
+             (when validity
                schema)))
          (filterv some?))))
