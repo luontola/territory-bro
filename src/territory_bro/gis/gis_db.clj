@@ -243,8 +243,7 @@
         ;; have been validated, we can avoid slow db/tenant-schema-up-to-date? calls.
         *validation-cache (atom {})]
     (->> (for [[schema history] schema->history]
-           (let [validity (get @*validation-cache history)
-                 validity (if (some? validity)
+           (let [validity (if-some [validity (get @*validation-cache history)]
                             validity
                             (let [validity (db/tenant-schema-up-to-date? schema)]
                               (swap! *validation-cache assoc history validity)
