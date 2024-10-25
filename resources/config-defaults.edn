@@ -6,7 +6,6 @@
  :database-schema "territorybro"
  :gis-database-host nil
  :gis-database-name "territorybro"
- :gis-database-ssl-mode "prefer"
  :auth0-domain nil
  :auth0-client-id nil
  :auth0-client-secret nil

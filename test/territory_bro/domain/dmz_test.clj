@@ -124,8 +124,7 @@
   {:public-url "https://example.com"
    :qr-code-base-url "https://qr.example.com"
    :gis-database-host "gis.example.com"
-   :gis-database-name "gis-db"
-   :gis-database-ssl-mode "required"})
+   :gis-database-name "gis-db"})
 (def env-with-demo (assoc env :demo-congregation cong-id))
 
 (use-fixtures :once (fn [f]
@@ -253,7 +252,6 @@
                                      #"host=gis\.example\.com"
                                      #"user='username123'"
                                      #"password='password123'"
-                                     #"sslmode=required"
                                      #"table=\"cong1_schema\"\.\"territory\"")}]
 
     (testutil/with-user-id user-id

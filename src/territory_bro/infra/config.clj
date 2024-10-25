@@ -34,7 +34,6 @@
    :dev s/Bool
    :gis-database-host s/Str
    :gis-database-name s/Str
-   :gis-database-ssl-mode s/Str
    :jwt-audience s/Str
    :jwt-issuer s/Str
    :port s/Int

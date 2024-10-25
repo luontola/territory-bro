@@ -387,8 +387,7 @@
                                     :gis-user/username "username123"
                                     :gis-user/password "password123"}])
       (binding [config/env {:gis-database-host "gis.example.com"
-                            :gis-database-name "example_db"
-                            :gis-database-ssl-mode "prefer"}]
+                            :gis-database-name "example_db"}]
         (testutil/with-user-id user-id
 
           (testing "downloads the QGIS project file for the congregation and user"

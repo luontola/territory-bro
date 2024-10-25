@@ -211,8 +211,7 @@
                                       :database-name (:gis-database-name config/env)
                                       :database-schema (:congregation/schema-name congregation)
                                       :database-username (:gis-user/username gis-user)
-                                      :database-password (:gis-user/password gis-user)
-                                      :database-ssl-mode (:gis-database-ssl-mode config/env)})
+                                      :database-password (:gis-user/password gis-user)})
      :filename (qgis/project-file-name (:congregation/name congregation))}))
 
 
