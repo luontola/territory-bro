@@ -48,4 +48,4 @@ docker compose build --pull app
 
 export DEMO_CONGREGATION=$(cat target/test-congregation-id)
 docker compose up -d app
-lein kaocha e2e
+lein kaocha e2e --skip-meta prod
