@@ -63,7 +63,7 @@
             (with-fixtures [fake-dispatcher-fixture]
               (let [response (open-share-page/open-share! request)]
                 (is (= {:status 303
-                        :headers {"Location" "/congregation/demo/territories/00000000-0000-0000-0000-000000000002?share-key=demo-AAAAAAAAAAAAAAAAAAAAAg"}
+                        :headers {"Location" "/congregation/demo/territories/00000000-0000-0000-0000-000000000002"}
                         :body ""}
                        response)
                     "redirects to demo, without touching session state")

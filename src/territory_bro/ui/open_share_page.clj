@@ -13,7 +13,9 @@
         [share session] (dmz/open-share! share-key (:session request))]
     (when-not (some? share)
       (http-response/not-found! "Share not found"))
-    (cond-> (http-response/see-other (str "/congregation/" (:congregation/id share) "/territories/" (:territory/id share) "?share-key=" (url-encode share-key)))
+    (cond-> (http-response/see-other (str "/congregation/" (:congregation/id share) "/territories/" (:territory/id share)
+                                          (when-not (= "demo" (:congregation/id share))
+                                            (str "?share-key=" (url-encode share-key)))))
       ;; demo shares don't update the session
       (some? session) (assoc :session session
                              ;; Since share URLs are entrypoints to the app, we must use GET instead of POST,
