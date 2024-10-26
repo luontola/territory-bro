@@ -156,7 +156,7 @@
                                     :type "button"
                                     :style {:float "right"
                                             :font-size "70%"}}
-               "Return"]
+               "Assign"]
               [:span {:style {:color "blue"}}
                "Up for grabs"]
               [:br]
@@ -237,7 +237,96 @@
               " Mark the territory as covered"]
              [:button.pure-button.pure-button-primary {:type "submit"} "Return"]
              " "
-             [:button.pure-button {:type "button"} "Cancel"]]]])]
+             [:button.pure-button {:type "button"} "Cancel"]]]])
+
+        ;; TODO: POC - assignment history
+        (when (:dev config/env)
+          [:div
+           [:div {:style {:display "grid"
+                          :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
+                          :gap "0.5rem"
+                          :width "fit-content"}}
+
+            ;; TODO: POC - ongoing assignment
+            [:div {:style {:grid-column "timeline-start / timeline-end"
+                           :grid-row "1 / 5"
+                           :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"}}]
+            [:div {:style {:grid-column "controls-start / controls-end"
+                           :grid-row 1
+                           :text-align "right"}}
+             [:a {:href "#"}
+              "Edit"]]
+
+            [:div {:style {:grid-column "time-start / time-end"
+                           :grid-row 1
+                           :white-space "nowrap"
+                           :text-align "center"
+                           :padding "0.7rem 0"}}
+             "2 months"]
+
+            [:div {:style {:grid-column "time-start / time-end"
+                           :grid-row 2
+                           :white-space "nowrap"}}
+             (str (-> (LocalDate/now) (.minusMonths 2) (.minusDays 4)))]
+            [:div {:style {:grid-column "event-start / event-end"
+                           :grid-row 2}}
+             "✅ Covered"]
+
+            [:div {:style {:grid-column "time-start / time-end"
+                           :grid-row 3
+                           :white-space "nowrap"
+                           :text-align "center"
+                           :padding "0.7rem 0"}}
+             "4 months"]
+
+            [:div {:style {:grid-column "time-start / time-end"
+                           :grid-row 4
+                           :white-space "nowrap"}}
+             (str (-> (LocalDate/now) (.minusMonths 6) (.minusDays 16)))]
+            [:div {:style {:grid-column "event-start / event-end"
+                           :grid-row 4}}
+             "⤴️ Assigned to John Doe"]
+
+            [:div {:style {:grid-column "time-start / time-end"
+                           :grid-row 5
+                           :white-space "nowrap"
+                           :text-align "center"
+                           :padding "0.7rem 0"
+                           :color "#999"}}
+             "8 months"]
+
+            ;; TODO: POC - completed assignment
+            [:div {:style {:grid-column "timeline-start / timeline-end"
+                           :grid-row "6 / 9"
+                           :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"}}]
+            [:div {:style {:grid-column "controls-start / controls-end"
+                           :grid-row 6
+                           :text-align "right"}}
+             [:a {:href "#"}
+              "Edit"]]
+
+            [:div {:style {:grid-column "time-start / time-end"
+                           :grid-row 6
+                           :white-space "nowrap"}}
+             (str (-> (LocalDate/now) (.minusMonths 14) (.minusDays 20)))]
+            [:div {:style {:grid-column "event-start / event-end"
+                           :grid-row 6}}
+             "📥 Returned " [:br] "✅ Covered"]
+
+            [:div {:style {:grid-column "time-start / time-end"
+                           :grid-row 7
+                           :white-space "nowrap"
+                           :text-align "center"
+                           :padding "0.7rem 0"}}
+             "2 months"]
+
+            [:div {:style {:grid-column "time-start / time-end"
+                           :grid-row 8
+                           :white-space "nowrap"}}
+             (str (-> (LocalDate/now) (.minusMonths 16) (.minusDays 30)))]
+            [:div {:style {:grid-column "event-start / event-end"
+                           :grid-row 8}}
+             "⤴️ Assigned to Joe Blow"]]])]
 
        (when (:share-territory-link permissions)
          [:div {:class (:actions styles)}
