@@ -8,13 +8,15 @@
             [ring.util.response :as response]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.gis.geometry :as geometry]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
-            [territory-bro.ui.maps :as maps]))
+            [territory-bro.ui.maps :as maps])
+  (:import (java.time LocalDate)))
 
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
@@ -143,7 +145,99 @@
            [:td (:territory/addresses territory)]]
           [:tr
            [:th (h/raw (i18n/t "TerritoryPage.doNotCalls"))]
-           [:td (do-not-calls--viewing model)]]]]]
+           [:td (do-not-calls--viewing model)]]
+
+          ;; TODO: POC - status=available
+          (when (:dev config/env)
+            [:tr
+             [:th "Status"]
+             [:td
+              [:button.pure-button {:hx-get (str html/*page-path* "/return")
+                                    :type "button"
+                                    :style {:float "right"
+                                            :font-size "70%"}}
+               "Return"]
+              [:span {:style {:color "blue"}}
+               "Up for grabs"]
+              [:br]
+              "(6 months, since "
+              (-> (LocalDate/now) (.minusMonths 6) (.minusDays 7))
+              ")"]])
+
+          ;; TODO: POC - status=assigned
+          (when (:dev config/env)
+            [:tr
+             [:th "Status"]
+             [:td
+              [:button.pure-button {:hx-get (str html/*page-path* "/return")
+                                    :type "button"
+                                    :style {:float "right"
+                                            :font-size "70%"}}
+               "Return"]
+              [:span {:style {:color "red"}} "Assigned"] " to John Doe"
+              [:br]
+              "(4 months, since "
+              (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))
+              ")"]])]]
+
+        ;; TODO: POC - assign territory form
+        (when (:dev config/env)
+          [:form.pure-form.pure-form-aligned
+           [:fieldset
+            [:legend "Assign territory"]
+            [:div.pure-control-group
+             [:label {:for "publisher"} "Publisher"]
+             [:input#publisher {:list "publisher-list"}]
+             [:datalist#publisher-list
+              [:option {:value "Andrew"}]
+              [:option {:value "Bartholomew"}]
+              [:option {:value "James, son of Zebedee"}]
+              [:option {:value "James, son of Alphaeus"}]
+              [:option {:value "John"}]
+              [:option {:value "Matthew"}]
+              [:option {:value "Matthias"}]
+              [:option {:value "Peter"}]
+              [:option {:value "Philip"}]
+              [:option {:value "Simon"}]
+              [:option {:value "Thaddaeus"}]
+              [:option {:value "Thomas"}]]]
+            [:div.pure-control-group
+             [:label {:for "assign-date"} "Date"]
+             [:input#assign-date {:type "date"
+                                  :value (str (LocalDate/now))
+                                  :max (str (LocalDate/now))}]]
+            [:div.pure-controls
+             [:button.pure-button.pure-button-primary {:type "submit"} "Assign"]
+             " "
+             [:button.pure-button {:type "button"} "Cancel"]]]])
+
+        ;; TODO: POC - return territory form
+        (when (:dev config/env)
+          [:form.pure-form.pure-form-aligned
+           [:fieldset
+            [:legend "Return territory"]
+            [:div.pure-control-group
+             [:label {:for "return-date"} "Date"]
+             [:input#return-date {:type "date"
+                                  :value (str (LocalDate/now))
+                                  :min (str (-> (LocalDate/now) (.minusMonths 4)))
+                                  :max (str (LocalDate/now))}]]
+            [:div.pure-controls
+             [:label.pure-checkbox
+              [:input#return {:type "checkbox"
+                              :checked true
+                              :style {:width "1.5rem"
+                                      :height "1.5rem"}}]
+              " Return the territory to storage"]
+             [:label.pure-checkbox
+              [:input#return {:type "checkbox"
+                              :checked true
+                              :style {:width "1.5rem"
+                                      :height "1.5rem"}}]
+              " Mark the territory as covered"]
+             [:button.pure-button.pure-button-primary {:type "submit"} "Return"]
+             " "
+             [:button.pure-button {:type "button"} "Cancel"]]]])]
 
        (when (:share-territory-link permissions)
          [:div {:class (:actions styles)}
