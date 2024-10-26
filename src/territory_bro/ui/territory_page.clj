@@ -208,6 +208,7 @@
               [:label {:for "assign-date"} "Date"]
               [:input#assign-date {:type "date"
                                    :value (str (LocalDate/now))
+                                   :required true
                                    :max (str (LocalDate/now))}]]
              [:div.pure-controls
               [:button.pure-button.pure-button-primary {:type "submit"}
@@ -221,13 +222,25 @@
         ;; TODO: POC - return territory form
         (when (:dev config/env)
           [:dialog#return-territory-dialog
-           [:form.pure-form.pure-form-aligned {:method "dialog"} ; TODO: submit form, remove dialog from DOM with htmx
+           [:form.pure-form.pure-form-aligned {:method "dialog" ; TODO: submit form, remove dialog from DOM with htmx
+                                               :onchange "
+                                               const submit = document.querySelector('#return-territory-dialog .pure-button-primary');
+                                               if (document.getElementById('return').checked) {
+                                                   submit.textContent = 'Return territory'
+                                                   submit.disabled = false
+                                               } else if (document.getElementById('cover').checked) {
+                                                   submit.textContent = 'Mark covered'
+                                                   submit.disabled = false
+                                               } else {
+                                                   submit.disabled = true
+                                               }"}
             [:fieldset
              [:legend "Return territory"]
              [:div.pure-control-group
               [:label {:for "return-date"} "Date"]
               [:input#return-date {:type "date"
                                    :value (str (LocalDate/now))
+                                   :required true
                                    :min (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))
                                    :max (str (LocalDate/now))}]]
              [:div.pure-controls
@@ -238,10 +251,10 @@
                                        :height "1.5rem"}}]
                " Return the territory to storage"]
               [:label.pure-checkbox
-               [:input#return {:type "checkbox"
-                               :checked true
-                               :style {:width "1.5rem"
-                                       :height "1.5rem"}}]
+               [:input#cover {:type "checkbox"
+                              :checked true
+                              :style {:width "1.5rem"
+                                      :height "1.5rem"}}]
                " Mark the territory as covered"]
               [:button.pure-button.pure-button-primary {:type "submit"
                                                         :autofocus true}
