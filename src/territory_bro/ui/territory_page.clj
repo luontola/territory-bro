@@ -241,7 +241,12 @@
 
         ;; TODO: POC - assignment history
         (when (:dev config/env)
-          [:div
+          [:details {:open true}
+           [:summary {:style {:margin "1rem 0"
+                              :font-weight "bold"
+                              :cursor "pointer"}
+                      :open true}
+            "Assignment history"]
            [:div {:style {:display "grid"
                           :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
                           :gap "0.5rem"
