@@ -284,104 +284,106 @@
         [:br]
         "(" (months-difference end-date today) " months, since " (nowrap end-date) ")"]))))
 
-(defn assignment-history [{:keys []}]
-  (h/html
-   [:details {:open false}
-    [:summary {:style {:margin "1rem 0"
-                       :font-weight "bold"
-                       :cursor "pointer"}}
-     "Assignment history"]
-    [:div {:style {:display "grid"
-                   :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
-                   :gap "0.5rem"
-                   :width "fit-content"
-                   :margin "1rem 0"}}
+(def fake-assignment-model-history
+  {:assignment-history []})
 
-     ;; TODO: POC - ongoing assignment
-     [:div {:style {:grid-column "timeline-start / timeline-end"
-                    :grid-row "1 / 5"
-                    :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"}}]
-     [:div {:style {:grid-column "controls-start / controls-end"
-                    :grid-row 1
-                    :text-align "right"}}
-      [:a {:href "#"
-           :onclick "return false"}
-       "Edit"]]
+(defn assignment-history [{:keys [assignment-history]}]
+  ;; TODO: calculate rows based on assignment-history
+  (let [rows [{:type :assignment
+               :grid-row 1
+               :grid-span 4}
+              {:type :duration
+               :grid-row 1
+               :assigned? true
+               :months 2}
+              {:type :event
+               :grid-row 2
+               :date (-> (LocalDate/now) (.minusMonths 2) (.minusDays 4))
+               :covered? true}
+              {:type :duration
+               :grid-row 3
+               :assigned? true
+               :months 4}
+              {:type :event
+               :grid-row 4
+               :date (-> (LocalDate/now) (.minusMonths 6) (.minusDays 16))
+               :assigned? true
+               :publisher/name "John Doe"}
+              {:type :duration
+               :grid-row 5
+               :assigned? false
+               :months 8}
+              {:type :assignment
+               :grid-row 6
+               :grid-span 3}
+              {:type :event
+               :grid-row 6
+               :date (-> (LocalDate/now) (.minusMonths 14) (.minusDays 20))
+               :returned? true
+               :covered? true}
+              {:type :duration
+               :grid-row 7
+               :assigned? true
+               :months 2}
+              {:type :event
+               :grid-row 8
+               :date (-> (LocalDate/now) (.minusMonths 16) (.minusDays 30))
+               :assigned? true
+               :publisher/name "Joe Blow"}]]
+    (h/html
+     [:details {:open false}
+      [:summary {:style {:margin "1rem 0"
+                         :font-weight "bold"
+                         :cursor "pointer"}}
+       "Assignment history"]
+      [:div {:style {:display "grid"
+                     :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
+                     :gap "0.5rem"
+                     :width "fit-content"
+                     :margin "1rem 0"}}
+       (for [{:keys [grid-row grid-span] :as row} rows]
+         (case (:type row)
+           :assignment
+           (h/html
+            ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
+            [:div {:style (identity {:grid-column "timeline-start / timeline-end"
+                                     :grid-row (str grid-row " / " (+ grid-row grid-span))
+                                     :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"})}]
+            [:div {:style (identity {:grid-column "controls-start / controls-end"
+                                     :grid-row grid-row
+                                     :text-align "right"})}
+             [:a {:href "#"
+                  :onclick "return false"}
+              "Edit"]])
 
-     [:div {:style {:grid-column "time-start / time-end"
-                    :grid-row 1
-                    :white-space "nowrap"
-                    :text-align "center"
-                    :padding "0.7rem 0"}}
-      "2 months"]
+           :duration
+           (h/html
+            [:div {:style (identity {:grid-column "time-start / time-end"
+                                     :grid-row grid-row
+                                     :white-space "nowrap"
+                                     :text-align "center"
+                                     :padding "0.7rem 0"
+                                     :color (when-not (:assigned? row)
+                                              "#999")})}
+             (:months row) " months"])
 
-     [:div {:style {:grid-column "time-start / time-end"
-                    :grid-row 2
-                    :white-space "nowrap"}}
-      (str (-> (LocalDate/now) (.minusMonths 2) (.minusDays 4)))]
-     [:div {:style {:grid-column "event-start / event-end"
-                    :grid-row 2}}
-      "✅ Covered"]
-
-     [:div {:style {:grid-column "time-start / time-end"
-                    :grid-row 3
-                    :white-space "nowrap"
-                    :text-align "center"
-                    :padding "0.7rem 0"}}
-      "4 months"]
-
-     [:div {:style {:grid-column "time-start / time-end"
-                    :grid-row 4
-                    :white-space "nowrap"}}
-      (str (-> (LocalDate/now) (.minusMonths 6) (.minusDays 16)))]
-     [:div {:style {:grid-column "event-start / event-end"
-                    :grid-row 4}}
-      "⤴️ Assigned to John Doe"]
-
-     [:div {:style {:grid-column "time-start / time-end"
-                    :grid-row 5
-                    :white-space "nowrap"
-                    :text-align "center"
-                    :padding "0.7rem 0"
-                    :color "#999"}}
-      "8 months"]
-
-     ;; TODO: POC - completed assignment
-     [:div {:style {:grid-column "timeline-start / timeline-end"
-                    :grid-row "6 / 9"
-                    :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"}}]
-     [:div {:style {:grid-column "controls-start / controls-end"
-                    :grid-row 6
-                    :text-align "right"}}
-      [:a {:href "#"
-           :onclick "return false"}
-       "Edit"]]
-
-     [:div {:style {:grid-column "time-start / time-end"
-                    :grid-row 6
-                    :white-space "nowrap"
-                    #_#_:align-self "center"}}
-      (str (-> (LocalDate/now) (.minusMonths 14) (.minusDays 20)))]
-     [:div {:style {:grid-column "event-start / event-end"
-                    :grid-row 6}}
-      "📥 Returned "
-      [:div {:style {:margin-top "0.25rem"}} ; add some vertical spacing between emojis (line-height would add space also above the first row, which doesn't look good)
-       "✅ Covered"]]
-
-     [:div {:style {:grid-column "time-start / time-end"
-                    :grid-row 7
-                    :white-space "nowrap"
-                    :text-align "center"
-                    :padding "0.7rem 0"}}
-      "2 months"]
-
-     [:div {:style {:grid-column "time-start / time-end"
-                    :grid-row 8
-                    :white-space "nowrap"}}
-      (str (-> (LocalDate/now) (.minusMonths 16) (.minusDays 30)))]
-     [:div {:style {:grid-column "event-start / event-end"
-                    :grid-row 8}}
-      "⤴️ Assigned to Joe Blow"]]]))
+           :event
+           (h/html
+            [:div {:style (identity {:grid-column "time-start / time-end"
+                                     :grid-row grid-row
+                                     :white-space "nowrap"})}
+             (:date row)]
+            [:div {:style (identity {:grid-column "event-start / event-end"
+                                     :grid-row grid-row
+                                     :display "flex"
+                                     :flex-direction "column"
+                                     :gap "0.25rem"})}
+             (when (:returned? row)
+               [:div "📥 Returned "])
+             (when (:covered? row)
+               [:div "✅ Covered"])
+             (when (:assigned? row)
+               [:div "⤴️ Assigned to " (:publisher/name row)])])))]])))
 
 (defn view [{:keys [territory permissions] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
@@ -415,7 +417,7 @@
           (share-link--closed)])
 
        (when (:dev config/env)
-         (assignment-history model))]
+         (assignment-history fake-assignment-model-history))]
 
       [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
        [:div {:class (:map styles)}
