@@ -156,23 +156,24 @@
 (defn return-territory-dialog [{:keys [today latest-assignment]}]
   (h/html
    [:dialog#return-territory-dialog
-    [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/return")
-                                        :onchange "
-                                               const returningButton = document.querySelector('#return-territory-dialog #returning-button');
-                                               const returningCheckbox = document.querySelector('#return-territory-dialog #returning-checkbox');
-                                               const coveredButton = document.querySelector('#return-territory-dialog #covered-button');
-                                               const coveredCheckbox = document.querySelector('#return-territory-dialog #covered-checkbox');
-                                               if (returningCheckbox.checked) {
-                                                   returningButton.style.display = '';
-                                                   coveredButton.style.display = 'none';
-                                                   returningButton.disabled = coveredButton.disabled = false;
-                                               } else if (coveredCheckbox.checked) {
-                                                   returningButton.style.display = 'none';
-                                                   coveredButton.style.display = '';
-                                                   returningButton.disabled = coveredButton.disabled = false;
-                                               } else {
-                                                   returningButton.disabled = coveredButton.disabled = true;
-                                               }"}
+    [:form.pure-form.pure-form-aligned
+     {:hx-post (str html/*page-path* "/assignments/return")
+      :onchange "
+        const returningButton = this.querySelector('#returning-button');
+        const returningCheckbox = this.querySelector('#returning-checkbox');
+        const coveredButton = this.querySelector('#covered-button');
+        const coveredCheckbox = this.querySelector('#covered-checkbox');
+        if (returningCheckbox.checked) {
+            returningButton.style.display = '';
+            coveredButton.style.display = 'none';
+            returningButton.disabled = coveredButton.disabled = false;
+        } else if (coveredCheckbox.checked) {
+            returningButton.style.display = 'none';
+            coveredButton.style.display = '';
+            returningButton.disabled = coveredButton.disabled = false;
+        } else {
+            returningButton.disabled = coveredButton.disabled = true;
+        }"}
      [:fieldset
       [:legend "Return territory"]
       [:div.pure-control-group
@@ -253,7 +254,7 @@
        [:div#assignment-status {:hx-target "this"
                                 :hx-swap "outerHTML"
                                 :hx-on-htmx-load (when open-form?
-                                                   "document.querySelector('#return-territory-dialog').showModal()")}
+                                                   "this.querySelector('#return-territory-dialog').showModal()")}
         (when open-form?
           (return-territory-dialog model))
         [:button.pure-button {:hx-get (str html/*page-path* "/assignments/return")
@@ -271,7 +272,7 @@
        [:div#assignment-status {:hx-target "this"
                                 :hx-swap "outerHTML"
                                 :hx-on-htmx-load (when open-form?
-                                                   "document.querySelector('#assign-territory-dialog').showModal()")}
+                                                   "this.querySelector('#assign-territory-dialog').showModal()")}
         (when open-form?
           (assign-territory-dialog model))
         [:button.pure-button {:hx-get (str html/*page-path* "/assignments/assign")
