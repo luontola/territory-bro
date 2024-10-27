@@ -3,12 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.css
-  (:require [clojure.string :as str]
-            [territory-bro.infra.json :as json]
+  (:require [territory-bro.infra.json :as json]
             [territory-bro.infra.resources :as resources]))
 
 (def modules
   (resources/auto-refresher "css-modules.json" #(json/read-value (slurp %))))
-
-(defn classes [& names]
-  (str/join " " names))
