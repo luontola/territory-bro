@@ -33,6 +33,12 @@ kbd {
     font-family: "system-ui", sans-serif;
 }
 
+/* improvements to PureCSS */
+:global .pure-button.pure-button:focus-visible {
+    outline: 1px auto #129FEA;
+    outline-offset: 2px;
+}
+
 /* layout */
 
 .navbar {
