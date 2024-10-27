@@ -125,7 +125,7 @@
 
 (defn assign-territory-dialog [{:keys [publishers today]}]
   (h/html
-   [:dialog#assign-territory-dialog
+   [:dialog
     [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/assign")}
      [:fieldset
       [:legend "Assign territory"]
@@ -155,7 +155,7 @@
 
 (defn return-territory-dialog [{:keys [today latest-assignment]}]
   (h/html
-   [:dialog#return-territory-dialog
+   [:dialog
     [:form.pure-form.pure-form-aligned
      {:hx-post (str html/*page-path* "/assignments/return")
       :onchange "
@@ -254,7 +254,7 @@
        [:div#assignment-status {:hx-target "this"
                                 :hx-swap "outerHTML"
                                 :hx-on-htmx-load (when open-form?
-                                                   "this.querySelector('#return-territory-dialog').showModal()")}
+                                                   "this.querySelector('dialog').showModal()")}
         (when open-form?
           (return-territory-dialog model))
         [:button.pure-button {:hx-get (str html/*page-path* "/assignments/return")
@@ -272,7 +272,7 @@
        [:div#assignment-status {:hx-target "this"
                                 :hx-swap "outerHTML"
                                 :hx-on-htmx-load (when open-form?
-                                                   "this.querySelector('#assign-territory-dialog').showModal()")}
+                                                   "this.querySelector('dialog').showModal()")}
         (when open-form?
           (assign-territory-dialog model))
         [:button.pure-button {:hx-get (str html/*page-path* "/assignments/assign")
