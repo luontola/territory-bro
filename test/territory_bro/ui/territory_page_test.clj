@@ -17,7 +17,8 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.territory-page :as territory-page])
-  (:import (java.util UUID)))
+  (:import (java.time LocalDate)
+           (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
 (def territory-id (UUID. 0 2))
@@ -218,3 +219,23 @@
                      (dissoc @*last-command :command/time :share/id)))
               (is (-> (html/visible-text html)
                       (str/includes? "[/share/abcxyz/123] {copy.svg}"))))))))))
+
+(deftest months-difference-test
+  (testing "same day"
+    (is (= 0 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 1 1)))))
+
+  (testing "start of month"
+    (is (= 0 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 1 31))))
+    (is (= 1 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 2 1)))))
+
+  (testing "middle of month"
+    (is (= 0 (territory-page/months-difference (LocalDate/of 2000 1 15) (LocalDate/of 2000 2 14))))
+    (is (= 1 (territory-page/months-difference (LocalDate/of 2000 1 15) (LocalDate/of 2000 2 15)))))
+
+  (testing "over a year"
+    (is (= 11 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 12 1))))
+    (is (= 12 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2001 1 1))))
+    (is (= 18 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2001 7 1)))))
+
+  (testing "negative"
+    (is (= -1 (territory-page/months-difference (LocalDate/of 2000 2 1) (LocalDate/of 2000 1 1))))))

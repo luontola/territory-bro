@@ -22,6 +22,11 @@
     }
 }
 
+.edit-button.edit-button { /* XXX: competes for specificity with pure-button's font size, and Vite doesn't support listing library CSS files first */
+    float: right;
+    font-size: 70%;
+}
+
 /* Actions panel */
 
 .actions {

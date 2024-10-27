@@ -16,7 +16,7 @@
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
             [territory-bro.ui.maps :as maps])
-  (:import (java.time LocalDate)))
+  (:import (java.time LocalDate Period)))
 
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
@@ -34,17 +34,17 @@
 
 
 (defn do-not-calls--viewing [{:keys [territory permissions]}]
-  (h/html
-   [:div#do-not-calls {:hx-target "this"
-                       :hx-swap "outerHTML"}
-    (when (:edit-do-not-calls permissions)
-      [:button.pure-button {:hx-get (str html/*page-path* "/do-not-calls/edit")
-                            :hx-disabled-elt "this"
-                            :type "button"
-                            :style {:float "right"
-                                    :font-size "70%"}}
-       (i18n/t "TerritoryPage.edit")])
-    (:territory/do-not-calls territory)]))
+  (let [styles (:TerritoryPage (css/modules))]
+    (h/html
+     [:div#do-not-calls {:hx-target "this"
+                         :hx-swap "outerHTML"}
+      (when (:edit-do-not-calls permissions)
+        [:button.pure-button {:hx-get (str html/*page-path* "/do-not-calls/edit")
+                              :hx-disabled-elt "this"
+                              :type "button"
+                              :class (:edit-button styles)}
+         (i18n/t "TerritoryPage.edit")])
+      (:territory/do-not-calls territory)])))
 
 (defn do-not-calls--editing [{:keys [territory]}]
   (h/html
@@ -123,7 +123,7 @@
 (defn share-link--closed []
   (share-link {:open? false}))
 
-(defn assign-territory-dialog [{:keys []}]
+(defn assign-territory-dialog [{:keys [publishers today]}]
   (h/html
    [:dialog#assign-territory-dialog
     [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/assign")}
@@ -136,25 +136,15 @@
                                 :autofocus true
                                 :required true}]
        [:datalist#publisher-list
-        [:option {:value "Andrew"}]
-        [:option {:value "Bartholomew"}]
-        [:option {:value "James, son of Zebedee"}]
-        [:option {:value "James, son of Alphaeus"}]
-        [:option {:value "John"}]
-        [:option {:value "Matthew"}]
-        [:option {:value "Matthias"}]
-        [:option {:value "Peter"}]
-        [:option {:value "Philip"}]
-        [:option {:value "Simon"}]
-        [:option {:value "Thaddaeus"}]
-        [:option {:value "Thomas"}]]]
+        (for [publisher publishers]
+          [:option {:value (:publisher/name publisher)}])]]
       [:div.pure-control-group
        [:label {:for "start-date-field"} "Date"]
        [:input#start-date-field {:name "start-date"
                                  :type "date"
-                                 :value (str (LocalDate/now))
+                                 :value (str today)
                                  :required true
-                                 :max (str (LocalDate/now))}]]
+                                 :max (str today)}]]
       [:div.pure-controls
        [:button.pure-button.pure-button-primary {:type "submit"}
         "Assign territory"]
@@ -163,20 +153,25 @@
                              :onclick "this.closest('dialog').close()"}
         "Cancel"]]]]]))
 
-(defn return-territory-dialog [{:keys []}]
+(defn return-territory-dialog [{:keys [today latest-assignment]}]
   (h/html
    [:dialog#return-territory-dialog
     [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/return")
                                         :onchange "
-                                               const submit = document.querySelector('#return-territory-dialog .pure-button-primary');
-                                               if (document.getElementById('returning-checkbox').checked) {
-                                                   submit.textContent = 'Return territory'
-                                                   submit.disabled = false
-                                               } else if (document.getElementById('covered-checkbox').checked) {
-                                                   submit.textContent = 'Mark covered'
-                                                   submit.disabled = false
+                                               const returningButton = document.querySelector('#return-territory-dialog #returning-button');
+                                               const returningCheckbox = document.querySelector('#return-territory-dialog #returning-checkbox');
+                                               const coveredButton = document.querySelector('#return-territory-dialog #covered-button');
+                                               const coveredCheckbox = document.querySelector('#return-territory-dialog #covered-checkbox');
+                                               if (returningCheckbox.checked) {
+                                                   returningButton.style.display = '';
+                                                   coveredButton.style.display = 'none';
+                                                   returningButton.disabled = coveredButton.disabled = false;
+                                               } else if (coveredCheckbox.checked) {
+                                                   returningButton.style.display = 'none';
+                                                   coveredButton.style.display = '';
+                                                   returningButton.disabled = coveredButton.disabled = false;
                                                } else {
-                                                   submit.disabled = true
+                                                   returningButton.disabled = coveredButton.disabled = true;
                                                }"}
      [:fieldset
       [:legend "Return territory"]
@@ -184,10 +179,10 @@
        [:label {:for "end-date-field"} "Date"]
        [:input#end-date-field {:name "end-date"
                                :type "date"
-                               :value (str (LocalDate/now))
+                               :value (str today)
                                :required true
-                               :min (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))
-                               :max (str (LocalDate/now))}]]
+                               :min (str (:assignment/start-date latest-assignment))
+                               :max (str today)}]]
       [:div.pure-controls
        [:label.pure-checkbox
         [:input#returning-checkbox {:name "returning"
@@ -196,7 +191,8 @@
                                     :checked true
                                     :style {:width "1.5rem"
                                             :height "1.5rem"}}]
-        " Return the territory to storage"]
+        " "
+        "Return the territory to storage"]
        [:label.pure-checkbox
         [:input#covered-checkbox {:name "covered"
                                   :type "checkbox"
@@ -204,55 +200,89 @@
                                   :checked true
                                   :style {:width "1.5rem"
                                           :height "1.5rem"}}]
-        " Mark the territory as covered"]
-       [:button.pure-button.pure-button-primary {:type "submit"
-                                                 :autofocus true}
+        " "
+        "Mark the territory as covered"]
+       [:button#returning-button.pure-button.pure-button-primary {:type "submit"
+                                                                  :autofocus true}
         "Return territory"]
+       [:button#covered-button.pure-button.pure-button-primary {:type "submit"
+                                                                :style {:display "none"}}
+        "Mark covered"]
        " "
        [:button.pure-button {:type "button"
                              :onclick "this.closest('dialog').close()"}
         "Cancel"]]]]]))
 
-(defn assignment-status [{:keys [assigned? open-form?] :as model}]
-  (if assigned?
-    (h/html
-     [:div#assignment-status {:hx-target "this"
-                              :hx-swap "outerHTML"
-                              :hx-on-htmx-load (when open-form?
-                                                 "document.querySelector('#return-territory-dialog').showModal()")}
-      (when open-form?
-        (return-territory-dialog model))
-      [:button.pure-button {:hx-get (str html/*page-path* "/assignments/return")
-                            :hx-disabled-elt "this"
-                            :type "button"
-                            :style {:float "right"
-                                    :font-size "70%"}}
-       "Return"]
-      [:span {:style {:color "red"}} "Assigned"] " to John Doe"
-      [:br]
-      "(4 months, since "
-      (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))
-      ")"])
+(def fake-assignment-model-assigned
+  {:today (LocalDate/now)
+   :latest-assignment {:publisher/name "John Doe"
+                       :assignment/start-date (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))}})
+(def fake-assignment-model-vacant
+  {:today (LocalDate/now)
+   :latest-assignment {:publisher/name "John Doe"
+                       :assignment/start-date (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))
+                       :assignment/end-date (-> (LocalDate/now) (.minusMonths 2) (.minusDays 5))}
+   :publishers [{:publisher/name "Andrew"}
+                {:publisher/name "Bartholomew"}
+                {:publisher/name "James, son of Zebedee"}
+                {:publisher/name "James, son of Alphaeus"}
+                {:publisher/name "John"}
+                {:publisher/name "Matthew"}
+                {:publisher/name "Matthias"}
+                {:publisher/name "Peter"}
+                {:publisher/name "Philip"}
+                {:publisher/name "Simon"}
+                {:publisher/name "Thaddaeus"}
+                {:publisher/name "Thomas"}]})
 
-    (h/html
-     [:div#assignment-status {:hx-target "this"
-                              :hx-swap "outerHTML"
-                              :hx-on-htmx-load (when open-form?
-                                                 "document.querySelector('#assign-territory-dialog').showModal()")}
-      (when open-form?
-        (assign-territory-dialog model))
-      [:button.pure-button {:hx-get (str html/*page-path* "/assignments/assign")
-                            :hx-disabled-elt "this"
-                            :type "button"
-                            :style {:float "right"
-                                    :font-size "70%"}}
-       "Assign"]
-      [:span {:style {:color "blue"}}
-       "Up for grabs"]
-      [:br]
-      "(6 months, since "
-      (-> (LocalDate/now) (.minusMonths 6) (.minusDays 7))
-      ")"])))
+(defn months-difference [^LocalDate start ^LocalDate end]
+  (.toTotalMonths (Period/between start end)))
+
+(defn- nowrap [s]
+  (h/html [:span {:style {:white-space "nowrap"}}
+           s]))
+
+(defn assignment-status [{:keys [open-form? today latest-assignment] :as model}]
+  (let [styles (:TerritoryPage (css/modules))
+        start-date (:assignment/start-date latest-assignment)
+        end-date (:assignment/end-date latest-assignment)
+        assigned? (and (some? start-date)
+                       (nil? end-date))]
+    (if assigned?
+      (h/html
+       [:div#assignment-status {:hx-target "this"
+                                :hx-swap "outerHTML"
+                                :hx-on-htmx-load (when open-form?
+                                                   "document.querySelector('#return-territory-dialog').showModal()")}
+        (when open-form?
+          (return-territory-dialog model))
+        [:button.pure-button {:hx-get (str html/*page-path* "/assignments/return")
+                              :hx-disabled-elt "this"
+                              :type "button"
+                              :class (:edit-button styles)}
+         "Return"]
+        [:span {:style {:color "red"}}
+         "Assigned"]
+        " to " (:publisher/name latest-assignment)
+        [:br]
+        "(" (months-difference start-date today) " months, since " (nowrap start-date) ")"])
+
+      (h/html
+       [:div#assignment-status {:hx-target "this"
+                                :hx-swap "outerHTML"
+                                :hx-on-htmx-load (when open-form?
+                                                   "document.querySelector('#assign-territory-dialog').showModal()")}
+        (when open-form?
+          (assign-territory-dialog model))
+        [:button.pure-button {:hx-get (str html/*page-path* "/assignments/assign")
+                              :hx-disabled-elt "this"
+                              :type "button"
+                              :class (:edit-button styles)}
+         "Assign"]
+        [:span {:style {:color "blue"}}
+         "Up for grabs"]
+        [:br]
+        "(" (months-difference end-date today) " months, since " (nowrap end-date) ")"]))))
 
 (defn assignment-history [{:keys []}]
   (h/html
@@ -378,7 +408,7 @@
           (when (:dev config/env)
             [:tr
              [:th "Status"]
-             [:td (assignment-status {:assigned? false})]])]]]
+             [:td (assignment-status fake-assignment-model-assigned)]])]]]
 
        (when (:share-territory-link permissions)
          [:div {:class (:actions styles)}
@@ -483,22 +513,22 @@ if (url.searchParams.has('share-key')) {
     {:middleware [dmz/wrap-db-connection]
      :get {:handler (fn [request]
                       (let [model (model! request)]
-                        (-> (assignment-status {:assigned? false
-                                                :open-form? true})
+                        (-> (assignment-status (assoc fake-assignment-model-vacant
+                                                      :open-form? true))
                             (html/response))))}
      :post {:handler (fn [request]
                        (let [model (model! request)]
-                         (-> (assignment-status {:assigned? true})
+                         (-> (assignment-status fake-assignment-model-assigned)
                              (html/response))))}}]
 
    ["/assignments/return"
     {:middleware [dmz/wrap-db-connection]
      :get {:handler (fn [request]
                       (let [model (model! request)]
-                        (-> (assignment-status {:assigned? true
-                                                :open-form? true})
+                        (-> (assignment-status (assoc fake-assignment-model-assigned
+                                                      :open-form? true))
                             (html/response))))}
      :post {:handler (fn [request]
                        (let [model (model! request)]
-                         (-> (assignment-status {:assigned? false})
+                         (-> (assignment-status fake-assignment-model-vacant)
                              (html/response))))}}]])
