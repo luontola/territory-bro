@@ -6,8 +6,8 @@
   (:require [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
-            [hiccup2.core :as h]
             [territory-bro.infra.resources :as resources]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.markdown :as markdown]))

@@ -3,8 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.info-box
-  (:require [hiccup2.core :as h]
-            [territory-bro.ui.css :as css]
+  (:require [territory-bro.ui.css :as css]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]))
 
 (defn view [{:keys [title]} content]

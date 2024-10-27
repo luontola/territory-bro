@@ -4,7 +4,6 @@
 
 (ns territory-bro.ui.settings-page
   (:require [clojure.string :as str]
-            [hiccup2.core :as h]
             [ring.util.codec :as codec]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
@@ -13,6 +12,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.forms :as forms]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]

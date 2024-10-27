@@ -6,7 +6,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer :all]
-            [hiccup2.core :as h]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html])
   (:import (java.io File)
            (org.apache.commons.codec.digest DigestUtils)

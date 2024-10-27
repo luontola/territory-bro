@@ -5,12 +5,12 @@
 (ns territory-bro.ui.layout-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
-            [hiccup2.core :as h]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil :refer [replace-in]]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout])

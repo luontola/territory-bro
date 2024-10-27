@@ -4,7 +4,7 @@
 
 (ns territory-bro.ui.map-interaction-help
   (:require [clojure.string :as str]
-            [hiccup2.core :as h]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]))
 

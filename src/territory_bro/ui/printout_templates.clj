@@ -3,8 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.printout-templates
-  (:require [hiccup2.core :as h]
-            [territory-bro.ui.css :as css]
+  (:require [territory-bro.ui.css :as css]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n])
   (:import (java.time LocalDate)))

@@ -5,13 +5,13 @@
 (ns territory-bro.ui.layout
   (:require [clojure.string :as str]
             [hiccup.page :as hiccup.page]
-            [hiccup2.core :as h]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.resources :as resources]
             [territory-bro.ui.css :as css]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]))
@@ -181,8 +181,8 @@
 (defn page [view model]
   (let [styles (:Layout (css/modules))
         title (parse-title view)]
-    (assert (= :html hiccup.util/*html-mode*))
     (str (h/html
+          (assert (= :html hiccup.util/*html-mode*))
           (hiccup.page/doctype :html5)
           [:html {:lang (name i18n/*lang*)}
            [:head

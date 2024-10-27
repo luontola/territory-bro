@@ -3,10 +3,10 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.registration-page
-  (:require [hiccup2.core :as h]
-            [ring.util.http-response :as http-response]
+  (:require [ring.util.http-response :as http-response]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.ui.forms :as forms]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout])

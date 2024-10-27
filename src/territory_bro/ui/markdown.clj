@@ -3,8 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.ui.markdown
-  (:require [hiccup2.core :as h]
-            [ring.util.http-response :as http-response])
+  (:require [ring.util.http-response :as http-response]
+            [territory-bro.ui.hiccup :as h])
   (:import (com.vladsch.flexmark.ext.anchorlink AnchorLinkExtension)
            (com.vladsch.flexmark.html HtmlRenderer)
            (com.vladsch.flexmark.parser Parser)

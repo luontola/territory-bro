@@ -4,8 +4,8 @@
 
 (ns territory-bro.ui.error-page
   (:require [clojure.tools.logging :as log]
-            [hiccup2.core :as h]
             [ring.util.response :as response]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]))

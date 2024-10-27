@@ -5,18 +5,15 @@
 (ns territory-bro.ui.html
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [hiccup.util :as hiccup.util]
-            [hiccup2.core :as h]
             [net.cgrand.enlive-html :as en]
             [reitit.core :as reitit]
             [ring.middleware.anti-forgery :as anti-forgery]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
-            [territory-bro.infra.json :as json])
+            [territory-bro.infra.json :as json]
+            [territory-bro.ui.hiccup :as h])
   (:import (org.reflections Reflections)
            (org.reflections.scanners Scanners)))
-
-(alter-var-root #'hiccup.util/*html-mode* (constantly :html)) ; change default from :xhtml to :html
 
 (def ^:dynamic *page-path*)
 

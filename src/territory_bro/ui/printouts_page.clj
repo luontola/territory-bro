@@ -4,12 +4,12 @@
 
 (ns territory-bro.ui.printouts-page
   (:require [clojure.string :as str]
-            [hiccup2.core :as h]
             [ring.util.response :as response]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.json :as json]
             [territory-bro.infra.middleware :as middleware]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]

@@ -4,8 +4,8 @@
 
 (ns territory-bro.ui.documentation-page
   (:require [clojure.java.io :as io]
-            [hiccup2.core :as h]
             [territory-bro.infra.resources :as resources]
+            [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]
