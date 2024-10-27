@@ -123,6 +123,215 @@
 (defn share-link--closed []
   (share-link {:open? false}))
 
+(defn assign-territory-form [{:keys []}]
+  (h/html
+   [:dialog#assign-territory-dialog
+    [:form.pure-form.pure-form-aligned {:method "dialog"} ; TODO: submit form, remove dialog from DOM with htmx
+     [:fieldset
+      [:legend "Assign territory"]
+      [:div.pure-control-group
+       [:label {:for "publisher"} "Publisher"]
+       [:input#publisher {:autofocus true
+                          :required true
+                          :list "publisher-list"}]
+       [:datalist#publisher-list
+        [:option {:value "Andrew"}]
+        [:option {:value "Bartholomew"}]
+        [:option {:value "James, son of Zebedee"}]
+        [:option {:value "James, son of Alphaeus"}]
+        [:option {:value "John"}]
+        [:option {:value "Matthew"}]
+        [:option {:value "Matthias"}]
+        [:option {:value "Peter"}]
+        [:option {:value "Philip"}]
+        [:option {:value "Simon"}]
+        [:option {:value "Thaddaeus"}]
+        [:option {:value "Thomas"}]]]
+      [:div.pure-control-group
+       [:label {:for "assign-date"} "Date"]
+       [:input#assign-date {:type "date"
+                            :value (str (LocalDate/now))
+                            :required true
+                            :max (str (LocalDate/now))}]]
+      [:div.pure-controls
+       [:button.pure-button.pure-button-primary {:type "submit"}
+        "Assign territory"]
+       " "
+       [:button.pure-button {:type "submit"
+                             :formmethod "dialog"
+                             :formnovalidate true}
+        "Cancel"]]]]]))
+
+(defn return-territory-form [{:keys []}]
+  (h/html
+   [:dialog#return-territory-dialog
+    [:form.pure-form.pure-form-aligned {:method "dialog" ; TODO: submit form, remove dialog from DOM with htmx
+                                        :onchange "
+                                               const submit = document.querySelector('#return-territory-dialog .pure-button-primary');
+                                               if (document.getElementById('return').checked) {
+                                                   submit.textContent = 'Return territory'
+                                                   submit.disabled = false
+                                               } else if (document.getElementById('cover').checked) {
+                                                   submit.textContent = 'Mark covered'
+                                                   submit.disabled = false
+                                               } else {
+                                                   submit.disabled = true
+                                               }"}
+     [:fieldset
+      [:legend "Return territory"]
+      [:div.pure-control-group
+       [:label {:for "return-date"} "Date"]
+       [:input#return-date {:type "date"
+                            :value (str (LocalDate/now))
+                            :required true
+                            :min (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))
+                            :max (str (LocalDate/now))}]]
+      [:div.pure-controls
+       [:label.pure-checkbox
+        [:input#return {:type "checkbox"
+                        :checked true
+                        :style {:width "1.5rem"
+                                :height "1.5rem"}}]
+        " Return the territory to storage"]
+       [:label.pure-checkbox
+        [:input#cover {:type "checkbox"
+                       :checked true
+                       :style {:width "1.5rem"
+                               :height "1.5rem"}}]
+        " Mark the territory as covered"]
+       [:button.pure-button.pure-button-primary {:type "submit"
+                                                 :autofocus true}
+        "Return territory"]
+       " "
+       [:button.pure-button {:type "submit"
+                             :formmethod "dialog"
+                             :formnovalidate true}
+        "Cancel"]]]]]))
+
+(defn assignment-status [{:keys [assigned?]}]
+  (if assigned?
+    (h/html
+     [:button.pure-button {:onclick "document.querySelector('#return-territory-dialog').showModal()"
+                           :type "button"
+                           :style {:float "right"
+                                   :font-size "70%"}}
+      "Return"]
+     [:span {:style {:color "red"}} "Assigned"] " to John Doe"
+     [:br]
+     "(4 months, since "
+     (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))
+     ")")
+    (h/html
+     [:button.pure-button {:onclick "document.querySelector('#assign-territory-dialog').showModal()"
+                           :type "button"
+                           :style {:float "right"
+                                   :font-size "70%"}}
+      "Assign"]
+     [:span {:style {:color "blue"}}
+      "Up for grabs"]
+     [:br]
+     "(6 months, since "
+     (-> (LocalDate/now) (.minusMonths 6) (.minusDays 7))
+     ")")))
+
+(defn assignment-history [{:keys []}]
+  (h/html
+   [:details {:open false}
+    [:summary {:style {:margin "1rem 0"
+                       :font-weight "bold"
+                       :cursor "pointer"}}
+     "Assignment history"]
+    [:div {:style {:display "grid"
+                   :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
+                   :gap "0.5rem"
+                   :width "fit-content"
+                   :margin "1rem 0"}}
+
+     ;; TODO: POC - ongoing assignment
+     [:div {:style {:grid-column "timeline-start / timeline-end"
+                    :grid-row "1 / 5"
+                    :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"}}]
+     [:div {:style {:grid-column "controls-start / controls-end"
+                    :grid-row 1
+                    :text-align "right"}}
+      [:a {:href "#"
+           :onclick "return false"}
+       "Edit"]]
+
+     [:div {:style {:grid-column "time-start / time-end"
+                    :grid-row 1
+                    :white-space "nowrap"
+                    :text-align "center"
+                    :padding "0.7rem 0"}}
+      "2 months"]
+
+     [:div {:style {:grid-column "time-start / time-end"
+                    :grid-row 2
+                    :white-space "nowrap"}}
+      (str (-> (LocalDate/now) (.minusMonths 2) (.minusDays 4)))]
+     [:div {:style {:grid-column "event-start / event-end"
+                    :grid-row 2}}
+      "✅ Covered"]
+
+     [:div {:style {:grid-column "time-start / time-end"
+                    :grid-row 3
+                    :white-space "nowrap"
+                    :text-align "center"
+                    :padding "0.7rem 0"}}
+      "4 months"]
+
+     [:div {:style {:grid-column "time-start / time-end"
+                    :grid-row 4
+                    :white-space "nowrap"}}
+      (str (-> (LocalDate/now) (.minusMonths 6) (.minusDays 16)))]
+     [:div {:style {:grid-column "event-start / event-end"
+                    :grid-row 4}}
+      "⤴️ Assigned to John Doe"]
+
+     [:div {:style {:grid-column "time-start / time-end"
+                    :grid-row 5
+                    :white-space "nowrap"
+                    :text-align "center"
+                    :padding "0.7rem 0"
+                    :color "#999"}}
+      "8 months"]
+
+     ;; TODO: POC - completed assignment
+     [:div {:style {:grid-column "timeline-start / timeline-end"
+                    :grid-row "6 / 9"
+                    :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"}}]
+     [:div {:style {:grid-column "controls-start / controls-end"
+                    :grid-row 6
+                    :text-align "right"}}
+      [:a {:href "#"
+           :onclick "return false"}
+       "Edit"]]
+
+     [:div {:style {:grid-column "time-start / time-end"
+                    :grid-row 6
+                    :white-space "nowrap"
+                    #_#_:align-self "center"}}
+      (str (-> (LocalDate/now) (.minusMonths 14) (.minusDays 20)))]
+     [:div {:style {:grid-column "event-start / event-end"
+                    :grid-row 6}}
+      "📥 Returned "
+      [:div {:style {:margin-top "0.25rem"}} ; add some vertical spacing between emojis (line-height would add space also above the first row, which doesn't look good)
+       "✅ Covered"]]
+
+     [:div {:style {:grid-column "time-start / time-end"
+                    :grid-row 7
+                    :white-space "nowrap"
+                    :text-align "center"
+                    :padding "0.7rem 0"}}
+      "2 months"]
+
+     [:div {:style {:grid-column "time-start / time-end"
+                    :grid-row 8
+                    :white-space "nowrap"}}
+      (str (-> (LocalDate/now) (.minusMonths 16) (.minusDays 30)))]
+     [:div {:style {:grid-column "event-start / event-end"
+                    :grid-row 8}}
+      "⤴️ Assigned to Joe Blow"]]]))
 
 (defn view [{:keys [territory permissions] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
@@ -146,227 +355,20 @@
           [:tr
            [:th (h/raw (i18n/t "TerritoryPage.doNotCalls"))]
            [:td (do-not-calls--viewing model)]]
-
-          ;; TODO: POC - status=available
           (when (:dev config/env)
             [:tr
              [:th "Status"]
              [:td
-              [:button.pure-button {:onclick "document.querySelector('#assign-territory-dialog').showModal()"
-                                    :type "button"
-                                    :style {:float "right"
-                                            :font-size "70%"}}
-               "Assign"]
-              [:span {:style {:color "blue"}}
-               "Up for grabs"]
-              [:br]
-              "(6 months, since "
-              (-> (LocalDate/now) (.minusMonths 6) (.minusDays 7))
-              ")"]])
-
-          ;; TODO: POC - status=assigned
-          (when (:dev config/env)
-            [:tr
-             [:th "Status"]
-             [:td
-              [:button.pure-button {:onclick "document.querySelector('#return-territory-dialog').showModal()"
-                                    :type "button"
-                                    :style {:float "right"
-                                            :font-size "70%"}}
-               "Return"]
-              [:span {:style {:color "red"}} "Assigned"] " to John Doe"
-              [:br]
-              "(4 months, since "
-              (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))
-              ")"]])]]
-
-        ;; TODO: POC - assign territory form
-        (when (:dev config/env)
-          [:dialog#assign-territory-dialog
-           [:form.pure-form.pure-form-aligned {:method "dialog"} ; TODO: submit form, remove dialog from DOM with htmx
-            [:fieldset
-             [:legend "Assign territory"]
-             [:div.pure-control-group
-              [:label {:for "publisher"} "Publisher"]
-              [:input#publisher {:autofocus true
-                                 :required true
-                                 :list "publisher-list"}]
-              [:datalist#publisher-list
-               [:option {:value "Andrew"}]
-               [:option {:value "Bartholomew"}]
-               [:option {:value "James, son of Zebedee"}]
-               [:option {:value "James, son of Alphaeus"}]
-               [:option {:value "John"}]
-               [:option {:value "Matthew"}]
-               [:option {:value "Matthias"}]
-               [:option {:value "Peter"}]
-               [:option {:value "Philip"}]
-               [:option {:value "Simon"}]
-               [:option {:value "Thaddaeus"}]
-               [:option {:value "Thomas"}]]]
-             [:div.pure-control-group
-              [:label {:for "assign-date"} "Date"]
-              [:input#assign-date {:type "date"
-                                   :value (str (LocalDate/now))
-                                   :required true
-                                   :max (str (LocalDate/now))}]]
-             [:div.pure-controls
-              [:button.pure-button.pure-button-primary {:type "submit"}
-               "Assign territory"]
-              " "
-              [:button.pure-button {:type "submit"
-                                    :formmethod "dialog"
-                                    :formnovalidate true}
-               "Cancel"]]]]])
-
-        ;; TODO: POC - return territory form
-        (when (:dev config/env)
-          [:dialog#return-territory-dialog
-           [:form.pure-form.pure-form-aligned {:method "dialog" ; TODO: submit form, remove dialog from DOM with htmx
-                                               :onchange "
-                                               const submit = document.querySelector('#return-territory-dialog .pure-button-primary');
-                                               if (document.getElementById('return').checked) {
-                                                   submit.textContent = 'Return territory'
-                                                   submit.disabled = false
-                                               } else if (document.getElementById('cover').checked) {
-                                                   submit.textContent = 'Mark covered'
-                                                   submit.disabled = false
-                                               } else {
-                                                   submit.disabled = true
-                                               }"}
-            [:fieldset
-             [:legend "Return territory"]
-             [:div.pure-control-group
-              [:label {:for "return-date"} "Date"]
-              [:input#return-date {:type "date"
-                                   :value (str (LocalDate/now))
-                                   :required true
-                                   :min (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))
-                                   :max (str (LocalDate/now))}]]
-             [:div.pure-controls
-              [:label.pure-checkbox
-               [:input#return {:type "checkbox"
-                               :checked true
-                               :style {:width "1.5rem"
-                                       :height "1.5rem"}}]
-               " Return the territory to storage"]
-              [:label.pure-checkbox
-               [:input#cover {:type "checkbox"
-                              :checked true
-                              :style {:width "1.5rem"
-                                      :height "1.5rem"}}]
-               " Mark the territory as covered"]
-              [:button.pure-button.pure-button-primary {:type "submit"
-                                                        :autofocus true}
-               "Return territory"]
-              " "
-              [:button.pure-button {:type "submit"
-                                    :formmethod "dialog"
-                                    :formnovalidate true}
-               "Cancel"]]]]])]
+              (assignment-status {:assigned? false})
+              (assign-territory-form model)
+              (return-territory-form model)]])]]]
 
        (when (:share-territory-link permissions)
          [:div {:class (:actions styles)}
           (share-link--closed)])
 
-       ;; TODO: POC - assignment history
        (when (:dev config/env)
-         [:details {:open false}
-          [:summary {:style {:margin "1rem 0"
-                             :font-weight "bold"
-                             :cursor "pointer"}}
-           "Assignment history"]
-          [:div {:style {:display "grid"
-                         :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
-                         :gap "0.5rem"
-                         :width "fit-content"
-                         :margin "1rem 0"}}
-
-           ;; TODO: POC - ongoing assignment
-           [:div {:style {:grid-column "timeline-start / timeline-end"
-                          :grid-row "1 / 5"
-                          :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"}}]
-           [:div {:style {:grid-column "controls-start / controls-end"
-                          :grid-row 1
-                          :text-align "right"}}
-            [:a {:href "#"
-                 :onclick "return false"}
-             "Edit"]]
-
-           [:div {:style {:grid-column "time-start / time-end"
-                          :grid-row 1
-                          :white-space "nowrap"
-                          :text-align "center"
-                          :padding "0.7rem 0"}}
-            "2 months"]
-
-           [:div {:style {:grid-column "time-start / time-end"
-                          :grid-row 2
-                          :white-space "nowrap"}}
-            (str (-> (LocalDate/now) (.minusMonths 2) (.minusDays 4)))]
-           [:div {:style {:grid-column "event-start / event-end"
-                          :grid-row 2}}
-            "✅ Covered"]
-
-           [:div {:style {:grid-column "time-start / time-end"
-                          :grid-row 3
-                          :white-space "nowrap"
-                          :text-align "center"
-                          :padding "0.7rem 0"}}
-            "4 months"]
-
-           [:div {:style {:grid-column "time-start / time-end"
-                          :grid-row 4
-                          :white-space "nowrap"}}
-            (str (-> (LocalDate/now) (.minusMonths 6) (.minusDays 16)))]
-           [:div {:style {:grid-column "event-start / event-end"
-                          :grid-row 4}}
-            "⤴️ Assigned to John Doe"]
-
-           [:div {:style {:grid-column "time-start / time-end"
-                          :grid-row 5
-                          :white-space "nowrap"
-                          :text-align "center"
-                          :padding "0.7rem 0"
-                          :color "#999"}}
-            "8 months"]
-
-           ;; TODO: POC - completed assignment
-           [:div {:style {:grid-column "timeline-start / timeline-end"
-                          :grid-row "6 / 9"
-                          :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"}}]
-           [:div {:style {:grid-column "controls-start / controls-end"
-                          :grid-row 6
-                          :text-align "right"}}
-            [:a {:href "#"
-                 :onclick "return false"}
-             "Edit"]]
-
-           [:div {:style {:grid-column "time-start / time-end"
-                          :grid-row 6
-                          :white-space "nowrap"
-                          #_#_:align-self "center"}}
-            (str (-> (LocalDate/now) (.minusMonths 14) (.minusDays 20)))]
-           [:div {:style {:grid-column "event-start / event-end"
-                          :grid-row 6}}
-            "📥 Returned "
-            [:div {:style {:margin-top "0.25rem"}} ; add some vertical spacing between emojis (line-height would add space also above the first row, which doesn't look good)
-             "✅ Covered"]]
-
-           [:div {:style {:grid-column "time-start / time-end"
-                          :grid-row 7
-                          :white-space "nowrap"
-                          :text-align "center"
-                          :padding "0.7rem 0"}}
-            "2 months"]
-
-           [:div {:style {:grid-column "time-start / time-end"
-                          :grid-row 8
-                          :white-space "nowrap"}}
-            (str (-> (LocalDate/now) (.minusMonths 16) (.minusDays 30)))]
-           [:div {:style {:grid-column "event-start / event-end"
-                          :grid-row 8}}
-            "⤴️ Assigned to Joe Blow"]]])]
+         (assignment-history model))]
 
       [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
        [:div {:class (:map styles)}
