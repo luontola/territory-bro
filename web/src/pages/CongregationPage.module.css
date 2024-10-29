@@ -4,9 +4,7 @@
     margin-bottom: 1rem;
 }
 
-ul.checklist {
-    /* alternatives: ⏳ 🕑 ⬜ 🔲 */
-    list-style-type: "⏳ ";
+ol.checklist {
     padding-left: 1.7rem;
     font-size: 1.1rem;
 

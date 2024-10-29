@@ -33,7 +33,7 @@
   (when (:gis-access permissions)
     (let [styles (:CongregationPage (css/modules))
           content (h/html
-                   [:ul {:class (:checklist styles)}
+                   [:ol {:class (:checklist styles)}
                     [:li (checklist-item-status (:congregation-boundary? statistics))
                      [:a {:href "/documentation#how-to-create-congregation-boundaries"}
                       (i18n/t "GettingStarted.congregationBoundary")]]
