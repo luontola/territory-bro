@@ -214,15 +214,16 @@
                              :onclick "this.closest('dialog').close()"}
         "Cancel"]]]]]))
 
+(def fake-time (LocalDate/of 2024 10 29))
 (def fake-assignment-model-assigned
-  {:today (LocalDate/now)
+  {:today fake-time
    :latest-assignment {:publisher/name "John Doe"
-                       :assignment/start-date (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))}})
+                       :assignment/start-date (-> fake-time (.minusMonths 4) (.minusDays 18))}})
 (def fake-assignment-model-vacant
-  {:today (LocalDate/now)
+  {:today fake-time
    :latest-assignment {:publisher/name "John Doe"
-                       :assignment/start-date (-> (LocalDate/now) (.minusMonths 4) (.minusDays 18))
-                       :assignment/end-date (-> (LocalDate/now) (.minusMonths 2) (.minusDays 5))}
+                       :assignment/start-date (-> fake-time (.minusMonths 4) (.minusDays 18))
+                       :assignment/end-date (-> fake-time (.minusMonths 2) (.minusDays 5))}
    :publishers [{:publisher/name "Andrew"}
                 {:publisher/name "Bartholomew"}
                 {:publisher/name "James, son of Zebedee"}
@@ -299,7 +300,7 @@
                :months 2}
               {:type :event
                :grid-row 2
-               :date (-> (LocalDate/now) (.minusMonths 2) (.minusDays 4))
+               :date (-> fake-time (.minusMonths 2) (.minusDays 4))
                :covered? true}
               {:type :duration
                :grid-row 3
@@ -307,7 +308,7 @@
                :months 4}
               {:type :event
                :grid-row 4
-               :date (-> (LocalDate/now) (.minusMonths 6) (.minusDays 16))
+               :date (-> fake-time (.minusMonths 6) (.minusDays 16))
                :assigned? true
                :publisher/name "John Doe"}
               {:type :duration
@@ -319,7 +320,7 @@
                :grid-span 3}
               {:type :event
                :grid-row 6
-               :date (-> (LocalDate/now) (.minusMonths 14) (.minusDays 20))
+               :date (-> fake-time (.minusMonths 14) (.minusDays 20))
                :returned? true
                :covered? true}
               {:type :duration
@@ -328,7 +329,7 @@
                :months 2}
               {:type :event
                :grid-row 8
-               :date (-> (LocalDate/now) (.minusMonths 16) (.minusDays 30))
+               :date (-> fake-time (.minusMonths 16) (.minusDays 30))
                :assigned? true
                :publisher/name "Joe Blow"}]]
     (h/html

@@ -239,3 +239,59 @@
 
   (testing "negative"
     (is (= -1 (territory-page/months-difference (LocalDate/of 2000 2 1) (LocalDate/of 2000 1 1))))))
+
+(deftest assignment-status-test
+  (testing "vacant"
+    (is (= (html/normalize-whitespace
+            "Assign
+             Up for grabs
+             (2 months, since 2024-08-24)")
+           (-> (territory-page/assignment-status territory-page/fake-assignment-model-vacant)
+               html/visible-text))))
+
+  (testing "assigned"
+    (is (= (html/normalize-whitespace
+            "Return
+             Assigned to John Doe
+             (4 months, since 2024-06-11)")
+           (-> (territory-page/assignment-status territory-page/fake-assignment-model-assigned)
+               html/visible-text)))))
+
+(deftest assign-territory-dialog-test
+  (is (= (html/normalize-whitespace
+          "Assign territory
+             Publisher []
+             Date [2024-10-29]
+           Assign territory
+           Cancel")
+         (-> (territory-page/assign-territory-dialog territory-page/fake-assignment-model-vacant)
+             html/visible-text))))
+
+(deftest return-territory-dialog-test
+  (is (= (html/normalize-whitespace
+          "Return territory
+             Date [2024-10-29]
+             [true] Return the territory to storage
+             [true] Mark the territory as covered
+           Return territory
+           Mark covered
+           Cancel")
+         (-> (territory-page/return-territory-dialog territory-page/fake-assignment-model-assigned)
+             html/visible-text))))
+
+(deftest assignment-history-test
+  (is (= (html/normalize-whitespace
+          "Assignment history
+                                               Edit
+           2 months
+           2024-08-25    ✅ Covered
+           4 months
+           2024-04-13    ⤴️ Assigned to John Doe
+           8 months
+                                               Edit
+           2023-08-09    📥 Returned
+                         ✅ Covered
+           2 months
+           2023-05-30    ⤴️ Assigned to Joe Blow")
+         (-> (territory-page/assignment-history territory-page/fake-assignment-model-history)
+             html/visible-text))))
