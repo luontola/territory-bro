@@ -11,7 +11,7 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.json :as json])
-  (:import (java.time Instant)
+  (:import (java.time Instant LocalDate)
            (java.util UUID)))
 
 (defn- enrich-event [event command current-time]
@@ -132,6 +132,29 @@
          :congregation/id UUID
          :territory/id UUID))
 
+(s/defschema TerritoryAssigned
+  (assoc BaseEvent
+         :event/type (s/eq :territory.event/territory-assigned)
+         :congregation/id UUID
+         :territory/id UUID
+         :assignment/id UUID
+         :assignment/start-date LocalDate
+         :publisher/id UUID))
+(s/defschema TerritoryCovered
+  (assoc BaseEvent
+         :event/type (s/eq :territory.event/territory-covered)
+         :congregation/id UUID
+         :territory/id UUID
+         :assignment/id UUID
+         :assignment/covered-date LocalDate))
+(s/defschema TerritoryReturned
+  (assoc BaseEvent
+         :event/type (s/eq :territory.event/territory-returned)
+         :congregation/id UUID
+         :territory/id UUID
+         :assignment/id UUID
+         :assignment/end-date LocalDate))
+
 ;;; Region
 
 (s/defschema RegionDefined
@@ -234,8 +257,11 @@
    :region.event/region-deleted RegionDeleted
    :share.event/share-created ShareCreated
    :share.event/share-opened ShareOpened
+   :territory.event/territory-assigned TerritoryAssigned
+   :territory.event/territory-covered TerritoryCovered
    :territory.event/territory-defined TerritoryDefined
-   :territory.event/territory-deleted TerritoryDeleted})
+   :territory.event/territory-deleted TerritoryDeleted
+   :territory.event/territory-returned TerritoryReturned})
 
 (s/defschema Event
   (apply refined/dispatch-on :event/type (flatten (seq event-schemas))))
@@ -286,8 +312,14 @@
     (Instant/parse s)
     s))
 
+(defn- string->date [s]
+  (if (string? s)
+    (LocalDate/parse s)
+    s))
+
 (def ^:private datestring-coercion-matcher
-  {Instant string->instant})
+  {Instant string->instant
+   LocalDate string->date})
 
 (defn- coercion-matcher [schema]
   (or (datestring-coercion-matcher schema)

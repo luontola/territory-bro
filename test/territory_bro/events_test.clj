@@ -12,7 +12,7 @@
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :refer [re-contains re-equals thrown-with-msg? thrown?]])
   (:import (clojure.lang ExceptionInfo)
-           (java.time Instant)
+           (java.time Instant LocalDate)
            (java.util UUID)))
 
 (def test-time (Instant/now))
@@ -133,8 +133,12 @@
 (def instant-gen (gen/fmap (fn [millis]
                              (Instant/ofEpochMilli millis))
                            (gen/large-integer* {:min 0})))
+(def date-gen (gen/fmap (fn [day]
+                          (LocalDate/ofEpochDay day))
+                        (gen/large-integer* {:min 0, :max (-> (LocalDate/now) (.plusYears 100) .toEpochDay)})))
 (def leaf-generators {UUID uuid-gen
-                      Instant instant-gen})
+                      Instant instant-gen
+                      LocalDate date-gen})
 (def event-user-gen (gen/tuple (gen/elements [:event/user])
                                uuid-gen))
 (def event-system-gen (gen/tuple (gen/elements [:event/system])

@@ -9,7 +9,7 @@
             [territory-bro.infra.foreign-key :as foreign-key]
             [territory-bro.infra.json :as json]
             [territory-bro.infra.permissions :as permissions])
-  (:import (java.time Instant)
+  (:import (java.time Instant LocalDate)
            (java.util UUID)))
 
 (def ^:private key-order
@@ -129,6 +129,25 @@
          :congregation/id (foreign-key/references :congregation UUID)
          :territory/id (foreign-key/references :territory UUID)))
 
+(s/defschema AssignTerritory
+  (assoc BaseCommand
+         :command/type (s/eq :territory.command/assign-territory)
+         :congregation/id (foreign-key/references :congregation UUID)
+         :territory/id (foreign-key/references :territory UUID)
+         :assignment/id (foreign-key/references :unsafe UUID) ; assignments don't have their own stream
+         :date LocalDate
+         :publisher/id (foreign-key/references :publisher UUID)))
+
+(s/defschema ReturnTerritory
+  (assoc BaseCommand
+         :command/type (s/eq :territory.command/return-territory)
+         :congregation/id (foreign-key/references :congregation UUID)
+         :territory/id (foreign-key/references :territory UUID)
+         :assignment/id (foreign-key/references :unsafe UUID) ; assignments don't have their own stream
+         :date LocalDate
+         :returning? boolean
+         :covered? boolean))
+
 ;;; Region
 
 (s/defschema DefineRegion
@@ -220,8 +239,10 @@
    :region.command/delete-region DeleteRegion
    :share.command/create-share CreateShare
    :share.command/record-share-opened RecordShareOpened
+   :territory.command/assign-territory AssignTerritory
    :territory.command/define-territory DefineTerritory
-   :territory.command/delete-territory DeleteTerritory})
+   :territory.command/delete-territory DeleteTerritory
+   :territory.command/return-territory ReturnTerritory})
 
 (s/defschema Command
   (apply refined/dispatch-on :command/type (flatten (seq command-schemas))))
