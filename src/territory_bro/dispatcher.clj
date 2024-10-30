@@ -11,6 +11,7 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.do-not-calls :as do-not-calls]
+            [territory-bro.domain.publisher :as publisher]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
@@ -39,6 +40,9 @@
    :congregation (fn [cong-id]
                    (congregation/check-congregation-exists state cong-id)
                    true)
+   :publisher (fn [publisher-id]
+                (publisher/check-publisher-exists state (:congregation/id command) publisher-id)
+                true)
    :region (fn [region-id]
              (region/check-region-exists state (:congregation/id command) region-id)
              true)

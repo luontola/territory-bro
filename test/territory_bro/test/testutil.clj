@@ -54,12 +54,13 @@
    :congregation (constantly true)
    :congregation-boundary (constantly true)
    :new (constantly true)
+   :publisher (constantly true)
    :region (constantly true)
    :share (constantly true)
    :territory (constantly true)
+   :unsafe (constantly true)
    :user (constantly true)
-   :user-or-anonymous (constantly true)
-   :unsafe (constantly true)})
+   :user-or-anonymous (constantly true)})
 
 (defn validate-command [command]
   (binding [foreign-key/*reference-checkers* dummy-reference-checkers]

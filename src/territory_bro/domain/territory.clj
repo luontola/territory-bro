@@ -4,7 +4,8 @@
 
 (ns territory-bro.domain.territory
   (:require [medley.core :refer [dissoc-in]]
-            [territory-bro.gis.gis-change :as gis-change])
+            [territory-bro.gis.gis-change :as gis-change]
+            [territory-bro.infra.util :refer [conj-set]])
   (:import (territory_bro ValidationException)))
 
 ;;;; Read model
@@ -30,6 +31,23 @@
 (defmethod projection :territory.event/territory-deleted
   [state event]
   (dissoc-in state [::territories (:congregation/id event) (:territory/id event)]))
+
+(defmethod projection :territory.event/territory-assigned
+  [state event]
+  (assoc-in state [::territories (:congregation/id event) (:territory/id event) :territory/assignments (:assignment/id event)]
+            (select-keys event [:assignment/id :assignment/start-date :publisher/id])))
+
+(defmethod projection :territory.event/territory-covered
+  [state event]
+  (update-in state [::territories (:congregation/id event) (:territory/id event) :territory/assignments (:assignment/id event)]
+             (fn [assignment]
+               (update assignment :assignment/covered-dates conj-set (:assignment/covered-date event)))))
+
+(defmethod projection :territory.event/territory-returned
+  [state event]
+  (update-in state [::territories (:congregation/id event) (:territory/id event) :territory/assignments (:assignment/id event)]
+             (fn [assignment]
+               (assoc assignment :assignment/end-date (:assignment/end-date event)))))
 
 
 ;;;; Queries
@@ -86,6 +104,26 @@
                :congregation/id cong-id
                :territory/id territory-id}
               (gis-change/event-metadata command))])))
+
+(defmethod command-handler :territory.command/assign-territory
+  [command territory {:keys [check-permit]}]
+  (let [cong-id (:congregation/id command)
+        territory-id (:territory/id command)
+        assignment-id (:assignment/id command)
+        start-date (:date command)
+        publisher-id (:publisher/id command)
+        assignments (:territory/assignments territory)]
+    (check-permit [:assign-territory cong-id territory-id publisher-id])
+    (when-not (contains? assignments assignment-id)
+      (when (some #(nil? (:assignment/end-date %)) ; TODO: simplify checking latest assignment
+                  (vals assignments))
+        (throw (ValidationException. [[:already-assigned cong-id territory-id]])))
+      [{:event/type :territory.event/territory-assigned
+        :congregation/id cong-id
+        :territory/id territory-id
+        :assignment/id assignment-id
+        :assignment/start-date start-date
+        :publisher/id publisher-id}])))
 
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))

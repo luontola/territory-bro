@@ -8,14 +8,19 @@
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.events :as events]
             [territory-bro.test.testutil :as testutil :refer [re-equals thrown-with-msg? thrown?]])
-  (:import (java.time Instant)
+  (:import (java.time Instant LocalDate)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException)))
 
 (def cong-id (UUID. 0 1))
 (def territory-id (UUID. 0 2))
-(def user-id (UUID. 0 3))
+(def assignment-id (UUID. 0 3))
+(def publisher-id (UUID. 0 4))
+(def user-id (UUID. 0 5))
 (def gis-change-id 42)
+(def start-date (LocalDate/of 2000 1 1))
+(def end-date (LocalDate/of 2000 1 31))
+
 (def territory-defined
   {:event/type :territory.event/territory-defined
    :gis-change/id gis-change-id
@@ -26,11 +31,34 @@
    :territory/region "the region"
    :territory/meta {:foo "bar"}
    :territory/location testdata/wkt-multi-polygon})
+
 (def territory-deleted
   {:event/type :territory.event/territory-deleted
    :gis-change/id gis-change-id
    :congregation/id cong-id
    :territory/id territory-id})
+
+(def territory-assigned
+  {:event/type :territory.event/territory-assigned
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id assignment-id
+   :assignment/start-date start-date
+   :publisher/id publisher-id})
+
+(def territory-covered
+  {:event/type :territory.event/territory-covered
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id assignment-id
+   :assignment/covered-date end-date})
+
+(def territory-returned
+  {:event/type :territory.event/territory-returned
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id assignment-id
+   :assignment/end-date end-date})
 
 (defn- apply-events [events]
   (testutil/apply-events territory/projection events))
@@ -67,6 +95,32 @@
                                          :territory/meta {:new-meta "new stuff"}
                                          :territory/location "new location"})]
           (is (= expected (apply-events events)))))
+
+      (testing "> assigned"
+        (let [events (conj events territory-assigned)
+              expected (update-in expected [::territory/territories cong-id territory-id :territory/assignments assignment-id]
+                                  merge {:assignment/id assignment-id
+                                         :assignment/start-date start-date
+                                         :publisher/id publisher-id})]
+          (is (= expected (apply-events events)))
+
+          (testing "> covered"
+            (let [events (conj events territory-covered)
+                  expected (update-in expected [::territory/territories cong-id territory-id :territory/assignments assignment-id]
+                                      merge {:assignment/covered-dates #{end-date}})]
+              (is (= expected (apply-events events)))
+
+              (testing "> covered many times"
+                (let [events (conj events (assoc territory-covered :assignment/covered-date (LocalDate/of 2000 2 3)))
+                      expected (update-in expected [::territory/territories cong-id territory-id :territory/assignments assignment-id]
+                                          merge {:assignment/covered-dates #{end-date (LocalDate/of 2000 2 3)}})]
+                  (is (= expected (apply-events events)))))
+
+              (testing "> returned"
+                (let [events (conj events territory-returned)
+                      expected (update-in expected [::territory/territories cong-id territory-id :territory/assignments assignment-id]
+                                          merge {:assignment/end-date end-date})]
+                  (is (= expected (apply-events events)))))))))
 
       (testing "> deleted"
         (let [events (conj events territory-deleted)
@@ -160,4 +214,40 @@
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
                      (handle-command delete-command [territory-defined] injections)))))))
-  
+
+(deftest assign-territory-test
+  (let [injections {:check-permit (fn [_permit])}
+        assign-command {:command/type :territory.command/assign-territory
+                        :command/time (Instant/now)
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :territory/id territory-id
+                        :assignment/id assignment-id
+                        :date start-date
+                        :publisher/id publisher-id}]
+
+    (testing "assigned"
+      (is (= [territory-assigned]
+             (handle-command assign-command [territory-defined] injections))))
+
+    (testing "is idempotent"
+      (is (empty? (handle-command assign-command [territory-defined territory-assigned] injections))))
+
+    (testing "cannot assign if territory is already assigned"
+      (let [assign-command (assoc assign-command :assignment/id (UUID/randomUUID))]
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:already-assigned #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000002\"]]")
+             (handle-command assign-command [territory-defined territory-assigned] injections)))))
+
+    (testing "can assign after territory has been returned"
+      (let [assignment-id2 (UUID/randomUUID)
+            assign-command (assoc assign-command :assignment/id assignment-id2)]
+        (is (= [(assoc territory-assigned :assignment/id assignment-id2)]
+               (handle-command assign-command [territory-defined territory-assigned territory-returned] injections)))))
+
+    (testing "checks permits"
+      (let [injections {:check-permit (fn [permit]
+                                        (is (= [:assign-territory cong-id territory-id publisher-id] permit))
+                                        (throw (NoPermitException. nil nil)))}]
+        (is (thrown? NoPermitException
+                     (handle-command assign-command [territory-defined] injections)))))))
