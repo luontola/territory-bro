@@ -16,18 +16,46 @@
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
             [territory-bro.ui.maps :as maps])
-  (:import (java.time LocalDate Period)))
+  (:import (java.time LocalDate Period ZonedDateTime)))
+
+(def fake-publishers ; TODO: fetch from database through DMZ
+  [{:publisher/name "Andrew"}
+   {:publisher/name "Bartholomew"}
+   {:publisher/name "James, son of Zebedee"}
+   {:publisher/name "James, son of Alphaeus"}
+   {:publisher/name "John"}
+   {:publisher/name "Matthew"}
+   {:publisher/name "Matthias"}
+   {:publisher/name "Peter"}
+   {:publisher/name "Philip"}
+   {:publisher/name "Simon"}
+   {:publisher/name "Thaddaeus"}
+   {:publisher/name "Thomas"}])
+
+(defn congregation-time ^ZonedDateTime [congregation] ; TODO: move to another namespace
+  (ZonedDateTime/now (.withZone config/*clock* (:congregation/timezone congregation))))
 
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
         territory-id (get-in request [:path-params :territory])
         congregation (dmz/get-congregation cong-id)
         territory (dmz/get-territory cong-id territory-id)
+        territory (if (some? (:territory/current-assignment territory))
+                    ;; TODO: read assignments through DMZ, enrich with publisher names (if user has permission)
+                    (update territory :territory/current-assignment assoc :publisher/name "John Doe")
+                    territory)
+        assignments (->> (vals (:territory/assignments territory))
+                         (mapv (fn [assignment]
+                                 ;; TODO: read assignments through DMZ, enrich with publisher names (if user has permission)
+                                 (assoc assignment :publisher/name "John Doe"))))
         do-not-calls (dmz/get-do-not-calls cong-id territory-id)]
     (-> {:congregation (select-keys congregation [:congregation/name])
          :territory (-> territory
+                        (dissoc :territory/assignments)
                         (dissoc :congregation/id)
                         (assoc :territory/do-not-calls do-not-calls))
+         :assignment-history assignments
+         :today (.toLocalDate (congregation-time congregation))
          :permissions {:edit-do-not-calls (dmz/allowed? [:edit-do-not-calls cong-id territory-id])
                        :share-territory-link (dmz/allowed? [:share-territory-link cong-id territory-id])}}
         (merge (map-interaction-help/model request)))))
@@ -153,7 +181,7 @@
                              :onclick "this.closest('dialog').close()"}
         "Cancel"]]]]]))
 
-(defn return-territory-dialog [{:keys [today latest-assignment]}]
+(defn return-territory-dialog [{:keys [territory today]}]
   (h/html
    [:dialog
     [:form.pure-form.pure-form-aligned
@@ -182,7 +210,7 @@
                                :type "date"
                                :value (str today)
                                :required true
-                               :min (str (:assignment/start-date latest-assignment))
+                               :min (str (:assignment/start-date (:territory/current-assignment territory)))
                                :max (str today)}]]
       [:div.pure-controls
        [:label.pure-checkbox
@@ -214,29 +242,6 @@
                              :onclick "this.closest('dialog').close()"}
         "Cancel"]]]]]))
 
-(def fake-time (LocalDate/of 2024 10 29))
-(def fake-assignment-model-assigned
-  {:today fake-time
-   :latest-assignment {:publisher/name "John Doe"
-                       :assignment/start-date (-> fake-time (.minusMonths 4) (.minusDays 18))}})
-(def fake-assignment-model-vacant
-  {:today fake-time
-   :latest-assignment {:publisher/name "John Doe"
-                       :assignment/start-date (-> fake-time (.minusMonths 4) (.minusDays 18))
-                       :assignment/end-date (-> fake-time (.minusMonths 2) (.minusDays 5))}
-   :publishers [{:publisher/name "Andrew"}
-                {:publisher/name "Bartholomew"}
-                {:publisher/name "James, son of Zebedee"}
-                {:publisher/name "James, son of Alphaeus"}
-                {:publisher/name "John"}
-                {:publisher/name "Matthew"}
-                {:publisher/name "Matthias"}
-                {:publisher/name "Peter"}
-                {:publisher/name "Philip"}
-                {:publisher/name "Simon"}
-                {:publisher/name "Thaddaeus"}
-                {:publisher/name "Thomas"}]})
-
 (defn months-difference [^LocalDate start ^LocalDate end]
   (.toTotalMonths (Period/between start end)))
 
@@ -244,13 +249,12 @@
   (h/html [:span {:style {:white-space "nowrap"}}
            s]))
 
-(defn assignment-status [{:keys [open-form? today latest-assignment] :as model}]
+(defn assignment-status [{:keys [territory open-form? today] :as model}]
   (let [styles (:TerritoryPage (css/modules))
-        start-date (:assignment/start-date latest-assignment)
-        end-date (:assignment/end-date latest-assignment)
-        assigned? (and (some? start-date)
-                       (nil? end-date))]
-    (if assigned?
+        assignment (:territory/current-assignment territory)
+        start-date (:assignment/start-date assignment)
+        last-covered (:territory/last-covered territory)]
+    (if (some? assignment)
       (h/html
        [:div#assignment-status {:hx-target "this"
                                 :hx-swap "outerHTML"
@@ -265,7 +269,7 @@
          "Return"]
         [:span {:style {:color "red"}}
          "Assigned"]
-        " to " (:publisher/name latest-assignment)
+        " to " (:publisher/name assignment)
         [:br]
         "(" (months-difference start-date today) " months, since " (nowrap start-date) ")"])
 
@@ -283,15 +287,18 @@
          "Assign"]
         [:span {:style {:color "blue"}}
          "Up for grabs"]
-        [:br]
-        "(" (months-difference end-date today) " months, since " (nowrap end-date) ")"]))))
+        (when (some? last-covered)
+          (h/html
+           [:br]
+           "(" (months-difference last-covered today) " months, since " (nowrap last-covered) ")"))]))))
 
 (def fake-assignment-model-history
   {:assignment-history []})
 
 (defn assignment-history [{:keys [assignment-history]}]
   ;; TODO: calculate rows based on assignment-history
-  (let [rows [{:type :assignment
+  (let [fake-time (LocalDate/of 2024 10 29)
+        rows [{:type :assignment
                :grid-row 1
                :grid-span 4}
               {:type :duration
@@ -412,7 +419,7 @@
           (when (:dev config/env)
             [:tr
              [:th "Status"]
-             [:td (assignment-status fake-assignment-model-assigned)]])]]]
+             [:td (assignment-status model)]])]]]
 
        (when (:share-territory-link permissions)
          [:div {:class (:actions styles)}
@@ -517,22 +524,20 @@ if (url.searchParams.has('share-key')) {
     {:middleware [dmz/wrap-db-connection]
      :get {:handler (fn [request]
                       (let [model (model! request)]
-                        (-> (assignment-status (assoc fake-assignment-model-vacant
-                                                      :open-form? true))
+                        (-> (assignment-status (assoc model :publishers fake-publishers, :open-form? true))
                             (html/response))))}
      :post {:handler (fn [request]
                        (let [model (model! request)]
-                         (-> (assignment-status fake-assignment-model-assigned)
+                         (-> (assignment-status model)
                              (html/response))))}}]
 
    ["/assignments/return"
     {:middleware [dmz/wrap-db-connection]
      :get {:handler (fn [request]
                       (let [model (model! request)]
-                        (-> (assignment-status (assoc fake-assignment-model-assigned
-                                                      :open-form? true))
+                        (-> (assignment-status (assoc model :open-form? true))
                             (html/response))))}
      :post {:handler (fn [request]
                        (let [model (model! request)]
-                         (-> (assignment-status fake-assignment-model-vacant)
+                         (-> (assignment-status (assoc model :publishers fake-publishers))
                              (html/response))))}}]])

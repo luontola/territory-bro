@@ -17,12 +17,17 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.territory-page :as territory-page])
-  (:import (java.time LocalDate)
+  (:import (java.time LocalDate LocalTime OffsetDateTime ZoneOffset)
            (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
 (def territory-id (UUID. 0 2))
-(def user-id (UUID. 0 3))
+(def assignment-id (UUID. 0 3))
+(def publisher-id (UUID. 0 4))
+(def user-id (UUID. 0 5))
+(def start-date (LocalDate/of 2000 1 2))
+(def end-date (LocalDate/of 2000 2 3))
+(def today (LocalDate/of 2000 3 4))
 (def model
   {:congregation {:congregation/name "Congregation 1"}
    :territory {:territory/id territory-id
@@ -32,6 +37,8 @@
                :territory/meta {:foo "bar"}
                :territory/location testdata/wkt-helsinki-rautatientori
                :territory/do-not-calls "the do-not-calls"}
+   :assignment-history []
+   :today today
    :permissions {:edit-do-not-calls true
                  :share-territory-link true}
    :mac? false})
@@ -44,9 +51,31 @@
                :territory/meta {:foo "bar"}
                :territory/location testdata/wkt-helsinki-rautatientori
                :territory/do-not-calls nil}
+   :assignment-history []
+   :today today
    :permissions {:edit-do-not-calls false
                  :share-territory-link true}
    :mac? false})
+
+(def untouched-model model)
+(def assigned-model
+  (let [assignment {:assignment/id assignment-id
+                    :assignment/start-date start-date
+                    :publisher/id publisher-id
+                    :publisher/name "John Doe"}]
+    (-> model
+        (update :territory assoc :territory/current-assignment assignment)
+        (assoc :assignment-history [assignment]))))
+(def returned-model
+  (let [assignment {:assignment/id assignment-id
+                    :assignment/start-date start-date
+                    :assignment/covered-dates #{end-date}
+                    :assignment/end-date end-date
+                    :publisher/id publisher-id
+                    :publisher/name "John Doe"}]
+    (-> model
+        (update :territory assoc :territory/last-covered end-date)
+        (assoc :assignment-history [assignment]))))
 
 (def test-events
   (flatten [{:event/type :congregation.event/congregation-created
@@ -62,6 +91,28 @@
              :territory/region "the region"
              :territory/meta {:foo "bar"}
              :territory/location testdata/wkt-helsinki-rautatientori}]))
+(def territory-assigned
+  {:event/type :territory.event/territory-assigned
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id assignment-id
+   :assignment/start-date start-date
+   :publisher/id publisher-id})
+(def territory-covered
+  {:event/type :territory.event/territory-covered
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id assignment-id
+   :assignment/covered-date end-date})
+(def territory-returned
+  {:event/type :territory.event/territory-returned
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id assignment-id
+   :assignment/end-date end-date})
+
+(def test-time (.toInstant (OffsetDateTime/of today LocalTime/NOON ZoneOffset/UTC)))
+(use-fixtures :once (fixed-clock-fixture test-time))
 
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id
@@ -72,6 +123,14 @@
 
           (testing "default"
             (is (= model (territory-page/model! request))))
+
+          (testing "assigned"
+            (testutil/with-events [territory-assigned]
+              (is (= assigned-model (territory-page/model! request)))))
+
+          (testing "returned & covered"
+            (testutil/with-events [territory-assigned territory-covered territory-returned]
+              (is (= returned-model (territory-page/model! request)))))
 
           (testing "demo congregation"
             (binding [config/env {:demo-congregation cong-id}]
@@ -241,42 +300,51 @@
     (is (= -1 (territory-page/months-difference (LocalDate/of 2000 2 1) (LocalDate/of 2000 1 1))))))
 
 (deftest assignment-status-test
-  (testing "vacant"
+  (testing "untouched"
     (is (= (html/normalize-whitespace
             "Assign
-             Up for grabs
-             (2 months, since 2024-08-24)")
-           (-> (territory-page/assignment-status territory-page/fake-assignment-model-vacant)
+             Up for grabs")
+           (-> (territory-page/assignment-status untouched-model)
                html/visible-text))))
 
   (testing "assigned"
     (is (= (html/normalize-whitespace
             "Return
              Assigned to John Doe
-             (4 months, since 2024-06-11)")
-           (-> (territory-page/assignment-status territory-page/fake-assignment-model-assigned)
+             (2 months, since 2000-01-02)")
+           (-> (territory-page/assignment-status assigned-model)
+               html/visible-text))))
+
+  (testing "returned"
+    (is (= (html/normalize-whitespace
+            "Assign
+             Up for grabs
+             (1 months, since 2000-02-03)")
+           (-> (territory-page/assignment-status returned-model)
                html/visible-text)))))
 
 (deftest assign-territory-dialog-test
   (is (= (html/normalize-whitespace
           "Assign territory
              Publisher []
-             Date [2024-10-29]
+             Date [2000-03-04]
            Assign territory
            Cancel")
-         (-> (territory-page/assign-territory-dialog territory-page/fake-assignment-model-vacant)
+         (-> (territory-page/assign-territory-dialog untouched-model)
+             html/visible-text)
+         (-> (territory-page/assign-territory-dialog returned-model)
              html/visible-text))))
 
 (deftest return-territory-dialog-test
   (is (= (html/normalize-whitespace
           "Return territory
-             Date [2024-10-29]
+             Date [2000-03-04]
              [true] Return the territory to storage
              [true] Mark the territory as covered
            Return territory
            Mark covered
            Cancel")
-         (-> (territory-page/return-territory-dialog territory-page/fake-assignment-model-assigned)
+         (-> (territory-page/return-territory-dialog assigned-model)
              html/visible-text))))
 
 (deftest assignment-history-test

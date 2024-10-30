@@ -38,9 +38,9 @@
         (assoc-dissoc :territory/current-assignment (->> assignments
                                                          (remove :assignment/end-date)
                                                          (first)))
-        (assoc :territory/last-covered (->> assignments
-                                            (mapcat :assignment/covered-dates)
-                                            (apply greatest))))))
+        (assoc-dissoc :territory/last-covered (->> assignments
+                                                   (mapcat :assignment/covered-dates)
+                                                   (apply greatest))))))
 
 (defmethod projection :territory.event/territory-assigned
   [state event]

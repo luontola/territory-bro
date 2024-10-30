@@ -103,7 +103,6 @@
                                    :assignment/start-date start-date
                                    :publisher/id publisher-id}
               expected (-> expected
-                           (assoc-in [::territory/territories cong-id territory-id :territory/last-covered] nil)
                            (assoc-in [::territory/territories cong-id territory-id :territory/current-assignment] expected-assignment)
                            (assoc-in [::territory/territories cong-id territory-id :territory/assignments assignment-id] expected-assignment))]
           (is (= expected (apply-events events)))
