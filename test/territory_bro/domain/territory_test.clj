@@ -251,3 +251,64 @@
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
                      (handle-command assign-command [territory-defined] injections)))))))
+
+(deftest return-territory-test
+  (let [injections {:check-permit (fn [_permit])}
+        return-command {:command/type :territory.command/return-territory
+                        :command/time (Instant/now)
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :territory/id territory-id
+                        :assignment/id assignment-id
+                        :date end-date
+                        :returning? true
+                        :covered? true}
+        only-returning-command (assoc return-command :covered? false)
+        only-mark-covered-command (assoc return-command :returning? false)]
+
+    (testing "returned & covered"
+      (is (= [territory-covered territory-returned]
+             (handle-command return-command [territory-defined territory-assigned] injections))))
+
+    (testing "only returning"
+      (is (= [territory-returned]
+             (handle-command only-returning-command [territory-defined territory-assigned] injections))))
+
+    (testing "only marking as covered"
+      (is (= [territory-covered]
+             (handle-command only-mark-covered-command [territory-defined territory-assigned] injections))))
+
+    (testing "neither returning nor marking as covered"
+      (is (empty? (handle-command (assoc return-command :returning? false, :covered? false)
+                                  [territory-defined territory-assigned] injections))))
+
+    (testing "can mark as covered multiple times, if the date is different"
+      (is (= [(assoc territory-covered :assignment/covered-date (.plusDays end-date 1))]
+             (handle-command (assoc only-mark-covered-command :date (.plusDays end-date 1))
+                             [territory-defined territory-assigned territory-covered] injections))))
+
+    (testing "is idempotent"
+      (is (empty? (handle-command return-command [territory-defined territory-assigned territory-covered territory-returned] injections))
+          "returned & covered")
+      (is (empty? (handle-command only-returning-command [territory-defined territory-assigned territory-returned] injections))
+          "only returned")
+      (is (empty? (handle-command only-mark-covered-command [territory-defined territory-assigned territory-covered] injections))
+          "only covered"))
+
+    (testing "cannot return if territory is not assigned"
+      (is (thrown-with-msg?
+           ValidationException (re-equals "[[:no-such-assignment #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000002\" #uuid \"00000000-0000-0000-0000-000000000003\"]]")
+           (handle-command return-command [territory-defined] injections))))
+
+    (testing "cannot return if assignment ID is wrong"
+      (let [return-command (assoc return-command :assignment/id (UUID. 0 0x666))]
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:no-such-assignment #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000002\" #uuid \"00000000-0000-0000-0000-000000000666\"]]")
+             (handle-command return-command [territory-defined territory-assigned] injections)))))
+
+    (testing "checks permits"
+      (let [injections {:check-permit (fn [permit]
+                                        (is (= [:assign-territory cong-id territory-id publisher-id] permit))
+                                        (throw (NoPermitException. nil nil)))}]
+        (is (thrown? NoPermitException
+                     (handle-command return-command [territory-defined territory-assigned] injections)))))))

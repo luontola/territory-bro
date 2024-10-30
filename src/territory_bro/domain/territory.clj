@@ -125,5 +125,31 @@
         :assignment/start-date start-date
         :publisher/id publisher-id}])))
 
+(defmethod command-handler :territory.command/return-territory
+  [command territory {:keys [check-permit]}]
+  (let [cong-id (:congregation/id command)
+        territory-id (:territory/id command)
+        assignment-id (:assignment/id command)
+        end-date (:date command)
+        assignment (get-in territory [:territory/assignments assignment-id])]
+    (when (nil? assignment)
+      (throw (ValidationException. [[:no-such-assignment cong-id territory-id assignment-id]])))
+    (check-permit [:assign-territory cong-id territory-id (:publisher/id assignment)])
+    (when (nil? (:assignment/end-date assignment))
+      (->> [(when (and (:covered? command)
+                       (not (contains? (:assignment/covered-dates assignment) end-date)))
+              {:event/type :territory.event/territory-covered
+               :congregation/id cong-id
+               :territory/id territory-id
+               :assignment/id assignment-id
+               :assignment/covered-date end-date})
+            (when (:returning? command)
+              {:event/type :territory.event/territory-returned
+               :congregation/id cong-id
+               :territory/id territory-id
+               :assignment/id assignment-id
+               :assignment/end-date end-date})]
+           (filterv some?)))))
+
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))
