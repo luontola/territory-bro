@@ -27,6 +27,11 @@
 
 (def conj-set (fnil conj #{}))
 
+(defn assoc-dissoc [m k v]
+  (if (some? v)
+    (assoc m k v)
+    (dissoc m k)))
+
 (defn decode-base64url [^String base64-str]
   (-> (Base64/getUrlDecoder)
       (.decode base64-str)

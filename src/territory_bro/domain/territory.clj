@@ -3,9 +3,9 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.domain.territory
-  (:require [medley.core :refer [dissoc-in]]
+  (:require [medley.core :refer [dissoc-in greatest]]
             [territory-bro.gis.gis-change :as gis-change]
-            [territory-bro.infra.util :refer [conj-set]])
+            [territory-bro.infra.util :refer [assoc-dissoc conj-set]])
   (:import (territory_bro ValidationException)))
 
 ;;;; Read model
@@ -32,22 +32,39 @@
   [state event]
   (dissoc-in state [::territories (:congregation/id event) (:territory/id event)]))
 
+(defn- update-assignment-status [territory]
+  (let [assignments (vals (:territory/assignments territory))]
+    (-> territory
+        (assoc-dissoc :territory/current-assignment (->> assignments
+                                                         (remove :assignment/end-date)
+                                                         (first)))
+        (assoc :territory/last-covered (->> assignments
+                                            (mapcat :assignment/covered-dates)
+                                            (apply greatest))))))
+
 (defmethod projection :territory.event/territory-assigned
   [state event]
-  (assoc-in state [::territories (:congregation/id event) (:territory/id event) :territory/assignments (:assignment/id event)]
-            (select-keys event [:assignment/id :assignment/start-date :publisher/id])))
+  (update-in state [::territories (:congregation/id event) (:territory/id event)]
+             (fn [territory]
+               (-> territory
+                   (assoc-in [:territory/assignments (:assignment/id event)] (select-keys event [:assignment/id :assignment/start-date :publisher/id]))
+                   (update-assignment-status)))))
 
 (defmethod projection :territory.event/territory-covered
   [state event]
-  (update-in state [::territories (:congregation/id event) (:territory/id event) :territory/assignments (:assignment/id event)]
-             (fn [assignment]
-               (update assignment :assignment/covered-dates conj-set (:assignment/covered-date event)))))
+  (update-in state [::territories (:congregation/id event) (:territory/id event)]
+             (fn [territory]
+               (-> territory
+                   (update-in [:territory/assignments (:assignment/id event) :assignment/covered-dates] conj-set (:assignment/covered-date event))
+                   (update-assignment-status)))))
 
 (defmethod projection :territory.event/territory-returned
   [state event]
-  (update-in state [::territories (:congregation/id event) (:territory/id event) :territory/assignments (:assignment/id event)]
-             (fn [assignment]
-               (assoc assignment :assignment/end-date (:assignment/end-date event)))))
+  (update-in state [::territories (:congregation/id event) (:territory/id event)]
+             (fn [territory]
+               (-> territory
+                   (assoc-in [:territory/assignments (:assignment/id event) :assignment/end-date] (:assignment/end-date event))
+                   (update-assignment-status)))))
 
 
 ;;;; Queries

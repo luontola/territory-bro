@@ -4,6 +4,7 @@
 
 (ns territory-bro.domain.territory-test
   (:require [clojure.test :refer :all]
+            [medley.core :refer [dissoc-in]]
             [territory-bro.domain.territory :as territory]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.events :as events]
@@ -98,28 +99,40 @@
 
       (testing "> assigned"
         (let [events (conj events territory-assigned)
-              expected (update-in expected [::territory/territories cong-id territory-id :territory/assignments assignment-id]
-                                  merge {:assignment/id assignment-id
-                                         :assignment/start-date start-date
-                                         :publisher/id publisher-id})]
+              expected-assignment {:assignment/id assignment-id
+                                   :assignment/start-date start-date
+                                   :publisher/id publisher-id}
+              expected (-> expected
+                           (assoc-in [::territory/territories cong-id territory-id :territory/last-covered] nil)
+                           (assoc-in [::territory/territories cong-id territory-id :territory/current-assignment] expected-assignment)
+                           (assoc-in [::territory/territories cong-id territory-id :territory/assignments assignment-id] expected-assignment))]
           (is (= expected (apply-events events)))
 
           (testing "> covered"
             (let [events (conj events territory-covered)
-                  expected (update-in expected [::territory/territories cong-id territory-id :territory/assignments assignment-id]
-                                      merge {:assignment/covered-dates #{end-date}})]
+                  expected-assignment (assoc expected-assignment :assignment/covered-dates #{end-date})
+                  expected (-> expected
+                               (assoc-in [::territory/territories cong-id territory-id :territory/last-covered] end-date)
+                               (assoc-in [::territory/territories cong-id territory-id :territory/current-assignment] expected-assignment)
+                               (assoc-in [::territory/territories cong-id territory-id :territory/assignments assignment-id] expected-assignment))]
               (is (= expected (apply-events events)))
 
               (testing "> covered many times"
-                (let [events (conj events (assoc territory-covered :assignment/covered-date (LocalDate/of 2000 2 3)))
-                      expected (update-in expected [::territory/territories cong-id territory-id :territory/assignments assignment-id]
-                                          merge {:assignment/covered-dates #{end-date (LocalDate/of 2000 2 3)}})]
+                (let [end-date2 (LocalDate/of 2000 2 3)
+                      events (conj events (assoc territory-covered :assignment/covered-date end-date2))
+                      expected-assignment (assoc expected-assignment :assignment/covered-dates #{end-date end-date2})
+                      expected (-> expected
+                                   (assoc-in [::territory/territories cong-id territory-id :territory/last-covered] end-date2)
+                                   (assoc-in [::territory/territories cong-id territory-id :territory/current-assignment] expected-assignment)
+                                   (assoc-in [::territory/territories cong-id territory-id :territory/assignments assignment-id] expected-assignment))]
                   (is (= expected (apply-events events)))))
 
               (testing "> returned"
                 (let [events (conj events territory-returned)
-                      expected (update-in expected [::territory/territories cong-id territory-id :territory/assignments assignment-id]
-                                          merge {:assignment/end-date end-date})]
+                      expected-assignment (assoc expected-assignment :assignment/end-date end-date)
+                      expected (-> expected
+                                   (dissoc-in [::territory/territories cong-id territory-id :territory/current-assignment])
+                                   (assoc-in [::territory/territories cong-id territory-id :territory/assignments assignment-id] expected-assignment))]
                   (is (= expected (apply-events events)))))))))
 
       (testing "> deleted"
