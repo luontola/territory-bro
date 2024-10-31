@@ -6,7 +6,8 @@
   (:require [medley.core :refer [dissoc-in greatest]]
             [territory-bro.gis.gis-change :as gis-change]
             [territory-bro.infra.util :refer [assoc-dissoc conj-set]])
-  (:import (territory_bro ValidationException)))
+  (:import (java.time LocalDate)
+           (territory_bro ValidationException)))
 
 ;;;; Read model
 
@@ -148,11 +149,15 @@
   (let [cong-id (:congregation/id command)
         territory-id (:territory/id command)
         assignment-id (:assignment/id command)
-        end-date (:date command)
+        end-date ^LocalDate (:date command)
         assignment (get-in territory [:territory/assignments assignment-id])]
     (when (nil? assignment)
       (throw (ValidationException. [[:no-such-assignment cong-id territory-id assignment-id]])))
     (check-permit [:assign-territory cong-id territory-id (:publisher/id assignment)])
+    (doseq [^LocalDate date (conj (:assignment/covered-dates assignment)
+                                  (:assignment/start-date assignment))]
+      (when (-> end-date (.isBefore date))
+        (throw (ValidationException. [[:invalid-end-date]]))))
     (when (nil? (:assignment/end-date assignment))
       (->> [(when (and (:covered? command)
                        (not (contains? (:assignment/covered-dates assignment) end-date)))

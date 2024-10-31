@@ -25,9 +25,9 @@
 (def assignment-id (UUID. 0 3))
 (def publisher-id (UUID. 0 4))
 (def user-id (UUID. 0 5))
-(def start-date (LocalDate/of 2000 1 2))
-(def end-date (LocalDate/of 2000 2 3))
-(def today (LocalDate/of 2000 3 4))
+(def start-date (LocalDate/of 2000 1 1))
+(def end-date (LocalDate/of 2000 2 1))
+(def today (LocalDate/of 2000 3 1))
 (def model
   {:congregation {:congregation/name "Congregation 1"}
    :territory {:territory/id territory-id
@@ -311,7 +311,7 @@
     (is (= (html/normalize-whitespace
             "Return
              Assigned to John Doe
-             (2 months, since 2000-01-02)")
+             (2 months, since 2000-01-01)")
            (-> (territory-page/assignment-status assigned-model)
                html/visible-text))))
 
@@ -319,7 +319,7 @@
     (is (= (html/normalize-whitespace
             "Assign
              Up for grabs
-             (1 months, since 2000-02-03)")
+             (1 months, since 2000-02-01)")
            (-> (territory-page/assignment-status returned-model)
                html/visible-text)))))
 
@@ -327,25 +327,51 @@
   (is (= (html/normalize-whitespace
           "Assign territory
              Publisher []
-             Date [2000-03-04]
+             Date [2000-03-01]
            Assign territory
            Cancel")
          (-> (territory-page/assign-territory-dialog untouched-model)
              html/visible-text)
          (-> (territory-page/assign-territory-dialog returned-model)
-             html/visible-text))))
+             html/visible-text)))
+
+  (testing "date cannot be in the future"
+    (let [model (assoc assigned-model :today (LocalDate/of 2000 3 15))]
+      (is (str/includes?
+           (-> (territory-page/assign-territory-dialog model))
+           " max=\"2000-03-15\"")))))
 
 (deftest return-territory-dialog-test
   (is (= (html/normalize-whitespace
           "Return territory
-             Date [2000-03-04]
+             Date [2000-03-01]
              [true] Return the territory to storage
              [true] Mark the territory as covered
            Return territory
            Mark covered
            Cancel")
          (-> (territory-page/return-territory-dialog assigned-model)
-             html/visible-text))))
+             html/visible-text)))
+
+  (testing "date cannot be in the future"
+    (let [model (assoc assigned-model :today (LocalDate/of 2000 3 15))]
+      (is (str/includes?
+           (-> (territory-page/return-territory-dialog model))
+           " max=\"2000-03-15\""))))
+
+  (testing "date cannot be before start date"
+    (let [model (assoc-in assigned-model [:territory :territory/current-assignment :assignment/start-date]
+                          (LocalDate/of 2000 1 15))]
+      (is (str/includes?
+           (-> (territory-page/return-territory-dialog model))
+           " min=\"2000-01-15\""))))
+
+  (testing "date cannot be before previous covered dates"
+    (let [model (assoc-in assigned-model [:territory :territory/current-assignment :assignment/covered-dates]
+                          #{(LocalDate/of 2000 1 15)})]
+      (is (str/includes?
+           (-> (territory-page/return-territory-dialog model))
+           " min=\"2000-01-15\"")))))
 
 (deftest assignment-history-test
   (is (= (html/normalize-whitespace

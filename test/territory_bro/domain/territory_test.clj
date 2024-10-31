@@ -19,8 +19,8 @@
 (def publisher-id (UUID. 0 4))
 (def user-id (UUID. 0 5))
 (def gis-change-id 42)
-(def start-date (LocalDate/of 2000 1 1))
-(def end-date (LocalDate/of 2000 1 31))
+(def ^LocalDate start-date (LocalDate/of 2000 1 1))
+(def ^LocalDate end-date (LocalDate/of 2000 1 31))
 
 (def territory-defined
   {:event/type :territory.event/territory-defined
@@ -268,6 +268,16 @@
         (is (= [(assoc territory-assigned :assignment/id assignment-id2)]
                (handle-command assign-command [territory-defined territory-assigned territory-returned] injections)))))
 
+    (testing "can enter historical assignments in any order; start date can be before previous assignments"
+      (let [assignment-id2 (UUID/randomUUID)
+            assign-command (assoc assign-command
+                                  :date (.minusYears start-date 1)
+                                  :assignment/id assignment-id2)]
+        (is (= [(assoc territory-assigned
+                       :assignment/start-date (.minusYears start-date 1)
+                       :assignment/id assignment-id2)]
+               (handle-command assign-command [territory-defined territory-assigned territory-returned] injections)))))
+
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
                                         (is (= [:assign-territory cong-id territory-id publisher-id] permit))
@@ -317,6 +327,24 @@
           "only returned")
       (is (empty? (handle-command only-mark-covered-command [territory-defined territory-assigned territory-covered] injections))
           "only covered"))
+
+    (testing "end date can be same as start date"
+      (let [return-command (assoc return-command :date start-date)]
+        (is (= [(assoc territory-covered :assignment/covered-date start-date)
+                (assoc territory-returned :assignment/end-date start-date)]
+               (handle-command return-command [territory-defined territory-assigned] injections)))))
+
+    (testing "end date cannot be before start date"
+      (let [return-command (assoc return-command :date (.minusDays start-date 1))]
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:invalid-end-date]]")
+             (handle-command return-command [territory-defined territory-assigned] injections)))))
+
+    (testing "end date cannot be before any previous coverage date"
+      (let [return-command (assoc return-command :date (.minusDays end-date 1))]
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:invalid-end-date]]")
+             (handle-command return-command [territory-defined territory-assigned territory-covered] injections)))))
 
     (testing "cannot return if territory is not assigned"
       (is (thrown-with-msg?

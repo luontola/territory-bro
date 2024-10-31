@@ -4,6 +4,7 @@
 
 (ns territory-bro.ui.territory-page
   (:require [clojure.string :as str]
+            [medley.core :refer [greatest]]
             [ring.util.response :as response]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.gis.geometry :as geometry]
@@ -210,7 +211,9 @@
                                :type "date"
                                :value (str today)
                                :required true
-                               :min (str (:assignment/start-date (:territory/current-assignment territory)))
+                               :min (let [assignment (:territory/current-assignment territory)]
+                                      (str (apply greatest (conj (:assignment/covered-dates assignment)
+                                                                 (:assignment/start-date assignment)))))
                                :max (str today)}]]
       [:div.pure-controls
        [:label.pure-checkbox
