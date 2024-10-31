@@ -129,12 +129,13 @@
         assignment-id (:assignment/id command)
         start-date (:date command)
         publisher-id (:publisher/id command)
+        current-assignment-id (:assignment/id (:territory/current-assignment territory))
         assignments (:territory/assignments territory)]
     (check-permit [:assign-territory cong-id territory-id publisher-id])
+    (when (and (some? current-assignment-id)
+               (not= assignment-id current-assignment-id))
+      (throw (ValidationException. [[:already-assigned cong-id territory-id]])))
     (when-not (contains? assignments assignment-id)
-      (when (some #(nil? (:assignment/end-date %)) ; TODO: simplify checking latest assignment
-                  (vals assignments))
-        (throw (ValidationException. [[:already-assigned cong-id territory-id]])))
       [{:event/type :territory.event/territory-assigned
         :congregation/id cong-id
         :territory/id territory-id
