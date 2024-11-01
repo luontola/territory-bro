@@ -45,17 +45,16 @@
                     ;; TODO: read assignments through DMZ, enrich with publisher names (if user has permission)
                     (update territory :territory/current-assignment assoc :publisher/name "John Doe")
                     territory)
-        assignments (->> (vals (:territory/assignments territory))
-                         (mapv (fn [assignment]
-                                 ;; TODO: read assignments through DMZ, enrich with publisher names (if user has permission)
-                                 (assoc assignment :publisher/name "John Doe"))))
+        assignment-history (->> (dmz/get-territory-assignment-history cong-id territory-id)
+                                (mapv (fn [assignment]
+                                        ;; TODO: read assignments through DMZ, enrich with publisher names (if user has permission)
+                                        (assoc assignment :publisher/name "John Doe"))))
         do-not-calls (dmz/get-do-not-calls cong-id territory-id)]
     (-> {:congregation (select-keys congregation [:congregation/name])
          :territory (-> territory
-                        (dissoc :territory/assignments)
                         (dissoc :congregation/id)
                         (assoc :territory/do-not-calls do-not-calls))
-         :assignment-history assignments
+         :assignment-history assignment-history
          :today (.toLocalDate (congregation-time congregation))
          :permissions {:edit-do-not-calls (dmz/allowed? [:edit-do-not-calls cong-id territory-id])
                        :share-territory-link (dmz/allowed? [:share-territory-link cong-id territory-id])}}

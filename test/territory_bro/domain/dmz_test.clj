@@ -19,6 +19,7 @@
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil])
   (:import (clojure.lang ExceptionInfo)
+           (java.time LocalDate)
            (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
@@ -29,9 +30,14 @@
 (def congregation-boundary-id (UUID. 0 6))
 (def region-id (UUID. 0 7))
 (def card-minimap-viewport-id (UUID. 0 8))
-(def share-id (UUID. 0 9))
+(def assignment-id (UUID. 0 9))
+(def publisher-id (UUID. 0 10))
+(def share-id (UUID. 0 11))
 (def share-key "abc123")
 (def demo-share-key "demo-AAAAAAAAAAAAAAAAAAAABA")
+(def ^LocalDate start-date (LocalDate/of 2000 1 1))
+(def ^LocalDate covered-date (LocalDate/of 2000 2 1))
+(def ^LocalDate end-date (LocalDate/of 2000 3 1))
 
 (def congregation-created
   {:event/type :congregation.event/congregation-created
@@ -85,6 +91,26 @@
    :card-minimap-viewport/id card-minimap-viewport-id
    :card-minimap-viewport/location testdata/wkt-polygon})
 
+(def territory-assigned
+  {:event/type :territory.event/territory-assigned
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id assignment-id
+   :assignment/start-date start-date
+   :publisher/id publisher-id})
+(def territory-covered
+  {:event/type :territory.event/territory-covered
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id assignment-id
+   :assignment/covered-date covered-date})
+(def territory-returned ; TODO: not needed? it reduces the amount of state (no current assignment)
+  {:event/type :territory.event/territory-returned
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id assignment-id
+   :assignment/end-date end-date})
+
 (def share-created
   {:event/type :share.event/share-created
    :share/id share-id
@@ -104,6 +130,8 @@
             congregation-boundary-defined
             region-defined
             card-minimap-viewport-defined
+            territory-assigned
+            territory-covered
             share-created]))
 
 (defn- apply-share-opened [state]
@@ -298,7 +326,12 @@
                   :territory/addresses "the addresses"
                   :territory/region "the region"
                   :territory/meta {:foo "bar"}
-                  :territory/location testdata/wkt-helsinki-rautatientori}
+                  :territory/location testdata/wkt-helsinki-rautatientori
+                  :territory/current-assignment {:assignment/id assignment-id
+                                                 :assignment/start-date start-date
+                                                 :assignment/covered-dates #{covered-date}
+                                                 :publisher/id publisher-id}
+                  :territory/last-covered covered-date}
         demo-expected {:congregation/id "demo" ; changed
                        :territory/id territory-id
                        :territory/number "123"
@@ -367,7 +400,12 @@
                    :territory/addresses "the addresses"
                    :territory/region "the region"
                    :territory/meta {:foo "bar"}
-                   :territory/location testdata/wkt-helsinki-rautatientori}
+                   :territory/location testdata/wkt-helsinki-rautatientori
+                   :territory/current-assignment {:assignment/id assignment-id
+                                                  :assignment/start-date start-date
+                                                  :assignment/covered-dates #{covered-date}
+                                                  :publisher/id publisher-id}
+                   :territory/last-covered covered-date}
                   {:territory/id territory-id2
                    :territory/number "456"
                    :territory/addresses "the addresses"
@@ -440,6 +478,39 @@
         (testing "opened a share"
           (binding [dmz/*state* (apply-share-opened dmz/*state*)]
             (is (= territories (dmz/enrich-territory-loans cong-id territories)))))))))
+
+(deftest get-territory-assignment-history-test
+  (let [expected [{:assignment/id assignment-id
+                   :assignment/start-date start-date
+                   :assignment/covered-dates #{covered-date}
+                   :publisher/id publisher-id}]
+        demo-expected nil] ; TODO: generate fake assignment history
+
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/get-territory-assignment-history cong-id territory-id)))))
+
+    (testutil/with-super-user
+      (testing "super user"
+        (is (= expected (dmz/get-territory-assignment-history cong-id territory-id)))))
+
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (thrown-match? ExceptionInfo access-denied
+                           (dmz/get-territory-assignment-history cong-id territory-id)))))
+
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (thrown-match? ExceptionInfo not-logged-in
+                           (dmz/get-territory-assignment-history cong-id territory-id))))
+
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= demo-expected (dmz/get-territory-assignment-history "demo" territory-id)))))
+
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (nil? (dmz/get-territory-assignment-history cong-id territory-id))))))))
 
 
 ;;;; Shares

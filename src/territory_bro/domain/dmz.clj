@@ -220,9 +220,13 @@
 (defn get-territory [cong-id territory-id]
   (when-not (view-territory? cong-id territory-id)
     (access-denied!))
-  (let [territory (territory/get-unrestricted-territory *state* (coerce-demo-cong-id cong-id) territory-id)]
+  (let [territory (-> (territory/get-unrestricted-territory *state* (coerce-demo-cong-id cong-id) territory-id)
+                      (dissoc :territory/assignments))]
     (if (= "demo" cong-id)
-      (assoc territory :congregation/id "demo")
+      (-> territory
+          (assoc :congregation/id "demo")
+          (dissoc :territory/current-assignment) ; TODO: generate fake assignment history
+          (dissoc :territory/last-covered))
       territory)))
 
 (defn get-do-not-calls [cong-id territory-id]
@@ -238,7 +242,8 @@
          (allowed? [:view-congregation-temporarily cong-id])
          (for [[_ _ territory-id] (permissions/match *state* (auth/current-user-id) [:view-territory cong-id '*])]
            (get-in *state* [::territory/territories cong-id territory-id])))
-       (util/natural-sort-by :territory/number)))
+       (util/natural-sort-by :territory/number)
+       (mapv #(dissoc % :territory/assignments))))
 
 (defn enrich-territory-loans [cong-id territories]
   (if (allowed? [:view-congregation cong-id])
@@ -246,6 +251,16 @@
       (loan/enrich-territory-loans! territories loans-csv-url)
       territories)
     territories))
+
+(defn get-territory-assignment-history [cong-id territory-id]
+  (when-not (view-territory? cong-id territory-id)
+    (access-denied!))
+  (when (allowed? [:view-congregation cong-id])
+    (if (= "demo" cong-id)
+      nil ; TODO: generate fake assignment history
+      (let [territory (territory/get-unrestricted-territory *state* (coerce-demo-cong-id cong-id) territory-id)]
+        (->> (vals (:territory/assignments territory))
+             (sort-by :assignment/start-date))))))
 
 
 ;;;; Shares
