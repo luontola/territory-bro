@@ -7,6 +7,7 @@
             [clojure.test :refer :all]
             [net.cgrand.enlive-html :as en]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.publisher :as publisher]
@@ -59,7 +60,7 @@
                :territory/location testdata/wkt-helsinki-rautatientori
                :territory/do-not-calls nil}
    :assignment-history nil ; TODO: generate fake assignment history
-   :publishers nil
+   :publishers dmz/demo-publishers
    :today today
    :permissions {:edit-do-not-calls false
                  :share-territory-link true}

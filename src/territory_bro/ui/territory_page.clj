@@ -20,20 +20,6 @@
             [territory-bro.ui.maps :as maps])
   (:import (java.time LocalDate Period ZonedDateTime)))
 
-(def fake-publishers ; TODO: use as demo publishers
-  [{:publisher/name "Andrew"}
-   {:publisher/name "Bartholomew"}
-   {:publisher/name "James, son of Zebedee"}
-   {:publisher/name "James, son of Alphaeus"}
-   {:publisher/name "John"}
-   {:publisher/name "Matthew"}
-   {:publisher/name "Matthias"}
-   {:publisher/name "Peter"}
-   {:publisher/name "Philip"}
-   {:publisher/name "Simon"}
-   {:publisher/name "Thaddaeus"}
-   {:publisher/name "Thomas"}])
-
 (defn congregation-time ^ZonedDateTime [congregation] ; TODO: move to another namespace
   (ZonedDateTime/now (.withZone config/*clock* (:congregation/timezone congregation))))
 

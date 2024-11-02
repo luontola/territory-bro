@@ -218,17 +218,38 @@
 
 ;;;; Publishers
 
+(def ^:private demo-publishers-by-id
+  (reduce (fn [m publisher]
+            (let [publisher-id (UUID/randomUUID)]
+              (assoc m publisher-id (assoc publisher
+                                           :congregation/id "demo"
+                                           :publisher/id publisher-id))))
+          {}
+          [{:publisher/name "Andrew"}
+           {:publisher/name "Bartholomew"}
+           {:publisher/name "James, son of Alphaeus"}
+           {:publisher/name "James, son of Zebedee"}
+           {:publisher/name "John, son of Zebedee"}
+           {:publisher/name "Matthew"}
+           {:publisher/name "Matthias"}
+           {:publisher/name "Philip"}
+           {:publisher/name "Simon Peter"}
+           {:publisher/name "Simon, the Cananaean"}
+           {:publisher/name "Thaddaeus"}
+           {:publisher/name "Thomas"}]))
+(def demo-publishers (vals demo-publishers-by-id))
+
 (defn list-publishers [cong-id]
   (when (allowed? [:view-congregation cong-id])
     (if (= "demo" cong-id)
-      nil ; TODO: generate fake publishers
+      demo-publishers
       (publisher/list-publishers *conn* cong-id))))
 
 (defn get-publisher [cong-id publisher-id]
   (when (or (allowed? [:view-congregation cong-id])
             (allowed? [:view-congregation-temporarily cong-id]))
     (if (= "demo" cong-id)
-      nil ; TODO: generate fake publishers
+      (get demo-publishers-by-id publisher-id)
       (publisher/get-by-id *conn* cong-id publisher-id))))
 
 

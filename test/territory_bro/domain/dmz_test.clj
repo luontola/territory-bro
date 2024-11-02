@@ -3,7 +3,8 @@
 ;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 (ns territory-bro.domain.dmz-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [matcher-combinators.matchers :as m]
             [matcher-combinators.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
@@ -331,8 +332,7 @@
 ;;;; Publishers
 
 (deftest list-publishers-test
-  (let [expected [test-publisher]
-        demo-expected nil] ; TODO: generate fake publishers
+  (let [expected [test-publisher]]
 
     (testutil/with-user-id user-id
       (testing "full permissions"
@@ -352,15 +352,21 @@
 
       (testing "demo congregation"
         (binding [config/env env-with-demo]
-          (is (= demo-expected (dmz/list-publishers "demo")))))
+          (let [publishers (dmz/list-publishers "demo")]
+            (is (not (empty? publishers)))
+            (is (= dmz/demo-publishers publishers))
+            (doseq [publisher publishers]
+              (is (= #{:congregation/id :publisher/id :publisher/name} (set (keys publisher))))
+              (is (= "demo" (:congregation/id publisher)))
+              (is (uuid? (:publisher/id publisher)))
+              (is (not (str/blank? (:publisher/name publisher))))))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
           (is (nil? (dmz/list-publishers cong-id))))))))
 
 (deftest get-publisher-test
-  (let [expected test-publisher
-        demo-expected nil] ; TODO: generate fake publishers
+  (let [expected test-publisher]
 
     (testutil/with-user-id user-id
       (testing "full permissions"
@@ -380,7 +386,13 @@
 
       (testing "demo congregation"
         (binding [config/env env-with-demo]
-          (is (= demo-expected (dmz/get-publisher "demo" publisher-id)))))
+          (let [publisher-id (:publisher/id (first dmz/demo-publishers))
+                publisher (dmz/get-publisher "demo" publisher-id)]
+            (is (uuid? publisher-id))
+            (is (some? publisher))
+            (is (= "demo" (:congregation/id publisher)))
+            (is (= publisher-id (:publisher/id publisher)))
+            (is (not (str/blank? (:publisher/name publisher)))))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -492,7 +504,7 @@
                    :territory/location testdata/wkt-helsinki-kauppatori}]
         demo-expected (-> expected
                           (replace-in [0 :congregation/id] cong-id "demo")
-                          (replace-in [0 :territory/current-assignment :publisher/name] "John Doe" nil) ; TODO: generate fake publishers
+                          (replace-in [0 :territory/current-assignment :publisher/name] "John Doe" nil) ; TODO: generate fake assignment history
                           (replace-in [1 :congregation/id] cong-id "demo"))]
 
     (testutil/with-user-id user-id
