@@ -11,6 +11,7 @@
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.loan :as loan]
+            [territory-bro.domain.publisher :as publisher]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
@@ -315,6 +316,80 @@
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
           (is (thrown-match? ExceptionInfo not-logged-in
                              (dmz/download-qgis-project cong-id))))))))
+
+
+;;;; Publishers
+
+(def test-publisher
+  {:congregation/id cong-id
+   :publisher/id publisher-id
+   :publisher/name "John Doe"})
+(def test-publishers-by-id {cong-id {publisher-id test-publisher}})
+
+(defmacro with-test-publishers [& body]
+  `(binding [publisher/list-publishers (fn [_conn# cong-id#]
+                                         (vals (get test-publishers-by-id cong-id#)))
+             publisher/get-by-id (fn [_conn# cong-id# publisher-id#]
+                                   (get-in test-publishers-by-id [cong-id# publisher-id#]))]
+     ~@body))
+
+(deftest list-publishers-test
+  (let [expected [test-publisher]
+        demo-expected nil] ; TODO: generate fake publishers
+    (with-test-publishers
+
+      (testutil/with-user-id user-id
+        (testing "full permissions"
+          (is (= expected (dmz/list-publishers cong-id)))))
+
+      (testutil/with-super-user
+        (testing "super user"
+          (is (= expected (dmz/list-publishers cong-id)))))
+
+      (testutil/with-user-id (UUID. 0 0x666)
+        (testing "no permissions"
+          (is (nil? (dmz/list-publishers cong-id)))))
+
+      (testutil/with-anonymous-user
+        (testing "anonymous"
+          (is (nil? (dmz/list-publishers cong-id))))
+
+        (testing "demo congregation"
+          (binding [config/env env-with-demo]
+            (is (= demo-expected (dmz/list-publishers "demo")))))
+
+        (testing "opened a share"
+          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+            (is (nil? (dmz/list-publishers cong-id)))))))))
+
+(deftest get-publisher-test
+  (let [expected test-publisher
+        demo-expected nil] ; TODO: generate fake publishers
+    (with-test-publishers
+
+      (testutil/with-user-id user-id
+        (testing "full permissions"
+          (is (= expected (dmz/get-publisher cong-id publisher-id)))))
+
+      (testutil/with-super-user
+        (testing "super user"
+          (is (= expected (dmz/get-publisher cong-id publisher-id)))))
+
+      (testutil/with-user-id (UUID. 0 0x666)
+        (testing "no permissions"
+          (is (nil? (dmz/get-publisher cong-id publisher-id)))))
+
+      (testutil/with-anonymous-user
+        (testing "anonymous"
+          (is (nil? (dmz/get-publisher cong-id publisher-id))))
+
+        (testing "demo congregation"
+          (binding [config/env env-with-demo]
+            (is (= demo-expected (dmz/get-publisher "demo" publisher-id)))))
+
+        (testing "opened a share"
+          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+            (is (nil? (dmz/get-publisher cong-id publisher-id)))))))))
 
 
 ;;;; Territories

@@ -14,11 +14,11 @@
      :publisher/id (:id row)
      :publisher/name (:name row)}))
 
-(defn list-publishers [conn cong-id]
+(defn ^:dynamic list-publishers [conn cong-id]
   (->> (db/query! conn queries :list-publishers {:congregation cong-id})
        (mapv format-publisher)))
 
-(defn get-by-id [conn cong-id publisher-id]
+(defn ^:dynamic get-by-id [conn cong-id publisher-id]
   (format-publisher (db/query! conn queries :get-publisher {:congregation cong-id
                                                             :id publisher-id})))
 

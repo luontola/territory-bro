@@ -11,6 +11,7 @@
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.loan :as loan]
+            [territory-bro.domain.publisher :as publisher]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
@@ -213,6 +214,21 @@
                                       :database-username (:gis-user/username gis-user)
                                       :database-password (:gis-user/password gis-user)})
      :filename (qgis/project-file-name (:congregation/name congregation))}))
+
+
+;;;; Publishers
+
+(defn list-publishers [cong-id]
+  (when (allowed? [:view-congregation cong-id])
+    (if (= "demo" cong-id)
+      nil ; TODO: generate fake publishers
+      (publisher/list-publishers *conn* cong-id))))
+
+(defn get-publisher [cong-id publisher-id]
+  (when (allowed? [:view-congregation cong-id])
+    (if (= "demo" cong-id)
+      nil ; TODO: generate fake publishers
+      (publisher/get-by-id *conn* cong-id publisher-id))))
 
 
 ;;;; Territories
