@@ -18,7 +18,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.test.fixtures :refer :all]
-            [territory-bro.test.testutil :as testutil])
+            [territory-bro.test.testutil :as testutil :refer [replace-in]])
   (:import (clojure.lang ExceptionInfo)
            (java.time LocalDate)
            (java.util UUID)))
@@ -39,6 +39,12 @@
 (def ^LocalDate start-date (LocalDate/of 2000 1 1))
 (def ^LocalDate covered-date (LocalDate/of 2000 2 1))
 (def ^LocalDate end-date (LocalDate/of 2000 3 1))
+
+(def test-publisher
+  {:congregation/id cong-id
+   :publisher/id publisher-id
+   :publisher/name "John Doe"})
+(def test-publishers-by-id {cong-id {publisher-id test-publisher}})
 
 (def congregation-created
   {:event/type :congregation.event/congregation-created
@@ -157,7 +163,11 @@
 (def env-with-demo (assoc env :demo-congregation cong-id))
 
 (use-fixtures :once (fn [f]
-                      (binding [config/env env]
+                      (binding [config/env env
+                                publisher/list-publishers (fn [_conn cong-id]
+                                                            (vals (get test-publishers-by-id cong-id)))
+                                publisher/get-by-id (fn [_conn cong-id publisher-id]
+                                                      (get-in test-publishers-by-id [cong-id publisher-id]))]
                         (testutil/with-events test-events
                           (f)))))
 
@@ -320,76 +330,65 @@
 
 ;;;; Publishers
 
-(def test-publisher
-  {:congregation/id cong-id
-   :publisher/id publisher-id
-   :publisher/name "John Doe"})
-(def test-publishers-by-id {cong-id {publisher-id test-publisher}})
-
-(defmacro with-test-publishers [& body]
-  `(binding [publisher/list-publishers (fn [_conn# cong-id#]
-                                         (vals (get test-publishers-by-id cong-id#)))
-             publisher/get-by-id (fn [_conn# cong-id# publisher-id#]
-                                   (get-in test-publishers-by-id [cong-id# publisher-id#]))]
-     ~@body))
-
 (deftest list-publishers-test
   (let [expected [test-publisher]
         demo-expected nil] ; TODO: generate fake publishers
-    (with-test-publishers
 
-      (testutil/with-user-id user-id
-        (testing "full permissions"
-          (is (= expected (dmz/list-publishers cong-id)))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/list-publishers cong-id)))))
 
-      (testutil/with-super-user
-        (testing "super user"
-          (is (= expected (dmz/list-publishers cong-id)))))
+    (testutil/with-super-user
+      (testing "super user"
+        (is (= expected (dmz/list-publishers cong-id)))))
 
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
-          (is (nil? (dmz/list-publishers cong-id)))))
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (nil? (dmz/list-publishers cong-id)))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (nil? (dmz/list-publishers cong-id))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (nil? (dmz/list-publishers cong-id))))
 
-        (testing "demo congregation"
-          (binding [config/env env-with-demo]
-            (is (= demo-expected (dmz/list-publishers "demo")))))
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= demo-expected (dmz/list-publishers "demo")))))
 
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (nil? (dmz/list-publishers cong-id)))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (nil? (dmz/list-publishers cong-id))))))))
 
 (deftest get-publisher-test
   (let [expected test-publisher
         demo-expected nil] ; TODO: generate fake publishers
-    (with-test-publishers
 
-      (testutil/with-user-id user-id
-        (testing "full permissions"
-          (is (= expected (dmz/get-publisher cong-id publisher-id)))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/get-publisher cong-id publisher-id)))))
 
-      (testutil/with-super-user
-        (testing "super user"
-          (is (= expected (dmz/get-publisher cong-id publisher-id)))))
+    (testutil/with-super-user
+      (testing "super user"
+        (is (= expected (dmz/get-publisher cong-id publisher-id)))))
 
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
-          (is (nil? (dmz/get-publisher cong-id publisher-id)))))
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (nil? (dmz/get-publisher cong-id publisher-id)))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (nil? (dmz/get-publisher cong-id publisher-id))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (nil? (dmz/get-publisher cong-id publisher-id))))
 
-        (testing "demo congregation"
-          (binding [config/env env-with-demo]
-            (is (= demo-expected (dmz/get-publisher "demo" publisher-id)))))
+      (testing "demo congregation"
+        (binding [config/env env-with-demo]
+          (is (= demo-expected (dmz/get-publisher "demo" publisher-id)))))
 
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (nil? (dmz/get-publisher cong-id publisher-id)))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          ;; When a publisher opens a shared link, it is beneficial for them to see
+          ;; if the territory has accidentally been assigned to someone other than them.
+          ;; They should, however, not be allowed to see the full assignment history.
+          ;; That permission check needs to be tightened in the caller of dmz/get-publisher.
+          (is (= expected (dmz/get-publisher cong-id publisher-id))))))))
 
 
 ;;;; Territories
@@ -405,7 +404,8 @@
                   :territory/current-assignment {:assignment/id assignment-id
                                                  :assignment/start-date start-date
                                                  :assignment/covered-dates #{covered-date}
-                                                 :publisher/id publisher-id}
+                                                 :publisher/id publisher-id
+                                                 :publisher/name "John Doe"}
                   :territory/last-covered covered-date}
         demo-expected {:congregation/id "demo" ; changed
                        :territory/id territory-id
@@ -470,7 +470,8 @@
             (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))))))
 
 (deftest list-territories-test
-  (let [expected [{:territory/id territory-id
+  (let [expected [{:congregation/id cong-id
+                   :territory/id territory-id
                    :territory/number "123"
                    :territory/addresses "the addresses"
                    :territory/region "the region"
@@ -479,14 +480,20 @@
                    :territory/current-assignment {:assignment/id assignment-id
                                                   :assignment/start-date start-date
                                                   :assignment/covered-dates #{covered-date}
-                                                  :publisher/id publisher-id}
+                                                  :publisher/id publisher-id
+                                                  :publisher/name "John Doe"}
                    :territory/last-covered covered-date}
-                  {:territory/id territory-id2
+                  {:congregation/id cong-id
+                   :territory/id territory-id2
                    :territory/number "456"
                    :territory/addresses "the addresses"
                    :territory/region "the region"
                    :territory/meta {:foo "bar"}
-                   :territory/location testdata/wkt-helsinki-kauppatori}]]
+                   :territory/location testdata/wkt-helsinki-kauppatori}]
+        demo-expected (-> expected
+                          (replace-in [0 :congregation/id] cong-id "demo")
+                          (replace-in [0 :territory/current-assignment :publisher/name] "John Doe" nil) ; TODO: generate fake publishers
+                          (replace-in [1 :congregation/id] cong-id "demo"))]
 
     (testutil/with-user-id user-id
       (testing "full permissions"
@@ -506,7 +513,7 @@
 
       (testing "demo congregation"
         (binding [config/env env-with-demo]
-          (is (= expected (dmz/list-territories "demo")))))
+          (is (= demo-expected (dmz/list-territories "demo")))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -558,7 +565,8 @@
   (let [expected [{:assignment/id assignment-id
                    :assignment/start-date start-date
                    :assignment/covered-dates #{covered-date}
-                   :publisher/id publisher-id}]
+                   :publisher/id publisher-id
+                   :publisher/name "John Doe"}]
         demo-expected nil] ; TODO: generate fake assignment history
 
     (testutil/with-user-id user-id

@@ -41,14 +41,7 @@
         territory-id (get-in request [:path-params :territory])
         congregation (dmz/get-congregation cong-id)
         territory (dmz/get-territory cong-id territory-id)
-        territory (if (some? (:territory/current-assignment territory))
-                    ;; TODO: read assignments through DMZ, enrich with publisher names (if user has permission)
-                    (update territory :territory/current-assignment assoc :publisher/name "John Doe")
-                    territory)
-        assignment-history (->> (dmz/get-territory-assignment-history cong-id territory-id)
-                                (mapv (fn [assignment]
-                                        ;; TODO: read assignments through DMZ, enrich with publisher names (if user has permission)
-                                        (assoc assignment :publisher/name "John Doe"))))
+        assignment-history (dmz/get-territory-assignment-history cong-id territory-id)
         do-not-calls (dmz/get-do-not-calls cong-id territory-id)]
     (-> {:congregation (select-keys congregation [:congregation/name])
          :territory (-> territory

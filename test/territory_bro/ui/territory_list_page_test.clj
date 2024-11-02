@@ -25,7 +25,8 @@
 (def territory-id (UUID. 0 1))
 (def model
   {:congregation-boundary testdata/wkt-helsinki
-   :territories [{:territory/id territory-id
+   :territories [{:congregation/id cong-id
+                  :territory/id territory-id
                   :territory/number "123"
                   :territory/addresses "the addresses"
                   :territory/region "the region"
@@ -39,8 +40,9 @@
   (update-in model-loans-enabled [:territories 0] merge {:territory/loaned? true
                                                          :territory/staleness 7}))
 (def demo-model
-  (assoc model
-         :permissions {:view-congregation-temporarily false}))
+  (-> model
+      (replace-in [:territories 0 :congregation/id] cong-id "demo")
+      (assoc :permissions {:view-congregation-temporarily false})))
 (def anonymous-model
   (assoc model
          :congregation-boundary nil

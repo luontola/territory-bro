@@ -9,6 +9,7 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
+            [territory-bro.domain.publisher :as publisher]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.config :as config]
@@ -28,6 +29,8 @@
 (def start-date (LocalDate/of 2000 1 1))
 (def end-date (LocalDate/of 2000 2 1))
 (def today (LocalDate/of 2000 3 1))
+(def fake-publishers {cong-id {publisher-id {:publisher/name "John Doe"}}})
+
 (def model
   {:congregation {:congregation/name "Congregation 1"}
    :territory {:territory/id territory-id
@@ -51,7 +54,7 @@
                :territory/meta {:foo "bar"}
                :territory/location testdata/wkt-helsinki-rautatientori
                :territory/do-not-calls nil}
-   :assignment-history []
+   :assignment-history nil ; TODO: generate fake assignment history
    :today today
    :permissions {:edit-do-not-calls false
                  :share-territory-link true}
@@ -118,11 +121,13 @@
   (let [request {:path-params {:congregation cong-id
                                :territory territory-id}}]
     (testutil/with-events test-events
-      (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
+      (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls
+                publisher/get-by-id (fn [_conn cong-id publisher-id]
+                                      (get-in fake-publishers [cong-id publisher-id]))]
         (testutil/with-user-id user-id
 
-          (testing "default"
-            (is (= model (territory-page/model! request))))
+          (testing "untouched"
+            (is (= untouched-model (territory-page/model! request))))
 
           (testing "assigned"
             (testutil/with-events [territory-assigned]

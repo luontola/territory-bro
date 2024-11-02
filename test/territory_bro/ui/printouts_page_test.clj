@@ -37,7 +37,8 @@
    :regions [{:region/id region-id
               :region/name "the region"
               :region/location testdata/wkt-south-helsinki}]
-   :territories [{:territory/id territory-id
+   :territories [{:congregation/id cong-id
+                  :territory/id territory-id
                   :territory/number "123"
                   :territory/addresses "the addresses"
                   :territory/region "the region"
@@ -84,6 +85,7 @@
   (-> default-model
       (replace-in [:congregation :congregation/id] cong-id "demo")
       (replace-in [:congregation :congregation/name] "Example Congregation" "Demo Congregation")
+      (replace-in [:territories 0 :congregation/id] cong-id "demo")
       (replace-in [:form :regions] #{cong-id} #{"demo"})))
 
 (def test-minimal-events
