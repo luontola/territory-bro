@@ -10,6 +10,7 @@
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.middleware :as middleware]
+            [territory-bro.infra.util :as util]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
@@ -19,7 +20,7 @@
             [territory-bro.ui.maps :as maps])
   (:import (java.time LocalDate Period ZonedDateTime)))
 
-(def fake-publishers ; TODO: fetch from database through DMZ
+(def fake-publishers ; TODO: use as demo publishers
   [{:publisher/name "Andrew"}
    {:publisher/name "Bartholomew"}
    {:publisher/name "James, son of Zebedee"}
@@ -41,13 +42,15 @@
         territory-id (get-in request [:path-params :territory])
         congregation (dmz/get-congregation cong-id)
         territory (dmz/get-territory cong-id territory-id)
+        do-not-calls (dmz/get-do-not-calls cong-id territory-id)
         assignment-history (dmz/get-territory-assignment-history cong-id territory-id)
-        do-not-calls (dmz/get-do-not-calls cong-id territory-id)]
+        publishers (dmz/list-publishers cong-id)]
     (-> {:congregation (select-keys congregation [:congregation/name])
          :territory (-> territory
                         (dissoc :congregation/id)
                         (assoc :territory/do-not-calls do-not-calls))
          :assignment-history assignment-history
+         :publishers publishers
          :today (.toLocalDate (congregation-time congregation))
          :permissions {:edit-do-not-calls (dmz/allowed? [:edit-do-not-calls cong-id territory-id])
                        :share-territory-link (dmz/allowed? [:share-territory-link cong-id territory-id])}}
@@ -155,9 +158,10 @@
        [:input#publisher-field {:name "publisher"
                                 :list "publisher-list"
                                 :autofocus true
-                                :required true}]
+                                :required true
+                                :autocomplete "off"}] ; rely on the publisher list, don't remember old inputs
        [:datalist#publisher-list
-        (for [publisher publishers]
+        (for [publisher (util/natural-sort-by :publisher/name publishers)]
           [:option {:value (:publisher/name publisher)}])]]
       [:div.pure-control-group
        [:label {:for "start-date-field"} "Date"]
@@ -519,7 +523,7 @@ if (url.searchParams.has('share-key')) {
     {:middleware [dmz/wrap-db-connection]
      :get {:handler (fn [request]
                       (let [model (model! request)]
-                        (-> (assignment-status (assoc model :publishers fake-publishers, :open-form? true))
+                        (-> (assignment-status (assoc model :open-form? true))
                             (html/response))))}
      :post {:handler (fn [request]
                        (let [model (model! request)]
@@ -534,5 +538,5 @@ if (url.searchParams.has('share-key')) {
                             (html/response))))}
      :post {:handler (fn [request]
                        (let [model (model! request)]
-                         (-> (assignment-status (assoc model :publishers fake-publishers))
+                         (-> (assignment-status model)
                              (html/response))))}}]])

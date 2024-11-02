@@ -29,7 +29,10 @@
 (def start-date (LocalDate/of 2000 1 1))
 (def end-date (LocalDate/of 2000 2 1))
 (def today (LocalDate/of 2000 3 1))
-(def fake-publishers {cong-id {publisher-id {:publisher/name "John Doe"}}})
+(def publisher {:congregation/id cong-id
+                :publisher/id publisher-id
+                :publisher/name "John Doe"})
+(def fake-publishers {cong-id {publisher-id publisher}})
 
 (def model
   {:congregation {:congregation/name "Congregation 1"}
@@ -41,6 +44,7 @@
                :territory/location testdata/wkt-helsinki-rautatientori
                :territory/do-not-calls "the do-not-calls"}
    :assignment-history []
+   :publishers [publisher]
    :today today
    :permissions {:edit-do-not-calls true
                  :share-territory-link true}
@@ -55,6 +59,7 @@
                :territory/location testdata/wkt-helsinki-rautatientori
                :territory/do-not-calls nil}
    :assignment-history nil ; TODO: generate fake assignment history
+   :publishers nil
    :today today
    :permissions {:edit-do-not-calls false
                  :share-territory-link true}
@@ -114,36 +119,41 @@
    :assignment/id assignment-id
    :assignment/end-date end-date})
 
+(defn fakes [f]
+  (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls
+            publisher/list-publishers (fn [_conn cong-id]
+                                        (vals (get fake-publishers cong-id)))
+            publisher/get-by-id (fn [_conn cong-id publisher-id]
+                                  (get-in fake-publishers [cong-id publisher-id]))]
+    (f)))
+
 (def test-time (.toInstant (OffsetDateTime/of today LocalTime/NOON ZoneOffset/UTC)))
-(use-fixtures :once (fixed-clock-fixture test-time))
+(use-fixtures :once (join-fixtures [fakes (fixed-clock-fixture test-time)]))
 
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id
                                :territory territory-id}}]
     (testutil/with-events test-events
-      (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls
-                publisher/get-by-id (fn [_conn cong-id publisher-id]
-                                      (get-in fake-publishers [cong-id publisher-id]))]
-        (testutil/with-user-id user-id
+      (testutil/with-user-id user-id
 
-          (testing "untouched"
-            (is (= untouched-model (territory-page/model! request))))
+        (testing "untouched"
+          (is (= untouched-model (territory-page/model! request))))
 
-          (testing "assigned"
-            (testutil/with-events [territory-assigned]
-              (is (= assigned-model (territory-page/model! request)))))
+        (testing "assigned"
+          (testutil/with-events [territory-assigned]
+            (is (= assigned-model (territory-page/model! request)))))
 
-          (testing "returned & covered"
-            (testutil/with-events [territory-assigned territory-covered territory-returned]
-              (is (= returned-model (territory-page/model! request)))))
+        (testing "returned & covered"
+          (testutil/with-events [territory-assigned territory-covered territory-returned]
+            (is (= returned-model (territory-page/model! request)))))
 
-          (testing "demo congregation"
-            (binding [config/env {:demo-congregation cong-id}]
-              (let [request (replace-in request [:path-params :congregation] cong-id "demo")]
-                (is (= demo-model
-                       (territory-page/model! request)
-                       (testutil/with-anonymous-user
-                         (territory-page/model! request))))))))))))
+        (testing "demo congregation"
+          (binding [config/env {:demo-congregation cong-id}]
+            (let [request (replace-in request [:path-params :congregation] cong-id "demo")]
+              (is (= demo-model
+                     (territory-page/model! request)
+                     (testutil/with-anonymous-user
+                       (territory-page/model! request)))))))))))
 
 (deftest view-test
   (testing "full permissions"
@@ -235,19 +245,18 @@
                                :territory territory-id}
                  :params {:do-not-calls "the new value"}}]
     (testutil/with-events test-events
-      (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
-        (testutil/with-user-id user-id
-          (with-fixtures [fake-dispatcher-fixture]
+      (testutil/with-user-id user-id
+        (with-fixtures [fake-dispatcher-fixture]
 
-            (let [html (territory-page/do-not-calls--save! request)]
-              (is (= {:command/type :do-not-calls.command/save-do-not-calls
-                      :command/user user-id
-                      :congregation/id cong-id
-                      :territory/id territory-id
-                      :territory/do-not-calls "the new value"}
-                     (dissoc @*last-command :command/time)))
-              (is (-> (html/visible-text html)
-                      (str/includes? "Edit"))))))))))
+          (let [html (territory-page/do-not-calls--save! request)]
+            (is (= {:command/type :do-not-calls.command/save-do-not-calls
+                    :command/user user-id
+                    :congregation/id cong-id
+                    :territory/id territory-id
+                    :territory/do-not-calls "the new value"}
+                   (dissoc @*last-command :command/time)))
+            (is (-> (html/visible-text html)
+                    (str/includes? "Edit")))))))))
 
 (deftest share-link-test
   (testing "closed"
