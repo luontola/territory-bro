@@ -219,7 +219,8 @@
 (def routes
   ["/congregation/:congregation/printouts"
    {:middleware [[html/wrap-page-path ::page]
-                 [dmz/wrap-access-check dmz/view-printouts-page?]]}
+                 [dmz/wrap-access-check dmz/view-printouts-page?]
+                 dmz/wrap-db-connection]}
    [""
     {:name ::page
      :get {:handler (fn [request]
@@ -231,8 +232,7 @@
                            (html/response)))}}]
 
    ["/qr-code/:territory"
-    {:get {:middleware [dmz/wrap-db-connection]
-           :handler (fn [request]
+    {:get {:handler (fn [request]
                       (-> (generate-qr-code! request)
                           (html/response)
                           ;; avoid generating QR codes unnecessarily while the user is tweaking the settings

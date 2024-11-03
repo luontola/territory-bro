@@ -282,16 +282,15 @@
 (def routes
   ["/congregation/:congregation/settings"
    {:middleware [[html/wrap-page-path ::page]
-                 [dmz/wrap-access-check dmz/view-settings-page?]]}
+                 [dmz/wrap-access-check dmz/view-settings-page?]
+                 dmz/wrap-db-connection]}
    [""
     {:name ::page
-     :get {:middleware [dmz/wrap-db-connection]
-           :handler (fn [request]
+     :get {:handler (fn [request]
                       (-> (view! request)
                           (layout/page! request)
                           (html/response)))}
-     :post {:middleware [dmz/wrap-db-connection]
-            :handler (fn [request]
+     :post {:handler (fn [request]
                        (save-congregation-settings! request))}}]
 
    ["/qgis-project"
@@ -299,14 +298,11 @@
                       (download-qgis-project request))}}]
 
    ["/users"
-    {:get {:middleware [dmz/wrap-db-connection]
-           :handler (fn [request]
+    {:get {:handler (fn [request]
                       (-> (model! request)
                           (user-management-section)
                           (html/response)))}
-     :post {:middleware [dmz/wrap-db-connection]
-            :handler (fn [request]
+     :post {:handler (fn [request]
                        (add-user! request))}
-     :delete {:middleware [dmz/wrap-db-connection]
-              :handler (fn [request]
+     :delete {:handler (fn [request]
                          (remove-user! request))}}]])

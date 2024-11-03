@@ -116,7 +116,8 @@
 
 (def routes
   ["/congregation/:congregation/territories"
-   {:middleware [[html/wrap-page-path ::page]]}
+   {:middleware [[html/wrap-page-path ::page]
+                 dmz/wrap-db-connection]}
    [""
     {:name ::page
      :get {:handler (fn [request]

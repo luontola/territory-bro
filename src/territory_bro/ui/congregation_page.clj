@@ -64,7 +64,8 @@
 
 (def routes
   ["/congregation/:congregation"
-   {:get {:handler (fn [request]
+   {:middleware [dmz/wrap-db-connection]
+    :get {:handler (fn [request]
                      (-> (view! request)
                          (layout/page! request)
                          (html/response)))}}])

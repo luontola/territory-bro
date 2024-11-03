@@ -453,12 +453,12 @@ if (url.searchParams.has('share-key')) {
 
 (def routes
   ["/congregation/:congregation/territories/:territory"
-   {:middleware [[html/wrap-page-path ::page]]}
+   {:middleware [[html/wrap-page-path ::page]
+                 dmz/wrap-db-connection]}
    [""
     {:name ::page
      :conflicting true
-     :get {:middleware [dmz/wrap-db-connection]
-           :handler (fn [request]
+     :get {:handler (fn [request]
                       ;; When a share is opened by an instant messenger app such as WhatsApp,
                       ;; the HTTP client may not have cookies enabled.
                       ;; Passing the share-key as a query parameter enables opening the share without cookies.
@@ -475,20 +475,17 @@ if (url.searchParams.has('share-key')) {
                               (html/response)))))}}]
 
    ["/do-not-calls/edit"
-    {:get {:middleware [dmz/wrap-db-connection]
-           :handler (fn [request]
+    {:get {:handler (fn [request]
                       (-> (do-not-calls--edit! request)
                           (html/response)))}}]
 
    ["/do-not-calls/save"
-    {:post {:middleware [dmz/wrap-db-connection]
-            :handler (fn [request]
+    {:post {:handler (fn [request]
                        (-> (do-not-calls--save! request)
                            (html/response)))}}]
 
    ["/share-link/open"
-    {:get {:middleware [dmz/wrap-db-connection]
-           :handler (fn [request]
+    {:get {:handler (fn [request]
                       (-> (share-link--open! request)
                           (html/response)
                           ;; avoid creating lots of new shares if the user clicks the share button repeatedly
@@ -502,8 +499,7 @@ if (url.searchParams.has('share-key')) {
                           (html/response)))}}]
 
    ["/assignments/assign"
-    {:middleware [dmz/wrap-db-connection]
-     :get {:handler (fn [request]
+    {:get {:handler (fn [request]
                       (let [model (model! request)]
                         (-> (assignment-status (assoc model :open-form? true))
                             (html/response))))}
@@ -513,8 +509,7 @@ if (url.searchParams.has('share-key')) {
                              (html/response))))}}]
 
    ["/assignments/return"
-    {:middleware [dmz/wrap-db-connection]
-     :get {:handler (fn [request]
+    {:get {:handler (fn [request]
                       (let [model (model! request)]
                         (-> (assignment-status (assoc model :open-form? true))
                             (html/response))))}
