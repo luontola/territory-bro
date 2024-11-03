@@ -41,6 +41,6 @@
 
 (defn create [task]
   (assert (fn? task) {:task task})
-  (AsyncPoller. (doto (ArrayBlockingQueue. 1)
-                  (.add task))
-                (Executors/newFixedThreadPool 1 thread-factory)))
+  (->AsyncPoller (doto (ArrayBlockingQueue. 1)
+                   (.add task))
+                 (Executors/newFixedThreadPool 1 thread-factory)))

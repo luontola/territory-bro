@@ -24,4 +24,4 @@
     (list 'foreign-key/references entity-type (s/explain id-schema))))
 
 (defn references [entity-type id-schema]
-  (References. entity-type id-schema))
+  (->References entity-type id-schema))
