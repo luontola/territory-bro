@@ -37,7 +37,7 @@
                    (congregation/check-congregation-exists state cong-id)
                    true)
    :publisher (fn [publisher-id]
-                (publisher/check-publisher-exists state (:congregation/id command) publisher-id)
+                (publisher/check-publisher-exists conn (:congregation/id command) publisher-id)
                 true)
    :region (fn [region-id]
              (region/check-region-exists state (:congregation/id command) region-id)
