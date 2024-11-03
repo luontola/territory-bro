@@ -1,14 +1,10 @@
-;; Copyright © 2015-2020 Esko Luontola
-;; This software is released under the Apache License 2.0.
-;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
-
 (ns territory-bro.infra.poller
   (:refer-clojure :exclude [await])
   (:require [territory-bro.infra.executors :as executors])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
            (java.util Queue)
-           (java.util.concurrent ExecutorService Executors TimeUnit ArrayBlockingQueue Future)))
+           (java.util.concurrent ArrayBlockingQueue ExecutorService Executors Future TimeUnit)))
 
 (defprotocol Poller
   (trigger! [this])

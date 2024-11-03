@@ -1,7 +1,3 @@
-// Copyright © 2015-2024 Esko Luontola
-// This software is released under the Apache License 2.0.
-// The license text is at http://www.apache.org/licenses/LICENSE-2.0
-
 import Control from "ol/control/Control";
 import {boundingExtent, buffer, containsCoordinate, extend, extendCoordinate, getHeight, getWidth} from "ol/extent";
 import style from "./ShowMyLocation.module.css";

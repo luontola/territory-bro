@@ -1,7 +1,3 @@
-;; Copyright © 2015-2022 Esko Luontola
-;; This software is released under the Apache License 2.0.
-;; The license text is at http://www.apache.org/licenses/LICENSE-2.0
-
 (ns territory-bro.gis.gis-change-test
   (:require [clojure.test :refer :all]
             [schema.core :as s]
@@ -9,8 +5,8 @@
             [territory-bro.gis.gis-change :as gis-change]
             [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.test.testutil :as testutil])
-  (:import (java.util UUID)
-           (java.time Instant)))
+  (:import (java.time Instant)
+           (java.util UUID)))
 
 (def cong-id (UUID. 0 1))
 (def cong-schema "cong1_schema")
