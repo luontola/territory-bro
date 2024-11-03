@@ -152,7 +152,7 @@
     (check-permit [:assign-territory cong-id territory-id (:publisher/id assignment)])
     (doseq [^LocalDate date (conj (:assignment/covered-dates assignment)
                                   (:assignment/start-date assignment))]
-      (when (-> end-date (.isBefore date))
+      (when (. end-date isBefore date)
         (throw (ValidationException. [[:invalid-end-date]]))))
     (when (nil? (:assignment/end-date assignment))
       (->> [(when (and (:covered? command)

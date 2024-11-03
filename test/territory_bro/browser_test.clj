@@ -60,14 +60,14 @@
 
 (defn await-healthy
   ([url]
-   (await-healthy url (-> (Instant/now) (.plusSeconds 10))))
+   (await-healthy url (. (Instant/now) plusSeconds 10)))
   ([url ^Instant deadline]
    (let [status (try
                   (:status (http/get url {:throw-exceptions false}))
                   (catch Exception e ; can throw "java.net.ConnectException: Connection refused"
                     e))]
      (when-not (= 200 status)
-       (when (-> (Instant/now) (.isAfter deadline))
+       (when (. (Instant/now) isAfter deadline)
          (throw (IllegalStateException. (str url " not healthy; received " status))))
        (Thread/sleep 500)
        (recur url deadline)))))
