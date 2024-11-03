@@ -11,4 +11,4 @@
                  util/*escape-strings?* ~escape-strings?]
          (util/raw-string ~(apply compiler/compile-html content))))))
 
-(def raw util/raw-string)
+(def ^{:arglists '([& xs])} raw util/raw-string)
