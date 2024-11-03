@@ -10,6 +10,7 @@
   [:view-congregation ; :view-congregation implies :view-territory for all territories
    :configure-congregation
    :gis-access
+   :assign-territory
    :share-territory-link
    :edit-do-not-calls])
 
