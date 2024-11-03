@@ -1,20 +1,25 @@
 (ns territory-bro.ui.territory-page
   (:require [clojure.string :as str]
             [medley.core :refer [greatest]]
+            [ring.util.http-response :as http-response]
             [ring.util.response :as response]
             [territory-bro.domain.dmz :as dmz]
+            [territory-bro.domain.publisher :as publisher]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.infra.util :as util]
             [territory-bro.ui.css :as css]
+            [territory-bro.ui.forms :as forms]
             [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
             [territory-bro.ui.maps :as maps])
-  (:import (java.time LocalDate Period ZonedDateTime)))
+  (:import (java.time LocalDate Period ZonedDateTime)
+           (java.util UUID)
+           (territory_bro ValidationException)))
 
 (defn congregation-time ^ZonedDateTime [congregation] ; TODO: move to another namespace
   (ZonedDateTime/now (.withZone config/*clock* (:congregation/timezone congregation))))
@@ -26,14 +31,19 @@
         territory (dmz/get-territory cong-id territory-id)
         do-not-calls (dmz/get-do-not-calls cong-id territory-id)
         assignment-history (dmz/get-territory-assignment-history cong-id territory-id)
-        publishers (dmz/list-publishers cong-id)]
+        publishers (dmz/list-publishers cong-id)
+        today (.toLocalDate (congregation-time congregation))]
     (-> {:congregation (select-keys congregation [:congregation/name])
          :territory (-> territory
                         (dissoc :congregation/id)
                         (assoc :territory/do-not-calls do-not-calls))
          :assignment-history assignment-history
          :publishers publishers
-         :today (.toLocalDate (congregation-time congregation))
+         :today today
+         :form {:publisher (get-in request [:params :publisher] "")
+                :start-date (or (some-> (get-in request [:params :start-date])
+                                        LocalDate/parse)
+                                today)}
          :permissions {:edit-do-not-calls (dmz/allowed? [:edit-do-not-calls cong-id territory-id])
                        :share-territory-link (dmz/allowed? [:share-territory-link cong-id territory-id])}}
         (merge (map-interaction-help/model request)))))
@@ -129,99 +139,117 @@
 (defn share-link--closed []
   (share-link {:open? false}))
 
-(defn assign-territory-dialog [{:keys [publishers today]}]
+(defn- common-assignment-form-errors [errors]
   (h/html
-   [:dialog
-    [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/assign")}
-     [:fieldset
-      [:legend "Assign territory"]
-      [:div.pure-control-group
-       [:label {:for "publisher-field"} "Publisher"]
-       [:input#publisher-field {:name "publisher"
-                                :list "publisher-list"
-                                :autofocus true
-                                :required true
-                                :autocomplete "off"}] ; rely on the publisher list, don't remember old inputs
-       [:datalist#publisher-list
-        (for [publisher (util/natural-sort-by :publisher/name publishers)]
-          [:option {:value (:publisher/name publisher)}])]]
-      [:div.pure-control-group
-       [:label {:for "start-date-field"} "Date"]
-       [:input#start-date-field {:name "start-date"
+   (when (contains? errors :already-assigned)
+     [:p.pure-form-message "⚠️ The territory was already assigned"]))) ; TODO: i18n
+
+(defn assign-territory-dialog [{:keys [publishers form today errors]}]
+  (let [errors (group-by first errors)
+        publisher-not-found? (contains? errors :publisher-not-found)]
+    (h/html
+     [:dialog
+      (common-assignment-form-errors errors)
+      [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/assign")}
+       [:fieldset
+        [:legend "Assign territory"] ; TODO: i18n
+
+        [:div.pure-control-group
+         [:label {:for "publisher-field"} "Publisher"] ; TODO: i18n
+         [:input#publisher-field {:name "publisher"
+                                  :value (:publisher form)
+                                  :list "publisher-list"
+                                  :autofocus true
+                                  :required true
+                                  :autocomplete "off"}] ; rely on the publisher list, don't remember old inputs
+         (when publisher-not-found?
+           (h/html " ⚠️ " [:span.pure-form-message-inline "Name not found"])) ; TODO: i18n
+         [:datalist#publisher-list
+          (for [publisher (util/natural-sort-by :publisher/name publishers)]
+            [:option {:value (:publisher/name publisher)}])]]
+
+        [:div.pure-control-group
+         [:label {:for "start-date-field"} "Date"] ; TODO: i18n
+         [:input#start-date-field {:name "start-date"
+                                   :type "date"
+                                   :value (str (:start-date form))
+                                   :required true
+                                   :max (str today)}]]
+
+        [:div.pure-controls
+         [:button.pure-button.pure-button-primary {:type "submit"}
+          "Assign territory"] ; TODO: i18n
+         " "
+         [:button.pure-button {:type "button"
+                               :onclick "this.closest('dialog').close()"}
+          "Cancel"]]]]]))) ; TODO: i18n 
+
+(def ^:private sync-submit-button-js "
+const returningButton = this.querySelector('#returning-button');
+const returningCheckbox = this.querySelector('#returning-checkbox');
+const coveredButton = this.querySelector('#covered-button');
+const coveredCheckbox = this.querySelector('#covered-checkbox');
+if (returningCheckbox.checked) {
+    returningButton.style.display = '';
+    coveredButton.style.display = 'none';
+    returningButton.disabled = coveredButton.disabled = false;
+} else if (coveredCheckbox.checked) {
+    returningButton.style.display = 'none';
+    coveredButton.style.display = '';
+    returningButton.disabled = coveredButton.disabled = false;
+} else {
+    returningButton.disabled = coveredButton.disabled = true;
+}")
+
+(defn return-territory-dialog [{:keys [territory today errors]}]
+  (let [errors (group-by first errors)]
+    (h/html
+     [:dialog
+      (common-assignment-form-errors errors)
+      [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/return")
+                                          :onchange sync-submit-button-js}
+       [:fieldset
+        [:legend "Return territory"] ; TODO: i18n
+        [:div.pure-control-group
+         [:label {:for "end-date-field"} "Date"] ; TODO: i18n
+         [:input#end-date-field {:name "end-date"
                                  :type "date"
                                  :value (str today)
                                  :required true
+                                 :min (let [assignment (:territory/current-assignment territory)]
+                                        (str (apply greatest (conj (:assignment/covered-dates assignment)
+                                                                   (:assignment/start-date assignment)))))
                                  :max (str today)}]]
-      [:div.pure-controls
-       [:button.pure-button.pure-button-primary {:type "submit"}
-        "Assign territory"]
-       " "
-       [:button.pure-button {:type "button"
-                             :onclick "this.closest('dialog').close()"}
-        "Cancel"]]]]]))
-
-(defn return-territory-dialog [{:keys [territory today]}]
-  (h/html
-   [:dialog
-    [:form.pure-form.pure-form-aligned
-     {:hx-post (str html/*page-path* "/assignments/return")
-      :onchange "
-        const returningButton = this.querySelector('#returning-button');
-        const returningCheckbox = this.querySelector('#returning-checkbox');
-        const coveredButton = this.querySelector('#covered-button');
-        const coveredCheckbox = this.querySelector('#covered-checkbox');
-        if (returningCheckbox.checked) {
-            returningButton.style.display = '';
-            coveredButton.style.display = 'none';
-            returningButton.disabled = coveredButton.disabled = false;
-        } else if (coveredCheckbox.checked) {
-            returningButton.style.display = 'none';
-            coveredButton.style.display = '';
-            returningButton.disabled = coveredButton.disabled = false;
-        } else {
-            returningButton.disabled = coveredButton.disabled = true;
-        }"}
-     [:fieldset
-      [:legend "Return territory"]
-      [:div.pure-control-group
-       [:label {:for "end-date-field"} "Date"]
-       [:input#end-date-field {:name "end-date"
-                               :type "date"
-                               :value (str today)
-                               :required true
-                               :min (let [assignment (:territory/current-assignment territory)]
-                                      (str (apply greatest (conj (:assignment/covered-dates assignment)
-                                                                 (:assignment/start-date assignment)))))
-                               :max (str today)}]]
-      [:div.pure-controls
-       [:label.pure-checkbox
-        [:input#returning-checkbox {:name "returning"
+        [:div.pure-controls
+         [:label.pure-checkbox
+          [:input#returning-checkbox {:name "returning"
+                                      :type "checkbox"
+                                      :value "true"
+                                      :checked true
+                                      :style {:width "1.5rem"
+                                              :height "1.5rem"}}]
+          " "
+          "Return the territory to storage"] ; TODO: i18n
+         [:label.pure-checkbox
+          [:input#covered-checkbox {:name "covered"
                                     :type "checkbox"
                                     :value "true"
                                     :checked true
                                     :style {:width "1.5rem"
                                             :height "1.5rem"}}]
-        " "
-        "Return the territory to storage"]
-       [:label.pure-checkbox
-        [:input#covered-checkbox {:name "covered"
-                                  :type "checkbox"
-                                  :value "true"
-                                  :checked true
-                                  :style {:width "1.5rem"
-                                          :height "1.5rem"}}]
-        " "
-        "Mark the territory as covered"]
-       [:button#returning-button.pure-button.pure-button-primary {:type "submit"
-                                                                  :autofocus true}
-        "Return territory"]
-       [:button#covered-button.pure-button.pure-button-primary {:type "submit"
-                                                                :style {:display "none"}}
-        "Mark covered"]
-       " "
-       [:button.pure-button {:type "button"
-                             :onclick "this.closest('dialog').close()"}
-        "Cancel"]]]]]))
+          " "
+          "Mark the territory as covered"] ; TODO: i18n
+
+         [:button#returning-button.pure-button.pure-button-primary {:type "submit"
+                                                                    :autofocus true}
+          "Return territory"] ; TODO: i18n
+         [:button#covered-button.pure-button.pure-button-primary {:type "submit"
+                                                                  :style {:display "none"}}
+          "Mark covered"] ; TODO: i18n
+         " "
+         [:button.pure-button {:type "button"
+                               :onclick "this.closest('dialog').close()"}
+          "Cancel"]]]]]))) ; TODO: i18n
 
 (defn months-difference [^LocalDate start ^LocalDate end]
   (.toTotalMonths (Period/between start end)))
@@ -247,12 +275,12 @@
                               :hx-disabled-elt "this"
                               :type "button"
                               :class (:edit-button styles)}
-         "Return"]
+         "Return"] ; TODO: i18n
         [:span {:style {:color "red"}}
-         "Assigned"]
+         "Assigned"] ; TODO: i18n
         " to " (:publisher/name assignment)
         [:br]
-        "(" (months-difference start-date today) " months, since " (nowrap start-date) ")"])
+        "(" (months-difference start-date today) " months, since " (nowrap start-date) ")"]) ; TODO: i18n
 
       (h/html
        [:div#assignment-status {:hx-target "this"
@@ -265,13 +293,16 @@
                               :hx-disabled-elt "this"
                               :type "button"
                               :class (:edit-button styles)}
-         "Assign"]
+         "Assign"] ; TODO: i18n
         [:span {:style {:color "blue"}}
-         "Up for grabs"]
+         "Up for grabs"] ; TODO: i18n
         (when (some? last-covered)
           (h/html
            [:br]
            "(" (months-difference last-covered today) " months, since " (nowrap last-covered) ")"))]))))
+
+(defn assignment-form-open [model]
+  (assignment-status (assoc model :open-form? true)))
 
 (def fake-assignment-model-history
   {:assignment-history []})
@@ -325,7 +356,7 @@
       [:summary {:style {:margin "1rem 0"
                          :font-weight "bold"
                          :cursor "pointer"}}
-       "Assignment history"]
+       "Assignment history"] ; TODO: i18n
       [:div {:style {:display "grid"
                      :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
                      :gap "0.5rem"
@@ -344,7 +375,7 @@
                                      :text-align "right"})}
              [:a {:href "#"
                   :onclick "return false"}
-              "Edit"]])
+              "Edit"]]) ; TODO: i18n
 
            :duration
            (h/html
@@ -355,7 +386,7 @@
                                      :padding "0.7rem 0"
                                      :color (when-not (:assigned? row)
                                               "#999")})}
-             (:months row) " months"])
+             (:months row) " months"]) ; TODO: i18n
 
            :event
            (h/html
@@ -369,11 +400,11 @@
                                      :flex-direction "column"
                                      :gap "0.25rem"})}
              (when (:returned? row)
-               [:div "📥 Returned "])
+               [:div "📥 Returned "]) ; TODO: i18n
              (when (:covered? row)
-               [:div "✅ Covered"])
+               [:div "✅ Covered"]) ; TODO: i18n
              (when (:assigned? row)
-               [:div "⤴️ Assigned to " (:publisher/name row)])])))]])))
+               [:div "⤴️ Assigned to " (:publisher/name row)])])))]]))) ; TODO: i18n
 
 (defn view [{:keys [territory permissions] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
@@ -399,7 +430,7 @@
            [:td (do-not-calls--viewing model)]]
           (when (:dev config/env)
             [:tr
-             [:th "Status"]
+             [:th "Status"] ; TODO: i18n
              [:td (assignment-status model)]])]]]
 
        (when (:share-territory-link permissions)
@@ -451,6 +482,26 @@ if (url.searchParams.has('share-key')) {
    [:script {:type "module"}
     share-key-cleanup-js]))
 
+(defn assign-territory! [request]
+  (let [model (model! request)
+        cong-id (get-in request [:path-params :congregation])
+        territory-id (get-in request [:path-params :territory])
+        publisher-name (-> model :form :publisher)
+        publisher-id (publisher/publisher-name->id publisher-name (:publishers model))
+        start-date (-> model :form :start-date)]
+    (try
+      (when (nil? publisher-id)
+        (throw (ValidationException. [[:publisher-not-found]])))
+      (dmz/dispatch! {:command/type :territory.command/assign-territory
+                      :congregation/id cong-id
+                      :territory/id territory-id
+                      :assignment/id (UUID/randomUUID)
+                      :publisher/id publisher-id
+                      :date start-date})
+      (http-response/see-other (str html/*page-path* "/assignments/status"))
+      (catch Exception e
+        (forms/validation-error-htmx-response e request model! assignment-form-open)))))
+
 (def routes
   ["/congregation/:congregation/territories/:territory"
    {:middleware [[html/wrap-page-path ::page]
@@ -498,22 +549,26 @@ if (url.searchParams.has('share-key')) {
                       (-> (share-link--closed)
                           (html/response)))}}]
 
+   ["/assignments/status"
+    {:get {:handler (fn [request]
+                      (-> (model! request)
+                          (assignment-status)
+                          (html/response)))}}]
+
    ["/assignments/assign"
     {:get {:handler (fn [request]
-                      (let [model (model! request)]
-                        (-> (assignment-status (assoc model :open-form? true))
-                            (html/response))))}
+                      (-> (model! request)
+                          (assignment-form-open)
+                          (html/response)))}
      :post {:handler (fn [request]
-                       (let [model (model! request)]
-                         (-> (assignment-status model)
-                             (html/response))))}}]
+                       (assign-territory! request))}}]
 
    ["/assignments/return"
     {:get {:handler (fn [request]
-                      (let [model (model! request)]
-                        (-> (assignment-status (assoc model :open-form? true))
-                            (html/response))))}
+                      (-> (model! request)
+                          (assignment-form-open)
+                          (html/response)))}
      :post {:handler (fn [request]
-                       (let [model (model! request)]
-                         (-> (assignment-status model)
-                             (html/response))))}}]])
+                       (-> (model! request)
+                           (assignment-status)
+                           (html/response)))}}]])

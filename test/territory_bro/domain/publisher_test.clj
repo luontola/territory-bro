@@ -36,6 +36,17 @@
           (publisher/save-publisher! conn updated)
           (is (= updated (publisher/get-by-id conn cong-id publisher-id)))))
 
+      (testing "publisher names are whitespace-normalized on save"
+        (let [cong-id (UUID/randomUUID)
+              publisher {:congregation/id cong-id
+                         :publisher/id publisher-id
+                         :publisher/name " \t John \u00a0  Doe \r\n"}]
+          (publisher/save-publisher! conn publisher)
+          (is (= "John Doe"
+                 (->> (publisher/list-publishers conn cong-id)
+                      first
+                      :publisher/name)))))
+
       (testing "list all publishers in a congregation"
         (let [cong-id (UUID/randomUUID)
               publishers [{:congregation/id cong-id

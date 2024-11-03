@@ -1,5 +1,7 @@
 (ns territory-bro.domain.publisher
-  (:require [territory-bro.infra.db :as db])
+  (:require [clojure.string :as str]
+            [territory-bro.infra.db :as db]
+            [territory-bro.ui.html :as html])
   (:import (territory_bro ValidationException)))
 
 (def ^:private queries (db/compile-queries "db/hugsql/publisher.sql"))
@@ -22,7 +24,17 @@
   (when (nil? (get-by-id conn cong-id publisher-id))
     (throw (ValidationException. [[:no-such-publisher cong-id publisher-id]]))))
 
+(def ^:private normalized-name html/normalize-whitespace)
+
+(defn publisher-name->id [publisher-name publishers]
+  (let [needle (str/lower-case (normalized-name publisher-name))
+        found (filterv #(= needle (str/lower-case (:publisher/name %)))
+                       publishers)]
+    (when (= 1 (count found))
+      (-> found first :publisher/id))))
+
+;; TODO: prevent multiple publishers with the same name (case insensitive)
 (defn save-publisher! [conn publisher]
   (db/query! conn queries :save-publisher {:congregation (:congregation/id publisher)
                                            :id (:publisher/id publisher)
-                                           :name (:publisher/name publisher)}))
+                                           :name (normalized-name (:publisher/name publisher))}))

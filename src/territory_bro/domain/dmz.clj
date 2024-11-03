@@ -214,7 +214,7 @@
 
 ;;;; Publishers
 
-(def ^:private demo-publishers-by-id
+(defonce ^:private demo-publishers-by-id ; defonce to avoid test failures due to namespace reloading and unpredictable UUIDs
   (reduce (fn [m publisher]
             (let [publisher-id (UUID/randomUUID)]
               (assoc m publisher-id (assoc publisher

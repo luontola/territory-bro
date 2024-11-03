@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [net.cgrand.enlive-html :as en]
+            [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.do-not-calls :as do-not-calls]
@@ -12,11 +13,13 @@
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil :refer [replace-in]]
+            [territory-bro.ui.forms :as forms]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.map-interaction-help-test :as map-interaction-help-test]
             [territory-bro.ui.territory-page :as territory-page])
   (:import (java.time LocalDate LocalTime OffsetDateTime ZoneOffset)
-           (java.util UUID)))
+           (java.util UUID)
+           (territory_bro ValidationException)))
 
 (def cong-id (UUID. 0 1))
 (def territory-id (UUID. 0 2))
@@ -43,6 +46,8 @@
    :assignment-history []
    :publishers [publisher]
    :today today
+   :form {:publisher ""
+          :start-date today}
    :permissions {:edit-do-not-calls true
                  :share-territory-link true}
    :mac? false})
@@ -58,6 +63,8 @@
    :assignment-history nil ; TODO: generate fake assignment history
    :publishers dmz/demo-publishers
    :today today
+   :form {:publisher ""
+          :start-date today}
    :permissions {:edit-do-not-calls false
                  :share-territory-link true}
    :mac? false})
@@ -400,3 +407,63 @@
            2023-05-30    ⤴️ Assigned to Joe Blow")
          (-> (territory-page/assignment-history territory-page/fake-assignment-model-history)
              html/visible-text))))
+
+(deftest assign-territory!-test
+  (let [request {:path-params {:congregation cong-id
+                               :territory territory-id}
+                 :params {:publisher "John Doe"
+                          :start-date "2000-01-01"}}]
+    (testutil/with-events test-events
+      (binding [html/*page-path* "/territory-page-url"]
+        (testutil/with-user-id user-id
+
+          (testing "assign successful"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (territory-page/assign-territory! request)]
+                (is (= {:status 303
+                        :headers {"Location" "/territory-page-url/assignments/status"}
+                        :body ""}
+                       response))
+                (is (uuid? (:assignment/id @*last-command)))
+                (is (= {:command/type :territory.command/assign-territory
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :territory/id territory-id
+                        :date start-date
+                        :publisher/id publisher-id}
+                       (dissoc @*last-command :command/time :assignment/id))))))
+
+          (testing "publisher name matching is case insensitive and ignores whitespace"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (territory-page/assign-territory! (assoc-in request [:params :publisher] "  john  DOE  "))]
+                (is (= 303 (:status response)))
+                (is (= {:command/type :territory.command/assign-territory
+                        :publisher/id publisher-id}
+                       (select-keys @*last-command [:command/type :publisher/id]))))))
+
+          (testing "assign failed: publisher not found"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (territory-page/assign-territory! (-> request
+                                                                   (assoc-in [:params :publisher] "foo")
+                                                                   (assoc-in [:params :start-date] "2001-02-03")))]
+                (is (= forms/validation-error-http-status (:status response))
+                    "http status code")
+                (is (str/includes? (html/visible-text (:body response))
+                                   (html/normalize-whitespace
+                                    "Publisher [foo] ⚠️ Name not found
+                                     Date [2001-02-03]
+                                     Assign territory"))
+                    "highlights erroneous form fields, doesn't forget invalid user input"))))
+
+          (testing "assign failed: already assigned"
+            (testutil/with-events [territory-assigned]
+              (binding [dispatcher/command! (fn [& _]
+                                              (throw (ValidationException. [[:already-assigned cong-id territory-id]])))]
+                (let [response (territory-page/assign-territory! request)]
+                  (is (= forms/validation-error-http-status (:status response))
+                      "http status code")
+                  (is (str/includes? (html/visible-text (:body response))
+                                     (html/normalize-whitespace
+                                      "⚠️ The territory was already assigned
+                                       Return territory"))
+                      "refreshes the form, since it should really be in 'return territory' mode"))))))))))
