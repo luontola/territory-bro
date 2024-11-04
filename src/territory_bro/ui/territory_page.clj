@@ -274,43 +274,34 @@ if (returningCheckbox.checked) {
         assignment (:territory/current-assignment territory)
         start-date (:assignment/start-date assignment)
         last-covered (:territory/last-covered territory)]
-    (if (some? assignment)
-      (h/html
-       [:div#assignment-status {:hx-target "this"
-                                :hx-swap "outerHTML"
-                                :hx-on-htmx-load (when open-form?
-                                                   "this.querySelector('dialog').showModal()")}
-        (when open-form?
-          (return-territory-dialog model))
-        [:button.pure-button {:hx-get (str html/*page-path* "/assignments/form")
-                              :hx-disabled-elt "this"
-                              :type "button"
-                              :class (:edit-button styles)}
-         "Return"] ; TODO: i18n
-        [:span {:style {:color "red"}}
-         "Assigned"] ; TODO: i18n
-        " to " (:publisher/name assignment)
-        [:br]
-        "(" (months-difference start-date today) " months, since " (nowrap start-date) ")"]) ; TODO: i18n
+    (h/html
+     [:div#assignment-status {:hx-target "this"
+                              :hx-swap "outerHTML"
+                              :hx-on-htmx-load (when open-form?
+                                                 "this.querySelector('dialog').showModal()")}
+      (when open-form?
+        (if (some? assignment)
+          (return-territory-dialog model)
+          (assign-territory-dialog model)))
 
-      (h/html
-       [:div#assignment-status {:hx-target "this"
-                                :hx-swap "outerHTML"
-                                :hx-on-htmx-load (when open-form?
-                                                   "this.querySelector('dialog').showModal()")}
-        (when open-form?
-          (assign-territory-dialog model))
-        [:button.pure-button {:hx-get (str html/*page-path* "/assignments/form")
-                              :hx-disabled-elt "this"
-                              :type "button"
-                              :class (:edit-button styles)}
-         "Assign"] ; TODO: i18n
-        [:span {:style {:color "blue"}}
-         "Up for grabs"] ; TODO: i18n
-        (when (some? last-covered)
-          (h/html
-           [:br]
-           "(" (months-difference last-covered today) " months, since " (nowrap last-covered) ")"))]))))
+      [:button.pure-button {:hx-get (str html/*page-path* "/assignments/form")
+                            :hx-disabled-elt "this"
+                            :type "button"
+                            :class (:edit-button styles)}
+       (if (some? assignment)
+         "Return" ; TODO: i18n
+         "Assign")] ; TODO: i18n
+
+      (if (some? assignment)
+        (h/html [:span {:style {:color "red"}} "Assigned"] ; TODO: i18n
+                " to " (:publisher/name assignment)
+                [:br]
+                "(" (months-difference start-date today) " months, since " (nowrap start-date) ")") ; TODO: i18n
+        (h/html [:span {:style {:color "blue"}} "Up for grabs"] ; TODO: i18n
+                (when (some? last-covered)
+                  (h/html
+                   [:br]
+                   "(" (months-difference last-covered today) " months, since " (nowrap last-covered) ")"))))]))) ; TODO: i18n
 
 (defn assignment-form-open [model]
   (assignment-status (assoc model :open-form? true)))
