@@ -282,7 +282,7 @@ if (returningCheckbox.checked) {
                                                    "this.querySelector('dialog').showModal()")}
         (when open-form?
           (return-territory-dialog model))
-        [:button.pure-button {:hx-get (str html/*page-path* "/assignments/return")
+        [:button.pure-button {:hx-get (str html/*page-path* "/assignments/form")
                               :hx-disabled-elt "this"
                               :type "button"
                               :class (:edit-button styles)}
@@ -300,7 +300,7 @@ if (returningCheckbox.checked) {
                                                    "this.querySelector('dialog').showModal()")}
         (when open-form?
           (assign-territory-dialog model))
-        [:button.pure-button {:hx-get (str html/*page-path* "/assignments/assign")
+        [:button.pure-button {:hx-get (str html/*page-path* "/assignments/form")
                               :hx-disabled-elt "this"
                               :type "button"
                               :class (:edit-button styles)}
@@ -584,18 +584,16 @@ if (url.searchParams.has('share-key')) {
                           (assignment-status)
                           (html/response)))}}]
 
-   ["/assignments/assign"
+   ["/assignments/form"
     {:get {:handler (fn [request]
                       (-> (model! request)
                           (assignment-form-open)
-                          (html/response)))}
-     :post {:handler (fn [request]
+                          (html/response)))}}]
+
+   ["/assignments/assign"
+    {:post {:handler (fn [request]
                        (assign-territory! request))}}]
 
    ["/assignments/return"
-    {:get {:handler (fn [request]
-                      (-> (model! request)
-                          (assignment-form-open)
-                          (html/response)))}
-     :post {:handler (fn [request]
+    {:post {:handler (fn [request]
                        (return-territory! request))}}]])
