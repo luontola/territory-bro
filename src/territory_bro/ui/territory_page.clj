@@ -354,7 +354,16 @@ if (returningCheckbox.checked) {
                :assigned? true
                :publisher/name "Joe Blow"}]]
     (h/html
-     [:details {:open false}
+     [:script {:type "module"}
+      (h/raw "
+const desktop = window.matchMedia('(min-width: 64em)');
+function toggleOpen() {
+  document.querySelector('#assignment-history').open = desktop.matches;
+}
+toggleOpen();
+desktop.addEventListener('change', toggleOpen);
+")]
+     [:details#assignment-history {:open false}
       [:summary {:style {:margin "1rem 0"
                          :font-weight "bold"
                          :cursor "pointer"}}
@@ -454,7 +463,7 @@ if (returningCheckbox.checked) {
 const url = new URL(document.location.href);
 if (url.searchParams.has('share-key')) {
   url.searchParams.delete('share-key');
-  history.replaceState(null, '', url)
+  history.replaceState(null, '', url);
 }
 "))
 
