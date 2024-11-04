@@ -1,6 +1,7 @@
 (ns territory-bro.ui.territory-page-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
+            [medley.core :refer [dissoc-in]]
             [net.cgrand.enlive-html :as en]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.congregation :as congregation]
@@ -47,7 +48,10 @@
    :publishers [publisher]
    :today today
    :form {:publisher ""
-          :start-date today}
+          :start-date today
+          :end-date today
+          :returning? false
+          :covered? false}
    :permissions {:edit-do-not-calls true
                  :share-territory-link true}
    :mac? false})
@@ -64,7 +68,10 @@
    :publishers dmz/demo-publishers
    :today today
    :form {:publisher ""
-          :start-date today}
+          :start-date today
+          :end-date today
+          :returning? false
+          :covered? false}
    :permissions {:edit-do-not-calls false
                  :share-territory-link true}
    :mac? false})
@@ -90,19 +97,19 @@
         (assoc :assignment-history [assignment]))))
 
 (def test-events
-  (flatten [{:event/type :congregation.event/congregation-created
-             :congregation/id cong-id
-             :congregation/name "Congregation 1"
-             :congregation/schema-name "cong1_schema"}
-            (congregation/admin-permissions-granted cong-id user-id)
-            {:event/type :territory.event/territory-defined
-             :congregation/id cong-id
-             :territory/id territory-id
-             :territory/number "123"
-             :territory/addresses "the addresses"
-             :territory/region "the region"
-             :territory/meta {:foo "bar"}
-             :territory/location testdata/wkt-helsinki-rautatientori}]))
+  (vec (flatten [{:event/type :congregation.event/congregation-created
+                  :congregation/id cong-id
+                  :congregation/name "Congregation 1"
+                  :congregation/schema-name "cong1_schema"}
+                 (congregation/admin-permissions-granted cong-id user-id)
+                 {:event/type :territory.event/territory-defined
+                  :congregation/id cong-id
+                  :territory/id territory-id
+                  :territory/number "123"
+                  :territory/addresses "the addresses"
+                  :territory/region "the region"
+                  :territory/meta {:foo "bar"}
+                  :territory/location testdata/wkt-helsinki-rautatientori}])))
 (def territory-assigned
   {:event/type :territory.event/territory-assigned
    :congregation/id cong-id
@@ -467,3 +474,70 @@
                                       "⚠️ The territory was already assigned
                                        Return territory"))
                       "refreshes the form, since it should really be in 'return territory' mode"))))))))))
+
+(deftest return-territory!-test
+  (let [request {:path-params {:congregation cong-id
+                               :territory territory-id}
+                 :params {:end-date "2000-02-01"
+                          :returning "true"
+                          :covered "true"}}]
+    (testutil/with-events (conj test-events territory-assigned)
+      (binding [html/*page-path* "/territory-page-url"]
+        (testutil/with-user-id user-id
+
+          (testing "return successful"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (territory-page/return-territory! request)]
+                (is (= {:status 303
+                        :headers {"Location" "/territory-page-url/assignments/status"}
+                        :body ""}
+                       response))
+                (is (= {:command/type :territory.command/return-territory
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :territory/id territory-id
+                        :assignment/id assignment-id
+                        :date end-date
+                        :returning? true
+                        :covered? true}
+                       (dissoc @*last-command :command/time))))))
+
+          (testing "return successful: only returning"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (territory-page/return-territory! (dissoc-in request [:params :covered]))]
+                (is (= 303 (:status response)))
+                (is (= {:returning? true
+                        :covered? false}
+                       (select-keys @*last-command [:returning? :covered?]))))))
+
+          (testing "return successful: only marking as covered"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (territory-page/return-territory! (dissoc-in request [:params :returning]))]
+                (is (= 303 (:status response)))
+                (is (= {:returning? false
+                        :covered? true}
+                       (select-keys @*last-command [:returning? :covered?]))))))
+
+          (testing "assign failed: invalid end date"
+            (with-fixtures [fake-dispatcher-fixture]
+              (binding [dispatcher/command! (fn [& _]
+                                              (throw (ValidationException. [[:invalid-end-date]])))]
+                (let [response (territory-page/return-territory! (assoc-in request [:params :end-date] "1999-01-01"))]
+                  (is (= forms/validation-error-http-status (:status response))
+                      "http status code")
+                  (is (str/includes? (html/visible-text (:body response))
+                                     "Date [1999-01-01] ⚠️")
+                      "highlights erroneous form fields, doesn't forget invalid user input")))))
+
+          (testing "return failed: already returned"
+            (testutil/with-events [territory-returned]
+              (binding [dispatcher/command! (fn [& _]
+                                              (assert false "should not be called"))]
+                (let [response (territory-page/return-territory! request)]
+                  (is (= forms/validation-error-http-status (:status response))
+                      "http status code")
+                  (is (str/includes? (html/visible-text (:body response))
+                                     (html/normalize-whitespace
+                                      "⚠️ The territory was already returned
+                                       Assign territory"))
+                      "refreshes the form, since it should really be in 'assign territory' mode"))))))))))

@@ -24,6 +24,10 @@
 (defn congregation-time ^ZonedDateTime [congregation] ; TODO: move to another namespace
   (ZonedDateTime/now (.withZone config/*clock* (:congregation/timezone congregation))))
 
+(defn- parse-date [s default]
+  (or (some-> s LocalDate/parse)
+      default))
+
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
         territory-id (get-in request [:path-params :territory])
@@ -41,9 +45,10 @@
          :publishers publishers
          :today today
          :form {:publisher (get-in request [:params :publisher] "")
-                :start-date (or (some-> (get-in request [:params :start-date])
-                                        LocalDate/parse)
-                                today)}
+                :start-date (parse-date (get-in request [:params :start-date]) today)
+                :end-date (parse-date (get-in request [:params :end-date]) today)
+                :returning? (Boolean/parseBoolean (get-in request [:params :returning]))
+                :covered? (Boolean/parseBoolean (get-in request [:params :covered]))}
          :permissions {:edit-do-not-calls (dmz/allowed? [:edit-do-not-calls cong-id territory-id])
                        :share-territory-link (dmz/allowed? [:share-territory-link cong-id territory-id])}}
         (merge (map-interaction-help/model request)))))
@@ -142,7 +147,9 @@
 (defn- common-assignment-form-errors [errors]
   (h/html
    (when (contains? errors :already-assigned)
-     [:p.pure-form-message "⚠️ The territory was already assigned"]))) ; TODO: i18n
+     [:p.pure-form-message "⚠️ The territory was already assigned"]) ; TODO: i18n
+   (when (contains? errors :already-returned)
+     [:p.pure-form-message "⚠️ The territory was already returned"]))) ; TODO: i18n
 
 (defn assign-territory-dialog [{:keys [publishers form today errors]}]
   (let [errors (group-by first errors)
@@ -201,8 +208,12 @@ if (returningCheckbox.checked) {
     returningButton.disabled = coveredButton.disabled = true;
 }")
 
-(defn return-territory-dialog [{:keys [territory today errors]}]
-  (let [errors (group-by first errors)]
+(defn return-territory-dialog [{:keys [territory form today errors]}]
+  (let [assignment (:territory/current-assignment territory)
+        start-date (apply greatest (conj (:assignment/covered-dates assignment)
+                                         (:assignment/start-date assignment)))
+        errors (group-by first errors)
+        invalid-end-date? (contains? errors :invalid-end-date)]
     (h/html
      [:dialog
       (common-assignment-form-errors errors)
@@ -214,12 +225,12 @@ if (returningCheckbox.checked) {
          [:label {:for "end-date-field"} "Date"] ; TODO: i18n
          [:input#end-date-field {:name "end-date"
                                  :type "date"
-                                 :value (str today)
+                                 :value (str (:end-date form))
                                  :required true
-                                 :min (let [assignment (:territory/current-assignment territory)]
-                                        (str (apply greatest (conj (:assignment/covered-dates assignment)
-                                                                   (:assignment/start-date assignment)))))
-                                 :max (str today)}]]
+                                 :min (str start-date)
+                                 :max (str today)}]
+         (when invalid-end-date? ; HTML form validation should prevent this error, so no user-friendly error message is needed
+           (h/html " ⚠️ "))]
         [:div.pure-controls
          [:label.pure-checkbox
           [:input#returning-checkbox {:name "returning"
@@ -487,8 +498,7 @@ if (url.searchParams.has('share-key')) {
         cong-id (get-in request [:path-params :congregation])
         territory-id (get-in request [:path-params :territory])
         publisher-name (-> model :form :publisher)
-        publisher-id (publisher/publisher-name->id publisher-name (:publishers model))
-        start-date (-> model :form :start-date)]
+        publisher-id (publisher/publisher-name->id publisher-name (:publishers model))]
     (try
       (when (nil? publisher-id)
         (throw (ValidationException. [[:publisher-not-found]])))
@@ -497,7 +507,26 @@ if (url.searchParams.has('share-key')) {
                       :territory/id territory-id
                       :assignment/id (UUID/randomUUID)
                       :publisher/id publisher-id
-                      :date start-date})
+                      :date (-> model :form :start-date)})
+      (http-response/see-other (str html/*page-path* "/assignments/status"))
+      (catch Exception e
+        (forms/validation-error-htmx-response e request model! assignment-form-open)))))
+
+(defn return-territory! [request]
+  (let [model (model! request)
+        cong-id (get-in request [:path-params :congregation])
+        territory-id (get-in request [:path-params :territory])
+        assignment-id (-> model :territory :territory/current-assignment :assignment/id)]
+    (try
+      (when (nil? assignment-id)
+        (throw (ValidationException. [[:already-returned]])))
+      (dmz/dispatch! {:command/type :territory.command/return-territory
+                      :congregation/id cong-id
+                      :territory/id territory-id
+                      :assignment/id assignment-id
+                      :date (-> model :form :end-date)
+                      :returning? (-> model :form :returning?)
+                      :covered? (-> model :form :covered?)})
       (http-response/see-other (str html/*page-path* "/assignments/status"))
       (catch Exception e
         (forms/validation-error-htmx-response e request model! assignment-form-open)))))
@@ -569,6 +598,4 @@ if (url.searchParams.has('share-key')) {
                           (assignment-form-open)
                           (html/response)))}
      :post {:handler (fn [request]
-                       (-> (model! request)
-                           (assignment-status)
-                           (html/response)))}}]])
+                       (return-territory! request))}}]])
