@@ -1,5 +1,6 @@
 (ns territory-bro.infra.util
   (:import (java.sql SQLException)
+           (java.time LocalDate Period)
            (java.util Base64)
            (net.greypanther.natsort CaseInsensitiveSimpleNaturalComparator)))
 
@@ -37,3 +38,6 @@
   (sort-by (comp str keyfn)
            (CaseInsensitiveSimpleNaturalComparator/getInstance)
            coll))
+
+(defn months-difference [^LocalDate start ^LocalDate end]
+  (.toTotalMonths (Period/between start end)))

@@ -3,7 +3,8 @@
             [territory-bro.infra.util :as util]
             [territory-bro.infra.util :refer [fix-sqlexception-chain getx]]
             [territory-bro.test.testutil :refer [re-equals thrown-with-msg?]])
-  (:import (java.sql SQLException)))
+  (:import (java.sql SQLException)
+           (java.time LocalDate)))
 
 (deftest fix-sqlexception-chain-test
   (testing "returns argument"
@@ -79,3 +80,23 @@
                     {:value nil} ; due to stable sort, should stay here in the middle
                     {:value ""}]]
       (is (= expected (util/natural-sort-by :value expected))))))
+
+(deftest months-difference-test
+  (testing "same day"
+    (is (= 0 (util/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 1 1)))))
+
+  (testing "start of month"
+    (is (= 0 (util/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 1 31))))
+    (is (= 1 (util/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 2 1)))))
+
+  (testing "middle of month"
+    (is (= 0 (util/months-difference (LocalDate/of 2000 1 15) (LocalDate/of 2000 2 14))))
+    (is (= 1 (util/months-difference (LocalDate/of 2000 1 15) (LocalDate/of 2000 2 15)))))
+
+  (testing "over a year"
+    (is (= 11 (util/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 12 1))))
+    (is (= 12 (util/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2001 1 1))))
+    (is (= 18 (util/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2001 7 1)))))
+
+  (testing "negative"
+    (is (= -1 (util/months-difference (LocalDate/of 2000 2 1) (LocalDate/of 2000 1 1))))))

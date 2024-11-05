@@ -9,6 +9,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.infra.util :as util]
+            [territory-bro.ui.assignment-history :as assignment-history]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.hiccup :as h]
@@ -306,117 +307,6 @@ if (returningCheckbox.checked) {
 (defn assignment-form-open [model]
   (assignment-status (assoc model :open-form? true)))
 
-(def fake-assignment-model-history
-  {:assignment-history []})
-
-(defn assignment-history [{:keys [assignment-history]}]
-  ;; TODO: calculate rows based on assignment-history
-  (let [fake-time (LocalDate/of 2024 10 29)
-        rows [{:type :assignment
-               :grid-row 1
-               :grid-span 4}
-              {:type :duration
-               :grid-row 1
-               :assigned? true
-               :months 2}
-              {:type :event
-               :grid-row 2
-               :date (-> fake-time (.minusMonths 2) (.minusDays 4))
-               :covered? true}
-              {:type :duration
-               :grid-row 3
-               :assigned? true
-               :months 4}
-              {:type :event
-               :grid-row 4
-               :date (-> fake-time (.minusMonths 6) (.minusDays 16))
-               :assigned? true
-               :publisher/name "John Doe"}
-              {:type :duration
-               :grid-row 5
-               :assigned? false
-               :months 8}
-              {:type :assignment
-               :grid-row 6
-               :grid-span 3}
-              {:type :event
-               :grid-row 6
-               :date (-> fake-time (.minusMonths 14) (.minusDays 20))
-               :returned? true
-               :covered? true}
-              {:type :duration
-               :grid-row 7
-               :assigned? true
-               :months 2}
-              {:type :event
-               :grid-row 8
-               :date (-> fake-time (.minusMonths 16) (.minusDays 30))
-               :assigned? true
-               :publisher/name "Joe Blow"}]]
-    (h/html
-     [:script {:type "module"}
-      (h/raw "
-const desktop = window.matchMedia('(min-width: 64em)');
-function toggleOpen() {
-  document.querySelector('#assignment-history').open = desktop.matches;
-}
-toggleOpen();
-desktop.addEventListener('change', toggleOpen);
-")]
-     [:details#assignment-history {:open false}
-      [:summary {:style {:margin "1rem 0"
-                         :font-weight "bold"
-                         :cursor "pointer"}}
-       "Assignment history"] ; TODO: i18n
-      [:div {:style {:display "grid"
-                     :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
-                     :gap "0.5rem"
-                     :width "fit-content"
-                     :margin "1rem 0"}}
-       (for [{:keys [grid-row grid-span] :as row} rows]
-         (case (:type row)
-           :assignment
-           (h/html
-            ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
-            [:div {:style (identity {:grid-column "timeline-start / timeline-end"
-                                     :grid-row (str grid-row " / " (+ grid-row grid-span))
-                                     :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"})}]
-            [:div {:style (identity {:grid-column "controls-start / controls-end"
-                                     :grid-row grid-row
-                                     :text-align "right"})}
-             [:a {:href "#"
-                  :onclick "return false"}
-              "Edit"]]) ; TODO: i18n
-
-           :duration
-           (h/html
-            [:div {:style (identity {:grid-column "time-start / time-end"
-                                     :grid-row grid-row
-                                     :white-space "nowrap"
-                                     :text-align "center"
-                                     :padding "0.7rem 0"
-                                     :color (when-not (:assigned? row)
-                                              "#999")})}
-             (:months row) " months"]) ; TODO: i18n
-
-           :event
-           (h/html
-            [:div {:style (identity {:grid-column "time-start / time-end"
-                                     :grid-row grid-row
-                                     :white-space "nowrap"})}
-             (:date row)]
-            [:div {:style (identity {:grid-column "event-start / event-end"
-                                     :grid-row grid-row
-                                     :display "flex"
-                                     :flex-direction "column"
-                                     :gap "0.25rem"})}
-             (when (:returned? row)
-               [:div "📥 Returned "]) ; TODO: i18n
-             (when (:covered? row)
-               [:div "✅ Covered"]) ; TODO: i18n
-             (when (:assigned? row)
-               [:div "⤴️ Assigned to " (:publisher/name row)])])))]]))) ; TODO: i18n
-
 (defn view [{:keys [territory permissions] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
@@ -449,7 +339,7 @@ desktop.addEventListener('change', toggleOpen);
           (share-link--closed)])
 
        (when (:dev config/env)
-         (assignment-history fake-assignment-model-history))]
+         (assignment-history/view model))]
 
       [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
        [:div {:class (:map styles)}

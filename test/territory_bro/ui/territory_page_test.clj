@@ -304,26 +304,6 @@
               (is (-> (html/visible-text html)
                       (str/includes? "[/share/abcxyz/123] {copy.svg}"))))))))))
 
-(deftest months-difference-test
-  (testing "same day"
-    (is (= 0 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 1 1)))))
-
-  (testing "start of month"
-    (is (= 0 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 1 31))))
-    (is (= 1 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 2 1)))))
-
-  (testing "middle of month"
-    (is (= 0 (territory-page/months-difference (LocalDate/of 2000 1 15) (LocalDate/of 2000 2 14))))
-    (is (= 1 (territory-page/months-difference (LocalDate/of 2000 1 15) (LocalDate/of 2000 2 15)))))
-
-  (testing "over a year"
-    (is (= 11 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2000 12 1))))
-    (is (= 12 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2001 1 1))))
-    (is (= 18 (territory-page/months-difference (LocalDate/of 2000 1 1) (LocalDate/of 2001 7 1)))))
-
-  (testing "negative"
-    (is (= -1 (territory-page/months-difference (LocalDate/of 2000 2 1) (LocalDate/of 2000 1 1))))))
-
 (deftest assignment-status-test
   (testing "untouched"
     (is (= (html/normalize-whitespace
@@ -397,23 +377,6 @@
       (is (str/includes?
            (-> (territory-page/return-territory-dialog model))
            " min=\"2000-01-15\"")))))
-
-(deftest assignment-history-test
-  (is (= (html/normalize-whitespace
-          "Assignment history
-                                               Edit
-           2 months
-           2024-08-25    ✅ Covered
-           4 months
-           2024-04-13    ⤴️ Assigned to John Doe
-           8 months
-                                               Edit
-           2023-08-09    📥 Returned
-                         ✅ Covered
-           2 months
-           2023-05-30    ⤴️ Assigned to Joe Blow")
-         (-> (territory-page/assignment-history territory-page/fake-assignment-model-history)
-             html/visible-text))))
 
 (deftest assign-territory!-test
   (let [request {:path-params {:congregation cong-id
