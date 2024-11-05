@@ -9,8 +9,8 @@
                             (:assignment/end-date assignment)]
                            (:assignment/covered-dates assignment))
                    (filter some?)
-                   (distinct)
-                   (sort))]
+                   distinct
+                   sort)]
     (for [date dates]
       (cond-> {:type :event
                :date date}
@@ -71,7 +71,9 @@
 
 (defn compile-assignment-history-rows [assignment-history today]
   (->> assignment-history
-       (sort-by :assignment/start-date)
+       (sort-by (juxt (comp nil? :assignment/end-date)
+                      :assignment/start-date
+                      :assignment/end-date))
        (mapcat (fn [assignment]
                  (-> (assignment->events assignment)
                      vec
