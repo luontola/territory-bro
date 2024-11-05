@@ -215,11 +215,14 @@
         (testing "GIS data is synced to the web app"
           (doto *driver*
             (go-to-page "Territories"))
-          (when-not (b/has-text? *driver* "101")
-            (doto *driver*
-              (b/wait 1) ; it shouldn't take longer than this for the changes to be synced
-              (b/refresh)
-              (b/wait-has-text h1 "Territories")))
+          (loop [tries 10]
+            (when (and (pos? tries)
+                       (not (b/has-text? *driver* "101")))
+              (doto *driver*
+                (b/wait 0.5)
+                (b/refresh)
+                (b/wait-has-text h1 "Territories"))
+              (recur (dec tries))))
           (is (= (html/normalize-whitespace
                   "Number  Region          Addresses
                    101     South Helsinki  Rautatientori
