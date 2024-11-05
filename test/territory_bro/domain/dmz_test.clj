@@ -161,10 +161,8 @@
 
 (use-fixtures :once (fn [f]
                       (binding [config/env env
-                                publisher/list-publishers (fn [_conn cong-id]
-                                                            (vals (get test-publishers-by-id cong-id)))
-                                publisher/get-by-id (fn [_conn cong-id publisher-id]
-                                                      (get-in test-publishers-by-id [cong-id publisher-id]))]
+                                publisher/publishers-by-id (fn [_conn cong-id]
+                                                             (get test-publishers-by-id cong-id))]
                         (testutil/with-events test-events
                           (f)))))
 

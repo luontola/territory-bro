@@ -132,10 +132,8 @@
 
 (defn fakes [f]
   (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls
-            publisher/list-publishers (fn [_conn cong-id]
-                                        (vals (get fake-publishers cong-id)))
-            publisher/get-by-id (fn [_conn cong-id publisher-id]
-                                  (get-in fake-publishers [cong-id publisher-id]))]
+            publisher/publishers-by-id (fn [_conn cong-id]
+                                         (get fake-publishers cong-id))]
     (f)))
 
 (def test-time (.toInstant (OffsetDateTime/of today LocalTime/NOON ZoneOffset/UTC)))

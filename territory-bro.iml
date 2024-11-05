@@ -167,12 +167,12 @@
     <orderEntry type="library" name="Leiningen: org.ccil.cowan.tagsoup/tagsoup:1.2.1" level="project" />
     <orderEntry type="library" name="Leiningen: org.checkerframework/checker-qual:3.42.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/clojure:1.12.0" level="project" />
-    <orderEntry type="library" name="Leiningen: org.clojure/core.cache:0.6.5" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/core.cache:1.1.234" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/core.memoize:0.5.7" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/core.rrb-vector:0.2.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/core.specs.alpha:0.4.74" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/data.csv:1.1.0" level="project" />
-    <orderEntry type="library" name="Leiningen: org.clojure/data.priority-map:0.0.7" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/data.priority-map:1.2.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/java.classpath:1.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/java.data:1.2.107" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/java.jdbc:0.7.12" level="project" />

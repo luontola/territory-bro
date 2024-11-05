@@ -1,5 +1,6 @@
 (ns ^:slow territory-bro.domain.publisher-test
   (:require [clojure.test :refer :all]
+            [mount.core :as mount]
             [territory-bro.domain.publisher :as publisher]
             [territory-bro.infra.db :as db]
             [territory-bro.test.fixtures :refer [db-fixture]]
@@ -7,7 +8,11 @@
   (:import (java.util UUID)
            (territory_bro ValidationException)))
 
-(use-fixtures :once db-fixture)
+(defn cache-fixture [f]
+  (mount/start #'publisher/publishers-cache)
+  (f))
+
+(use-fixtures :once (join-fixtures [db-fixture cache-fixture]))
 
 (deftest publishers-test
   (db/with-transaction [conn {:rollback-only true}]
@@ -47,7 +52,7 @@
                           {:congregation/id cong-id
                            :publisher/id (UUID/randomUUID)
                            :publisher/name "C"}]]
-          (is (= [] (publisher/list-publishers conn cong-id)))
+          (is (empty? (publisher/list-publishers conn cong-id)))
           (doseq [publisher publishers]
             (publisher/save-publisher! conn publisher))
           (is (= publishers (publisher/list-publishers conn cong-id)))))

@@ -1,8 +1,11 @@
 (ns territory-bro.domain.publisher
-  (:require [clojure.string :as str]
+  (:require [clojure.core.cache.wrapped :as cache]
+            [clojure.string :as str]
+            [mount.core :as mount]
             [territory-bro.infra.db :as db]
             [territory-bro.ui.html :as html])
-  (:import (territory_bro ValidationException)))
+  (:import (java.time Duration)
+           (territory_bro ValidationException)))
 
 (def ^:private queries (db/compile-queries "db/hugsql/publisher.sql"))
 
@@ -12,13 +15,25 @@
      :publisher/id (:id row)
      :publisher/name (:name row)}))
 
-(defn ^:dynamic list-publishers [conn cong-id]
+(defn- publishers-by-id* [conn cong-id]
   (->> (db/query! conn queries :list-publishers {:congregation cong-id})
-       (mapv format-publisher)))
+       (mapv format-publisher)
+       (reduce (fn [m publisher]
+                 (assoc m (:publisher/id publisher) publisher))
+               {})))
 
-(defn ^:dynamic get-by-id [conn cong-id publisher-id]
-  (format-publisher (db/query! conn queries :get-publisher {:congregation cong-id
-                                                            :id publisher-id})))
+(mount/defstate publishers-cache
+  :start (cache/ttl-cache-factory {:ttl (.toMillis (Duration/ofMinutes 5))}))
+
+(defn ^:dynamic publishers-by-id [conn cong-id]
+  (cache/lookup-or-miss publishers-cache cong-id (partial publishers-by-id* conn)))
+
+(defn list-publishers [conn cong-id]
+  (vals (publishers-by-id conn cong-id)))
+
+(defn get-by-id [conn cong-id publisher-id]
+  (-> (publishers-by-id conn cong-id)
+      (get publisher-id)))
 
 (defn check-publisher-exists [conn cong-id publisher-id]
   (when (nil? (get-by-id conn cong-id publisher-id))
@@ -40,11 +55,13 @@
         existing-names (into #{}
                              (comp (remove #(= publisher-id (:publisher/id %)))
                                    (map #(str/lower-case (:publisher/name %))))
-                             (list-publishers conn cong-id))]
+                             (vals (publishers-by-id* conn cong-id)))]
     (when (str/blank? new-name)
       (throw (ValidationException. [[:missing-name]])))
     (when (contains? existing-names (str/lower-case new-name))
       (throw (ValidationException. [[:non-unique-name]])))
     (db/query! conn queries :save-publisher {:congregation cong-id
                                              :id publisher-id
-                                             :name new-name})))
+                                             :name new-name})
+    (cache/evict publishers-cache cong-id)
+    nil))
