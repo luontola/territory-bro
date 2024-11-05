@@ -307,6 +307,8 @@ if (returningCheckbox.checked) {
 (defn assignment-form-open [model]
   (assignment-status (assoc model :open-form? true)))
 
+(def assignment-status-updated "assignment-status-updated")
+
 (defn view [{:keys [territory permissions] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
     (h/html
@@ -339,7 +341,26 @@ if (returningCheckbox.checked) {
           (share-link--closed)])
 
        (when (:dev config/env)
-         (assignment-history/view model))]
+         (h/html
+          [:script {:type "module"}
+           (h/raw "
+const desktop = window.matchMedia('(min-width: 64em)');
+function toggleOpen() {
+  document.querySelector('#assignment-history').open = desktop.matches;
+}
+toggleOpen();
+desktop.addEventListener('change', toggleOpen);
+")]
+          [:details#assignment-history {:open false}
+           [:summary {:style {:margin "1rem 0"
+                              :font-weight "bold"
+                              :cursor "pointer"}}
+            "Assignment history"] ; TODO: i18n
+           [:div {:hx-get (str html/*page-path* "/assignments/history")
+                  :hx-trigger (str assignment-status-updated " from:body")
+                  :hx-target "this"
+                  :hx-swap "innerHTML"}
+            (assignment-history/view model)]]))]
 
       [:div.pure-u-1.pure-u-lg-2-3.pure-u-xl-3-4
        [:div {:class (:map styles)}
@@ -472,6 +493,17 @@ if (url.searchParams.has('share-key')) {
     {:get {:handler (fn [request]
                       (-> (model! request)
                           (assignment-status)
+                          (html/response)
+                          ;; Refreshes the history after a territory has been assigned or returned.
+                          ;; It would be more logical to emit this header in the assign/return route,
+                          ;; but because they do a redirect after post, htmx will ignore any headers
+                          ;; that were part of the redirect response.
+                          (response/header "hx-trigger" assignment-status-updated)))}}]
+
+   ["/assignments/history"
+    {:get {:handler (fn [request]
+                      (-> (model! request)
+                          (assignment-history/view)
                           (html/response)))}}]
 
    ["/assignments/form"

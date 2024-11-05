@@ -200,8 +200,7 @@
                                               :publisher/name "John Doe"}])
                :today today}]
     (is (= (html/normalize-whitespace
-            "Assignment history
-                                                 Edit
+            "                                    Edit
              2 months
              2024-08-25    ✅ Covered
              4 months

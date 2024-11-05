@@ -89,67 +89,53 @@
 (defn view [{:keys [assignment-history today]}]
   (let [rows (compile-assignment-history-rows assignment-history today)]
     (h/html
-     [:script {:type "module"}
-      (h/raw "
-const desktop = window.matchMedia('(min-width: 64em)');
-function toggleOpen() {
-  document.querySelector('#assignment-history').open = desktop.matches;
-}
-toggleOpen();
-desktop.addEventListener('change', toggleOpen);
-")]
-     [:details#assignment-history {:open false}
-      [:summary {:style {:margin "1rem 0"
-                         :font-weight "bold"
-                         :cursor "pointer"}}
-       "Assignment history"] ; TODO: i18n
-      [:div {:style {:display "grid"
-                     :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
-                     :gap "0.5rem"
-                     :width "fit-content"
-                     :margin "1rem 0"}}
-       (for [{:keys [grid-row grid-span] :as row} rows]
-         (case (:type row)
-           :assignment
-           (h/html
-            ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
-            [:div {:style (identity {:grid-column "timeline-start / timeline-end"
-                                     :grid-row (str grid-row " / " (+ grid-row grid-span))
-                                     :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"})}]
-            [:div {:style (identity {:grid-column "controls-start / controls-end"
-                                     :grid-row grid-row
-                                     :text-align "right"})}
-             [:a {:href "#"
-                  :onclick "return false"}
-              "Edit"]]) ; TODO: i18n
+     [:div {:style {:display "grid"
+                    :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
+                    :gap "0.5rem"
+                    :width "fit-content"
+                    :margin "1rem 0"}}
+      (for [{:keys [grid-row grid-span] :as row} rows]
+        (case (:type row)
+          :assignment
+          (h/html
+           ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
+           [:div {:style (identity {:grid-column "timeline-start / timeline-end"
+                                    :grid-row (str grid-row " / " (+ grid-row grid-span))
+                                    :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"})}]
+           [:div {:style (identity {:grid-column "controls-start / controls-end"
+                                    :grid-row grid-row
+                                    :text-align "right"})}
+            [:a {:href "#"
+                 :onclick "return false"}
+             "Edit"]]) ; TODO: i18n
 
-           :duration
-           (h/html
-            [:div {:style (identity {:grid-column "time-start / time-end"
-                                     :grid-row grid-row
-                                     :white-space "nowrap"
-                                     :text-align "center"
-                                     :padding "0.7rem 0"
-                                     :color (when (= :vacant (:status row))
-                                              "#999")})}
-             (if (:temporal-paradox? row)
-               " ⚠️ "
-               (h/html (:months row) " months"))]) ; TODO: i18n
+          :duration
+          (h/html
+           [:div {:style (identity {:grid-column "time-start / time-end"
+                                    :grid-row grid-row
+                                    :white-space "nowrap"
+                                    :text-align "center"
+                                    :padding "0.7rem 0"
+                                    :color (when (= :vacant (:status row))
+                                             "#999")})}
+            (if (:temporal-paradox? row)
+              " ⚠️ "
+              (h/html (:months row) " months"))]) ; TODO: i18n
 
-           :event
-           (h/html
-            [:div {:style (identity {:grid-column "time-start / time-end"
-                                     :grid-row grid-row
-                                     :white-space "nowrap"})}
-             (:date row)]
-            [:div {:style (identity {:grid-column "event-start / event-end"
-                                     :grid-row grid-row
-                                     :display "flex"
-                                     :flex-direction "column"
-                                     :gap "0.25rem"})}
-             (when (:returned? row)
-               [:div "📥 Returned "]) ; TODO: i18n
-             (when (:covered? row)
-               [:div "✅ Covered"]) ; TODO: i18n
-             (when (:assigned? row)
-               [:div "⤴️ Assigned to " (:publisher/name row)])])))]]))) ; TODO: i18n
+          :event
+          (h/html
+           [:div {:style (identity {:grid-column "time-start / time-end"
+                                    :grid-row grid-row
+                                    :white-space "nowrap"})}
+            (:date row)]
+           [:div {:style (identity {:grid-column "event-start / event-end"
+                                    :grid-row grid-row
+                                    :display "flex"
+                                    :flex-direction "column"
+                                    :gap "0.25rem"})}
+            (when (:returned? row)
+              [:div "📥 Returned "]) ; TODO: i18n
+            (when (:covered? row)
+              [:div "✅ Covered"]) ; TODO: i18n
+            (when (:assigned? row)
+              [:div "⤴️ Assigned to " (:publisher/name row)])])))]))) ; TODO: i18n
