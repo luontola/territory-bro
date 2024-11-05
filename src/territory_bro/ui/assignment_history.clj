@@ -1,7 +1,9 @@
 (ns territory-bro.ui.assignment-history
   (:require [medley.core :refer [assoc-some]]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.util :as util]
-            [territory-bro.ui.hiccup :as h])
+            [territory-bro.ui.hiccup :as h]
+            [territory-bro.ui.html :as html])
   (:import (java.time LocalDate)))
 
 (defn assignment->events [assignment]
@@ -106,10 +108,19 @@
                                     :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"})}]
            [:div {:style (identity {:grid-column "controls-start / controls-end"
                                     :grid-row grid-row
-                                    :text-align "right"})}
-            [:a {:href "#"
-                 :onclick "return false"}
-             "Edit"]]) ; TODO: i18n
+                                    :text-align "right"
+                                    :margin-left "1em"})}
+            ;; TODO: at first add just a checkmark for deleting the assignment? simpler to implement than full editing
+            #_[:a {:href "#"
+                   :style {:margin-left "1em"}
+                   :title "Delete assignment"
+                   :aria-label "Delete assignment"}
+               (html/inline-svg "icons/close.svg")]
+            (if (:dev config/env)
+              [:a {:href "#"
+                   :onclick "return false"}
+               "Edit"] ; TODO: i18n
+              [:span {:data-test-icon "Edit"}])])
 
           :duration
           (h/html
