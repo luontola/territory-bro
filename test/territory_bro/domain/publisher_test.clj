@@ -36,17 +36,6 @@
           (publisher/save-publisher! conn updated)
           (is (= updated (publisher/get-by-id conn cong-id publisher-id)))))
 
-      (testing "publisher names are whitespace-normalized on save"
-        (let [cong-id (UUID/randomUUID)
-              publisher {:congregation/id cong-id
-                         :publisher/id publisher-id
-                         :publisher/name " \t John \u00a0  Doe \r\n"}]
-          (publisher/save-publisher! conn publisher)
-          (is (= "John Doe"
-                 (->> (publisher/list-publishers conn cong-id)
-                      first
-                      :publisher/name)))))
-
       (testing "list all publishers in a congregation"
         (let [cong-id (UUID/randomUUID)
               publishers [{:congregation/id cong-id
@@ -70,6 +59,63 @@
       (testing "did not accidentally change unrelated publishers"
         (is (= unrelated-1 (publisher/get-by-id conn (:congregation/id unrelated-1) (:publisher/id unrelated-1))))
         (is (= unrelated-2 (publisher/get-by-id conn (:congregation/id unrelated-2) (:publisher/id unrelated-2))))))))
+
+(deftest publisher-names-test
+  (db/with-transaction [conn {:rollback-only true}]
+
+    (testing "publisher names are whitespace-normalized on save"
+      (let [cong-id (UUID/randomUUID)
+            publisher {:congregation/id cong-id
+                       :publisher/id (UUID/randomUUID)
+                       :publisher/name " \t John \u00a0  Doe \r\n"}]
+        (publisher/save-publisher! conn publisher)
+        (is (= "John Doe"
+               (->> (publisher/list-publishers conn cong-id)
+                    first
+                    :publisher/name)))))
+
+    (testing "publisher names must be unique within a congregation (case-insensitive)"
+      (let [cong-id (UUID/randomUUID)
+            publisher-id (UUID/randomUUID)
+            publisher {:congregation/id cong-id
+                       :publisher/id publisher-id
+                       :publisher/name "foo BAR"}
+            conflicting-publisher {:congregation/id cong-id
+                                   :publisher/id (UUID/randomUUID)
+                                   :publisher/name "FOO bar"}]
+        (publisher/save-publisher! conn publisher)
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:non-unique-name]]")
+             (publisher/save-publisher! conn conflicting-publisher)))
+        (is (= [publisher]
+               (publisher/list-publishers conn cong-id)))
+
+        (testing "- allows changing a publisher's name's case"
+          (let [publisher-v2 {:congregation/id cong-id
+                              :publisher/id publisher-id
+                              :publisher/name "Foo Bar"}]
+            (publisher/save-publisher! conn publisher-v2)
+            (is (= [publisher-v2]
+                   (publisher/list-publishers conn cong-id)))))
+
+        (testing "- allows the same name in other congregations"
+          (let [other-cong-id (UUID/randomUUID)
+                other-publisher {:congregation/id other-cong-id
+                                 :publisher/id (UUID/randomUUID)
+                                 :publisher/name "Foo Bar"}]
+            (publisher/save-publisher! conn other-publisher)
+            (is (= [other-publisher]
+                   (publisher/list-publishers conn other-cong-id)))))))
+
+    (testing "publisher names cannot be empty"
+      (let [cong-id (UUID/randomUUID)
+            publisher {:congregation/id cong-id
+                       :publisher/id (UUID/randomUUID)
+                       :publisher/name " "}]
+        (is (thrown-with-msg?
+             ValidationException (re-equals "[[:missing-name]]")
+             (publisher/save-publisher! conn publisher)))
+        (is (empty? (publisher/list-publishers conn cong-id)))))))
 
 (deftest check-publisher-exists-test
   (db/with-transaction [conn {:rollback-only true}]

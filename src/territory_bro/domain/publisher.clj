@@ -33,8 +33,18 @@
     (when (= 1 (count found))
       (-> found first :publisher/id))))
 
-;; TODO: prevent multiple publishers with the same name (case insensitive)
 (defn save-publisher! [conn publisher]
-  (db/query! conn queries :save-publisher {:congregation (:congregation/id publisher)
-                                           :id (:publisher/id publisher)
-                                           :name (normalized-name (:publisher/name publisher))}))
+  (let [cong-id (:congregation/id publisher)
+        publisher-id (:publisher/id publisher)
+        new-name (normalized-name (:publisher/name publisher))
+        existing-names (into #{}
+                             (comp (remove #(= publisher-id (:publisher/id %)))
+                                   (map #(str/lower-case (:publisher/name %))))
+                             (list-publishers conn cong-id))]
+    (when (str/blank? new-name)
+      (throw (ValidationException. [[:missing-name]])))
+    (when (contains? existing-names (str/lower-case new-name))
+      (throw (ValidationException. [[:non-unique-name]])))
+    (db/query! conn queries :save-publisher {:congregation cong-id
+                                             :id publisher-id
+                                             :name new-name})))
