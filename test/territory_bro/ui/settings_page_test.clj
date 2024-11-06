@@ -7,6 +7,7 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.dmz-test :as dmz-test]
+            [territory-bro.domain.publisher :as publisher]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]
@@ -20,10 +21,18 @@
            (java.util UUID)
            (territory_bro ValidationException)))
 
-(def cong-id (UUID/randomUUID))
-(def user-id (UUID. 0 1))
+(def cong-id (UUID. 0 1))
+(def publisher-id (UUID. 0 2))
+(def user-id (UUID. 0 3))
+(def test-publisher
+  {:congregation/id cong-id
+   :publisher/id publisher-id
+   :publisher/name "John Doe"})
+
 (def model
   {:congregation {:congregation/name "Congregation Name"}
+   :publisher nil
+   :publishers [test-publisher]
    :users [{:user/id user-id
             :user/subject "google-oauth2|102883237794451111459"
             :user/attributes {:name "Esko Luontola"
@@ -34,6 +43,8 @@
                  :gis-access true}
    :form {:congregation-name "Congregation Name"
           :loans-csv-url "https://docs.google.com/spreadsheets/123"
+          :publisher-id nil
+          :publisher-name ""
           :user-id nil}})
 
 (def test-events
@@ -45,6 +56,8 @@
             {:event/type :congregation.event/settings-updated
              :congregation/id cong-id
              :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"}]))
+
+(def test-publishers-by-id {cong-id {publisher-id test-publisher}})
 
 (def fake-get-users
   (fn [_conn query]
@@ -58,7 +71,9 @@
 
 (use-fixtures :once (fn [f]
                       (binding [html/*page-path* "/settings-page-url"
-                                user/get-users fake-get-users]
+                                user/get-users fake-get-users
+                                publisher/publishers-by-id (fn [_conn cong-id]
+                                                             (get test-publishers-by-id cong-id))]
                         (f))))
 
 (deftest model!-test
@@ -235,6 +250,12 @@
             You can edit the maps using the QGIS application, for which you will need the following QGIS project file.
 
             Download QGIS project file
+
+          Publishers
+
+            Name
+            John Doe      Edit
+            [] Add publisher
 
           Users
 

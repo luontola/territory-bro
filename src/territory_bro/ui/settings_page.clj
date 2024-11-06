@@ -6,6 +6,7 @@
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
+            [territory-bro.infra.util :as util]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.forms :as forms]
             [territory-bro.ui.hiccup :as h]
@@ -20,10 +21,16 @@
         _ (when-not (dmz/view-settings-page? cong-id)
             (dmz/access-denied!))
         congregation (dmz/get-congregation cong-id)
+        publisher-id (some-> (get-in request [:path-params :publisher])
+                             (parse-uuid))
+        publisher (dmz/get-publisher cong-id publisher-id)
+        publishers (dmz/list-publishers cong-id)
         users (dmz/list-congregation-users cong-id)
         new-user (some-> (get-in request [:params :new-user])
                          (parse-uuid))]
     {:congregation (select-keys congregation [:congregation/name])
+     :publisher publisher
+     :publishers publishers
      :users (->> users
                  (mapv (fn [user]
                          (assoc user :new? (= new-user (:user/id user)))))
@@ -37,6 +44,10 @@
                                    (:congregation/name congregation))
             :loans-csv-url (or (get-in request [:params :loans-csv-url])
                                (:congregation/loans-csv-url congregation))
+            :publisher-id publisher-id
+            :publisher-name (or (get-in request [:params :publisher-name])
+                                (:publisher/name publisher)
+                                "")
             :user-id (get-in request [:params :user-id])}}))
 
 (defn loans-csv-url-info []
@@ -128,6 +139,96 @@
               (h/raw))]
       [:p [:a.pure-button {:href (str html/*page-path* "/qgis-project")}
            (i18n/t "EditingMaps.downloadQgisProject")]]])))
+
+(defn view-publisher-row [{:keys [publisher]}]
+  (let [styles (:UserManagement (css/modules))]
+    (h/html
+     [:tr {:hx-target "this"
+           :hx-swap "outerHTML"}
+      [:td (:publisher/name publisher)]
+      [:td {:style {:text-align "right"}}
+       [:a {:href "#"
+            :hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")}
+        "Edit"]]]))) ; TODO: i18n
+
+(defn add-publisher-row [{:keys [form]}]
+  (let [styles (:UserManagement (css/modules))
+        errors nil
+        missing-name? (contains? errors :missing-name)
+        non-unique-name? (contains? errors :non-unique-name)
+        error? (or missing-name?
+                   non-unique-name?)]
+    (h/html
+     [:tr
+      [:td {:colspan 2
+            :style {:padding "4px"}}
+       [:form.pure-form {:hx-post (str html/*page-path* "/publishers")}
+        [:input#publisher-name {:name "publisher-name"
+                                :type "text"
+                                :autocomplete "off"
+                                :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
+                                :required true
+                                :value (:publisher-name form)
+                                :aria-invalid (when error? "true")}]
+        " "
+        [:button.pure-button.pure-button-primary {:type "submit"}
+         "Add publisher"] ; TODO: i18n
+        [:div
+         (when error?
+           [:span.pure-form-message-inline " ⚠️ "])
+         (when non-unique-name?
+           [:span.pure-form-message-inline "There is already a publisher with that name"])]]]]))) ; TODO: i18n
+
+(defn edit-publisher-row [{:keys [form]}]
+  (let [styles (:UserManagement (css/modules)) ; TODO: css module for publisher management
+        publisher-id (:publisher-id form)
+        errors nil
+        missing-name? (contains? errors :missing-name)
+        non-unique-name? (contains? errors :non-unique-name)
+        error? (or missing-name?
+                   non-unique-name?)]
+    (h/html
+     [:tr {:hx-target "this"
+           :hx-swap "outerHTML"}
+      [:td {:colspan 2
+            :style {:padding "4px"}}
+       [:form.pure-form {:hx-post (str html/*page-path* "/publishers/" publisher-id)}
+        [:input#publisher-name {:name "publisher-name"
+                                :type "text"
+                                :autocomplete "off"
+                                :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
+                                :required true
+                                :value (:publisher-name form)
+                                :aria-invalid (when error? "true")}]
+        " "
+        [:button.pure-button.pure-button-primary {:type "submit"}
+         "Save"]
+        " "
+        [:button.pure-button {:hx-delete (str html/*page-path* "/publishers/" publisher-id)
+                              :type "button"
+                              :class (:removeUser styles)}
+         "Delete"]
+        " "
+        [:button.pure-button {:hx-get (str html/*page-path* "/publishers/" publisher-id)
+                              :type "button"}
+         "Cancel"]]]])))
+
+(defn publisher-management-section [{:keys [publishers permissions form errors] :as model}]
+  (when (:configure-congregation permissions)
+    (let [errors (group-by first errors)]
+      (h/html
+       [:section#publishers-section {:hx-target "this"
+                                     :hx-swap "outerHTML"}
+        [:h2 "Publishers"] ; TODO: i18n
+        [:table.pure-table.pure-table-horizontal
+         [:thead
+          [:tr
+           [:th "Name"] ; TODO: i18n
+           [:th]]]
+         [:tbody
+          (for [publisher (util/natural-sort-by :publisher/name publishers)]
+            (view-publisher-row (assoc model :publisher publisher)))
+          (add-publisher-row model)]]]))))
 
 
 (defn identity-provider [user]
@@ -228,10 +329,12 @@
      [:div {:class (:sections styles)}
       (congregation-settings-section model)
       (editing-maps-section model)
+      (publisher-management-section model)
       (user-management-section model)])))
 
 (defn view! [request]
   (view (model! request)))
+
 
 (defn save-congregation-settings! [request]
   (let [cong-id (get-in request [:path-params :congregation])
@@ -296,6 +399,31 @@
    ["/qgis-project"
     {:get {:handler (fn [request]
                       (download-qgis-project request))}}]
+
+   ["/publishers"
+    {:get {:handler (fn [request]
+                      (-> (model! request)
+                          (publisher-management-section)
+                          (html/response)))}
+     :post {:handler (fn [request]
+                       ; TODO: add publisher
+                       (http-response/see-other (str html/*page-path* "/publishers")))}}]
+   ["/publishers/:publisher"
+    {:get {:handler (fn [request]
+                      (-> (model! request)
+                          (view-publisher-row)
+                          (html/response)))}
+     :post {:handler (fn [request]
+                       ; TODO: save publisher
+                       (http-response/see-other (:uri request)))}
+     :delete {:handler (fn [request]
+                         ; TODO: remove publisher
+                         (html/response ""))}}]
+   ["/publishers/:publisher/edit"
+    {:get {:handler (fn [request]
+                      (-> (model! request)
+                          (edit-publisher-row)
+                          (html/response)))}}]
 
    ["/users"
     {:get {:handler (fn [request]
