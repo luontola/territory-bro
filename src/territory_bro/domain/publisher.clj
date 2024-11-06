@@ -2,6 +2,7 @@
   (:require [clojure.core.cache.wrapped :as cache]
             [clojure.string :as str]
             [mount.core :as mount]
+            [next.jdbc :as jdbc]
             [territory-bro.infra.db :as db]
             [territory-bro.ui.html :as html])
   (:import (java.time Duration)
@@ -53,6 +54,7 @@
       (-> found first :publisher/id))))
 
 (defn save-publisher! [conn publisher]
+  (assert (jdbc/active-tx?))
   (let [cong-id (:congregation/id publisher)
         publisher-id (:publisher/id publisher)
         new-name (normalized-name (:publisher/name publisher))

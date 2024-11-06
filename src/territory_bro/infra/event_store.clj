@@ -1,5 +1,6 @@
 (ns territory-bro.infra.event-store
-  (:require [territory-bro.events :as events]
+  (:require [next.jdbc :as jdbc]
+            [territory-bro.events :as events]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db])
   (:import (java.util UUID)
@@ -64,6 +65,7 @@
         (throw e)))))
 
 (defn save! [conn stream-id stream-revision events]
+  (assert (jdbc/active-tx?))
   ;; The prepare_new_event trigger already locks the events table, but
   ;; transaction conflicts still happen when generating multiple QR codes
   ;; in parallel. Maybe the insert statement acquires a lower level lock
