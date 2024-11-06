@@ -2,7 +2,11 @@
 select congregation, id, name
 from publisher
 where congregation = :congregation
-order by name;
+order by name
+/*~ (when (:for-update? params) */
+    for update
+/*~ ) ~*/
+;
 
 -- :name save-publisher :! :n
 insert into publisher (congregation, id, name)

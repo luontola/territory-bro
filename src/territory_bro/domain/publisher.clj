@@ -15,12 +15,16 @@
      :publisher/id (:id row)
      :publisher/name (:name row)}))
 
-(defn- publishers-by-id* [conn cong-id]
-  (->> (db/query! conn queries :list-publishers {:congregation cong-id})
-       (mapv format-publisher)
-       (reduce (fn [m publisher]
-                 (assoc m (:publisher/id publisher) publisher))
-               {})))
+(defn- publishers-by-id*
+  ([conn cong-id]
+   (publishers-by-id* conn cong-id nil))
+  ([conn cong-id {:keys [for-update?]}]
+   (->> (db/query! conn queries :list-publishers {:congregation cong-id
+                                                  :for-update? for-update?})
+        (mapv format-publisher)
+        (reduce (fn [m publisher]
+                  (assoc m (:publisher/id publisher) publisher))
+                {}))))
 
 (mount/defstate publishers-cache
   :start (cache/ttl-cache-factory {:ttl (.toMillis (Duration/ofMinutes 5))}))
@@ -55,7 +59,7 @@
         existing-names (into #{}
                              (comp (remove #(= publisher-id (:publisher/id %)))
                                    (map #(str/lower-case (:publisher/name %))))
-                             (vals (publishers-by-id* conn cong-id)))]
+                             (vals (publishers-by-id* conn cong-id {:for-update? true})))]
     (when (str/blank? new-name)
       (throw (ValidationException. [[:missing-name]])))
     (when (contains? existing-names (str/lower-case new-name))
