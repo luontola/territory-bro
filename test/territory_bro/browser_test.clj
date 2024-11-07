@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer :all]
+            [clojure.tools.logging :as log]
             [etaoin.api :as b]
             [etaoin.api2 :as b2]
             [next.jdbc :as jdbc]
@@ -218,6 +219,7 @@
           (loop [tries 10]
             (when (and (pos? tries)
                        (not (b/has-text? *driver* "101")))
+              (log/info "Waiting for GIS sync," tries "tries")
               (doto *driver*
                 (b/wait 0.5)
                 (b/refresh)
