@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
+            [medley.core :refer [dissoc-in]]
             [reitit.ring :as ring]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.congregation :as congregation]
@@ -228,13 +229,63 @@
 ;;;; Publishers
 
 (deftest view-publisher-row-test
-  (is true)) ; TODO
+  (testing "shows the publisher and their assigned territories"
+    (let [html (settings-page/view-publisher-row publisher-model)]
+      (is (= (html/normalize-whitespace
+              "John Doe   123   Edit")
+             (html/visible-text html)))
+      (is (str/includes? html " href=\"/congregation/00000000-0000-0000-0000-000000000001/territories/00000000-0000-0000-0000-000000000002\"")
+          "links to the territory")))
+
+  (testing "multiple assigned territories"
+    (let [model (update-in publisher-model [:publisher :assigned-territories] concat [{:territory/id (random-uuid)
+                                                                                       :territory/number "100"}
+                                                                                      {:territory/id (random-uuid)
+                                                                                       :territory/number "200"}])]
+      (is (= (html/normalize-whitespace
+              "John Doe   100, 123, 200   Edit")
+             (-> (settings-page/view-publisher-row model)
+                 html/visible-text)))))
+
+  (testing "no assigned territories"
+    (let [model (dissoc-in publisher-model [:publisher :assigned-territories])]
+      (is (= (html/normalize-whitespace
+              "John Doe   Edit")
+             (-> (settings-page/view-publisher-row model)
+                 html/visible-text)))))
+
+  (testing "requires the configure-congregation permission"
+    (let [model (replace-in publisher-model [:permissions :configure-congregation] true false)]
+      (is (nil? (settings-page/view-publisher-row model)))))
+
+  (testing "publisher not found: removes the table row"
+    ;; Handles the situation that the publisher has been removed, and the row is refreshed with htmx.
+    ;; Empty string removes the table row, whereas nil would return HTTP error 404.
+    (let [model (dissoc publisher-model :publisher)]
+      (is (= "" (settings-page/view-publisher-row model))))))
 
 (deftest edit-publisher-row-test
-  (is true)) ; TODO
+  (testing "shows a form for editing the publisher"
+    (is (= (html/normalize-whitespace
+            "[John Doe]   Save   Delete   Cancel")
+           (-> (settings-page/edit-publisher-row publisher-model)
+               html/visible-text))))
+
+  (testing "requires the configure-congregation permission"
+    (let [model (replace-in publisher-model [:permissions :configure-congregation] true false)]
+      (is (nil? (settings-page/edit-publisher-row model)))))
+
+  (testing "publisher not found: removes the table row"
+    ;; Handles the situation that the publisher has been removed, and the row is refreshed with htmx.
+    ;; Empty string removes the table row, whereas nil would return HTTP error 404.
+    (let [model (dissoc publisher-model :publisher)]
+      (is (= "" (settings-page/edit-publisher-row model))))))
 
 (deftest add-publisher-row-test
-  (is true)) ; TODO
+  (testing "shows a form for adding a new publisher"
+    (is (= "[] Add publisher"
+           (-> (settings-page/add-publisher-row model)
+               html/visible-text)))))
 
 (deftest publisher-management-section-test
   ;; TODO: another permit for publisher management? or only for quick-adding publishers?

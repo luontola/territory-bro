@@ -176,62 +176,66 @@
 
 ;;;; Publishers
 
-(defn view-publisher-row [{:keys [publisher congregation]}]
-  (let [styles (:UserManagement (css/modules))]
-    (h/html
-     [:tr {:hx-target "this"
-           :hx-swap "outerHTML"}
-      [:td (:publisher/name publisher)]
-      [:td (->> (:assigned-territories publisher)
-                (util/natural-sort-by :territory/number)
-                (mapv (fn [territory]
-                        (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
-                                 (:territory/number territory)])))
-                (interpose ", "))]
-      [:td {:style {:text-align "right"}}
-       [:a {:href "#"
-            :hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")}
-        "Edit"]]]))) ; TODO: i18n
+(defn view-publisher-row [{:keys [publisher congregation permissions]}]
+  (when (:configure-congregation permissions)
+    (if (nil? publisher)
+      ""
+      (h/html
+       [:tr {:hx-target "this"
+             :hx-swap "outerHTML"}
+        [:td (:publisher/name publisher)]
+        [:td (->> (:assigned-territories publisher)
+                  (util/natural-sort-by :territory/number)
+                  (mapv (fn [territory]
+                          (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
+                                   (:territory/number territory)])))
+                  (interpose ", "))]
+        [:td {:style {:text-align "right"}}
+         [:a {:hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")
+              :href "#"}
+          "Edit"]]])))) ; TODO: i18n
 
 (def ^:private publisher-table-column-count 3)
 
-(defn edit-publisher-row [{:keys [form]}]
-  (let [styles (:UserManagement (css/modules)) ; TODO: css module for publisher management
-        publisher-id (:publisher-id form)
-        errors nil
-        missing-name? (contains? errors :missing-name)
-        non-unique-name? (contains? errors :non-unique-name)
-        error? (or missing-name?
-                   non-unique-name?)]
-    (h/html
-     [:tr {:hx-target "this"
-           :hx-swap "outerHTML"}
-      [:td {:colspan publisher-table-column-count
-            :style {:padding "4px"}}
-       [:form.pure-form {:hx-post (str html/*page-path* "/publishers/" publisher-id)}
-        [:input#publisher-name {:name "publisher-name"
-                                :type "text"
-                                :autocomplete "off"
-                                :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
-                                :required true
-                                :value (:publisher-name form)
-                                :aria-invalid (when error? "true")}]
-        " "
-        [:button.pure-button.pure-button-primary {:type "submit"}
-         "Save"]
-        " "
-        [:button.pure-button {:hx-delete (str html/*page-path* "/publishers/" publisher-id)
-                              :type "button"
-                              :class (:removeUser styles)}
-         "Delete"]
-        " "
-        [:button.pure-button {:hx-get (str html/*page-path* "/publishers/" publisher-id)
-                              :type "button"}
-         "Cancel"]]]])))
+(defn edit-publisher-row [{:keys [publisher form permissions]}]
+  (when (:configure-congregation permissions)
+    (if (nil? publisher)
+      ""
+      (let [styles (:UserManagement (css/modules)) ; TODO: css module for publisher management
+            publisher-id (:publisher-id form)
+            errors nil ; TODO: test through form submit
+            missing-name? (contains? errors :missing-name)
+            non-unique-name? (contains? errors :non-unique-name)
+            error? (or missing-name?
+                       non-unique-name?)]
+        (h/html
+         [:tr {:hx-target "this"
+               :hx-swap "outerHTML"}
+          [:td {:colspan publisher-table-column-count
+                :style {:padding "4px"}}
+           [:form.pure-form {:hx-post (str html/*page-path* "/publishers/" publisher-id)}
+            [:input#publisher-name {:name "publisher-name"
+                                    :type "text"
+                                    :autocomplete "off"
+                                    :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
+                                    :required true
+                                    :value (:publisher-name form)
+                                    :aria-invalid (when error? "true")}]
+            " "
+            [:button.pure-button.pure-button-primary {:type "submit"}
+             "Save"]
+            " "
+            [:button.pure-button {:hx-delete (str html/*page-path* "/publishers/" publisher-id)
+                                  :type "button"
+                                  :class (:removeUser styles)}
+             "Delete"]
+            " "
+            [:button.pure-button {:hx-get (str html/*page-path* "/publishers/" publisher-id)
+                                  :type "button"}
+             "Cancel"]]]])))))
 
 (defn add-publisher-row [{:keys [form]}]
-  (let [styles (:UserManagement (css/modules))
-        errors nil
+  (let [errors nil
         missing-name? (contains? errors :missing-name)
         non-unique-name? (contains? errors :non-unique-name)
         error? (or missing-name?
@@ -257,23 +261,22 @@
          (when non-unique-name?
            [:span.pure-form-message-inline "There is already a publisher with that name"])]]]]))) ; TODO: i18n
 
-(defn publisher-management-section [{:keys [publishers permissions form errors] :as model}]
+(defn publisher-management-section [{:keys [publishers permissions] :as model}]
   (when (:configure-congregation permissions)
-    (let [errors (group-by first errors)]
-      (h/html
-       [:section#publishers-section {:hx-target "this"
-                                     :hx-swap "outerHTML"}
-        [:h2 "Publishers"] ; TODO: i18n
-        [:table.pure-table.pure-table-horizontal
-         [:thead
-          [:tr
-           [:th "Name"] ; TODO: i18n
-           [:th "Assigned territories"] ; TODO: i18n
-           [:th]]]
-         [:tbody
-          (for [publisher (util/natural-sort-by :publisher/name publishers)]
-            (view-publisher-row (assoc model :publisher publisher)))
-          (add-publisher-row model)]]]))))
+    (h/html
+     [:section#publishers-section {:hx-target "this"
+                                   :hx-swap "outerHTML"}
+      [:h2 "Publishers"] ; TODO: i18n
+      [:table.pure-table.pure-table-horizontal
+       [:thead
+        [:tr
+         [:th "Name"] ; TODO: i18n
+         [:th "Assigned territories"] ; TODO: i18n
+         [:th]]]
+       [:tbody
+        (for [publisher (util/natural-sort-by :publisher/name publishers)]
+          (view-publisher-row (assoc model :publisher publisher)))
+        (add-publisher-row model)]]])))
 
 
 ;;;; Users
@@ -444,7 +447,7 @@
                        (http-response/see-other (:uri request)))}
      :delete {:handler (fn [request]
                          ; TODO: remove publisher
-                         (html/response ""))}}]
+                         (http-response/see-other (:uri request)))}}]
    ["/publishers/:publisher/edit"
     {:get {:handler (fn [request]
                       (-> (model! request)
