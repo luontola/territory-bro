@@ -33,7 +33,7 @@
 (def ^File postmortem-dir (io/file "target/etaoin-postmortem"))
 (def ^File download-dir (io/file "target/etaoin-download"))
 (def browser-config
-  {:size [1920 1080]
+  {:size [1920 2000]
    :prefs {:download.default_directory (.getAbsolutePath download-dir)}
    :args ["--disable-search-engine-choice-screen"]})
 
