@@ -157,7 +157,7 @@
                 (util/natural-sort-by :territory/number)
                 (mapv (fn [territory]
                         (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
-                                 (str/trim (:territory/number territory))])))
+                                 (:territory/number territory)])))
                 (interpose ", "))]
       [:td {:style {:text-align "right"}}
        [:a {:href "#"

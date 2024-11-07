@@ -133,7 +133,25 @@
       (testing "> deleted"
         (let [events (conj events territory-deleted)
               expected {}]
-          (is (= expected (apply-events events))))))))
+          (is (= expected (apply-events events)))))))
+
+  (testing "trims whitespace in territory number, addresses and region"
+    ;; If the territory number was copy-pasted from Excel or somewhere, it's
+    ;; possible that there will be some trailing whitespace. For good measure,
+    ;; trim also the other text fields. There could be some future UI element
+    ;; where a newline at the end of the addresses would show up as an empty row.
+    (let [events [(assoc territory-defined
+                         :territory/number "  234  "
+                         :territory/addresses "  trimmed addresses  "
+                         :territory/region "  trimmed region  ")]
+          expected {::territory/territories
+                    {cong-id {territory-id {:territory/id territory-id
+                                            :territory/number "234"
+                                            :territory/addresses "trimmed addresses"
+                                            :territory/region "trimmed region"
+                                            :territory/meta {:foo "bar"}
+                                            :territory/location testdata/wkt-multi-polygon}}}}]
+      (is (= expected (apply-events events))))))
 
 
 ;;;; Queries

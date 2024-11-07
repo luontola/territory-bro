@@ -1,5 +1,6 @@
 (ns territory-bro.domain.territory
-  (:require [medley.core :refer [dissoc-in greatest]]
+  (:require [clojure.string :as str]
+            [medley.core :refer [dissoc-in greatest]]
             [territory-bro.gis.gis-change :as gis-change]
             [territory-bro.infra.util :refer [assoc-dissoc conj-set]])
   (:import (java.time LocalDate)
@@ -19,9 +20,9 @@
              (fn [territory]
                (-> territory
                    (assoc :territory/id (:territory/id event))
-                   (assoc :territory/number (:territory/number event))
-                   (assoc :territory/addresses (:territory/addresses event))
-                   (assoc :territory/region (:territory/region event))
+                   (assoc :territory/number (str/trim (:territory/number event)))
+                   (assoc :territory/addresses (str/trim (:territory/addresses event)))
+                   (assoc :territory/region (str/trim (:territory/region event)))
                    (assoc :territory/meta (:territory/meta event))
                    (assoc :territory/location (:territory/location event))))))
 
