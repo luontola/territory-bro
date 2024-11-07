@@ -31,10 +31,11 @@
 
 (defn wrap-parse-path-params [handler]
   (fn [request]
-    (let [{:keys [congregation territory]} (:path-params request)
+    (let [{:keys [congregation territory publisher]} (:path-params request)
           request (cond-> request
                     (some? congregation) (update-in [:path-params :congregation] parse-congregation-id)
-                    (some? territory) (update-in [:path-params :territory] parse-mandatory-uuid))]
+                    (some? territory) (update-in [:path-params :territory] parse-mandatory-uuid)
+                    (some? publisher) (update-in [:path-params :publisher] parse-mandatory-uuid))]
       (handler request))))
 
 (def routes

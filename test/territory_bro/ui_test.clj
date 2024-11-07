@@ -23,7 +23,11 @@
       (is (= {:path-params {:congregation (UUID. 0 1)
                             :territory (UUID. 0 2)}}
              (handle {:path-params {:congregation "00000000-0000-0000-0000-000000000001"
-                                    :territory "00000000-0000-0000-0000-000000000002"}}))))
+                                    :territory "00000000-0000-0000-0000-000000000002"}})))
+      (is (= {:path-params {:congregation (UUID. 0 1)
+                            :publisher (UUID. 0 3)}}
+             (handle {:path-params {:congregation "00000000-0000-0000-0000-000000000001"
+                                    :publisher "00000000-0000-0000-0000-000000000003"}}))))
 
     (testing "parse 'demo' congregation"
       (is (= {:path-params {:congregation "demo"}}

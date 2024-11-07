@@ -18,19 +18,26 @@
 
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
+        publisher-id (get-in request [:path-params :publisher])
         _ (when-not (dmz/view-settings-page? cong-id)
             (dmz/access-denied!))
         congregation (dmz/get-congregation cong-id)
-        publisher-id (some-> (get-in request [:path-params :publisher])
-                             (parse-uuid))
         publisher (dmz/get-publisher cong-id publisher-id)
         publishers (dmz/list-publishers cong-id)
+        territories-by-assigned-publisher (group-by #(-> % :territory/current-assignment :publisher/id)
+                                                    (dmz/list-territories cong-id))
+        enrich-publisher-with-assignments (fn [publisher]
+                                            (if-some [territories (get territories-by-assigned-publisher (:publisher/id publisher))]
+                                              (let [territories (mapv #(select-keys % [:territory/id :territory/number])
+                                                                      territories)]
+                                                (assoc publisher :assigned-territories territories))
+                                              publisher))
         users (dmz/list-congregation-users cong-id)
         new-user (some-> (get-in request [:params :new-user])
                          (parse-uuid))]
-    {:congregation (select-keys congregation [:congregation/name])
-     :publisher publisher
-     :publishers publishers
+    {:congregation (select-keys congregation [:congregation/id :congregation/name])
+     :publisher (some-> publisher enrich-publisher-with-assignments) ; nil, except when editing a publisher
+     :publishers (map enrich-publisher-with-assignments publishers) ; lazy, because not every htmx component uses publishers
      :users (->> users
                  (mapv (fn [user]
                          (assoc user :new? (= new-user (:user/id user)))))
@@ -140,16 +147,24 @@
       [:p [:a.pure-button {:href (str html/*page-path* "/qgis-project")}
            (i18n/t "EditingMaps.downloadQgisProject")]]])))
 
-(defn view-publisher-row [{:keys [publisher]}]
+(defn view-publisher-row [{:keys [publisher congregation]}]
   (let [styles (:UserManagement (css/modules))]
     (h/html
      [:tr {:hx-target "this"
            :hx-swap "outerHTML"}
       [:td (:publisher/name publisher)]
+      [:td (->> (:assigned-territories publisher)
+                (util/natural-sort-by :territory/number)
+                (mapv (fn [territory]
+                        (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
+                                 (str/trim (:territory/number territory))])))
+                (interpose ", "))]
       [:td {:style {:text-align "right"}}
        [:a {:href "#"
             :hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")}
         "Edit"]]]))) ; TODO: i18n
+
+(def ^:private publisher-table-column-count 3)
 
 (defn add-publisher-row [{:keys [form]}]
   (let [styles (:UserManagement (css/modules))
@@ -160,7 +175,7 @@
                    non-unique-name?)]
     (h/html
      [:tr
-      [:td {:colspan 2
+      [:td {:colspan publisher-table-column-count
             :style {:padding "4px"}}
        [:form.pure-form {:hx-post (str html/*page-path* "/publishers")}
         [:input#publisher-name {:name "publisher-name"
@@ -190,7 +205,7 @@
     (h/html
      [:tr {:hx-target "this"
            :hx-swap "outerHTML"}
-      [:td {:colspan 2
+      [:td {:colspan publisher-table-column-count
             :style {:padding "4px"}}
        [:form.pure-form {:hx-post (str html/*page-path* "/publishers/" publisher-id)}
         [:input#publisher-name {:name "publisher-name"
@@ -224,6 +239,7 @@
          [:thead
           [:tr
            [:th "Name"] ; TODO: i18n
+           [:th "Assigned territories"] ; TODO: i18n
            [:th]]]
          [:tbody
           (for [publisher (util/natural-sort-by :publisher/name publishers)]

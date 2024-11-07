@@ -8,6 +8,7 @@
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.domain.publisher :as publisher]
+            [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]
@@ -18,21 +19,28 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.settings-page :as settings-page])
   (:import (clojure.lang ExceptionInfo)
+           (java.time LocalDate)
            (java.util UUID)
            (territory_bro ValidationException)))
 
 (def cong-id (UUID. 0 1))
-(def publisher-id (UUID. 0 2))
-(def user-id (UUID. 0 3))
+(def territory-id (UUID. 0 2))
+(def assignment-id (UUID. 0 3))
+(def publisher-id (UUID. 0 4))
+(def user-id (UUID. 0 5))
 (def test-publisher
   {:congregation/id cong-id
    :publisher/id publisher-id
    :publisher/name "John Doe"})
+(def test-publisher-with-assignments
+  (assoc test-publisher :assigned-territories [{:territory/id territory-id
+                                                :territory/number "123"}]))
 
 (def model
-  {:congregation {:congregation/name "Congregation Name"}
+  {:congregation {:congregation/id cong-id
+                  :congregation/name "Congregation Name"}
    :publisher nil
-   :publishers [test-publisher]
+   :publishers [test-publisher-with-assignments]
    :users [{:user/id user-id
             :user/subject "google-oauth2|102883237794451111459"
             :user/attributes {:name "Esko Luontola"
@@ -46,6 +54,11 @@
           :publisher-id nil
           :publisher-name ""
           :user-id nil}})
+(def publisher-model
+  (-> model
+      (assoc :publisher test-publisher-with-assignments)
+      (update :form merge {:publisher-id publisher-id
+                           :publisher-name "John Doe"})))
 
 (def test-events
   (flatten [{:event/type :congregation.event/congregation-created
@@ -55,7 +68,21 @@
             (congregation/admin-permissions-granted cong-id user-id)
             {:event/type :congregation.event/settings-updated
              :congregation/id cong-id
-             :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"}]))
+             :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"}
+            {:event/type :territory.event/territory-defined
+             :congregation/id cong-id
+             :territory/id territory-id
+             :territory/number "123"
+             :territory/addresses "the addresses"
+             :territory/region "the region"
+             :territory/meta {:foo "bar"}
+             :territory/location testdata/wkt-helsinki-rautatientori}
+            {:event/type :territory.event/territory-assigned
+             :congregation/id cong-id
+             :territory/id territory-id
+             :assignment/id assignment-id
+             :assignment/start-date (LocalDate/of 2000 1 1)
+             :publisher/id publisher-id}]))
 
 (def test-publishers-by-id {cong-id {publisher-id test-publisher}})
 
@@ -101,6 +128,10 @@
           (testutil/with-anonymous-user
             (is (thrown-match? ExceptionInfo dmz-test/not-logged-in
                                (settings-page/model! request)))))
+
+        (testing "editing a publisher"
+          (let [request (assoc-in request [:path-params :publisher] publisher-id)]
+            (is (= publisher-model (settings-page/model! request)))))
 
         (testing "user was added"
           (let [request (assoc-in request [:params :new-user] (str user-id))
@@ -253,8 +284,8 @@
 
           Publishers
 
-            Name
-            John Doe      Edit
+            Name       Assigned territories
+            John Doe   123                    Edit
             [] Add publisher
 
           Users
