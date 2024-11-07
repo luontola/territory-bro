@@ -155,16 +155,95 @@
                           :users
                           (mapv (comp :name :user/attributes))))))))))))
 
+;;;; Congregation settings
+
 (deftest congregation-settings-section-test
   (testing "requires the configure-congregation permission"
     (let [model (replace-in model [:permissions :configure-congregation] true false)]
       (is (nil? (settings-page/congregation-settings-section model))))))
+
+(deftest save-congregation-settings!-test
+  (let [request {:path-params {:congregation cong-id}
+                 :params {:congregation-name "new name"
+                          :loans-csv-url "new url"}}]
+    (testutil/with-events test-events
+      (testutil/with-user-id user-id
+
+        (testing "save successful: redirects to same page"
+          (with-fixtures [fake-dispatcher-fixture]
+            (let [response (settings-page/save-congregation-settings! request)]
+              (is (= {:status 303
+                      :headers {"Location" "/settings-page-url"}
+                      :body ""}
+                     response))
+              (is (= {:command/type :congregation.command/update-congregation
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :congregation/loans-csv-url "new url"
+                      :congregation/name "new name"}
+                     (dissoc @*last-command :command/time))))))
+
+        (testing "save failed: highlights erroneous form fields, doesn't forget invalid user input"
+          (binding [dispatcher/command! (fn [& _]
+                                          (throw (ValidationException. [[:missing-name]
+                                                                        [:disallowed-loans-csv-url]])))]
+            (let [response (settings-page/save-congregation-settings! request)]
+              (is (= forms/validation-error-http-status (:status response)))
+              (is (str/includes?
+                   (html/visible-text (:body response))
+                   (html/normalize-whitespace
+                    "Congregation name [new name] ⚠️
+                     Experimental features
+                     Territory loans CSV URL (optional) [new url] ⚠️"))))))))))
+
+
+;;;; Editing maps
 
 (deftest editing-maps-section-test
   (testing "requires the gis-access permission"
     (let [model (replace-in model [:permissions :gis-access] true false)]
       (is (nil? (settings-page/editing-maps-section model))))))
 
+(deftest download-qgis-project-test
+  (let [request {:path-params {:congregation cong-id}}]
+    (testutil/with-events (concat test-events
+                                  [{:event/type :congregation.event/gis-user-created
+                                    :congregation/id cong-id
+                                    :user/id user-id
+                                    :gis-user/username "username123"
+                                    :gis-user/password "password123"}])
+      (binding [config/env {:gis-database-host "gis.example.com"
+                            :gis-database-name "example_db"}]
+        (testutil/with-user-id user-id
+
+          (testing "downloads the QGIS project file for the congregation and user"
+            (let [response (settings-page/download-qgis-project request)]
+              (is (= {:status 200
+                      :headers {"Content-Type" "application/octet-stream"
+                                "Content-Disposition" "attachment; filename=\"Congregation Name.qgs\""}}
+                     (dissoc response :body)))
+              (is (str/includes? (:body response) "dbname='example_db' host=gis.example.com port=5432 user='username123'")))))))))
+
+
+;;;; Publishers
+
+(deftest view-publisher-row-test
+  (is true)) ; TODO
+
+(deftest edit-publisher-row-test
+  (is true)) ; TODO
+
+(deftest add-publisher-row-test
+  (is true)) ; TODO
+
+(deftest publisher-management-section-test
+  ;; TODO: another permit for publisher management? or only for quick-adding publishers?
+  (testing "requires the configure-congregation permission"
+    (let [model (replace-in model [:permissions :configure-congregation] true false)]
+      (is (nil? (settings-page/publisher-management-section model))))))
+
+
+;;;; Users
 
 (deftest identity-provider-test
   (is (= "" (settings-page/identity-provider nil)))
@@ -232,109 +311,6 @@
   (testing "requires the configure-congregation permission"
     (let [model (replace-in model [:permissions :configure-congregation] true false)]
       (is (nil? (settings-page/user-management-section model))))))
-
-
-(deftest view-test
-  (is (= (html/normalize-whitespace
-          "Settings
-
-          Congregation name [Congregation Name]
-
-          Experimental features
-
-          Territory loans CSV URL (optional) [https://docs.google.com/spreadsheets/123] Link to a Google Sheets spreadsheet published to the web as CSV
-             
-            {info.svg} Early Access Feature: Integrate with territory loans data from Google Sheets
-
-            If you keep track of your territory loans using Google Sheets, it's possible to export the data from there
-            and visualize it on the map on Territory Bro's Territories page. Eventually Territory Bro will handle the
-            territory loans accounting all by itself, but in the meanwhile this workaround gives some of the benefits.
-
-            Here is an example spreadsheet that you can use as a starting point. Also please contact me for assistance
-            and so that I will know to help you later with migration to full accounting support.
-
-            You'll need to create a sheet with the following structure:
-
-            Number Loaned Staleness
-            101    TRUE   2
-            102    FALSE  6
-
-            The Number column should contain the territory number. It's should match the territories in Territory Bro.
-
-            The Loaned column should contain \"TRUE\" when the territory is currently loaned to a publisher and
-            \"FALSE\" when nobody has it.
-
-            The Staleness column should indicate the number of months since the territory was last loaned or returned.
-
-            The first row of the sheet must contain the column names, but otherwise the sheet's structure is flexible:
-            The columns can be in any order. Columns with other names are ignored. Empty rows are ignored.
-
-            After you have such a sheet, you can expose it to the Internet through File | Share | Publish to web.
-
-            Publish that sheet as a CSV file and enter its URL to the above field on this settings page.
-
-          Save settings
-
-          Editing maps
-
-            The instructions for editing maps are in the user guide.
-            You can edit the maps using the QGIS application, for which you will need the following QGIS project file.
-
-            Download QGIS project file
-
-          Publishers
-
-            Name       Assigned territories
-            John Doe   123                    Edit
-            [] Add publisher
-
-          Users
-
-          To add users to this congregation, ask them to visit https://territorybro.com/join and copy their User ID
-          from that page and send it to you.
-
-          User ID []
-          Add user
-
-          Name              Email       Login method   Actions
-          Esko Luontola                 Google         Remove user")
-         (binding [config/env {:public-url "https://territorybro.com"}]
-           (-> (settings-page/view model)
-               html/visible-text)))))
-
-(deftest save-congregation-settings!-test
-  (let [request {:path-params {:congregation cong-id}
-                 :params {:congregation-name "new name"
-                          :loans-csv-url "new url"}}]
-    (testutil/with-events test-events
-      (testutil/with-user-id user-id
-
-        (testing "save successful: redirects to same page"
-          (with-fixtures [fake-dispatcher-fixture]
-            (let [response (settings-page/save-congregation-settings! request)]
-              (is (= {:status 303
-                      :headers {"Location" "/settings-page-url"}
-                      :body ""}
-                     response))
-              (is (= {:command/type :congregation.command/update-congregation
-                      :command/user user-id
-                      :congregation/id cong-id
-                      :congregation/loans-csv-url "new url"
-                      :congregation/name "new name"}
-                     (dissoc @*last-command :command/time))))))
-
-        (testing "save failed: highlights erroneous form fields, doesn't forget invalid user input"
-          (binding [dispatcher/command! (fn [& _]
-                                          (throw (ValidationException. [[:missing-name]
-                                                                        [:disallowed-loans-csv-url]])))]
-            (let [response (settings-page/save-congregation-settings! request)]
-              (is (= forms/validation-error-http-status (:status response)))
-              (is (str/includes?
-                   (html/visible-text (:body response))
-                   (html/normalize-whitespace
-                    "Congregation name [new name] ⚠️
-                     Experimental features
-                     Territory loans CSV URL (optional) [new url] ⚠️"))))))))))
 
 (deftest add-user!-test
   (let [new-user-id (UUID. 0 2)
@@ -425,25 +401,76 @@
                       :permission/ids []}
                      (dissoc @*last-command :command/time))))))))))
 
-(deftest download-qgis-project-test
-  (let [request {:path-params {:congregation cong-id}}]
-    (testutil/with-events (concat test-events
-                                  [{:event/type :congregation.event/gis-user-created
-                                    :congregation/id cong-id
-                                    :user/id user-id
-                                    :gis-user/username "username123"
-                                    :gis-user/password "password123"}])
-      (binding [config/env {:gis-database-host "gis.example.com"
-                            :gis-database-name "example_db"}]
-        (testutil/with-user-id user-id
 
-          (testing "downloads the QGIS project file for the congregation and user"
-            (let [response (settings-page/download-qgis-project request)]
-              (is (= {:status 200
-                      :headers {"Content-Type" "application/octet-stream"
-                                "Content-Disposition" "attachment; filename=\"Congregation Name.qgs\""}}
-                     (dissoc response :body)))
-              (is (str/includes? (:body response) "dbname='example_db' host=gis.example.com port=5432 user='username123'")))))))))
+;;;; Main view
+
+(deftest view-test
+  (is (= (html/normalize-whitespace
+          "Settings
+
+          Congregation name [Congregation Name]
+
+          Experimental features
+
+          Territory loans CSV URL (optional) [https://docs.google.com/spreadsheets/123] Link to a Google Sheets spreadsheet published to the web as CSV
+             
+            {info.svg} Early Access Feature: Integrate with territory loans data from Google Sheets
+
+            If you keep track of your territory loans using Google Sheets, it's possible to export the data from there
+            and visualize it on the map on Territory Bro's Territories page. Eventually Territory Bro will handle the
+            territory loans accounting all by itself, but in the meanwhile this workaround gives some of the benefits.
+
+            Here is an example spreadsheet that you can use as a starting point. Also please contact me for assistance
+            and so that I will know to help you later with migration to full accounting support.
+
+            You'll need to create a sheet with the following structure:
+
+            Number Loaned Staleness
+            101    TRUE   2
+            102    FALSE  6
+
+            The Number column should contain the territory number. It's should match the territories in Territory Bro.
+
+            The Loaned column should contain \"TRUE\" when the territory is currently loaned to a publisher and
+            \"FALSE\" when nobody has it.
+
+            The Staleness column should indicate the number of months since the territory was last loaned or returned.
+
+            The first row of the sheet must contain the column names, but otherwise the sheet's structure is flexible:
+            The columns can be in any order. Columns with other names are ignored. Empty rows are ignored.
+
+            After you have such a sheet, you can expose it to the Internet through File | Share | Publish to web.
+
+            Publish that sheet as a CSV file and enter its URL to the above field on this settings page.
+
+          Save settings
+
+          Editing maps
+
+            The instructions for editing maps are in the user guide.
+            You can edit the maps using the QGIS application, for which you will need the following QGIS project file.
+
+            Download QGIS project file
+
+          Publishers
+
+            Name       Assigned territories
+            John Doe   123                    Edit
+            [] Add publisher
+
+          Users
+
+          To add users to this congregation, ask them to visit https://territorybro.com/join and copy their User ID
+          from that page and send it to you.
+
+          User ID []
+          Add user
+
+          Name              Email       Login method   Actions
+          Esko Luontola                 Google         Remove user")
+         (binding [config/env {:public-url "https://territorybro.com"}]
+           (-> (settings-page/view model)
+               html/visible-text)))))
 
 (deftest routes-test
   (let [handler (ring/ring-handler (ring/router settings-page/routes))

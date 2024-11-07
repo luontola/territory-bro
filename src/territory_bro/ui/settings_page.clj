@@ -57,6 +57,9 @@
                                 "")
             :user-id (get-in request [:params :user-id])}}))
 
+
+;;;; Congregation settings
+
 (defn loans-csv-url-info []
   (let [styles (:CongregationSettings (css/modules))]
     (info-box/view
@@ -132,6 +135,22 @@
            [:button.pure-button.pure-button-primary {:type "submit"}
             (i18n/t "CongregationSettings.save")]]]]]))))
 
+(declare view)
+(defn save-congregation-settings! [request]
+  (let [cong-id (get-in request [:path-params :congregation])
+        name (get-in request [:params :congregation-name])
+        loans-csv-url (get-in request [:params :loans-csv-url])]
+    (try
+      (dmz/dispatch! {:command/type :congregation.command/update-congregation
+                      :congregation/id cong-id
+                      :congregation/name name
+                      :congregation/loans-csv-url loans-csv-url})
+      (http-response/see-other html/*page-path*)
+      (catch Exception e
+        (forms/validation-error-page-response e request model! view)))))
+
+
+;;;; Editing maps
 
 (defn editing-maps-section [{:keys [permissions]}]
   (when (:gis-access permissions)
@@ -146,6 +165,16 @@
               (h/raw))]
       [:p [:a.pure-button {:href (str html/*page-path* "/qgis-project")}
            (i18n/t "EditingMaps.downloadQgisProject")]]])))
+
+(defn download-qgis-project [request]
+  (let [cong-id (get-in request [:path-params :congregation])
+        {:keys [content filename]} (dmz/download-qgis-project cong-id)]
+    (-> (http-response/ok content)
+        (response/content-type "application/octet-stream")
+        (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))
+
+
+;;;; Publishers
 
 (defn view-publisher-row [{:keys [publisher congregation]}]
   (let [styles (:UserManagement (css/modules))]
@@ -165,34 +194,6 @@
         "Edit"]]]))) ; TODO: i18n
 
 (def ^:private publisher-table-column-count 3)
-
-(defn add-publisher-row [{:keys [form]}]
-  (let [styles (:UserManagement (css/modules))
-        errors nil
-        missing-name? (contains? errors :missing-name)
-        non-unique-name? (contains? errors :non-unique-name)
-        error? (or missing-name?
-                   non-unique-name?)]
-    (h/html
-     [:tr
-      [:td {:colspan publisher-table-column-count
-            :style {:padding "4px"}}
-       [:form.pure-form {:hx-post (str html/*page-path* "/publishers")}
-        [:input#publisher-name {:name "publisher-name"
-                                :type "text"
-                                :autocomplete "off"
-                                :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
-                                :required true
-                                :value (:publisher-name form)
-                                :aria-invalid (when error? "true")}]
-        " "
-        [:button.pure-button.pure-button-primary {:type "submit"}
-         "Add publisher"] ; TODO: i18n
-        [:div
-         (when error?
-           [:span.pure-form-message-inline " ⚠️ "])
-         (when non-unique-name?
-           [:span.pure-form-message-inline "There is already a publisher with that name"])]]]]))) ; TODO: i18n
 
 (defn edit-publisher-row [{:keys [form]}]
   (let [styles (:UserManagement (css/modules)) ; TODO: css module for publisher management
@@ -228,6 +229,34 @@
                               :type "button"}
          "Cancel"]]]])))
 
+(defn add-publisher-row [{:keys [form]}]
+  (let [styles (:UserManagement (css/modules))
+        errors nil
+        missing-name? (contains? errors :missing-name)
+        non-unique-name? (contains? errors :non-unique-name)
+        error? (or missing-name?
+                   non-unique-name?)]
+    (h/html
+     [:tr
+      [:td {:colspan publisher-table-column-count
+            :style {:padding "4px"}}
+       [:form.pure-form {:hx-post (str html/*page-path* "/publishers")}
+        [:input#publisher-name {:name "publisher-name"
+                                :type "text"
+                                :autocomplete "off"
+                                :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
+                                :required true
+                                :value (:publisher-name form)
+                                :aria-invalid (when error? "true")}]
+        " "
+        [:button.pure-button.pure-button-primary {:type "submit"}
+         "Add publisher"] ; TODO: i18n
+        [:div
+         (when error?
+           [:span.pure-form-message-inline " ⚠️ "])
+         (when non-unique-name?
+           [:span.pure-form-message-inline "There is already a publisher with that name"])]]]]))) ; TODO: i18n
+
 (defn publisher-management-section [{:keys [publishers permissions form errors] :as model}]
   (when (:configure-congregation permissions)
     (let [errors (group-by first errors)]
@@ -246,6 +275,8 @@
             (view-publisher-row (assoc model :publisher publisher)))
           (add-publisher-row model)]]]))))
 
+
+;;;; Users
 
 (defn identity-provider [user]
   (let [sub (str (:user/subject user))]
@@ -337,34 +368,6 @@
           (for [user users]
             (users-table-row user model))]]]))))
 
-
-(defn view [model]
-  (let [styles (:SettingsPage (css/modules))]
-    (h/html
-     [:h1 (i18n/t "SettingsPage.title")]
-     [:div {:class (:sections styles)}
-      (congregation-settings-section model)
-      (editing-maps-section model)
-      (publisher-management-section model)
-      (user-management-section model)])))
-
-(defn view! [request]
-  (view (model! request)))
-
-
-(defn save-congregation-settings! [request]
-  (let [cong-id (get-in request [:path-params :congregation])
-        name (get-in request [:params :congregation-name])
-        loans-csv-url (get-in request [:params :loans-csv-url])]
-    (try
-      (dmz/dispatch! {:command/type :congregation.command/update-congregation
-                      :congregation/id cong-id
-                      :congregation/name name
-                      :congregation/loans-csv-url loans-csv-url})
-      (http-response/see-other html/*page-path*)
-      (catch Exception e
-        (forms/validation-error-page-response e request model! view)))))
-
 (defn add-user! [request]
   (let [cong-id (get-in request [:path-params :congregation])
         user-id (get-in request [:params :user-id])]
@@ -391,12 +394,18 @@
           (response/header "hx-redirect" "/"))
       (http-response/see-other (str html/*page-path* "/users")))))
 
-(defn download-qgis-project [request]
-  (let [cong-id (get-in request [:path-params :congregation])
-        {:keys [content filename]} (dmz/download-qgis-project cong-id)]
-    (-> (http-response/ok content)
-        (response/content-type "application/octet-stream")
-        (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))
+
+;;;; Main view
+
+(defn view [model]
+  (let [styles (:SettingsPage (css/modules))]
+    (h/html
+     [:h1 (i18n/t "SettingsPage.title")]
+     [:div {:class (:sections styles)}
+      (congregation-settings-section model)
+      (editing-maps-section model)
+      (publisher-management-section model)
+      (user-management-section model)])))
 
 (def routes
   ["/congregation/:congregation/settings"
@@ -406,7 +415,8 @@
    [""
     {:name ::page
      :get {:handler (fn [request]
-                      (-> (view! request)
+                      (-> (model! request)
+                          (view)
                           (layout/page! request)
                           (html/response)))}
      :post {:handler (fn [request]
