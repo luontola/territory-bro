@@ -218,7 +218,7 @@
             (go-to-page "Territories"))
           (loop [tries 10]
             (when (and (pos? tries)
-                       (not (b/has-text? *driver* "101")))
+                       (not (b/has-text? *driver* :territory-list "103")))
               (log/info "Waiting for GIS sync," tries "tries")
               (doto *driver*
                 (b/wait 0.5)
