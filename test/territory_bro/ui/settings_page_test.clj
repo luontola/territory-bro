@@ -286,6 +286,14 @@
            (-> (settings-page/edit-publisher-row publisher-model)
                html/visible-text))))
 
+  (testing "shows a delete confirmation if the user has assigned territories"
+    (let [delete-confirmation #" hx-confirm=\"John Doe has assigned territories.*\n\nAre you sure you want to delete John Doe\?\""
+          no-assignments-model (dissoc-in publisher-model [:publisher :assigned-territories])]
+      (is (re-find delete-confirmation (str (settings-page/edit-publisher-row publisher-model)))
+          "has assignments")
+      (is (not (re-find delete-confirmation (str (settings-page/edit-publisher-row no-assignments-model))))
+          "doesn't have assignments")))
+
   (testing "requires the configure-congregation permission"
     (let [model (replace-in publisher-model [:permissions :configure-congregation] true false)]
       (is (nil? (settings-page/edit-publisher-row model)))))

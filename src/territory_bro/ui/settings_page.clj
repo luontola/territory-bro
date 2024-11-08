@@ -254,6 +254,10 @@
             " "
             [:button.pure-button {:type "button"
                                   :hx-delete (str html/*page-path* "/publishers/" publisher-id)
+                                  :hx-confirm (when-not (empty? (:assigned-territories publisher))
+                                                ;; TODO: i18n
+                                                (-> "{name} has assigned territories. It will not be possible to see to whom the territories are assigned if the publisher is deleted.\n\nAre you sure you want to delete {name}?"
+                                                    (str/replace "{name}" (:publisher/name publisher))))
                                   :class (:delete-button styles)}
              "Delete"]
             " "
