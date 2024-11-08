@@ -179,27 +179,31 @@
 
 ;;;; Publishers
 
-(defn view-publisher-row [{:keys [publisher congregation permissions]}]
-  (when (:configure-congregation permissions)
-    (if (nil? publisher)
-      ""
-      (let [styles (:SettingsPage (css/modules))]
-        (h/html
-         [:tr {:hx-target "this"
-               :hx-swap "outerHTML"
-               :class (when (:new? publisher)
-                        (:new-row styles))}
-          [:td (:publisher/name publisher)]
-          [:td (->> (:assigned-territories publisher)
-                    (util/natural-sort-by :territory/number)
-                    (mapv (fn [territory]
-                            (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
-                                     (:territory/number territory)])))
-                    (interpose ", "))]
-          [:td {:style {:text-align "right"}}
-           [:a {:hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")
-                :href "#"}
-            "Edit"]]]))))) ; TODO: i18n
+(defn view-publisher-row
+  ([model]
+   (view-publisher-row model nil))
+  ([{:keys [publisher congregation permissions]} {:keys [autofocus]}]
+   (when (:configure-congregation permissions)
+     (if (nil? publisher)
+       ""
+       (let [styles (:SettingsPage (css/modules))]
+         (h/html
+          [:tr {:hx-target "this"
+                :hx-swap "outerHTML"
+                :class (when (:new? publisher)
+                         (:new-row styles))}
+           [:td (:publisher/name publisher)]
+           [:td (->> (:assigned-territories publisher)
+                     (util/natural-sort-by :territory/number)
+                     (mapv (fn [territory]
+                             (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
+                                      (:territory/number territory)])))
+                     (interpose ", "))]
+           [:td {:style {:text-align "right"}}
+            [:a {:hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")
+                 :href "#"
+                 :autofocus autofocus}
+             "Edit"]]])))))) ; TODO: i18n
 
 (def ^:private publisher-table-column-count 3)
 
@@ -218,11 +222,12 @@
               (when non-unique-name?
                 "There is already a publisher with that name")]])))) ; TODO: i18n
 
-(defn- publisher-name-input [{:keys [form] :as model}]
+(defn- publisher-name-input [{:keys [form] :as model} {:keys [autofocus]}]
   (h/html
    [:input#publisher-name {:type "text"
                            :name "publisher-name"
                            :value (:publisher-name form)
+                           :autofocus autofocus
                            :autocomplete "off" ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
                            :data-1p-ignore true
                            :required true
@@ -242,7 +247,7 @@
           [:td {:colspan publisher-table-column-count
                 :style {:padding "4px"}}
            [:form.pure-form {:hx-post (str html/*page-path* "/publishers/" publisher-id)}
-            (publisher-name-input model)
+            (publisher-name-input model {:autofocus true})
             " "
             [:button.pure-button.pure-button-primary {:type "submit"}
              "Save"]
@@ -263,7 +268,7 @@
     [:td {:colspan publisher-table-column-count
           :style {:padding "4px"}}
      [:form.pure-form {:hx-post (str html/*page-path* "/publishers")}
-      (publisher-name-input model)
+      (publisher-name-input model nil)
       " "
       [:button.pure-button.pure-button-primary {:type "submit"}
        "Add publisher"] ; TODO: i18n
@@ -475,7 +480,7 @@
    ["/publishers/:publisher"
     {:get {:handler (fn [request]
                       (-> (model! request)
-                          (view-publisher-row)
+                          (view-publisher-row {:autofocus true})
                           (html/response)))}
      :post {:handler (fn [request]
                        (update-publisher! request))}
