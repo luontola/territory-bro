@@ -6,8 +6,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.congregation-page :as congregation-page]
-            [territory-bro.ui.html :as html])
-  (:import (java.util UUID)))
+            [territory-bro.ui.html :as html]))
 
 (def model
   {:congregation {:congregation/name "Example Congregation"}
@@ -29,7 +28,7 @@
                  :gis-access false}})
 
 (deftest model!-test
-  (let [user-id (UUID/randomUUID)
+  (let [user-id (random-uuid)
         cong-id dmz-test/cong-id
         request {:path-params {:congregation cong-id}}]
     (binding [config/env {:demo-congregation cong-id}]

@@ -17,7 +17,7 @@
 
 
 (deftest enrich-events-test
-  (let [user-id (UUID/randomUUID)
+  (let [user-id (random-uuid)
         system "some-subsystem"
         events [{:extra-keys :foo}]]
 
@@ -47,8 +47,8 @@
 
 (def valid-event {:event/type :congregation.event/congregation-created
                   :event/time (Instant/now)
-                  :event/user (UUID/randomUUID)
-                  :congregation/id (UUID/randomUUID)
+                  :event/user (random-uuid)
+                  :congregation/id (random-uuid)
                   :congregation/name ""
                   :congregation/schema-name ""})
 (def lax-event (dissoc valid-event :event/time))

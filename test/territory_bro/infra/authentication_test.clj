@@ -1,7 +1,6 @@
 (ns territory-bro.infra.authentication-test
   (:require [clojure.test :refer :all]
-            [territory-bro.infra.authentication :as auth])
-  (:import (java.util UUID)))
+            [territory-bro.infra.authentication :as auth]))
 
 (deftest logged-in-or-anonymous-test
   (testing "nil user"
@@ -21,7 +20,7 @@
         (is (true? (auth/anonymous?))))))
 
   (testing "logged in user"
-    (let [user-id (UUID/randomUUID)]
+    (let [user-id (random-uuid)]
       (is (true? (auth/logged-in? user-id)))
       (is (false? (auth/anonymous? user-id)))
       (binding [auth/*user* {:user/id user-id}]

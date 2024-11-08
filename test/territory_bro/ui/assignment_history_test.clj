@@ -189,18 +189,18 @@
         t4 (-> today (.minusMonths 2) (.minusDays 4))]
 
     (testing "shows the assignment history on a timeline"
-      (let [model {:assignment-history (shuffle [{:assignment/id (UUID/randomUUID)
+      (let [model {:assignment-history (shuffle [{:assignment/id (random-uuid)
                                                   :assignment/start-date t1
                                                   ;; Typical use case: returned and marked as covered at the same time.
                                                   :assignment/covered-dates #{t2}
                                                   :assignment/end-date t2
-                                                  :publisher/id (UUID/randomUUID)
+                                                  :publisher/id (random-uuid)
                                                   :publisher/name "Joe Blow"}
-                                                 {:assignment/id (UUID/randomUUID)
+                                                 {:assignment/id (random-uuid)
                                                   :assignment/start-date t3
                                                   ;; CO's visit week: marked as covered, but continuing to hold the territory.
                                                   :assignment/covered-dates #{t4}
-                                                  :publisher/id (UUID/randomUUID)
+                                                  :publisher/id (random-uuid)
                                                   :publisher/name "John Doe"}])
                    :today today}]
         (is (= (html/normalize-whitespace
@@ -223,21 +223,21 @@
       ;; but right after that the decision was changed, and it was returned and
       ;; assigned to another publisher. Though the start date is the same, logically
       ;; the second assignment is newer.
-      (let [model {:assignment-history (shuffle [{:assignment/id (UUID/randomUUID)
+      (let [model {:assignment-history (shuffle [{:assignment/id (random-uuid)
                                                   ;; Territory wasn't visited: returned without marking as covered.
                                                   :assignment/start-date t1
                                                   :assignment/end-date t1
-                                                  :publisher/id (UUID/randomUUID)
+                                                  :publisher/id (random-uuid)
                                                   :publisher/name "Publisher 1"}
-                                                 {:assignment/id (UUID/randomUUID)
+                                                 {:assignment/id (random-uuid)
                                                   :assignment/start-date t1
                                                   :assignment/end-date t2
-                                                  :publisher/id (UUID/randomUUID)
+                                                  :publisher/id (random-uuid)
                                                   :publisher/name "Publisher 2"}
-                                                 {:assignment/id (UUID/randomUUID)
+                                                 {:assignment/id (random-uuid)
                                                   :assignment/start-date t2
                                                   :assignment/end-date t2
-                                                  :publisher/id (UUID/randomUUID)
+                                                  :publisher/id (random-uuid)
                                                   :publisher/name "Publisher 3"}])
                    :today today}]
         (is (= (html/normalize-whitespace
@@ -260,15 +260,15 @@
       ;; one of the dates, it's possible to enter overlapping assignments.
       ;; Show a warning about them, so that the user will hopefully notice
       ;; it and correct the mistake.
-      (let [model {:assignment-history (shuffle [{:assignment/id (UUID/randomUUID)
+      (let [model {:assignment-history (shuffle [{:assignment/id (random-uuid)
                                                   :assignment/start-date t1
                                                   :assignment/end-date t3
-                                                  :publisher/id (UUID/randomUUID)
+                                                  :publisher/id (random-uuid)
                                                   :publisher/name "Publisher 1"}
-                                                 {:assignment/id (UUID/randomUUID)
+                                                 {:assignment/id (random-uuid)
                                                   :assignment/start-date t2
                                                   :assignment/end-date t4
-                                                  :publisher/id (UUID/randomUUID)
+                                                  :publisher/id (random-uuid)
                                                   :publisher/name "Publisher 2"}])
                    :today today}]
         (is (str/includes?
@@ -281,14 +281,14 @@
                2024-04-13    📥 Returned")))))
 
     (testing "ongoing assignments are always first in the list, even if due to a temporal paradox they are older"
-      (let [model {:assignment-history (shuffle [{:assignment/id (UUID/randomUUID)
+      (let [model {:assignment-history (shuffle [{:assignment/id (random-uuid)
                                                   :assignment/start-date t3
                                                   :assignment/end-date t4
-                                                  :publisher/id (UUID/randomUUID)
+                                                  :publisher/id (random-uuid)
                                                   :publisher/name "Publisher 1"}
-                                                 {:assignment/id (UUID/randomUUID)
+                                                 {:assignment/id (random-uuid)
                                                   :assignment/start-date t1
-                                                  :publisher/id (UUID/randomUUID)
+                                                  :publisher/id (random-uuid)
                                                   :publisher/name "Publisher 2"}])
                    :today today}]
         (is (= (html/normalize-whitespace

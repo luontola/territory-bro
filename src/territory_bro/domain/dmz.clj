@@ -21,8 +21,7 @@
             [territory-bro.infra.util :as util]
             [territory-bro.infra.util :refer [conj-set]]
             [territory-bro.projections :as projections])
-  (:import (java.util UUID)
-           (org.postgresql.util PSQLException)
+  (:import (org.postgresql.util PSQLException)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 ;;;; State
@@ -216,7 +215,7 @@
 
 (defonce ^:private demo-publishers-by-id ; defonce to avoid test failures due to namespace reloading and unpredictable UUIDs
   (reduce (fn [m publisher]
-            (let [publisher-id (UUID/randomUUID)]
+            (let [publisher-id (random-uuid)]
               (assoc m publisher-id (assoc publisher
                                            :congregation/id "demo"
                                            :publisher/id publisher-id))))
@@ -322,7 +321,7 @@
       (share/demo-share-key territory-id)
       (let [share-key (share/generate-share-key)]
         (dispatch! {:command/type :share.command/create-share
-                    :share/id (UUID/randomUUID)
+                    :share/id (random-uuid)
                     :share/key share-key
                     :share/type share-type
                     :congregation/id cong-id

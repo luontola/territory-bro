@@ -16,8 +16,8 @@
             [territory-bro.ui.territory-page :as territory-page])
   (:import (java.util UUID)))
 
-(def user-id (UUID/randomUUID))
-(def cong-id (UUID/randomUUID))
+(def user-id (random-uuid))
+(def cong-id (random-uuid))
 (def territory-id (UUID. 0 1))
 (def model
   {:congregation-boundary testdata/wkt-helsinki
@@ -53,7 +53,7 @@
                                     (congregation/admin-permissions-granted cong-id user-id)
                                     {:event/type :congregation-boundary.event/congregation-boundary-defined
                                      :congregation/id cong-id
-                                     :congregation-boundary/id (UUID/randomUUID)
+                                     :congregation-boundary/id (random-uuid)
                                      :congregation-boundary/location testdata/wkt-helsinki}
                                     {:event/type :territory.event/territory-defined
                                      :congregation/id cong-id
@@ -77,7 +77,7 @@
 
         (testing "anonymous, has opened a share"
           (testutil/with-anonymous-user
-            (let [share-id (UUID/randomUUID)
+            (let [share-id (random-uuid)
                   request (assoc request :session {::dmz/opened-shares #{share-id}})]
               (testutil/with-events [{:event/type :share.event/share-created
                                       :share/id share-id
@@ -185,13 +185,13 @@
                Search [] Clear
                Number   Region       Addresses
                123      the region   the addresses")
-             (binding [auth/*user* {:user/id (UUID/randomUUID)}]
+             (binding [auth/*user* {:user/id (random-uuid)}]
                (-> (territory-list-page/view anonymous-model)
                    html/visible-text)))))))
 
 (deftest route-conflicts-test
   (let [router (reitit/router ui/routes)
-        uuid (str (UUID/randomUUID))]
+        uuid (str (random-uuid))]
     (testing "htmx component URLs shouldn't conflict with territory page URLs"
       (is (= ::territory-list-page/map
              (-> (reitit/match-by-path router (str "/congregation/" uuid "/territories/map"))

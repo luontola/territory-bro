@@ -13,8 +13,8 @@
 
 (def valid-command {:command/type :congregation.command/update-congregation
                     :command/time (Instant/now)
-                    :command/user (UUID/randomUUID)
-                    :congregation/id (UUID/randomUUID)
+                    :command/user (random-uuid)
+                    :congregation/id (random-uuid)
                     :congregation/name ""})
 (def invalid-command (dissoc valid-command :congregation/name))
 (def unknown-command (assoc valid-command :command/type :foo))

@@ -5,8 +5,7 @@
             [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
-            [territory-bro.ui.layout :as layout])
-  (:import (java.util UUID)))
+            [territory-bro.ui.layout :as layout]))
 
 (defn model! [request]
   (dmz/require-logged-in!)
@@ -67,7 +66,7 @@
 (defn submit! [request]
   (dmz/require-logged-in!)
   (let [cong-name (get-in request [:params :congregationName])
-        cong-id (UUID/randomUUID)]
+        cong-id (random-uuid)]
     (try
       (dmz/dispatch! {:command/type :congregation.command/create-congregation
                       :congregation/id cong-id

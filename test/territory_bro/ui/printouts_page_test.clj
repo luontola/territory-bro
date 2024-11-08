@@ -24,7 +24,7 @@
 (def cong-id (UUID. 0 1))
 (def region-id (UUID. 0 2))
 (def territory-id (UUID. 0 3))
-(def user-id (UUID/randomUUID))
+(def user-id (random-uuid))
 (def default-model
   {:congregation {:congregation/id cong-id
                   :congregation/name "Example Congregation"
@@ -95,12 +95,12 @@
           [{:event/type :congregation-boundary.event/congregation-boundary-defined
             :gis-change/id 42
             :congregation/id cong-id
-            :congregation-boundary/id (UUID/randomUUID)
+            :congregation-boundary/id (random-uuid)
             :congregation-boundary/location testdata/wkt-helsinki}
            {:event/type :card-minimap-viewport.event/card-minimap-viewport-defined,
             :gis-change/id 42
             :congregation/id cong-id
-            :card-minimap-viewport/id (UUID/randomUUID)
+            :card-minimap-viewport/id (random-uuid)
             :card-minimap-viewport/location testdata/wkt-helsinki}
            {:event/type :region.event/region-defined
             :gis-change/id 42
@@ -140,8 +140,8 @@
             (is (= no-qr-codes-model (printouts-page/model! request)))))
 
         (testing "has opened a share, cannot see all territories"
-          (let [user-id (UUID/randomUUID)
-                share-id (UUID/randomUUID)]
+          (let [user-id (random-uuid)
+                share-id (random-uuid)]
             (testutil/with-user-id user-id
               (binding [dmz/*state* (share/grant-opened-shares dmz/*state* [share-id] user-id)]
                 (is (thrown-match? ExceptionInfo dmz-test/access-denied
@@ -272,7 +272,7 @@
                   create-dupe (dmz/wrap-db-connection
                                (fn [_]
                                  (dmz/dispatch! {:command/type :share.command/create-share
-                                                 :share/id (UUID/randomUUID)
+                                                 :share/id (random-uuid)
                                                  :share/key "dupe"
                                                  :share/type :link
                                                  :congregation/id cong-id

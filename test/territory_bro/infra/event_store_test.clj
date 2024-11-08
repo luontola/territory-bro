@@ -28,8 +28,8 @@
 (deftest event-store-test
   (with-fixtures [bypass-validating-serializers]
     (db/with-transaction [conn {:rollback-only true}]
-      (let [stream-1 (UUID/randomUUID)
-            stream-2 (UUID/randomUUID)
+      (let [stream-1 (random-uuid)
+            stream-2 (random-uuid)
             events [{:event/type :event-1
                      :stuff "foo"}
                     {:event/type :event-2
@@ -154,7 +154,7 @@
 
         (testing "adds a row to stream table when events are saved,"
           (testing "dummy event"
-            (let [stream (UUID/randomUUID)]
+            (let [stream (random-uuid)]
               (event-store/save! conn stream 0 [dummy-event])
               (is (= {:stream_id stream
                       :entity_type nil
@@ -164,7 +164,7 @@
                      (event-store/stream-info conn stream)))))
 
           (testing "congregation event"
-            (let [stream (UUID/randomUUID)]
+            (let [stream (random-uuid)]
               (event-store/save! conn stream 0 [cong-event])
               (is (= {:stream_id stream
                       :entity_type "territory"
@@ -175,7 +175,7 @@
 
         (testing "the stream table row may exist before events are saved,"
           (testing "dummy event"
-            (let [stream (UUID/randomUUID)]
+            (let [stream (random-uuid)]
               (db/execute-one! conn ["insert into stream (stream_id, gis_schema, gis_table) values (?, ?, ?)"
                                      stream "the_schema" "the_table"])
               (event-store/save! conn stream 0 [dummy-event])
@@ -187,7 +187,7 @@
                      (event-store/stream-info conn stream)))))
 
           (testing "congregation event"
-            (let [stream (UUID/randomUUID)]
+            (let [stream (random-uuid)]
               (db/execute-one! conn ["insert into stream (stream_id, gis_schema, gis_table) values (?, ?, ?)"
                                      stream "the_schema" "the_table"])
               (event-store/save! conn stream 0 [cong-event])
@@ -199,8 +199,8 @@
                      (event-store/stream-info conn stream))))))
 
         (testing "only the first event in the stream will update the stream table"
-          (let [stream (UUID/randomUUID)
-                cong-1 (UUID/randomUUID)
+          (let [stream (random-uuid)
+                cong-1 (random-uuid)
                 event-1 {:event/type :region.event/example
                          :congregation/id cong-1}
                 event-2 cong-event]
@@ -260,7 +260,7 @@
 
 (deftest event-validation-test
   (db/with-transaction [conn {:rollback-only true}]
-    (let [stream-id (UUID/randomUUID)]
+    (let [stream-id (random-uuid)]
 
       (testing "validates events on write"
         (is (thrown-with-msg? ExceptionInfo (re-equals "Unknown event type :dummy-event")

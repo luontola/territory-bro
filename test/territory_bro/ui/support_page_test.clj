@@ -4,8 +4,7 @@
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.html :as html]
-            [territory-bro.ui.support-page :as support-page])
-  (:import (java.util UUID)))
+            [territory-bro.ui.support-page :as support-page]))
 
 (def private-model
   {:support-email "support@example.com"})
@@ -13,7 +12,7 @@
   {:support-email nil})
 
 (deftest model!-test
-  (let [user-id (UUID/randomUUID)
+  (let [user-id (random-uuid)
         request {}]
     (binding [config/env {:support-email "support@example.com"}]
       (testutil/with-user-id user-id

@@ -17,7 +17,6 @@
             [territory-bro.ui.territory-page-test :refer [parse-open-graph-tags]])
   (:import (java.io File)
            (java.time Instant)
-           (java.util UUID)
            (org.apache.commons.io FileUtils)
            (org.postgresql.util PSQLException)))
 
@@ -186,11 +185,11 @@
       (let [[_ dbname host port user password schema] (re-find #"dbname='(\w+)' host=(\w+) port=(\w+) user='(\w+)' password='(.*?)' .* table=\"(\w+)\"\."
                                                                (slurp qgis-project))
             jdbc-url (str "jdbc:postgresql://" host ":" port "/" dbname "?user=" user "&password=" password "&currentSchema=" schema ",public")
-            congregation-boundary-id (UUID/randomUUID)
-            region-id (UUID/randomUUID)
-            territory-id1 (UUID/randomUUID)
-            territory-id2 (UUID/randomUUID)
-            territory-id3 (UUID/randomUUID)]
+            congregation-boundary-id (random-uuid)
+            region-id (random-uuid)
+            territory-id1 (random-uuid)
+            territory-id2 (random-uuid)
+            territory-id3 (random-uuid)]
 
         (testing "access GIS database"
           (is (str/starts-with? user "gis_user_"))
@@ -505,7 +504,7 @@
       (go-to-page "Territories"))
 
     (testing "can edit do-not-calls"
-      (let [test-content (str "test content " (UUID/randomUUID))
+      (let [test-content (str "test content " (random-uuid))
             input-field [:do-not-calls {:tag :textarea}]]
         (doto *driver*
           (go-to-territory "101")

@@ -1,7 +1,6 @@
 (ns territory-bro.infra.user
   (:require [territory-bro.infra.db :as db])
-  (:import (java.util UUID)
-           (territory_bro ValidationException)))
+  (:import (territory_bro ValidationException)))
 
 (def ^:private queries (db/compile-queries "db/hugsql/user.sql"))
 
@@ -26,7 +25,7 @@
   (first (get-users conn {:subjects [subject]})))
 
 (defn save-user! [conn subject attributes]
-  (:id (first (db/query! conn queries :save-user {:id (UUID/randomUUID)
+  (:id (first (db/query! conn queries :save-user {:id (random-uuid)
                                                   :subject subject
                                                   :attributes attributes}))))
 

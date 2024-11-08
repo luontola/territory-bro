@@ -45,7 +45,7 @@
 
         (testing "keeps existing session state, supports opening multiple shares"
           (with-fixtures [fake-dispatcher-fixture]
-            (let [another-share-id (UUID/randomUUID)
+            (let [another-share-id (random-uuid)
                   request (assoc request :session {::dmz/opened-shares #{another-share-id}
                                                    :other-session-state "stuff"})
                   response (open-share-page/open-share! request)]

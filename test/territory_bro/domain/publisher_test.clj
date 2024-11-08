@@ -16,13 +16,13 @@
 
 (deftest publishers-test
   (db/with-transaction [conn {:rollback-only true}]
-    (let [cong-id (UUID/randomUUID)
-          publisher-id (UUID/randomUUID)
-          unrelated-1 {:congregation/id (UUID/randomUUID)
+    (let [cong-id (random-uuid)
+          publisher-id (random-uuid)
+          unrelated-1 {:congregation/id (random-uuid)
                        :publisher/id publisher-id
                        :publisher/name "Unrelated 1"}
           unrelated-2 {:congregation/id cong-id
-                       :publisher/id (UUID/randomUUID)
+                       :publisher/id (random-uuid)
                        :publisher/name "Unrelated 2"}]
       (publisher/save-publisher! conn unrelated-1)
       (publisher/save-publisher! conn unrelated-2)
@@ -42,15 +42,15 @@
           (is (= updated (publisher/get-by-id conn cong-id publisher-id)))))
 
       (testing "list all publishers in a congregation"
-        (let [cong-id (UUID/randomUUID)
+        (let [cong-id (random-uuid)
               publishers [{:congregation/id cong-id
-                           :publisher/id (UUID/randomUUID)
+                           :publisher/id (random-uuid)
                            :publisher/name "A"}
                           {:congregation/id cong-id
-                           :publisher/id (UUID/randomUUID)
+                           :publisher/id (random-uuid)
                            :publisher/name "B"}
                           {:congregation/id cong-id
-                           :publisher/id (UUID/randomUUID)
+                           :publisher/id (random-uuid)
                            :publisher/name "C"}]]
           (is (empty? (publisher/list-publishers conn cong-id)))
           (doseq [publisher publishers]
@@ -58,8 +58,8 @@
           (is (= publishers (publisher/list-publishers conn cong-id)))))
 
       (testing "publisher not found"
-        (is (nil? (publisher/get-by-id conn (UUID/randomUUID) publisher-id)))
-        (is (nil? (publisher/get-by-id conn cong-id (UUID/randomUUID)))))
+        (is (nil? (publisher/get-by-id conn (random-uuid) publisher-id)))
+        (is (nil? (publisher/get-by-id conn cong-id (random-uuid)))))
 
       (testing "did not accidentally change unrelated publishers"
         (is (= unrelated-1 (publisher/get-by-id conn (:congregation/id unrelated-1) (:publisher/id unrelated-1))))
@@ -69,9 +69,9 @@
   (db/with-transaction [conn {:rollback-only true}]
 
     (testing "publisher names are whitespace-normalized on save"
-      (let [cong-id (UUID/randomUUID)
+      (let [cong-id (random-uuid)
             publisher {:congregation/id cong-id
-                       :publisher/id (UUID/randomUUID)
+                       :publisher/id (random-uuid)
                        :publisher/name " \t John \u00a0  Doe \r\n"}]
         (publisher/save-publisher! conn publisher)
         (is (= "John Doe"
@@ -80,13 +80,13 @@
                     :publisher/name)))))
 
     (testing "publisher names must be unique within a congregation (case-insensitive)"
-      (let [cong-id (UUID/randomUUID)
-            publisher-id (UUID/randomUUID)
+      (let [cong-id (random-uuid)
+            publisher-id (random-uuid)
             publisher {:congregation/id cong-id
                        :publisher/id publisher-id
                        :publisher/name "foo BAR"}
             conflicting-publisher {:congregation/id cong-id
-                                   :publisher/id (UUID/randomUUID)
+                                   :publisher/id (random-uuid)
                                    :publisher/name "FOO bar"}]
         (publisher/save-publisher! conn publisher)
         (is (thrown-with-msg?
@@ -104,18 +104,18 @@
                    (publisher/list-publishers conn cong-id)))))
 
         (testing "- allows the same name in other congregations"
-          (let [other-cong-id (UUID/randomUUID)
+          (let [other-cong-id (random-uuid)
                 other-publisher {:congregation/id other-cong-id
-                                 :publisher/id (UUID/randomUUID)
+                                 :publisher/id (random-uuid)
                                  :publisher/name "Foo Bar"}]
             (publisher/save-publisher! conn other-publisher)
             (is (= [other-publisher]
                    (publisher/list-publishers conn other-cong-id)))))))
 
     (testing "publisher names cannot be empty"
-      (let [cong-id (UUID/randomUUID)
+      (let [cong-id (random-uuid)
             publisher {:congregation/id cong-id
-                       :publisher/id (UUID/randomUUID)
+                       :publisher/id (random-uuid)
                        :publisher/name " "}]
         (is (thrown-with-msg?
              ValidationException (re-equals "[[:missing-name]]")
@@ -147,8 +147,8 @@
     (let [injections {:conn conn
                       :check-permit (fn [_permit])}
           state {}
-          cong-id (UUID/randomUUID)
-          publisher-id (UUID/randomUUID)]
+          cong-id (random-uuid)
+          publisher-id (random-uuid)]
 
       (testing "add publisher:"
         (let [command {:command/type :publisher.command/add-publisher
@@ -189,7 +189,7 @@
                        :publisher/name))))
 
           (testing "error: cannot update if publisher ID doesn't exist"
-            (let [publisher-id (UUID/randomUUID)]
+            (let [publisher-id (random-uuid)]
               (is (thrown?
                    WriteConflictException
                    (publisher/handle-command {:command/type :publisher.command/update-publisher

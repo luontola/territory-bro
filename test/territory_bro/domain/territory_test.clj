@@ -260,7 +260,7 @@
       (is (empty? (handle-command assign-command [territory-defined territory-assigned] injections))))
 
     (testing "cannot create a new assignment if one is already active"
-      (let [assign-command (assoc assign-command :assignment/id (UUID/randomUUID))]
+      (let [assign-command (assoc assign-command :assignment/id (random-uuid))]
         (is (thrown-with-msg?
              ValidationException (re-equals "[[:already-assigned #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000002\"]]")
              (handle-command assign-command [territory-defined territory-assigned] injections)))))
@@ -268,7 +268,7 @@
     (testing "cannot reuse an old assignment ID"
       ;; The command handler should not check just the latest assignment,
       ;; but all assignment IDs that are tied to this territory.
-      (let [assignment-id2 (UUID/randomUUID)]
+      (let [assignment-id2 (random-uuid)]
         (is (empty? (handle-command assign-command [territory-defined
                                                     territory-assigned
                                                     territory-returned
@@ -277,13 +277,13 @@
                                     injections)))))
 
     (testing "can assign after territory has been returned"
-      (let [assignment-id2 (UUID/randomUUID)
+      (let [assignment-id2 (random-uuid)
             assign-command (assoc assign-command :assignment/id assignment-id2)]
         (is (= [(assoc territory-assigned :assignment/id assignment-id2)]
                (handle-command assign-command [territory-defined territory-assigned territory-returned] injections)))))
 
     (testing "can enter historical assignments in any order; start date can be before previous assignments"
-      (let [assignment-id2 (UUID/randomUUID)
+      (let [assignment-id2 (random-uuid)
             assign-command (assoc assign-command
                                   :date (.minusYears start-date 1)
                                   :assignment/id assignment-id2)]

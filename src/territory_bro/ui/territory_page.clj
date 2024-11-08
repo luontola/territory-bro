@@ -19,7 +19,6 @@
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
             [territory-bro.ui.maps :as maps])
   (:import (java.time LocalDate Period ZonedDateTime)
-           (java.util UUID)
            (territory_bro ValidationException)))
 
 (defn congregation-time ^ZonedDateTime [congregation] ; TODO: move to another namespace
@@ -416,7 +415,7 @@ if (url.searchParams.has('share-key')) {
       (dmz/dispatch! {:command/type :territory.command/assign-territory
                       :congregation/id cong-id
                       :territory/id territory-id
-                      :assignment/id (UUID/randomUUID)
+                      :assignment/id (random-uuid)
                       :publisher/id publisher-id
                       :date (-> model :form :start-date)})
       (http-response/see-other (str html/*page-path* "/assignments/status"))

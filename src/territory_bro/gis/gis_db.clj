@@ -25,7 +25,7 @@
        (mapv format-feature)))
 
 (defn create-congregation-boundary! [conn location]
-  (:id (db/query! conn queries :create-congregation-boundary {:id (UUID/randomUUID)
+  (:id (db/query! conn queries :create-congregation-boundary {:id (random-uuid)
                                                               :location location})))
 
 
@@ -40,7 +40,7 @@
                                                :location location})))
 
 (defn create-region! [conn name location]
-  (create-region-with-id! conn (UUID/randomUUID) name location))
+  (create-region-with-id! conn (random-uuid) name location))
 
 
 ;; TODO: not used in production code; remove?
@@ -49,7 +49,7 @@
        (mapv format-feature)))
 
 (defn create-card-minimap-viewport! [conn location]
-  (:id (db/query! conn queries :create-card-minimap-viewport {:id (UUID/randomUUID)
+  (:id (db/query! conn queries :create-card-minimap-viewport {:id (random-uuid)
                                                               :location location})))
 
 
@@ -65,7 +65,7 @@
   (first (get-territories conn {:ids [id]})))
 
 (defn create-territory! [conn territory]
-  (:id (db/query! conn queries :create-territory {:id (UUID/randomUUID)
+  (:id (db/query! conn queries :create-territory {:id (random-uuid)
                                                   :number (:territory/number territory)
                                                   :addresses (:territory/addresses territory)
                                                   :subregion (:territory/region territory)

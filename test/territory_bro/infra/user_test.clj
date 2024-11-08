@@ -64,7 +64,7 @@
 
       (testing "find user by ID"
         (is (= user-id (:user/id (user/get-by-id conn user-id))))
-        (is (nil? (user/get-by-id conn (UUID/randomUUID)))
+        (is (nil? (user/get-by-id conn (random-uuid)))
             "not found"))
 
       (testing "find users by subjects"

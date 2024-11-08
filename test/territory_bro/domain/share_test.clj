@@ -172,7 +172,7 @@
            (share/demo-share-key #uuid "68e8ac93-1f5f-4741-bab2-665f2c338e56"))))
 
   (testing "keys can be converted back to UUIDs"
-    (let [uuid (UUID/randomUUID)
+    (let [uuid (random-uuid)
           key (share/demo-share-key uuid)]
       (is (= uuid (share/demo-share-key->territory-id key)))))
 
@@ -208,7 +208,7 @@
 
     (testing "checks share key uniqueness"
       ;; trying to create a new share (i.e. new share ID) with the same old share key
-      (let [conflicting-command (assoc create-command :share/id (UUID/randomUUID))]
+      (let [conflicting-command (assoc create-command :share/id (random-uuid))]
         (is (thrown-with-msg?
              WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
              (handle-command conflicting-command [share-created] injections)))))

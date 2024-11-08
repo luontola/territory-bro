@@ -46,7 +46,7 @@
              (gis-change/normalize-change change)))))
 
   (testing "ID change"
-    (let [territory-id2 (UUID/randomUUID)
+    (let [territory-id2 (random-uuid)
           change {:gis-change/id change-id
                   :gis-change/op :UPDATE
                   :gis-change/old {:id territory-id

@@ -10,13 +10,12 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.registration-page :as registration-page])
   (:import (clojure.lang ExceptionInfo)
-           (java.util UUID)
            (territory_bro ValidationException)))
 
 (def model {:form nil})
 
 (deftest model!-test
-  (let [user-id (UUID/randomUUID)
+  (let [user-id (random-uuid)
         request {}]
 
     (testing "logged in"
@@ -29,7 +28,7 @@
                            (registration-page/model! request)))))))
 
 (deftest submit!-test
-  (let [user-id (UUID/randomUUID)
+  (let [user-id (random-uuid)
         request {:params {:congregationName "the name"}}]
     (testutil/with-user-id user-id
       (testing "registration ok"

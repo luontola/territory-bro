@@ -25,7 +25,7 @@
     (with-open [conn (db/get-connection)]
       (let [write-stream! #'dispatcher/write-stream!
             append-stream! #'dispatcher/append-stream!
-            stream-id (UUID/randomUUID)]
+            stream-id (random-uuid)]
 
         (testing "appends events to the stream"
           (jdbc/with-transaction [conn conn]

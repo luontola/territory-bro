@@ -12,7 +12,6 @@
             [territory-bro.test.testutil :as testutil]
             [territory-bro.test.testutil :refer [re-equals thrown-with-msg? thrown?]])
   (:import (java.sql Connection)
-           (java.util UUID)
            (org.apache.http.client.utils URIBuilder)
            (org.postgresql.util PSQLException)))
 
@@ -146,7 +145,7 @@
 
       (testing "populates the stream table on ID change"
         (let [old-id (gis-db/create-region! conn "test" testdata/wkt-multi-polygon)
-              new-id (UUID/randomUUID)]
+              new-id (random-uuid)]
           (db/execute-one! conn ["UPDATE subregion SET id = ? WHERE id = ?"
                                  new-id old-id])
           (is (= {:stream_id old-id
@@ -166,7 +165,7 @@
 
       (testing "stream ID conflict detection:"
         (testing "stream ID is used by current schema and table -> keeps ID"
-          (let [old-id (init-stream! conn (UUID/randomUUID) test-schema "subregion")
+          (let [old-id (init-stream! conn (random-uuid) test-schema "subregion")
                 new-id (gis-db/create-region-with-id! conn old-id "reused" testdata/wkt-multi-polygon)]
             (is (= old-id new-id))
             (is (= [{:name "reused"}]
@@ -176,7 +175,7 @@
                 "the validation happens before appending to gis_change_log")))
 
         (testing "stream ID is used by another schema -> replaces ID"
-          (let [old-id (init-stream! conn (UUID/randomUUID) "another_schema" "subregion")
+          (let [old-id (init-stream! conn (random-uuid) "another_schema" "subregion")
                 new-id (gis-db/create-region-with-id! conn old-id "reused" testdata/wkt-multi-polygon)]
             (is (uuid? new-id))
             (is (not= old-id new-id))
@@ -187,7 +186,7 @@
                 "the validation happens before appending to gis_change_log")))
 
         (testing "stream ID is used by another table -> replaces ID"
-          (let [old-id (init-stream! conn (UUID/randomUUID) test-schema "territory")
+          (let [old-id (init-stream! conn (random-uuid) test-schema "territory")
                 new-id (gis-db/create-region-with-id! conn old-id "reused" testdata/wkt-multi-polygon)]
             (is (uuid? new-id))
             (is (not= old-id new-id))
@@ -198,7 +197,7 @@
                 "the validation happens before appending to gis_change_log")))
 
         (testing "stream ID is used by non-GIS entity -> replaces ID"
-          (let [old-id (init-stream! conn (UUID/randomUUID) nil nil)
+          (let [old-id (init-stream! conn (random-uuid) nil nil)
                 new-id (gis-db/create-region-with-id! conn old-id "reused" testdata/wkt-multi-polygon)]
             (is (uuid? new-id))
             (is (not= old-id new-id))
