@@ -1,5 +1,6 @@
 (ns territory-bro.ui.assignment-history
-  (:require [medley.core :refer [assoc-some]]
+  (:require [clojure.string :as str]
+            [medley.core :refer [assoc-some]]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.util :as util]
             [territory-bro.ui.hiccup :as h]
@@ -151,4 +152,6 @@
             (when (:covered? row)
               [:div "✅ Covered"]) ; TODO: i18n
             (when (:assigned? row)
-              [:div "⤴️ Assigned to " (:publisher/name row)])])))]))) ; TODO: i18n
+              [:div (-> "⤴️ Assigned to {name}" ; TODO: i18n
+                        (str/replace "{name}" (or (:publisher/name row)
+                                                  "[deleted]")))])])))]))) ; TODO: i18n

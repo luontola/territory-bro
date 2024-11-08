@@ -301,4 +301,17 @@
                  4 months
                  2024-04-13 ⤴️ Assigned to Publisher 1")
                (-> (assignment-history/view model)
+                   html/visible-text)))))
+
+    (testing "placeholder for deleted publishers"
+      (let [model {:assignment-history [{:assignment/id (random-uuid)
+                                         :assignment/start-date t1
+                                         :publisher/id (random-uuid)
+                                         :publisher/name nil}]
+                   :today today}]
+        (is (= (html/normalize-whitespace
+                "                                 Edit
+                 16 months
+                 2023-05-30 ⤴️ Assigned to [deleted]")
+               (-> (assignment-history/view model)
                    html/visible-text)))))))

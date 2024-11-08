@@ -324,7 +324,16 @@
              Up for grabs
              (1 months, since 2000-02-01)")
            (-> (territory-page/assignment-status returned-model)
-               html/visible-text)))))
+               html/visible-text))))
+
+  (testing "placeholder for deleted publishers"
+    (let [model (dissoc-in assigned-model [:territory :territory/current-assignment :publisher/name])]
+      (is (= (html/normalize-whitespace
+              "Return
+               Assigned to [deleted]
+               (2 months, since 2000-01-01)")
+             (-> (territory-page/assignment-status model)
+                 html/visible-text))))))
 
 (deftest assign-territory-dialog-test
   (is (= (html/normalize-whitespace

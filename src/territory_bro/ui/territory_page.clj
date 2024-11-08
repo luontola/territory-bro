@@ -294,7 +294,9 @@ if (returningCheckbox.checked) {
 
       (if (some? assignment)
         (h/html [:span {:style {:color "red"}} "Assigned"] ; TODO: i18n
-                " to " (:publisher/name assignment)
+                (-> " to {name}"
+                    (str/replace "{name}" (or (:publisher/name assignment)
+                                              "[deleted]"))) ; TODO: i18n
                 [:br]
                 "(" (months-difference start-date today) " months, since " (nowrap start-date) ")") ; TODO: i18n
         (h/html [:span {:style {:color "blue"}} "Up for grabs"] ; TODO: i18n
