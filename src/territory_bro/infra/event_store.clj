@@ -3,8 +3,7 @@
             [territory-bro.events :as events]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db])
-  (:import (java.util UUID)
-           (org.postgresql.util PSQLException)
+  (:import (org.postgresql.util PSQLException)
            (territory_bro WriteConflictException)))
 
 (def ^:dynamic *event->json* events/event->json)
@@ -92,6 +91,6 @@
 
 (comment
   (db/with-transaction [conn {:read-only? true}]
-    (into [] (read-stream conn (UUID/fromString "61e51981-bbd3-4298-a7a6-46109e39dd52"))))
+    (into [] (read-stream conn (parse-uuid "61e51981-bbd3-4298-a7a6-46109e39dd52"))))
   (db/with-transaction [conn {:read-only? true}]
     (take-last 10 (into [] (read-all-events conn)))))

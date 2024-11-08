@@ -4,8 +4,7 @@
             [mount.core :as mount]
             [schema.core :as s]
             [territory-bro.infra.util :refer [getx]])
-  (:import (java.time Clock Instant)
-           (java.util UUID)))
+  (:import (java.time Clock Instant)))
 
 (def ^:dynamic ^Clock *clock* (Clock/systemUTC))
 
@@ -39,10 +38,8 @@
 (def validate-env (s/validator Env))
 
 (defn- parse-uuid-or-string [s]
-  (try
-    (UUID/fromString s)
-    (catch Exception _
-      s)))
+  (or (parse-uuid s)
+      s))
 
 (defn enrich-env [env]
   (assoc env
@@ -54,7 +51,7 @@
                            (map parse-uuid-or-string)
                            (set))
          :demo-congregation (some-> (:demo-congregation env)
-                                    (parse-uuid))))
+                                    parse-uuid)))
 
 (defn load-config []
   (cprop/load-config :resource "config-defaults.edn")) ; TODO: use ":as-is? true" and schema coercion?)

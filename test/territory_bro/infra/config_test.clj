@@ -3,8 +3,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.infra.util :refer [getx]]
             [territory-bro.test.testutil :refer [re-contains thrown-with-msg?]])
-  (:import (clojure.lang ExceptionInfo)
-           (java.util UUID)))
+  (:import (clojure.lang ExceptionInfo)))
 
 (deftest enrich-env-test
   (let [env (-> (config/load-config)
@@ -24,11 +23,11 @@
              (getx env :jwt-audience))))
 
     (testing ":super-users is parsed as a set"
-      (is (= #{"user1" "user2" (UUID/fromString "ac66bb30-0b9b-11ea-8d71-362b9e155667")}
+      (is (= #{"user1" "user2" (parse-uuid "ac66bb30-0b9b-11ea-8d71-362b9e155667")}
              (getx env :super-users))))
 
     (testing ":demo-congregation is parsed as a UUID"
-      (is (= (UUID/fromString "7df983b1-6be6-42a4-b3b7-75b165005b03")
+      (is (= (parse-uuid "7df983b1-6be6-42a4-b3b7-75b165005b03")
              (getx env :demo-congregation))))
 
     (testing ":public-url must not end in a slash"
