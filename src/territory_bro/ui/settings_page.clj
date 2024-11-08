@@ -106,9 +106,9 @@
             [:div.pure-control-group
              [:label {:for "congregation-name"}
               (i18n/t "CongregationSettings.congregationName")]
-             [:input#congregation-name {:name "congregation-name"
+             [:input#congregation-name {:type "text"
+                                        :name "congregation-name"
                                         :value (:congregation-name form)
-                                        :type "text"
                                         :required true
                                         :aria-invalid (when error? "true")}]
              (when error?
@@ -123,9 +123,9 @@
               [:div.pure-control-group
                [:label {:for "loans-csv-url"}
                 "Territory loans CSV URL (optional)"]
-               [:input#loans-csv-url {:name "loans-csv-url"
+               [:input#loans-csv-url {:type "text"
+                                      :name "loans-csv-url"
                                       :value (:loans-csv-url form)
-                                      :type "text"
                                       :size "50"
                                       :pattern "https://docs\\.google\\.com/.*"
                                       :aria-invalid (when error? "true")}]
@@ -247,13 +247,13 @@
             [:button.pure-button.pure-button-primary {:type "submit"}
              "Save"]
             " "
-            [:button.pure-button {:hx-delete (str html/*page-path* "/publishers/" publisher-id)
-                                  :type "button"
+            [:button.pure-button {:type "button"
+                                  :hx-delete (str html/*page-path* "/publishers/" publisher-id)
                                   :class (:delete-button styles)}
              "Delete"]
             " "
-            [:button.pure-button {:hx-get (str html/*page-path* "/publishers/" publisher-id)
-                                  :type "button"}
+            [:button.pure-button {:type "button"
+                                  :hx-get (str html/*page-path* "/publishers/" publisher-id)}
              "Cancel"]
             (publisher-name-errors model)]]])))))
 
@@ -379,13 +379,13 @@
             [:div.pure-control-group
              [:label {:for "user-id"}
               (i18n/t "UserManagement.userId")]
-             [:input#user-id {:name "user-id"
-                              :type "text"
-                              :autocomplete "off"
-                              :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
+             [:input#user-id {:type "text"
+                              :name "user-id"
+                              :value (:user-id form)
+                              :autocomplete "off" ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
+                              :data-1p-ignore true
                               :required true
                               :pattern "\\s*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\s*"
-                              :value (:user-id form)
                               :aria-invalid (when error? "true")}]
              (when error?
                " ⚠️ ")
