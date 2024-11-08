@@ -199,10 +199,11 @@
                              (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
                                       (:territory/number territory)])))
                      (interpose ", "))]
-           [:td {:style {:text-align "right"}}
-            [:a {:hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")
-                 :href "#"
-                 :autofocus autofocus}
+           [:td {:class (:edit-button styles)}
+            [:button.pure-button {:type "button"
+                                  :hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")
+                                  :class (:edit-button styles)
+                                  :autofocus autofocus}
              "Edit"]]])))))) ; TODO: i18n
 
 (def ^:private publisher-table-column-count 3)
@@ -245,7 +246,7 @@
          [:tr {:hx-target "this"
                :hx-swap "outerHTML"}
           [:td {:colspan publisher-table-column-count
-                :style {:padding "4px"}}
+                :class (:edit-publisher styles)}
            [:form.pure-form {:hx-post (str html/*page-path* "/publishers/" publisher-id)}
             (publisher-name-input model {:autofocus true})
             " "
@@ -267,16 +268,17 @@
             (publisher-name-errors model)]]])))))
 
 (defn add-publisher-row [model]
-  (h/html
-   [:tr
-    [:td {:colspan publisher-table-column-count
-          :style {:padding "4px"}}
-     [:form.pure-form {:hx-post (str html/*page-path* "/publishers")}
-      (publisher-name-input model nil)
-      " "
-      [:button.pure-button.pure-button-primary {:type "submit"}
-       "Add publisher"] ; TODO: i18n
-      (publisher-name-errors model)]]]))
+  (let [styles (:SettingsPage (css/modules))]
+    (h/html
+     [:tr
+      [:td {:colspan publisher-table-column-count
+            :class (:edit-publisher styles)}
+       [:form.pure-form {:hx-post (str html/*page-path* "/publishers")}
+        (publisher-name-input model nil)
+        " "
+        [:button.pure-button.pure-button-primary {:type "submit"}
+         "Add publisher"] ; TODO: i18n
+        (publisher-name-errors model)]]])))
 
 (defn publisher-management-section [{:keys [publishers permissions] :as model}]
   (when (:configure-congregation permissions)

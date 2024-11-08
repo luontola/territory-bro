@@ -8,6 +8,17 @@ tr.new-row {
     background-color: #ffc;
 }
 
+td.edit-publisher {
+    padding: 4px !important;
+}
+
+td.edit-button {
+    /* XXX: competes for specificity with PureCSS */
+    font-size: 70% !important;
+    padding: 2px 4px !important;
+    text-align: right;
+}
+
 button.delete-button {
     color: white;
     background-color: rgb(202, 60, 60);
