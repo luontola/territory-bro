@@ -75,6 +75,14 @@
     (cache/evict publishers-cache cong-id)
     nil))
 
+(defn delete-publisher! [conn publisher]
+  (let [cong-id (:congregation/id publisher)
+        publisher-id (:publisher/id publisher)]
+    (db/query! conn queries :delete-publisher {:congregation cong-id
+                                               :id publisher-id})
+    (cache/evict publishers-cache cong-id)
+    nil))
+
 
 ;;;; Command handlers
 
@@ -88,8 +96,8 @@
     (check-permit [:configure-congregation cong-id])
     (when (publisher-exists? conn cong-id publisher-id)
       (throw (WriteConflictException.)))
-    (save-publisher! conn command))
-  nil)
+    (save-publisher! conn command)
+    nil))
 
 (defmethod command-handler :publisher.command/update-publisher
   [command _state {:keys [conn check-permit]}]
@@ -98,8 +106,15 @@
     (check-permit [:configure-congregation cong-id])
     (when-not (publisher-exists? conn cong-id publisher-id)
       (throw (WriteConflictException.)))
-    (save-publisher! conn command))
-  nil)
+    (save-publisher! conn command)
+    nil))
+
+(defmethod command-handler :publisher.command/delete-publisher
+  [command _state {:keys [conn check-permit]}]
+  (let [cong-id (:congregation/id command)]
+    (check-permit [:configure-congregation cong-id])
+    (delete-publisher! conn command)
+    nil))
 
 (defn handle-command [command state injections]
   (command-handler command state injections))

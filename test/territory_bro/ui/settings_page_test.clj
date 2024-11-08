@@ -394,6 +394,25 @@
                     "[new name] Save Delete Cancel
                      ⚠️ There is already a publisher with that name"))))))))))
 
+(deftest delete-publisher!-test
+  (let [request {:path-params {:congregation cong-id
+                               :publisher publisher-id}}]
+    (testutil/with-events test-events
+      (testutil/with-user-id user-id
+
+        (testing "delete successful"
+          (with-fixtures [fake-dispatcher-fixture]
+            (let [response (settings-page/delete-publisher! request)]
+              (is (= {:status 303
+                      :headers {"Location" "/settings-page-url/publishers/00000000-0000-0000-0000-000000000004"}
+                      :body ""}
+                     response))
+              (is (= {:command/type :publisher.command/delete-publisher
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :publisher/id publisher-id}
+                     (dissoc @*last-command :command/time))))))))))
+
 
 ;;;; Users
 

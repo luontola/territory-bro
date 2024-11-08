@@ -319,6 +319,17 @@
       (catch Exception e
         (forms/validation-error-htmx-response e request model! edit-publisher-row)))))
 
+(defn delete-publisher! [request]
+  (let [cong-id (get-in request [:path-params :congregation])
+        publisher-id (get-in request [:path-params :publisher])]
+    (try
+      (dmz/dispatch! {:command/type :publisher.command/delete-publisher
+                      :congregation/id cong-id
+                      :publisher/id publisher-id})
+      (http-response/see-other (str html/*page-path* "/publishers/" publisher-id))
+      (catch Exception e
+        (forms/validation-error-htmx-response e request model! edit-publisher-row)))))
+
 
 ;;;; Users
 
@@ -485,8 +496,7 @@
      :post {:handler (fn [request]
                        (update-publisher! request))}
      :delete {:handler (fn [request]
-                         ; TODO: remove publisher
-                         (http-response/see-other (:uri request)))}}]
+                         (delete-publisher! request))}}]
    ["/publishers/:publisher/edit"
     {:get {:handler (fn [request]
                       (-> (model! request)

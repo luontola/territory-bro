@@ -13,3 +13,9 @@ insert into publisher (congregation, id, name)
 values (:congregation, :id, :name)
 on conflict (congregation, id) do update
     set name = :name;
+
+-- :name delete-publisher :! :n
+delete
+from publisher
+where congregation = :congregation
+  and id = :id;

@@ -41,6 +41,16 @@
           (publisher/save-publisher! conn updated)
           (is (= updated (publisher/get-by-id conn cong-id publisher-id)))))
 
+      (testing "publisher not found"
+        (is (nil? (publisher/get-by-id conn (random-uuid) publisher-id)))
+        (is (nil? (publisher/get-by-id conn cong-id (random-uuid)))))
+
+      (testing "delete publisher"
+        (let [updated {:congregation/id cong-id
+                       :publisher/id publisher-id}]
+          (publisher/delete-publisher! conn updated)
+          (is (nil? (publisher/get-by-id conn cong-id publisher-id)))))
+
       (testing "list all publishers in a congregation"
         (let [cong-id (random-uuid)
               publishers [{:congregation/id cong-id
@@ -56,10 +66,6 @@
           (doseq [publisher publishers]
             (publisher/save-publisher! conn publisher))
           (is (= publishers (publisher/list-publishers conn cong-id)))))
-
-      (testing "publisher not found"
-        (is (nil? (publisher/get-by-id conn (random-uuid) publisher-id)))
-        (is (nil? (publisher/get-by-id conn cong-id (random-uuid)))))
 
       (testing "did not accidentally change unrelated publishers"
         (is (= unrelated-1 (publisher/get-by-id conn (:congregation/id unrelated-1) (:publisher/id unrelated-1))))
@@ -199,6 +205,22 @@
                                              state
                                              injections)))
               (is (nil? (publisher/get-by-id conn cong-id publisher-id)))))
+
+          (testing "checks write permits"
+            (let [injections (assoc injections :check-permit (fn [permit]
+                                                               (is (= [:configure-congregation cong-id] permit))
+                                                               (throw (NoPermitException. nil nil))))]
+              (is (thrown? NoPermitException
+                           (publisher/handle-command command state injections)))))))
+
+      (testing "delete publisher:"
+        (let [command {:command/type :publisher.command/delete-publisher
+                       :congregation/id cong-id
+                       :publisher/id publisher-id}]
+
+          (testing "success"
+            (publisher/handle-command command state injections)
+            (is (nil? (publisher/get-by-id conn cong-id publisher-id))))
 
           (testing "checks write permits"
             (let [injections (assoc injections :check-permit (fn [permit]

@@ -231,6 +231,12 @@
          :publisher/id (foreign-key/references :publisher UUID)
          :publisher/name s/Str))
 
+(s/defschema DeletePublisher
+  (assoc BaseCommand
+         :command/type (s/eq :publisher.command/delete-publisher)
+         :congregation/id (foreign-key/references :congregation UUID)
+         :publisher/id (foreign-key/references :publisher UUID)))
+
 
 (def command-schemas
   {:card-minimap-viewport.command/define-card-minimap-viewport DefineCardMinimapViewport
@@ -248,6 +254,7 @@
    :gis-user.command/create-gis-user CreateGisUser
    :gis-user.command/delete-gis-user DeleteGisUser
    :publisher.command/add-publisher AddPublisher
+   :publisher.command/delete-publisher DeletePublisher
    :publisher.command/update-publisher UpdatePublisher
    :region.command/define-region DefineRegion
    :region.command/delete-region DeleteRegion
