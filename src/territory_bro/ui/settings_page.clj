@@ -22,22 +22,26 @@
         _ (when-not (dmz/view-settings-page? cong-id)
             (dmz/access-denied!))
         congregation (dmz/get-congregation cong-id)
+
         publisher (dmz/get-publisher cong-id publisher-id)
         publishers (dmz/list-publishers cong-id)
+        new-publisher (some-> (get-in request [:params :new-publisher])
+                              parse-uuid)
         territories-by-assigned-publisher (group-by #(-> % :territory/current-assignment :publisher/id)
                                                     (dmz/list-territories cong-id))
-        enrich-publisher-with-assignments (fn [publisher]
-                                            (if-some [territories (get territories-by-assigned-publisher (:publisher/id publisher))]
-                                              (let [territories (mapv #(select-keys % [:territory/id :territory/number])
-                                                                      territories)]
-                                                (assoc publisher :assigned-territories territories))
-                                              publisher))
+        enrich-publisher (fn [publisher]
+                           (-> publisher
+                               (dissoc :congregation/id)
+                               (assoc :assigned-territories (->> (get territories-by-assigned-publisher (:publisher/id publisher))
+                                                                 (mapv #(select-keys % [:territory/id :territory/number]))))
+                               (assoc :new? (= new-publisher (:publisher/id publisher)))))
+
         users (dmz/list-congregation-users cong-id)
         new-user (some-> (get-in request [:params :new-user])
-                         (parse-uuid))]
+                         parse-uuid)]
     {:congregation (select-keys congregation [:congregation/id :congregation/name])
-     :publisher (some-> publisher enrich-publisher-with-assignments) ; nil, except when editing a publisher
-     :publishers (map enrich-publisher-with-assignments publishers) ; lazy, because not every htmx component uses publishers
+     :publisher (some-> publisher enrich-publisher) ; nil, except when editing a publisher
+     :publishers (map enrich-publisher publishers) ; lazy, because not every htmx component uses publishers
      :users (->> users
                  (mapv (fn [user]
                          (assoc user :new? (= new-user (:user/id user)))))
@@ -180,20 +184,23 @@
   (when (:configure-congregation permissions)
     (if (nil? publisher)
       ""
-      (h/html
-       [:tr {:hx-target "this"
-             :hx-swap "outerHTML"}
-        [:td (:publisher/name publisher)]
-        [:td (->> (:assigned-territories publisher)
-                  (util/natural-sort-by :territory/number)
-                  (mapv (fn [territory]
-                          (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
-                                   (:territory/number territory)])))
-                  (interpose ", "))]
-        [:td {:style {:text-align "right"}}
-         [:a {:hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")
-              :href "#"}
-          "Edit"]]])))) ; TODO: i18n
+      (let [styles (:SettingsPage (css/modules))]
+        (h/html
+         [:tr {:hx-target "this"
+               :hx-swap "outerHTML"
+               :class (when (:new? publisher)
+                        (:new-row styles))}
+          [:td (:publisher/name publisher)]
+          [:td (->> (:assigned-territories publisher)
+                    (util/natural-sort-by :territory/number)
+                    (mapv (fn [territory]
+                            (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
+                                     (:territory/number territory)])))
+                    (interpose ", "))]
+          [:td {:style {:text-align "right"}}
+           [:a {:hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")
+                :href "#"}
+            "Edit"]]]))))) ; TODO: i18n
 
 (def ^:private publisher-table-column-count 3)
 
@@ -201,7 +208,7 @@
   (when (:configure-congregation permissions)
     (if (nil? publisher)
       ""
-      (let [styles (:UserManagement (css/modules)) ; TODO: css module for publisher management
+      (let [styles (:SettingsPage (css/modules))
             publisher-id (:publisher-id form)
             errors nil ; TODO: test through form submit
             missing-name? (contains? errors :missing-name)
@@ -220,6 +227,7 @@
                                     :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
                                     :required true
                                     :value (:publisher-name form)
+                                    :aria-label "Name" ; TODO: i18n
                                     :aria-invalid (when error? "true")}]
             " "
             [:button.pure-button.pure-button-primary {:type "submit"}
@@ -227,15 +235,15 @@
             " "
             [:button.pure-button {:hx-delete (str html/*page-path* "/publishers/" publisher-id)
                                   :type "button"
-                                  :class (:removeUser styles)}
+                                  :class (:delete-button styles)}
              "Delete"]
             " "
             [:button.pure-button {:hx-get (str html/*page-path* "/publishers/" publisher-id)
                                   :type "button"}
              "Cancel"]]]])))))
 
-(defn add-publisher-row [{:keys [form]}]
-  (let [errors nil
+(defn add-publisher-row [{:keys [form errors]}]
+  (let [errors (group-by first errors)
         missing-name? (contains? errors :missing-name)
         non-unique-name? (contains? errors :non-unique-name)
         error? (or missing-name?
@@ -251,15 +259,18 @@
                                 :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
                                 :required true
                                 :value (:publisher-name form)
+                                :aria-label "Name" ; TODO: i18n
                                 :aria-invalid (when error? "true")}]
         " "
         [:button.pure-button.pure-button-primary {:type "submit"}
          "Add publisher"] ; TODO: i18n
-        [:div
-         (when error?
-           [:span.pure-form-message-inline " ⚠️ "])
-         (when non-unique-name?
-           [:span.pure-form-message-inline "There is already a publisher with that name"])]]]]))) ; TODO: i18n
+        (when error?
+          [:div [:span.pure-form-message-inline
+                 " ⚠️ "
+                 (when missing-name?
+                   "Name is required") ; TODO: i18n
+                 (when non-unique-name?
+                   "There is already a publisher with that name")]])]]]))) ; TODO: i18n
 
 (defn publisher-management-section [{:keys [publishers permissions] :as model}]
   (when (:configure-congregation permissions)
@@ -278,6 +289,21 @@
           (view-publisher-row (assoc model :publisher publisher)))
         (add-publisher-row model)]]])))
 
+(defn add-publisher!
+  ([request]
+   (add-publisher! request (random-uuid)))
+  ([request publisher-id]
+   (let [cong-id (get-in request [:path-params :congregation])
+         publisher-name (get-in request [:params :publisher-name])]
+     (try
+       (dmz/dispatch! {:command/type :publisher.command/add-publisher
+                       :congregation/id cong-id
+                       :publisher/id publisher-id
+                       :publisher/name publisher-name})
+       (http-response/see-other (str html/*page-path* "/publishers?new-publisher=" publisher-id))
+       (catch Exception e
+         (forms/validation-error-htmx-response e request model! publisher-management-section))))))
+
 
 ;;;; Users
 
@@ -290,14 +316,14 @@
       :else sub)))
 
 (defn users-table-row [user {:keys [congregation]}]
-  (let [styles (:UserManagement (css/modules))
+  (let [styles (:SettingsPage (css/modules))
         current-user? (= (:user/id user)
                          (:user/id auth/*user*))
         {:keys [name email email_verified picture]} (:user/attributes user)]
     (h/html
      [:tr {:class (when (:new? user)
-                    (:newUser styles))}
-      [:td {:class (:profilePicture styles)}
+                    (:new-row styles))}
+      [:td {:class (:profile-picture styles)}
        (when (some? picture)
          [:img {:src picture
                 :alt ""}])]
@@ -314,7 +340,7 @@
          (h/html " " [:em "(" (i18n/t "UserManagement.unverified") ")"]))]
       [:td (identity-provider user)]
       [:td [:button.pure-button {:type "button"
-                                 :class (:removeUser styles)
+                                 :class (:delete-button styles)
                                  :hx-delete (str html/*page-path* "/users?user-id=" (codec/url-encode (:user/id user)))
                                  :hx-confirm (when current-user?
                                                (-> (i18n/t "UserManagement.removeYourselfWarning")
@@ -435,8 +461,7 @@
                           (publisher-management-section)
                           (html/response)))}
      :post {:handler (fn [request]
-                       ; TODO: add publisher
-                       (http-response/see-other (str html/*page-path* "/publishers")))}}]
+                       (add-publisher! request))}}]
    ["/publishers/:publisher"
     {:get {:handler (fn [request]
                       (-> (model! request)

@@ -215,6 +215,22 @@
          :territory/id (foreign-key/references :territory UUID)
          :territory/do-not-calls s/Str))
 
+;;; Publishers
+
+(s/defschema AddPublisher
+  (assoc BaseCommand
+         :command/type (s/eq :publisher.command/add-publisher)
+         :congregation/id (foreign-key/references :congregation UUID)
+         :publisher/id (foreign-key/references :new UUID)
+         :publisher/name s/Str))
+
+(s/defschema UpdatePublisher
+  (assoc BaseCommand
+         :command/type (s/eq :publisher.command/update-publisher)
+         :congregation/id (foreign-key/references :congregation UUID)
+         :publisher/id (foreign-key/references :publisher UUID)
+         :publisher/name s/Str))
+
 
 (def command-schemas
   {:card-minimap-viewport.command/define-card-minimap-viewport DefineCardMinimapViewport
@@ -231,6 +247,8 @@
    :do-not-calls.command/save-do-not-calls SaveDoNotCalls
    :gis-user.command/create-gis-user CreateGisUser
    :gis-user.command/delete-gis-user DeleteGisUser
+   :publisher.command/add-publisher AddPublisher
+   :publisher.command/update-publisher UpdatePublisher
    :region.command/define-region DefineRegion
    :region.command/delete-region DeleteRegion
    :share.command/create-share CreateShare

@@ -6,7 +6,7 @@
             [territory-bro.infra.db :as db]
             [territory-bro.ui.html :as html])
   (:import (java.time Duration)
-           (territory_bro ValidationException)))
+           (territory_bro ValidationException WriteConflictException)))
 
 (def ^:private queries (db/compile-queries "db/hugsql/publisher.sql"))
 
@@ -40,8 +40,11 @@
   (-> (publishers-by-id conn cong-id)
       (get publisher-id)))
 
+(defn publisher-exists? [conn cong-id publisher-id]
+  (some? (get-by-id conn cong-id publisher-id)))
+
 (defn check-publisher-exists [conn cong-id publisher-id]
-  (when (nil? (get-by-id conn cong-id publisher-id))
+  (when-not (publisher-exists? conn cong-id publisher-id)
     (throw (ValidationException. [[:no-such-publisher cong-id publisher-id]]))))
 
 (def ^:private normalized-name html/normalize-whitespace)
@@ -71,3 +74,32 @@
                                              :name new-name})
     (cache/evict publishers-cache cong-id)
     nil))
+
+
+;;;; Command handlers
+
+(defmulti ^:private command-handler (fn [command _state _injections]
+                                      (:command/type command)))
+
+(defmethod command-handler :publisher.command/add-publisher
+  [command _state {:keys [conn check-permit]}]
+  (let [cong-id (:congregation/id command)
+        publisher-id (:publisher/id command)]
+    (check-permit [:configure-congregation cong-id])
+    (when (publisher-exists? conn cong-id publisher-id)
+      (throw (WriteConflictException.)))
+    (save-publisher! conn command))
+  nil)
+
+(defmethod command-handler :publisher.command/update-publisher
+  [command _state {:keys [conn check-permit]}]
+  (let [cong-id (:congregation/id command)
+        publisher-id (:publisher/id command)]
+    (check-permit [:configure-congregation cong-id])
+    (when-not (publisher-exists? conn cong-id publisher-id)
+      (throw (WriteConflictException.)))
+    (save-publisher! conn command))
+  nil)
+
+(defn handle-command [command state injections]
+  (command-handler command state injections))

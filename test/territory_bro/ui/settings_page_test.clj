@@ -33,15 +33,18 @@
   {:congregation/id cong-id
    :publisher/id publisher-id
    :publisher/name "John Doe"})
-(def test-publisher-with-assignments
-  (assoc test-publisher :assigned-territories [{:territory/id territory-id
-                                                :territory/number "123"}]))
+(def enriched-publisher
+  (-> test-publisher
+      (select-keys [:publisher/id :publisher/name])
+      (assoc :assigned-territories [{:territory/id territory-id
+                                     :territory/number "123"}])
+      (assoc :new? false)))
 
 (def model
   {:congregation {:congregation/id cong-id
                   :congregation/name "Congregation Name"}
    :publisher nil
-   :publishers [test-publisher-with-assignments]
+   :publishers [enriched-publisher]
    :users [{:user/id user-id
             :user/subject "google-oauth2|102883237794451111459"
             :user/attributes {:name "Esko Luontola"
@@ -57,7 +60,7 @@
           :user-id nil}})
 (def publisher-model
   (-> model
-      (assoc :publisher test-publisher-with-assignments)
+      (assoc :publisher enriched-publisher)
       (update :form merge {:publisher-id publisher-id
                            :publisher-name "John Doe"})))
 
@@ -133,6 +136,11 @@
         (testing "editing a publisher"
           (let [request (assoc-in request [:path-params :publisher] publisher-id)]
             (is (= publisher-model (settings-page/model! request)))))
+
+        (testing "publisher was added"
+          (let [request (assoc-in request [:params :new-publisher] (str publisher-id))
+                model (replace-in model [:publishers 0 :new?] false true)]
+            (is (= model (settings-page/model! request)))))
 
         (testing "user was added"
           (let [request (assoc-in request [:params :new-user] (str user-id))
@@ -254,6 +262,15 @@
              (-> (settings-page/view-publisher-row model)
                  html/visible-text)))))
 
+  (testing "highlights new publishers"
+    (let [new-row-class " class=\"SettingsPage__new-row--"]
+      (is (not (str/includes? (settings-page/view-publisher-row publisher-model)
+                              new-row-class))
+          "old publisher")
+      (is (str/includes? (settings-page/view-publisher-row (replace-in publisher-model [:publisher :new?] false true))
+                         new-row-class)
+          "new publisher")))
+
   (testing "requires the configure-congregation permission"
     (let [model (replace-in publisher-model [:permissions :configure-congregation] true false)]
       (is (nil? (settings-page/view-publisher-row model)))))
@@ -292,6 +309,49 @@
   (testing "requires the configure-congregation permission"
     (let [model (replace-in model [:permissions :configure-congregation] true false)]
       (is (nil? (settings-page/publisher-management-section model))))))
+
+(deftest add-publisher!-test
+  (let [new-publisher-id (UUID. 0 0x42)
+        request {:path-params {:congregation cong-id}
+                 :params {:publisher-name "John Doe"}}]
+    (testutil/with-events test-events
+      (testutil/with-user-id user-id
+
+        (testing "add successful: highlights the added publisher"
+          (with-fixtures [fake-dispatcher-fixture]
+            (let [response (settings-page/add-publisher! request new-publisher-id)]
+              (is (= {:status 303
+                      :headers {"Location" "/settings-page-url/publishers?new-publisher=00000000-0000-0000-0000-000000000042"}
+                      :body ""}
+                     response))
+              (is (= {:command/type :publisher.command/add-publisher
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :publisher/id new-publisher-id
+                      :publisher/name "John Doe"}
+                     (dissoc @*last-command :command/time))))))
+
+        (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
+          (binding [dispatcher/command! (fn [& _]
+                                          (throw (ValidationException. [[:missing-name]])))]
+            (let [request (assoc-in request [:params :publisher-name] " ")
+                  response (settings-page/add-publisher! request)]
+              (is (= forms/validation-error-http-status (:status response)))
+              (is (str/includes?
+                   (html/visible-text (:body response))
+                   (html/normalize-whitespace
+                    "[ ] Add publisher
+                     ⚠️ Name is required")))))
+
+          (binding [dispatcher/command! (fn [& _]
+                                          (throw (ValidationException. [[:non-unique-name]])))]
+            (let [response (settings-page/add-publisher! request)]
+              (is (= forms/validation-error-http-status (:status response)))
+              (is (str/includes?
+                   (html/visible-text (:body response))
+                   (html/normalize-whitespace
+                    "[John Doe] Add publisher
+                     ⚠️ There is already a publisher with that name"))))))))))
 
 
 ;;;; Users
@@ -343,7 +403,7 @@
                               "<tr>")
             "old user")
         (is (str/starts-with? (str (settings-page/users-table-row (replace-in user [:new?] false true) model))
-                              "<tr class=\"UserManagement__newUser--")
+                              "<tr class=\"SettingsPage__new-row--")
             "new user"))
 
       (testing "highlights unverified emails"

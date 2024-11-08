@@ -4,9 +4,9 @@
             [territory-bro.domain.publisher :as publisher]
             [territory-bro.infra.db :as db]
             [territory-bro.test.fixtures :refer [db-fixture]]
-            [territory-bro.test.testutil :refer [re-equals thrown-with-msg?]])
+            [territory-bro.test.testutil :refer [re-equals thrown-with-msg? thrown?]])
   (:import (java.util UUID)
-           (territory_bro ValidationException)))
+           (territory_bro NoPermitException ValidationException WriteConflictException)))
 
 (defn cache-fixture [f]
   (mount/start #'publisher/publishers-cache)
@@ -141,3 +141,68 @@
         (is (thrown-with-msg?
              ValidationException (re-equals "[[:no-such-publisher #uuid \"00000000-0000-0000-0000-000000000001\" #uuid \"00000000-0000-0000-0000-000000000666\"]]")
              (publisher/check-publisher-exists conn cong-id (UUID. 0 0x666))))))))
+
+(deftest handle-command-test
+  (db/with-transaction [conn {:rollback-only true}]
+    (let [injections {:conn conn
+                      :check-permit (fn [_permit])}
+          state {}
+          cong-id (UUID/randomUUID)
+          publisher-id (UUID/randomUUID)]
+
+      (testing "add publisher:"
+        (let [command {:command/type :publisher.command/add-publisher
+                       :congregation/id cong-id
+                       :publisher/id publisher-id
+                       :publisher/name "original name"}]
+          (testing "success"
+            (publisher/handle-command command state injections)
+            (is (= "original name"
+                   (-> (publisher/get-by-id conn cong-id publisher-id)
+                       :publisher/name))))
+
+          (testing "error: cannot add if publisher ID exists"
+            (is (thrown?
+                 WriteConflictException
+                 (publisher/handle-command (assoc command :publisher/name "bad add") state injections)))
+            (is (= "original name"
+                   (-> (publisher/get-by-id conn cong-id publisher-id)
+                       :publisher/name))))
+
+          (testing "checks write permits"
+            (let [injections (assoc injections :check-permit (fn [permit]
+                                                               (is (= [:configure-congregation cong-id] permit))
+                                                               (throw (NoPermitException. nil nil))))]
+              (is (thrown? NoPermitException
+                           (publisher/handle-command command state injections)))))))
+
+      (testing "update publisher:"
+        (let [command {:command/type :publisher.command/update-publisher
+                       :congregation/id cong-id
+                       :publisher/id publisher-id
+                       :publisher/name "updated name"}]
+
+          (testing "success"
+            (publisher/handle-command command state injections)
+            (is (= "updated name"
+                   (-> (publisher/get-by-id conn cong-id publisher-id)
+                       :publisher/name))))
+
+          (testing "error: cannot update if publisher ID doesn't exist"
+            (let [publisher-id (UUID/randomUUID)]
+              (is (thrown?
+                   WriteConflictException
+                   (publisher/handle-command {:command/type :publisher.command/update-publisher
+                                              :congregation/id cong-id
+                                              :publisher/id publisher-id
+                                              :publisher/name "bad update"}
+                                             state
+                                             injections)))
+              (is (nil? (publisher/get-by-id conn cong-id publisher-id)))))
+
+          (testing "checks write permits"
+            (let [injections (assoc injections :check-permit (fn [permit]
+                                                               (is (= [:configure-congregation cong-id] permit))
+                                                               (throw (NoPermitException. nil nil))))]
+              (is (thrown? NoPermitException
+                           (publisher/handle-command command state injections))))))))))

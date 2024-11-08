@@ -138,6 +138,11 @@
                    (fn [old-events]
                      (call! gis-user/handle-command command old-events injections)))))
 
+(defn- publisher-command! [conn command state]
+  (let [injections (assoc (default-injections command state)
+                          :conn conn)]
+    (call! publisher/handle-command command state injections)))
+
 (defn- region-command! [conn command state]
   (let [injections (default-injections command state)]
     (write-stream! conn
@@ -165,6 +170,7 @@
    "db-admin.command" db-admin-command!
    "do-not-calls.command" do-not-calls-command!
    "gis-user.command" gis-user-command!
+   "publisher.command" publisher-command!
    "region.command" region-command!
    "share.command" share-command!
    "territory.command" territory-command!})
