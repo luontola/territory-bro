@@ -55,14 +55,12 @@
                  :gis-access true}
    :form {:congregation-name "Congregation Name"
           :loans-csv-url "https://docs.google.com/spreadsheets/123"
-          :publisher-id nil
           :publisher-name ""
           :user-id nil}})
 (def publisher-model
   (-> model
-      (assoc :publisher enriched-publisher)
-      (update :form merge {:publisher-id publisher-id
-                           :publisher-name "John Doe"})))
+      (replace-in [:publisher] nil enriched-publisher)
+      (replace-in [:form :publisher-name] "" "John Doe")))
 
 (def test-events
   (flatten [{:event/type :congregation.event/congregation-created
@@ -351,6 +349,49 @@
                    (html/visible-text (:body response))
                    (html/normalize-whitespace
                     "[John Doe] Add publisher
+                     ⚠️ There is already a publisher with that name"))))))))))
+
+(deftest update-publisher!-test
+  (let [request {:path-params {:congregation cong-id
+                               :publisher publisher-id}
+                 :params {:publisher-name "new name"}}]
+    (testutil/with-events test-events
+      (testutil/with-user-id user-id
+
+        (testing "update successful"
+          (with-fixtures [fake-dispatcher-fixture]
+            (let [response (settings-page/update-publisher! request)]
+              (is (= {:status 303
+                      :headers {"Location" "/settings-page-url/publishers/00000000-0000-0000-0000-000000000004"}
+                      :body ""}
+                     response))
+              (is (= {:command/type :publisher.command/update-publisher
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :publisher/id publisher-id
+                      :publisher/name "new name"}
+                     (dissoc @*last-command :command/time))))))
+
+        (testing "add failed: highlights erroneous form fields, doesn't forget invalid user input"
+          (binding [dispatcher/command! (fn [& _]
+                                          (throw (ValidationException. [[:missing-name]])))]
+            (let [request (assoc-in request [:params :publisher-name] " ")
+                  response (settings-page/update-publisher! request)]
+              (is (= forms/validation-error-http-status (:status response)))
+              (is (str/includes?
+                   (html/visible-text (:body response))
+                   (html/normalize-whitespace
+                    "[ ] Save Delete Cancel
+                     ⚠️ Name is required")))))
+
+          (binding [dispatcher/command! (fn [& _]
+                                          (throw (ValidationException. [[:non-unique-name]])))]
+            (let [response (settings-page/update-publisher! request)]
+              (is (= forms/validation-error-http-status (:status response)))
+              (is (str/includes?
+                   (html/visible-text (:body response))
+                   (html/normalize-whitespace
+                    "[new name] Save Delete Cancel
                      ⚠️ There is already a publisher with that name"))))))))))
 
 

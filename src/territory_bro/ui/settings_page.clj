@@ -55,7 +55,6 @@
                                    (:congregation/name congregation))
             :loans-csv-url (or (get-in request [:params :loans-csv-url])
                                (:congregation/loans-csv-url congregation))
-            :publisher-id publisher-id
             :publisher-name (or (get-in request [:params :publisher-name])
                                 (:publisher/name publisher)
                                 "")
@@ -204,31 +203,46 @@
 
 (def ^:private publisher-table-column-count 3)
 
-(defn edit-publisher-row [{:keys [publisher form permissions]}]
+(defn- publisher-name-errors [{:keys [errors]}]
+  (let [errors (group-by first errors)
+        missing-name? (contains? errors :missing-name)
+        non-unique-name? (contains? errors :non-unique-name)
+        error? (or missing-name?
+                   non-unique-name?)]
+    (when error?
+      (h/html
+       [:div [:span.pure-form-message-inline
+              " ⚠️ "
+              (when missing-name?
+                "Name is required") ; TODO: i18n
+              (when non-unique-name?
+                "There is already a publisher with that name")]])))) ; TODO: i18n
+
+(defn- publisher-name-input [{:keys [form] :as model}]
+  (h/html
+   [:input#publisher-name {:type "text"
+                           :name "publisher-name"
+                           :value (:publisher-name form)
+                           :autocomplete "off" ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
+                           :data-1p-ignore true
+                           :required true
+                           :aria-label "Name" ; TODO: i18n
+                           :aria-invalid (when (some? (publisher-name-errors model))
+                                           "true")}]))
+
+(defn edit-publisher-row [{:keys [publisher permissions] :as model}]
   (when (:configure-congregation permissions)
     (if (nil? publisher)
       ""
       (let [styles (:SettingsPage (css/modules))
-            publisher-id (:publisher-id form)
-            errors nil ; TODO: test through form submit
-            missing-name? (contains? errors :missing-name)
-            non-unique-name? (contains? errors :non-unique-name)
-            error? (or missing-name?
-                       non-unique-name?)]
+            publisher-id (:publisher/id publisher)]
         (h/html
          [:tr {:hx-target "this"
                :hx-swap "outerHTML"}
           [:td {:colspan publisher-table-column-count
                 :style {:padding "4px"}}
            [:form.pure-form {:hx-post (str html/*page-path* "/publishers/" publisher-id)}
-            [:input#publisher-name {:name "publisher-name"
-                                    :type "text"
-                                    :autocomplete "off"
-                                    :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
-                                    :required true
-                                    :value (:publisher-name form)
-                                    :aria-label "Name" ; TODO: i18n
-                                    :aria-invalid (when error? "true")}]
+            (publisher-name-input model)
             " "
             [:button.pure-button.pure-button-primary {:type "submit"}
              "Save"]
@@ -240,37 +254,20 @@
             " "
             [:button.pure-button {:hx-get (str html/*page-path* "/publishers/" publisher-id)
                                   :type "button"}
-             "Cancel"]]]])))))
+             "Cancel"]
+            (publisher-name-errors model)]]])))))
 
-(defn add-publisher-row [{:keys [form errors]}]
-  (let [errors (group-by first errors)
-        missing-name? (contains? errors :missing-name)
-        non-unique-name? (contains? errors :non-unique-name)
-        error? (or missing-name?
-                   non-unique-name?)]
-    (h/html
-     [:tr
-      [:td {:colspan publisher-table-column-count
-            :style {:padding "4px"}}
-       [:form.pure-form {:hx-post (str html/*page-path* "/publishers")}
-        [:input#publisher-name {:name "publisher-name"
-                                :type "text"
-                                :autocomplete "off"
-                                :data-1p-ignore true ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
-                                :required true
-                                :value (:publisher-name form)
-                                :aria-label "Name" ; TODO: i18n
-                                :aria-invalid (when error? "true")}]
-        " "
-        [:button.pure-button.pure-button-primary {:type "submit"}
-         "Add publisher"] ; TODO: i18n
-        (when error?
-          [:div [:span.pure-form-message-inline
-                 " ⚠️ "
-                 (when missing-name?
-                   "Name is required") ; TODO: i18n
-                 (when non-unique-name?
-                   "There is already a publisher with that name")]])]]]))) ; TODO: i18n
+(defn add-publisher-row [model]
+  (h/html
+   [:tr
+    [:td {:colspan publisher-table-column-count
+          :style {:padding "4px"}}
+     [:form.pure-form {:hx-post (str html/*page-path* "/publishers")}
+      (publisher-name-input model)
+      " "
+      [:button.pure-button.pure-button-primary {:type "submit"}
+       "Add publisher"] ; TODO: i18n
+      (publisher-name-errors model)]]]))
 
 (defn publisher-management-section [{:keys [publishers permissions] :as model}]
   (when (:configure-congregation permissions)
@@ -303,6 +300,19 @@
        (http-response/see-other (str html/*page-path* "/publishers?new-publisher=" publisher-id))
        (catch Exception e
          (forms/validation-error-htmx-response e request model! publisher-management-section))))))
+
+(defn update-publisher! [request]
+  (let [cong-id (get-in request [:path-params :congregation])
+        publisher-id (get-in request [:path-params :publisher])
+        publisher-name (get-in request [:params :publisher-name])]
+    (try
+      (dmz/dispatch! {:command/type :publisher.command/update-publisher
+                      :congregation/id cong-id
+                      :publisher/id publisher-id
+                      :publisher/name publisher-name})
+      (http-response/see-other (str html/*page-path* "/publishers/" publisher-id))
+      (catch Exception e
+        (forms/validation-error-htmx-response e request model! edit-publisher-row)))))
 
 
 ;;;; Users
@@ -468,8 +478,7 @@
                           (view-publisher-row)
                           (html/response)))}
      :post {:handler (fn [request]
-                       ; TODO: save publisher
-                       (http-response/see-other (:uri request)))}
+                       (update-publisher! request))}
      :delete {:handler (fn [request]
                          ; TODO: remove publisher
                          (http-response/see-other (:uri request)))}}]
