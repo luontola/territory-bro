@@ -108,11 +108,16 @@
      [:table#territory-list.pure-table.pure-table-striped
       [:thead
        [:tr
-        [:th (i18n/t "Territory.number")]
-        [:th (i18n/t "Territory.region")]
-        [:th (i18n/t "Territory.addresses")]
-        [:th "Status"] ; TODO: i18n
-        [:th "Last covered"]]] ; TODO: i18n
+        [:th {:style {:min-width "4em"}}
+         (i18n/t "Territory.number")]
+        [:th {:style {:min-width "8em"}}
+         (i18n/t "Territory.region")]
+        [:th {:style {:min-width "12em"}}
+         (i18n/t "Territory.addresses")]
+        [:th {:style {:min-width "10em"}}
+         "Status"] ; TODO: i18n
+        [:th {:style {:min-width "8em"}}
+         "Last covered"]]] ; TODO: i18n
       [:tbody
        (for [territory territories]
          [:tr {:data-territory-id (:territory/id territory)
@@ -127,7 +132,8 @@
               "-"
               (:territory/number territory))]]
           [:td (:territory/region territory)]
-          [:td (:territory/addresses territory)]
+          [:td {:style {:max-width "30em"}}
+           (:territory/addresses territory)]
           [:td (if-some [assignment (:territory/current-assignment territory)]
                  (h/html
                   [:span {:style {:color "red"}} "Assigned"] ; TODO: i18n

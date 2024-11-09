@@ -10,7 +10,7 @@ form.search input {
 }
 
 td.number {
-    padding: 0;
+    padding: 0 !important;
     white-space: nowrap;
 }
 
@@ -18,8 +18,9 @@ td.number a {
     /*
     make the whole cell clickable:
     - block link (for 100% width)
-    - move padding from cell to link (for 100% height)
-    - horizontal padding is half of the other TD elements, but since the text is center aligned, it'll look fine
+    - move padding from the TD cell to the link (for more width)
+    - padding is less than the other TD elements, but since the text is center aligned, it'll look fine, and it counters the bigger font size
+    - setting 100% height would do nothing, because the TD doesn't have a fixed height, but is dynamic based on content
     */
     display: block;
     padding: 0 .5em;
