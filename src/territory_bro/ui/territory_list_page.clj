@@ -137,9 +137,9 @@
           [:td (if-some [assignment (:territory/current-assignment territory)]
                  (h/html
                   [:span {:style {:color "red"}} "Assigned"] ; TODO: i18n
-                  (-> " to {name}"
-                      (str/replace "{name}" (or (:publisher/name assignment)
-                                                "[deleted]")))
+                  (-> " to {{name}}"
+                      (str/replace "{{name}}" (or (:publisher/name assignment)
+                                                  "[deleted]")))
                   " for " (util/months-difference (:assignment/start-date assignment) today) " months")
                  (h/html
                   [:span {:style {:color "blue"}} "Up for grabs"]))] ; TODO: i18n

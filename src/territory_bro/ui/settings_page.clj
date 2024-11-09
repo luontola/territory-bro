@@ -204,7 +204,7 @@
                                   :hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")
                                   :class (:edit-button styles)
                                   :autofocus autofocus}
-             "Edit"]]])))))) ; TODO: i18n
+             (i18n/t "PublisherManagement.edit")]]]))))))
 
 (def ^:private publisher-table-column-count 3)
 
@@ -219,9 +219,9 @@
        [:div [:span.pure-form-message-inline
               " ⚠️ "
               (when missing-name?
-                "Name is required") ; TODO: i18n
+                (i18n/t "PublisherManagement.missingNameError"))
               (when non-unique-name?
-                "There is already a publisher with that name")]])))) ; TODO: i18n
+                (i18n/t "PublisherManagement.nonUniqueNameError"))]]))))
 
 (defn- publisher-name-input [{:keys [form] :as model} {:keys [autofocus]}]
   (h/html
@@ -232,7 +232,7 @@
                            :autocomplete "off" ; don't offer to fill with 1Password https://developer.1password.com/docs/web/compatible-website-design/
                            :data-1p-ignore true
                            :required true
-                           :aria-label "Name" ; TODO: i18n
+                           :aria-label (i18n/t "PublisherManagement.publisherName")
                            :aria-invalid (when (some? (publisher-name-errors model))
                                            "true")}]))
 
@@ -251,20 +251,19 @@
             (publisher-name-input model {:autofocus true})
             " "
             [:button.pure-button.pure-button-primary {:type "submit"}
-             "Save"]
+             (i18n/t "PublisherManagement.save")]
             " "
             [:button.pure-button {:type "button"
                                   :hx-delete (str html/*page-path* "/publishers/" publisher-id)
                                   :hx-confirm (when-not (empty? (:assigned-territories publisher))
-                                                ;; TODO: i18n
-                                                (-> "{name} has assigned territories. It will not be possible to see to whom the territories are assigned if the publisher is deleted.\n\nAre you sure you want to delete {name}?"
-                                                    (str/replace "{name}" (:publisher/name publisher))))
+                                                (-> (i18n/t "PublisherManagement.deleteWarning")
+                                                    (str/replace "{{name}}" (:publisher/name publisher))))
                                   :class (:delete-button styles)}
-             "Delete"]
+             (i18n/t "PublisherManagement.delete")]
             " "
             [:button.pure-button {:type "button"
                                   :hx-get (str html/*page-path* "/publishers/" publisher-id)}
-             "Cancel"]
+             (i18n/t "PublisherManagement.cancel")]
             (publisher-name-errors model)]]])))))
 
 (defn add-publisher-row [model]
@@ -277,7 +276,7 @@
         (publisher-name-input model nil)
         " "
         [:button.pure-button.pure-button-primary {:type "submit"}
-         "Add publisher"] ; TODO: i18n
+         (i18n/t "PublisherManagement.addPublisher")]
         (publisher-name-errors model)]]])))
 
 (defn publisher-management-section [{:keys [publishers permissions] :as model}]
@@ -285,12 +284,12 @@
     (h/html
      [:section#publishers-section {:hx-target "this"
                                    :hx-swap "outerHTML"}
-      [:h2 "Publishers"] ; TODO: i18n
+      [:h2 (i18n/t "PublisherManagement.title")]
       [:table.pure-table.pure-table-horizontal
        [:thead
         [:tr
-         [:th "Name"] ; TODO: i18n
-         [:th "Assigned territories"] ; TODO: i18n
+         [:th (i18n/t "PublisherManagement.publisherName")]
+         [:th (i18n/t "PublisherManagement.assignedTerritories")]
          [:th]]]
        [:tbody
         (for [publisher (util/natural-sort-by :publisher/name publishers)]

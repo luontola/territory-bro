@@ -72,6 +72,18 @@ EditingMaps:
   title: Editing maps
   introduction: The instructions for editing maps are in the <0>user guide</0>. You can edit the maps using the <1>QGIS application</1>, for which you will need the following QGIS project file.
   downloadQgisProject: Download QGIS project file
+PublisherManagement:
+  title: Publishers
+  publisherName: Name
+  assignedTerritories: Assigned territories
+  addPublisher: Add publisher
+  edit: Edit
+  save: Save
+  delete: Delete
+  cancel: Cancel
+  deleteWarning: "{{name}} has assigned territories. It will not be possible to see to whom the territories are assigned if the publisher is deleted.\n\nAre you sure you want to delete {{name}}?"
+  missingNameError: Name is required
+  nonUniqueNameError: There is already a publisher with that name
 UserManagement:
   title: Users
   userId: User ID

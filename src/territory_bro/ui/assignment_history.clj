@@ -152,6 +152,6 @@
             (when (:covered? row)
               [:div "✅ Covered"]) ; TODO: i18n
             (when (:assigned? row)
-              [:div (-> "⤴️ Assigned to {name}" ; TODO: i18n
-                        (str/replace "{name}" (or (:publisher/name row)
-                                                  "[deleted]")))])])))]))) ; TODO: i18n
+              [:div (-> "⤴️ Assigned to {{name}}" ; TODO: i18n
+                        (str/replace "{{name}}" (or (:publisher/name row)
+                                                    "[deleted]")))])])))]))) ; TODO: i18n
