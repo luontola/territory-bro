@@ -225,10 +225,10 @@
                 (b/wait-has-text h1 "Territories"))
               (recur (dec tries))))
           (is (= (html/normalize-whitespace
-                  "Number  Region          Addresses
-                   101     South Helsinki  Rautatientori
-                   102     South Helsinki  Kauppatori
-                   103     South Helsinki  Narinkkatori")
+                  "Number  Region          Addresses      Status        Last covered
+                   101     South Helsinki  Rautatientori  Up for grabs
+                   102     South Helsinki  Kauppatori     Up for grabs
+                   103     South Helsinki  Narinkkatori   Up for grabs")
                  (html/normalize-whitespace
                   (b/get-element-text *driver* :territory-list)))))))))
 

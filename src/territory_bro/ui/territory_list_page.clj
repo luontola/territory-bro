@@ -1,8 +1,10 @@
 (ns territory-bro.ui.territory-list-page
   (:require [clojure.string :as str]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.json :as json]
+            [territory-bro.infra.util :as util]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
@@ -14,12 +16,26 @@
 (defn model! [request {:keys [fetch-loans?]}]
   (let [cong-id (get-in request [:path-params :congregation])
         congregation (dmz/get-congregation cong-id)
+        today (.toLocalDate (congregation/local-time congregation))
         congregation-boundary (dmz/get-congregation-boundary cong-id)
-        territories (cond->> (dmz/list-territories cong-id)
+        territories (->> (dmz/list-territories cong-id)
+                         (mapv (fn [territory]
+                                 (let [assigned? (some? (:territory/current-assignment territory))
+                                       start-date (-> territory :territory/current-assignment :assignment/start-date)
+                                       last-covered (-> territory :territory/last-covered)
+                                       staleness (cond
+                                                   assigned? (util/months-difference start-date today)
+                                                   (some? last-covered) (util/months-difference last-covered today)
+                                                   :else Integer/MAX_VALUE)]
+                                   (-> territory
+                                       (assoc :territory/loaned? assigned?)
+                                       (assoc :territory/staleness staleness))))))
+        territories (cond->> territories
                       fetch-loans? (dmz/enrich-territory-loans cong-id))]
     {:congregation-boundary congregation-boundary
      :territories territories
      :has-loans? (some? (:congregation/loans-csv-url congregation))
+     :today today
      :permissions {:view-congregation-temporarily (dmz/allowed? [:view-congregation-temporarily cong-id])}}))
 
 
@@ -59,7 +75,7 @@
   (territory-list-map (model! request {:fetch-loans? true})))
 
 
-(defn view [{:keys [territories has-loans? permissions] :as model}]
+(defn view [{:keys [territories has-loans? permissions today] :as model}]
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
      [:h1 (i18n/t "TerritoryListPage.title")]
@@ -94,7 +110,9 @@
        [:tr
         [:th (i18n/t "Territory.number")]
         [:th (i18n/t "Territory.region")]
-        [:th (i18n/t "Territory.addresses")]]]
+        [:th (i18n/t "Territory.addresses")]
+        [:th "Status"] ; TODO: i18n
+        [:th "Last covered"]]] ; TODO: i18n
       [:tbody
        (for [territory territories]
          [:tr {:data-territory-id (:territory/id territory)
@@ -109,7 +127,19 @@
               "-"
               (:territory/number territory))]]
           [:td (:territory/region territory)]
-          [:td (:territory/addresses territory)]])]])))
+          [:td (:territory/addresses territory)]
+          [:td (if-some [assignment (:territory/current-assignment territory)]
+                 (h/html
+                  [:span {:style {:color "red"}} "Assigned"] ; TODO: i18n
+                  (-> " to {name}"
+                      (str/replace "{name}" (or (:publisher/name assignment)
+                                                "[deleted]")))
+                  " for " (util/months-difference (:assignment/start-date assignment) today) " months")
+                 (h/html
+                  [:span {:style {:color "blue"}} "Up for grabs"]))] ; TODO: i18n
+          [:td (when-some [last-covered (:territory/last-covered territory)]
+                 (h/html
+                  (util/months-difference last-covered today) " months ago (" (html/nowrap last-covered) ")"))]])]])))
 
 (defn view! [request]
   (view (model! request {:fetch-loans? false})))

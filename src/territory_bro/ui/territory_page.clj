@@ -3,6 +3,7 @@
             [medley.core :refer [greatest]]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.publisher :as publisher]
             [territory-bro.gis.geometry :as geometry]
@@ -18,11 +19,8 @@
             [territory-bro.ui.layout :as layout]
             [territory-bro.ui.map-interaction-help :as map-interaction-help]
             [territory-bro.ui.maps :as maps])
-  (:import (java.time LocalDate Period ZonedDateTime)
+  (:import (java.time LocalDate)
            (territory_bro ValidationException)))
-
-(defn congregation-time ^ZonedDateTime [congregation] ; TODO: move to another namespace
-  (ZonedDateTime/now (.withZone config/*clock* (:congregation/timezone congregation))))
 
 (defn- parse-date [s default]
   (or (some-> s LocalDate/parse)
@@ -36,7 +34,7 @@
         do-not-calls (dmz/get-do-not-calls cong-id territory-id)
         assignment-history (dmz/get-territory-assignment-history cong-id territory-id)
         publishers (dmz/list-publishers cong-id)
-        today (.toLocalDate (congregation-time congregation))]
+        today (.toLocalDate (congregation/local-time congregation))]
     (-> {:congregation (select-keys congregation [:congregation/name])
          :territory (-> territory
                         (dissoc :congregation/id)
@@ -262,13 +260,6 @@ if (returningCheckbox.checked) {
                                :onclick "this.closest('dialog').close()"}
           "Cancel"]]]]]))) ; TODO: i18n
 
-(defn months-difference [^LocalDate start ^LocalDate end]
-  (.toTotalMonths (Period/between start end)))
-
-(defn- nowrap [s]
-  (h/html [:span {:style {:white-space "nowrap"}}
-           s]))
-
 (defn assignment-status [{:keys [territory open-form? today] :as model}]
   (let [styles (:TerritoryPage (css/modules))
         assignment (:territory/current-assignment territory)
@@ -298,12 +289,12 @@ if (returningCheckbox.checked) {
                     (str/replace "{name}" (or (:publisher/name assignment)
                                               "[deleted]"))) ; TODO: i18n
                 [:br]
-                "(" (months-difference start-date today) " months, since " (nowrap start-date) ")") ; TODO: i18n
+                "(" (util/months-difference start-date today) " months, since " (html/nowrap start-date) ")") ; TODO: i18n
         (h/html [:span {:style {:color "blue"}} "Up for grabs"] ; TODO: i18n
                 (when (some? last-covered)
                   (h/html
                    [:br]
-                   "(" (months-difference last-covered today) " months, since " (nowrap last-covered) ")"))))]))) ; TODO: i18n
+                   "(" (util/months-difference last-covered today) " months, since " (html/nowrap last-covered) ")"))))]))) ; TODO: i18n
 
 (defn assignment-form-open [model]
   (assignment-status (assoc model :open-form? true)))

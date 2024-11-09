@@ -115,6 +115,10 @@
        (filterv some?)
        (str/join " ")))
 
+(defn nowrap [s]
+  (h/html [:span {:style {:white-space "nowrap"}}
+           s]))
+
 
 ;;;; CSRF protection
 

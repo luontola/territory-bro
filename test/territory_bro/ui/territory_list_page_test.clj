@@ -5,6 +5,7 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.loan :as loan]
+            [territory-bro.domain.publisher :as publisher]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
@@ -14,11 +15,21 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.territory-list-page :as territory-list-page]
             [territory-bro.ui.territory-page :as territory-page])
-  (:import (java.util UUID)))
+  (:import (java.time LocalDate LocalTime OffsetDateTime ZoneOffset)
+           (java.util UUID)))
 
 (def user-id (random-uuid))
 (def cong-id (random-uuid))
 (def territory-id (UUID. 0 1))
+(def publisher-id (UUID. 0 2))
+(def assignment-id (UUID. 0 3))
+(def start-date (LocalDate/of 2000 1 1))
+(def end-date (LocalDate/of 2000 2 1))
+(def today (LocalDate/of 2000 3 1))
+(def publisher {:congregation/id cong-id
+                :publisher/id publisher-id
+                :publisher/name "John Doe"})
+
 (def model
   {:congregation-boundary testdata/wkt-helsinki
    :territories [{:congregation/id cong-id
@@ -27,14 +38,31 @@
                   :territory/addresses "the addresses"
                   :territory/region "the region"
                   :territory/meta {:foo "bar"}
-                  :territory/location testdata/wkt-helsinki-rautatientori}]
+                  :territory/location testdata/wkt-helsinki-rautatientori
+                  :territory/loaned? false
+                  :territory/staleness Integer/MAX_VALUE}]
    :has-loans? false
+   :today today
    :permissions {:view-congregation-temporarily false}})
 (def model-loans-enabled
   (replace-in model [:has-loans?] false true))
 (def model-loans-fetched
   (update-in model-loans-enabled [:territories 0] merge {:territory/loaned? true
                                                          :territory/staleness 7}))
+(def model-with-assignments
+  (update-in model [:territories 0] merge {:territory/loaned? true ; TODO: legacy field, remove me
+                                           :territory/staleness 2 ; TODO: legacy field, remove me
+                                           :territory/last-covered end-date
+                                           :territory/current-assignment {:assignment/id assignment-id
+                                                                          :assignment/start-date start-date
+                                                                          :assignment/covered-dates #{end-date}
+                                                                          :publisher/id publisher-id
+                                                                          :publisher/name "John Doe"}}))
+(def model-with-returned-territory
+  (update-in model [:territories 0] merge {:territory/loaned? false ; TODO: legacy field, remove me
+                                           :territory/staleness 1 ; TODO: legacy field, remove me
+                                           :territory/last-covered end-date}))
+
 (def demo-model
   (-> model
       (replace-in [:territories 0 :congregation/id] cong-id "demo")
@@ -43,6 +71,17 @@
   (assoc model
          :congregation-boundary nil
          :permissions {:view-congregation-temporarily true}))
+
+(def fake-publishers {cong-id {publisher-id publisher}})
+
+(defn fakes [f]
+  (binding [publisher/publishers-by-id (fn [_conn cong-id]
+                                         (get fake-publishers cong-id))]
+    (f)))
+
+(def test-time (.toInstant (OffsetDateTime/of today LocalTime/NOON ZoneOffset/UTC)))
+
+(use-fixtures :once (join-fixtures [fakes (fixed-clock-fixture test-time)]))
 
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id}}]
@@ -89,6 +128,29 @@
                   (is (= anonymous-model
                          (territory-list-page/model! request {}))))))))
 
+        (testing "territory assignment status"
+          (testutil/with-events [{:event/type :territory.event/territory-assigned
+                                  :congregation/id cong-id
+                                  :territory/id territory-id
+                                  :assignment/id assignment-id
+                                  :assignment/start-date start-date
+                                  :publisher/id publisher-id}
+                                 {:event/type :territory.event/territory-covered
+                                  :congregation/id cong-id
+                                  :territory/id territory-id
+                                  :assignment/id assignment-id
+                                  :assignment/covered-date end-date}]
+            (is (= model-with-assignments (territory-list-page/model! request {}))
+                "territory assigned")
+
+            (testutil/with-events [{:event/type :territory.event/territory-returned
+                                    :congregation/id cong-id
+                                    :territory/id territory-id
+                                    :assignment/id assignment-id
+                                    :assignment/end-date end-date}]
+              (is (= model-with-returned-territory (territory-list-page/model! request {}))
+                  "territory returned"))))
+
         (testing "loans enabled,"
           (testutil/with-events [{:event/type :congregation.event/settings-updated
                                   :congregation/id cong-id
@@ -109,10 +171,37 @@
             "Territories
 
              Search [] Clear
-             Number   Region       Addresses
-             123      the region   the addresses")
+             Number   Region       Addresses       Status         Last covered
+             123      the region   the addresses   Up for grabs")
            (-> (territory-list-page/view model)
                html/visible-text))))
+
+  (testing "shows territory assignment status"
+    (is (= (html/normalize-whitespace
+            "Territories
+
+             Search [] Clear
+             Number   Region       Addresses       Status                              Last covered
+             123      the region   the addresses   Assigned to John Doe for 2 months   1 months ago (2000-02-01)")
+           (-> (territory-list-page/view model-with-assignments)
+               html/visible-text))
+        "territory assigned")
+    (is (= (html/normalize-whitespace
+            "Territories
+
+             Search [] Clear
+             Number   Region       Addresses       Status         Last covered
+             123      the region   the addresses   Up for grabs   1 months ago (2000-02-01)")
+           (-> (territory-list-page/view model-with-returned-territory)
+               html/visible-text))
+        "territory returned"))
+
+  (testing "placeholder for deleted publishers"
+    (let [model (replace-in model-with-assignments [:territories 0 :territory/current-assignment :publisher/name] "John Doe" nil)]
+      (is (str/includes?
+           (-> (territory-list-page/view model)
+               html/visible-text)
+           "Assigned to [deleted] for 2 months"))))
 
   (testing "each row embeds the searchable text in lowercase"
     (let [model (-> model
@@ -132,8 +221,8 @@
             "Territories
 
              Search [] Clear
-             Number   Region       Addresses
-             -        the region   the addresses")
+             Number   Region       Addresses       Status         Last covered
+             -        the region   the addresses   Up for grabs")
            (-> (territory-list-page/view (replace-in model [:territories 0 :territory/number] "123" ""))
                html/visible-text))))
 
@@ -169,8 +258,8 @@
                You will need to login to see the rest.
 
                Search [] Clear
-               Number   Region       Addresses
-               123      the region   the addresses")
+               Number   Region       Addresses       Status         Last covered
+               123      the region   the addresses   Up for grabs")
              (-> (territory-list-page/view anonymous-model)
                  html/visible-text))))
 
@@ -183,8 +272,8 @@
                You will need to request access to see the rest.
 
                Search [] Clear
-               Number   Region       Addresses
-               123      the region   the addresses")
+               Number   Region       Addresses       Status         Last covered
+               123      the region   the addresses   Up for grabs")
              (binding [auth/*user* {:user/id (random-uuid)}]
                (-> (territory-list-page/view anonymous-model)
                    html/visible-text)))))))

@@ -1,9 +1,10 @@
 (ns territory-bro.domain.congregation
   (:require [clojure.set :as set]
             [clojure.string :as str]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.infra.util :refer [conj-set]])
-  (:import (java.time ZoneOffset)
+  (:import (java.time ZoneOffset ZonedDateTime)
            (territory_bro ValidationException)))
 
 (def all-permissions
@@ -13,6 +14,10 @@
    :assign-territory
    :share-territory-link
    :edit-do-not-calls])
+
+(defn local-time ^ZonedDateTime [congregation]
+  (ZonedDateTime/now (.withZone config/*clock* (:congregation/timezone congregation))))
+
 
 ;;;; Read model
 
