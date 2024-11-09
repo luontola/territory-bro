@@ -273,7 +273,7 @@
      [:tr
       [:td {:colspan publisher-table-column-count
             :class (:edit-publisher styles)}
-       [:form.pure-form {:hx-post (str html/*page-path* "/publishers")}
+       [:form#add-publisher-form.pure-form {:hx-post (str html/*page-path* "/publishers")}
         (publisher-name-input model nil)
         " "
         [:button.pure-button.pure-button-primary {:type "submit"}

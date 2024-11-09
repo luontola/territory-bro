@@ -430,6 +430,54 @@
         (wait-and-click {:tag :button, :fn/text "Save settings"})
         (b/wait-visible [{:tag :nav} {:tag :a, :fn/has-string (str *congregation-name* " B")}])))))
 
+(deftest territory-assignments-test
+  (with-fixtures [with-browser with-per-test-postmortem]
+    (doto *driver*
+      (dev-login-as *user*)
+      (go-to-congregation *congregation-name*))
+
+    (testing "add publishers"
+      (doto *driver*
+        (go-to-page "Settings")
+        (b/fill [:add-publisher-form {:tag :input, :name "publisher-name"}] "Paul Publisher")
+        (b/click [:add-publisher-form {:tag :button, :fn/text "Add publisher"}])
+        (b/wait-visible [:publishers-section {:tag :td, :fn/text "Paul Publisher"}])))
+
+    (testing "go to unassigned territory"
+      (doto *driver*
+        (go-to-page "Territories")
+        (go-to-territory "101"))
+      (is (str/includes? (b/get-element-text *driver* :assignment-status)
+                         "Up for grabs")))
+
+    (testing "assign territory"
+      (let [open-dialog-button [:assignment-status {:tag :button, :fn/text "Assign"}]
+            publisher-field [:assignment-status {:tag :input, :name "publisher"}]
+            submit-button [:assignment-status {:tag :button, :fn/text "Assign territory"}]]
+        (doto *driver*
+          (b/click open-dialog-button)
+          (b/wait-visible publisher-field)
+          (b/fill publisher-field "Paul Publisher")
+          (b/click submit-button)
+          (b/wait-invisible submit-button)))
+      (is (str/includes? (b/get-element-text *driver* :assignment-status)
+                         "Assigned to Paul Publisher")))
+
+    (testing "return territory"
+      (let [open-dialog-button [:assignment-status {:tag :button, :fn/text "Return"}]
+            submit-button [:assignment-status {:tag :button, :fn/text "Return territory"}]]
+        (doto *driver*
+          (b/click open-dialog-button)
+          (b/wait-visible submit-button)
+          (b/click submit-button)
+          (b/wait-invisible submit-button)))
+      (is (str/includes? (b/get-element-text *driver* :assignment-status)
+                         "Up for grabs")))
+
+    (testing "shows assignment history"
+      (is (str/includes? (html/normalize-whitespace
+                          (b/get-element-text *driver* :assignment-history))
+                         "📥 Returned ✅ Covered ⤴️ Assigned to Paul Publisher")))))
 
 (defn- get-territory-url [territory-number]
   (let [el (b/query *driver* [:territory-list {:tag :a, :fn/text (str territory-number)}])
