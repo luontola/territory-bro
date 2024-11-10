@@ -167,7 +167,7 @@
                        (territory-page/model! request)))))))))))
 
 (deftest view-test
-  (testing "untouched territory, hides the assignment history"
+  (testing "untouched territory"
     (is (= (html/normalize-whitespace
             "Territory 123
 
@@ -184,7 +184,9 @@
                Assign
                Up for grabs
 
-             {share.svg} Share a link"
+             {share.svg} Share a link
+
+             Assignment history" ; the title should be hidden using CSS
             map-interaction-help-test/default-visible-text)
            (-> (territory-page/view untouched-model)
                html/visible-text))))

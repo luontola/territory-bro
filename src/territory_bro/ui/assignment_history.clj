@@ -94,66 +94,68 @@
        assign-grid-rows))
 
 (defn view [{:keys [assignment-history today]}]
-  (let [rows (compile-assignment-history-rows assignment-history today)]
-    (h/html
-     [:div {:style {:display "grid"
-                    :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
-                    :gap "0.5rem"
-                    :width "fit-content"
-                    :margin "1rem 0"}}
-      (for [{:keys [grid-row grid-span] :as row} rows]
-        (case (:type row)
-          :assignment
-          (h/html
-           ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
-           [:div {:style (identity {:grid-column "timeline-start / timeline-end"
-                                    :grid-row (str grid-row " / " (+ grid-row grid-span))
-                                    :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"})}]
-           [:div {:style (identity {:grid-column "controls-start / controls-end"
-                                    :grid-row grid-row
-                                    :text-align "right"
-                                    :margin-left "1em"})}
-            ;; TODO: at first add just a checkmark for deleting the assignment? simpler to implement than full editing
-            #_[:a {:href "#"
-                   :style {:margin-left "1em"}
-                   :title "Delete assignment"
-                   :aria-label "Delete assignment"}
-               (html/inline-svg "icons/close.svg")]
-            (if (:dev config/env)
-              [:a {:href "#"
-                   :onclick "return false"}
-               (i18n/t "Assignment.form.edit")]
-              [:span {:data-test-icon (i18n/t "Assignment.form.edit")}])])
+  (if (empty? assignment-history)
+    [:div#empty-assignment-history]
+    (let [rows (compile-assignment-history-rows assignment-history today)]
+      (h/html
+       [:div {:style {:display "grid"
+                      :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
+                      :gap "0.5rem"
+                      :width "fit-content"
+                      :margin "1rem 0"}}
+        (for [{:keys [grid-row grid-span] :as row} rows]
+          (case (:type row)
+            :assignment
+            (h/html
+             ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
+             [:div {:style (identity {:grid-column "timeline-start / timeline-end"
+                                      :grid-row (str grid-row " / " (+ grid-row grid-span))
+                                      :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"})}]
+             [:div {:style (identity {:grid-column "controls-start / controls-end"
+                                      :grid-row grid-row
+                                      :text-align "right"
+                                      :margin-left "1em"})}
+              ;; TODO: at first add just a checkmark for deleting the assignment? simpler to implement than full editing
+              #_[:a {:href "#"
+                     :style {:margin-left "1em"}
+                     :title "Delete assignment"
+                     :aria-label "Delete assignment"}
+                 (html/inline-svg "icons/close.svg")]
+              (if (:dev config/env)
+                [:a {:href "#"
+                     :onclick "return false"}
+                 (i18n/t "Assignment.form.edit")]
+                [:span {:data-test-icon (i18n/t "Assignment.form.edit")}])])
 
-          :duration
-          (h/html
-           [:div {:style (identity {:grid-column "time-start / time-end"
-                                    :grid-row grid-row
-                                    :white-space "nowrap"
-                                    :text-align "center"
-                                    :padding "0.7rem 0"
-                                    :color (when (= :vacant (:status row))
-                                             "#999")})}
-            (if (:temporal-paradox? row)
-              " ⚠️ "
-              (-> (i18n/t "Assignment.durationMonths")
-                  (str/replace "{{months}}" (str (:months row)))))])
+            :duration
+            (h/html
+             [:div {:style (identity {:grid-column "time-start / time-end"
+                                      :grid-row grid-row
+                                      :white-space "nowrap"
+                                      :text-align "center"
+                                      :padding "0.7rem 0"
+                                      :color (when (= :vacant (:status row))
+                                               "#999")})}
+              (if (:temporal-paradox? row)
+                " ⚠️ "
+                (-> (i18n/t "Assignment.durationMonths")
+                    (str/replace "{{months}}" (str (:months row)))))])
 
-          :event
-          (h/html
-           [:div {:style (identity {:grid-column "time-start / time-end"
-                                    :grid-row grid-row
-                                    :white-space "nowrap"})}
-            (:date row)]
-           [:div {:style (identity {:grid-column "event-start / event-end"
-                                    :grid-row grid-row
-                                    :display "flex"
-                                    :flex-direction "column"
-                                    :gap "0.25rem"})}
-            (when (:returned? row)
-              [:div "📥 " (i18n/t "Assignment.returned")])
-            (when (:covered? row)
-              [:div "✅ " (i18n/t "Assignment.covered")])
-            (when (:assigned? row)
-              [:div "⤴️ " (-> (i18n/t "Assignment.assignedToPublisher")
-                              (str/replace "{{name}}" (assignment/format-publisher-name row)))])])))])))
+            :event
+            (h/html
+             [:div {:style (identity {:grid-column "time-start / time-end"
+                                      :grid-row grid-row
+                                      :white-space "nowrap"})}
+              (:date row)]
+             [:div {:style (identity {:grid-column "event-start / event-end"
+                                      :grid-row grid-row
+                                      :display "flex"
+                                      :flex-direction "column"
+                                      :gap "0.25rem"})}
+              (when (:returned? row)
+                [:div "📥 " (i18n/t "Assignment.returned")])
+              (when (:covered? row)
+                [:div "✅ " (i18n/t "Assignment.covered")])
+              (when (:assigned? row)
+                [:div "⤴️ " (-> (i18n/t "Assignment.assignedToPublisher")
+                                (str/replace "{{name}}" (assignment/format-publisher-name row)))])])))]))))

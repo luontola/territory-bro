@@ -341,8 +341,7 @@ if (returningCheckbox.checked) {
          [:div {:class (:actions styles)}
           (share-link--closed)])
 
-       (when (and (:assign-territory permissions)
-                  (not (empty? (:assignment-history model))))
+       (when (:assign-territory permissions)
          (h/html
           [:script {:type "module"}
            (h/raw "
@@ -358,10 +357,6 @@ desktop.addEventListener('change', toggleOpen);
                               :font-weight "bold"
                               :cursor "pointer"}}
             (i18n/t "Assignment.assignmentHistory")]
-           ;; XXX: When the territory is assigned for the first time, the assignment history will not become visible,
-           ;;      because this htmx element was not rendered when the history was empty.
-           ;;      Consider whether that's worth fixing.
-           ;;      Maybe wrap the whole <details> in a <div> which is hidden using CSS unless it :has() some history entries?
            [:div {:hx-get (str html/*page-path* "/assignments/history")
                   :hx-trigger (str assignment-status-updated " from:body")
                   :hx-target "this"
