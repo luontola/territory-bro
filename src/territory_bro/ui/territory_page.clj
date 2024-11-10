@@ -322,7 +322,7 @@ if (returningCheckbox.checked) {
            [:th (i18n/t "Territory.addresses")]
            [:td (:territory/addresses territory)]]
           [:tr
-           [:th (h/raw (i18n/t "TerritoryPage.doNotCalls"))]
+           [:th (h/raw (i18n/t "Territory.doNotCalls"))]
            [:td (do-not-calls--viewing model)]]
           (when (:dev config/env)
             [:tr

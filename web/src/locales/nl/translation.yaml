@@ -38,7 +38,6 @@ TerritoryListPage:
     needToLogin: Je moet <0>inloggen</0> om de rest te zien.
 TerritoryPage:
   title: Territorium {{number}}
-  doNotCalls: Niet contacteren
   edit: Bewerken
   save: Opslaan
   shareLink:
@@ -135,6 +134,7 @@ Territory:
   number: Nummer
   region: Regio
   addresses: Adressen
+  doNotCalls: Niet contacteren
 TerritoryCard:
   title: Gebiedskaart
   footer: "Gelieve deze kaart in het plastic etui te bewaren. Bevlek, beschrijf of vouw deze kaart niet. \n Gelieve iedere keer dat het gebied bewerkt is, de broeder die voor het gebiedssysteem zorgt, hierover in te lichten."

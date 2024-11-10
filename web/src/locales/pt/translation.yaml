@@ -38,7 +38,6 @@ TerritoryListPage:
     needToLogin: Você precisará <0>entrar</0> para ver o restante.
 TerritoryPage:
   title: Território {{number}}
-  doNotCalls: Não contactar
   edit: Editar
   save: Salvar
   shareLink:
@@ -135,6 +134,7 @@ Territory:
   number: Número
   region: Região
   addresses: Endereços
+  doNotCalls: Não contactar
 TerritoryCard:
   title: Cartão de mapa de território
   footer: "Guarde este cartão no envelope. Tome cuidado para não o manchar, marcar ou dobrar. \n Cada vez que o território for coberto, por favor informe o irmão que cuida do arquivo dos territórios."

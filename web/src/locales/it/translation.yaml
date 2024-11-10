@@ -38,7 +38,6 @@ TerritoryListPage:
     needToLogin: Dovrai <0>effettuare l'accesso</0> per vedere il resto.
 TerritoryPage:
   title: Territorio {{number}}
-  doNotCalls: Non contattare
   edit: Modifica
   save: Salva
   shareLink:
@@ -135,6 +134,7 @@ Territory:
   number: Numero
   region: Regione
   addresses: Indirizzi
+  doNotCalls: Non contattare
 TerritoryCard:
   title: Piantina del territorio
   footer: "Tenete questa cartolina nella busta. Non la sciupate, non vi fate segni e non la piegate. Ogni volta che \n il territorio è stato percorso interamente, informate il fratello che si occupa dello schedario dei territori."

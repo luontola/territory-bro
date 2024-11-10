@@ -38,7 +38,6 @@ TerritoryListPage:
     needToLogin: You will need to <0>login</0> to see the rest.
 TerritoryPage:
   title: Territory {{number}}
-  doNotCalls: Do-not-calls
   edit: Edit
   save: Save
   shareLink:
@@ -135,6 +134,7 @@ Territory:
   number: Number
   region: Region
   addresses: Addresses
+  doNotCalls: Do-not-calls
 TerritoryCard:
   title: Territory Map Card
   footer: "Please keep this card in the envelope. Do not soil, mark or bend it. \n Each time the territory is covered, please inform the brother who cares for the territory files."

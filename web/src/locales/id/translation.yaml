@@ -38,7 +38,6 @@ TerritoryListPage:
     needToLogin: Anda perlu <0>masuk</0> untuk melihat yang lainnya.
 TerritoryPage:
   title: Wilayah {{number}}
-  doNotCalls: Jangan <wbr>menghubungi
   edit: Edit
   save: Simpan
   shareLink:
@@ -135,6 +134,7 @@ Territory:
   number: Nomor
   region: Wilayah
   addresses: Alamat
+  doNotCalls: Jangan <wbr>menghubungi
 TerritoryCard:
   title: Kartu Peta Daerah
   footer: "Mohon simpan kartu ini di dalam amplop. Jangan sampai kotor, tercoret atau terlipat. \n Jika daerah selesai dikerjakan, mohon beritahu saudara yang bertanggung jawab atas arsip daerah."
