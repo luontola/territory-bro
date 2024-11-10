@@ -72,6 +72,18 @@ EditingMaps:
   title: Mengedit peta
   introduction: Instruksi untuk mengedit peta ada di <0>panduan pengguna</0>. Anda dapat mengedit peta menggunakan aplikasi <1>QGIS</1>, yang memerlukan file proyek QGIS berikut.
   downloadQgisProject: Unduh file proyek QGIS
+PublisherManagement:
+  title: Penyiar
+  publisherName: Nama
+  assignedTerritories: Wilayah yang Ditugaskan
+  addPublisher: Tambahkan penyiar
+  edit: Sunting
+  save: Simpan
+  delete: Hapus
+  cancel: Batalkan
+  deleteWarning: "{{name}} memiliki wilayah yang ditugaskan. Tidak akan mungkin melihat kepada siapa wilayah tersebut ditugaskan jika penyiar ini dihapus.\n\nApakah Anda yakin ingin menghapus {{name}}?"
+  missingNameError: Nama harus diisi
+  nonUniqueNameError: Sudah ada penyiar dengan nama ini
 UserManagement:
   title: Pengguna
   userId: ID Pengguna
@@ -126,3 +138,32 @@ Territory:
 TerritoryCard:
   title: Kartu Peta Daerah
   footer: "Mohon simpan kartu ini di dalam amplop. Jangan sampai kotor, tercoret atau terlipat. \n Jika daerah selesai dikerjakan, mohon beritahu saudara yang bertanggung jawab atas arsip daerah."
+Assignment:
+  assignedToPublisher: Ditugaskan ke {{name}}
+  returned: Dikembalikan
+  covered: Tercakup
+  lastCovered: Terakhir dikunjungi
+  status: Status
+  statusVacant: <0>Tersedia</0>
+  statusAssignedToPublisher: <0>Ditugaskan</0> ke {{name}}
+  statusAssignedToPublisherForMonths: <0>Ditugaskan</0> ke {{name}} selama {{months}} bulan
+  assignmentHistory: Riwayat Penugasan
+  durationMonths: "{{months}} bulan"
+  durationMonthsAgo: "{{months}} bulan yang lalu"
+  durationMonthsSinceDate: "{{months}} bulan, sejak {{date}}"
+  deletedPublisher: dihapus
+  form:
+    assign: Tugaskan
+    assignTerritory: Tugaskan wilayah
+    return: Kembalikan
+    returnTerritory: Kembalikan wilayah
+    returnTerritoryDescription: Kembalikan wilayah ke penyimpanan
+    markCovered: Tandai tercakup
+    markCoveredDescription: Tandai wilayah sebagai tercakup
+    edit: Sunting
+    cancel: Batalkan
+    date: Tanggal
+    publisher: Penyiar
+    publisherNotFound: Nama tidak ditemukan
+    alreadyAssignedError: Wilayah sudah ditugaskan
+    alreadyReturnedError: Wilayah sudah dikembalikan

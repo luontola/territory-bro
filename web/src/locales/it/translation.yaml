@@ -72,6 +72,18 @@ EditingMaps:
   title: Modifica delle mappe
   introduction: Le istruzioni per la modifica delle mappe si trovano nella <0>guida dell'utente</0>. Puoi modificare le mappe usando l'applicazione <1>QGIS</1>, per la quale avrai bisogno del file di progetto QGIS seguente.
   downloadQgisProject: Scarica il file di progetto QGIS
+PublisherManagement:
+  title: Proclamatori
+  publisherName: Nome
+  assignedTerritories: Territori assegnati
+  addPublisher: Aggiungi proclamatori
+  edit: Modifica
+  save: Salva
+  delete: Elimina
+  cancel: Annulla
+  deleteWarning: "{{name}} ha territori assegnati. Non sarà possibile vedere a chi sono stati assegnati i territori se il proclamatori viene eliminato.\n\nSei sicuro di voler eliminare {{name}}?"
+  missingNameError: Nome obbligatorio
+  nonUniqueNameError: Esiste già un proclamatori con questo nome
 UserManagement:
   title: Utenti
   userId: ID utente
@@ -126,3 +138,32 @@ Territory:
 TerritoryCard:
   title: Piantina del territorio
   footer: "Tenete questa cartolina nella busta. Non la sciupate, non vi fate segni e non la piegate. Ogni volta che \n il territorio è stato percorso interamente, informate il fratello che si occupa dello schedario dei territori."
+Assignment:
+  assignedToPublisher: Assegnato a {{name}}
+  returned: Restituito
+  covered: Coperto
+  lastCovered: Ultima visita
+  status: Stato
+  statusVacant: <0>Disponibile</0>
+  statusAssignedToPublisher: <0>Assegnato</0> a {{name}}
+  statusAssignedToPublisherForMonths: <0>Assegnato</0> a {{name}} per {{months}} mesi
+  assignmentHistory: Cronologia assegnazioni
+  durationMonths: "{{months}} mesi"
+  durationMonthsAgo: "{{months}} mesi fa"
+  durationMonthsSinceDate: "{{months}} mesi, da {{date}}"
+  deletedPublisher: eliminato
+  form:
+    assign: Assegna
+    assignTerritory: Assegna territorio
+    return: Restituisci
+    returnTerritory: Restituisci territorio
+    returnTerritoryDescription: Restituisci il territorio al magazzino
+    markCovered: Segna come coperto
+    markCoveredDescription: Segna il territorio come coperto
+    edit: Modifica
+    cancel: Annulla
+    date: Data
+    publisher: Proclamatori
+    publisherNotFound: Nome non trovato
+    alreadyAssignedError: Il territorio è già stato assegnato
+    alreadyReturnedError: Il territorio è già stato restituito

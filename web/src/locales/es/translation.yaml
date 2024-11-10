@@ -72,6 +72,18 @@ EditingMaps:
   title: Edición de mapas
   introduction: Las instrucciones para editar mapas se encuentran en la <0>guía del usuario</0>. Puedes editar los mapas utilizando la aplicación <1>QGIS</1>, para lo cual necesitarás el siguiente archivo de proyecto de QGIS.
   downloadQgisProject: Descargar archivo de proyecto de QGIS
+PublisherManagement:
+  title: Publicadores
+  publisherName: Nombre
+  assignedTerritories: Territorios asignados
+  addPublisher: Agregar publicador
+  edit: Editar
+  save: Guardar
+  delete: Eliminar
+  cancel: Cancelar
+  deleteWarning: "{{name}} tiene territorios asignados. No será posible ver a quién están asignados los territorios si se elimina al publicador.\n\n¿Está seguro de que desea eliminar a {{name}}?"
+  missingNameError: El nombre es obligatorio
+  nonUniqueNameError: Ya existe un publicador con ese nombre
 UserManagement:
   title: Usuarios
   userId: ID de usuario
@@ -126,3 +138,32 @@ Territory:
 TerritoryCard:
   title: Tarjeta del Mapa del Territorio
   footer: "Sirvase mantener esta tarjeta en el sobre. No la manche, ni doble. Cada vez que se haya trabajado \n completamente el territorio, sirvase informarlo al hermano que atiende los archivos del territorio."
+Assignment:
+  assignedToPublisher: Asignado a {{name}}
+  returned: Devuelto
+  covered: Cubierto
+  lastCovered: Última visita
+  status: Estado
+  statusVacant: <0>Disponible</0>
+  statusAssignedToPublisher: <0>Asignado</0> a {{name}}
+  statusAssignedToPublisherForMonths: <0>Asignado</0> a {{name}} por {{months}} meses
+  assignmentHistory: Historial de asignaciones
+  durationMonths: "{{months}} meses"
+  durationMonthsAgo: "hace {{months}} meses"
+  durationMonthsSinceDate: "{{months}} meses, desde {{date}}"
+  deletedPublisher: eliminado
+  form:
+    assign: Asignar
+    assignTerritory: Asignar territorio
+    return: Devolver
+    returnTerritory: Devolver territorio
+    returnTerritoryDescription: Devuelve el territorio al almacenamiento
+    markCovered: Marcar como cubierto
+    markCoveredDescription: Marcar el territorio como cubierto
+    edit: Editar
+    cancel: Cancelar
+    date: Fecha
+    publisher: Publicador
+    publisherNotFound: Nombre no encontrado
+    alreadyAssignedError: El territorio ya fue asignado
+    alreadyReturnedError: El territorio ya fue devuelto

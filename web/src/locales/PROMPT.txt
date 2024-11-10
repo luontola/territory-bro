@@ -21,5 +21,25 @@ Finnish: julistaja
 English: territory servant
 Finnish: aluepalvelija
 
+- When a territory is give to a publisher, so that they'll visit the territory
+English: assign territory, assigned to somebody
+Finnish: ota alue, annettu jollekin
+
+- When a publisher has tried meeting every address in the territory
+English: covered, mark as covered
+Finnish: käyty, merkitse käydyksi
+
+- Place for storing territory cards which are currently not assigned
+English: storage
+Finnish: laatikko
+
+- History of past territory assignments
+English: assignments history
+Finnish: käyntihistoria
+
+- Prefer using an acronym for a month if the translated word would otherwise be very long
+English: month
+Finnish: kk
+
 Translate the following YAML translation file to LANGUAGE. One file per language. Do not change the translation keys.
 Use the established terminology when known. Otherwise, translate the meaning, instead of translating word-for-word from English.

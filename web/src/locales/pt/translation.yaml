@@ -72,6 +72,18 @@ EditingMaps:
   title: Editando mapas
   introduction: As instruções para editar mapas estão no <0>guia do usuário</0>. Você pode editar os mapas usando o aplicativo <1>QGIS</1>, para o qual você precisará do seguinte arquivo de projeto QGIS.
   downloadQgisProject: Baixar arquivo de projeto QGIS
+PublisherManagement:
+  title: Publicadores
+  publisherName: Nome
+  assignedTerritories: Territórios atribuídos
+  addPublisher: Adicionar publicador
+  edit: Editar
+  save: Salvar
+  delete: Excluir
+  cancel: Cancelar
+  deleteWarning: "{{name}} tem territórios atribuídos. Não será possível ver para quem os territórios estão atribuídos se o publicador for excluído.\n\nTem certeza de que deseja excluir {{name}}?"
+  missingNameError: Nome é obrigatório
+  nonUniqueNameError: Já existe um publicador com esse nome
 UserManagement:
   title: Usuários
   userId: ID de usuário
@@ -126,3 +138,32 @@ Territory:
 TerritoryCard:
   title: Cartão de mapa de território
   footer: "Guarde este cartão no envelope. Tome cuidado para não o manchar, marcar ou dobrar. \n Cada vez que o território for coberto, por favor informe o irmão que cuida do arquivo dos territórios."
+Assignment:
+  assignedToPublisher: Atribuído a {{name}}
+  returned: Devolvido
+  covered: Coberto
+  lastCovered: Última visita
+  status: Status
+  statusVacant: <0>Disponível</0>
+  statusAssignedToPublisher: <0>Atribuído</0> a {{name}}
+  statusAssignedToPublisherForMonths: <0>Atribuído</0> a {{name}} por {{months}} meses
+  assignmentHistory: Histórico de atribuições
+  durationMonths: "{{months}} meses"
+  durationMonthsAgo: "{{months}} meses atrás"
+  durationMonthsSinceDate: "{{months}} meses, desde {{date}}"
+  deletedPublisher: excluído
+  form:
+    assign: Atribuir
+    assignTerritory: Atribuir território
+    return: Devolver
+    returnTerritory: Devolver território
+    returnTerritoryDescription: Devolve o território para o armazenamento
+    markCovered: Marcar como coberto
+    markCoveredDescription: Marcar o território como coberto
+    edit: Editar
+    cancel: Cancelar
+    date: Data
+    publisher: Publicador
+    publisherNotFound: Nome não encontrado
+    alreadyAssignedError: O território já foi atribuído
+    alreadyReturnedError: O território já foi devolvido
