@@ -53,6 +53,7 @@
           :returning? false
           :covered? false}
    :permissions {:edit-do-not-calls true
+                 :assign-territory true
                  :share-territory-link true}
    :mac? false})
 (def demo-model ; the important difference is hiding do-not-calls, to avoid accidental PII leaks
@@ -73,6 +74,7 @@
           :returning? false
           :covered? false}
    :permissions {:edit-do-not-calls false
+                 :assign-territory false
                  :share-territory-link true}
    :mac? false})
 
@@ -165,7 +167,7 @@
                        (territory-page/model! request)))))))))))
 
 (deftest view-test
-  (testing "full permissions"
+  (testing "untouched territory, hides the assignment history"
     (is (= (html/normalize-whitespace
             "Territory 123
 
@@ -178,15 +180,47 @@
              Do-not-calls
                Edit
                the do-not-calls
+             Status
+               Assign
+               Up for grabs
 
              {share.svg} Share a link"
             map-interaction-help-test/default-visible-text)
-           (-> (territory-page/view model)
+           (-> (territory-page/view untouched-model)
                html/visible-text))))
 
-  (testing "minimum permissions"
-    (let [model (-> model
+  (testing "assigned territory, full permissions"
+    (is (= (html/normalize-whitespace
+            "Territory 123
+
+             Number
+               123
+             Region
+               the region
+             Addresses
+               the addresses
+             Do-not-calls
+               Edit
+               the do-not-calls
+             Status
+               Return
+               Assigned to John Doe
+               (2 months, since 2000-01-01)
+
+             {share.svg} Share a link
+
+             Assignment history
+                                                Edit
+               2 months
+               2000-01-01    ⤴️ Assigned to John Doe"
+            map-interaction-help-test/default-visible-text)
+           (-> (territory-page/view assigned-model)
+               html/visible-text))))
+
+  (testing "assigned territory, minimum permissions"
+    (let [model (-> assigned-model
                     (replace-in [:permissions :edit-do-not-calls] true false)
+                    (replace-in [:permissions :assign-territory] true false)
                     (replace-in [:permissions :share-territory-link] true false))]
       (is (= (html/normalize-whitespace
               "Territory 123
@@ -198,7 +232,10 @@
                Addresses
                  the addresses
                Do-not-calls
-                 the do-not-calls"
+                 the do-not-calls
+               Status
+                 Assigned to John Doe
+                 (2 months, since 2000-01-01)"
               map-interaction-help-test/default-visible-text)
              (-> (territory-page/view model)
                  html/visible-text))))))

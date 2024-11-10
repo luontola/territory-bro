@@ -7,7 +7,6 @@
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.publisher :as publisher]
             [territory-bro.gis.geometry :as geometry]
-            [territory-bro.infra.config :as config]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.infra.util :as util]
             [territory-bro.ui.assignment :as assignment]
@@ -49,6 +48,7 @@
                 :returning? (Boolean/parseBoolean (get-in request [:params :returning]))
                 :covered? (Boolean/parseBoolean (get-in request [:params :covered]))}
          :permissions {:edit-do-not-calls (dmz/allowed? [:edit-do-not-calls cong-id territory-id])
+                       :assign-territory (dmz/allowed? [:assign-territory cong-id territory-id])
                        :share-territory-link (dmz/allowed? [:share-territory-link cong-id territory-id])}}
         (merge (map-interaction-help/model request)))))
 
@@ -273,7 +273,7 @@ if (returningCheckbox.checked) {
                                :onclick "this.closest('dialog').close()"}
           (i18n/t "Assignment.form.cancel")]]]]])))
 
-(defn assignment-status [{:keys [territory open-form? today] :as model}]
+(defn assignment-status [{:keys [territory open-form? today permissions] :as model}]
   (let [styles (:TerritoryPage (css/modules))
         assignment (:territory/current-assignment territory)
         start-date (:assignment/start-date assignment)
@@ -288,13 +288,14 @@ if (returningCheckbox.checked) {
           (return-territory-dialog model)
           (assign-territory-dialog model)))
 
-      [:button.pure-button {:hx-get (str html/*page-path* "/assignments/form")
-                            :hx-disabled-elt "this"
-                            :type "button"
-                            :class (:edit-button styles)}
-       (if (some? assignment)
-         (i18n/t "Assignment.form.return")
-         (i18n/t "Assignment.form.assign"))]
+      (when (:assign-territory permissions)
+        [:button.pure-button {:hx-get (str html/*page-path* "/assignments/form")
+                              :hx-disabled-elt "this"
+                              :type "button"
+                              :class (:edit-button styles)}
+         (if (some? assignment)
+           (i18n/t "Assignment.form.return")
+           (i18n/t "Assignment.form.assign"))])
 
       (if (some? assignment)
         (h/html (assignment/format-status-assigned assignment)
@@ -332,16 +333,16 @@ if (returningCheckbox.checked) {
           [:tr
            [:th (h/raw (i18n/t "Territory.doNotCalls"))]
            [:td (do-not-calls--viewing model)]]
-          (when (:dev config/env)
-            [:tr
-             [:th (i18n/t "Assignment.status")]
-             [:td (assignment-status model)]])]]]
+          [:tr
+           [:th (i18n/t "Assignment.status")]
+           [:td (assignment-status model)]]]]]
 
        (when (:share-territory-link permissions)
          [:div {:class (:actions styles)}
           (share-link--closed)])
 
-       (when (:dev config/env)
+       (when (and (:assign-territory permissions)
+                  (not (empty? (:assignment-history model))))
          (h/html
           [:script {:type "module"}
            (h/raw "
@@ -357,6 +358,10 @@ desktop.addEventListener('change', toggleOpen);
                               :font-weight "bold"
                               :cursor "pointer"}}
             (i18n/t "Assignment.assignmentHistory")]
+           ;; XXX: When the territory is assigned for the first time, the assignment history will not become visible,
+           ;;      because this htmx element was not rendered when the history was empty.
+           ;;      Consider whether that's worth fixing.
+           ;;      Maybe wrap the whole <details> in a <div> which is hidden using CSS unless it :has() some history entries?
            [:div {:hx-get (str html/*page-path* "/assignments/history")
                   :hx-trigger (str assignment-status-updated " from:body")
                   :hx-target "this"
