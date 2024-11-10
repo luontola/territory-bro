@@ -5,6 +5,7 @@
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.json :as json]
             [territory-bro.infra.util :as util]
+            [territory-bro.ui.assignment :as assignment]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
@@ -115,9 +116,9 @@
         [:th {:style {:min-width "12em"}}
          (i18n/t "Territory.addresses")]
         [:th {:style {:min-width "10em"}}
-         "Status"] ; TODO: i18n
+         (i18n/t "Assignment.status")]
         [:th {:style {:min-width "8em"}}
-         "Last covered"]]] ; TODO: i18n
+         (i18n/t "Assignment.lastCovered")]]]
       [:tbody
        (for [territory territories]
          [:tr {:data-territory-id (:territory/id territory)
@@ -135,17 +136,10 @@
           [:td {:style {:max-width "30em"}}
            (:territory/addresses territory)]
           [:td (if-some [assignment (:territory/current-assignment territory)]
-                 (h/html
-                  [:span {:style {:color "red"}} "Assigned"] ; TODO: i18n
-                  (-> " to {{name}}"
-                      (str/replace "{{name}}" (or (:publisher/name assignment)
-                                                  "[deleted]")))
-                  " for " (util/months-difference (:assignment/start-date assignment) today) " months")
-                 (h/html
-                  [:span {:style {:color "blue"}} "Up for grabs"]))] ; TODO: i18n
+                 (assignment/format-status-assigned-duration assignment today)
+                 (assignment/format-status-vacant))]
           [:td (when-some [last-covered (:territory/last-covered territory)]
-                 (h/html
-                  (util/months-difference last-covered today) " months ago (" (html/nowrap last-covered) ")"))]])]])))
+                 (assignment/format-months-ago-with-date last-covered today))]])]])))
 
 (defn view! [request]
   (view (model! request {:fetch-loans? false})))

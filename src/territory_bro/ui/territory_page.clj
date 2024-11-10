@@ -10,6 +10,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.infra.middleware :as middleware]
             [territory-bro.infra.util :as util]
+            [territory-bro.ui.assignment :as assignment]
             [territory-bro.ui.assignment-history :as assignment-history]
             [territory-bro.ui.css :as css]
             [territory-bro.ui.forms :as forms]
@@ -145,9 +146,9 @@
 (defn- common-assignment-form-errors [errors]
   (h/html
    (when (contains? errors :already-assigned)
-     [:p.pure-form-message "⚠️ The territory was already assigned"]) ; TODO: i18n
+     [:p.pure-form-message "⚠️ " (i18n/t "Assignment.form.alreadyAssignedError")])
    (when (contains? errors :already-returned)
-     [:p.pure-form-message "⚠️ The territory was already returned"]))) ; TODO: i18n
+     [:p.pure-form-message "⚠️ " (i18n/t "Assignment.form.alreadyReturnedError")])))
 
 (defn assign-territory-dialog [{:keys [publishers form today errors]}]
   (let [errors (group-by first errors)
@@ -157,10 +158,11 @@
       (common-assignment-form-errors errors)
       [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/assign")}
        [:fieldset
-        [:legend "Assign territory"] ; TODO: i18n
+        [:legend (i18n/t "Assignment.form.assignTerritory")]
 
         [:div.pure-control-group
-         [:label {:for "publisher-field"} "Publisher"] ; TODO: i18n
+         [:label {:for "publisher-field"}
+          (i18n/t "Assignment.form.publisher")]
          [:input#publisher-field {:name "publisher"
                                   :value (:publisher form)
                                   :list "publisher-list"
@@ -168,13 +170,15 @@
                                   :required true
                                   :autocomplete "off"}] ; rely on the publisher list, don't remember old inputs
          (when publisher-not-found?
-           (h/html " ⚠️ " [:span.pure-form-message-inline "Name not found"])) ; TODO: i18n
+           (h/html " ⚠️ " [:span.pure-form-message-inline
+                           (i18n/t "Assignment.form.publisherNotFound")]))
          [:datalist#publisher-list
           (for [publisher (util/natural-sort-by :publisher/name publishers)]
             [:option {:value (:publisher/name publisher)}])]]
 
         [:div.pure-control-group
-         [:label {:for "start-date-field"} "Date"] ; TODO: i18n
+         [:label {:for "start-date-field"}
+          (i18n/t "Assignment.form.date")]
          [:input#start-date-field {:name "start-date"
                                    :type "date"
                                    :value (str (:start-date form))
@@ -183,11 +187,11 @@
 
         [:div.pure-controls
          [:button.pure-button.pure-button-primary {:type "submit"}
-          "Assign territory"] ; TODO: i18n
+          (i18n/t "Assignment.form.assignTerritory")]
          " "
          [:button.pure-button {:type "button"
                                :onclick "this.closest('dialog').close()"}
-          "Cancel"]]]]]))) ; TODO: i18n 
+          (i18n/t "Assignment.form.cancel")]]]]])))
 
 (def ^:private sync-submit-button-js "
 const returningButton = this.querySelector('#returning-button');
@@ -218,9 +222,10 @@ if (returningCheckbox.checked) {
       [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/return")
                                           :onchange sync-submit-button-js}
        [:fieldset
-        [:legend "Return territory"] ; TODO: i18n
+        [:legend (i18n/t "Assignment.form.returnTerritory")]
         [:div.pure-control-group
-         [:label {:for "end-date-field"} "Date"] ; TODO: i18n
+         [:label {:for "end-date-field"}
+          (i18n/t "Assignment.form.date")]
          [:input#end-date-field {:name "end-date"
                                  :type "date"
                                  :value (str (:end-date form))
@@ -238,7 +243,7 @@ if (returningCheckbox.checked) {
                                       :style {:width "1.5rem"
                                               :height "1.5rem"}}]
           " "
-          "Return the territory to storage"] ; TODO: i18n
+          (i18n/t "Assignment.form.returnTerritoryDescription")]
          [:label.pure-checkbox
           [:input#covered-checkbox {:name "covered"
                                     :type "checkbox"
@@ -247,18 +252,18 @@ if (returningCheckbox.checked) {
                                     :style {:width "1.5rem"
                                             :height "1.5rem"}}]
           " "
-          "Mark the territory as covered"] ; TODO: i18n
+          (i18n/t "Assignment.form.markCoveredDescription")]
 
          [:button#returning-button.pure-button.pure-button-primary {:type "submit"
                                                                     :autofocus true}
-          "Return territory"] ; TODO: i18n
+          (i18n/t "Assignment.form.returnTerritory")]
          [:button#covered-button.pure-button.pure-button-primary {:type "submit"
                                                                   :style {:display "none"}}
-          "Mark covered"] ; TODO: i18n
+          (i18n/t "Assignment.form.markCovered")]
          " "
          [:button.pure-button {:type "button"
                                :onclick "this.closest('dialog').close()"}
-          "Cancel"]]]]]))) ; TODO: i18n
+          (i18n/t "Assignment.form.cancel")]]]]])))
 
 (defn assignment-status [{:keys [territory open-form? today] :as model}]
   (let [styles (:TerritoryPage (css/modules))
@@ -280,21 +285,17 @@ if (returningCheckbox.checked) {
                             :type "button"
                             :class (:edit-button styles)}
        (if (some? assignment)
-         "Return" ; TODO: i18n
-         "Assign")] ; TODO: i18n
+         (i18n/t "Assignment.form.return")
+         (i18n/t "Assignment.form.assign"))]
 
       (if (some? assignment)
-        (h/html [:span {:style {:color "red"}} "Assigned"] ; TODO: i18n
-                (-> " to {{name}}"
-                    (str/replace "{{name}}" (or (:publisher/name assignment)
-                                                "[deleted]"))) ; TODO: i18n
+        (h/html (assignment/format-status-assigned assignment)
                 [:br]
-                "(" (util/months-difference start-date today) " months, since " (html/nowrap start-date) ")") ; TODO: i18n
-        (h/html [:span {:style {:color "blue"}} "Up for grabs"] ; TODO: i18n
+                (assignment/format-months-since-date start-date today))
+        (h/html (assignment/format-status-vacant)
                 (when (some? last-covered)
-                  (h/html
-                   [:br]
-                   "(" (util/months-difference last-covered today) " months, since " (html/nowrap last-covered) ")"))))]))) ; TODO: i18n
+                  (h/html [:br]
+                          (assignment/format-months-since-date last-covered today)))))])))
 
 (defn assignment-form-open [model]
   (assignment-status (assoc model :open-form? true)))
@@ -325,7 +326,7 @@ if (returningCheckbox.checked) {
            [:td (do-not-calls--viewing model)]]
           (when (:dev config/env)
             [:tr
-             [:th "Status"] ; TODO: i18n
+             [:th (i18n/t "Assignment.status")]
              [:td (assignment-status model)]])]]]
 
        (when (:share-territory-link permissions)
@@ -347,7 +348,7 @@ desktop.addEventListener('change', toggleOpen);
            [:summary {:style {:margin "1rem 0"
                               :font-weight "bold"
                               :cursor "pointer"}}
-            "Assignment history"] ; TODO: i18n
+            (i18n/t "Assignment.assignmentHistory")]
            [:div {:hx-get (str html/*page-path* "/assignments/history")
                   :hx-trigger (str assignment-status-updated " from:body")
                   :hx-target "this"

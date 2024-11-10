@@ -3,8 +3,10 @@
             [medley.core :refer [assoc-some]]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.util :as util]
+            [territory-bro.ui.assignment :as assignment]
             [territory-bro.ui.hiccup :as h]
-            [territory-bro.ui.html :as html])
+            [territory-bro.ui.html :as html]
+            [territory-bro.ui.i18n :as i18n])
   (:import (java.time LocalDate)))
 
 (defn assignment->events [assignment]
@@ -120,8 +122,8 @@
             (if (:dev config/env)
               [:a {:href "#"
                    :onclick "return false"}
-               "Edit"] ; TODO: i18n
-              [:span {:data-test-icon "Edit"}])])
+               (i18n/t "Assignment.form.edit")]
+              [:span {:data-test-icon (i18n/t "Assignment.form.edit")}])])
 
           :duration
           (h/html
@@ -134,7 +136,8 @@
                                              "#999")})}
             (if (:temporal-paradox? row)
               " ⚠️ "
-              (h/html (:months row) " months"))]) ; TODO: i18n
+              (-> (i18n/t "Assignment.durationMonths")
+                  (str/replace "{{months}}" (str (:months row)))))])
 
           :event
           (h/html
@@ -148,10 +151,9 @@
                                     :flex-direction "column"
                                     :gap "0.25rem"})}
             (when (:returned? row)
-              [:div "📥 Returned "]) ; TODO: i18n
+              [:div "📥 " (i18n/t "Assignment.returned")])
             (when (:covered? row)
-              [:div "✅ Covered"]) ; TODO: i18n
+              [:div "✅ " (i18n/t "Assignment.covered")])
             (when (:assigned? row)
-              [:div (-> "⤴️ Assigned to {{name}}" ; TODO: i18n
-                        (str/replace "{{name}}" (or (:publisher/name row)
-                                                    "[deleted]")))])])))]))) ; TODO: i18n
+              [:div "⤴️ " (-> (i18n/t "Assignment.assignedToPublisher")
+                              (str/replace "{{name}}" (assignment/format-publisher-name row)))])])))])))

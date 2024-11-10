@@ -360,7 +360,7 @@
              [true] Return the territory to storage
              [true] Mark the territory as covered
            Return territory
-           Mark covered
+           Mark as covered
            Cancel")
          (-> (territory-page/return-territory-dialog assigned-model)
              html/visible-text)))

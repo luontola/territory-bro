@@ -138,3 +138,32 @@ Territory:
 TerritoryCard:
   title: Territory Map Card
   footer: "Please keep this card in the envelope. Do not soil, mark or bend it. \n Each time the territory is covered, please inform the brother who cares for the territory files."
+Assignment:
+  assignedToPublisher: Assigned to {{name}}
+  returned: Returned
+  covered: Covered
+  lastCovered: Last covered
+  status: Status
+  statusVacant: <0>Up for grabs</0>
+  statusAssignedToPublisher: <0>Assigned</0> to {{name}}
+  statusAssignedToPublisherForMonths: <0>Assigned</0> to {{name}} for {{months}} months
+  assignmentHistory: Assignment history
+  durationMonths: "{{months}} months"
+  durationMonthsAgo: "{{months}} months ago"
+  durationMonthsSinceDate: "{{months}} months, since {{date}}"
+  deletedPublisher: deleted
+  form:
+    assign: Assign
+    assignTerritory: Assign territory
+    return: Return
+    returnTerritory: Return territory
+    returnTerritoryDescription: Return the territory to storage
+    markCovered: Mark as covered
+    markCoveredDescription: Mark the territory as covered
+    edit: Edit
+    cancel: Cancel
+    date: Date
+    publisher: Publisher
+    publisherNotFound: Name not found
+    alreadyAssignedError: The territory was already assigned
+    alreadyReturnedError: The territory was already returned
