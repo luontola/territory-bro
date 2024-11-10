@@ -427,10 +427,17 @@
                     "http status code")
                 (is (str/includes? (html/visible-text (:body response))
                                    (html/normalize-whitespace
-                                    "Publisher [foo] ⚠️ Name not found
+                                    "Publisher [] ⚠️ Name not found
                                      Date [2001-02-03]
                                      Assign territory"))
-                    "highlights erroneous form fields, doesn't forget invalid user input"))))
+                    "highlights erroneous form fields, doesn't forget invalid user input")
+                ;; TODO: use a combobox to more easily select a publisher from a list of a hundred - then restore this test case
+                #_(is (str/includes? (html/visible-text (:body response))
+                                     (html/normalize-whitespace
+                                      "Publisher [foo] ⚠️ Name not found
+                                     Date [2001-02-03]
+                                     Assign territory"))
+                      "highlights erroneous form fields, doesn't forget invalid user input"))))
 
           (testing "assign failed: already assigned"
             (testutil/with-events [territory-assigned]

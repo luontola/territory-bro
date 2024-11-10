@@ -452,12 +452,12 @@
 
     (testing "assign territory"
       (let [open-dialog-button [:assignment-status {:tag :button, :fn/text "Assign"}]
-            publisher-field [:assignment-status {:tag :input, :name "publisher"}]
+            publisher-field [:assignment-status {:tag :select, :name "publisher"}]
             submit-button [:assignment-status {:tag :button, :fn/text "Assign territory"}]]
         (doto *driver*
           (b/click open-dialog-button)
           (b/wait-visible publisher-field)
-          (b/fill publisher-field "Paul Publisher")
+          (b/select publisher-field "Paul Publisher")
           (b/click submit-button)
           (b/wait-invisible submit-button)))
       (is (str/includes? (b/get-element-text *driver* :assignment-status)

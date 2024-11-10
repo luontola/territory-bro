@@ -163,18 +163,26 @@
         [:div.pure-control-group
          [:label {:for "publisher-field"}
           (i18n/t "Assignment.form.publisher")]
-         [:input#publisher-field {:name "publisher"
-                                  :value (:publisher form)
-                                  :list "publisher-list"
-                                  :autofocus true
-                                  :required true
-                                  :autocomplete "off"}] ; rely on the publisher list, don't remember old inputs
+         [:select#publisher-field {:name "publisher"
+                                   :autofocus true
+                                   :required true}
+          [:option]
+          (for [publisher (util/natural-sort-by :publisher/name publishers)]
+            [:option {:value (:publisher/name publisher)}
+             (:publisher/name publisher)])]
+         ;; TODO: use a combobox to more easily select a publisher from a list of a hundred (<datalist> has bad Android support)
+         #_[:input#publisher-field {:name "publisher"
+                                    :value (:publisher form)
+                                    :list "publisher-list"
+                                    :autofocus true
+                                    :required true
+                                    :autocomplete "off"}] ; rely on the publisher list, don't remember old inputs
          (when publisher-not-found?
            (h/html " ⚠️ " [:span.pure-form-message-inline
                            (i18n/t "Assignment.form.publisherNotFound")]))
-         [:datalist#publisher-list
-          (for [publisher (util/natural-sort-by :publisher/name publishers)]
-            [:option {:value (:publisher/name publisher)}])]]
+         #_[:datalist#publisher-list
+            (for [publisher (util/natural-sort-by :publisher/name publishers)]
+              [:option {:value (:publisher/name publisher)}])]]
 
         [:div.pure-control-group
          [:label {:for "start-date-field"}
