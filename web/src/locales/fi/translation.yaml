@@ -139,14 +139,19 @@ TerritoryCard:
   title: Aluekortti
   footer: "Pidä tätä korttia kotelossa. Älä tahri äläkä taita sitä äläkä tee siihen mitään merkintöjä. \n Joka kerta kun alue on käyty läpi, ilmoita siitä veljelle, joka hoitaa aluekarttoja."
 Assignment:
-  assignedToPublisher: Annettu {{name}}:lle
+  assignedToPublisher: "Annettu: {{name}}"
+  # TODO: more natural language, with inflections
+  # assignedToPublisher: Annettu {{name}}:lle
   returned: Palautettu
   covered: Käyty
   lastCovered: Viimeksi käyty
   status: Tila
   statusVacant: <0>Vapaana</0>
-  statusAssignedToPublisher: <0>Annettu</0> {{name}}:lle
-  statusAssignedToPublisherForMonths: <0>Annettu</0> {{name}}:lle {{months}} kk sitten
+  statusAssignedToPublisher: "<0>Annettu</0>: {{name}}"
+  statusAssignedToPublisherForMonths: "<0>Annettu</0>: {{name}}, {{months}} kk sitten"
+  # TODO: more natural language, with inflections
+  # statusAssignedToPublisher: <0>Annettu</0> {{name}}:lle
+  # statusAssignedToPublisherForMonths: <0>Annettu</0> {{name}}:lle {{months}} kk sitten
   assignmentHistory: Käyntihistoria
   durationMonths: "{{months}} kk"
   durationMonthsAgo: "{{months}} kk sitten"
