@@ -62,4 +62,4 @@
 (deftest view-test
   (testing "renders markdown content"
     (is (str/includes? (home-page/view empty-model)
-                       "<p>Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.</p>"))))
+                       "<p>Territory Bro is a web app for managing field service territories in the congregations of Jehovah's Witnesses.</p>"))))
