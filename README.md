@@ -1,6 +1,6 @@
 # Territory Bro
 
-Territory Bro is a tool for managing territory cards in the congregations of Jehovah's Witnesses.
+Territory Bro is a web app for managing field service territories in the congregations of Jehovah's Witnesses.
 
 For more information, see <https://territorybro.com>
 
