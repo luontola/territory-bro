@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: net.iakovlev/timeshape:2024a.22">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/net/iakovlev/timeshape/2024a.22/timeshape-2024a.22.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
