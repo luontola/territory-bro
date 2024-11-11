@@ -98,7 +98,7 @@ UserManagement:
   you: Você
   unverified: Não verificado
   removeUser: Remover usuário
-  removeYourselfWarning: Tem certeza de que deseja SE REMOVER de {{congregação}}? Você não poderá se adicionar de volta.
+  removeYourselfWarning: Tem certeza de que deseja SE REMOVER de {{congregation}}? Você não poderá se adicionar de volta.
 DocumentationPage:
   title: Documentação
 SupportPage:

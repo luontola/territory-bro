@@ -6,16 +6,24 @@ import {sortBy} from "lodash-es";
 
 describe("i18n", () => {
   describe("all languages contain the same translation keys", () => {
-    const englishData = i18n.getDataByLanguage("en");
+    const englishData = i18n.getDataByLanguage("en")?.translation;
     const englishKeys = getAllKeyPaths(englishData).sort();
+    expect(englishKeys.length).to.be.greaterThan(100);
+
     languages.forEach(language => {
       it(`${language.code} ${language.englishName}`, () => {
         if (language.code === 'en') {
           return; // don't compare the reference language to itself; it contains notTranslatedKeys
         }
-        const data = i18n.getDataByLanguage(language.code);
+        const data = i18n.getDataByLanguage(language.code)?.translation;
         const keys = getAllKeyPaths(data).sort();
         expect(keys).to.eql(englishKeys)
+
+        const enT = i18n.getFixedT('en');
+        const langT = i18n.getFixedT(language.code);
+        for (const key of keys) {
+          expect(getPlaceholders(langT(key)), `placeholders of ${key}`).to.eql(getPlaceholders(enT(key)))
+        }
       });
     })
   });
@@ -65,4 +73,11 @@ function getAllKeyPaths(obj, prefix = "") {
     }
   }
   return keyPaths;
+}
+
+function getPlaceholders(s) {
+  return [...s.matchAll(/<\/?.+?>|{{.+?}}/g)]
+    .map(match => match[0])
+    .filter(s => s != "<wbr>") // languages with long words may use the line break opportunity element when needed
+    .sort();
 }
