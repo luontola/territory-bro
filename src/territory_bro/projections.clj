@@ -73,7 +73,7 @@
                                        ;; Though this reads the database and is thus a slow
                                        ;; operation, retries on updating the atom should not
                                        ;; happen because it's called from a single thread.
-                                       (db/with-transaction [conn {:read-only? true}]
+                                       (db/with-transaction [conn {:read-only true}]
                                          (apply-new-events cached conn))))]
     (when-not (identical? old new)
       (log/info "Updated from revision" (:event/global-revision (:last-event old))
@@ -106,7 +106,7 @@
     (recur)))
 
 (defn- startup-optimizations []
-  (db/with-transaction [conn {:read-only? true}]
+  (db/with-transaction [conn {:read-only true}]
     (let [state (cached-state)
           injections {:get-present-schemas (fn []
                                              (gis-db/get-present-schemas conn {:schema-prefix ""}))

@@ -90,7 +90,7 @@
                          stream-id]))
 
 (comment
-  (db/with-transaction [conn {:read-only? true}]
-    (into [] (read-stream conn (parse-uuid "61e51981-bbd3-4298-a7a6-46109e39dd52"))))
-  (db/with-transaction [conn {:read-only? true}]
+  (db/with-transaction [conn {:read-only true}]
+    (into [] (read-stream conn (parse-uuid ""))))
+  (db/with-transaction [conn {:read-only true}]
     (take-last 10 (into [] (read-all-events conn)))))

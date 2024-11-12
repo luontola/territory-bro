@@ -233,7 +233,7 @@
 ;;;; Queries
 
 (defn check-database-version [minimum-version]
-  (with-transaction [conn {:read-only? true}]
+  (with-transaction [conn {:read-only true}]
     (let [metadata (.getMetaData ^Connection conn)
           version (.getDatabaseMajorVersion metadata)]
       (assert (>= version minimum-version)
