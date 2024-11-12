@@ -2,11 +2,18 @@
   (:require [clojure.pprint :as pp]
             [clojure.string :as str]
             [clojure.test :refer :all]
+            [territory-bro.dispatcher :as dispatcher]
+            [territory-bro.infra.config :as config]
+            [territory-bro.infra.db :as db]
+            [territory-bro.projections :as projections]
             [territory-bro.ui.html :as html])
   (:import (java.io PrintWriter)
            (org.apache.poi.ss.usermodel Cell CellType DataFormatter DateUtil Row Sheet)
            (org.apache.poi.util LocaleUtil)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)))
+
+(def cong-id (parse-uuid ""))
+(def system (str (ns-name *ns*)))
 
 (defn string-value [^Cell cell]
   (when cell
@@ -78,14 +85,38 @@
                (throw e))))
          (filter some?))))
 
-(defn generate-commands [assignment]
-  []) ; TODO
+(defn publisher-names [assignments]
+  (->> assignments
+       (map :publisher)
+       distinct
+       sort))
+
+(defn import-publishers-commands [publisher-names]
+  (mapv (fn [publisher-name]
+          {:command/type :publisher.command/add-publisher
+           :congregation/id cong-id
+           :publisher/id (random-uuid)
+           :publisher/name publisher-name})
+        publisher-names))
+
+
+(defn- enrich-command [command]
+  (-> command
+      (assoc :command/time (config/now))
+      (assoc :command/system system)))
+
+(defn dispatch-commands! [commands]
+  (db/with-transaction [conn {}]
+    (let [state (projections/cached-state)]
+      (doseq [command commands]
+        (dispatcher/command! conn state (enrich-command command)))))
+  (projections/refresh-async!))
+
 
 (comment
   (pp/pprint)
   (->> (parse-excel "alueet.xlsx")
        (mapcat generate-commands))
   (->> (parse-excel "alueet.xlsx")
-       (map :publisher)
-       distinct
-       sort))
+       publisher-names
+       import-publishers-commands))
