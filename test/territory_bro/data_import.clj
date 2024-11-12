@@ -1,18 +1,20 @@
 (ns territory-bro.data-import
-  (:require [clojure.pprint :as pp]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [territory-bro.dispatcher :as dispatcher]
+            [territory-bro.domain.publisher :as publisher]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.projections :as projections]
             [territory-bro.ui.html :as html])
   (:import (java.io PrintWriter)
+           (java.time LocalDate)
            (org.apache.poi.ss.usermodel Cell CellType DataFormatter DateUtil Row Sheet)
            (org.apache.poi.util LocaleUtil)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)))
 
 (def cong-id (parse-uuid ""))
+(def deleted-territories #{})
 (def system (str (ns-name *ns*)))
 
 (defn string-value [^Cell cell]
@@ -99,6 +101,45 @@
            :publisher/name publisher-name})
         publisher-names))
 
+(defn import-assignments-commands [assignments]
+  (db/with-transaction [conn {:read-only true}]
+    (let [state (projections/cached-state)
+          publishers (publisher/list-publishers conn cong-id)
+          publisher-name->id (-> (group-by :publisher/name publishers)
+                                 (update-vals #(-> % first :publisher/id)))
+          territories (vals (get-in state [:territory-bro.domain.territory/territories cong-id]))
+          territory-number->id (-> (group-by :territory/number territories)
+                                   (update-vals (fn [territories]
+                                                  (when (= 1 (count territories))
+                                                    (-> territories first :territory/id)))))]
+      (->> assignments
+           (remove #(contains? deleted-territories (:territory %)))
+           (mapcat (fn [assignment]
+                     (let [territory-id (-> assignment :territory territory-number->id)
+                           assignment-id (random-uuid)
+                           publisher-id (-> assignment :publisher publisher-name->id)]
+                       (assert (some? territory-id) assignment)
+                       (assert (some? publisher-id) assignment)
+                       (try
+                         [{:command/type :territory.command/assign-territory
+                           :congregation/id cong-id
+                           :territory/id territory-id
+                           :assignment/id assignment-id
+                           :date (-> assignment :start-date LocalDate/parse)
+                           :publisher/id publisher-id}
+                          (when (some? (:end-date assignment))
+                            {:command/type :territory.command/return-territory
+                             :congregation/id cong-id
+                             :territory/id territory-id
+                             :assignment/id assignment-id
+                             :date (-> assignment :end-date LocalDate/parse)
+                             :returning? true
+                             :covered? true})]
+                         (catch Exception e
+                           (prn 'assignment assignment)
+                           (throw e))))))
+           (filterv some?)))))
+
 
 (defn- enrich-command [command]
   (-> command
@@ -106,7 +147,7 @@
       (assoc :command/system system)))
 
 (defn dispatch-commands! [commands]
-  (db/with-transaction [conn {}]
+  (db/with-transaction [conn {:rollback-only true}] ; toggle after testing that all commands pass
     (let [state (projections/cached-state)]
       (doseq [command commands]
         (dispatcher/command! conn state (enrich-command command)))))
@@ -114,9 +155,10 @@
 
 
 (comment
-  (pp/pprint)
   (->> (parse-excel "alueet.xlsx")
-       (mapcat generate-commands))
+       #_(take 10)
+       import-assignments-commands)
+  (import-publishers-commands ["foo"])
   (->> (parse-excel "alueet.xlsx")
        publisher-names
        import-publishers-commands))
