@@ -15,7 +15,7 @@
            (org.apache.poi.xssf.usermodel XSSFWorkbook)))
 
 (def cong-id (parse-uuid ""))
-(def deleted-territories #{})
+(def deleted-territories #{"42" "S1" "S2" "S6" "S7" "S11" "K1" "K2" "K3" "K4" "K5" "K6" "K7" "K8" "K9" "K10"})
 (def system (str (ns-name *ns*)))
 
 (defn string-value [^Cell cell]
@@ -157,9 +157,9 @@
 
 (comment
   (->> (parse-excel "alueet.xlsx")
-       #_(take 10)
-       import-assignments-commands)
-  (import-publishers-commands ["foo"])
-  (->> (parse-excel "alueet.xlsx")
        publisher-names
-       import-publishers-commands))
+       import-publishers-commands
+       dispatch-commands!)
+  (->> (parse-excel "alueet.xlsx")
+       import-assignments-commands
+       dispatch-commands!))
