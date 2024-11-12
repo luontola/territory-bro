@@ -105,7 +105,16 @@
               {:type :today, :date t1}]
              (assignment-history/interpose-durations [{:type :today, :date t1}
                                                       {:type :assignment}
-                                                      {:type :today, :date t1}]))))
+                                                      {:type :today, :date t1}])))
+      ;; The same use case, but instead of the being recorded as returned and reassigned
+      ;; during the same day, it was recorded as reassigned the next day.
+      (is (= [{:type :today, :date t1}
+              {:type :assignment}
+              {:type :today, :date (.plusDays t1 1)}]
+             (assignment-history/interpose-durations [{:type :today, :date t1}
+                                                      {:type :assignment}
+                                                      {:type :today, :date (.plusDays t1 1)}]))
+          "or the next day"))
 
     (testing "gives a warning if the dates are not in ascending order"
       ;; This can happen if the user inputs historical assignments and makes a mistake,

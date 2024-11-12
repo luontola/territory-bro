@@ -47,7 +47,8 @@
                    (cond->
                      (and (some? date)
                           (some? previous-date)
-                          (not= date previous-date))
+                          (not= date previous-date)
+                          (not= date (.plusDays previous-date 1)))
                      (conj! (-> {:type :duration
                                  :status previous-status
                                  :months (util/months-difference previous-date date)}
