@@ -1,4 +1,4 @@
-import Feature from "ol/Feature";
+import Feature, {FeatureLike} from "ol/Feature";
 import {defaults as controlDefaults} from "ol/control";
 import Attribution from "ol/control/Attribution";
 import TileSource from "ol/source/Tile";
@@ -23,6 +23,7 @@ import Geolocation from "ol/Geolocation";
 import proj4 from 'proj4';
 import {register} from 'ol/proj/proj4';
 import Map from "ol/Map";
+import {getHeight as getExtentHeight, getWidth as getExtentWidth} from "ol/extent";
 
 proj4.defs(
   'EPSG:3067',
@@ -244,4 +245,18 @@ export function territoryTextStyle(territoryNumber: string, fontSize: string) {
     stroke: new Stroke({color: 'rgba(255, 255, 255, 1.0)', width: 3.0}),
     overflow: true
   });
+}
+
+export function scaledTerritoryTextStyle(territoryNumber: string, feature: FeatureLike, resolution: number) {
+  // Keep all territory numbers visible to not hide information.
+  // Declutter them by shrinking the font in proportion to the geometry size.
+  const extent = feature.getGeometry()!.getExtent();
+  const geomWidthPx = getExtentWidth(extent) / resolution;
+  const geomHeightPx = getExtentHeight(extent) / resolution;
+  const charWidthPx = 10; // estimate based on the font size
+  const textWidthPx = charWidthPx * territoryNumber.length;
+  const scale = Math.max(geomWidthPx, geomHeightPx * 0.5) / textWidthPx; // geometry's height is less important for the text to fit on screen
+  const text = territoryTextStyle(territoryNumber, '5mm');
+  text.setScale(Math.min(scale, 1));
+  return text;
 }

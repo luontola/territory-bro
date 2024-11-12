@@ -11,9 +11,9 @@ import {
   makeStreetsLayer,
   MapRaster,
   rememberViewAdjustments,
+  scaledTerritoryTextStyle,
   Territory,
   territoryStrokeStyle,
-  territoryTextStyle,
   wktToFeature,
   wktToFeatures
 } from "./mapOptions.ts";
@@ -56,9 +56,10 @@ function initRegionMap(element: HTMLDivElement,
       })
     }),
     style: function (feature, resolution) {
+      const number = feature.get('number');
       const style = new Style({
         stroke: territoryStrokeStyle(),
-        text: territoryTextStyle(feature.get('number'), '5mm')
+        text: scaledTerritoryTextStyle(number, feature, resolution)
       });
       return [style];
     }
