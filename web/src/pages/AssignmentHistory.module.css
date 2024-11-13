@@ -1,0 +1,60 @@
+:global #assignment-history:has(#empty-assignment-history) {
+    display: none;
+}
+
+.assignment-history {
+    display: grid;
+    grid-template-columns: [time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end];
+    gap: 0.5rem;
+    width: fit-content;
+    margin: 1rem 0;
+}
+
+.row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: 0.5rem;
+}
+
+.timeline {
+    grid-column: timeline-start / timeline-end;
+    background: linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330);
+}
+
+.controls {
+    grid-column: controls-start / controls-end;
+    grid-row: 1;
+    margin-left: 1em;
+    text-align: right;
+    z-index: 1;
+}
+
+.event-date {
+    grid-column: time-start / time-end;
+    white-space: nowrap;
+}
+
+.event-description {
+    grid-column: event-start / event-end;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.duration {
+    grid-column: time-start / time-end;
+    white-space: nowrap;
+    text-align: center;
+    padding: 0.7rem 0;
+}
+
+.duration.vacant {
+    color: #999;
+}
+
+.assignment-edit-mode {
+    outline: 2px dashed red;
+    border-radius: 4px;
+    outline-offset: 0.5rem;
+}

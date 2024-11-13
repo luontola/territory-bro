@@ -64,12 +64,6 @@
     flex: none;
 }
 
-/* Assignment history */
-
-:global #assignment-history:has(#empty-assignment-history) {
-    display: none;
-}
-
 /* Map */
 
 .map {

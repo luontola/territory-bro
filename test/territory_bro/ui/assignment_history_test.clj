@@ -46,84 +46,83 @@
              :covered? true}]
            (assignment-history/assignment->events covered-and-returned-assignment)))))
 
-(deftest interpose-durations-test
+(deftest interpose-durations-within-assignment-test
+  (let [t1 (LocalDate/of 2000 1 1)
+        t2 (.plusMonths t1 1)
+        today (.plusMonths t1 2)]
+
+    (testing "ongoing assignment: calculates the duration until today"
+      (is (= [{:type :event, :date t1, :assigned? true}
+              {:type :duration, :months 2, :status :assigned}]
+             (assignment-history/interpose-durations-within-assignment today [{:type :event, :date t1, :assigned? true}]))))
+
+    (testing "completed assignment: calculates the duration between events"
+      (is (= [{:type :event, :date t1, :assigned? true}
+              {:type :duration, :months 1, :status :assigned}
+              {:type :event, :date t2, :returned? true}]
+             (assignment-history/interpose-durations-within-assignment today [{:type :event, :date t1, :assigned? true}
+                                                                              {:type :event, :date t2, :returned? true}]))))
+
+    (testing "doesn't add duration if the dates are the same"
+      (is (= [{:type :event, :date t1, :assigned? true}
+              {:type :event, :date t1, :returned? true}]
+             (assignment-history/interpose-durations-within-assignment today [{:type :event, :date t1, :assigned? true}
+                                                                              {:type :event, :date t1, :returned? true}]))))))
+
+(deftest interpose-durations-between-assignments-test
   (let [t1 (LocalDate/of 2000 1 1)
         t2 (.plusMonths t1 1)
         t3 (.plusMonths t1 2)
-        t4 (.plusMonths t1 3)
-        t5 (.plusMonths t1 4)]
+        today (.plusMonths t1 3)]
 
-    (testing "no events: no change"
-      (is (= [] (assignment-history/interpose-durations []))))
+    (testing "no assignments: no change"
+      (is (= [] (assignment-history/interpose-durations-between-assignments today []))))
 
-    (testing "one event: no change"
-      (is (= [{:type :event, :date t1, :assigned? true}]
-             (assignment-history/interpose-durations [{:type :event, :date t1, :assigned? true}]))))
+    (testing "ongoing assignment: no change"
+      (is (= [{:type :assignment, :start-date t1, :end-date nil}]
+             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date nil}]))))
 
-    (testing "two events: calculates the duration between them"
-      (is (= [{:type :event, :date t1, :assigned? true}
-              {:type :duration, :months 3, :status :assigned}
-              {:type :event, :date t4, :returned? true}]
-             (assignment-history/interpose-durations [{:type :event, :date t1, :assigned? true}
-                                                      {:type :event, :date t4, :returned? true}]))))
+    (testing "completed assignment: calculates the duration after assignment until today"
+      (is (= [{:type :assignment, :start-date t1, :end-date t2}
+              {:type :duration, :months 2, :status :vacant}]
+             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date t2}]))))
 
-    (testing "keeps track of the assigned/vacant status"
-      (is (= [{:type :event, :date t1, :assigned? true}
-              {:type :duration, :months 1, :status :assigned}
-              {:type :event, :date t2, :covered? true}
-              {:type :duration, :months 1, :status :assigned}
-              {:type :event, :date t3, :returned? true}
+    (testing "multiple assignments: calculates the durations between assignments"
+      (is (= [{:type :assignment, :start-date t1, :end-date t2}
               {:type :duration, :months 1, :status :vacant}
-              {:type :event, :date t4, :assigned? true}
-              {:type :duration, :months 1, :status :assigned}
-              {:type :today, :date t5}]
-             (assignment-history/interpose-durations [{:type :event, :date t1, :assigned? true}
-                                                      {:type :event, :date t2, :covered? true}
-                                                      {:type :event, :date t3, :returned? true}
-                                                      {:type :event, :date t4, :assigned? true}
-                                                      {:type :today, :date t5}]))))
+              {:type :assignment, :start-date t3, :end-date nil}]
+             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date t2}
+                                                                                {:type :assignment, :start-date t3, :end-date nil}]))))
 
-    (testing "ignores events without date"
-      (is (= [{:type :event, :date t1, :assigned? true}
-              {:type :duration, :months 1, :status :assigned}
-              {:type :event, :date t2, :returned? true}
-              {:type :assignment}
-              {:type :duration, :months 1, :status :vacant}
-              {:type :today, :date t3}]
-             (assignment-history/interpose-durations [{:type :event, :date t1, :assigned? true}
-                                                      {:type :event, :date t2, :returned? true}
-                                                      {:type :assignment}
-                                                      {:type :today, :date t3}]))))
-
-    (testing "doesn't add duration if the date is the same"
+    (testing "doesn't add duration if the dates are the same"
       ;; This rule makes it simple to add today's date after all assignments,
       ;; without checking whether it already exists at the end of an ongoing assignment.
       ;; This may also be relevant if a territory is returned and assigned to another
       ;; publisher during the same day.
-      (is (= [{:type :today, :date t1}
-              {:type :assignment}
-              {:type :today, :date t1}]
-             (assignment-history/interpose-durations [{:type :today, :date t1}
-                                                      {:type :assignment}
-                                                      {:type :today, :date t1}])))
+      (is (= [{:type :assignment, :start-date t1, :end-date t2}
+              {:type :assignment, :start-date t2, :end-date today}]
+             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date t2}
+                                                                                {:type :assignment, :start-date t2, :end-date today}])))
       ;; The same use case, but instead of the being recorded as returned and reassigned
       ;; during the same day, it was recorded as reassigned the next day.
-      (is (= [{:type :today, :date t1}
-              {:type :assignment}
-              {:type :today, :date (.plusDays t1 1)}]
-             (assignment-history/interpose-durations [{:type :today, :date t1}
-                                                      {:type :assignment}
-                                                      {:type :today, :date (.plusDays t1 1)}]))
+      (is (= [{:type :assignment, :start-date t1, :end-date t2}
+              {:type :assignment
+               :start-date (.plusDays t2 1)
+               :end-date (.minusDays today 1)}]
+             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date t2}
+                                                                                {:type :assignment
+                                                                                 :start-date (.plusDays t2 1)
+                                                                                 :end-date (.minusDays today 1)}]))
           "or the next day"))
 
     (testing "gives a warning if the dates are not in ascending order"
       ;; This can happen if the user inputs historical assignments and makes a mistake,
       ;; so that some assignments are overlapping.
-      (is (= [{:type :event, :date t2, :returned? true}
+      (is (= [{:type :assignment, :start-date t1, :end-date t3}
               {:type :duration, :months -1, :status :vacant, :temporal-paradox? true}
-              {:type :event, :date t1, :assigned? true}]
-             (assignment-history/interpose-durations [{:type :event, :date t2, :returned? true}
-                                                      {:type :event, :date t1, :assigned? true}]))))))
+              {:type :assignment, :start-date t2, :end-date nil}]
+             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date t3}
+                                                                                {:type :assignment, :start-date t2, :end-date nil}]))))))
 
 (deftest compile-assignment-history-rows-test
   (testing "no assignments"
@@ -131,63 +130,53 @@
 
   (testing "assigned"
     (is (= [{:type :assignment
-             :grid-row 1
-             :grid-span 2}
-            {:type :duration
-             :grid-row 1
-             :status :assigned
-             :months 2}
-            {:type :event
-             :grid-row 2
-             :date start-date
-             :assigned? true
-             :publisher/name "John Doe"}]
+             :start-date start-date
+             :end-date nil
+             :rows [{:type :event
+                     :date start-date
+                     :assigned? true
+                     :publisher/name "John Doe"}
+                    {:type :duration
+                     :status :assigned
+                     :months 2}]}]
            (assignment-history/compile-assignment-history-rows [assigned-assignment] today))))
 
   (testing "covered"
     (is (= [{:type :assignment
-             :grid-row 1
-             :grid-span 4}
-            {:type :duration
-             :grid-row 1
-             :status :assigned
-             :months 1}
-            {:type :event
-             :grid-row 2
-             :date end-date
-             :covered? true}
-            {:type :duration
-             :grid-row 3
-             :status :assigned
-             :months 1}
-            {:type :event
-             :grid-row 4
-             :date start-date
-             :assigned? true
-             :publisher/name "John Doe"}]
+             :start-date start-date
+             :end-date nil
+             :rows [{:type :event
+                     :date start-date
+                     :assigned? true
+                     :publisher/name "John Doe"}
+                    {:type :duration
+                     :status :assigned
+                     :months 1}
+                    {:type :event
+                     :date end-date
+                     :covered? true}
+                    {:type :duration
+                     :status :assigned
+                     :months 1}]}]
            (assignment-history/compile-assignment-history-rows [covered-assignment] today))))
 
   (testing "returned"
-    (is (= [{:type :duration
-             :grid-row 1
-             :status :vacant
-             :months 1}
-            {:type :assignment
-             :grid-row 2
-             :grid-span 3}
-            {:type :event
-             :grid-row 2
-             :date end-date
-             :returned? true}
+    (is (= [{:type :assignment
+             :start-date start-date
+             :end-date end-date
+             :rows [{:type :event
+                     :date start-date
+                     :assigned? true
+                     :publisher/name "John Doe"}
+                    {:type :duration
+                     :status :assigned
+                     :months 1}
+                    {:type :event
+                     :date end-date
+                     :returned? true}]}
             {:type :duration
-             :grid-row 3
-             :status :assigned
-             :months 1}
-            {:type :event
-             :grid-row 4
-             :date start-date
-             :assigned? true
-             :publisher/name "John Doe"}]
+             :status :vacant
+             :months 1}]
            (assignment-history/compile-assignment-history-rows [returned-assignment] today)))))
 
 (deftest view-test

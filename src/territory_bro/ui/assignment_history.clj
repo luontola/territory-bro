@@ -4,6 +4,7 @@
             [territory-bro.infra.config :as config]
             [territory-bro.infra.util :as util]
             [territory-bro.ui.assignment :as assignment]
+            [territory-bro.ui.css :as css]
             [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n])
@@ -29,134 +30,126 @@
         (= date (:assignment/end-date assignment))
         (assoc :returned? true)))))
 
-(defn interpose-durations [events]
-  (loop [events events
-         ^LocalDate previous-date nil
-         previous-status :vacant
-         results (transient [])]
-    (if-some [event (first events)]
-      (let [^LocalDate date (:date event)
-            status (cond
-                     (:assigned? event) :assigned
-                     (:returned? event) :vacant
-                     :else previous-status)]
-        (recur (rest events)
-               (or date previous-date)
-               status
-               (-> results
-                   (cond->
-                     (and (some? date)
-                          (some? previous-date)
-                          (not= date previous-date)
-                          (not= date (.plusDays previous-date 1)))
-                     (conj! (-> {:type :duration
-                                 :status previous-status
-                                 :months (util/months-difference previous-date date)}
-                                (assoc-some :temporal-paradox? (when (. date isBefore previous-date) true)))))
-                   (conj! event))))
-      (persistent! results))))
+(defn- duration-entry [status ^LocalDate date-1 ^LocalDate date-2]
+  (when (and (some? date-1)
+             (some? date-2)
+             (not= date-1 date-2)
+             (not= date-1 (.minusDays date-2 1)))
+    (-> {:type :duration
+         :status status
+         :months (util/months-difference date-1 date-2)}
+        (assoc-some :temporal-paradox? (when (. date-2 isBefore date-1)
+                                         true)))))
 
-(defn- assign-grid-rows [rows]
-  (loop [rows rows
-         grid-row 1
-         results (transient [])]
-    (if-some [row (first rows)]
-      (if (= :assignment (:type row))
-        (recur (rest rows)
-               grid-row ; shares the same row with the end event
-               (conj! results (-> row
-                                  (assoc :grid-row grid-row)
-                                  ;; Count the number of rows until the start of the assignment.
-                                  ;; Doesn't count the start event, but counts the type=assignment row,
-                                  ;; so they cancel each other out.
-                                  (assoc :grid-span (count (take-while #(not (:assigned? %)) rows))))))
-        (recur (rest rows)
-               (inc grid-row)
-               (conj! results (assoc row :grid-row grid-row))))
-      (persistent! results))))
+(defn interpose-durations-within-assignment [today events]
+  (let [completed-assignment? (some :returned? events)]
+    (->> (concat events [(when-not completed-assignment?
+                           {:date today})])
+         (partition 2 1)
+         (mapcat (fn [[event-1 event-2]]
+                   [event-1
+                    (duration-entry :assigned (:date event-1) (:date event-2))]))
+         (filter some?))))
+
+(defn interpose-durations-between-assignments [today assignments]
+  (->> (concat assignments [{:start-date today}])
+       (partition 2 1)
+       (mapcat (fn [[assignment-1 assignment-2]]
+                 [assignment-1
+                  (duration-entry :vacant (:end-date assignment-1) (:start-date assignment-2))]))
+       (remove nil?)))
 
 (defn compile-assignment-history-rows [assignment-history today]
   (->> assignment-history
        (sort-by (juxt (comp nil? :assignment/end-date)
                       :assignment/start-date
                       :assignment/end-date))
-       (mapcat (fn [assignment]
-                 (-> (assignment->events assignment)
-                     vec
-                     (cond->
-                       (nil? (:assignment/end-date assignment))
-                       (conj {:type :today, :date today}))
-                     (conj {:type :assignment}))))
-       ((fn [events]
-          (concat events [{:type :today, :date today}])))
-       interpose-durations
-       (remove #(= :today (:type %)))
-       reverse
-       assign-grid-rows))
+       (map (fn [assignment]
+              {:type :assignment
+               :start-date (:assignment/start-date assignment)
+               :end-date (:assignment/end-date assignment)
+               :rows (->> (assignment->events assignment)
+                          (interpose-durations-within-assignment today))}))
+       (interpose-durations-between-assignments today)))
+
+
+(defn- grid-row-wrapper [{:keys [grid-row]} content]
+  (let [styles (:AssignmentHistory (css/modules))]
+    (h/html
+     [:div {:class (:row styles)
+            :style (when (some? grid-row)
+                     {:grid-row grid-row})}
+      content])))
+
+(defn- duration-row [row]
+  (let [styles (:AssignmentHistory (css/modules))]
+    (grid-row-wrapper
+     row
+     (h/html
+      [:div {:class (html/classes (:duration styles)
+                                  (when (= :vacant (:status row))
+                                    (:vacant styles)))}
+       (if (:temporal-paradox? row)
+         " ⚠️ "
+         (-> (i18n/t "Assignment.durationMonths")
+             (str/replace "{{months}}" (str (:months row)))))]))))
+
+(defn- event-row [row]
+  (let [styles (:AssignmentHistory (css/modules))]
+    (grid-row-wrapper
+     row
+     (h/html
+      [:div {:class (:event-date styles)}
+       (:date row)]
+      [:div {:class (:event-description styles)}
+       (when (:returned? row)
+         [:div "📥 " (i18n/t "Assignment.returned")])
+       (when (:covered? row)
+         [:div "✅ " (i18n/t "Assignment.covered")])
+       (when (:assigned? row)
+         [:div "⤴️ " (-> (i18n/t "Assignment.assignedToPublisher")
+                         (str/replace "{{name}}" (assignment/format-publisher-name row)))])]))))
+
+(defn- assignment-row [{:keys [rows] :as _assignment}]
+  (let [styles (:AssignmentHistory (css/modules))]
+    (h/html
+     [:div {:hx-target "this"
+            :hx-swap "outerHTML"
+            :class (html/classes (:row styles)
+                                 ;; TODO: deleting/editing assignments
+                                 #_(:assignment-edit-mode styles))}
+      [:div {:class (:timeline styles)
+             ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
+             :style (identity {:grid-row (str "1 / span " (count rows))})}]
+      [:div {:class (:controls styles)}
+       ;; TODO: at first add just a checkmark for deleting the assignment? simpler to implement than full editing
+       #_[:a {:href "#"
+              :style {:margin-left "1em"}
+              :title "Delete assignment"
+              :aria-label "Delete assignment"}
+          (html/inline-svg "icons/close.svg")]
+       (if (:dev config/env)
+         [:a {:href "#"
+              :onclick "return false"}
+          (i18n/t "Assignment.form.edit")]
+         [:span {:data-test-icon (i18n/t "Assignment.form.edit")}])]
+      (for [row (->> rows
+                     reverse
+                     (map-indexed (fn [idx row]
+                                    (assoc row :grid-row (inc idx)))))]
+        (case (:type row)
+          :event (event-row row)
+          :duration (duration-row row)))])))
 
 (defn view [{:keys [assignment-history today]}]
   (if (empty? assignment-history)
-    [:div#empty-assignment-history]
-    (let [rows (compile-assignment-history-rows assignment-history today)]
+    (h/html
+     [:div#empty-assignment-history])
+    (let [styles (:AssignmentHistory (css/modules))
+          rows (compile-assignment-history-rows assignment-history today)]
       (h/html
-       [:div {:style {:display "grid"
-                      :grid-template-columns "[time-start] min-content [time-end timeline-start] 4px [timeline-end event-start] 1fr [event-end controls-start] min-content [controls-end]"
-                      :gap "0.5rem"
-                      :width "fit-content"
-                      :margin "1rem 0"}}
-        (for [{:keys [grid-row grid-span] :as row} rows]
+       [:div {:class (:assignment-history styles)}
+        (for [row (reverse rows)]
           (case (:type row)
-            :assignment
-            (h/html
-             ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
-             [:div {:style (identity {:grid-column "timeline-start / timeline-end"
-                                      :grid-row (str grid-row " / " (+ grid-row grid-span))
-                                      :background "linear-gradient(to top, #3330, #333f 1.5rem, #333f calc(100% - 1.5rem), #3330)"})}]
-             [:div {:style (identity {:grid-column "controls-start / controls-end"
-                                      :grid-row grid-row
-                                      :text-align "right"
-                                      :margin-left "1em"})}
-              ;; TODO: at first add just a checkmark for deleting the assignment? simpler to implement than full editing
-              #_[:a {:href "#"
-                     :style {:margin-left "1em"}
-                     :title "Delete assignment"
-                     :aria-label "Delete assignment"}
-                 (html/inline-svg "icons/close.svg")]
-              (if (:dev config/env)
-                [:a {:href "#"
-                     :onclick "return false"}
-                 (i18n/t "Assignment.form.edit")]
-                [:span {:data-test-icon (i18n/t "Assignment.form.edit")}])])
-
-            :duration
-            (h/html
-             [:div {:style (identity {:grid-column "time-start / time-end"
-                                      :grid-row grid-row
-                                      :white-space "nowrap"
-                                      :text-align "center"
-                                      :padding "0.7rem 0"
-                                      :color (when (= :vacant (:status row))
-                                               "#999")})}
-              (if (:temporal-paradox? row)
-                " ⚠️ "
-                (-> (i18n/t "Assignment.durationMonths")
-                    (str/replace "{{months}}" (str (:months row)))))])
-
-            :event
-            (h/html
-             [:div {:style (identity {:grid-column "time-start / time-end"
-                                      :grid-row grid-row
-                                      :white-space "nowrap"})}
-              (:date row)]
-             [:div {:style (identity {:grid-column "event-start / event-end"
-                                      :grid-row grid-row
-                                      :display "flex"
-                                      :flex-direction "column"
-                                      :gap "0.25rem"})}
-              (when (:returned? row)
-                [:div "📥 " (i18n/t "Assignment.returned")])
-              (when (:covered? row)
-                [:div "✅ " (i18n/t "Assignment.covered")])
-              (when (:assigned? row)
-                [:div "⤴️ " (-> (i18n/t "Assignment.assignedToPublisher")
-                                (str/replace "{{name}}" (assignment/format-publisher-name row)))])])))]))))
+            :assignment (assignment-row row)
+            :duration (duration-row row)))]))))
