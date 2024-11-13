@@ -9,13 +9,12 @@ tr.new-row {
 }
 
 td.edit-publisher {
-    padding: 4px !important;
+    padding: 4px;
 }
 
 td.edit-button {
-    /* XXX: competes for specificity with PureCSS */
-    font-size: 70% !important;
-    padding: 2px 4px !important;
+    font-size: 70%;
+    padding: 2px 4px;
     text-align: right;
 }
 

@@ -12,8 +12,8 @@ import "ol/ol.css";
 import "purecss/build/pure.css";
 import "purecss/build/grids-responsive.css";
 import "@fortawesome/fontawesome-free/css/svg-with-js.css"
+import "./styles.ts"; // import last to have higher specificity than the library CSS
 
-import.meta.glob('./**/*.module.css', {eager: true})
 import.meta.glob('./**/*.svg', {eager: true})
 
 function formatXhrError({xhr, pathInfo}) {

@@ -10,7 +10,7 @@ form.search input {
 }
 
 td.number {
-    padding: 0 !important;
+    padding: 0;
     white-space: nowrap;
 }
 
