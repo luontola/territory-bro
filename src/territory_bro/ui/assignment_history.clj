@@ -52,11 +52,11 @@
          (filter some?))))
 
 (defn interpose-durations-between-assignments [today assignments]
-  (->> (concat assignments [{:start-date today}])
+  (->> (concat assignments [{:assignment/start-date today}])
        (partition 2 1)
        (mapcat (fn [[assignment-1 assignment-2]]
                  [assignment-1
-                  (duration-entry :vacant (:end-date assignment-1) (:start-date assignment-2))]))
+                  (duration-entry :vacant (:assignment/end-date assignment-1) (:assignment/start-date assignment-2))]))
        (remove nil?)))
 
 (defn compile-assignment-history-rows [assignment-history today]
@@ -66,8 +66,9 @@
                       :assignment/end-date))
        (map (fn [assignment]
               {:type :assignment
-               :start-date (:assignment/start-date assignment)
-               :end-date (:assignment/end-date assignment)
+               :assignment/id (:assignment/id assignment)
+               :assignment/start-date (:assignment/start-date assignment)
+               :assignment/end-date (:assignment/end-date assignment)
                :rows (->> (assignment->events assignment)
                           (interpose-durations-within-assignment today))}))
        (interpose-durations-between-assignments today)))

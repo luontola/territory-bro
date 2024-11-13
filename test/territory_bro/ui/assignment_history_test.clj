@@ -79,50 +79,54 @@
       (is (= [] (assignment-history/interpose-durations-between-assignments today []))))
 
     (testing "ongoing assignment: no change"
-      (is (= [{:type :assignment, :start-date t1, :end-date nil}]
-             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date nil}]))))
+      (is (= [{:type :assignment, :assignment/start-date t1, :assignment/end-date nil}]
+             (assignment-history/interpose-durations-between-assignments
+              today [{:type :assignment, :assignment/start-date t1, :assignment/end-date nil}]))))
 
     (testing "completed assignment: calculates the duration after assignment until today"
-      (is (= [{:type :assignment, :start-date t1, :end-date t2}
+      (is (= [{:type :assignment, :assignment/start-date t1, :assignment/end-date t2}
               {:type :duration, :months 2, :status :vacant}]
-             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date t2}]))))
+             (assignment-history/interpose-durations-between-assignments
+              today [{:type :assignment, :assignment/start-date t1, :assignment/end-date t2}]))))
 
     (testing "multiple assignments: calculates the durations between assignments"
-      (is (= [{:type :assignment, :start-date t1, :end-date t2}
+      (is (= [{:type :assignment, :assignment/start-date t1, :assignment/end-date t2}
               {:type :duration, :months 1, :status :vacant}
-              {:type :assignment, :start-date t3, :end-date nil}]
-             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date t2}
-                                                                                {:type :assignment, :start-date t3, :end-date nil}]))))
+              {:type :assignment, :assignment/start-date t3, :assignment/end-date nil}]
+             (assignment-history/interpose-durations-between-assignments
+              today [{:type :assignment, :assignment/start-date t1, :assignment/end-date t2}
+                     {:type :assignment, :assignment/start-date t3, :assignment/end-date nil}]))))
 
     (testing "doesn't add duration if the dates are the same"
       ;; This rule makes it simple to add today's date after all assignments,
       ;; without checking whether it already exists at the end of an ongoing assignment.
       ;; This may also be relevant if a territory is returned and assigned to another
       ;; publisher during the same day.
-      (is (= [{:type :assignment, :start-date t1, :end-date t2}
-              {:type :assignment, :start-date t2, :end-date today}]
-             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date t2}
-                                                                                {:type :assignment, :start-date t2, :end-date today}])))
+      (is (= [{:type :assignment, :assignment/start-date t1, :assignment/end-date t2}
+              {:type :assignment, :assignment/start-date t2, :assignment/end-date today}]
+             (assignment-history/interpose-durations-between-assignments
+              today [{:type :assignment, :assignment/start-date t1, :assignment/end-date t2}
+                     {:type :assignment, :assignment/start-date t2, :assignment/end-date today}])))
       ;; The same use case, but instead of the being recorded as returned and reassigned
       ;; during the same day, it was recorded as reassigned the next day.
-      (is (= [{:type :assignment, :start-date t1, :end-date t2}
+      (is (= [{:type :assignment, :assignment/start-date t1, :assignment/end-date t2}
               {:type :assignment
-               :start-date (.plusDays t2 1)
-               :end-date (.minusDays today 1)}]
-             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date t2}
-                                                                                {:type :assignment
-                                                                                 :start-date (.plusDays t2 1)
-                                                                                 :end-date (.minusDays today 1)}]))
+               :assignment/start-date (.plusDays t2 1)
+               :assignment/end-date (.minusDays today 1)}]
+             (assignment-history/interpose-durations-between-assignments
+              today [{:type :assignment, :assignment/start-date t1, :assignment/end-date t2}
+                     {:type :assignment :assignment/start-date (.plusDays t2 1) :assignment/end-date (.minusDays today 1)}]))
           "or the next day"))
 
     (testing "gives a warning if the dates are not in ascending order"
       ;; This can happen if the user inputs historical assignments and makes a mistake,
       ;; so that some assignments are overlapping.
-      (is (= [{:type :assignment, :start-date t1, :end-date t3}
+      (is (= [{:type :assignment, :assignment/start-date t1, :assignment/end-date t3}
               {:type :duration, :months -1, :status :vacant, :temporal-paradox? true}
-              {:type :assignment, :start-date t2, :end-date nil}]
-             (assignment-history/interpose-durations-between-assignments today [{:type :assignment, :start-date t1, :end-date t3}
-                                                                                {:type :assignment, :start-date t2, :end-date nil}]))))))
+              {:type :assignment, :assignment/start-date t2, :assignment/end-date nil}]
+             (assignment-history/interpose-durations-between-assignments
+              today [{:type :assignment, :assignment/start-date t1, :assignment/end-date t3}
+                     {:type :assignment, :assignment/start-date t2, :assignment/end-date nil}]))))))
 
 (deftest compile-assignment-history-rows-test
   (testing "no assignments"
@@ -130,8 +134,9 @@
 
   (testing "assigned"
     (is (= [{:type :assignment
-             :start-date start-date
-             :end-date nil
+             :assignment/id assignment-id
+             :assignment/start-date start-date
+             :assignment/end-date nil
              :rows [{:type :event
                      :date start-date
                      :assigned? true
@@ -143,8 +148,9 @@
 
   (testing "covered"
     (is (= [{:type :assignment
-             :start-date start-date
-             :end-date nil
+             :assignment/id assignment-id
+             :assignment/start-date start-date
+             :assignment/end-date nil
              :rows [{:type :event
                      :date start-date
                      :assigned? true
@@ -162,8 +168,9 @@
 
   (testing "returned"
     (is (= [{:type :assignment
-             :start-date start-date
-             :end-date end-date
+             :assignment/id assignment-id
+             :assignment/start-date start-date
+             :assignment/end-date end-date
              :rows [{:type :event
                      :date start-date
                      :assigned? true
