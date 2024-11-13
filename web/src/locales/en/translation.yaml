@@ -161,6 +161,7 @@ Assignment:
     markCovered: Mark as covered
     markCoveredDescription: Mark the territory as covered
     edit: Edit
+    delete: Delete
     cancel: Cancel
     date: Date
     publisher: Publisher

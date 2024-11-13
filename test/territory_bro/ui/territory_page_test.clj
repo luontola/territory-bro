@@ -44,6 +44,7 @@
                :territory/meta {:foo "bar"}
                :territory/location testdata/wkt-helsinki-rautatientori
                :territory/do-not-calls "the do-not-calls"}
+   :assignment nil
    :assignment-history []
    :publishers [publisher]
    :today today
@@ -65,6 +66,7 @@
                :territory/meta {:foo "bar"}
                :territory/location testdata/wkt-helsinki-rautatientori
                :territory/do-not-calls nil}
+   :assignment nil
    :assignment-history nil ; TODO: generate fake assignment history
    :publishers dmz/demo-publishers
    :today today
@@ -78,25 +80,30 @@
                  :share-territory-link true}
    :mac? false})
 
+(def started-assignment
+  {:assignment/id assignment-id
+   :assignment/start-date start-date
+   :publisher/id publisher-id
+   :publisher/name "John Doe"})
+(def completed-assignment
+  {:assignment/id assignment-id
+   :assignment/start-date start-date
+   :assignment/covered-dates #{end-date}
+   :assignment/end-date end-date
+   :publisher/id publisher-id
+   :publisher/name "John Doe"})
+
 (def untouched-model model)
 (def assigned-model
-  (let [assignment {:assignment/id assignment-id
-                    :assignment/start-date start-date
-                    :publisher/id publisher-id
-                    :publisher/name "John Doe"}]
-    (-> model
-        (update :territory assoc :territory/current-assignment assignment)
-        (assoc :assignment-history [assignment]))))
+  (-> model
+      (update :territory assoc :territory/current-assignment started-assignment)
+      (assoc :assignment-history [started-assignment])))
 (def returned-model
-  (let [assignment {:assignment/id assignment-id
-                    :assignment/start-date start-date
-                    :assignment/covered-dates #{end-date}
-                    :assignment/end-date end-date
-                    :publisher/id publisher-id
-                    :publisher/name "John Doe"}]
-    (-> model
-        (update :territory assoc :territory/last-covered end-date)
-        (assoc :assignment-history [assignment]))))
+  (-> model
+      (update :territory assoc :territory/last-covered end-date)
+      (assoc :assignment-history [completed-assignment])))
+(def editing-assignment-model
+  (assoc returned-model :assignment completed-assignment))
 
 (def test-events
   (vec (flatten [{:event/type :congregation.event/congregation-created
@@ -157,6 +164,11 @@
         (testing "returned & covered"
           (testutil/with-events [territory-assigned territory-covered territory-returned]
             (is (= returned-model (territory-page/model! request)))))
+
+        (testing "editing an assignment"
+          (testutil/with-events [territory-assigned territory-covered territory-returned]
+            (let [request (assoc-in request [:path-params :assignment] assignment-id)]
+              (is (= editing-assignment-model (territory-page/model! request))))))
 
         (testing "demo congregation"
           (binding [config/env {:demo-congregation cong-id}]

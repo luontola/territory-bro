@@ -161,6 +161,7 @@ Assignment:
     markCovered: Segna come coperto
     markCoveredDescription: Segna il territorio come coperto
     edit: Modifica
+    delete: Elimina
     cancel: Annulla
     date: Data
     publisher: Proclamatori

@@ -1,7 +1,6 @@
 (ns territory-bro.ui.assignment-history
   (:require [clojure.string :as str]
             [medley.core :refer [assoc-some]]
-            [territory-bro.infra.config :as config]
             [territory-bro.infra.util :as util]
             [territory-bro.ui.assignment :as assignment]
             [territory-bro.ui.css :as css]
@@ -111,36 +110,63 @@
          [:div "⤴️ " (-> (i18n/t "Assignment.assignedToPublisher")
                          (str/replace "{{name}}" (assignment/format-publisher-name row)))])]))))
 
-(defn- assignment-row [{:keys [rows] :as _assignment}]
-  (let [styles (:AssignmentHistory (css/modules))]
+(defn- assignment-row [{:keys [rows] :as assignment} {:keys [editing?]}]
+  (let [styles (:AssignmentHistory (css/modules))
+        assignment-url (str html/*page-path* "/assignments/history/" (:assignment/id assignment))]
     (h/html
      [:div {:hx-target "this"
             :hx-swap "outerHTML"
             :class (html/classes (:row styles)
-                                 ;; TODO: deleting/editing assignments
-                                 #_(:assignment-edit-mode styles))}
+                                 (when editing?
+                                   (:edit-mode-assignment styles)))}
       [:div {:class (:timeline styles)
              ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
              :style (identity {:grid-row (str "1 / span " (count rows))})}]
-      [:div {:class (:controls styles)}
-       ;; TODO: at first add just a checkmark for deleting the assignment? simpler to implement than full editing
-       #_[:a {:href "#"
-              :style {:margin-left "1em"}
-              :title "Delete assignment"
-              :aria-label "Delete assignment"}
-          (html/inline-svg "icons/close.svg")]
-       (if (:dev config/env)
-         [:a {:href "#"
-              :onclick "return false"}
-          (i18n/t "Assignment.form.edit")]
-         [:span {:data-test-icon (i18n/t "Assignment.form.edit")}])]
+
+      (when-not editing?
+        [:div {:class (:controls styles)}
+         [:button.pure-button {:type "button"
+                               :hx-get (str assignment-url "/edit")
+                               :class (:edit-button styles)}
+          (i18n/t "Assignment.form.edit")]])
+
       (for [row (->> rows
                      reverse
                      (map-indexed (fn [idx row]
                                     (assoc row :grid-row (inc idx)))))]
         (case (:type row)
           :event (event-row row)
-          :duration (duration-row row)))])))
+          :duration (duration-row row)))
+
+      (when editing?
+        [:div {:class (:edit-mode-controls styles)
+               ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
+               :style (identity {:grid-row (inc (count rows))})}
+         [:button.pure-button {:type "button"
+                               :hx-delete assignment-url
+                               :class (:delete-button styles)}
+          " 🚧 " ; TODO: not yet implemented
+          (i18n/t "Assignment.form.delete")]
+         " "
+         [:button.pure-button {:type "button"
+                               :hx-get assignment-url}
+          (i18n/t "Assignment.form.cancel")]])])))
+
+
+(defn- compile-single-assignment [assignment today]
+  (->> (compile-assignment-history-rows [assignment] today)
+       (filter #(= :assignment (:type %)))
+       first))
+
+(defn view-assignment [{:keys [assignment today]}]
+  (if-some [row (compile-single-assignment assignment today)]
+    (assignment-row row {})
+    ""))
+
+(defn edit-assignment [{:keys [assignment today]}]
+  (if-some [row (compile-single-assignment assignment today)]
+    (assignment-row row {:editing? true})
+    ""))
 
 (defn view [{:keys [assignment-history today]}]
   (if (empty? assignment-history)
@@ -152,5 +178,5 @@
        [:div {:class (:assignment-history styles)}
         (for [row (reverse rows)]
           (case (:type row)
-            :assignment (assignment-row row)
+            :assignment (assignment-row row {})
             :duration (duration-row row)))]))))

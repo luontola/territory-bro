@@ -53,8 +53,22 @@
     color: #999;
 }
 
-.assignment-edit-mode {
+.edit-button {
+    font-size: 70%;
+}
+
+.delete-button {
+    color: white;
+    background-color: rgb(202, 60, 60);
+}
+
+.edit-mode-assignment {
     outline: 2px dashed red;
     border-radius: 4px;
     outline-offset: 0.5rem;
+}
+
+.edit-mode-controls {
+    grid-column: 1 / -1;
+    text-align: right;
 }

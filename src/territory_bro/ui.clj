@@ -1,5 +1,6 @@
 (ns territory-bro.ui
-  (:require [reitit.ring :as ring]
+  (:require [medley.core :as m]
+            [reitit.ring :as ring]
             [ring.util.http-response :as http-response]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
@@ -31,11 +32,15 @@
 
 (defn wrap-parse-path-params [handler]
   (fn [request]
-    (let [{:keys [congregation territory publisher]} (:path-params request)
-          request (cond-> request
-                    (some? congregation) (update-in [:path-params :congregation] parse-congregation-id)
-                    (some? territory) (update-in [:path-params :territory] parse-mandatory-uuid)
-                    (some? publisher) (update-in [:path-params :publisher] parse-mandatory-uuid))]
+    (let [request (m/update-existing request :path-params
+                                     #(m/map-kv-vals (fn [k v]
+                                                       (case k
+                                                         :congregation (parse-congregation-id v)
+                                                         :territory (parse-mandatory-uuid v)
+                                                         :publisher (parse-mandatory-uuid v)
+                                                         :assignment (parse-mandatory-uuid v)
+                                                         v))
+                                                     %))]
       (handler request))))
 
 (def routes

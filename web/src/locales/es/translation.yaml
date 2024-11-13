@@ -161,6 +161,7 @@ Assignment:
     markCovered: Marcar como cubierto
     markCoveredDescription: Marcar el territorio como cubierto
     edit: Editar
+    delete: Eliminar
     cancel: Cancelar
     date: Fecha
     publisher: Publicador

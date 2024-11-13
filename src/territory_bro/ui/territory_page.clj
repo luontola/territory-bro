@@ -29,6 +29,7 @@
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
         territory-id (get-in request [:path-params :territory])
+        assignment-id (get-in request [:path-params :assignment])
         congregation (dmz/get-congregation cong-id)
         territory (dmz/get-territory cong-id territory-id)
         do-not-calls (dmz/get-do-not-calls cong-id territory-id)
@@ -39,6 +40,9 @@
          :territory (-> territory
                         (dissoc :congregation/id)
                         (assoc :territory/do-not-calls do-not-calls))
+         :assignment (->> assignment-history
+                          (filterv #(= assignment-id (:assignment/id %)))
+                          first)
          :assignment-history assignment-history
          :publishers publishers
          :today today
@@ -505,6 +509,19 @@ if (url.searchParams.has('share-key')) {
     {:get {:handler (fn [request]
                       (-> (model! request)
                           (assignment-history/view)
+                          (html/response)))}}]
+   ["/assignments/history/:assignment"
+    {:get {:handler (fn [request]
+                      (-> (model! request)
+                          (assignment-history/view-assignment)
+                          (html/response)))}
+     :delete {:handler (fn [request]
+                         ;; TODO: backend logic
+                         (http-response/see-other (:uri request)))}}]
+   ["/assignments/history/:assignment/edit"
+    {:get {:handler (fn [request]
+                      (-> (model! request)
+                          (assignment-history/edit-assignment)
                           (html/response)))}}]
 
    ["/assignments/form"

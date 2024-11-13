@@ -161,6 +161,7 @@ Assignment:
     markCovered: Markeer als gedekt
     markCoveredDescription: Markeer het gebied als gedekt
     edit: Bewerken
+    delete: Verwijderen
     cancel: Annuleren
     date: Datum
     publisher: Verkondiger

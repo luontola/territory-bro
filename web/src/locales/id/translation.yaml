@@ -161,6 +161,7 @@ Assignment:
     markCovered: Tandai tercakup
     markCoveredDescription: Tandai wilayah sebagai tercakup
     edit: Sunting
+    delete: Hapus
     cancel: Batalkan
     date: Tanggal
     publisher: Penyiar

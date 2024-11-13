@@ -166,6 +166,7 @@ Assignment:
     markCovered: Merkitse käydyksi
     markCoveredDescription: Merkitse alue käydyksi
     edit: Muokkaa
+    delete: Poista
     cancel: Peruuta
     date: Päivämäärä
     publisher: Julistaja

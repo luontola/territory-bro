@@ -3,7 +3,8 @@
             [clojure.test :refer :all]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.ui.assignment-history :as assignment-history]
-            [territory-bro.ui.html :as html])
+            [territory-bro.ui.html :as html]
+            [territory-bro.ui.territory-page-test :as territory-page-test])
   (:import (java.time LocalDate)
            (java.util UUID)))
 
@@ -185,6 +186,26 @@
              :status :vacant
              :months 1}]
            (assignment-history/compile-assignment-history-rows [returned-assignment] today)))))
+
+(deftest view-assignment-test
+  (is (= (html/normalize-whitespace
+          "                                   Edit
+           2000-02-01   📥 Returned
+                        ✅ Covered
+           1 months
+           2000-01-01   ⤴️ Assigned to John Doe")
+         (-> (assignment-history/view-assignment territory-page-test/editing-assignment-model)
+             html/visible-text))))
+
+(deftest edit-assignment-test
+  (is (= (html/normalize-whitespace
+          "2000-02-01   📥 Returned
+                        ✅ Covered
+           1 months
+           2000-01-01   ⤴️ Assigned to John Doe
+           🚧 Delete  Cancel")
+         (-> (assignment-history/edit-assignment territory-page-test/editing-assignment-model)
+             html/visible-text))))
 
 (deftest view-test
   (let [today (LocalDate/of 2024 10 29)
