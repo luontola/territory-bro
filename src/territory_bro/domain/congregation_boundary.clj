@@ -1,5 +1,5 @@
 (ns territory-bro.domain.congregation-boundary
-  (:require [medley.core :refer [dissoc-in]]
+  (:require [medley.core :as m]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.gis.geometry :as geometry]
             [territory-bro.gis.gis-change :as gis-change])
@@ -17,7 +17,7 @@
   (let [boundaries (->> (vals (get-in state [::congregation-boundaries cong-id]))
                         (mapv :congregation-boundary/location))]
     (case (count boundaries)
-      0 (dissoc-in state [::congregation-boundary cong-id])
+      0 (m/dissoc-in state [::congregation-boundary cong-id])
       1 (let [boundary (first boundaries)]
           (-> state
               (assoc-in [::congregation-boundary cong-id] boundary)
@@ -42,7 +42,7 @@
 (defmethod projection :congregation-boundary.event/congregation-boundary-deleted
   [state event]
   (-> state
-      (dissoc-in [::congregation-boundaries (:congregation/id event) (:congregation-boundary/id event)])
+      (m/dissoc-in [::congregation-boundaries (:congregation/id event) (:congregation-boundary/id event)])
       (update-precomputed-state (:congregation/id event))))
 
 

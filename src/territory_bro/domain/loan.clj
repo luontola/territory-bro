@@ -2,7 +2,7 @@
   (:require [clojure.data.csv :as csv]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [medley.core :refer [map-vals]])
+            [medley.core :as m])
   (:import (java.net URL)
            (java.time Duration)))
 
@@ -44,7 +44,7 @@
                     (parse-loans-csv))
           number->loan (->> loans
                             (group-by :territory/number)
-                            (map-vals first))]
+                            (m/map-vals first))]
       (mapv (fn [territory]
               (merge territory (number->loan (:territory/number territory))))
             territories))

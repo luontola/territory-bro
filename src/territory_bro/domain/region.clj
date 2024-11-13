@@ -1,5 +1,5 @@
 (ns territory-bro.domain.region
-  (:require [medley.core :refer [dissoc-in]]
+  (:require [medley.core :as m]
             [territory-bro.gis.gis-change :as gis-change])
   (:import (territory_bro ValidationException)))
 
@@ -22,7 +22,7 @@
 
 (defmethod projection :region.event/region-deleted
   [state event]
-  (dissoc-in state [::regions (:congregation/id event) (:region/id event)]))
+  (m/dissoc-in state [::regions (:congregation/id event) (:region/id event)]))
 
 
 ;;;; Queries

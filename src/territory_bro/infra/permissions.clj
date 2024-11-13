@@ -1,5 +1,5 @@
 (ns territory-bro.infra.permissions
-  (:require [medley.core :refer [dissoc-in]])
+  (:require [medley.core :as m])
   (:import (territory_bro NoPermitException)))
 
 ;; The search index is arranged so that the permission keyword
@@ -31,7 +31,7 @@
   (assoc-in state (path user-id permit) true))
 
 (defn revoke [state user-id permit]
-  (dissoc-in state (path user-id permit)))
+  (m/dissoc-in state (path user-id permit)))
 
 (defn allowed? [state user-id permit]
   (cond

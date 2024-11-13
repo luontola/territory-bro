@@ -1,6 +1,6 @@
 (ns territory-bro.domain.territory-test
   (:require [clojure.test :refer :all]
-            [medley.core :refer [dissoc-in]]
+            [medley.core :as m]
             [territory-bro.domain.territory :as territory]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.events :as events]
@@ -126,7 +126,7 @@
                 (let [events (conj events territory-returned)
                       expected-assignment (assoc expected-assignment :assignment/end-date end-date)
                       expected (-> expected
-                                   (dissoc-in [::territory/territories cong-id territory-id :territory/current-assignment])
+                                   (m/dissoc-in [::territory/territories cong-id territory-id :territory/current-assignment])
                                    (assoc-in [::territory/territories cong-id territory-id :territory/assignments assignment-id] expected-assignment))]
                   (is (= expected (apply-events events)))))))))
 

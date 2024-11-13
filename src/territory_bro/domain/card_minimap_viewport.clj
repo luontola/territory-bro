@@ -1,5 +1,5 @@
 (ns territory-bro.domain.card-minimap-viewport
-  (:require [medley.core :refer [dissoc-in]]
+  (:require [medley.core :as m]
             [territory-bro.gis.gis-change :as gis-change])
   (:import (territory_bro ValidationException)))
 
@@ -21,7 +21,7 @@
 
 (defmethod projection :card-minimap-viewport.event/card-minimap-viewport-deleted
   [state event]
-  (dissoc-in state [::card-minimap-viewports (:congregation/id event) (:card-minimap-viewport/id event)]))
+  (m/dissoc-in state [::card-minimap-viewports (:congregation/id event) (:card-minimap-viewport/id event)]))
 
 
 ;;;; Queries

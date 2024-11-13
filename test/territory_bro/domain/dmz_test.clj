@@ -1,7 +1,7 @@
 (ns territory-bro.domain.dmz-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
-            [matcher-combinators.matchers :as m]
+            [matcher-combinators.matchers :as match]
             [matcher-combinators.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
@@ -282,11 +282,11 @@
 
 (deftest download-qgis-project-test
   (let [expected {:filename "Cong1 Name.qgs"
-                  :content (m/all-of #"dbname='gis-db'"
-                                     #"host=gis\.example\.com"
-                                     #"user='username123'"
-                                     #"password='password123'"
-                                     #"table=\"cong1_schema\"\.\"territory\"")}]
+                  :content (match/all-of #"dbname='gis-db'"
+                                         #"host=gis\.example\.com"
+                                         #"user='username123'"
+                                         #"password='password123'"
+                                         #"table=\"cong1_schema\"\.\"territory\"")}]
 
     (testutil/with-user-id user-id
       (testing "full permissions"

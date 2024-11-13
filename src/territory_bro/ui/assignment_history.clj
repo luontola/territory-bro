@@ -1,6 +1,6 @@
 (ns territory-bro.ui.assignment-history
   (:require [clojure.string :as str]
-            [medley.core :refer [assoc-some]]
+            [medley.core :as m]
             [territory-bro.infra.util :as util]
             [territory-bro.ui.assignment :as assignment]
             [territory-bro.ui.css :as css]
@@ -37,8 +37,8 @@
     (-> {:type :duration
          :status status
          :months (util/months-difference date-1 date-2)}
-        (assoc-some :temporal-paradox? (when (. date-2 isBefore date-1)
-                                         true)))))
+        (m/assoc-some :temporal-paradox? (when (. date-2 isBefore date-1)
+                                           true)))))
 
 (defn interpose-durations-within-assignment [today events]
   (let [completed-assignment? (some :returned? events)]

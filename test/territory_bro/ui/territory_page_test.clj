@@ -1,7 +1,7 @@
 (ns territory-bro.ui.territory-page-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
-            [medley.core :refer [dissoc-in]]
+            [medley.core :as m]
             [net.cgrand.enlive-html :as en]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.congregation :as congregation]
@@ -378,7 +378,7 @@
                html/visible-text))))
 
   (testing "placeholder for deleted publishers"
-    (let [model (dissoc-in assigned-model [:territory :territory/current-assignment :publisher/name])]
+    (let [model (m/dissoc-in assigned-model [:territory :territory/current-assignment :publisher/name])]
       (is (= (html/normalize-whitespace
               "Return
                Assigned to [deleted]
@@ -532,7 +532,7 @@
 
           (testing "return successful: only returning"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [response (territory-page/return-territory! (dissoc-in request [:params :covered]))]
+              (let [response (territory-page/return-territory! (m/dissoc-in request [:params :covered]))]
                 (is (= 303 (:status response)))
                 (is (= {:returning? true
                         :covered? false}
@@ -540,7 +540,7 @@
 
           (testing "return successful: only marking as covered"
             (with-fixtures [fake-dispatcher-fixture]
-              (let [response (territory-page/return-territory! (dissoc-in request [:params :returning]))]
+              (let [response (territory-page/return-territory! (m/dissoc-in request [:params :returning]))]
                 (is (= 303 (:status response)))
                 (is (= {:returning? false
                         :covered? true}

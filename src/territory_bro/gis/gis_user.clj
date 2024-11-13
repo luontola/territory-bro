@@ -1,5 +1,5 @@
 (ns territory-bro.gis.gis-user
-  (:require [medley.core :refer [dissoc-in]])
+  (:require [medley.core :as m])
   (:import (java.security SecureRandom)
            (java.util Base64)))
 
@@ -18,7 +18,7 @@
 
 (defmethod projection :congregation.event/gis-user-deleted
   [state event]
-  (dissoc-in state [::gis-users (:congregation/id event) (:user/id event)]))
+  (m/dissoc-in state [::gis-users (:congregation/id event) (:user/id event)]))
 
 
 ;;;; Queries

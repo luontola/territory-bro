@@ -1,7 +1,7 @@
 (ns territory-bro.gis.gis-db
   (:require [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [medley.core :refer [map-keys]]
+            [medley.core :as m]
             [schema.coerce :as coerce]
             [schema.core :as s]
             [territory-bro.infra.db :as db])
@@ -15,8 +15,8 @@
 ;;;; Features
 
 (defn- format-feature [feature]
-  (map-keys #(keyword "gis-feature" (name %))
-            feature))
+  (m/map-keys #(keyword "gis-feature" (name %))
+              feature))
 
 
 ;; TODO: not used in production code; remove?
@@ -111,7 +111,7 @@
 
 (defn- format-gis-change [change]
   (->> change
-       (map-keys #(get column->key % %))
+       (m/map-keys #(get column->key % %))
        (gis-change-coercer)))
 
 (defn get-changes

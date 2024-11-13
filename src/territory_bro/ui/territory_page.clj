@@ -1,6 +1,6 @@
 (ns territory-bro.ui.territory-page
   (:require [clojure.string :as str]
-            [medley.core :refer [greatest]]
+            [medley.core :as m]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
             [territory-bro.domain.congregation :as congregation]
@@ -224,8 +224,8 @@ if (returningCheckbox.checked) {
 
 (defn return-territory-dialog [{:keys [territory form today errors]}]
   (let [assignment (:territory/current-assignment territory)
-        start-date (apply greatest (conj (:assignment/covered-dates assignment)
-                                         (:assignment/start-date assignment)))
+        start-date (apply m/greatest (conj (:assignment/covered-dates assignment)
+                                           (:assignment/start-date assignment)))
         errors (group-by first errors)
         invalid-end-date? (contains? errors :invalid-end-date)]
     (h/html

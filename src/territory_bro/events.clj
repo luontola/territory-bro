@@ -1,5 +1,5 @@
 (ns territory-bro.events
-  (:require [medley.core :refer [map-keys]]
+  (:require [medley.core :as m]
             [schema-refined.core :as refined]
             [schema-tools.core :as tools]
             [schema.coerce :as coerce]
@@ -263,10 +263,10 @@
   (apply refined/dispatch-on :event/type (flatten (seq event-schemas))))
 
 (defn- required-key [m k]
-  (map-keys #(if (= % (s/optional-key k))
-               k
-               %)
-            m))
+  (m/map-keys #(if (= % (s/optional-key k))
+                 k
+                 %)
+              m))
 
 (s/defschema EnrichedEvent
   (-> BaseEvent

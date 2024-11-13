@@ -1,6 +1,6 @@
 (ns territory-bro.domain.territory
   (:require [clojure.string :as str]
-            [medley.core :refer [dissoc-in greatest]]
+            [medley.core :as m]
             [territory-bro.gis.gis-change :as gis-change]
             [territory-bro.infra.util :refer [assoc-dissoc conj-set]])
   (:import (java.time LocalDate)
@@ -28,7 +28,7 @@
 
 (defmethod projection :territory.event/territory-deleted
   [state event]
-  (dissoc-in state [::territories (:congregation/id event) (:territory/id event)]))
+  (m/dissoc-in state [::territories (:congregation/id event) (:territory/id event)]))
 
 (defn- update-assignment-status [territory]
   (let [assignments (vals (:territory/assignments territory))]
@@ -38,7 +38,7 @@
                                                          (first)))
         (assoc-dissoc :territory/last-covered (->> assignments
                                                    (mapcat :assignment/covered-dates)
-                                                   (apply greatest))))))
+                                                   (apply m/greatest))))))
 
 (defmethod projection :territory.event/territory-assigned
   [state event]

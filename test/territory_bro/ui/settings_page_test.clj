@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
-            [medley.core :refer [dissoc-in]]
+            [medley.core :as m]
             [reitit.ring :as ring]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.congregation :as congregation]
@@ -254,7 +254,7 @@
                  html/visible-text)))))
 
   (testing "no assigned territories"
-    (let [model (dissoc-in publisher-model [:publisher :assigned-territories])]
+    (let [model (m/dissoc-in publisher-model [:publisher :assigned-territories])]
       (is (= (html/normalize-whitespace
               "John Doe   Edit")
              (-> (settings-page/view-publisher-row model)
@@ -288,7 +288,7 @@
 
   (testing "shows a delete confirmation if the user has assigned territories"
     (let [delete-confirmation #" hx-confirm=\"John Doe has assigned territories.*\n\nAre you sure you want to delete John Doe\?\""
-          no-assignments-model (dissoc-in publisher-model [:publisher :assigned-territories])]
+          no-assignments-model (m/dissoc-in publisher-model [:publisher :assigned-territories])]
       (is (re-find delete-confirmation (str (settings-page/edit-publisher-row publisher-model)))
           "has assignments")
       (is (not (re-find delete-confirmation (str (settings-page/edit-publisher-row no-assignments-model))))
