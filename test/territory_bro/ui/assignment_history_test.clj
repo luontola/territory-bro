@@ -188,14 +188,22 @@
            (assignment-history/compile-assignment-history-rows [returned-assignment] today)))))
 
 (deftest view-assignment-test
-  (is (= (html/normalize-whitespace
-          "                                   Edit
-           2000-02-01   📥 Returned
-                        ✅ Covered
-           1 months
-           2000-01-01   ⤴️ Assigned to John Doe")
-         (-> (assignment-history/view-assignment territory-page-test/editing-assignment-model)
-             html/visible-text))))
+  (let [model territory-page-test/editing-assignment-model]
+
+    (testing "shows the assignment"
+      (is (= (html/normalize-whitespace
+              "                                   Edit
+               2000-02-01   📥 Returned
+                            ✅ Covered
+               1 months
+               2000-01-01   ⤴️ Assigned to John Doe")
+             (-> (assignment-history/view-assignment model)
+                 html/visible-text))))
+
+    (testing "shows a placeholder for deleted assignments"
+      (is (= "The territory assignment has been deleted"
+             (-> (assignment-history/view-assignment (dissoc model :assignment))
+                 html/visible-text))))))
 
 (deftest edit-assignment-test
   (is (= (html/normalize-whitespace
@@ -203,7 +211,7 @@
                         ✅ Covered
            1 months
            2000-01-01   ⤴️ Assigned to John Doe
-           🚧 Delete  Cancel")
+           Delete  Cancel")
          (-> (assignment-history/edit-assignment territory-page-test/editing-assignment-model)
              html/visible-text))))
 

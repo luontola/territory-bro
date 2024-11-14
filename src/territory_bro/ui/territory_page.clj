@@ -447,6 +447,17 @@ if (url.searchParams.has('share-key')) {
       (catch Exception e
         (forms/validation-error-htmx-response e request model! assignment-form-open)))))
 
+(defn delete-assignment! [request]
+  (let [model (model! request)
+        cong-id (get-in request [:path-params :congregation])
+        territory-id (get-in request [:path-params :territory])
+        assignment-id (-> model :assignment :assignment/id)]
+    (dmz/dispatch! {:command/type :territory.command/delete-assignment
+                    :congregation/id cong-id
+                    :territory/id territory-id
+                    :assignment/id assignment-id})
+    (http-response/see-other (str html/*page-path* "/assignments/history/" assignment-id))))
+
 (def routes
   ["/congregation/:congregation/territories/:territory"
    {:middleware [[html/wrap-page-path ::page]
@@ -516,8 +527,7 @@ if (url.searchParams.has('share-key')) {
                           (assignment-history/view-assignment)
                           (html/response)))}
      :delete {:handler (fn [request]
-                         ;; TODO: backend logic
-                         (http-response/see-other (:uri request)))}}]
+                         (delete-assignment! request))}}]
    ["/assignments/history/:assignment/edit"
     {:get {:handler (fn [request]
                       (-> (model! request)

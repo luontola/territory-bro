@@ -72,3 +72,12 @@
     grid-column: 1 / -1;
     text-align: right;
 }
+
+.deleted-assignment {
+    grid-column: 1 / -1;
+    border: 2px dashed #888;
+    background-color: #eee;
+    color: #333;
+    border-radius: 4px;
+    padding: 0.5rem;
+}

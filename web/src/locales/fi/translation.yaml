@@ -173,3 +173,4 @@ Assignment:
     publisherNotFound: Nimiä ei löytynyt
     alreadyAssignedError: Alue on jo otettu
     alreadyReturnedError: Alue on jo palautettu
+    assignmentDeleted: Aluemääräys on poistettu

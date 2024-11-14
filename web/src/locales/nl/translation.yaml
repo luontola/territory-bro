@@ -168,3 +168,4 @@ Assignment:
     publisherNotFound: Naam niet gevonden
     alreadyAssignedError: Het gebied is al toegewezen
     alreadyReturnedError: Het gebied is al teruggebracht
+    assignmentDeleted: De toewijzing van het gebied is verwijderd

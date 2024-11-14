@@ -168,3 +168,4 @@ Assignment:
     publisherNotFound: Nama tidak ditemukan
     alreadyAssignedError: Wilayah sudah ditugaskan
     alreadyReturnedError: Wilayah sudah dikembalikan
+    assignmentDeleted: Penugasan wilayah telah dihapus

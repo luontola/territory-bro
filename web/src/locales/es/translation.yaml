@@ -168,3 +168,4 @@ Assignment:
     publisherNotFound: Nombre no encontrado
     alreadyAssignedError: El territorio ya fue asignado
     alreadyReturnedError: El territorio ya fue devuelto
+    assignmentDeleted: La asignación de territorio ha sido eliminada

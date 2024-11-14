@@ -112,45 +112,50 @@
 
 (defn- assignment-row [{:keys [rows] :as assignment} {:keys [editing?]}]
   (let [styles (:AssignmentHistory (css/modules))
-        assignment-url (str html/*page-path* "/assignments/history/" (:assignment/id assignment))]
-    (h/html
-     [:div {:hx-target "this"
-            :hx-swap "outerHTML"
-            :class (html/classes (:row styles)
-                                 (when editing?
-                                   (:edit-mode-assignment styles)))}
-      [:div {:class (:timeline styles)
-             ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
-             :style (identity {:grid-row (str "1 / span " (count rows))})}]
-
-      (when-not editing?
-        [:div {:class (:controls styles)}
-         [:button.pure-button {:type "button"
-                               :hx-get (str assignment-url "/edit")
-                               :class (:edit-button styles)}
-          (i18n/t "Assignment.form.edit")]])
-
-      (for [row (->> rows
-                     reverse
-                     (map-indexed (fn [idx row]
-                                    (assoc row :grid-row (inc idx)))))]
-        (case (:type row)
-          :event (event-row row)
-          :duration (duration-row row)))
-
-      (when editing?
-        [:div {:class (:edit-mode-controls styles)
+        assignment-id (:assignment/id assignment)
+        assignment-url (str html/*page-path* "/assignments/history/" assignment-id)]
+    (if (nil? assignment-id)
+      (h/html
+       [:div {:class (:row styles)}
+        [:div {:class (:deleted-assignment styles)}
+         (i18n/t "Assignment.form.assignmentDeleted")]])
+      (h/html
+       [:div {:hx-target "this"
+              :hx-swap "outerHTML"
+              :class (html/classes (:row styles)
+                                   (when editing?
+                                     (:edit-mode-assignment styles)))}
+        [:div {:class (:timeline styles)
                ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
-               :style (identity {:grid-row (inc (count rows))})}
-         [:button.pure-button {:type "button"
-                               :hx-delete assignment-url
-                               :class (:delete-button styles)}
-          " 🚧 " ; TODO: not yet implemented
-          (i18n/t "Assignment.form.delete")]
-         " "
-         [:button.pure-button {:type "button"
-                               :hx-get assignment-url}
-          (i18n/t "Assignment.form.cancel")]])])))
+               :style (identity {:grid-row (str "1 / span " (count rows))})}]
+
+        (when-not editing?
+          [:div {:class (:controls styles)}
+           [:button.pure-button {:type "button"
+                                 :hx-get (str assignment-url "/edit")
+                                 :class (:edit-button styles)}
+            (i18n/t "Assignment.form.edit")]])
+
+        (for [row (->> rows
+                       reverse
+                       (map-indexed (fn [idx row]
+                                      (assoc row :grid-row (inc idx)))))]
+          (case (:type row)
+            :event (event-row row)
+            :duration (duration-row row)))
+
+        (when editing?
+          [:div {:class (:edit-mode-controls styles)
+                 ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
+                 :style (identity {:grid-row (inc (count rows))})}
+           [:button.pure-button {:type "button"
+                                 :hx-delete assignment-url
+                                 :class (:delete-button styles)}
+            (i18n/t "Assignment.form.delete")]
+           " "
+           [:button.pure-button {:type "button"
+                                 :hx-get assignment-url}
+            (i18n/t "Assignment.form.cancel")]])]))))
 
 
 (defn- compile-single-assignment [assignment today]

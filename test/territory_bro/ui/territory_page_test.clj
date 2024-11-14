@@ -569,3 +569,25 @@
                                       "⚠️ The territory was already returned
                                        Assign territory"))
                       "refreshes the form, since it should really be in 'assign territory' mode"))))))))))
+
+(deftest delete-assignment!-test
+  (let [request {:path-params {:congregation cong-id
+                               :territory territory-id
+                               :assignment assignment-id}}]
+    (testutil/with-events (conj test-events territory-assigned)
+      (binding [html/*page-path* "/territory-page-url"]
+        (testutil/with-user-id user-id
+
+          (testing "delete successful"
+            (with-fixtures [fake-dispatcher-fixture]
+              (let [response (territory-page/delete-assignment! request)]
+                (is (= {:status 303
+                        :headers {"Location" "/territory-page-url/assignments/history/00000000-0000-0000-0000-000000000003"}
+                        :body ""}
+                       response))
+                (is (= {:command/type :territory.command/delete-assignment
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :territory/id territory-id
+                        :assignment/id assignment-id}
+                       (dissoc @*last-command :command/time)))))))))))
