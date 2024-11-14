@@ -150,6 +150,12 @@
          :territory/id UUID
          :assignment/id UUID
          :assignment/end-date LocalDate))
+(s/defschema AssignmentDeleted
+  (assoc BaseEvent
+         :event/type (s/eq :territory.event/assignment-deleted)
+         :congregation/id UUID
+         :territory/id UUID
+         :assignment/id UUID))
 
 ;;; Region
 
@@ -253,6 +259,7 @@
    :region.event/region-deleted RegionDeleted
    :share.event/share-created ShareCreated
    :share.event/share-opened ShareOpened
+   :territory.event/assignment-deleted AssignmentDeleted
    :territory.event/territory-assigned TerritoryAssigned
    :territory.event/territory-covered TerritoryCovered
    :territory.event/territory-defined TerritoryDefined

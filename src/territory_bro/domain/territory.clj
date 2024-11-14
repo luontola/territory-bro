@@ -46,7 +46,7 @@
              (fn [territory]
                (-> territory
                    (assoc-in [:territory/assignments (:assignment/id event)] (select-keys event [:assignment/id :assignment/start-date :publisher/id]))
-                   (update-assignment-status)))))
+                   update-assignment-status))))
 
 (defmethod projection :territory.event/territory-covered
   [state event]
@@ -54,7 +54,7 @@
              (fn [territory]
                (-> territory
                    (update-in [:territory/assignments (:assignment/id event) :assignment/covered-dates] conj-set (:assignment/covered-date event))
-                   (update-assignment-status)))))
+                   update-assignment-status))))
 
 (defmethod projection :territory.event/territory-returned
   [state event]
@@ -62,7 +62,15 @@
              (fn [territory]
                (-> territory
                    (assoc-in [:territory/assignments (:assignment/id event) :assignment/end-date] (:assignment/end-date event))
-                   (update-assignment-status)))))
+                   update-assignment-status))))
+
+(defmethod projection :territory.event/assignment-deleted
+  [state event]
+  (update-in state [::territories (:congregation/id event) (:territory/id event)]
+             (fn [territory]
+               (-> territory
+                   (m/dissoc-in [:territory/assignments (:assignment/id event)])
+                   update-assignment-status))))
 
 
 ;;;; Queries
@@ -170,6 +178,19 @@
                :assignment/id assignment-id
                :assignment/end-date end-date})]
            (filterv some?)))))
+
+(defmethod command-handler :territory.command/delete-assignment
+  [command territory {:keys [check-permit]}]
+  (let [cong-id (:congregation/id command)
+        territory-id (:territory/id command)
+        assignment-id (:assignment/id command)
+        assignment (get-in territory [:territory/assignments assignment-id])]
+    (check-permit [:assign-territory cong-id territory-id])
+    (when (some? assignment)
+      [{:event/type :territory.event/assignment-deleted
+        :congregation/id cong-id
+        :territory/id territory-id
+        :assignment/id assignment-id}])))
 
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))

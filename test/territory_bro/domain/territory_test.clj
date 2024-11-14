@@ -57,6 +57,12 @@
    :assignment/id assignment-id
    :assignment/end-date end-date})
 
+(def assignment-deleted
+  {:event/type :territory.event/assignment-deleted
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id assignment-id})
+
 (defn- apply-events [events]
   (testutil/apply-events territory/projection events))
 
@@ -75,7 +81,8 @@
                                             :territory/addresses "the addresses"
                                             :territory/region "the region"
                                             :territory/meta {:foo "bar"}
-                                            :territory/location testdata/wkt-multi-polygon}}}}]
+                                            :territory/location testdata/wkt-multi-polygon}}}}
+          original-expected expected]
       (is (= expected (apply-events events)))
 
       (testing "> updated"
@@ -128,9 +135,13 @@
                       expected (-> expected
                                    (m/dissoc-in [::territory/territories cong-id territory-id :territory/current-assignment])
                                    (assoc-in [::territory/territories cong-id territory-id :territory/assignments assignment-id] expected-assignment))]
-                  (is (= expected (apply-events events)))))))))
+                  (is (= expected (apply-events events)))
 
-      (testing "> deleted"
+                  (testing "> assignment deleted"
+                    (let [events (conj events assignment-deleted)]
+                      (is (= original-expected (apply-events events)))))))))))
+
+      (testing "> territory deleted"
         (let [events (conj events territory-deleted)
               expected {}]
           (is (= expected (apply-events events)))))))
@@ -377,3 +388,27 @@
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
                      (handle-command return-command [territory-defined territory-assigned] injections)))))))
+
+(deftest delete-assignment-test
+  (let [injections {:check-permit (fn [_permit])}
+        delete-command {:command/type :territory.command/delete-assignment
+                        :command/time (Instant/now)
+                        :command/user user-id
+                        :congregation/id cong-id
+                        :territory/id territory-id
+                        :assignment/id assignment-id}]
+
+    (testing "deleted"
+      (is (= [assignment-deleted]
+             (handle-command delete-command [territory-defined territory-assigned] injections)
+             (handle-command delete-command [territory-defined territory-assigned territory-returned] injections))))
+
+    (testing "is idempotent"
+      (is (empty? (handle-command delete-command [territory-defined territory-assigned assignment-deleted] injections))))
+
+    (testing "checks permits"
+      (let [injections {:check-permit (fn [permit]
+                                        (is (= [:assign-territory cong-id territory-id] permit))
+                                        (throw (NoPermitException. nil nil)))}]
+        (is (thrown? NoPermitException
+                     (handle-command delete-command [territory-defined territory-assigned] injections)))))))

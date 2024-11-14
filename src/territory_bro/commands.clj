@@ -144,6 +144,13 @@
          :returning? boolean
          :covered? boolean))
 
+(s/defschema DeleteAssignment
+  (assoc BaseCommand
+         :command/type (s/eq :territory.command/delete-assignment)
+         :congregation/id (foreign-key/references :congregation UUID)
+         :territory/id (foreign-key/references :territory UUID)
+         :assignment/id (foreign-key/references :unsafe UUID))) ; assignments don't have their own stream
+
 ;;; Region
 
 (s/defschema DefineRegion
@@ -262,6 +269,7 @@
    :share.command/record-share-opened RecordShareOpened
    :territory.command/assign-territory AssignTerritory
    :territory.command/define-territory DefineTerritory
+   :territory.command/delete-assignment DeleteAssignment
    :territory.command/delete-territory DeleteTerritory
    :territory.command/return-territory ReturnTerritory})
 
