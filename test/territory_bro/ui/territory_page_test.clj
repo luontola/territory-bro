@@ -5,7 +5,7 @@
             [net.cgrand.enlive-html :as en]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.congregation :as congregation]
-            [territory-bro.domain.dmz :as dmz]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.publisher :as publisher]
@@ -68,7 +68,7 @@
                :territory/do-not-calls nil}
    :assignment nil
    :assignment-history nil ; TODO: generate fake assignment history
-   :publishers dmz/demo-publishers
+   :publishers demo/publishers
    :today today
    :form {:publisher ""
           :start-date today

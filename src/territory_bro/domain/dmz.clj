@@ -5,6 +5,7 @@
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.loan :as loan]
             [territory-bro.domain.publisher :as publisher]
@@ -213,38 +214,17 @@
 
 ;;;; Publishers
 
-(defonce ^:private demo-publishers-by-id ; defonce to avoid test failures due to namespace reloading and unpredictable UUIDs
-  (reduce (fn [m publisher]
-            (let [publisher-id (random-uuid)]
-              (assoc m publisher-id (assoc publisher
-                                           :congregation/id "demo"
-                                           :publisher/id publisher-id))))
-          {}
-          [{:publisher/name "Andrew"}
-           {:publisher/name "Bartholomew"}
-           {:publisher/name "James, son of Alphaeus"}
-           {:publisher/name "James, son of Zebedee"}
-           {:publisher/name "John, son of Zebedee"}
-           {:publisher/name "Matthew"}
-           {:publisher/name "Matthias"}
-           {:publisher/name "Philip"}
-           {:publisher/name "Simon Peter"}
-           {:publisher/name "Simon, the Cananaean"}
-           {:publisher/name "Thaddaeus"}
-           {:publisher/name "Thomas"}]))
-(def demo-publishers (vals demo-publishers-by-id))
-
 (defn list-publishers [cong-id]
   (when (allowed? [:view-congregation cong-id])
     (if (= "demo" cong-id)
-      demo-publishers
+      demo/publishers
       (publisher/list-publishers *conn* cong-id))))
 
 (defn get-publisher [cong-id publisher-id]
   (when (or (allowed? [:view-congregation cong-id])
             (allowed? [:view-congregation-temporarily cong-id]))
     (if (= "demo" cong-id)
-      (get demo-publishers-by-id publisher-id)
+      (get demo/publishers-by-id publisher-id)
       (publisher/get-by-id *conn* cong-id publisher-id))))
 
 

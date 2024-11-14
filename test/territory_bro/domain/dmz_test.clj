@@ -4,6 +4,7 @@
             [matcher-combinators.matchers :as match]
             [matcher-combinators.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
@@ -348,7 +349,7 @@
         (binding [config/env env-with-demo]
           (let [publishers (dmz/list-publishers "demo")]
             (is (not (empty? publishers)))
-            (is (= dmz/demo-publishers publishers))
+            (is (= demo/publishers publishers))
             (doseq [publisher publishers]
               (is (= #{:congregation/id :publisher/id :publisher/name} (set (keys publisher))))
               (is (= "demo" (:congregation/id publisher)))
@@ -380,7 +381,7 @@
 
       (testing "demo congregation"
         (binding [config/env env-with-demo]
-          (let [publisher-id (:publisher/id (first dmz/demo-publishers))
+          (let [publisher-id (:publisher/id (first demo/publishers))
                 publisher (dmz/get-publisher "demo" publisher-id)]
             (is (uuid? publisher-id))
             (is (some? publisher))
