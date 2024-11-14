@@ -449,7 +449,7 @@
             (with-fixtures [fake-dispatcher-fixture]
               (let [response (territory-page/assign-territory! request)]
                 (is (= {:status 303
-                        :headers {"Location" "/territory-page-url/assignments/status"}
+                        :headers {"Location" "/territory-page-url/assignments/status?hx-trigger=assignment-status-changed"}
                         :body ""}
                        response))
                 (is (uuid? (:assignment/id @*last-command)))
@@ -517,7 +517,7 @@
             (with-fixtures [fake-dispatcher-fixture]
               (let [response (territory-page/return-territory! request)]
                 (is (= {:status 303
-                        :headers {"Location" "/territory-page-url/assignments/status"}
+                        :headers {"Location" "/territory-page-url/assignments/status?hx-trigger=assignment-status-changed"}
                         :body ""}
                        response))
                 (is (= {:command/type :territory.command/return-territory
@@ -582,7 +582,7 @@
             (with-fixtures [fake-dispatcher-fixture]
               (let [response (territory-page/delete-assignment! request)]
                 (is (= {:status 303
-                        :headers {"Location" "/territory-page-url/assignments/history/00000000-0000-0000-0000-000000000003"}
+                        :headers {"Location" "/territory-page-url/assignments/history/00000000-0000-0000-0000-000000000003?hx-trigger=assignment-history-changed"}
                         :body ""}
                        response))
                 (is (= {:command/type :territory.command/delete-assignment
@@ -591,3 +591,16 @@
                         :territory/id territory-id
                         :assignment/id assignment-id}
                        (dissoc @*last-command :command/time)))))))))))
+
+(deftest hx-trigger-after-redirect-test
+  (let [handler (territory-page/hx-trigger-after-redirect (constantly {}))]
+
+    (testing "copies known hx-trigger values from query strings to the response headers"
+      (is (= {:headers {"hx-trigger" territory-page/assignment-history-changed}}
+             (handler {:params {:hx-trigger territory-page/assignment-history-changed}})))
+      (is (= {:headers {"hx-trigger" territory-page/assignment-status-changed}}
+             (handler {:params {:hx-trigger territory-page/assignment-status-changed}}))))
+
+    (testing "ignores other hx-trigger values"
+      (is (= {} (handler {})))
+      (is (= {} (handler {:params {:hx-trigger "hacker"}}))))))

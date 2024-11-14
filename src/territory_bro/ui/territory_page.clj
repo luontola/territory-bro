@@ -277,6 +277,9 @@ if (returningCheckbox.checked) {
                                :onclick "this.closest('dialog').close()"}
           (i18n/t "Assignment.form.cancel")]]]]])))
 
+(def assignment-status-changed "assignment-status-changed")
+(def assignment-history-changed "assignment-history-changed")
+
 (defn assignment-status [{:keys [territory open-form? today permissions] :as model}]
   (let [styles (:TerritoryPage (css/modules))
         assignment (:territory/current-assignment territory)
@@ -285,6 +288,8 @@ if (returningCheckbox.checked) {
     (h/html
      [:div#assignment-status {:hx-target "this"
                               :hx-swap "outerHTML"
+                              :hx-get (str html/*page-path* "/assignments/status")
+                              :hx-trigger (str assignment-history-changed " from:body")
                               :hx-on-htmx-load (when open-form?
                                                  "this.querySelector('dialog').showModal()")}
       (when open-form?
@@ -312,8 +317,6 @@ if (returningCheckbox.checked) {
 
 (defn assignment-form-open [model]
   (assignment-status (assoc model :open-form? true)))
-
-(def assignment-status-updated "assignment-status-updated")
 
 (defn view [{:keys [territory permissions] :as model}]
   (let [styles (:TerritoryPage (css/modules))]
@@ -362,7 +365,7 @@ desktop.addEventListener('change', toggleOpen);
                               :cursor "pointer"}}
             (i18n/t "Assignment.assignmentHistory")]
            [:div {:hx-get (str html/*page-path* "/assignments/history")
-                  :hx-trigger (str assignment-status-updated " from:body")
+                  :hx-trigger (str assignment-status-changed " from:body")
                   :hx-target "this"
                   :hx-swap "innerHTML"}
             (assignment-history/view model)]]))]
@@ -424,7 +427,7 @@ if (url.searchParams.has('share-key')) {
                       :assignment/id (random-uuid)
                       :publisher/id publisher-id
                       :date (-> model :form :start-date)})
-      (http-response/see-other (str html/*page-path* "/assignments/status"))
+      (http-response/see-other (str html/*page-path* "/assignments/status?hx-trigger=" assignment-status-changed))
       (catch Exception e
         (forms/validation-error-htmx-response e request model! assignment-form-open)))))
 
@@ -443,7 +446,7 @@ if (url.searchParams.has('share-key')) {
                       :date (-> model :form :end-date)
                       :returning? (-> model :form :returning?)
                       :covered? (-> model :form :covered?)})
-      (http-response/see-other (str html/*page-path* "/assignments/status"))
+      (http-response/see-other (str html/*page-path* "/assignments/status?hx-trigger=" assignment-status-changed))
       (catch Exception e
         (forms/validation-error-htmx-response e request model! assignment-form-open)))))
 
@@ -456,12 +459,28 @@ if (url.searchParams.has('share-key')) {
                     :congregation/id cong-id
                     :territory/id territory-id
                     :assignment/id assignment-id})
-    (http-response/see-other (str html/*page-path* "/assignments/history/" assignment-id))))
+    (http-response/see-other (str html/*page-path* "/assignments/history/" assignment-id "?hx-trigger=" assignment-history-changed))))
+
+
+(defn hx-trigger-after-redirect [handler]
+  (fn [request]
+    ;; htmx will ignore any hx-trigger headers of a redirect response.
+    ;; This middleware is a workaround for that. The redirect response
+    ;; includes the hx-trigger as query parameter, and then the target
+    ;; route will copy it to the hx-trigger response header.
+    (let [hx-trigger (-> request :params :hx-trigger)
+          response (handler request)]
+      (if (contains? #{assignment-status-changed
+                       assignment-history-changed}
+                     hx-trigger) ; security check using a whitelist
+        (response/header response "hx-trigger" hx-trigger)
+        response))))
 
 (def routes
   ["/congregation/:congregation/territories/:territory"
    {:middleware [[html/wrap-page-path ::page]
-                 dmz/wrap-db-connection]}
+                 dmz/wrap-db-connection
+                 hx-trigger-after-redirect]}
    [""
     {:name ::page
      :conflicting true
@@ -509,12 +528,7 @@ if (url.searchParams.has('share-key')) {
     {:get {:handler (fn [request]
                       (-> (model! request)
                           (assignment-status)
-                          (html/response)
-                          ;; Refreshes the history after a territory has been assigned or returned.
-                          ;; It would be more logical to emit this header in the assign/return route,
-                          ;; but because they do a redirect after post, htmx will ignore any headers
-                          ;; that were part of the redirect response.
-                          (response/header "hx-trigger" assignment-status-updated)))}}]
+                          (html/response)))}}]
 
    ["/assignments/history"
     {:get {:handler (fn [request]
