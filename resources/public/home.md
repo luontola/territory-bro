@@ -5,6 +5,10 @@ Territory Bro is a web app for managing field service territories in the congreg
 * Keep track of territory assignments
 * A place to write down do-not-calls - compatible with European privacy laws (GDPR)
 
+You can [view a demo congregation](/congregation/demo) to explore what Territory Bro offers.
+
+To start creating new territory cards for your congregation, read more from the [user guide](/documentation).
+
 ## Example: Electronic Territory Cards
 
 <div class="sms-discussion" aria-description="Example SMS discussion">
@@ -35,9 +39,3 @@ In the corner, there is a minimap that shows where the territory is located with
 Print it on thick paper, cut with a sharp knife and ruler along the crop marks, and you're done!
 
 ![A sample territory card](assets/examples/card.fef9840a.jpg)
-
-## Learn More
-
-You can [view a demo congregation](/congregation/demo) to explore what Territory Bro offers.
-
-To start creating new territory cards for your congregation, read more from the [user guide](/documentation).
