@@ -8,7 +8,19 @@ set -x
 
 docker pull "luontola/territory-bro:ci"
 
+{ set +x; } 2>/dev/null
 GIT_COMMIT=$(docker inspect "luontola/territory-bro:ci" | jq -r '.[0].Config.Env[] | select(startswith("GIT_COMMIT=")) | split("=")[1]')
+set -x
+
+git log -1 "$GIT_COMMIT"
+
+{ set +x; } 2>/dev/null
+echo
+echo "================================================================================================="
+echo "    Ready to create release $TAG out of commit $GIT_COMMIT"
+echo "================================================================================================="
+read -p "Press Enter to continue..."
+set -x
 
 docker build \
   -t "luontola/territory-bro:latest" \
