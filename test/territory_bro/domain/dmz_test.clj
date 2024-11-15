@@ -139,6 +139,19 @@
             territory-covered
             share-created]))
 
+(def demo-events
+  (concat [demo/congregation-created]
+          (into [] (demo/transform-gis-events cong-id) test-events)
+          (demo/generate-assignment-events territory-id (LocalDate/of 2010 1 1))))
+
+;; deterministically generated random assignments (update manually if the generator algorithm is changed)
+(def demo-current-assignment
+  {:assignment/id #uuid "47c9933c-737b-dfc2-3ae8-be2f9642e6d3"
+   :assignment/start-date (LocalDate/of 2009 12 29)
+   :publisher/id #uuid "4b475264-5e76-f39e-81a8-e923dd4d7273"
+   :publisher/name "Matthias"})
+(def demo-last-covered (LocalDate/of 2009 8 24))
+
 (defn- apply-share-opened [state]
   (share/grant-opened-shares state [share-id] (auth/current-user-id)))
 
@@ -158,13 +171,12 @@
    :qr-code-base-url "https://qr.example.com"
    :gis-database-host "gis.example.com"
    :gis-database-name "gis-db"})
-(def env-with-demo (assoc env :demo-congregation cong-id))
 
 (use-fixtures :once (fn [f]
                       (binding [config/env env
                                 publisher/publishers-by-id (fn [_conn cong-id]
                                                              (get test-publishers-by-id cong-id))]
-                        (testutil/with-events test-events
+                        (testutil/with-events (concat test-events demo-events)
                           (f)))))
 
 
@@ -180,7 +192,7 @@
                        :congregation/name "Demo Congregation" ; changed
                        :congregation/timezone testdata/timezone-helsinki
                        #_:congregation/loans-csv-url ; removed
-                       #_:congregation/schema-name}] ; removed
+                       :congregation/schema-name nil}] ; removed
 
     (testutil/with-user-id user-id
       (testing "full permissions"
@@ -201,8 +213,7 @@
                            (dmz/get-congregation cong-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (= demo-expected (dmz/get-congregation "demo")))))
+        (is (= demo-expected (dmz/get-congregation "demo"))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -232,8 +243,7 @@
         (is (empty? (dmz/list-congregations))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (empty? (dmz/list-congregations)))))
+        (is (empty? (dmz/list-congregations))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -274,8 +284,7 @@
           (is (empty? (dmz/list-congregation-users cong-id))))
 
         (testing "demo congregation"
-          (binding [config/env env-with-demo]
-            (is (empty? (dmz/list-congregation-users cong-id)))))
+          (is (empty? (dmz/list-congregation-users cong-id))))
 
         (testing "opened a share"
           (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -314,9 +323,8 @@
                            (dmz/download-qgis-project cong-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (thrown-match? ExceptionInfo not-logged-in
-                             (dmz/download-qgis-project cong-id)))))
+        (is (thrown-match? ExceptionInfo not-logged-in
+                           (dmz/download-qgis-project cong-id))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -346,15 +354,14 @@
         (is (nil? (dmz/list-publishers cong-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (let [publishers (dmz/list-publishers "demo")]
-            (is (not (empty? publishers)))
-            (is (= demo/publishers publishers))
-            (doseq [publisher publishers]
-              (is (= #{:congregation/id :publisher/id :publisher/name} (set (keys publisher))))
-              (is (= "demo" (:congregation/id publisher)))
-              (is (uuid? (:publisher/id publisher)))
-              (is (not (str/blank? (:publisher/name publisher))))))))
+        (let [publishers (dmz/list-publishers "demo")]
+          (is (not (empty? publishers)))
+          (is (= demo/publishers publishers))
+          (doseq [publisher publishers]
+            (is (= #{:congregation/id :publisher/id :publisher/name} (set (keys publisher))))
+            (is (= "demo" (:congregation/id publisher)))
+            (is (uuid? (:publisher/id publisher)))
+            (is (not (str/blank? (:publisher/name publisher)))))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -380,14 +387,13 @@
         (is (nil? (dmz/get-publisher cong-id publisher-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (let [publisher-id (:publisher/id (first demo/publishers))
-                publisher (dmz/get-publisher "demo" publisher-id)]
-            (is (uuid? publisher-id))
-            (is (some? publisher))
-            (is (= "demo" (:congregation/id publisher)))
-            (is (= publisher-id (:publisher/id publisher)))
-            (is (not (str/blank? (:publisher/name publisher)))))))
+        (let [publisher-id (:publisher/id (first demo/publishers))
+              publisher (dmz/get-publisher "demo" publisher-id)]
+          (is (uuid? publisher-id))
+          (is (some? publisher))
+          (is (= "demo" (:congregation/id publisher)))
+          (is (= publisher-id (:publisher/id publisher)))
+          (is (not (str/blank? (:publisher/name publisher))))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -420,7 +426,9 @@
                        :territory/addresses "the addresses"
                        :territory/region "the region"
                        :territory/meta {:foo "bar"}
-                       :territory/location testdata/wkt-helsinki-rautatientori}]
+                       :territory/location testdata/wkt-helsinki-rautatientori
+                       :territory/current-assignment demo-current-assignment
+                       :territory/last-covered demo-last-covered}]
 
     (testutil/with-user-id user-id
       (testing "full permissions"
@@ -441,8 +449,7 @@
                            (dmz/get-territory cong-id territory-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (= demo-expected (dmz/get-territory "demo" territory-id)))))
+        (is (= demo-expected (dmz/get-territory "demo" territory-id))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -469,8 +476,7 @@
           (is (nil? (dmz/get-do-not-calls cong-id territory-id))))
 
         (testing "demo congregation"
-          (binding [config/env env-with-demo]
-            (is (nil? (dmz/get-do-not-calls "demo" territory-id)))))
+          (is (nil? (dmz/get-do-not-calls "demo" territory-id))))
 
         (testing "opened a share"
           (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -499,8 +505,9 @@
                    :territory/location testdata/wkt-helsinki-kauppatori}]
         demo-expected (-> expected
                           (replace-in [0 :congregation/id] cong-id "demo")
-                          (replace-in [0 :territory/current-assignment :publisher/name] "John Doe" nil) ; TODO: generate fake assignment history
-                          (replace-in [1 :congregation/id] cong-id "demo"))]
+                          (replace-in [1 :congregation/id] cong-id "demo")
+                          (assoc-in [0 :territory/current-assignment] demo-current-assignment)
+                          (replace-in [0 :territory/last-covered] covered-date demo-last-covered))]
 
     (testutil/with-user-id user-id
       (testing "full permissions"
@@ -519,8 +526,7 @@
         (is (empty? (dmz/list-territories cong-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (= demo-expected (dmz/list-territories "demo")))))
+        (is (= demo-expected (dmz/list-territories "demo"))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -561,8 +567,7 @@
           (is (= territories (dmz/enrich-territory-loans cong-id territories))))
 
         (testing "demo congregation"
-          (binding [config/env env-with-demo]
-            (is (= territories (dmz/enrich-territory-loans "demo" territories)))))
+          (is (= territories (dmz/enrich-territory-loans "demo" territories))))
 
         (testing "opened a share"
           (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -573,8 +578,7 @@
                    :assignment/start-date start-date
                    :assignment/covered-dates #{covered-date}
                    :publisher/id publisher-id
-                   :publisher/name "John Doe"}]
-        demo-expected nil] ; TODO: generate fake assignment history
+                   :publisher/name "John Doe"}]]
 
     (testutil/with-user-id user-id
       (testing "full permissions"
@@ -595,8 +599,9 @@
                            (dmz/get-territory-assignment-history cong-id territory-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (= demo-expected (dmz/get-territory-assignment-history "demo" territory-id)))))
+        (let [assignments (dmz/get-territory-assignment-history "demo" territory-id)]
+          (is (< 3 (count assignments)))
+          (is (= demo-current-assignment (last assignments)))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -647,8 +652,7 @@
                            (dmz/share-territory-link cong-id territory-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (= expected-demo (dmz/share-territory-link "demo" territory-id)))))
+        (is (= expected-demo (dmz/share-territory-link "demo" territory-id))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -690,8 +694,7 @@
                            (dmz/generate-qr-code cong-id territory-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (= expected-demo (dmz/generate-qr-code "demo" territory-id)))))
+        (is (= expected-demo (dmz/generate-qr-code "demo" territory-id))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -768,8 +771,7 @@
         (is (nil? (dmz/get-congregation-boundary cong-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (= expected (dmz/get-congregation-boundary "demo")))))
+        (is (= expected (dmz/get-congregation-boundary "demo"))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -797,8 +799,7 @@
         (is (nil? (dmz/list-regions cong-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (= expected (dmz/list-regions "demo")))))
+        (is (= expected (dmz/list-regions "demo"))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
@@ -825,8 +826,7 @@
         (is (nil? (dmz/list-card-minimap-viewports cong-id))))
 
       (testing "demo congregation"
-        (binding [config/env env-with-demo]
-          (is (= expected (dmz/list-card-minimap-viewports "demo")))))
+        (is (= expected (dmz/list-card-minimap-viewports "demo"))))
 
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]

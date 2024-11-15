@@ -11,7 +11,6 @@
             [territory-bro.domain.publisher :as publisher]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
-            [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.forms :as forms]
@@ -67,7 +66,7 @@
                :territory/location testdata/wkt-helsinki-rautatientori
                :territory/do-not-calls nil}
    :assignment nil
-   :assignment-history nil ; TODO: generate fake assignment history
+   :assignment-history []
    :publishers demo/publishers
    :today today
    :form {:publisher ""
@@ -119,6 +118,10 @@
                   :territory/region "the region"
                   :territory/meta {:foo "bar"}
                   :territory/location testdata/wkt-helsinki-rautatientori}])))
+(def demo-events
+  (concat [demo/congregation-created]
+          (into [] (demo/transform-gis-events cong-id) test-events)))
+
 (def territory-assigned
   {:event/type :territory.event/territory-assigned
    :congregation/id cong-id
@@ -151,7 +154,7 @@
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id
                                :territory territory-id}}]
-    (testutil/with-events test-events
+    (testutil/with-events (concat test-events demo-events)
       (testutil/with-user-id user-id
 
         (testing "untouched"
@@ -171,12 +174,11 @@
               (is (= editing-assignment-model (territory-page/model! request))))))
 
         (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (let [request (replace-in request [:path-params :congregation] cong-id "demo")]
-              (is (= demo-model
-                     (territory-page/model! request)
-                     (testutil/with-anonymous-user
-                       (territory-page/model! request)))))))))))
+          (let [request (replace-in request [:path-params :congregation] cong-id "demo")]
+            (is (= demo-model
+                   (territory-page/model! request)
+                   (testutil/with-anonymous-user
+                     (territory-page/model! request))))))))))
 
 (deftest view-test
   (testing "untouched territory"

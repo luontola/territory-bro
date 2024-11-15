@@ -121,10 +121,9 @@
                                (settings-page/model! request)))))
 
         (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (let [request {:path-params {:congregation "demo"}}]
-              (is (thrown-match? ExceptionInfo dmz-test/access-denied
-                                 (settings-page/model! request))))))
+          (let [request {:path-params {:congregation "demo"}}]
+            (is (thrown-match? ExceptionInfo dmz-test/access-denied
+                               (settings-page/model! request)))))
 
         (testing "anonymous"
           (testutil/with-anonymous-user

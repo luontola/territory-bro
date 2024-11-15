@@ -7,12 +7,14 @@
 
 (defmethod projection :congregation.event/congregation-created
   [state event]
-  (let [cong-id (:congregation/id event)
-        cong (select-keys event [:congregation/id
-                                 :congregation/schema-name])]
-    (-> state
-        (assoc-in [::congregations cong-id] cong)
-        (presence-tracker/set-desired ::tracked-congregations cong-id :present))))
+  (if (nil? (:congregation/schema-name event)) ; don't create a schema for the demo congregation
+    state
+    (let [cong-id (:congregation/id event)
+          cong (select-keys event [:congregation/id
+                                   :congregation/schema-name])]
+      (-> state
+          (assoc-in [::congregations cong-id] cong)
+          (presence-tracker/set-desired ::tracked-congregations cong-id :present)))))
 
 (defmethod projection :db-admin.event/gis-schema-is-present
   [state event]

@@ -6,6 +6,11 @@
 
 (def cong-id "demo")
 
+(def congregation-created
+  {:event/type :congregation.event/congregation-created
+   :congregation/id cong-id
+   :congregation/name "Demo Congregation"})
+
 (defn- random-uuid [^Random random]
   (UUID. (.nextLong random) (.nextLong random)))
 
@@ -77,3 +82,20 @@
                              :territory/id territory-id
                              :assignment/id assignment-id
                              :assignment/end-date date}))))))))
+
+(defn transform-gis-events [source-cong-id]
+  (let [kept-event-types #{:card-minimap-viewport.event/card-minimap-viewport-defined
+                           :card-minimap-viewport.event/card-minimap-viewport-deleted
+                           :congregation-boundary.event/congregation-boundary-defined
+                           :congregation-boundary.event/congregation-boundary-deleted
+                           :region.event/region-defined
+                           :region.event/region-deleted
+                           :territory.event/territory-defined
+                           :territory.event/territory-deleted}]
+    (comp (filter (fn [event]
+                    (and (= source-cong-id (:congregation/id event))
+                         (contains? kept-event-types (:event/type event)))))
+          (map (fn [event]
+                 (-> event
+                     (assoc :congregation/id cong-id)
+                     (dissoc :event/user :event/system :event/time :event/stream-id :event/stream-revision :event/global-revision :gis-change/id)))))))

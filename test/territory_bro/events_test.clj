@@ -6,7 +6,7 @@
             [schema.core :as s]
             [territory-bro.events :as events]
             [territory-bro.test.fixtures :refer :all]
-            [territory-bro.test.testutil :refer [re-contains re-equals thrown-with-msg? thrown?]])
+            [territory-bro.test.testutil :as testutil :refer [re-contains re-equals thrown-with-msg? thrown?]])
   (:import (clojure.lang ExceptionInfo)
            (java.time Instant LocalDate)
            (java.util UUID)))
@@ -168,8 +168,12 @@
                           (events/event->json invalid-event))))
 
   (testing "json->event validates events"
-    (is (thrown-with-msg? ExceptionInfo (re-contains "Value cannot be coerced to match schema")
-                          (events/json->event "{}"))))
+    (let [e (testutil/grab-exception
+              (events/json->event "{}"))]
+      (is (= "java.lang.IllegalArgumentException: Error coercing event: {}"
+             (str e)))
+      (is (str/starts-with? (str (.getCause ^Exception e))
+                            "clojure.lang.ExceptionInfo: Value cannot be coerced to match schema:"))))
 
   (testing "json data format"
     (let [event (assoc valid-event

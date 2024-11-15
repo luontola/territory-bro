@@ -29,6 +29,10 @@
     (assoc m k v)
     (dissoc m k)))
 
+(defn parse-uuid-or-string [s]
+  (or (parse-uuid s)
+      s))
+
 (defn decode-base64url [^String base64-str]
   (-> (Base64/getUrlDecoder)
       (.decode base64-str)

@@ -4,11 +4,11 @@
             [matcher-combinators.test :refer :all]
             [reitit.ring :as ring]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.testdata :as testdata]
-            [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.infra.user :as user]
@@ -116,10 +116,13 @@
             :territory/region "the region"
             :territory/meta {:foo "bar"}
             :territory/location testdata/wkt-helsinki-rautatientori}]))
+(def demo-events
+  (concat [demo/congregation-created]
+          (into [] (demo/transform-gis-events cong-id) test-events)))
 
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id}}]
-    (testutil/with-events test-events
+    (testutil/with-events (concat test-events demo-events)
       (testutil/with-user-id user-id
 
         (testing "default"
@@ -148,12 +151,11 @@
                                    (printouts-page/model! request)))))))
 
         (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (let [request {:path-params {:congregation "demo"}}]
-              (is (= demo-model
-                     (printouts-page/model! request)
-                     (testutil/with-anonymous-user
-                       (printouts-page/model! request)))))))))
+          (let [request {:path-params {:congregation "demo"}}]
+            (is (= demo-model
+                   (printouts-page/model! request)
+                   (testutil/with-anonymous-user
+                     (printouts-page/model! request))))))))
 
     (testing "minimal data"
       (testutil/with-events test-minimal-events

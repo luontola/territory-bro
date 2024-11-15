@@ -155,12 +155,6 @@
 
 ;;;; Congregations
 
-(defn- coerce-demo-cong-id [cong-id]
-  (if (= "demo" cong-id)
-    (or (:demo-congregation config/env)
-        (http-response/not-found! "No demo"))
-    cong-id))
-
 (defn- filter-congregation [congregation]
   (dissoc congregation :congregation/user-permissions))
 
@@ -168,15 +162,8 @@
   (when-not (or (allowed? [:view-congregation cong-id])
                 (allowed? [:view-congregation-temporarily cong-id]))
     (access-denied!))
-  (let [congregation (-> (congregation/get-unrestricted-congregation *state* (coerce-demo-cong-id cong-id))
-                         (filter-congregation))]
-    (if (= "demo" cong-id)
-      (-> congregation
-          (assoc :congregation/id "demo")
-          (assoc :congregation/name "Demo Congregation")
-          (dissoc :congregation/loans-csv-url)
-          (dissoc :congregation/schema-name))
-      congregation)))
+  (-> (congregation/get-unrestricted-congregation *state* cong-id)
+      filter-congregation))
 
 (def ^:private permits->congregations
   (let [permits->cong-ids (comp (map (fn [[_ cong-id]] cong-id))
@@ -245,14 +232,8 @@
 (defn get-territory [cong-id territory-id]
   (when-not (view-territory? cong-id territory-id)
     (access-denied!))
-  (let [territory (territory/get-unrestricted-territory *state* (coerce-demo-cong-id cong-id) territory-id)]
-    (-> territory
-        (cond->
-          (= "demo" cong-id)
-          (-> (assoc :congregation/id "demo")
-              (dissoc :territory/current-assignment) ; TODO: generate fake assignment history
-              (dissoc :territory/last-covered)))
-        (enrich-territory))))
+  (-> (territory/get-unrestricted-territory *state* cong-id territory-id)
+      enrich-territory))
 
 (defn get-do-not-calls [cong-id territory-id]
   (when (and (view-territory? cong-id territory-id)
@@ -262,7 +243,7 @@
 (defn list-territories [cong-id]
   (->> (cond
          (allowed? [:view-congregation cong-id])
-         (vals (get-in *state* [::territory/territories (coerce-demo-cong-id cong-id)]))
+         (vals (get-in *state* [::territory/territories cong-id]))
 
          (allowed? [:view-congregation-temporarily cong-id])
          (for [[_ _ territory-id] (permissions/match *state* (auth/current-user-id) [:view-territory cong-id '*])]
@@ -284,12 +265,10 @@
   (when-not (view-territory? cong-id territory-id)
     (access-denied!))
   (when (allowed? [:view-congregation cong-id])
-    (if (= "demo" cong-id)
-      nil ; TODO: generate fake assignment history
-      (let [territory (territory/get-unrestricted-territory *state* (coerce-demo-cong-id cong-id) territory-id)]
-        (->> (vals (:territory/assignments territory))
-             (sort-by :assignment/start-date)
-             (mapv #(enrich-assignment % cong-id)))))))
+    (let [territory (territory/get-unrestricted-territory *state* cong-id territory-id)]
+      (->> (vals (:territory/assignments territory))
+           (sort-by :assignment/start-date)
+           (mapv #(enrich-assignment % cong-id))))))
 
 
 ;;;; Shares
@@ -352,13 +331,13 @@
 
 (defn get-congregation-boundary [cong-id]
   (when (allowed? [:view-congregation cong-id])
-    (get-in *state* [::congregation-boundary/congregation-boundary (coerce-demo-cong-id cong-id)])))
+    (get-in *state* [::congregation-boundary/congregation-boundary cong-id])))
 
 (defn list-regions [cong-id]
   (when (allowed? [:view-congregation cong-id])
-    (->> (vals (get-in *state* [::region/regions (coerce-demo-cong-id cong-id)]))
+    (->> (vals (get-in *state* [::region/regions cong-id]))
          (util/natural-sort-by :region/name))))
 
 (defn list-card-minimap-viewports [cong-id]
   (when (allowed? [:view-congregation cong-id])
-    (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports (coerce-demo-cong-id cong-id)]))))
+    (vals (get-in *state* [::card-minimap-viewport/card-minimap-viewports cong-id]))))

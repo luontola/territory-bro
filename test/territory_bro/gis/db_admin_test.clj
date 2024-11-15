@@ -1,5 +1,6 @@
 (ns territory-bro.gis.db-admin-test
   (:require [clojure.test :refer :all]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.events :as events]
             [territory-bro.gis.db-admin :as db-admin]
             [territory-bro.test.fixtures :refer :all]
@@ -112,7 +113,11 @@
 
                       (testing "> GIS user is absent"
                         (let [events (conj events gis-user-is-absent)]
-                          (is (empty? (generate-commands events))))))))))))))))
+                          (is (empty? (generate-commands events)))))))))))))))
+
+  (testing "demo congregation created"
+    ;; The demo congregation doesn't have a schema, so db-admin shouldn't attempt to create one for it.
+    (is (empty? (generate-commands [demo/congregation-created])))))
 
 
 (defn- init-present-schemas [events present-schemas]

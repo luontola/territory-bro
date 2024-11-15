@@ -2,8 +2,8 @@
   (:require [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.domain.dmz-test :as dmz-test]
-            [territory-bro.infra.config :as config]
             [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui.congregation-page :as congregation-page]
             [territory-bro.ui.html :as html]))
@@ -31,26 +31,26 @@
   (let [user-id (random-uuid)
         cong-id dmz-test/cong-id
         request {:path-params {:congregation cong-id}}]
-    (binding [config/env {:demo-congregation cong-id}]
-      (testutil/with-events (flatten [(assoc dmz-test/congregation-created
-                                             :congregation/name "Example Congregation")
-                                      (congregation/admin-permissions-granted cong-id user-id)])
-        (testutil/with-user-id user-id
+    (testutil/with-events (flatten [(assoc dmz-test/congregation-created
+                                           :congregation/name "Example Congregation")
+                                    (congregation/admin-permissions-granted cong-id user-id)
+                                    demo/congregation-created])
+      (testutil/with-user-id user-id
 
-          (testing "default"
-            (is (= model (congregation-page/model! request))))
+        (testing "default"
+          (is (= model (congregation-page/model! request))))
 
-          (testing "with a congregation boundary"
-            (testutil/with-events [dmz-test/congregation-boundary-defined]
-              (is (= model-with-congregation-boundary (congregation-page/model! request)))))
+        (testing "with a congregation boundary"
+          (testutil/with-events [dmz-test/congregation-boundary-defined]
+            (is (= model-with-congregation-boundary (congregation-page/model! request)))))
 
-          (testing "with some territories"
-            (testutil/with-events [dmz-test/territory-defined]
-              (is (= model-with-territories (congregation-page/model! request)))))
+        (testing "with some territories"
+          (testutil/with-events [dmz-test/territory-defined]
+            (is (= model-with-territories (congregation-page/model! request)))))
 
-          (testing "demo congregation"
-            (let [request {:path-params {:congregation "demo"}}]
-              (is (= demo-model (congregation-page/model! request))))))))))
+        (testing "demo congregation"
+          (let [request {:path-params {:congregation "demo"}}]
+            (is (= demo-model (congregation-page/model! request)))))))))
 
 (deftest view-test
   (testing "full permissions"

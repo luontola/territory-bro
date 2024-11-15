@@ -5,7 +5,7 @@
             [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.json :as json]
             [territory-bro.test.fixtures :refer [db-fixture with-fixtures]]
-            [territory-bro.test.testutil :refer [grab-exception re-contains re-equals thrown-with-msg?]])
+            [territory-bro.test.testutil :refer [grab-exception re-equals thrown-with-msg?]])
   (:import (clojure.lang ExceptionInfo)
            (java.util UUID)
            (org.postgresql.util PSQLException)
@@ -271,11 +271,11 @@
         (event-store/save! conn stream-id 0 [{:event/type :dummy-event}]))
 
       (testing "validates events on reading a stream"
-        (is (thrown-with-msg? ExceptionInfo (re-contains "Value cannot be coerced to match schema")
+        (is (thrown-with-msg? IllegalArgumentException (re-equals "Error coercing event: {:event/type \"dummy-event\"}")
                               (into [] (event-store/read-stream conn stream-id)))))
 
       (testing "validates events on reading all events"
-        (is (thrown-with-msg? ExceptionInfo (re-contains "Value cannot be coerced to match schema")
+        (is (thrown-with-msg? IllegalArgumentException (re-equals "Error coercing event: {:event/type \"dummy-event\"}")
                               (into [] (event-store/read-all-events conn stream-id))))))))
 
 (deftest check-event-stream-does-not-exist-test

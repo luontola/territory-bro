@@ -3,6 +3,7 @@
             [cprop.core :as cprop]
             [mount.core :as mount]
             [schema.core :as s]
+            [territory-bro.infra.util :as util]
             [territory-bro.infra.util :refer [getx]])
   (:import (java.time Clock Instant)))
 
@@ -37,10 +38,6 @@
 
 (def validate-env (s/validator Env))
 
-(defn- parse-uuid-or-string [s]
-  (or (parse-uuid s)
-      s))
-
 (defn enrich-env [env]
   (assoc env
          :jwt-issuer (str "https://" (getx env :auth0-domain) "/")
@@ -48,7 +45,7 @@
          :super-users (->> (str/split (or (:super-users env) "")
                                       #"\s+")
                            (remove str/blank?)
-                           (map parse-uuid-or-string)
+                           (map util/parse-uuid-or-string)
                            (set))
          :demo-congregation (some-> (:demo-congregation env)
                                     parse-uuid)))

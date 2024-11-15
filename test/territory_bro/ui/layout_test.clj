@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
@@ -83,7 +84,9 @@
                                      :congregation/id cong-id
                                      :congregation/name "the congregation"
                                      :congregation/schema-name "cong_schema"}
-                                    (congregation/admin-permissions-granted cong-id user-id)])
+                                    (congregation/admin-permissions-granted cong-id user-id)
+                                    demo/congregation-created])
+
       (testing "top level, anonymous"
         (testutil/with-anonymous-user
           (let [request {:uri "/some/page"

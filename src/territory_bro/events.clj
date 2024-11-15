@@ -6,7 +6,8 @@
             [schema.core :as s]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.config :as config]
-            [territory-bro.infra.json :as json])
+            [territory-bro.infra.json :as json]
+            [territory-bro.infra.util :as util])
   (:import (java.time Instant LocalDate)
            (java.util UUID)))
 
@@ -63,16 +64,18 @@
 
 ;;; Congregation
 
+(s/defschema CongId (s/cond-pre UUID (s/eq "demo")))
+
 (s/defschema CongregationCreated
   (assoc BaseEvent
          :event/type (s/eq :congregation.event/congregation-created)
-         :congregation/id UUID
+         :congregation/id CongId
          :congregation/name s/Str
-         :congregation/schema-name s/Str))
+         (s/optional-key :congregation/schema-name) s/Str))
 (s/defschema CongregationRenamed
   (assoc BaseEvent
          :event/type (s/eq :congregation.event/congregation-renamed)
-         :congregation/id UUID
+         :congregation/id CongId
          :congregation/name s/Str))
 
 (s/defschema PermissionId
@@ -80,33 +83,33 @@
 (s/defschema PermissionGranted
   (assoc BaseEvent
          :event/type (s/eq :congregation.event/permission-granted)
-         :congregation/id UUID
+         :congregation/id CongId
          :user/id UUID
          :permission/id PermissionId))
 (s/defschema PermissionRevoked
   (assoc BaseEvent
          :event/type (s/eq :congregation.event/permission-revoked)
-         :congregation/id UUID
+         :congregation/id CongId
          :user/id UUID
          :permission/id PermissionId))
 
 (s/defschema SettingsUpdated
   (assoc BaseEvent
          :event/type (s/eq :congregation.event/settings-updated)
-         :congregation/id UUID
+         :congregation/id CongId
          :congregation/loans-csv-url (s/maybe s/Str)))
 
 (s/defschema GisUserCreated
   (assoc BaseEvent
          :event/type (s/eq :congregation.event/gis-user-created)
-         :congregation/id UUID
+         :congregation/id CongId
          :user/id UUID
          :gis-user/username s/Str
          :gis-user/password s/Str))
 (s/defschema GisUserDeleted
   (assoc BaseEvent
          :event/type (s/eq :congregation.event/gis-user-deleted)
-         :congregation/id UUID
+         :congregation/id CongId
          :user/id UUID
          :gis-user/username s/Str))
 
@@ -115,7 +118,7 @@
 (s/defschema TerritoryDefined
   (assoc GisSyncEvent
          :event/type (s/eq :territory.event/territory-defined)
-         :congregation/id UUID
+         :congregation/id CongId
          :territory/id UUID
          :territory/number s/Str
          :territory/addresses s/Str
@@ -125,13 +128,13 @@
 (s/defschema TerritoryDeleted
   (assoc GisSyncEvent
          :event/type (s/eq :territory.event/territory-deleted)
-         :congregation/id UUID
+         :congregation/id CongId
          :territory/id UUID))
 
 (s/defschema TerritoryAssigned
   (assoc BaseEvent
          :event/type (s/eq :territory.event/territory-assigned)
-         :congregation/id UUID
+         :congregation/id CongId
          :territory/id UUID
          :assignment/id UUID
          :assignment/start-date LocalDate
@@ -139,21 +142,21 @@
 (s/defschema TerritoryCovered
   (assoc BaseEvent
          :event/type (s/eq :territory.event/territory-covered)
-         :congregation/id UUID
+         :congregation/id CongId
          :territory/id UUID
          :assignment/id UUID
          :assignment/covered-date LocalDate))
 (s/defschema TerritoryReturned
   (assoc BaseEvent
          :event/type (s/eq :territory.event/territory-returned)
-         :congregation/id UUID
+         :congregation/id CongId
          :territory/id UUID
          :assignment/id UUID
          :assignment/end-date LocalDate))
 (s/defschema AssignmentDeleted
   (assoc BaseEvent
          :event/type (s/eq :territory.event/assignment-deleted)
-         :congregation/id UUID
+         :congregation/id CongId
          :territory/id UUID
          :assignment/id UUID))
 
@@ -162,14 +165,14 @@
 (s/defschema RegionDefined
   (assoc GisSyncEvent
          :event/type (s/eq :region.event/region-defined)
-         :congregation/id UUID
+         :congregation/id CongId
          :region/id UUID
          :region/name s/Str
          :region/location s/Str))
 (s/defschema RegionDeleted
   (assoc GisSyncEvent
          :event/type (s/eq :region.event/region-deleted)
-         :congregation/id UUID
+         :congregation/id CongId
          :region/id UUID))
 
 ;;; Congregation Boundary
@@ -177,13 +180,13 @@
 (s/defschema CongregationBoundaryDefined
   (assoc GisSyncEvent
          :event/type (s/eq :congregation-boundary.event/congregation-boundary-defined)
-         :congregation/id UUID
+         :congregation/id CongId
          :congregation-boundary/id UUID
          :congregation-boundary/location s/Str))
 (s/defschema CongregationBoundaryDeleted
   (assoc GisSyncEvent
          :event/type (s/eq :congregation-boundary.event/congregation-boundary-deleted)
-         :congregation/id UUID
+         :congregation/id CongId
          :congregation-boundary/id UUID))
 
 ;;; Card Minimap Viewport
@@ -191,13 +194,13 @@
 (s/defschema CardMinimapViewportDefined
   (assoc GisSyncEvent
          :event/type (s/eq :card-minimap-viewport.event/card-minimap-viewport-defined)
-         :congregation/id UUID
+         :congregation/id CongId
          :card-minimap-viewport/id UUID
          :card-minimap-viewport/location s/Str))
 (s/defschema CardMinimapViewportDeleted
   (assoc GisSyncEvent
          :event/type (s/eq :card-minimap-viewport.event/card-minimap-viewport-deleted)
-         :congregation/id UUID
+         :congregation/id CongId
          :card-minimap-viewport/id UUID))
 
 ;;; DB Admin
@@ -206,20 +209,20 @@
   (assoc BaseEvent
          :event/type (s/eq :db-admin.event/gis-schema-is-present)
          :event/transient? (s/eq true)
-         :congregation/id UUID
+         :congregation/id CongId
          :congregation/schema-name s/Str))
 (s/defschema GisUserIsPresent
   (assoc BaseEvent
          :event/type (s/eq :db-admin.event/gis-user-is-present)
          :event/transient? (s/eq true)
-         :congregation/id UUID
+         :congregation/id CongId
          :user/id UUID
          :gis-user/username s/Str))
 (s/defschema GisUserIsAbsent
   (assoc BaseEvent
          :event/type (s/eq :db-admin.event/gis-user-is-absent)
          :event/transient? (s/eq true)
-         :congregation/id UUID
+         :congregation/id CongId
          :user/id UUID
          :gis-user/username s/Str))
 
@@ -231,7 +234,7 @@
          :share/id UUID
          :share/key s/Str
          :share/type (s/enum :link :qr-code)
-         :congregation/id UUID
+         :congregation/id CongId
          :territory/id UUID))
 
 (s/defschema ShareOpened
@@ -337,7 +340,13 @@
 (defn- coerce-event [event]
   ;; must coerce the common fields first, so that Event can
   ;; choose the right event schema based on the event type
-  (coerce-event-specifics (coerce-event-commons event)))
+  (try
+    (coerce-event-specifics (-> event
+                                (m/update-existing :congregation/id util/parse-uuid-or-string)
+                                coerce-event-commons))
+    (catch Exception e
+      (throw (IllegalArgumentException. (str "Error coercing event: " (pr-str event))
+                                        e)))))
 
 (defn json->event [json]
   (when json

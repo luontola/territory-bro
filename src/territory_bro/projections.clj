@@ -5,6 +5,7 @@
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
@@ -13,6 +14,7 @@
             [territory-bro.gis.gis-db :as gis-db]
             [territory-bro.gis.gis-user :as gis-user]
             [territory-bro.gis.gis-user-process :as gis-user-process]
+            [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.infra.event-store :as event-store]
             [territory-bro.infra.executors :as executors]
@@ -121,13 +123,37 @@
   (let [new-events (startup-optimizations)]
     (update-with-transient-events! new-events)))
 
+(defn- demo-gis-events [conn source-cong-id]
+  (->> (event-store/read-all-events conn)
+       (eduction (demo/transform-gis-events source-cong-id))))
+
+(defn apply-demo-events [cache]
+  (if-some [source-cong-id (:demo-congregation config/env)]
+    (db/with-transaction [conn {:read-only true}]
+      (let [cache (apply-transient-events cache [demo/congregation-created])
+            cache (apply-transient-events cache (demo-gis-events conn source-cong-id))
+            congregation (congregation/get-unrestricted-congregation (:state cache) demo/cong-id)
+            today (.toLocalDate (congregation/local-time congregation))
+            territory-ids (keys (get-in cache [:state ::territory/territories demo/cong-id]))
+            assignment-events (mapcat #(demo/generate-assignment-events % today)
+                                      territory-ids)
+            cache (apply-transient-events cache assignment-events)]
+        cache))
+    cache))
+
+(defn generate-demo-data! []
+  (log/info "Generating demo data...")
+  (swap! *cache apply-demo-events)
+  (log/info "Demo data ready"))
+
 (defn refresh! []
   (let [startup? (nil? (cached-state))]
     (log/info "Refreshing projections")
     (refresh-projections!)
     (when startup?
       (log/info "Using startup optimizations")
-      (refresh-startup-optimizations!))
+      (refresh-startup-optimizations!)
+      (generate-demo-data!))
     (refresh-process-managers!)))
 
 (mount/defstate refresher

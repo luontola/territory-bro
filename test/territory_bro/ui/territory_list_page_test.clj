@@ -3,12 +3,12 @@
             [clojure.test :refer :all]
             [reitit.core :as reitit]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.loan :as loan]
             [territory-bro.domain.publisher :as publisher]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
-            [territory-bro.infra.config :as config]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil :refer [replace-in]]
             [territory-bro.ui :as ui]
@@ -72,6 +72,28 @@
          :congregation-boundary nil
          :permissions {:view-congregation-temporarily true}))
 
+(def test-events
+  (flatten [{:event/type :congregation.event/congregation-created
+             :congregation/id cong-id
+             :congregation/name "Congregation 1"
+             :congregation/schema-name "cong1_schema"}
+            (congregation/admin-permissions-granted cong-id user-id)
+            {:event/type :congregation-boundary.event/congregation-boundary-defined
+             :congregation/id cong-id
+             :congregation-boundary/id (random-uuid)
+             :congregation-boundary/location testdata/wkt-helsinki}
+            {:event/type :territory.event/territory-defined
+             :congregation/id cong-id
+             :territory/id territory-id
+             :territory/number "123"
+             :territory/addresses "the addresses"
+             :territory/region "the region"
+             :territory/meta {:foo "bar"}
+             :territory/location testdata/wkt-helsinki-rautatientori}]))
+(def demo-events
+  (concat [demo/congregation-created]
+          (into [] (demo/transform-gis-events cong-id) test-events)))
+
 (def fake-publishers {cong-id {publisher-id publisher}})
 
 (defn fakes [f]
@@ -85,34 +107,17 @@
 
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id}}]
-    (testutil/with-events (flatten [{:event/type :congregation.event/congregation-created
-                                     :congregation/id cong-id
-                                     :congregation/name "Congregation 1"
-                                     :congregation/schema-name "cong1_schema"}
-                                    (congregation/admin-permissions-granted cong-id user-id)
-                                    {:event/type :congregation-boundary.event/congregation-boundary-defined
-                                     :congregation/id cong-id
-                                     :congregation-boundary/id (random-uuid)
-                                     :congregation-boundary/location testdata/wkt-helsinki}
-                                    {:event/type :territory.event/territory-defined
-                                     :congregation/id cong-id
-                                     :territory/id territory-id
-                                     :territory/number "123"
-                                     :territory/addresses "the addresses"
-                                     :territory/region "the region"
-                                     :territory/meta {:foo "bar"}
-                                     :territory/location testdata/wkt-helsinki-rautatientori}])
+    (testutil/with-events (concat test-events demo-events)
       (testutil/with-user-id user-id
         (testing "default"
           (is (= model (territory-list-page/model! request {}))))
 
         (testing "demo congregation"
-          (binding [config/env {:demo-congregation cong-id}]
-            (let [request {:path-params {:congregation "demo"}}]
-              (is (= demo-model
-                     (territory-list-page/model! request {})
-                     (testutil/with-anonymous-user
-                       (territory-list-page/model! request {})))))))
+          (let [request {:path-params {:congregation "demo"}}]
+            (is (= demo-model
+                   (territory-list-page/model! request {})
+                   (testutil/with-anonymous-user
+                     (territory-list-page/model! request {}))))))
 
         (testing "anonymous, has opened a share"
           (testutil/with-anonymous-user
