@@ -156,7 +156,7 @@
 (defn dispatch! [command]
   (let [command (enrich-command command)]
     (try
-      (if (= "demo" (:congregation/id command))
+      (if (demo/demo-id? (:congregation/id command))
         (demo-dispatch! *state* command)
         (dispatcher/command! *conn* *state* command))
       ;; TODO: catch the exceptions and convert them to http responses at a higher level?
@@ -202,7 +202,7 @@
 
 (def ^:private permits->congregations
   (let [permits->cong-ids (comp (map (fn [[_ cong-id]] cong-id))
-                                (filter #(not= "demo" %))) ; everybody has demo permissions by default
+                                (remove demo/demo-id?)) ; everybody has demo permissions by default
         cong-ids->congregations (comp (map #(congregation/get-unrestricted-congregation *state* %))
                                       (map filter-congregation))]
     (comp permits->cong-ids
@@ -238,14 +238,14 @@
 
 (defn list-publishers [cong-id]
   (when (allowed? [:view-congregation cong-id])
-    (if (= "demo" cong-id)
+    (if (demo/demo-id? cong-id)
       demo/publishers
       (publisher/list-publishers *conn* cong-id))))
 
 (defn get-publisher [cong-id publisher-id]
   (when (or (allowed? [:view-congregation cong-id])
             (allowed? [:view-congregation-temporarily cong-id]))
-    (if (= "demo" cong-id)
+    (if (demo/demo-id? cong-id)
       (get demo/publishers-by-id publisher-id)
       (publisher/get-by-id *conn* cong-id publisher-id))))
 
@@ -272,7 +272,7 @@
 
 (defn get-do-not-calls [cong-id territory-id]
   (when (view-territory? cong-id territory-id)
-    (if (= "demo" cong-id)
+    (if (demo/demo-id? cong-id)
       (when (some? **demo-do-not-calls*)
         (get @**demo-do-not-calls* territory-id))
       (:territory/do-not-calls (do-not-calls/get-do-not-calls *conn* cong-id territory-id)))))
@@ -313,7 +313,7 @@
 (defn- generate-share-key [territory share-type]
   (let [cong-id (:congregation/id territory)
         territory-id (:territory/id territory)]
-    (if (= "demo" cong-id)
+    (if (demo/demo-id? cong-id)
       (share/demo-share-key territory-id)
       (let [share-key (share/generate-share-key)]
         (dispatch! {:command/type :share.command/create-share

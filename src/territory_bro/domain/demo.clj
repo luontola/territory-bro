@@ -6,6 +6,9 @@
 
 (def cong-id "demo")
 
+(defn demo-id? [id]
+  (= cong-id id))
+
 (def congregation-created
   {:event/type :congregation.event/congregation-created
    :congregation/id cong-id

@@ -1,6 +1,7 @@
 (ns territory-bro.ui.layout
   (:require [clojure.string :as str]
             [hiccup.page :as hiccup.page]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.infra.authentication :as auth]
@@ -28,7 +29,7 @@
      :language-selection-width language-selection-width
      :dev? (:dev config/env)
      :demo-available? (some? (:demo-congregation config/env))
-     :demo? (= "demo" cong-id)}))
+     :demo? (demo/demo-id? cong-id)}))
 
 
 (defn- minify-html [html]

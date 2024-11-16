@@ -2,6 +2,7 @@
   (:require [medley.core :as m]
             [reitit.ring :as ring]
             [ring.util.http-response :as http-response]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.auth0 :as auth0]
             [territory-bro.ui.congregation-page :as congregation-page]
@@ -26,8 +27,8 @@
       (throw (http-response/not-found! "Not found"))))
 
 (defn- parse-congregation-id [s]
-  (if (= "demo" s)
-    "demo"
+  (if (demo/demo-id? s)
+    s
     (parse-mandatory-uuid s)))
 
 (defn wrap-parse-path-params [handler]
