@@ -21,8 +21,8 @@ JoinPage:
   yourUserId: "Il tuo ID utente è:"
   copy: Copia negli appunti
 DemoDisclaimer:
-  welcome: Benvenuti nella demo
-  introduction: Questa demo è limitata solo alla visualizzazione di una congregazione. Alcune funzioni sono limitate.
+  welcome: Benvenuto nella demo
+  introduction: Solo tu vedrai le modifiche che apporti in questa congregazione demo. Alcune funzionalità sono limitate.
 GettingStarted:
   title: Iniziare
   congregationBoundary: Definisci i confini della congregazione

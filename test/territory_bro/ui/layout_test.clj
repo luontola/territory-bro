@@ -250,7 +250,7 @@
              Close
 
              {info.svg} Welcome to the demo
-             This demo is limited to only viewing a congregation. Some features are restricted.
+             Only you will see the changes you make in this demo congregation. Some features are restricted.
 
              the title
              the content")

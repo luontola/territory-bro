@@ -22,7 +22,7 @@ JoinPage:
   copy: Copy to clipboard
 DemoDisclaimer:
   welcome: Welcome to the demo
-  introduction: This demo is limited to only viewing a congregation. Some features are restricted.
+  introduction: Only you will see the changes you make in this demo congregation. Some features are restricted.
 GettingStarted:
   title: Getting started
   congregationBoundary: Define the congregation boundary

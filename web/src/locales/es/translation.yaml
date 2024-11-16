@@ -22,7 +22,7 @@ JoinPage:
   copy: Copiar al portapapeles
 DemoDisclaimer:
   welcome: Bienvenido a la demostración
-  introduction: Esta demostración está limitada a la visualización de una congregación. Algunas funciones están restringidas.
+  introduction: Solo usted verá los cambios que realice en esta congregación de demostración. Algunas funciones están restringidas.
 GettingStarted:
   title: Comenzando
   congregationBoundary: Definir los límites de la congregación

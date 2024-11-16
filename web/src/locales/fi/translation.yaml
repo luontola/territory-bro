@@ -22,7 +22,7 @@ JoinPage:
   copy: Kopioi leikepöydälle
 DemoDisclaimer:
   welcome: Tervetuloa demoon
-  introduction: Tämä demo rajoittuu vain seurakunnan katseluun. Joitain ominaisuuksia on rajoitettu.
+  introduction: Tässä demoseurakunnassa tekemäsi muutokset näkyvät vain sinulle. Joitain ominaisuuksia on rajoitettu.
 GettingStarted:
   title: Aloittaminen
   congregationBoundary: Määritä seurakunnan rajat

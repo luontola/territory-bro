@@ -22,7 +22,7 @@ JoinPage:
   copy: Copiar para a área de transferência
 DemoDisclaimer:
   welcome: Bem-vindo à demonstração
-  introduction: Esta demonstração está limitada apenas à visualização de uma congregação. Algumas funcionalidades estão restritas.
+  introduction: Apenas você verá as alterações que fizer nesta congregação de demonstração. Alguns recursos estão limitados.
 GettingStarted:
   title: Começando
   congregationBoundary: Defina os limites da congregação
