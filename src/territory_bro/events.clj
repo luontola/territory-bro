@@ -5,6 +5,7 @@
             [schema.coerce :as coerce]
             [schema.core :as s]
             [territory-bro.domain.congregation :as congregation]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.json :as json]
             [territory-bro.infra.util :as util])
@@ -64,7 +65,7 @@
 
 ;;; Congregation
 
-(s/defschema CongId (s/cond-pre UUID (s/eq "demo")))
+(s/defschema CongId (s/cond-pre UUID (s/eq demo/cong-id)))
 
 (s/defschema CongregationCreated
   (assoc BaseEvent

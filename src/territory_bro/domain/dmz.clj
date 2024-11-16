@@ -36,10 +36,10 @@
         user-id (auth/current-user-id)]
     (-> state
         ;; default permissions for all users
-        (permissions/grant user-id [:view-congregation "demo"])
-        (permissions/grant user-id [:assign-territory "demo"])
-        (permissions/grant user-id [:share-territory-link "demo"])
-        (permissions/grant user-id [:edit-do-not-calls "demo"])
+        (permissions/grant user-id [:view-congregation demo/cong-id])
+        (permissions/grant user-id [:assign-territory demo/cong-id])
+        (permissions/grant user-id [:share-territory-link demo/cong-id])
+        (permissions/grant user-id [:edit-do-not-calls demo/cong-id])
         ;; custom permissions based on user session
         (cond->
           (::sudo? session) (congregation/sudo user-id)
@@ -351,7 +351,7 @@
         [share session])
 
       (some? demo-territory)
-      [{:congregation/id "demo"
+      [{:congregation/id demo/cong-id
         :territory/id demo-territory}
        nil])))
 

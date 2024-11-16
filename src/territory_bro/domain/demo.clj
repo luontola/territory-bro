@@ -26,7 +26,7 @@
     (reduce (fn [m publisher]
               (let [publisher-id (random-uuid random)]
                 (assoc m publisher-id (assoc publisher
-                                             :congregation/id "demo"
+                                             :congregation/id cong-id
                                              :publisher/id publisher-id))))
             {}
             [{:publisher/name "Andrew"}
