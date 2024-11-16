@@ -29,6 +29,7 @@
 
 (def ^:dynamic *state* nil) ; the state starts empty, so nil is a good default for tests
 (def ^:dynamic **demo-events* nil)
+(def ^:dynamic **demo-do-not-calls* nil)
 
 (defn enrich-state-for-request [state request]
   (let [session (:session request)
@@ -38,6 +39,7 @@
         (permissions/grant user-id [:view-congregation "demo"])
         (permissions/grant user-id [:assign-territory "demo"])
         (permissions/grant user-id [:share-territory-link "demo"])
+        (permissions/grant user-id [:edit-do-not-calls "demo"])
         ;; custom permissions based on user session
         (cond->
           (::sudo? session) (congregation/sudo user-id)
@@ -54,18 +56,24 @@
 
 (defn wrap-demo-session [handler]
   (fn [request]
-    (let [original-demo-events (get-in request [:session :demo :events])]
+    (let [original-demo-events (get-in request [:session :demo :events])
+          original-demo-do-not-calls (get-in request [:session :demo :do-not-calls])]
       (binding [*state* (reduce projections/projection *state* original-demo-events)
-                **demo-events* (atom original-demo-events)]
+                **demo-events* (atom original-demo-events)
+                **demo-do-not-calls* (atom original-demo-do-not-calls)]
         (let [response (handler request)
-              updated-demo-events @**demo-events*]
-          (if (identical? original-demo-events
-                          updated-demo-events)
+              updated-demo-events @**demo-events*
+              updated-demo-do-not-calls @**demo-do-not-calls*]
+          (if (and (identical? original-demo-events
+                               updated-demo-events)
+                   (identical? original-demo-do-not-calls
+                               updated-demo-do-not-calls))
             response
             (-> response
                 (assoc :session (or (:session response)
                                     (:session request)))
-                (assoc-in [:session :demo :events] updated-demo-events))))))))
+                (assoc-in [:session :demo :events] updated-demo-events)
+                (assoc-in [:session :demo :do-not-calls] updated-demo-do-not-calls))))))))
 
 
 ;;;; Database connection
@@ -138,10 +146,12 @@
         (assoc :command/user user-id))))
 
 (defn- demo-dispatch! [state command]
-  (let [events (dispatcher/demo-command! state command)]
-    (assert (some? **demo-events*) "atom not bound")
-    (swap! **demo-events* concat events)
-    events))
+  (assert (some? **demo-events*) "atom not bound")
+  (assert (some? **demo-do-not-calls*) "atom not bound")
+  (if (= :do-not-calls.command/save-do-not-calls (:command/type command))
+    (swap! **demo-do-not-calls* assoc (:territory/id command) (:territory/do-not-calls command))
+    (swap! **demo-events* concat (dispatcher/demo-command! state command)))
+  nil)
 
 (defn dispatch! [command]
   (let [command (enrich-command command)]
@@ -261,9 +271,11 @@
       enrich-territory))
 
 (defn get-do-not-calls [cong-id territory-id]
-  (when (and (view-territory? cong-id territory-id)
-             (not= "demo" cong-id))
-    (:territory/do-not-calls (do-not-calls/get-do-not-calls *conn* cong-id territory-id))))
+  (when (view-territory? cong-id territory-id)
+    (if (= "demo" cong-id)
+      (when (some? **demo-do-not-calls*)
+        (get @**demo-do-not-calls* territory-id))
+      (:territory/do-not-calls (do-not-calls/get-do-not-calls *conn* cong-id territory-id)))))
 
 (defn list-territories [cong-id]
   (->> (cond

@@ -74,7 +74,7 @@
           :end-date today
           :returning? false
           :covered? false}
-   :permissions {:edit-do-not-calls false
+   :permissions {:edit-do-not-calls true
                  :assign-territory true
                  :share-territory-link true}
    :mac? false})

@@ -201,8 +201,8 @@
 
 (defn demo-command! [state command]
   (when-not (contains? #{:territory.command/assign-territory
-                         :territory.command/return-territory
-                         :territory.command/delete-assignment}
+                         :territory.command/delete-assignment
+                         :territory.command/return-territory}
                        (:command/type command))
     (throw (IllegalArgumentException. (str "Command not allowed in demo: " (pr-str command)))))
   (try

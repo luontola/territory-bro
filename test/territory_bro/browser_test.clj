@@ -324,7 +324,7 @@
         (wait-and-click [:territory-list {:tag :a}])
         (b/wait-has-text h1 "Territory")))
 
-    (testing "manage territory assignments"
+    (testing "can manage territory assignments"
       ;; The demo data is random, so it would be complicated to test assignment and returns,
       ;; since it depends on the territory's current state. But we can assume that every
       ;; demo territory has past assignments, so deleting is always possible.
@@ -334,6 +334,17 @@
         (wait-and-click [:assignment-history {:tag :button, :fn/text "Edit"}])
         (wait-and-click [:assignment-history {:tag :button, :fn/text "Delete"}])
         (b/wait-has-text :assignment-history "The territory assignment has been deleted")))
+
+    (testing "can edit do-not-calls"
+      (let [test-content (str "test content " (random-uuid))
+            input-field [:do-not-calls {:tag :textarea}]]
+        (doto *driver*
+          (wait-and-click [:do-not-calls {:tag :button, :fn/text "Edit"}])
+          (b/wait-visible input-field)
+          (b/fill input-field test-content)
+          (wait-and-click [:do-not-calls {:tag :button, :fn/text "Save"}])
+          (b/wait-invisible input-field)
+          (b/wait-has-text :do-not-calls test-content))))
 
     (testing "share a link"
       (doto *driver*
@@ -567,11 +578,11 @@
             input-field [:do-not-calls {:tag :textarea}]]
         (doto *driver*
           (go-to-territory "101")
-          (wait-and-click [:do-not-calls {:tag :button, :fn/has-string "Edit"}])
+          (wait-and-click [:do-not-calls {:tag :button, :fn/text "Edit"}])
           (b/wait-visible input-field)
           (b/clear input-field)
           (b/fill input-field test-content)
-          (wait-and-click [:do-not-calls {:tag :button, :fn/has-string "Save"}])
+          (wait-and-click [:do-not-calls {:tag :button, :fn/text "Save"}])
           (b/wait-invisible input-field)
           (b/wait-has-text :do-not-calls test-content))))))
 

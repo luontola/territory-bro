@@ -217,7 +217,8 @@
             (is (= {:status 200
                     :headers {}
                     :body "dummy"
-                    :session {:demo {:events [returned-event]}}}
+                    :session {:demo {:events [returned-event]
+                                     :do-not-calls nil}}}
                    (handler request)))))
 
         (testing "appends demo events after previous events in the session"
@@ -229,7 +230,8 @@
                     :headers {}
                     :body "dummy"
                     :session {:demo {:events [{:event/type :previous-dummy-event}
-                                              returned-event]}}}
+                                              returned-event]
+                                     :do-not-calls nil}}}
                    (handler (assoc request :session {:demo {:events [{:event/type :previous-dummy-event}]}}))))))
 
         (testing "demo events from session are applied to state"
@@ -254,7 +256,8 @@
                     :headers {}
                     :body "dummy"
                     :session {:unrelated "stuff"
-                              :demo {:events [returned-event]}}}
+                              :demo {:events [returned-event]
+                                     :do-not-calls nil}}}
                    (handler request)))))
 
         (testing "doesn't modify the session if no new events were dispatched"
@@ -264,7 +267,31 @@
             (is (= {:status 200
                     :headers {}
                     :body "dummy"}
-                   (handler (assoc request :session {:dummy "stuff"}))))))))))
+                   (handler (assoc request :session {:dummy "stuff"}))))))
+
+        (testing "saves demo do-not-calls into session"
+          (let [handler (-> (fn handler [_request]
+                              (dmz/dispatch! {:command/type :do-not-calls.command/save-do-not-calls
+                                              :congregation/id "demo"
+                                              :territory/id territory-id
+                                              :territory/do-not-calls "the do-not-calls"})
+                              (response/response "dummy"))
+                            dmz/wrap-demo-session)]
+            (is (= {:status 200
+                    :headers {}
+                    :body "dummy"
+                    :session {:demo {:do-not-calls {territory-id "the do-not-calls"}
+                                     :events nil}}}
+                   (handler request)))))
+
+        (testing "reads demo do-not-calls from session"
+          (let [handler (-> (fn handler [_request]
+                              (response/response (dmz/get-do-not-calls "demo" territory-id)))
+                            dmz/wrap-demo-session)]
+            (is (= {:status 200
+                    :headers {}
+                    :body "the do-not-calls"}
+                   (handler (assoc request :session {:demo {:do-not-calls {territory-id "the do-not-calls"}}}))))))))))
 
 (deftest dispatch!-test
   ;; TODO: tests for error handling?
