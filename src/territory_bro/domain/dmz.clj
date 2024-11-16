@@ -28,6 +28,7 @@
 ;;;; State
 
 (def ^:dynamic *state* nil) ; the state starts empty, so nil is a good default for tests
+(def ^:dynamic **demo-events* nil)
 
 (defn enrich-state-for-request [state request]
   (let [session (:session request)
@@ -35,6 +36,7 @@
     (-> state
         ;; default permissions for all users
         (permissions/grant user-id [:view-congregation "demo"])
+        (permissions/grant user-id [:assign-territory "demo"])
         (permissions/grant user-id [:share-territory-link "demo"])
         ;; custom permissions based on user session
         (cond->
@@ -49,6 +51,21 @@
   (fn [request]
     (binding [*state* (state-for-request request)]
       (handler request))))
+
+(defn wrap-demo-state [handler]
+  (fn [request]
+    (let [original-demo-events (get-in request [:session :demo :events])]
+      (binding [*state* (reduce projections/projection *state* original-demo-events)
+                **demo-events* (atom original-demo-events)]
+        (let [response (handler request)
+              updated-demo-events @**demo-events*]
+          (if (identical? original-demo-events
+                          updated-demo-events)
+            response
+            (-> response
+                (assoc :session (or (:session response)
+                                    (:session request)))
+                (assoc-in [:session :demo :events] updated-demo-events))))))))
 
 
 ;;;; Database connection
@@ -120,10 +137,18 @@
         (assoc :command/time (config/now))
         (assoc :command/user user-id))))
 
+(defn- demo-dispatch! [state command]
+  (let [events (dispatcher/demo-command! state command)]
+    (assert (some? **demo-events*) "atom not bound")
+    (swap! **demo-events* concat events)
+    events))
+
 (defn dispatch! [command]
   (let [command (enrich-command command)]
     (try
-      (dispatcher/command! *conn* *state* command)
+      (if (= "demo" (:congregation/id command))
+        (demo-dispatch! *state* command)
+        (dispatcher/command! *conn* *state* command))
       ;; TODO: catch the exceptions and convert them to http responses at a higher level?
       (catch ValidationException e
         (log/warn e "Invalid command:" command)

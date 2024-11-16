@@ -198,3 +198,20 @@
         ;; the full stack trace will be logged at a higher level
         (log/warn "Command failed:" (str t))
         (throw t)))))
+
+(defn demo-command! [state command]
+  (when-not (contains? #{:territory.command/assign-territory
+                         :territory.command/return-territory
+                         :territory.command/delete-assignment}
+                       (:command/type command))
+    (throw (IllegalArgumentException. (str "Command not allowed in demo: " (pr-str command)))))
+  (try
+    (let [command (commands/sorted-keys command)]
+      (log/info "Dispatch demo command:" (pretty-str command))
+      (let [injections (default-injections command state)
+            events (territory/handle-demo-command command state injections)]
+        (log/info "Produced demo events:" (pretty-str events))
+        events))
+    (catch Throwable t
+      (log/warn "Command failed:" (str t))
+      (throw t))))

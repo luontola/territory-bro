@@ -75,7 +75,7 @@
           :returning? false
           :covered? false}
    :permissions {:edit-do-not-calls false
-                 :assign-territory false
+                 :assign-territory true
                  :share-territory-link true}
    :mac? false})
 
