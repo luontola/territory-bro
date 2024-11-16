@@ -188,7 +188,86 @@
 
 ;;;; Commands
 
+(deftest wrap-demo-session-test
+  (testutil/with-user-id user-id
+    (binding [dispatcher/command! (fn [_conn _state _command]
+                                    (assert false "should not be called"))]
+      (let [assignment-id (-> (dmz/get-territory "demo" territory-id)
+                              :territory/current-assignment
+                              :assignment/id)
+            return-command {:command/type :territory.command/return-territory
+                            :congregation/id "demo"
+                            :territory/id territory-id
+                            :assignment/id assignment-id
+                            :date today
+                            :returning? true
+                            :covered? false}
+            returned-event {:assignment/end-date today
+                            :assignment/id assignment-id
+                            :congregation/id "demo"
+                            :event/type :territory.event/territory-returned
+                            :territory/id territory-id}
+            request (mock/request :get "/foo")]
+
+        (testing "saves demo events into session"
+          (let [handler (-> (fn handler [_request]
+                              (dmz/dispatch! return-command)
+                              (response/response "dummy"))
+                            dmz/wrap-demo-session)]
+            (is (= {:status 200
+                    :headers {}
+                    :body "dummy"
+                    :session {:demo {:events [returned-event]}}}
+                   (handler request)))))
+
+        (testing "appends demo events after previous events in the session"
+          (let [handler (-> (fn handler [_request]
+                              (dmz/dispatch! return-command)
+                              (response/response "dummy"))
+                            dmz/wrap-demo-session)]
+            (is (= {:status 200
+                    :headers {}
+                    :body "dummy"
+                    :session {:demo {:events [{:event/type :previous-dummy-event}
+                                              returned-event]}}}
+                   (handler (assoc request :session {:demo {:events [{:event/type :previous-dummy-event}]}}))))))
+
+        (testing "demo events from session are applied to state"
+          (let [current-assignment #(:territory/current-assignment (dmz/get-territory "demo" territory-id))
+                handler (-> (fn handler [_request]
+                              (is (nil? (current-assignment)))
+                              (response/response "dummy"))
+                            dmz/wrap-demo-session)]
+            (is (some? (current-assignment)))
+            (is (= {:status 200
+                    :headers {}
+                    :body "dummy"}
+                   (handler (assoc request :session {:demo {:events [returned-event]}}))))))
+
+        (testing "handlers can add unrelated stuff to the session"
+          (let [handler (-> (fn handler [_request]
+                              (dmz/dispatch! return-command)
+                              (-> (response/response "dummy")
+                                  (assoc :session {:unrelated "stuff"})))
+                            dmz/wrap-demo-session)]
+            (is (= {:status 200
+                    :headers {}
+                    :body "dummy"
+                    :session {:unrelated "stuff"
+                              :demo {:events [returned-event]}}}
+                   (handler request)))))
+
+        (testing "doesn't modify the session if no new events were dispatched"
+          (let [handler (-> (fn handler [_request]
+                              (response/response "dummy"))
+                            dmz/wrap-demo-session)]
+            (is (= {:status 200
+                    :headers {}
+                    :body "dummy"}
+                   (handler (assoc request :session {:dummy "stuff"}))))))))))
+
 (deftest dispatch!-test
+  ;; TODO: tests for error handling?
   (testing "enriches commands and delegates to the real dispatcher"
     (testutil/with-user-id user-id
       (binding [dispatcher/command! (fn [_conn _state command]
@@ -198,83 +277,7 @@
                       :command/type :dummy.command/foo
                       :congregation/id cong-id}}
                (dmz/dispatch! {:command/type :dummy.command/foo
-                               :congregation/id cong-id}))))))
-
-  (testing "demo commands:"
-    (testutil/with-user-id user-id
-      (binding [dispatcher/command! (fn [_conn _state _command]
-                                      (assert false "should not be called"))]
-        (let [assignment-id (-> (dmz/get-territory "demo" territory-id)
-                                :territory/current-assignment
-                                :assignment/id)
-              return-command {:command/type :territory.command/return-territory
-                              :congregation/id "demo"
-                              :territory/id territory-id
-                              :assignment/id assignment-id
-                              :date today
-                              :returning? true
-                              :covered? false}
-              returned-event {:assignment/end-date today
-                              :assignment/id assignment-id
-                              :congregation/id "demo"
-                              :event/type :territory.event/territory-returned
-                              :territory/id territory-id}
-              handler (-> (fn handler [_request]
-                            (dmz/dispatch! return-command)
-                            (response/response "dummy"))
-                          dmz/wrap-demo-state)]
-
-          (testing "saves demo events into session"
-            (is (= {:status 200
-                    :headers {}
-                    :body "dummy"
-                    :session {:demo {:events [returned-event]}}}
-                   (handler (mock/request :get "/foo")))))
-
-          (testing "appends demo events if the session already has some"
-            (is (= {:status 200
-                    :headers {}
-                    :body "dummy"
-                    :session {:demo {:events [{:event/type :previous-dummy-event}
-                                              returned-event]}}}
-                   (handler (-> (mock/request :get "/foo")
-                                (assoc :session {:demo {:events [{:event/type :previous-dummy-event}]}}))))))
-
-          (testing "demo events from session are applied to state during the next request"
-            (let [current-assignment #(:territory/current-assignment (dmz/get-territory "demo" territory-id))
-                  handler (-> (fn handler [_request]
-                                (is (nil? (current-assignment)))
-                                (response/response "dummy"))
-                              dmz/wrap-demo-state)]
-              (is (some? (current-assignment)))
-              (is (= {:status 200
-                      :headers {}
-                      :body "dummy"}
-                     (handler (-> (mock/request :get "/foo")
-                                  (assoc :session {:demo {:events [returned-event]}})))))))
-
-          (testing "the handler can add unrelated stuff to the session"
-            (let [handler (-> (fn handler [_request]
-                                (dmz/dispatch! return-command)
-                                (-> (response/response "dummy")
-                                    (assoc :session {:dummy "stuff"})))
-                              dmz/wrap-demo-state)]
-              (is (= {:status 200
-                      :headers {}
-                      :body "dummy"
-                      :session {:dummy "stuff"
-                                :demo {:events [returned-event]}}}
-                     (handler (mock/request :get "/foo"))))))
-
-          (testing "doesn't modify the session if no new events were dispatched"
-            (let [handler (-> (fn handler [_request]
-                                (response/response "dummy"))
-                              dmz/wrap-demo-state)]
-              (is (= {:status 200
-                      :headers {}
-                      :body "dummy"}
-                     (handler (-> (mock/request :get "/foo")
-                                  (assoc :session {:dummy "stuff"}))))))))))))
+                               :congregation/id cong-id})))))))
 
 
 ;;;; Congregations

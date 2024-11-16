@@ -47,7 +47,7 @@
   [""
    {:middleware [[html/wrap-page-path nil] ; outermost middleware first
                  dmz/wrap-current-state
-                 dmz/wrap-demo-state
+                 dmz/wrap-demo-session
                  wrap-parse-path-params]}
    auth0/routes
    congregation-page/routes

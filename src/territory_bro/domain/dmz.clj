@@ -52,7 +52,7 @@
     (binding [*state* (state-for-request request)]
       (handler request))))
 
-(defn wrap-demo-state [handler]
+(defn wrap-demo-session [handler]
   (fn [request]
     (let [original-demo-events (get-in request [:session :demo :events])]
       (binding [*state* (reduce projections/projection *state* original-demo-events)
