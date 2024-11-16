@@ -147,15 +147,15 @@
 (def demo-events
   (concat [demo/congregation-created]
           (into [] (demo/transform-gis-events cong-id) test-events)
-          (demo/generate-assignment-events territory-id (LocalDate/of 2010 1 1))))
+          (demo/generate-assignment-events territory-id today)))
 
 ;; deterministically generated random assignments (update manually if the generator algorithm is changed)
 (def demo-current-assignment
   {:assignment/id #uuid "47c9933c-737b-dfc2-3ae8-be2f9642e6d3"
-   :assignment/start-date (LocalDate/of 2009 12 29)
+   :assignment/start-date (LocalDate/of 2000 3 29)
    :publisher/id #uuid "4b475264-5e76-f39e-81a8-e923dd4d7273"
    :publisher/name "Matthias"})
-(def demo-last-covered (LocalDate/of 2009 8 24))
+(def demo-last-covered (LocalDate/of 1999 11 23))
 
 (defn- apply-share-opened [state]
   (share/grant-opened-shares state [share-id] (auth/current-user-id)))
@@ -207,7 +207,6 @@
         (let [assignment-id (-> (dmz/get-territory "demo" territory-id)
                                 :territory/current-assignment
                                 :assignment/id)
-              today (LocalDate/of 2010 1 1)
               return-command {:command/type :territory.command/return-territory
                               :congregation/id "demo"
                               :territory/id territory-id
