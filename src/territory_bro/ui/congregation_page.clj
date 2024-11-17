@@ -60,21 +60,22 @@
   (when (:view-statistics permissions)
     (let [styles (:CongregationPage (css/modules))]
       (info-box/view
-       {:title "Territory statistics"} ; TODO: i18n
+       {:title (i18n/t "Statistics.title")}
        (h/html
         [:ul {:class (:statistics styles)}
-         [:li "Territories: " (:territories statistics)] ; TODO: i18n
-         [:li "Currently assigned: " ; TODO: i18n
+         [:li (i18n/t "Statistics.territories") ": " (:territories statistics)]
+         [:li (i18n/t "Statistics.assignedTerritories") ": "
           (count-and-percentage (:assigned-territories statistics)
                                 (:territories statistics))]
-         [:li "Covered in past 6 months: " ; TODO: i18n
+         [:li (i18n/t "Statistics.coveredInPast6Months") ": "
           (count-and-percentage (:covered-in-past-6-months statistics)
                                 (:territories statistics))]
-         [:li "Covered in past 12 months: " ; TODO: i18n
+         [:li (i18n/t "Statistics.coveredInPast12Months") ": "
           (count-and-percentage (:covered-in-past-12-months statistics)
                                 (:territories statistics))]
          (when-some [days (:average-assignment-days statistics)]
-           [:li "Average assignment duration: " days " days"])]))))) ; TODO: i18n
+           [:li (-> (i18n/t "Statistics.averageAssignmentDurationDays")
+                    (str/replace "{{days}}" (str days)))])])))))
 
 
 (defn- checklist-item-status [completed?]

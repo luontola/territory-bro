@@ -23,6 +23,13 @@ JoinPage:
 DemoDisclaimer:
   welcome: Bem-vindo à demonstração
   introduction: Apenas você verá as alterações que fizer nesta congregação de demonstração.
+Statistics:
+  title: Estatísticas dos territórios
+  territories: Territórios
+  assignedTerritories: Atualmente atribuídos
+  coveredInPast6Months: Visitados nos últimos 6 meses
+  coveredInPast12Months: Visitados nos últimos 12 meses
+  averageAssignmentDurationDays: "Duração média da designação: {{days}} dias"
 GettingStarted:
   title: Começando
   congregationBoundary: Defina os limites da congregação

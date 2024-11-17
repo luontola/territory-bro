@@ -23,6 +23,13 @@ JoinPage:
 DemoDisclaimer:
   welcome: Selamat datang di demo
   introduction: Hanya Anda yang dapat melihat perubahan yang Anda buat di sidang demo ini.
+Statistics:
+  title: Statistik wilayah
+  territories: Wilayah
+  assignedTerritories: Sedang ditugaskan
+  coveredInPast6Months: Dikerjakan dalam 6 bulan terakhir
+  coveredInPast12Months: Dikerjakan dalam 12 bulan terakhir
+  averageAssignmentDurationDays: "Rata-rata durasi penugasan: {{days}} hari"
 GettingStarted:
   title: Memulai
   congregationBoundary: Tentukan batas jemaat

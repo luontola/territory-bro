@@ -23,6 +23,13 @@ JoinPage:
 DemoDisclaimer:
   welcome: Welkom bij de demo
   introduction: Alleen jij ziet de wijzigingen die je maakt in deze demogemeente.
+Statistics:
+  title: Territoriumstatistieken
+  territories: Gebieden
+  assignedTerritories: Momenteel toegewezen
+  coveredInPast6Months: Bezocht in de afgelopen 6 maanden
+  coveredInPast12Months: Bezocht in de afgelopen 12 maanden
+  averageAssignmentDurationDays: "Gemiddelde toewijzingsduur: {{days}} dagen"
 GettingStarted:
   title: Aan de slag
   congregationBoundary: Definieer de grenzen van de gemeente
