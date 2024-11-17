@@ -39,6 +39,11 @@ kbd {
     outline-offset: 2px;
 }
 
+:global .pure-form button[type=submit] {
+    /* PureCSS adds top margin to submit buttons on mobile, which misaligns it with the cancel button next to it */
+    margin-top: 0;
+}
+
 /* layout */
 
 .navbar {
