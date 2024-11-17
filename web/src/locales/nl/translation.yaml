@@ -22,7 +22,7 @@ JoinPage:
   copy: Kopiëren naar klembord
 DemoDisclaimer:
   welcome: Welkom bij de demo
-  introduction: Alleen jij ziet de wijzigingen die je maakt in deze demogemeente. Sommige functies zijn beperkt.
+  introduction: Alleen jij ziet de wijzigingen die je maakt in deze demogemeente.
 GettingStarted:
   title: Aan de slag
   congregationBoundary: Definieer de grenzen van de gemeente

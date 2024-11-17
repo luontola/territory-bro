@@ -22,7 +22,7 @@ JoinPage:
   copy: Copia negli appunti
 DemoDisclaimer:
   welcome: Benvenuto nella demo
-  introduction: Solo tu vedrai le modifiche che apporti in questa congregazione demo. Alcune funzionalità sono limitate.
+  introduction: Solo tu vedrai le modifiche che apporti in questa congregazione demo.
 GettingStarted:
   title: Iniziare
   congregationBoundary: Definisci i confini della congregazione

@@ -22,7 +22,7 @@ JoinPage:
   copy: Salin ke clipboard
 DemoDisclaimer:
   welcome: Selamat datang di demo
-  introduction: Hanya Anda yang dapat melihat perubahan yang Anda buat di sidang demo ini. Beberapa fitur dibatasi.
+  introduction: Hanya Anda yang dapat melihat perubahan yang Anda buat di sidang demo ini.
 GettingStarted:
   title: Memulai
   congregationBoundary: Tentukan batas jemaat
