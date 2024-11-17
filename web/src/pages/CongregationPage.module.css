@@ -10,15 +10,22 @@ ul.navigation {
     }
 }
 
-.getting-started {
-    width: min(100%, 30rem);
+ul.statistics {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    :is(li) {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
 }
 
 ol.checklist {
     padding-left: 1.7rem;
-    font-size: 1.1rem;
 
     :is(li) {
+        font-size: 1.1rem;
         margin-bottom: 0.5rem;
 
         &.completed {
