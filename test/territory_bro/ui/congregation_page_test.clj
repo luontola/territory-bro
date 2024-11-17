@@ -57,14 +57,14 @@
     (is (= (html/normalize-whitespace
             "Example Congregation
 
+             📍 Territories
+             🖨️ Printouts
+             ⚙️ Settings
+
              {info.svg} Getting started
              ⏳ Define the congregation boundary
              ⏳ Add some territories
-             We recommend subscribing to our mailing list to be notified about important Territory Bro updates.
-
-             📍 Territories
-             🖨️ Printouts
-             ⚙️ Settings")
+             We recommend subscribing to our mailing list to be notified about important Territory Bro updates.")
            (-> (congregation-page/view model)
                html/visible-text))))
 

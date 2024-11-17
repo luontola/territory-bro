@@ -1,7 +1,17 @@
+ul.navigation {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    :is(li) {
+        font-size: 1.25rem;
+        white-space: nowrap;
+        margin-bottom: 1rem;
+    }
+}
+
 .getting-started {
-    float: right;
     width: min(100%, 30rem);
-    margin-bottom: 1rem;
 }
 
 ol.checklist {
