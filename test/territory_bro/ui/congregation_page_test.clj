@@ -62,16 +62,16 @@
              ⏳ Add some territories
              We recommend subscribing to our mailing list to be notified about important Territory Bro updates.
 
-             Territories
-             Printouts
-             Settings")
+             📍 Territories
+             🖨️ Printouts
+             ⚙️ Settings")
            (-> (congregation-page/view model)
                html/visible-text))))
 
   (testing "minimal permissions"
     (is (= (html/normalize-whitespace
             "Example Congregation
-             Territories")
+             📍 Territories")
            (-> (congregation-page/view (dissoc model :permissions))
                html/visible-text)))))
 

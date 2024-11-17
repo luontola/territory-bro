@@ -50,14 +50,21 @@
   (h/html
    [:h1 (:congregation/name congregation)]
    (getting-started model)
-   [:p [:a {:href (str html/*page-path* "/territories")}
-        (i18n/t "TerritoryListPage.title")]]
-   (when (:view-printouts-page permissions)
-     [:p [:a {:href (str html/*page-path* "/printouts")}
-          (i18n/t "PrintoutPage.title")]])
-   (when (:view-settings-page permissions)
-     [:p [:a {:href (str html/*page-path* "/settings")}
-          (i18n/t "SettingsPage.title")]])))
+   [:div {:style {:font-size "1.25rem"}}
+    [:p [:a {:href (str html/*page-path* "/territories")}
+         [:span {:aria-hidden ""} "📍"]
+         " "
+         (i18n/t "TerritoryListPage.title")]]
+    (when (:view-printouts-page permissions)
+      [:p [:a {:href (str html/*page-path* "/printouts")}
+           [:span {:aria-hidden ""} "🖨️"]
+           " "
+           (i18n/t "PrintoutPage.title")]])
+    (when (:view-settings-page permissions)
+      [:p [:a {:href (str html/*page-path* "/settings")}
+           [:span {:aria-hidden ""} "⚙️"]
+           " "
+           (i18n/t "SettingsPage.title")]])]))
 
 (defn view! [request]
   (view (model! request)))
