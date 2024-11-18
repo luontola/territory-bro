@@ -183,12 +183,20 @@
                    [:tbody
                     (for [[year milestones] (sort-by first milestones-by-year)]
                       (let [total (count-milestone milestones :congregation-created)]
-                        [:tr
-                         [:td year]
-                         (for [k milestone-keys]
-                           (let [n (count-milestone milestones k)
-                                 percent (math/round (* 100 (/ n total)))]
-                             [:td percent "% (" n ")"]))]))]]]])))))
+                        (list
+                         [:tr
+                          [:td year]
+                          (for [k milestone-keys]
+                            (let [n (count-milestone milestones k)
+                                  percent (math/round (* 100 (/ n total)))]
+                              [:td percent "% (" n ")"]))]
+                         (for [cong (sort-by :congregation/name milestones)]
+                           [:tr
+                            [:td]
+                            [:td (:congregation/name cong)]
+                            (for [k (drop 1 milestone-keys)]
+                              [:td (if (pos? (count-milestone [cong] k))
+                                     "✅")])]))))]]]])))))
 
 (comment
   (build-report))
