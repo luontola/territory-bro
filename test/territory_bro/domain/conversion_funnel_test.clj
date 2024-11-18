@@ -1,11 +1,17 @@
 (ns territory-bro.domain.conversion-funnel-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.math :as math]
+            [clojure.string :as str]
+            [clojure.test :refer :all]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.conversion-funnel :as conversion-funnel]
+            [territory-bro.domain.demo :as demo]
             [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.domain.share :as share]
             [territory-bro.domain.territory :as territory]
-            [territory-bro.test.testutil :as testutil])
-  (:import (java.time Instant)))
+            [territory-bro.projections :as projections]
+            [territory-bro.test.testutil :as testutil]
+            [territory-bro.ui.hiccup :as h])
+  (:import (java.time Instant ZoneOffset)))
 
 (def cong-id dmz-test/cong-id)
 (def t1 (Instant/ofEpochSecond 1))
@@ -129,3 +135,60 @@
       (is (= expected (apply-events [created-event opened-event])))
       (is (= expected (apply-events [created-event opened-event (again opened-event)]))
           "records only the first time it happens"))))
+
+
+;;;; Reporting
+
+(defn count-milestone [milestones k]
+  (count (filterv some? (mapv k milestones))))
+
+(defn build-report []
+  (let [state (projections/cached-state)
+        milestones-by-cong-id (-> (::conversion-funnel/milestones state)
+                                  (dissoc demo/cong-id))
+        milestones (->> milestones-by-cong-id
+                        (mapv (fn [[cong-id milestones]]
+                                (assoc milestones
+                                       :congregation/id cong-id
+                                       :congregation/name (:congregation/name (congregation/get-unrestricted-congregation state cong-id)))))
+                        (remove #(str/starts-with? (:congregation/name %) "Test Congregation")))
+        milestones-by-year (->> milestones
+                                (group-by (fn [milestones]
+                                            (let [^Instant created (:congregation-created milestones)]
+                                              (.getYear (.atOffset created ZoneOffset/UTC))))))
+        milestone-keys [:congregation-created
+                        #_:congregation-boundary-created
+                        #_:region-created
+                        :territory-created
+                        :ten-territories-created
+                        #_:territory-assigned
+                        :share-link-created
+                        :qr-code-scanned]]
+    (spit "target/conversion-funnel.html"
+          (str (h/html
+                [:html
+                 [:head
+                  [:title "Conversion Funnel"]
+                  [:link {:rel "stylesheet"
+                          :href "https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css"
+                          :integrity "sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls"
+                          :crossorigin "anonymous"}]]
+                 [:body
+                  [:table.pure-table
+                   [:thead
+                    [:tr
+                     [:th "Year"]
+                     (for [k milestone-keys]
+                       [:th (name k)])]]
+                   [:tbody
+                    (for [[year milestones] (sort-by first milestones-by-year)]
+                      (let [total (count-milestone milestones :congregation-created)]
+                        [:tr
+                         [:td year]
+                         (for [k milestone-keys]
+                           (let [n (count-milestone milestones k)
+                                 percent (math/round (* 100 (/ n total)))]
+                             [:td percent "% (" n ")"]))]))]]]])))))
+
+(comment
+  (build-report))
