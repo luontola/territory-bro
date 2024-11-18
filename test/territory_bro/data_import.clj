@@ -3,6 +3,7 @@
             [clojure.test :refer :all]
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.domain.publisher :as publisher]
+            [territory-bro.domain.territory :as territory]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
             [territory-bro.projections :as projections]
@@ -107,7 +108,7 @@
           publishers (publisher/list-publishers conn cong-id)
           publisher-name->id (-> (group-by :publisher/name publishers)
                                  (update-vals #(-> % first :publisher/id)))
-          territories (vals (get-in state [:territory-bro.domain.territory/territories cong-id]))
+          territories (territory/list-unrestricted-territories state cong-id)
           territory-number->id (-> (group-by :territory/number territories)
                                    (update-vals (fn [territories]
                                                   (when (= 1 (count territories))

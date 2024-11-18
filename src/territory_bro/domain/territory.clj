@@ -83,6 +83,9 @@
   (when-some [territory (get-in state [::territories cong-id territory-id])]
     (assoc territory :congregation/id cong-id)))
 
+(defn list-unrestricted-territories [state cong-id]
+  (vals (get-in state [::territories cong-id])))
+
 
 ;;;; Write model
 

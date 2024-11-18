@@ -134,7 +134,8 @@
             cache (apply-transient-events cache (demo-gis-events conn source-cong-id))
             congregation (congregation/get-unrestricted-congregation (:state cache) demo/cong-id)
             today (.toLocalDate (congregation/local-time congregation))
-            territory-ids (keys (get-in cache [:state ::territory/territories demo/cong-id]))
+            territory-ids (->> (territory/list-unrestricted-territories (:state cache) demo/cong-id)
+                               (mapv :territory/id))
             assignment-events (mapcat #(demo/generate-assignment-events % today)
                                       territory-ids)
             cache (apply-transient-events cache assignment-events)]

@@ -280,11 +280,11 @@
 (defn list-raw-territories [cong-id]
   (cond
     (allowed? [:view-congregation cong-id])
-    (vals (get-in *state* [::territory/territories cong-id]))
+    (territory/list-unrestricted-territories *state* cong-id)
 
     (allowed? [:view-congregation-temporarily cong-id])
     (for [[_ _ territory-id] (permissions/match *state* (auth/current-user-id) [:view-territory cong-id '*])]
-      (get-in *state* [::territory/territories cong-id territory-id]))))
+      (territory/get-unrestricted-territory *state* cong-id territory-id))))
 
 (defn list-territories [cong-id]
   (->> (list-raw-territories cong-id)
