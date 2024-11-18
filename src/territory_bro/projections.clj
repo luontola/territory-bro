@@ -5,6 +5,7 @@
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
+            [territory-bro.domain.conversion-funnel :as conversion-funnel]
             [territory-bro.domain.demo :as demo]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.share :as share]
@@ -41,7 +42,9 @@
         (gis-user/projection event)
         (region/projection event)
         (share/projection event)
-        (territory/projection event))
+        (territory/projection event)
+        ;; last, so it can read the state produces by the other projections
+        (conversion-funnel/projection event))
     (catch Throwable t
       (log/error t "Failed to process event" (pr-str event))
       (throw t))))

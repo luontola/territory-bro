@@ -831,6 +831,7 @@
 (deftest open-share!-test
   (let [session {::unrelated "session data"}
         expected [{:share/id share-id
+                   :share/type :link
                    :congregation/id cong-id
                    :territory/id territory-id}
                   {::dmz/opened-shares #{share-id}

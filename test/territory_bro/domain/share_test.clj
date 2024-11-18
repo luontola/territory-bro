@@ -58,6 +58,7 @@
     (let [events [share-created]
           expected {::share/share-keys {share-key share-id}
                     ::share/shares {share-id {:share/id share-id
+                                              :share/type :link
                                               :congregation/id cong-id
                                               :territory/id territory-id}}}]
       (is (= expected (apply-events events)))
@@ -122,6 +123,7 @@
   (let [state (apply-events [share-created])]
     (testing "existing share"
       (is (= {:share/id share-id
+              :share/type :link
               :congregation/id cong-id
               :territory/id territory-id}
              (share/find-share-by-key state share-key))))

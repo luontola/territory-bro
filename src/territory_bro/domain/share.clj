@@ -23,6 +23,7 @@
   (-> state
       (assoc-in [::share-keys (:share/key event)] (:share/id event))
       (assoc-in [::shares (:share/id event)] (select-keys event [:share/id
+                                                                 :share/type
                                                                  :congregation/id
                                                                  :territory/id]))))
 
@@ -47,8 +48,11 @@
 
 ;;;; Queries
 
+(defn get-share [state share-id]
+  (get-in state [::shares share-id]))
+
 (defn share-exists? [state share-id]
-  (some? (get-in state [::shares share-id])))
+  (some? (get-share state share-id)))
 
 (defn check-share-exists [state share-id]
   (when-not (share-exists? state share-id)
