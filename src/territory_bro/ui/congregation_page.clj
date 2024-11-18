@@ -25,12 +25,12 @@
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
         congregation (dmz/get-congregation cong-id)
-        territories (dmz/list-territories cong-id)
+        territories (dmz/list-raw-territories cong-id)
         today (.toLocalDate (congregation/local-time congregation))
         cutoff-6-months (.minusMonths today 6)
         cutoff-12-months (.minusMonths today 12)
         assignment-durations-in-days (into []
-                                           (comp (mapcat #(dmz/get-territory-assignment-history cong-id (:territory/id %)))
+                                           (comp (mapcat #(vals (:territory/assignments %)))
                                                  (filter :assignment/end-date)
                                                  (filter :assignment/covered-dates)
                                                  (filter #(. cutoff-12-months isBefore (:assignment/end-date %)))

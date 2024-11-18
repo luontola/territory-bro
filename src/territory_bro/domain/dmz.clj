@@ -277,14 +277,17 @@
         (get @**demo-do-not-calls* territory-id))
       (:territory/do-not-calls (do-not-calls/get-do-not-calls *conn* cong-id territory-id)))))
 
-(defn list-territories [cong-id]
-  (->> (cond
-         (allowed? [:view-congregation cong-id])
-         (vals (get-in *state* [::territory/territories cong-id]))
+(defn list-raw-territories [cong-id]
+  (cond
+    (allowed? [:view-congregation cong-id])
+    (vals (get-in *state* [::territory/territories cong-id]))
 
-         (allowed? [:view-congregation-temporarily cong-id])
-         (for [[_ _ territory-id] (permissions/match *state* (auth/current-user-id) [:view-territory cong-id '*])]
-           (get-in *state* [::territory/territories cong-id territory-id])))
+    (allowed? [:view-congregation-temporarily cong-id])
+    (for [[_ _ territory-id] (permissions/match *state* (auth/current-user-id) [:view-territory cong-id '*])]
+      (get-in *state* [::territory/territories cong-id territory-id]))))
+
+(defn list-territories [cong-id]
+  (->> (list-raw-territories cong-id)
        (util/natural-sort-by :territory/number)
        (mapv (fn [territory]
                (-> territory
