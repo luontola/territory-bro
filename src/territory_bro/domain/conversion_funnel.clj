@@ -53,3 +53,9 @@
   (let [share (share/get-share state (:share/id event))
         event (assoc event :congregation/id (:congregation/id share))]
     (record-milestone state event :qr-code-scanned #(= :qr-code (:share/type share)))))
+
+
+;;;; Queries
+
+(defn milestones [state cong-id]
+  (get-in state [::milestones cong-id]))

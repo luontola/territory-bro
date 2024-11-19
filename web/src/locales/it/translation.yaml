@@ -34,6 +34,10 @@ GettingStarted:
   title: Iniziare
   congregationBoundary: Definisci i confini della congregazione
   territories: Aggiungi alcuni territori
+  publishers: Aggiungi alcuni proclamatori
+  territoriesAssigned: Assegna un territorio a un proclamatore
+  shareLinkCreated: Prova a condividere un link a un territorio
+  qrCodeScanned: Prova a scansionare il codice QR di una stampa
 TerritoryListPage:
   title: Territori
   search: Cerca

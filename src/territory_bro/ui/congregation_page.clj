@@ -26,6 +26,8 @@
   (let [cong-id (get-in request [:path-params :congregation])
         congregation (dmz/get-congregation cong-id)
         territories (dmz/list-raw-territories cong-id)
+        publishers (dmz/list-publishers cong-id)
+        milestones (dmz/milestones cong-id)
         today (.toLocalDate (congregation/local-time congregation))
         cutoff-6-months (.minusMonths today 6)
         cutoff-12-months (.minusMonths today 12)
@@ -38,7 +40,11 @@
                                            territories)]
     {:congregation (select-keys congregation [:congregation/name])
      :getting-started {:congregation-boundary? (some? (dmz/get-congregation-boundary cong-id))
-                       :territories? (not (empty? territories))}
+                       :territories? (not (empty? territories))
+                       :publishers? (not (empty? publishers))
+                       :territories-assigned? (contains? milestones :territory-assigned)
+                       :share-link-created? (contains? milestones :share-link-created)
+                       :qr-code-scanned? (contains? milestones :qr-code-scanned)}
      :statistics {:territories (count territories)
                   :assigned-territories (count (filterv :territory/current-assignment territories))
                   :covered-in-past-6-months (count (filterv (covered-after? cutoff-6-months) territories))
@@ -97,7 +103,19 @@
            (i18n/t "GettingStarted.congregationBoundary")]]
          [:li (checklist-item-status (:territories? getting-started))
           [:a {:href "/documentation#how-to-create-and-edit-territories"}
-           (i18n/t "GettingStarted.territories")]]]
+           (i18n/t "GettingStarted.territories")]]
+         [:li (checklist-item-status (:publishers? getting-started))
+          [:a {:href (str html/*page-path* "/settings#publishers-section")}
+           (i18n/t "GettingStarted.publishers")]]
+         [:li (checklist-item-status (:territories-assigned? getting-started))
+          [:a {:href (str html/*page-path* "/territories")}
+           (i18n/t "GettingStarted.territoriesAssigned")]]
+         [:li (checklist-item-status (:share-link-created? getting-started))
+          [:a {:href (str html/*page-path* "/territories")}
+           (i18n/t "GettingStarted.shareLinkCreated")]]
+         [:li (checklist-item-status (:qr-code-scanned? getting-started))
+          [:a {:href (str html/*page-path* "/printouts")}
+           (i18n/t "GettingStarted.qrCodeScanned")]]]
         [:p (-> (i18n/t "SupportPage.mailingListAd")
                 (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")
                 (str/replace "</0>" "</a>")

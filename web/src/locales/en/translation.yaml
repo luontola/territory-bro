@@ -34,6 +34,10 @@ GettingStarted:
   title: Getting started
   congregationBoundary: Define the congregation boundary
   territories: Add some territories
+  publishers: Add some publishers
+  territoriesAssigned: Assign a territory to a publisher
+  shareLinkCreated: Try sharing a link to a territory
+  qrCodeScanned: Try scanning the QR code of a printout
 TerritoryListPage:
   title: Territories
   search: Search

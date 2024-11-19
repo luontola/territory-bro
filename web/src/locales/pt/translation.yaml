@@ -31,9 +31,13 @@ Statistics:
   coveredInPast12Months: Visitados nos últimos 12 meses
   averageAssignmentDurationDays: "Duração média da designação: {{days}} dias"
 GettingStarted:
-  title: Começando
+  title: Primeiros passos
   congregationBoundary: Defina os limites da congregação
   territories: Adicione alguns territórios
+  publishers: Adicione alguns publicadores
+  territoriesAssigned: Atribua um território a um publicador
+  shareLinkCreated: Experimente compartilhar um link para um território
+  qrCodeScanned: Experimente escanear o código QR de uma impressão
 TerritoryListPage:
   title: Territórios
   search: Pesquisar

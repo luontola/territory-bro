@@ -128,21 +128,25 @@
    :share/type :link
    :congregation/id cong-id
    :territory/id territory-id})
+(def share-opened
+  {:event/type :share.event/share-opened
+   :share/id share-id})
 
 (def test-events
-  (flatten [congregation-created
-            settings-updated
-            (congregation/admin-permissions-granted cong-id user-id)
-            (congregation/admin-permissions-granted cong-id user-id2)
-            gis-user-created
-            territory-defined
-            territory-defined2
-            congregation-boundary-defined
-            region-defined
-            card-minimap-viewport-defined
-            territory-assigned
-            territory-covered
-            share-created]))
+  (->> (flatten [congregation-created
+                 settings-updated
+                 (congregation/admin-permissions-granted cong-id user-id)
+                 (congregation/admin-permissions-granted cong-id user-id2)
+                 gis-user-created
+                 territory-defined
+                 territory-defined2
+                 congregation-boundary-defined
+                 region-defined
+                 card-minimap-viewport-defined
+                 territory-assigned
+                 territory-covered
+                 share-created])
+       (mapv #(assoc % :event/time test-time))))
 
 (def demo-events
   (concat [demo/congregation-created]
@@ -375,6 +379,44 @@
       (testing "opened a share"
         (binding [dmz/*state* (apply-share-opened dmz/*state*)]
           (is (empty? (dmz/list-congregations))))))))
+
+(deftest milestones-test
+  (let [expected {:congregation-boundary-created test-time
+                  :congregation-created test-time
+                  :region-created test-time
+                  :share-link-created test-time
+                  :territory-assigned test-time
+                  :territory-created test-time}
+        ;; The generated demo events don't have an :event/time, so all completed milestones have a nil value.
+        ;; Unfinished milestones don't even have a key, so there is no ambiguity; just check whether a key exists.
+        demo-expected {:congregation-boundary-created nil
+                       :congregation-created nil
+                       :region-created nil
+                       :territory-assigned nil
+                       :territory-created nil}]
+
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/milestones cong-id)))))
+
+    (testutil/with-super-user
+      (testing "super user"
+        (is (= expected (dmz/milestones cong-id)))))
+
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (empty? (dmz/milestones cong-id)))))
+
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (empty? (dmz/milestones cong-id))))
+
+      (testing "demo congregation"
+        (is (= demo-expected (dmz/milestones "demo"))))
+
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (empty? (dmz/milestones cong-id))))))))
 
 
 ;;;; Settings

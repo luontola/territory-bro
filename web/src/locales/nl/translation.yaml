@@ -33,7 +33,11 @@ Statistics:
 GettingStarted:
   title: Aan de slag
   congregationBoundary: Definieer de grenzen van de gemeente
-  territories: Voeg enkele territoria toe
+  territories: Voeg enkele gebieden toe
+  publishers: Voeg enkele verkondigers toe
+  territoriesAssigned: Wijs een gebied toe aan een verkondiger
+  shareLinkCreated: Probeer een link naar een gebied te delen
+  qrCodeScanned: Probeer de QR-code van een afdruk te scannen
 TerritoryListPage:
   title: Territoria
   search: Zoeken

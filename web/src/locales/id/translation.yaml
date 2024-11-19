@@ -34,6 +34,10 @@ GettingStarted:
   title: Memulai
   congregationBoundary: Tentukan batas jemaat
   territories: Tambahkan beberapa wilayah
+  publishers: Tambahkan beberapa penyiar
+  territoriesAssigned: Tugaskan wilayah kepada seorang penyiar
+  shareLinkCreated: Cobalah membagikan tautan ke wilayah
+  qrCodeScanned: Cobalah memindai kode QR dari cetakan
 TerritoryListPage:
   title: Wilayah
   search: Cari

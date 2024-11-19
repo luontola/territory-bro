@@ -5,6 +5,7 @@
             [territory-bro.domain.card-minimap-viewport :as card-minimap-viewport]
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.congregation-boundary :as congregation-boundary]
+            [territory-bro.domain.conversion-funnel :as conversion-funnel]
             [territory-bro.domain.demo :as demo]
             [territory-bro.domain.do-not-calls :as do-not-calls]
             [territory-bro.domain.loan :as loan]
@@ -212,6 +213,10 @@
   (->> (permissions/match *state* (auth/current-user-id) [:view-congregation '*])
        (into [] permits->congregations)
        (util/natural-sort-by :congregation/name)))
+
+(defn milestones [cong-id]
+  (when (allowed? [:view-congregation cong-id])
+    (conversion-funnel/milestones *state* cong-id)))
 
 
 ;;;; Settings

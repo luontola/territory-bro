@@ -31,9 +31,13 @@ Statistics:
   coveredInPast12Months: Käyty viimeisen 12 kk aikana
   averageAssignmentDurationDays: "Lainan kesto keskimäärin: {{days}} päivää"
 GettingStarted:
-  title: Aloittaminen
+  title: Ohjattu käyttöönotto
   congregationBoundary: Määritä seurakunnan rajat
-  territories: Lisää joitakin alueita
+  territories: Lisää alueita
+  publishers: Lisää julistajia
+  territoriesAssigned: Anna alue julistajalle
+  shareLinkCreated: Kokeile jakaa linkki alueeseen
+  qrCodeScanned: Kokeile skannata tulosteen QR-koodi
 TerritoryListPage:
   title: Alueet
   search: Hae
