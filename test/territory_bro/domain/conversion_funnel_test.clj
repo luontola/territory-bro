@@ -188,16 +188,17 @@
                           :crossorigin "anonymous"}]]
                  [:body
                   [:table.pure-table
-                   [:thead
+                   [:thead {:style {:position "sticky"
+                                    :top "-1px"}} ; the header has a top border which doesn't stick, but leaves a 1px see-through gap
                     [:tr
                      [:th "Year"]
                      (for [k milestone-keys]
-                       [:th (name k)])]]
+                       [:th (str/replace (name k) "-" " ")])]]
                    [:tbody
                     (for [[year milestones] (sort-by first milestones-by-year)]
                       (let [total (count-milestone milestones :congregation-created)]
                         (list
-                         [:tr
+                         [:tr {:style {:border-top "1px solid #cbcbcb"}}
                           [:td year]
                           (for [k milestone-keys]
                             (let [n (count-milestone milestones k)
