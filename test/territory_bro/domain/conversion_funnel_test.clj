@@ -11,7 +11,8 @@
             [territory-bro.projections :as projections]
             [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.hiccup :as h])
-  (:import (java.time Instant OffsetDateTime YearMonth ZoneOffset)))
+  (:import (java.time Instant LocalDateTime OffsetDateTime YearMonth ZoneOffset)
+           (java.time.temporal ChronoUnit)))
 
 (def cong-id dmz-test/cong-id)
 (def t1 (Instant/ofEpochSecond 1))
@@ -155,6 +156,56 @@
 (defn count-milestone [milestones k]
   (count (filterv some? (mapv k milestones))))
 
+(defn render-report [{:keys [milestones-by-year show-congregations?]}]
+  (let [milestone-keys [:congregation-created
+                        #_:congregation-boundary-created
+                        #_:region-created
+                        :territory-created
+                        :ten-territories-created
+                        #_:territory-assigned
+                        :share-link-created
+                        :qr-code-scanned]]
+    (str (h/html
+          [:html
+           [:head
+            [:title "Conversion Funnel"]
+            [:link {:rel "stylesheet"
+                    :href "https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css"
+                    :integrity "sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls"
+                    :crossorigin "anonymous"}]]
+           [:body
+            [:table.pure-table
+             [:thead {:style {:position "sticky"
+                              :top "-1px"}} ; the header has a top border which doesn't stick, but leaves a 1px see-through gap
+              [:tr
+               [:th "Year"]
+               (for [k milestone-keys]
+                 [:th (str/replace (name k) "-" " ")])]]
+             [:tbody
+              (for [[year milestones] (sort-by first milestones-by-year)]
+                (let [total (count-milestone milestones :congregation-created)]
+                  (list
+                   [:tr (when show-congregations?
+                          {:style {:border-top "1px solid #cbcbcb"}})
+                    [:td year]
+                    (for [k milestone-keys]
+                      (let [n (count-milestone milestones k)
+                            percent (math/round (* 100 (/ n total)))]
+                        [:td percent "% (" n ")"]))]
+                   (when show-congregations?
+                     (for [cong (sort-by :congregation/name milestones)]
+                       [:tr
+                        [:td]
+                        [:td (:congregation/name cong)]
+                        (for [k (drop 1 milestone-keys)]
+                          [:td (if (pos? (count-milestone [cong] k))
+                                 "✅")])])))))]]]]))))
+
+(defn write-file! [file content]
+  (spit file content)
+  (println (-> (LocalDateTime/now) (.truncatedTo ChronoUnit/SECONDS) str)
+           "- Wrote" file))
+
 (defn build-report []
   (let [state (projections/cached-state)
         milestones-by-cong-id (-> (::conversion-funnel/milestones state)
@@ -168,49 +219,13 @@
         milestones-by-year (->> milestones
                                 (group-by (fn [milestones]
                                             (let [^Instant created (:congregation-created milestones)]
-                                              (year-quarter (.atOffset created ZoneOffset/UTC))))))
-        milestone-keys [:congregation-created
-                        #_:congregation-boundary-created
-                        #_:region-created
-                        :territory-created
-                        :ten-territories-created
-                        #_:territory-assigned
-                        :share-link-created
-                        :qr-code-scanned]]
-    (spit "target/conversion-funnel.html"
-          (str (h/html
-                [:html
-                 [:head
-                  [:title "Conversion Funnel"]
-                  [:link {:rel "stylesheet"
-                          :href "https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css"
-                          :integrity "sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls"
-                          :crossorigin "anonymous"}]]
-                 [:body
-                  [:table.pure-table
-                   [:thead {:style {:position "sticky"
-                                    :top "-1px"}} ; the header has a top border which doesn't stick, but leaves a 1px see-through gap
-                    [:tr
-                     [:th "Year"]
-                     (for [k milestone-keys]
-                       [:th (str/replace (name k) "-" " ")])]]
-                   [:tbody
-                    (for [[year milestones] (sort-by first milestones-by-year)]
-                      (let [total (count-milestone milestones :congregation-created)]
-                        (list
-                         [:tr {:style {:border-top "1px solid #cbcbcb"}}
-                          [:td year]
-                          (for [k milestone-keys]
-                            (let [n (count-milestone milestones k)
-                                  percent (math/round (* 100 (/ n total)))]
-                              [:td percent "% (" n ")"]))]
-                         (for [cong (sort-by :congregation/name milestones)]
-                           [:tr
-                            [:td]
-                            [:td (:congregation/name cong)]
-                            (for [k (drop 1 milestone-keys)]
-                              [:td (if (pos? (count-milestone [cong] k))
-                                     "✅")])]))))]]]])))))
+                                              (year-quarter (.atOffset created ZoneOffset/UTC))))))]
+    (write-file! "target/conversion-funnel.html"
+                 (render-report {:milestones-by-year milestones-by-year
+                                 :show-congregations? false}))
+    (write-file! "target/conversion-funnel-details.html"
+                 (render-report {:milestones-by-year milestones-by-year
+                                 :show-congregations? true}))))
 
 (comment
   (build-report))
