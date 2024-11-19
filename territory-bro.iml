@@ -222,6 +222,7 @@
     <orderEntry type="library" name="Leiningen: org.msgpack/msgpack:0.6.12" level="project" />
     <orderEntry type="library" name="Leiningen: org.nrepl/incomplete:0.1.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.objenesis/objenesis:3.3" level="project" />
+    <orderEntry type="library" name="Leiningen: org.openjdk.jol/jol-core:0.17" level="project" />
     <orderEntry type="library" name="Leiningen: org.postgresql/postgresql:42.7.4" level="project" />
     <orderEntry type="library" name="Leiningen: org.reflections/reflections:0.10.2" level="project" />
     <orderEntry type="library" name="Leiningen: org.ring-clojure/ring-core-protocols:1.13.0" level="project" />

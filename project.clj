@@ -38,6 +38,7 @@
                  [org.flywaydb/flyway-core "10.21.0"]
                  [org.flywaydb/flyway-database-postgresql "10.21.0"]
                  [org.locationtech.jts/jts-core "1.20.0"]
+                 [org.openjdk.jol/jol-core "0.17"]
                  [org.postgresql/postgresql "42.7.4"]
                  [org.reflections/reflections "0.10.2"]
                  [prismatic/schema "1.4.1"]

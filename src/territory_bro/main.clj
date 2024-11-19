@@ -10,7 +10,8 @@
             [territory-bro.migration :as migration]
             [territory-bro.projections :as projections])
   (:import (org.eclipse.jetty.server Server)
-           (org.eclipse.jetty.server.handler.gzip GzipHandler))
+           (org.eclipse.jetty.server.handler.gzip GzipHandler)
+           (org.openjdk.jol.info GraphLayout))
   (:gen-class))
 
 (mount/defstate ^{:tag Server, :on-reload :noop} http-server
@@ -59,6 +60,7 @@
 
   (doto (Runtime/getRuntime)
     (.addShutdownHook (Thread. ^Runnable stop-app)))
+  (log/infof "Projection state memory usage: %,d bytes" (.totalSize (GraphLayout/parseInstance (into-array [(projections/cached-state)]))))
   (log/info "Started"))
 
 (defn -main [& _args]
