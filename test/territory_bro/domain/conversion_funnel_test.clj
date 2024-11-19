@@ -11,7 +11,7 @@
             [territory-bro.projections :as projections]
             [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.hiccup :as h])
-  (:import (java.time Instant ZoneOffset)))
+  (:import (java.time Instant OffsetDateTime YearMonth ZoneOffset)))
 
 (def cong-id dmz-test/cong-id)
 (def t1 (Instant/ofEpochSecond 1))
@@ -139,6 +139,19 @@
 
 ;;;; Reporting
 
+(defn quarter [month]
+  (inc (long (/ (dec month) 3))))
+
+(deftest quarter-test
+  (is (= 1 (quarter 1) (quarter 2) (quarter 3)))
+  (is (= 2 (quarter 4) (quarter 5) (quarter 6)))
+  (is (= 3 (quarter 7) (quarter 8) (quarter 9)))
+  (is (= 4 (quarter 10) (quarter 11) (quarter 12))))
+
+(defn year-quarter [^OffsetDateTime timestamp]
+  (let [ym (YearMonth/from timestamp)]
+    (str (.getYear ym) "-Q" (quarter (.getMonthValue ym)))))
+
 (defn count-milestone [milestones k]
   (count (filterv some? (mapv k milestones))))
 
@@ -155,7 +168,7 @@
         milestones-by-year (->> milestones
                                 (group-by (fn [milestones]
                                             (let [^Instant created (:congregation-created milestones)]
-                                              (.getYear (.atOffset created ZoneOffset/UTC))))))
+                                              (year-quarter (.atOffset created ZoneOffset/UTC))))))
         milestone-keys [:congregation-created
                         #_:congregation-boundary-created
                         #_:region-created
