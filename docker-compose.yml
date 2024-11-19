@@ -31,7 +31,7 @@ services:
   # https://github.com/postgis/docker-postgis/pull/356
   # https://hub.docker.com/r/imresamu/postgis/tags
   db:
-    image: imresamu/postgis:16-3.4
+    image: imresamu/postgis:16-3.5
     environment:
       POSTGRES_USER: territorybro
       POSTGRES_PASSWORD: territorybro
