@@ -22,7 +22,8 @@
             [territory-bro.infra.poller :as poller])
   (:import (com.google.common.util.concurrent ThreadFactoryBuilder)
            (java.time Duration)
-           (java.util.concurrent Executors ScheduledExecutorService TimeUnit)))
+           (java.util.concurrent Executors ScheduledExecutorService TimeUnit)
+           (org.openjdk.jol.info GraphLayout)))
 
 ;;;; Cache
 
@@ -69,6 +70,29 @@
    but does not update the cache (it could cause dirty reads to others)."
   [conn]
   (:state (apply-new-events @*cache conn)))
+
+
+(defn memory-usage ^GraphLayout [obj]
+  (GraphLayout/parseInstance (into-array [obj])))
+
+(defn memory-usage-by-key [m]
+  (doseq [entry (->> m
+                     (map (fn [[k v]]
+                            {:key k
+                             :size (if (nil? v)
+                                     0
+                                     (.totalSize (memory-usage v)))}))
+                     (sort-by :size)
+                     reverse)]
+    (printf "%,12d bytes in %s\n" (:size entry) (:key entry))))
+
+(defn congregation-state [state cong-id]
+  (update-vals state #(get % cong-id)))
+
+(comment
+  (memory-usage-by-key (cached-state))
+  (memory-usage-by-key (::territory/territories (cached-state)))
+  (memory-usage-by-key (congregation-state (cached-state) "demo")))
 
 
 ;;;; Refreshing projections
