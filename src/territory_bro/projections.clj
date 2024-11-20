@@ -73,6 +73,29 @@
 
 
 (defn memory-usage ^GraphLayout [obj]
+  ;; This will print the following warnings. The size estimates might be a bit off,
+  ;; but that is fine as long as they're in the same ballpark.
+  ;;
+  ;; # WARNING: Unable to get Instrumentation. Dynamic Attach failed. You may add this JAR as -javaagent manually,
+  ;; or supply -Djdk.attach.allowAttachSelf
+  ;; # WARNING: Unable to attach Serviceability Agent. You can try again with escalated privileges. Two options:
+  ;; a) use -Djol.tryWithSudo=true to try with sudo; b) echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+  ;;
+  ;; To enable the Java Agent, you will need to add the following manifest entries
+  ;; to the uberjar in project.clj. See https://github.com/openjdk/jol#use-as-library-dependency
+  (comment
+    :manifest {"Premain-Class" "org.openjdk.jol.vm.InstrumentationSupport"
+               "Launcher-Agent-Class" "org.openjdk.jol.vm.InstrumentationSupport$Installer"})
+  ;;
+  ;; With those manifest entries in place, the reported size changes by about 5 %. No significant difference.
+  ;; But even then, JOL will give the following warning.
+  ;;
+  ;; # WARNING: Unable to attach Serviceability Agent. Unable to attach even with module exceptions:
+  ;; [org.openjdk.jol.vm.sa.SASupportException: Sense failed., org.openjdk.jol.vm.sa.SASupportException: Sense failed.,
+  ;; org.openjdk.jol.vm.sa.SASupportException: Sense failed.]
+  ;;
+  ;; The javadocs of org.openjdk.jol.vm.sa.ServiceabilityAgentSupport indicate that
+  ;; it might require running the app as root, which is not worth the risks.
   (GraphLayout/parseInstance (into-array [obj])))
 
 (defn memory-usage-by-key [m]
