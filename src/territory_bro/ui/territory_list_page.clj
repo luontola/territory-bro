@@ -22,8 +22,8 @@
 
 (defn assignment-status-sort-key [territory]
   (if-some [assignment (:territory/current-assignment territory)]
-    [1 (:assignment/start-date assignment)]
-    [2 (- (last-covered-sort-key territory))]))
+    [2 (- (.toEpochDay ^LocalDate (:assignment/start-date assignment)))]
+    [1 (last-covered-sort-key territory)]))
 
 (defn sort-territories [sort-column sort-reverse? territories]
   (cond->> territories

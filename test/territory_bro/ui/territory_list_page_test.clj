@@ -193,17 +193,17 @@
           "reverse")))
 
   (testing "sort by assignment status"
-    ;; Primary use case: find overdue assigned territories.
-    ;; Secondary use case: find vacant territories which haven't been covered for a long time.
-    (let [expected [{:description "assigned, most stale"
-                     :territory/current-assignment {:assignment/start-date (LocalDate/ofEpochDay 1)}}
-                    {:description "assigned"
-                     :territory/current-assignment {:assignment/start-date (LocalDate/ofEpochDay 2)}}
-                    {:description "vacant"
-                     :territory/last-covered (LocalDate/ofEpochDay 2)}
+    ;; Primary use case: assign a territory, find vacant territories which haven't been covered for a long time.
+    ;; Secondary use case: find overdue assigned territories, to get them covered faster.
+    (let [expected [{:description "untouched"}
                     {:description "vacant, most stale"
                      :territory/last-covered (LocalDate/ofEpochDay 1)}
-                    {:description "untouched"}]]
+                    {:description "vacant"
+                     :territory/last-covered (LocalDate/ofEpochDay 2)}
+                    {:description "assigned"
+                     :territory/current-assignment {:assignment/start-date (LocalDate/ofEpochDay 2)}}
+                    {:description "assigned, most stale"
+                     :territory/current-assignment {:assignment/start-date (LocalDate/ofEpochDay 1)}}]]
       (is (= expected
              (territory-list-page/sort-territories :status false (shuffle expected))))
       (is (= (reverse expected)
@@ -212,12 +212,12 @@
 
   (testing "sort by last covered"
     ;; Primary use case: find territories which haven't been covered for a long time.
+    ;; Could be either to assign them or to find overdue assigned territories.
     (let [expected [{:description "untouched"}
                     {:description "most stale"
                      :territory/last-covered (LocalDate/ofEpochDay 1)}
                     {:description "least stale"
                      :territory/last-covered (LocalDate/ofEpochDay 2)}]]
-
       (is (= expected
              (territory-list-page/sort-territories :covered false (shuffle expected))))
       (is (= (reverse expected)
