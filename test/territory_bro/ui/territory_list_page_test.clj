@@ -228,7 +228,7 @@
   (testing "sorted by another column"
     (let [html (territory-list-page/sortable-column-header "Label" :stuff {:sort-column :other
                                                                            :sort-reverse? false})]
-      (is (= "Label ↕" (html/visible-text html)))
+      (is (= "Label" (html/visible-text html)))
       (is (str/includes? html "href=\"?sort=stuff\""))))
 
   (testing "sorted by current column"
@@ -249,7 +249,7 @@
             "Territories
 
              Search [] Clear
-             Number ↑   Region       Addresses       Status ↕       Last covered ↕
+             Number ↑   Region       Addresses       Status         Last covered
              123        the region   the addresses   Up for grabs")
            (-> (territory-list-page/view model)
                html/visible-text))))
@@ -259,7 +259,7 @@
             "Territories
 
              Search [] Clear
-             Number ↑   Region       Addresses       Status ↕                            Last covered ↕
+             Number ↑   Region       Addresses       Status                              Last covered
              123        the region   the addresses   Assigned to John Doe for 2 months   1 months ago (2000-02-01)")
            (-> (territory-list-page/view model-with-assignments)
                html/visible-text))
@@ -268,7 +268,7 @@
             "Territories
 
              Search [] Clear
-             Number ↑   Region       Addresses       Status ↕       Last covered ↕
+             Number ↑   Region       Addresses       Status         Last covered
              123        the region   the addresses   Up for grabs   1 months ago (2000-02-01)")
            (-> (territory-list-page/view model-with-returned-territory)
                html/visible-text))
@@ -299,7 +299,7 @@
             "Territories
 
              Search [] Clear
-             Number ↑   Region       Addresses       Status ↕       Last covered ↕
+             Number ↑   Region       Addresses       Status         Last covered
              -          the region   the addresses   Up for grabs")
            (-> (territory-list-page/view (replace-in model [:territories 0 :territory/number] "123" ""))
                html/visible-text))))
@@ -336,7 +336,7 @@
                You will need to login to see the rest.
 
                Search [] Clear
-               Number ↑   Region       Addresses       Status ↕       Last covered ↕
+               Number ↑   Region       Addresses       Status         Last covered
                123        the region   the addresses   Up for grabs")
              (-> (territory-list-page/view anonymous-model)
                  html/visible-text))))
@@ -350,7 +350,7 @@
                You will need to request access to see the rest.
 
                Search [] Clear
-               Number ↑   Region       Addresses       Status ↕       Last covered ↕
+               Number ↑   Region       Addresses       Status         Last covered
                123        the region   the addresses   Up for grabs")
              (binding [auth/*user* {:user/id (random-uuid)}]
                (-> (territory-list-page/view anonymous-model)

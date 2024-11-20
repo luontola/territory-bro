@@ -44,11 +44,13 @@ a.sortable {
 }
 
 .sort-icon {
+    grid-row: 1;
+    grid-column: 2;
     color: gray;
-}
 
-.sort-icon.active {
-    color: black;
+    &.active {
+        color: black;
+    }
 }
 
 .map {

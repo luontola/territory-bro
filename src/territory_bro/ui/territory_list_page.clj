@@ -111,14 +111,13 @@
                        "&reverse"))
           :class (:sortable styles)}
       [:span label]
-      [:span {:class (html/classes (:sort-icon styles)
-                                   (when active?
-                                     (:active styles)))}
-       (if active?
+      [:span {:class (:sort-icon styles)}
+       (html/inline-svg "icons/sort.svg" {:data-test-icon ""})]
+      (when active?
+        [:span {:class (html/classes (:sort-icon styles) (:active styles))}
          (if reverse?
            (html/inline-svg "icons/sort-down.svg" {:data-test-icon "↓"})
-           (html/inline-svg "icons/sort-up.svg" {:data-test-icon "↑"}))
-         (html/inline-svg "icons/sort.svg" {:data-test-icon "↕"}))]])))
+           (html/inline-svg "icons/sort-up.svg" {:data-test-icon "↑"}))])])))
 
 (defn view [{:keys [territories has-loans? permissions today] :as model}]
   (let [styles (:TerritoryListPage (css/modules))]
