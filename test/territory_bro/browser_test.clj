@@ -321,7 +321,7 @@
 
     (testing "view one territory"
       (doto *driver*
-        (wait-and-click [:territory-list {:tag :a}])
+        (wait-and-click [:territory-list {:tag :tbody} {:tag :a}])
         (b/wait-has-text h1 "Territory")))
 
     (testing "can manage territory assignments"
@@ -552,7 +552,7 @@
         (testing "cannot see territories which were not shared"
           (go-to-page *driver* "Territories")
           (is (= [shared-territory-number]
-                 (->> (b/query-all *driver* [:territory-list {:tag :a}])
+                 (->> (b/query-all *driver* [:territory-list {:tag :tbody} {:tag :a}])
                       (map #(b/get-element-text-el *driver* %))))
               "page lists only the shared territory")
           (is (b/wait-has-text-everywhere *driver* "Only those territories which have been shared with you are currently shown.")

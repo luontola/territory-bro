@@ -32,6 +32,25 @@ td.number:hover a {
     font-weight: bold;
 }
 
+a.sortable {
+    display: grid;
+    grid-template-columns: 1fr 1ex;
+    gap: 1ex;
+    color: inherit;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.sort-icon {
+    color: gray;
+}
+
+.sort-icon.active {
+    color: black;
+}
+
 .map {
     width: 100%;
     height: min(700px, calc(100vh - 8em));

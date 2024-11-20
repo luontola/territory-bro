@@ -12,10 +12,32 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]
             [territory-bro.ui.layout :as layout]
-            [territory-bro.ui.maps :as maps]))
+            [territory-bro.ui.maps :as maps])
+  (:import (java.time LocalDate)))
+
+(defn- last-covered-sort-key [territory]
+  (if-some [^LocalDate last-covered (:territory/last-covered territory)]
+    (.toEpochDay last-covered)
+    0))
+
+(defn assignment-status-sort-key [territory]
+  (if-some [assignment (:territory/current-assignment territory)]
+    [1 (:assignment/start-date assignment)]
+    [2 (- (last-covered-sort-key territory))]))
+
+(defn sort-territories [sort-column sort-reverse? territories]
+  (cond->> territories
+    (= :status sort-column) (sort-by assignment-status-sort-key)
+    (= :covered sort-column) (sort-by last-covered-sort-key)
+    (= :number sort-column) (util/natural-sort-by :territory/number)
+    sort-reverse? reverse))
 
 (defn model! [request {:keys [fetch-loans?]}]
   (let [cong-id (get-in request [:path-params :congregation])
+        sort-column (if-some [s (get-in request [:params :sort])]
+                      (keyword s)
+                      :number)
+        sort-reverse? (some? (get-in request [:params :reverse]))
         congregation (dmz/get-congregation cong-id)
         today (.toLocalDate (congregation/local-time congregation))
         congregation-boundary (dmz/get-congregation-boundary cong-id)
@@ -30,14 +52,17 @@
                                                    :else Integer/MAX_VALUE)]
                                    (-> territory
                                        (assoc :territory/loaned? assigned?)
-                                       (assoc :territory/staleness staleness))))))
+                                       (assoc :territory/staleness staleness)))))
+                         (sort-territories sort-column sort-reverse?))
         territories (cond->> territories
                       fetch-loans? (dmz/enrich-territory-loans cong-id))]
     {:congregation-boundary congregation-boundary
      :territories territories
      :has-loans? (some? (:congregation/loans-csv-url congregation))
      :today today
-     :permissions {:view-congregation-temporarily (dmz/allowed? [:view-congregation-temporarily cong-id])}}))
+     :permissions {:view-congregation-temporarily (dmz/allowed? [:view-congregation-temporarily cong-id])}
+     :sort-column sort-column
+     :sort-reverse? sort-reverse?}))
 
 
 (defn limited-visibility-help []
@@ -76,6 +101,25 @@
   (territory-list-map (model! request {:fetch-loans? true})))
 
 
+(defn sortable-column-header [label sort-column model]
+  (let [styles (:TerritoryListPage (css/modules))
+        active? (= sort-column (:sort-column model))
+        reverse? (:sort-reverse? model)]
+    (h/html
+     [:a {:href (str "?sort=" (name sort-column)
+                     (when (and active? (not reverse?))
+                       "&reverse"))
+          :class (:sortable styles)}
+      [:span label]
+      [:span {:class (html/classes (:sort-icon styles)
+                                   (when active?
+                                     (:active styles)))}
+       (if active?
+         (if reverse?
+           (html/inline-svg "icons/sort-down.svg" {:data-test-icon "↓"})
+           (html/inline-svg "icons/sort-up.svg" {:data-test-icon "↑"}))
+         (html/inline-svg "icons/sort.svg" {:data-test-icon "↕"}))]])))
+
 (defn view [{:keys [territories has-loans? permissions today] :as model}]
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
@@ -110,15 +154,15 @@
       [:thead
        [:tr
         [:th {:style {:min-width "4em"}}
-         (i18n/t "Territory.number")]
+         (sortable-column-header (i18n/t "Territory.number") :number model)]
         [:th {:style {:min-width "8em"}}
          (i18n/t "Territory.region")]
         [:th {:style {:min-width "12em"}}
          (i18n/t "Territory.addresses")]
         [:th {:style {:min-width "10em"}}
-         (i18n/t "Assignment.status")]
+         (sortable-column-header (i18n/t "Assignment.status") :status model)]
         [:th {:style {:min-width "8em"}}
-         (i18n/t "Assignment.lastCovered")]]]
+         (sortable-column-header (i18n/t "Assignment.lastCovered") :covered model)]]]
       [:tbody
        (for [territory territories]
          [:tr {:data-territory-id (:territory/id territory)

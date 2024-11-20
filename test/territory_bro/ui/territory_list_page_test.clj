@@ -43,7 +43,9 @@
                   :territory/staleness Integer/MAX_VALUE}]
    :has-loans? false
    :today today
-   :permissions {:view-congregation-temporarily false}})
+   :permissions {:view-congregation-temporarily false}
+   :sort-column :number
+   :sort-reverse? false})
 (def model-loans-enabled
   (replace-in model [:has-loans?] false true))
 (def model-loans-fetched
@@ -168,7 +170,78 @@
 
               (testing "fetched"
                 (is (= model-loans-fetched
-                       (territory-list-page/model! request {:fetch-loans? true})))))))))))
+                       (territory-list-page/model! request {:fetch-loans? true})))))))
+
+        (testing "sorting options"
+          (let [request (assoc request :params {:sort "status"
+                                                :reverse ""})]
+            (is (= (-> model
+                       (replace-in [:sort-column] :number :status)
+                       (replace-in [:sort-reverse?] false true))
+                   (territory-list-page/model! request {})))))))))
+
+(deftest sort-territories-test
+  (testing "sort by territory number"
+    ;; Primary use case: find a territory by number.
+    (let [expected [{:territory/number "1"}
+                    {:territory/number "2"}
+                    {:territory/number "3"}]]
+      (is (= expected
+             (territory-list-page/sort-territories :number false (shuffle expected))))
+      (is (= (reverse expected)
+             (territory-list-page/sort-territories :number true (shuffle expected)))
+          "reverse")))
+
+  (testing "sort by assignment status"
+    ;; Primary use case: find overdue assigned territories.
+    ;; Secondary use case: find vacant territories which haven't been covered for a long time.
+    (let [expected [{:description "assigned, most stale"
+                     :territory/current-assignment {:assignment/start-date (LocalDate/ofEpochDay 1)}}
+                    {:description "assigned"
+                     :territory/current-assignment {:assignment/start-date (LocalDate/ofEpochDay 2)}}
+                    {:description "vacant"
+                     :territory/last-covered (LocalDate/ofEpochDay 2)}
+                    {:description "vacant, most stale"
+                     :territory/last-covered (LocalDate/ofEpochDay 1)}
+                    {:description "untouched"}]]
+      (is (= expected
+             (territory-list-page/sort-territories :status false (shuffle expected))))
+      (is (= (reverse expected)
+             (territory-list-page/sort-territories :status true (shuffle expected)))
+          "reverse")))
+
+  (testing "sort by last covered"
+    ;; Primary use case: find territories which haven't been covered for a long time.
+    (let [expected [{:description "untouched"}
+                    {:description "most stale"
+                     :territory/last-covered (LocalDate/ofEpochDay 1)}
+                    {:description "least stale"
+                     :territory/last-covered (LocalDate/ofEpochDay 2)}]]
+
+      (is (= expected
+             (territory-list-page/sort-territories :covered false (shuffle expected))))
+      (is (= (reverse expected)
+             (territory-list-page/sort-territories :covered true (shuffle expected)))
+          "reverse"))))
+
+(deftest sortable-column-header-test
+  (testing "sorted by another column"
+    (let [html (territory-list-page/sortable-column-header "Label" :stuff {:sort-column :other
+                                                                           :sort-reverse? false})]
+      (is (= "Label ↕" (html/visible-text html)))
+      (is (str/includes? html "href=\"?sort=stuff\""))))
+
+  (testing "sorted by current column"
+    (let [html (territory-list-page/sortable-column-header "Label" :stuff {:sort-column :stuff
+                                                                           :sort-reverse? false})]
+      (is (= "Label ↑" (html/visible-text html)))
+      (is (str/includes? html "href=\"?sort=stuff&amp;reverse\""))))
+
+  (testing "sorted by current column in reverse"
+    (let [html (territory-list-page/sortable-column-header "Label" :stuff {:sort-column :stuff
+                                                                           :sort-reverse? true})]
+      (is (= "Label ↓" (html/visible-text html)))
+      (is (str/includes? html "href=\"?sort=stuff\"")))))
 
 (deftest view-test
   (testing "default"
@@ -176,8 +249,8 @@
             "Territories
 
              Search [] Clear
-             Number   Region       Addresses       Status         Last covered
-             123      the region   the addresses   Up for grabs")
+             Number ↑   Region       Addresses       Status ↕       Last covered ↕
+             123        the region   the addresses   Up for grabs")
            (-> (territory-list-page/view model)
                html/visible-text))))
 
@@ -186,8 +259,8 @@
             "Territories
 
              Search [] Clear
-             Number   Region       Addresses       Status                              Last covered
-             123      the region   the addresses   Assigned to John Doe for 2 months   1 months ago (2000-02-01)")
+             Number ↑   Region       Addresses       Status ↕                            Last covered ↕
+             123        the region   the addresses   Assigned to John Doe for 2 months   1 months ago (2000-02-01)")
            (-> (territory-list-page/view model-with-assignments)
                html/visible-text))
         "territory assigned")
@@ -195,8 +268,8 @@
             "Territories
 
              Search [] Clear
-             Number   Region       Addresses       Status         Last covered
-             123      the region   the addresses   Up for grabs   1 months ago (2000-02-01)")
+             Number ↑   Region       Addresses       Status ↕       Last covered ↕
+             123        the region   the addresses   Up for grabs   1 months ago (2000-02-01)")
            (-> (territory-list-page/view model-with-returned-territory)
                html/visible-text))
         "territory returned"))
@@ -226,8 +299,8 @@
             "Territories
 
              Search [] Clear
-             Number   Region       Addresses       Status         Last covered
-             -        the region   the addresses   Up for grabs")
+             Number ↑   Region       Addresses       Status ↕       Last covered ↕
+             -          the region   the addresses   Up for grabs")
            (-> (territory-list-page/view (replace-in model [:territories 0 :territory/number] "123" ""))
                html/visible-text))))
 
@@ -263,8 +336,8 @@
                You will need to login to see the rest.
 
                Search [] Clear
-               Number   Region       Addresses       Status         Last covered
-               123      the region   the addresses   Up for grabs")
+               Number ↑   Region       Addresses       Status ↕       Last covered ↕
+               123        the region   the addresses   Up for grabs")
              (-> (territory-list-page/view anonymous-model)
                  html/visible-text))))
 
@@ -277,8 +350,8 @@
                You will need to request access to see the rest.
 
                Search [] Clear
-               Number   Region       Addresses       Status         Last covered
-               123      the region   the addresses   Up for grabs")
+               Number ↑   Region       Addresses       Status ↕       Last covered ↕
+               123        the region   the addresses   Up for grabs")
              (binding [auth/*user* {:user/id (random-uuid)}]
                (-> (territory-list-page/view anonymous-model)
                    html/visible-text)))))))
