@@ -1,5 +1,6 @@
 (ns territory-bro.ui.html
-  (:require [clojure.java.io :as io]
+  (:require [clojure.core.cache.wrapped :as cache]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [net.cgrand.enlive-html :as en]
             [reitit.core :as reitit]
@@ -182,6 +183,11 @@
        (filter symbol?)
        (empty?)))
 
+(def ^:private runtime-svg-cache (cache/lru-cache-factory {}))
+
+(defn cached-inline-svg [path args]
+  (cache/lookup-or-miss runtime-svg-cache [path args] #(apply inline-svg* %)))
+
 (defmacro inline-svg
   ([path]
    `(inline-svg ~path nil))
@@ -191,4 +197,4 @@
      (when-some [svg (inline-svg* path args)]
        `(h/raw ~svg))
      ;; if the args are dynamic, this macro can't precompute the SVG at compile time
-     `(h/raw (inline-svg* ~path ~args)))))
+     `(h/raw (cached-inline-svg ~path ~args)))))
