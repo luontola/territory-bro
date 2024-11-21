@@ -46,7 +46,7 @@ a.sortable {
 .sort-icon {
     grid-row: 1;
     grid-column: 2;
-    color: gray;
+    color: #aaa;
 
     &.active {
         color: black;
