@@ -13,6 +13,7 @@
                  [com.github.seancorfield/next.jdbc "1.3.955"]
                  [com.layerware/hugsql "0.5.3"]
                  [com.layerware/hugsql-adapter-next-jdbc "0.5.3"]
+                 [com.nextjournal/beholder "1.0.2"]
                  [com.vladsch.flexmark/flexmark "0.64.8"]
                  [com.vladsch.flexmark/flexmark-ext-anchorlink "0.64.8"]
                  [cprop "0.1.20"]

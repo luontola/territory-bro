@@ -25,11 +25,12 @@
         (is (= "loaded true 1" result))))
 
     (testing "refreshes the value if the resource has changed"
-      (swap! *state update ::resources/last-modified dec)
+      (resources/notify-change!)
       (let [result (resources/auto-refresh! *state loader-fn)]
         (is (= "loaded true 2" result))))
 
     (testing "reuses the old value if the resource temporarily disappears"
+      (resources/notify-change!)
       (swap! *state update ::resources/resource (fn [^URL resource]
                                                   (URL. (str resource ".no-such-file"))))
       (let [result (resources/auto-refresh! *state loader-fn)]
