@@ -177,10 +177,18 @@
                                      set-data-test-icon-attr))
           (emit-xml)))))
 
+(defn- static? [code]
+  (->> (tree-seq coll? seq code)
+       (filter symbol?)
+       (empty?)))
+
 (defmacro inline-svg
   ([path]
-   (when-some [svg (inline-svg* path nil)]
-     `(h/raw ~svg)))
+   `(inline-svg ~path nil))
   ([path args]
-   ;; if the args are dynamic, this macro can't precompute the SVG at compile time
-   `(h/raw (inline-svg* ~path ~args))))
+   (if (and (static? path)
+            (static? args))
+     (when-some [svg (inline-svg* path args)]
+       `(h/raw ~svg))
+     ;; if the args are dynamic, this macro can't precompute the SVG at compile time
+     `(h/raw (inline-svg* ~path ~args)))))
