@@ -95,7 +95,8 @@
                        :aot :all
                        :uberjar-name "territory-bro.jar"}
 
-             :dev {:dependencies [[criterium "0.4.6"]
+             :dev {:dependencies [[com.clojure-goes-fast/clj-async-profiler "1.5.0"]
+                                  [criterium "0.4.6"]
                                   [etaoin "1.1.42"]
                                   [lambdaisland/kaocha "1.91.1392"]
                                   [nubank/matcher-combinators "3.9.1"]
@@ -105,7 +106,11 @@
                                   [ring/ring-devel "1.13.0"]
                                   [ring/ring-mock "0.4.0"]]
                    :jvm-opts ^:replace ["-Dconf=dev-config.edn"
-                                        "-XX:-OmitStackTraceInFastThrow"]
+                                        "-XX:-OmitStackTraceInFastThrow"
+                                        ;; org.openjdk.jol and clj-async-profiler use Java agents
+                                        "-Djdk.attach.allowAttachSelf"
+                                        "-XX:+EnableDynamicAgentLoading"
+                                        "-Dclj-async-profiler.output-dir=./target"]
                    :repl-options {:init-ns territory-bro.repl}
                    :resource-paths ["test-resources"]}
 

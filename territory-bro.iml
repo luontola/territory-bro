@@ -40,6 +40,7 @@
     <orderEntry type="library" name="Leiningen: com.auth0/jwks-rsa:0.22.1" level="project" />
     <orderEntry type="library" name="Leiningen: com.auth0/mvc-auth-commons:1.11.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.bhauman/spell-spec:0.1.2" level="project" />
+    <orderEntry type="library" name="Leiningen: com.clojure-goes-fast/clj-async-profiler:1.5.0" level="project" />
     <orderEntry type="library" name="Leiningen: com.cognitect/transit-clj:1.0.333" level="project" />
     <orderEntry type="library" name="Leiningen: com.cognitect/transit-java:1.0.371" level="project" />
     <orderEntry type="library" name="Leiningen: com.esri.geometry/esri-geometry-api:2.2.4" level="project" />

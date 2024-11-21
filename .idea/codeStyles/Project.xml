@@ -15,6 +15,7 @@
       <option name="commentAlignColumn" value="0" />
       <option name="indentCustomisations">
         <map>
+          <entry key="clj-async-profiler.core/profile" value="0" />
           <entry key="clojure.core/assoc" value="1000" />
           <entry key="clojure.core/comment" value="0" />
           <entry key="clojure.core/cond-&gt;" value="1" />
