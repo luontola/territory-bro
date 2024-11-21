@@ -3,6 +3,22 @@
             [ring.middleware.cookies :as cookies]
             [territory-bro.ui.i18n :as i18n]))
 
+(deftest flatten-map-test
+  (let [flatten-map @#'i18n/flatten-map]
+    (is (= {} (flatten-map {} nil)))
+    (is (= {"foo" "bar"} (flatten-map {:foo "bar"} nil)))
+    (is (= {"foo.bar" "gazonk"} (flatten-map {:foo {:bar "gazonk"}} nil)))
+    (is (= {"foo" 1
+            "bar" 2}
+           (flatten-map {:foo 1
+                         :bar 2}
+                        nil)))
+    (is (= {"root.foo" 1
+            "root.bar" 2}
+           (flatten-map {:root {:foo 1
+                                :bar 2}}
+                        nil)))))
+
 (deftest t-test
   (testing "returns translation in the specified language"
     (binding [i18n/*lang* :fi]
@@ -16,7 +32,10 @@
       (is (= "Home" (i18n/t "HomePage.title")))))
 
   (testing "fallback: non-existing translation key -> show key"
-    (is (= "foo.bar" (i18n/t "foo.bar")))))
+    (is (= "foo.bar" (i18n/t "foo.bar"))))
+
+  (testing "data format matches localization keys"
+    (is (= "Home" (get-in (i18n/i18n) [:resources :en "HomePage.title"])))))
 
 (deftest languages-test
   (testing "lists all supported languages, sorted by native name"

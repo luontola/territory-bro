@@ -1,6 +1,5 @@
 (ns territory-bro.ui.i18n
-  (:require [clojure.string :as str]
-            [ring.util.response :as response]
+  (:require [ring.util.response :as response]
             [territory-bro.infra.json :as json]
             [territory-bro.infra.resources :as resources])
   (:import (java.time Duration)
@@ -9,14 +8,32 @@
 (def default-lang :en)
 (def ^:dynamic *lang* default-lang)
 
+(defn- flatten-map [m parent-key]
+  (reduce-kv
+   (fn [result k v]
+     (let [new-key (str (when parent-key
+                          (str parent-key "."))
+                        (name k))]
+       (if (map? v)
+         (merge result (flatten-map v new-key))
+         (assoc result new-key v))))
+   {}
+   m))
+
+(defn- compile-translation-keys [resources]
+  (assert (= [:translation] (keys resources)))
+  (flatten-map (:translation resources) nil))
+
+(defn- compile-i18n-json [json-data]
+  (update json-data :resources #(update-vals % compile-translation-keys)))
+
 (def i18n
-  (resources/auto-refresher "i18n.json" #(json/read-value (slurp %))))
+  (resources/auto-refresher "i18n.json" #(compile-i18n-json (json/read-value (slurp %)))))
 
 (defn t [key]
-  (let [path (->> (str/split key #"\.")
-                  (map keyword))]
-    (or (-> (i18n) :resources *lang* :translation (get-in path))
-        (-> (i18n) :resources default-lang :translation (get-in path))
+  (let [resources (:resources (i18n))]
+    (or (-> resources *lang* (get key))
+        (-> resources default-lang (get key))
         key)))
 
 (defn languages []
