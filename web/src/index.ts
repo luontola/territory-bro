@@ -99,43 +99,45 @@ installCopyToClipboard('#copy-share-link');
 
 // ### territory-bro.ui.territory-list-page ###
 
-const territorySearch = document.getElementById("territory-search") as HTMLInputElement | null;
-const clearTerritorySearch = document.getElementById("clear-territory-search");
-const territoryList = document.getElementById("territory-list");
-if (territorySearch && clearTerritorySearch && territoryList) {
-  const onTerritorySearch = () => {
-    setPageState('territorySearch', territorySearch.value);
-    const needle = territorySearch.value.toLowerCase().trim();
-    clearTerritorySearch.style.display = needle === "" ? "none" : ""
+const onTerritorySearch = () => {
+  const territorySearch = document.getElementById("territory-search") as HTMLInputElement;
+  const clearTerritorySearch = document.getElementById("clear-territory-search")!;
+  const territoryList = document.getElementById("territory-list")!;
 
-    const visibleTerritories: string[] = [];
-    for (const row of territoryList.querySelectorAll("[data-searchable]") as NodeListOf<HTMLElement>) {
-      const territoryId = row.getAttribute("data-territory-id");
-      const haystack = row.getAttribute("data-searchable");
-      if (territoryId && haystack) {
-        if (haystack.includes(needle)) {
-          visibleTerritories.push(territoryId);
-          row.style.display = "";
-        } else {
-          row.style.display = "none";
-        }
+  setPageState('territorySearch', territorySearch.value);
+  const needle = territorySearch.value.toLowerCase().trim();
+  clearTerritorySearch.style.display = needle === "" ? "none" : ""
+
+  const visibleTerritories: string[] = [];
+  for (const row of territoryList.querySelectorAll("[data-searchable]") as NodeListOf<HTMLElement>) {
+    const territoryId = row.getAttribute("data-territory-id");
+    const haystack = row.getAttribute("data-searchable");
+    if (territoryId && haystack) {
+      if (haystack.includes(needle)) {
+        visibleTerritories.push(territoryId);
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
       }
     }
-    // guard against zero map elements, if it's lazy loaded
-    for (const territoryListMap of document.querySelectorAll("territory-list-map")) {
-      territoryListMap.setAttribute("visible-territories", JSON.stringify(visibleTerritories));
-    }
-  };
+  }
+  // guard against zero map elements, if it's lazy loaded
+  for (const territoryListMap of document.querySelectorAll("territory-list-map")) {
+    territoryListMap.setAttribute("visible-territories", JSON.stringify(visibleTerritories));
+  }
+};
+window.onTerritorySearch = onTerritorySearch;
 
-  const onClearTerritorySearch = () => {
-    territorySearch.value = "";
-    territorySearch.focus();
-    onTerritorySearch();
-  };
+const onClearTerritorySearch = () => {
+  const territorySearch = document.getElementById("territory-search") as HTMLInputElement;
+  territorySearch.value = "";
+  territorySearch.focus();
+  onTerritorySearch();
+};
+window.onClearTerritorySearch = onClearTerritorySearch;
 
+const territorySearch = document.getElementById("territory-search") as HTMLInputElement | null;
+if (territorySearch) {
   territorySearch.value = getPageState('territorySearch') ?? '';
   onTerritorySearch(); // apply the search term from page state to filter the rows
-
-  window.onTerritorySearch = onTerritorySearch;
-  window.onClearTerritorySearch = onClearTerritorySearch;
 }

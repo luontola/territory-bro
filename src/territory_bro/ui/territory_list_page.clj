@@ -104,11 +104,14 @@
 (defn sortable-column-header [label sort-column model]
   (let [styles (:TerritoryListPage (css/modules))
         active? (= sort-column (:sort-column model))
-        reverse? (:sort-reverse? model)]
+        reverse? (:sort-reverse? model)
+        query-params (str "?sort=" (name sort-column)
+                          (when (and active? (not reverse?))
+                            "&reverse"))]
     (h/html
-     [:a {:href (str "?sort=" (name sort-column)
-                     (when (and active? (not reverse?))
-                       "&reverse"))
+     [:a {:href query-params
+          :hx-get (str html/*page-path* "/table" query-params)
+          :hx-push-url query-params
           :class (:sortable styles)}
       [:span label]
       [:span {:class (:sort-icon styles)}
@@ -119,37 +122,12 @@
            (html/inline-svg "icons/sort-down.svg" {:data-test-icon "↓"})
            (html/inline-svg "icons/sort-up.svg" {:data-test-icon "↑"}))])])))
 
-(defn view [{:keys [territories has-loans? permissions today] :as model}]
+(defn territory-list-table [{:keys [territories today] :as model}]
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
-     [:h1 (i18n/t "TerritoryListPage.title")]
-     (when (:view-congregation-temporarily permissions)
-       (limited-visibility-help))
-
-     [:div {:class (:map styles)}
-      (if has-loans?
-        [:div {:class (:placeholder styles)
-               :hx-target "this"
-               :hx-swap "outerHTML"
-               :hx-trigger "load"
-               :hx-get (str html/*page-path* "/map")}
-         (html/inline-svg "icons/map-location.svg")]
-        (territory-list-map model))]
-
-     [:form.pure-form {:class (:search styles)
-                       :onsubmit "return false"}
-      [:label {:for "territory-search"}
-       (i18n/t "TerritoryListPage.search")]
-      [:input#territory-search.pure-input-rounded {:type "text"
-                                                   :oninput "onTerritorySearch()"
-                                                   :autocomplete "off"}]
-      [:button#clear-territory-search.pure-button {:type "button"
-                                                   :onclick "onClearTerritorySearch()"
-                                                   ;; onTerritorySearch will make this visible
-                                                   :style {:display "none"}}
-       (i18n/t "TerritoryListPage.clear")]]
-
-     [:table#territory-list.pure-table.pure-table-striped
+     [:table#territory-list.pure-table.pure-table-striped {:hx-target "this"
+                                                           :hx-swap "outerHTML"
+                                                           :hx-on-htmx-load "onTerritorySearch()"}
       [:thead
        [:tr
         [:th {:style {:min-width "4em"}}
@@ -184,6 +162,38 @@
           [:td (when-some [last-covered (:territory/last-covered territory)]
                  (assignment/format-months-ago-with-date last-covered today))]])]])))
 
+(defn view [{:keys [has-loans? permissions] :as model}]
+  (let [styles (:TerritoryListPage (css/modules))]
+    (h/html
+     [:h1 (i18n/t "TerritoryListPage.title")]
+     (when (:view-congregation-temporarily permissions)
+       (limited-visibility-help))
+
+     [:div {:class (:map styles)}
+      (if has-loans?
+        [:div {:class (:placeholder styles)
+               :hx-target "this"
+               :hx-swap "outerHTML"
+               :hx-trigger "load"
+               :hx-get (str html/*page-path* "/map")}
+         (html/inline-svg "icons/map-location.svg")]
+        (territory-list-map model))]
+
+     [:form.pure-form {:class (:search styles)
+                       :onsubmit "return false"}
+      [:label {:for "territory-search"}
+       (i18n/t "TerritoryListPage.search")]
+      [:input#territory-search.pure-input-rounded {:type "text"
+                                                   :oninput "onTerritorySearch()"
+                                                   :autocomplete "off"}]
+      [:button#clear-territory-search.pure-button {:type "button"
+                                                   :onclick "onClearTerritorySearch()"
+                                                   ;; onTerritorySearch will make this visible
+                                                   :style {:display "none"}}
+       (i18n/t "TerritoryListPage.clear")]]
+
+     (territory-list-table model))))
+
 (defn view! [request]
   (view (model! request {:fetch-loans? false})))
 
@@ -203,5 +213,12 @@
      :conflicting true
      :get {:handler (fn [request]
                       (-> (territory-list-map! request)
-                          (html/response)))}}]])
+                          (html/response)))}}]
 
+   ["/table"
+    {:name ::table
+     :conflicting true
+     :get {:handler (fn [request]
+                      (-> (model! request {:fetch-loans? false})
+                          (territory-list-table)
+                          (html/response)))}}]])

@@ -13,6 +13,13 @@ export abstract class OpenLayersMapElement extends HTMLElement {
     if (printout) {
       className += " " + styles.printout;
     }
+    // When the History API is used to navigate back, it's possible that
+    // this custom element already contains a root node from an older
+    // instance of this map. HTMX's history support (https://htmx.org/docs/#history)
+    // may also produce duplicate DOM nodes. Remove them to avoid breaking the map.
+    this.querySelectorAll("div").forEach(root => {
+      root.remove();
+    });
     const root = document.createElement("div");
     root.setAttribute("class", className)
     this.appendChild(root)

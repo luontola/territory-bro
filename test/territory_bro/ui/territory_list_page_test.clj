@@ -363,6 +363,9 @@
       (is (= ::territory-list-page/map
              (-> (reitit/match-by-path router (str "/congregation/" uuid "/territories/map"))
                  :data :name)))
+      (is (= ::territory-list-page/table
+             (-> (reitit/match-by-path router (str "/congregation/" uuid "/territories/table"))
+                 :data :name)))
       (is (= ::territory-page/page
              (-> (reitit/match-by-path router (str "/congregation/" uuid "/territories/" uuid))
                  :data :name))))))
