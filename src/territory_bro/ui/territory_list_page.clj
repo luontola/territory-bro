@@ -111,7 +111,7 @@
     (h/html
      [:a {:href query-params
           :hx-get (str html/*page-path* "/table" query-params)
-          :hx-push-url query-params
+          :hx-replace-url query-params
           :class (:sortable styles)}
       [:span label]
       [:span {:class (:sort-icon styles)}
