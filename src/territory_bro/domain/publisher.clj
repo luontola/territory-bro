@@ -28,7 +28,7 @@
                 {}))))
 
 (mount/defstate publishers-cache
-  :start (cache/ttl-cache-factory {:ttl (.toMillis (Duration/ofMinutes 5))}))
+  :start (cache/ttl-cache-factory {} :ttl (.toMillis (Duration/ofMinutes 5))))
 
 (defn ^:dynamic publishers-by-id [conn cong-id]
   (cache/lookup-or-miss publishers-cache cong-id (partial publishers-by-id* conn)))
