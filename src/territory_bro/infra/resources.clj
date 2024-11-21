@@ -7,7 +7,7 @@
 
 (def ^:private *change-counter (atom 0))
 
-(defn notify-change! []
+(defn notify-change! [& _]
   (swap! *change-counter inc)
   nil)
 
