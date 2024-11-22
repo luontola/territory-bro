@@ -69,19 +69,24 @@
        {:title (i18n/t "Statistics.title")}
        (h/html
         [:ul {:class (:statistics styles)}
-         [:li (i18n/t "Statistics.territories") ": " (:territories statistics)]
-         [:li (i18n/t "Statistics.assignedTerritories") ": "
+         [:li {}
+          (i18n/t "Statistics.territories") ": " (:territories statistics)]
+         [:li {}
+          (i18n/t "Statistics.assignedTerritories") ": "
           (count-and-percentage (:assigned-territories statistics)
                                 (:territories statistics))]
-         [:li (i18n/t "Statistics.coveredInPast6Months") ": "
+         [:li {}
+          (i18n/t "Statistics.coveredInPast6Months") ": "
           (count-and-percentage (:covered-in-past-6-months statistics)
                                 (:territories statistics))]
-         [:li (i18n/t "Statistics.coveredInPast12Months") ": "
+         [:li {}
+          (i18n/t "Statistics.coveredInPast12Months") ": "
           (count-and-percentage (:covered-in-past-12-months statistics)
                                 (:territories statistics))]
          (when-some [days (:average-assignment-days statistics)]
-           [:li (-> (i18n/t "Statistics.averageAssignmentDurationDays")
-                    (str/replace "{{days}}" (str days)))])])))))
+           [:li {}
+            (-> (i18n/t "Statistics.averageAssignmentDurationDays")
+                (str/replace "{{days}}" (str days)))])])))))
 
 
 (defn- checklist-item-status [completed?]
@@ -116,16 +121,16 @@
          [:li (checklist-item-status (:qr-code-scanned? getting-started))
           [:a {:href (str html/*page-path* "/printouts")}
            (i18n/t "GettingStarted.qrCodeScanned")]]]
-        [:p (-> (i18n/t "SupportPage.mailingListAd")
-                (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")
-                (str/replace "</0>" "</a>")
-                (h/raw))])))))
+        [:p {} (-> (i18n/t "SupportPage.mailingListAd")
+                   (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")
+                   (str/replace "</0>" "</a>")
+                   (h/raw))])))))
 
 
 (defn view [{:keys [congregation permissions] :as model}]
   (let [styles (:CongregationPage (css/modules))]
     (h/html
-     [:h1 (:congregation/name congregation)]
+     [:h1 {} (:congregation/name congregation)]
      [:div.pure-g
       [:div.pure-u-1.pure-u-md-1-2
        [:ul.home-navigation {:class (:navigation styles)}
@@ -143,7 +148,7 @@
                 [:span {:aria-hidden ""} "⚙️"]
                 " "
                 (i18n/t "SettingsPage.title")]])]]
-      [:div.pure-u-1.pure-u-md-1-2
+      [:div.pure-u-1.pure-u-md-1-2 {}
        (statistics model)
        (getting-started model)]])))
 

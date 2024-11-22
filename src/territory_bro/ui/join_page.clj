@@ -12,10 +12,10 @@
 
 (defn view [{:keys [user-id]}]
   (h/html
-   [:h1 (i18n/t "JoinPage.title")]
-   [:p (-> (i18n/t "JoinPage.introduction")
-           (h/raw))]
-   [:p (i18n/t "JoinPage.yourUserId")]
+   [:h1 {} (i18n/t "JoinPage.title")]
+   [:p {} (-> (i18n/t "JoinPage.introduction")
+              (h/raw))]
+   [:p {} (i18n/t "JoinPage.yourUserId")]
    [:p#your-user-id {:style {:font-size "150%"
                              :margin "15px"}}
     user-id]

@@ -13,7 +13,7 @@
 
 (defn view []
   (h/html
-   [:h1 (i18n/t "DocumentationPage.title")]
+   [:h1 {} (i18n/t "DocumentationPage.title")]
    [:dev {:lang "en"}
     (documentation-html)]))
 

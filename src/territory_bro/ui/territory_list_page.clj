@@ -69,7 +69,7 @@
   (info-box/view
    {:title (i18n/t "TerritoryListPage.limitedVisibility.title")}
    (h/html
-    [:p
+    [:p {}
      (i18n/t "TerritoryListPage.limitedVisibility.explanation")
      " "
      (if (auth/logged-in?)
@@ -113,7 +113,7 @@
           :hx-get (str html/*page-path* "/table" query-params)
           :hx-replace-url query-params
           :class (:sortable styles)}
-      [:span label]
+      [:span {} label]
       [:span {:class (:sort-icon styles)}
        (html/inline-svg "icons/sort.svg" {:data-test-icon ""})]
       (when active?
@@ -153,19 +153,22 @@
             (if (str/blank? (:territory/number territory))
               "-"
               (:territory/number territory))]]
-          [:td (:territory/region territory)]
+          [:td {}
+           (:territory/region territory)]
           [:td {:style {:max-width "30em"}}
            (:territory/addresses territory)]
-          [:td (if-some [assignment (:territory/current-assignment territory)]
-                 (assignment/format-status-assigned-duration assignment today)
-                 (assignment/format-status-vacant))]
-          [:td (when-some [last-covered (:territory/last-covered territory)]
-                 (assignment/format-months-ago-with-date last-covered today))]])]])))
+          [:td {}
+           (if-some [assignment (:territory/current-assignment territory)]
+             (assignment/format-status-assigned-duration assignment today)
+             (assignment/format-status-vacant))]
+          [:td {}
+           (when-some [last-covered (:territory/last-covered territory)]
+             (assignment/format-months-ago-with-date last-covered today))]])]])))
 
 (defn view [{:keys [has-loans? permissions] :as model}]
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
-     [:h1 (i18n/t "TerritoryListPage.title")]
+     [:h1 {} (i18n/t "TerritoryListPage.title")]
      (when (:view-congregation-temporarily permissions)
        (limited-visibility-help))
 

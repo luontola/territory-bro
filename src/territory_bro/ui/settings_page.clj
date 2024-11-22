@@ -116,7 +116,7 @@
 
           [:details {:class (:experimentalFeatures styles)
                      :open (not (str/blank? (:loans-csv-url form)))}
-           [:summary (i18n/t "CongregationSettings.experimentalFeatures")]
+           [:summary {} (i18n/t "CongregationSettings.experimentalFeatures")]
 
            [:div {:lang "en"}
             (let [error? (contains? errors :disallowed-loans-csv-url)]
@@ -159,13 +159,13 @@
   (when (:gis-access permissions)
     (h/html
      [:section
-      [:h2 (i18n/t "EditingMaps.title")]
-      [:p (-> (i18n/t "EditingMaps.introduction")
-              (str/replace "<0>" "<a href=\"/documentation\">")
-              (str/replace "</0>" "</a>")
-              (str/replace "<1>" "<a href=\"https://www.qgis.org/\" target=\"_blank\">")
-              (str/replace "</1>" "</a>")
-              (h/raw))]
+      [:h2 {} (i18n/t "EditingMaps.title")]
+      [:p {} (-> (i18n/t "EditingMaps.introduction")
+                 (str/replace "<0>" "<a href=\"/documentation\">")
+                 (str/replace "</0>" "</a>")
+                 (str/replace "<1>" "<a href=\"https://www.qgis.org/\" target=\"_blank\">")
+                 (str/replace "</1>" "</a>")
+                 (h/raw))]
       [:p [:a.pure-button {:href (str html/*page-path* "/qgis-project")}
            (i18n/t "EditingMaps.downloadQgisProject")]]])))
 
@@ -192,13 +192,13 @@
                 :hx-swap "outerHTML"
                 :class (when (:new? publisher)
                          (:new-row styles))}
-           [:td (:publisher/name publisher)]
-           [:td (->> (:assigned-territories publisher)
-                     (util/natural-sort-by :territory/number)
-                     (mapv (fn [territory]
-                             (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
-                                      (:territory/number territory)])))
-                     (interpose ", "))]
+           [:td {} (:publisher/name publisher)]
+           [:td {} (->> (:assigned-territories publisher)
+                        (util/natural-sort-by :territory/number)
+                        (mapv (fn [territory]
+                                (h/html [:a {:href (str "/congregation/" (:congregation/id congregation) "/territories/" (:territory/id territory))}
+                                         (:territory/number territory)])))
+                        (interpose ", "))]
            [:td {:class (:edit-button styles)}
             [:button.pure-button {:type "button"
                                   :hx-get (str html/*page-path* "/publishers/" (:publisher/id publisher) "/edit")
@@ -284,12 +284,12 @@
     (h/html
      [:section#publishers-section {:hx-target "this"
                                    :hx-swap "outerHTML"}
-      [:h2 (i18n/t "PublisherManagement.title")]
+      [:h2 {} (i18n/t "PublisherManagement.title")]
       [:table.pure-table.pure-table-horizontal
        [:thead
         [:tr
-         [:th (i18n/t "PublisherManagement.publisherName")]
-         [:th (i18n/t "PublisherManagement.assignedTerritories")]
+         [:th {} (i18n/t "PublisherManagement.publisherName")]
+         [:th {} (i18n/t "PublisherManagement.assignedTerritories")]
          [:th]]]
        [:tbody
         (for [publisher (util/natural-sort-by :publisher/name publishers)]
@@ -358,25 +358,27 @@
        (when (some? picture)
          [:img {:src picture
                 :alt ""}])]
-      [:td
+      [:td {}
        (if (str/blank? name)
          (:user/id user)
          name)
        (when current-user?
          (h/html " " [:em "(" (i18n/t "UserManagement.you") ")"]))]
-      [:td
+      [:td {}
        email
        (when (and (some? email)
                   (not email_verified))
          (h/html " " [:em "(" (i18n/t "UserManagement.unverified") ")"]))]
-      [:td (identity-provider user)]
-      [:td [:button.pure-button {:type "button"
-                                 :class (:delete-button styles)
-                                 :hx-delete (str html/*page-path* "/users?user-id=" (codec/url-encode (:user/id user)))
-                                 :hx-confirm (when current-user?
-                                               (-> (i18n/t "UserManagement.removeYourselfWarning")
-                                                   (str/replace "{{congregation}}" (:congregation/name congregation))))}
-            (i18n/t "UserManagement.removeUser")]]])))
+      [:td {}
+       (identity-provider user)]
+      [:td
+       [:button.pure-button {:type "button"
+                             :class (:delete-button styles)
+                             :hx-delete (str html/*page-path* "/users?user-id=" (codec/url-encode (:user/id user)))
+                             :hx-confirm (when current-user?
+                                           (-> (i18n/t "UserManagement.removeYourselfWarning")
+                                               (str/replace "{{congregation}}" (:congregation/name congregation))))}
+        (i18n/t "UserManagement.removeUser")]]])))
 
 (defn user-management-section [{:keys [users permissions form errors] :as model}]
   (when (:configure-congregation permissions)
@@ -384,12 +386,12 @@
       (h/html
        [:section#users-section {:hx-target "this"
                                 :hx-swap "outerHTML"}
-        [:h2 (i18n/t "UserManagement.title")]
-        [:p (-> (i18n/t "UserManagement.addUserInstructions")
-                (str/replace "{{joinPageUrl}}" (str (:public-url config/env) "/join"))
-                (str/replace "<0>" "<a href=\"/join\">")
-                (str/replace "</0>" "</a>")
-                (h/raw))]
+        [:h2 {} (i18n/t "UserManagement.title")]
+        [:p {} (-> (i18n/t "UserManagement.addUserInstructions")
+                   (str/replace "{{joinPageUrl}}" (str (:public-url config/env) "/join"))
+                   (str/replace "<0>" "<a href=\"/join\">")
+                   (str/replace "</0>" "</a>")
+                   (h/raw))]
 
         [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/users")}
          [:fieldset
@@ -420,10 +422,10 @@
          [:thead
           [:tr
            [:th]
-           [:th (i18n/t "UserManagement.name")]
-           [:th (i18n/t "UserManagement.email")]
-           [:th (i18n/t "UserManagement.loginMethod")]
-           [:th (i18n/t "UserManagement.actions")]]]
+           [:th {} (i18n/t "UserManagement.name")]
+           [:th {} (i18n/t "UserManagement.email")]
+           [:th {} (i18n/t "UserManagement.loginMethod")]
+           [:th {} (i18n/t "UserManagement.actions")]]]
          [:tbody
           (for [user users]
             (users-table-row user model))]]]))))
@@ -460,7 +462,7 @@
 (defn view [model]
   (let [styles (:SettingsPage (css/modules))]
     (h/html
-     [:h1 (i18n/t "SettingsPage.title")]
+     [:h1 {} (i18n/t "SettingsPage.title")]
      [:div {:class (:sections styles)}
       (congregation-settings-section model)
       (editing-maps-section model)

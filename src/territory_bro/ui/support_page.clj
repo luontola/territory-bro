@@ -13,34 +13,34 @@
 
 (defn view [{:keys [support-email]}]
   (h/html
-   [:h1 (i18n/t "SupportPage.title")]
-   [:p (-> (i18n/t "SupportPage.introduction")
-           (str/replace "<0>" "<a href=\"https://github.com/luontola/territory-bro\" target=\"_blank\">")
-           (str/replace "</0>" "</a>")
-           (str/replace "<1>" "<a href=\"https://www.luontola.fi/about\" target=\"_blank\">")
-           (str/replace "</1>" "</a>")
-           (h/raw))]
-   [:p (-> (i18n/t "SupportPage.mailingListAd")
-           (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")
-           (str/replace "</0>" "</a>")
-           (h/raw))]
-   [:p (-> (i18n/t "SupportPage.userGuideAd")
-           (str/replace "<0>" "<a href=\"/documentation\">")
-           (str/replace "</0>" "</a>")
-           (h/raw))]
+   [:h1 {} (i18n/t "SupportPage.title")]
+   [:p {} (-> (i18n/t "SupportPage.introduction")
+              (str/replace "<0>" "<a href=\"https://github.com/luontola/territory-bro\" target=\"_blank\">")
+              (str/replace "</0>" "</a>")
+              (str/replace "<1>" "<a href=\"https://www.luontola.fi/about\" target=\"_blank\">")
+              (str/replace "</1>" "</a>")
+              (h/raw))]
+   [:p {} (-> (i18n/t "SupportPage.mailingListAd")
+              (str/replace "<0>" "<a href=\"https://groups.google.com/g/territory-bro-announcements\" target=\"_blank\">")
+              (str/replace "</0>" "</a>")
+              (h/raw))]
+   [:p {} (-> (i18n/t "SupportPage.userGuideAd")
+              (str/replace "<0>" "<a href=\"/documentation\">")
+              (str/replace "</0>" "</a>")
+              (h/raw))]
    (when (some? support-email)
-     [:p (-> (i18n/t "SupportPage.emailAd")
-             (str/replace "<0>{{email}}</0>" (str (h/html [:a {:href (str "mailto:" support-email)}
-                                                           support-email])))
-             (h/raw))])
-   [:p (-> (i18n/t "SupportPage.translationAd")
-           (str/replace "<0>" "<a href=\"https://github.com/luontola/territory-bro/tree/main/web/src/locales#readme\" target=\"_blank\">")
-           (str/replace "</0>" "</a>")
-           (h/raw))]
-   [:p (-> (i18n/t "SupportPage.issueTrackerAd")
-           (str/replace "<0>" "<a href=\"https://github.com/luontola/territory-bro/issues\" target=\"_blank\">")
-           (str/replace "</0>" "</a>")
-           (h/raw))]
+     [:p {} (-> (i18n/t "SupportPage.emailAd")
+                (str/replace "<0>{{email}}</0>" (str (h/html [:a {:href (str "mailto:" support-email)}
+                                                              support-email])))
+                (h/raw))])
+   [:p {} (-> (i18n/t "SupportPage.translationAd")
+              (str/replace "<0>" "<a href=\"https://github.com/luontola/territory-bro/tree/main/web/src/locales#readme\" target=\"_blank\">")
+              (str/replace "</0>" "</a>")
+              (h/raw))]
+   [:p {} (-> (i18n/t "SupportPage.issueTrackerAd")
+              (str/replace "<0>" "<a href=\"https://github.com/luontola/territory-bro/issues\" target=\"_blank\">")
+              (str/replace "</0>" "</a>")
+              (h/raw))]
    [:p [:a {:href "/privacy-policy"}
         "Privacy policy"]]))
 

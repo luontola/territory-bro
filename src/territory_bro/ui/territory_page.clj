@@ -162,7 +162,8 @@
       (common-assignment-form-errors errors)
       [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/assign")}
        [:fieldset
-        [:legend (i18n/t "Assignment.form.assignTerritory")]
+        [:legend {}
+         (i18n/t "Assignment.form.assignTerritory")]
 
         [:div.pure-control-group
          [:label {:for "publisher-field"}
@@ -182,7 +183,7 @@
                                     :required true
                                     :autocomplete "off"}] ; rely on the publisher list, don't remember old inputs
          (when publisher-not-found?
-           (h/html " ⚠️ " [:span.pure-form-message-inline
+           (h/html " ⚠️ " [:span.pure-form-message-inline {}
                            (i18n/t "Assignment.form.publisherNotFound")]))
          #_[:datalist#publisher-list
             (for [publisher (util/natural-sort-by :publisher/name publishers)]
@@ -229,12 +230,13 @@ if (returningCheckbox.checked) {
         errors (group-by first errors)
         invalid-end-date? (contains? errors :invalid-end-date)]
     (h/html
-     [:dialog
+     [:dialog {}
       (common-assignment-form-errors errors)
       [:form.pure-form.pure-form-aligned {:hx-post (str html/*page-path* "/assignments/return")
                                           :onchange sync-submit-button-js}
        [:fieldset
-        [:legend (i18n/t "Assignment.form.returnTerritory")]
+        [:legend {}
+         (i18n/t "Assignment.form.returnTerritory")]
         [:div.pure-control-group
          [:label {:for "end-date-field"}
           (i18n/t "Assignment.form.date")]
@@ -329,20 +331,20 @@ if (returningCheckbox.checked) {
         [:table.pure-table.pure-table-horizontal
          [:tbody
           [:tr
-           [:th (i18n/t "Territory.number")]
-           [:td (:territory/number territory)]]
+           [:th {} (i18n/t "Territory.number")]
+           [:td {} (:territory/number territory)]]
           [:tr
-           [:th (i18n/t "Territory.region")]
-           [:td (:territory/region territory)]]
+           [:th {} (i18n/t "Territory.region")]
+           [:td {} (:territory/region territory)]]
           [:tr
-           [:th (i18n/t "Territory.addresses")]
-           [:td (:territory/addresses territory)]]
+           [:th {} (i18n/t "Territory.addresses")]
+           [:td {} (:territory/addresses territory)]]
           [:tr
-           [:th (h/raw (i18n/t "Territory.doNotCalls"))]
-           [:td (do-not-calls--viewing model)]]
+           [:th {} (h/raw (i18n/t "Territory.doNotCalls"))]
+           [:td {} (do-not-calls--viewing model)]]
           [:tr
-           [:th (i18n/t "Assignment.status")]
-           [:td (assignment-status model)]]]]]
+           [:th {} (i18n/t "Assignment.status")]
+           [:td {} (assignment-status model)]]]]]
 
        (when (:share-territory-link permissions)
          [:div {:class (:actions styles)}
@@ -374,7 +376,7 @@ desktop.addEventListener('change', toggleOpen);
        [:div {:class (:map styles)}
         [:territory-map {:territory-location (:territory/location territory)
                          :map-raster maps/default-for-availability}]]
-       [:div.no-print
+       [:div.no-print {}
         (map-interaction-help/view model)]]])))
 
 (def share-key-cleanup-js

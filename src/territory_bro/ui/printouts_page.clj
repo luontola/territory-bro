@@ -94,7 +94,7 @@
                                          regions)]
     (h/html
      [:div.no-print
-      [:h1 (i18n/t "PrintoutPage.title")]
+      [:h1 {} (i18n/t "PrintoutPage.title")]
 
       [:form#print-options.pure-form.pure-form-stacked {:hx-post html/*page-path*
                                                         :hx-trigger "load delay:1ms, change delay:250ms"
@@ -107,7 +107,7 @@
                                                         ;; don't morph the printouts, since it would break web components
                                                         :hx-select-oob "#printouts:outerHTML"}
        [:fieldset
-        [:legend (i18n/t "PrintoutPage.printOptions")]
+        [:legend {} (i18n/t "PrintoutPage.printOptions")]
 
         [:div.pure-g
          [:div.pure-u-1.pure-u-md-1-2.pure-u-lg-1-3
@@ -120,7 +120,8 @@
 
         [:div.pure-g
          [:div.pure-u-1.pure-u-md-1-2.pure-u-lg-1-3
-          [:label {:for "language"} (i18n/t "PrintoutPage.language")]
+          [:label {:for "language"}
+           (i18n/t "PrintoutPage.language")]
           [:select#language.pure-input-1 {:name "language"}
            (for [{:keys [code englishName nativeName]} (i18n/languages)]
              [:option {:value code
@@ -131,7 +132,8 @@
 
         [:div.pure-g
          [:div.pure-u-1.pure-u-md-1-2.pure-u-lg-1-3
-          [:label {:for "map-raster"} (i18n/t "PrintoutPage.mapRaster")]
+          [:label {:for "map-raster"}
+           (i18n/t "PrintoutPage.mapRaster")]
           [:select#map-raster.pure-input-1 {:name "map-raster"}
            (for [{:keys [id name]} (maps/map-rasters)]
              [:option {:value id
@@ -141,7 +143,8 @@
         [:div.pure-g {:style (when-not (= :region (:type template))
                                {:display "none"})}
          [:div.pure-u-1.pure-u-md-1-2.pure-u-lg-1-3
-          [:label {:for "regions"} (i18n/t "PrintoutPage.regions")]
+          [:label {:for "regions"}
+           (i18n/t "PrintoutPage.regions")]
           [:select#regions.pure-input-1 {:name "regions"
                                          :multiple true
                                          :size "7"}
@@ -153,7 +156,8 @@
         [:div.pure-g {:style (when-not (= :territory (:type template))
                                {:display "none"})}
          [:div.pure-u-1.pure-u-md-1-2.pure-u-lg-1-3
-          [:label {:for "territories"} (i18n/t "PrintoutPage.territories")]
+          [:label {:for "territories"}
+           (i18n/t "PrintoutPage.territories")]
           [:select#territories.pure-input-1 {:name "territories"
                                              :multiple true
                                              :size "7"}
@@ -198,7 +202,7 @@
                                :map-raster (:map-raster form)
                                :print-date print-date})))))))]
 
-     [:div.no-print
+     [:div.no-print {}
       (map-interaction-help/view model)])))
 
 (defn view! [request]

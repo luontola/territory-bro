@@ -61,10 +61,13 @@
                               :map-raster map-raster}]]
 
        [:div {:class (:header styles)}
-        [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
-        [:div {:class (:region styles)} (:territory/region territory)]]
+        [:div {:class (:title styles)}
+         (i18n/t "TerritoryCard.title")]
+        [:div {:class (:region styles)}
+         (:territory/region territory)]]
 
-       [:div {:class (:number styles)} (:territory/number territory)]
+       [:div {:class (:number styles)}
+        (:territory/number territory)]
 
        [:div {:class (:map styles)}
         (print-date-notice
@@ -76,10 +79,12 @@
 
        [:div {:class (:addresses styles)}
         (when qr-codes-allowed?
-          [:div {:class (:qrCode styles)} (territory-qr-code territory)])
+          [:div {:class (:qrCode styles)}
+           (territory-qr-code territory)])
         (:territory/addresses territory)]
 
-       [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
+       [:div {:class (:footer styles)}
+        (i18n/t "TerritoryCard.footer")]]))))
 
 (defn territory-card-map-only [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date qr-codes-allowed?]}]
   ;; TODO: deduplicate with TerritoryCard
@@ -96,10 +101,13 @@
                               :map-raster map-raster}]]
 
        [:div {:class (:header styles)}
-        [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
-        [:div {:class (:region styles)} (:territory/region territory)]]
+        [:div {:class (:title styles)}
+         (i18n/t "TerritoryCard.title")]
+        [:div {:class (:region styles)}
+         (:territory/region territory)]]
 
-       [:div {:class (:number styles)} (:territory/number territory)]
+       [:div {:class (:number styles)}
+        (:territory/number territory)]
 
        [:div {:class (:map styles)}
         (print-date-notice
@@ -110,9 +118,11 @@
                           :printout true}])]
 
        (when qr-codes-allowed?
-         [:div {:class (:qrCode styles)} (territory-qr-code territory)])
+         [:div {:class (:qrCode styles)}
+          (territory-qr-code territory)])
 
-       [:div {:class (:footer styles)} (i18n/t "TerritoryCard.footer")]]))))
+       [:div {:class (:footer styles)}
+        (i18n/t "TerritoryCard.footer")]]))))
 
 (defn rural-territory-card [{:keys [territory congregation-boundary enclosing-region enclosing-minimap-viewport map-raster print-date qr-codes-allowed?]}]
   ;; TODO: deduplicate with TerritoryCard
@@ -129,10 +139,13 @@
                               :map-raster map-raster}]]
 
        [:div {:class (:header styles)}
-        [:div {:class (:title styles)} (i18n/t "TerritoryCard.title")]
-        [:div {:class (:region styles)} (:territory/region territory)]]
+        [:div {:class (:title styles)}
+         (i18n/t "TerritoryCard.title")]
+        [:div {:class (:region styles)}
+         (:territory/region territory)]]
 
-       [:div {:class (:number styles)} (:territory/number territory)]
+       [:div {:class (:number styles)}
+        (:territory/number territory)]
 
        [:div {:class (:map styles)}
         (print-date-notice
@@ -143,16 +156,19 @@
                           :printout true}])]
 
        (when qr-codes-allowed?
-         [:div {:class (:qrCode styles)} (territory-qr-code territory)])]))))
+         [:div {:class (:qrCode styles)}
+          (territory-qr-code territory)])]))))
 
 (defn qr-code-only [{:keys [territory qr-codes-allowed?]}]
   (let [styles (:QrCodeOnly (css/modules))]
     (h/html
      [:div {:class (:cropArea styles)}
       [:div {:class (:root styles)}
-       [:div {:class (:number styles)} (:territory/number territory)]
+       [:div {:class (:number styles)}
+        (:territory/number territory)]
        (if qr-codes-allowed?
-         [:div {:class (:qrCode styles)} (territory-qr-code territory)]
+         [:div {:class (:qrCode styles)}
+          (territory-qr-code territory)]
          "QR codes not allowed")]])))
 
 (defn neighborhood-card [{:keys [territory map-raster]}]
@@ -171,7 +187,8 @@
     (a4-print-frame
      (h/html
       [:div {:class (:root styles)}
-       [:div {:class (:name styles)} (:region/name region)]
+       [:div {:class (:name styles)}
+        (:region/name region)]
        [:div {:class (:map styles)}
         (print-date-notice
          print-date

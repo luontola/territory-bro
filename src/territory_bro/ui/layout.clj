@@ -74,48 +74,48 @@
   (let [cong-id (:congregation/id congregation)
         styles (:Layout (css/modules))]
     (h/html
-     [:li (nav-link {:href (str "/congregation/" cong-id)
-                     :title (if demo?
-                              (str "🔍 " (i18n/t "Navigation.demo"))
-                              (:congregation/name congregation))})]
+     [:li {} (nav-link {:href (str "/congregation/" cong-id)
+                        :title (if demo?
+                                 (str "🔍 " (i18n/t "Navigation.demo"))
+                                 (:congregation/name congregation))})]
      [:ul {:class (:nav-submenu styles)}
-      [:li (nav-link {:href (str "/congregation/" cong-id "/territories")
-                      :icon "📍"
-                      :title (i18n/t "TerritoryListPage.title")})]
+      [:li {} (nav-link {:href (str "/congregation/" cong-id "/territories")
+                         :icon "📍"
+                         :title (i18n/t "TerritoryListPage.title")})]
       (when (:view-printouts-page permissions)
-        [:li (nav-link {:href (str "/congregation/" cong-id "/printouts")
-                        :icon "🖨️"
-                        :title (i18n/t "PrintoutPage.title")})])
+        [:li {} (nav-link {:href (str "/congregation/" cong-id "/printouts")
+                           :icon "🖨️"
+                           :title (i18n/t "PrintoutPage.title")})])
       (when (:view-settings-page permissions)
-        [:li (nav-link {:href (str "/congregation/" cong-id "/settings")
-                        :icon "⚙️"
-                        :title (i18n/t "SettingsPage.title")})])])))
+        [:li {} (nav-link {:href (str "/congregation/" cong-id "/settings")
+                           :icon "⚙️"
+                           :title (i18n/t "SettingsPage.title")})])])))
 
 (defn navigation [{:keys [congregation demo-available? demo?] :as model}]
   (let [styles (:Layout (css/modules))]
     (h/html
      [:ul {:class (:nav-menu styles)}
-      [:li (nav-link {:href "/"
-                      :icon "🏠"
-                      :title (i18n/t "HomePage.title")})]
+      [:li {} (nav-link {:href "/"
+                         :icon "🏠"
+                         :title (i18n/t "HomePage.title")})]
       (when (some? congregation)
         (congregation-navigation model))
       (when (and demo-available? (not demo?))
-        [:li (nav-link {:href "/congregation/demo"
-                        :icon "🔍"
-                        :title (i18n/t "Navigation.demo")})])
-      [:li (nav-link {:href "/documentation"
-                      :icon "📖"
-                      :title (i18n/t "DocumentationPage.title")})]
-      [:li (nav-link {:href "/register"
-                      :icon "✍️"
-                      :title (i18n/t "Navigation.registration")})]
-      [:li (external-link {:href "https://groups.google.com/g/territory-bro-announcements"
-                           :icon "📢"
-                           :title (i18n/t "Navigation.news")})]
-      [:li (nav-link {:href "/support"
-                      :icon "🛟"
-                      :title (i18n/t "SupportPage.title")})]])))
+        [:li {} (nav-link {:href "/congregation/demo"
+                           :icon "🔍"
+                           :title (i18n/t "Navigation.demo")})])
+      [:li {} (nav-link {:href "/documentation"
+                         :icon "📖"
+                         :title (i18n/t "DocumentationPage.title")})]
+      [:li {} (nav-link {:href "/register"
+                         :icon "✍️"
+                         :title (i18n/t "Navigation.registration")})]
+      [:li {} (external-link {:href "https://groups.google.com/g/territory-bro-announcements"
+                              :icon "📢"
+                              :title (i18n/t "Navigation.news")})]
+      [:li {} (nav-link {:href "/support"
+                         :icon "🛟"
+                         :title (i18n/t "SupportPage.title")})]])))
 
 
 (defn- format-language-name [{:keys [code englishName nativeName]} current-language]
@@ -134,7 +134,7 @@
         current-language (name i18n/*lang*)]
     (h/html
      [:form.pure-form {:method "get"}
-      [:label
+      [:label {}
        (html/inline-svg "icons/language.svg"
                         {:title (i18n/t "Navigation.changeLanguage")
                          :class (:languageSelectionIcon styles)})
@@ -167,10 +167,10 @@
 
 (defn demo-disclaimer []
   (h/html
-   [:div.no-print
+   [:div.no-print {}
     (info-box/view {:title (i18n/t "DemoDisclaimer.welcome")}
                    (h/html
-                    [:p (i18n/t "DemoDisclaimer.introduction")]))]))
+                    [:p {} (i18n/t "DemoDisclaimer.introduction")]))]))
 
 (defn- parse-title [view]
   (second (re-find #"<h1>(.*?)</h1>" (str view))))
@@ -184,7 +184,7 @@
           [:html {:lang (name i18n/*lang*)}
            [:head
             [:meta {:charset "utf-8"}]
-            [:title
+            [:title {}
              (when (and (some? title)
                         (not= "Territory Bro" title))
                (str title " - "))
@@ -218,7 +218,7 @@
                (authentication-panel model)]]]
 
             [:dialog#htmx-error-dialog
-             [:h2 (i18n/t "Errors.unknownError")]
+             [:h2 {} (i18n/t "Errors.unknownError")]
              [:p#htmx-error-message {:data-default-message (i18n/t "Errors.reloadAndTryAgain")}]
              [:form {:method "dialog"}
               [:button.pure-button.pure-button-primary {:type "submit"}

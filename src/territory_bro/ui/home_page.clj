@@ -19,7 +19,7 @@
     (let [styles (:HomePage (css/modules))]
       (h/html
        [:div {:class (:sidebar styles)}
-        [:h2 (i18n/t "HomePage.yourCongregations")]
+        [:h2 {} (i18n/t "HomePage.yourCongregations")]
         [:ul#congregation-list {:class (:congregationList styles)}
          (for [congregation congregations]
            [:li [:a {:href (str "/congregation/" (:congregation/id congregation))}

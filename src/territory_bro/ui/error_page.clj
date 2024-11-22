@@ -16,10 +16,10 @@
 
 (defn view [{:keys [status]}]
   (h/html
-   [:h1 (condp = status
-          403 (i18n/t "Errors.accessDenied")
-          404 (i18n/t "Errors.pageNotFound")
-          (i18n/t "Errors.unknownError"))]
+   [:h1 {} (case status
+             403 (i18n/t "Errors.accessDenied")
+             404 (i18n/t "Errors.pageNotFound")
+             (i18n/t "Errors.unknownError"))]
    [:p [:a {:href "/"}
         (i18n/t "Errors.returnToFrontPage")]]))
 

@@ -32,7 +32,7 @@
 (defn view [model]
   (let [errors (group-by first (:errors model))]
     (h/html
-     [:h1 (i18n/t "RegistrationPage.title")]
+     [:h1 {} (i18n/t "RegistrationPage.title")]
 
      [:form.pure-form.pure-form-aligned {:method "post"}
       (html/anti-forgery-field)
