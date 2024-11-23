@@ -16,7 +16,7 @@
 
 (defn view [{:keys [status]}]
   (h/html
-   [:h1 {} (case status
+   [:h1 {} (case (int status)
              403 (i18n/t "Errors.accessDenied")
              404 (i18n/t "Errors.pageNotFound")
              (i18n/t "Errors.unknownError"))]
