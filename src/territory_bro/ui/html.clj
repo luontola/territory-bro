@@ -71,7 +71,7 @@
    "&gt;" ">"
    "&amp;" "&"})
 
-(defn visible-text [html]
+(defn visible-text ^String [html]
   (let [nodes (-> (en/html-snippet (str html))
                   (en/transform [(en/attr? :data-test-icon)] visualize-data-test-icon-attribute)
                   (en/transform [:input] visualize-input-element)

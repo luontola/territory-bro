@@ -30,7 +30,7 @@
 (def i18n
   (resources/auto-refresher "i18n.json" #(compile-i18n-json (json/read-value (slurp %)))))
 
-(defn t [key]
+(defn t ^String [key]
   (let [resources (:resources (i18n))]
     (or (-> resources *lang* (get key))
         (-> resources default-lang (get key))

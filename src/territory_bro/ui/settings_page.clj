@@ -4,6 +4,7 @@
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
             [territory-bro.domain.dmz :as dmz]
+            [territory-bro.domain.export :as export]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.util :as util]
@@ -159,7 +160,7 @@
   (when (:gis-access permissions)
     (h/html
      [:section
-      [:h2 {} (i18n/t "EditingMaps.title")]
+      [:h3 {} (i18n/t "EditingMaps.title")]
       [:p {} (-> (i18n/t "EditingMaps.introduction")
                  (str/replace "<0>" "<a href=\"/documentation\">")
                  (str/replace "</0>" "</a>")
@@ -169,6 +170,16 @@
       [:p [:a.pure-button {:href (str html/*page-path* "/qgis-project")}
            (i18n/t "EditingMaps.downloadQgisProject")]]])))
 
+(defn territories-section [model]
+  (h/html
+   [:section
+    (when (:dev config/env)
+      (list
+       [:h2 {} "Territories"] ; TODO: i18n
+       [:p [:a.pure-button {:href (str html/*page-path* "/export-territories")}
+            "Export territories and assignments as a spreadsheet (.xlsx)"]])) ; TODO: i18n
+    (editing-maps-section model)]))
+
 (defn download-qgis-project [request]
   (let [cong-id (get-in request [:path-params :congregation])
         {:keys [content filename]} (dmz/download-qgis-project cong-id)]
@@ -176,6 +187,12 @@
         (response/content-type "application/octet-stream")
         (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))
 
+(defn export-territories [request]
+  (let [cong-id (get-in request [:path-params :congregation])
+        {:keys [content filename]} (export/export-territories cong-id)]
+    (-> (http-response/ok content)
+        (response/content-type "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))
 
 ;;;; Publishers
 
@@ -465,7 +482,7 @@
      [:h1 {} (i18n/t "SettingsPage.title")]
      [:div {:class (:sections styles)}
       (congregation-settings-section model)
-      (editing-maps-section model)
+      (territories-section model)
       (publisher-management-section model)
       (user-management-section model)])))
 
@@ -487,6 +504,10 @@
    ["/qgis-project"
     {:get {:handler (fn [request]
                       (download-qgis-project request))}}]
+
+   ["/export-territories"
+    {:get {:handler (fn [request]
+                      (export-territories request))}}]
 
    ["/publishers"
     {:get {:handler (fn [request]
