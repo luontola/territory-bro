@@ -147,6 +147,8 @@
       (ByteArrayInputStream. (.toByteArray out)))))
 
 (defn export-territories [cong-id]
+  (when-not (dmz/allowed? [:configure-congregation cong-id])
+    (dmz/access-denied!))
   (let [congregation (dmz/get-congregation cong-id)
         territories (->> (dmz/list-territories cong-id)
                          (mapv (fn [territory]

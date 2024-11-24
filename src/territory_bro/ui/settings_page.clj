@@ -170,15 +170,16 @@
       [:p [:a.pure-button {:href (str html/*page-path* "/qgis-project")}
            (i18n/t "EditingMaps.downloadQgisProject")]]])))
 
-(defn territories-section [model]
-  (h/html
-   [:section
-    (when (:dev config/env)
-      (list
-       [:h2 {} "Territories"] ; TODO: i18n
-       [:p [:a.pure-button {:href (str html/*page-path* "/export-territories")}
-            "Export territories and assignments as a spreadsheet (.xlsx)"]])) ; TODO: i18n
-    (editing-maps-section model)]))
+(defn territories-section [{:keys [permissions] :as model}]
+  (when (or (:configure-congregation permissions)
+            (:gis-access permissions))
+    (h/html
+     [:section
+      [:h2 {} "Territories"] ; TODO: i18n
+      (when (:configure-congregation permissions)
+        [:p [:a.pure-button {:href (str html/*page-path* "/export-territories")}
+             "Export territories and assignments as a spreadsheet (.xlsx)"]]) ; TODO: i18n
+      (editing-maps-section model)])))
 
 (defn download-qgis-project [request]
   (let [cong-id (get-in request [:path-params :congregation])

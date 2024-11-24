@@ -1,10 +1,16 @@
 (ns territory-bro.domain.export-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
+            [matcher-combinators.test :refer :all]
+            [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.domain.export :as export]
+            [territory-bro.test.fixtures :refer :all]
+            [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.html :as html])
-  (:import (java.time LocalDate)
-           (org.apache.poi.ss.usermodel Cell DataFormatter Row)
+  (:import (clojure.lang ExceptionInfo)
+           (java.io InputStream)
+           (java.time LocalDate)
+           (org.apache.poi.ss.usermodel Cell DataFormatter Row Sheet)
            (org.apache.poi.xssf.usermodel XSSFSheet XSSFWorkbook)))
 
 (defn string-value [^Cell cell]
@@ -47,3 +53,31 @@
              (-> (.getSheet wb "Assignments")
                  visible-text))
           "assignments"))))
+
+(deftest export-territories-test
+  (with-fixtures [dmz-test/testdata-fixture]
+    (testutil/with-user-id dmz-test/user-id
+
+      (testing "generates an Excel spreadsheet with territories and assignments"
+        (let [{:keys [content filename]} (export/export-territories dmz-test/cong-id)
+              wb (XSSFWorkbook. ^InputStream content)
+              territories-sheet (-> (.getSheet wb "Territories")
+                                    visible-text)
+              assignments-sheet (-> (.getSheet wb "Assignments")
+                                    visible-text)]
+          (is (= "Cong1 Name.xlsx" filename))
+          (is (= ["Territories" "Assignments"]
+                 (->> (iterator-seq (.sheetIterator wb))
+                      (mapv Sheet/.getSheetName))))
+          (is (str/includes? territories-sheet (html/normalize-whitespace "123   the region   the addresses   the do-not-calls"))
+              "enriches territories with do-not-calls")
+          (is (str/includes? assignments-sheet (html/normalize-whitespace "123   John Doe   1/1/00"))
+              "enriches territories with assignment history")))
+
+      (testing "requires the configure-congregation permission"
+        (testutil/with-events [{:event/type :congregation.event/permission-revoked
+                                :congregation/id dmz-test/cong-id
+                                :user/id dmz-test/user-id
+                                :permission/id :configure-congregation}]
+          (is (thrown-match? ExceptionInfo dmz-test/access-denied
+                             (export/export-territories dmz-test/cong-id))))))))

@@ -8,6 +8,8 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.domain.dmz-test :as dmz-test]
+            [territory-bro.domain.do-not-calls :as do-not-calls]
+            [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.publisher :as publisher]
             [territory-bro.domain.testdata :as testdata]
             [territory-bro.infra.authentication :as auth]
@@ -20,8 +22,11 @@
             [territory-bro.ui.html :as html]
             [territory-bro.ui.settings-page :as settings-page])
   (:import (clojure.lang ExceptionInfo)
+           (java.io InputStream)
            (java.time LocalDate)
            (java.util UUID)
+           (org.apache.poi.ss.usermodel Sheet)
+           (org.apache.poi.xssf.usermodel XSSFWorkbook)
            (territory_bro ValidationException)))
 
 (def cong-id (UUID. 0 1))
@@ -203,12 +208,38 @@
                      Territory loans CSV URL (optional) [new url] ⚠️"))))))))))
 
 
-;;;; Editing maps
+;;;; Territories
 
 (deftest editing-maps-section-test
   (testing "requires the gis-access permission"
     (let [model (replace-in model [:permissions :gis-access] true false)]
       (is (nil? (settings-page/editing-maps-section model))))))
+
+(deftest territories-section-test
+  (testing "requires the gis-access or configure-congregation permission"
+    (let [model (-> model
+                    (replace-in [:permissions :gis-access] true false)
+                    (replace-in [:permissions :configure-congregation] true false))]
+      (is (nil? (settings-page/territories-section model)))))
+
+  (testing "only gis-access permission: will show the editing maps section"
+    (let [model (replace-in model [:permissions :configure-congregation] true false)]
+      (is (= (html/normalize-whitespace
+              "Territories
+               Editing maps
+               The instructions for editing maps are in the user guide. You can edit the maps using the QGIS application,
+               for which you will need the following QGIS project file.
+               Download QGIS project file")
+             (-> (settings-page/territories-section model)
+                 html/visible-text)))))
+
+  (testing "only configure-congregation permission: will show the export territories link"
+    (let [model (replace-in model [:permissions :gis-access] true false)]
+      (is (= (html/normalize-whitespace
+              "Territories
+               Export territories and assignments as a spreadsheet (.xlsx)")
+             (-> (settings-page/territories-section model)
+                 html/visible-text))))))
 
 (deftest download-qgis-project-test
   (let [request {:path-params {:congregation cong-id}}]
@@ -229,6 +260,24 @@
                                 "Content-Disposition" "attachment; filename=\"Congregation Name.qgs\""}}
                      (dissoc response :body)))
               (is (str/includes? (:body response) "dbname='example_db' host=gis.example.com port=5432 user='username123'")))))))))
+
+(deftest export-territories-test
+  (let [request {:path-params {:congregation cong-id}}]
+    (testutil/with-events test-events
+      (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
+        (testutil/with-user-id user-id
+
+          (testing "downloads an Excel spreadsheet with territories and assignments"
+            (let [response (settings-page/export-territories request)]
+              (is (= {:status 200
+                      :headers {"Content-Type" "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                "Content-Disposition" "attachment; filename=\"Congregation Name.xlsx\""}}
+                     (dissoc response :body)))
+              (is (= ["Territories" "Assignments"]
+                     (->> (XSSFWorkbook. ^InputStream (:body response))
+                          .sheetIterator
+                          iterator-seq
+                          (mapv Sheet/.getSheetName)))))))))))
 
 
 ;;;; Publishers
@@ -622,6 +671,10 @@
             Publish that sheet as a CSV file and enter its URL to the above field on this settings page.
 
           Save settings
+          
+          Territories
+
+            Export territories and assignments as a spreadsheet (.xlsx)
 
           Editing maps
 
@@ -663,6 +716,9 @@
           (is (thrown-match? ExceptionInfo dmz-test/access-denied
                              (handler {:request-method :get
                                        :uri (str page-path "/qgis-project")})))
+          (is (thrown-match? ExceptionInfo dmz-test/access-denied
+                             (handler {:request-method :get
+                                       :uri (str page-path "/export-territories")})))
           (is (thrown-match? ExceptionInfo dmz-test/access-denied
                              (handler {:request-method :get
                                        :uri (str page-path "/users")}))))))))

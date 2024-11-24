@@ -181,13 +181,17 @@
    :gis-database-host "gis.example.com"
    :gis-database-name "gis-db"})
 
-(use-fixtures :once (join-fixtures [(fixed-clock-fixture test-time)
-                                    (fn [f]
-                                      (binding [config/env env
-                                                publisher/publishers-by-id (fn [_conn cong-id]
-                                                                             (get test-publishers-by-id cong-id))]
-                                        (testutil/with-events (concat test-events demo-events)
-                                          (f))))]))
+(def testdata-fixture
+  (join-fixtures [(fixed-clock-fixture test-time)
+                  (fn [f]
+                    (binding [config/env env
+                              publisher/publishers-by-id (fn [_conn cong-id]
+                                                           (get test-publishers-by-id cong-id))
+                              do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
+                      (testutil/with-events (concat test-events demo-events)
+                        (f))))]))
+
+(use-fixtures :once testdata-fixture)
 
 
 ;;;; Commands
@@ -627,29 +631,28 @@
 (deftest get-do-not-calls-test
   (let [expected "the do-not-calls"]
 
-    (binding [do-not-calls/get-do-not-calls do-not-calls-test/fake-get-do-not-calls]
-      (testutil/with-user-id user-id
-        (testing "full permissions"
-          (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))
+    (testutil/with-user-id user-id
+      (testing "full permissions"
+        (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))
 
-      (testutil/with-super-user
-        (testing "super user"
-          (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))
+    (testutil/with-super-user
+      (testing "super user"
+        (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))
 
-      (testutil/with-user-id (UUID. 0 0x666)
-        (testing "no permissions"
-          (is (nil? (dmz/get-do-not-calls cong-id territory-id)))))
+    (testutil/with-user-id (UUID. 0 0x666)
+      (testing "no permissions"
+        (is (nil? (dmz/get-do-not-calls cong-id territory-id)))))
 
-      (testutil/with-anonymous-user
-        (testing "anonymous"
-          (is (nil? (dmz/get-do-not-calls cong-id territory-id))))
+    (testutil/with-anonymous-user
+      (testing "anonymous"
+        (is (nil? (dmz/get-do-not-calls cong-id territory-id))))
 
-        (testing "demo congregation"
-          (is (nil? (dmz/get-do-not-calls "demo" territory-id))))
+      (testing "demo congregation"
+        (is (nil? (dmz/get-do-not-calls "demo" territory-id))))
 
-        (testing "opened a share"
-          (binding [dmz/*state* (apply-share-opened dmz/*state*)]
-            (is (= expected (dmz/get-do-not-calls cong-id territory-id)))))))))
+      (testing "opened a share"
+        (binding [dmz/*state* (apply-share-opened dmz/*state*)]
+          (is (= expected (dmz/get-do-not-calls cong-id territory-id))))))))
 
 (deftest list-territories-test
   (let [expected [{:congregation/id cong-id
