@@ -14,7 +14,7 @@
   ;; auto-size doesn't make the cells wide enough to fit all dates, likely depending on locale
   (.setColumnWidth sheet column (max 3000 (.getColumnWidth sheet column))))
 
-(defn make-spreadsheet [{:keys [territories assignments]}]
+(defn make-spreadsheet ^ByteArrayInputStream [{:keys [territories assignments]}]
   (let [wb (XSSFWorkbook.)
         bold-font (doto (.createFont wb)
                     (.setBold true))
@@ -27,6 +27,7 @@
                              (.setVerticalAlignment VerticalAlignment/TOP)
                              (.setWrapText true))
         date-style (doto (.createCellStyle wb)
+                     ;; Excel will show this short date format according to the operating system's regional date and time settings
                      (.setDataFormat (BuiltinFormats/getBuiltinFormat "m/d/yy"))
                      (.setVerticalAlignment VerticalAlignment/TOP))
         territories-sheet (.createSheet wb "Territories") ; TODO: i18n
