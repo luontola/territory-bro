@@ -4,6 +4,7 @@
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
             [territory-bro.domain.dmz :as dmz]
+            [territory-bro.gis.qgis :as qgis]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.util :as util]
@@ -181,16 +182,31 @@
              "Export territories and assignments as a spreadsheet (.xlsx)"]]) ; TODO: i18n
       (editing-maps-section model)])))
 
+(defn sanitize-filename [basename extension fallback]
+  (let [basename (-> basename
+                     (str/replace #"[<>:\"/\\|?*]" "") ; not allowed in Windows file names
+                     (str/replace #"^[\.\s]+" "") ; leading comma = hidden file
+                     (str/replace #"\s+" " ")
+                     (str/trim))
+        basename (if (str/blank? basename)
+                   fallback
+                   basename)]
+    (str basename extension)))
+
 (defn download-qgis-project [request]
   (let [cong-id (get-in request [:path-params :congregation])
-        {:keys [content filename]} (dmz/download-qgis-project cong-id)]
+        content (dmz/download-qgis-project cong-id)
+        congregation (dmz/get-congregation cong-id)
+        filename (sanitize-filename (:congregation/name congregation) qgis/qgis-project-ext "territories")]
     (-> (http-response/ok content)
         (response/content-type "application/octet-stream")
         (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))
 
 (defn export-territories [request]
   (let [cong-id (get-in request [:path-params :congregation])
-        {:keys [content filename]} (export/export-territories cong-id)]
+        content (export/export-territories cong-id)
+        congregation (dmz/get-congregation cong-id)
+        filename (sanitize-filename (:congregation/name congregation) export/excel-spreadsheet-ext "territories")]
     (-> (http-response/ok content)
         (response/content-type "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))

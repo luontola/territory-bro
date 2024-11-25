@@ -1,14 +1,14 @@
 (ns territory-bro.ui.export
-  (:require [clojure.string :as str]
-            [medley.core :as m]
+  (:require [medley.core :as m]
             [territory-bro.domain.dmz :as dmz]
-            [territory-bro.gis.qgis :as qgis]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n])
   (:import (java.io ByteArrayInputStream ByteArrayOutputStream)
            (java.time LocalDate)
            (org.apache.poi.ss.usermodel BuiltinFormats VerticalAlignment)
            (org.apache.poi.xssf.usermodel XSSFSheet XSSFWorkbook)))
+
+(def excel-spreadsheet-ext ".xlsx")
 
 (defn- set-date-column-min-width [^XSSFSheet sheet column]
   ;; auto-size doesn't make the cells wide enough to fit all dates, likely depending on locale
@@ -149,17 +149,12 @@
 (defn export-territories [cong-id]
   (when-not (dmz/allowed? [:configure-congregation cong-id])
     (dmz/access-denied!))
-  (let [congregation (dmz/get-congregation cong-id)
-        territories (->> (dmz/list-territories cong-id)
+  (let [territories (->> (dmz/list-territories cong-id)
                          (mapv (fn [territory]
                                  (assoc territory :territory/do-not-calls (dmz/get-do-not-calls (:congregation/id territory) (:territory/id territory))))))
         assignments (->> territories
                          (mapcat (fn [territory]
                                    (->> (dmz/get-territory-assignment-history (:congregation/id territory) (:territory/id territory))
-                                        (mapv #(assoc % :territory/number (:territory/number territory)))))))
-        content (make-spreadsheet {:territories territories
-                                   :assignments assignments})
-        filename (-> (qgis/project-file-name (:congregation/name congregation))
-                     (str/replace #"\.qgs$" ".xlsx"))]
-    {:content content
-     :filename filename}))
+                                        (mapv #(assoc % :territory/number (:territory/number territory)))))))]
+    (make-spreadsheet {:territories territories
+                       :assignments assignments})))

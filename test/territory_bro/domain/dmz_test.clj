@@ -464,12 +464,11 @@
             (is (empty? (dmz/list-congregation-users cong-id)))))))))
 
 (deftest download-qgis-project-test
-  (let [expected {:filename "Cong1 Name.qgs"
-                  :content (match/all-of #"dbname='gis-db'"
-                                         #"host=gis\.example\.com"
-                                         #"user='username123'"
-                                         #"password='password123'"
-                                         #"table=\"cong1_schema\"\.\"territory\"")}]
+  (let [expected (match/all-of #"dbname='gis-db'"
+                               #"host=gis\.example\.com"
+                               #"user='username123'"
+                               #"password='password123'"
+                               #"table=\"cong1_schema\"\.\"territory\"")]
 
     (testutil/with-user-id user-id
       (testing "full permissions"

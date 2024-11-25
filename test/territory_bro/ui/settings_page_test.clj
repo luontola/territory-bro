@@ -12,6 +12,7 @@
             [territory-bro.domain.do-not-calls-test :as do-not-calls-test]
             [territory-bro.domain.publisher :as publisher]
             [territory-bro.domain.testdata :as testdata]
+            [territory-bro.gis.qgis :as qgis]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions]
@@ -240,6 +241,38 @@
                Export territories and assignments as a spreadsheet (.xlsx)")
              (-> (settings-page/territories-section model)
                  html/visible-text))))))
+
+(deftest sanitize-filename-test
+  (testing "joins the basename and extension"
+    (is (= "hello.txt" (settings-page/sanitize-filename "hello" ".txt" "goodbye"))))
+
+  (testing "keeps non-ASCII characters"
+    (is (= "Ylöjärvi.qgs" (settings-page/sanitize-filename "Ylöjärvi" qgis/qgis-project-ext "fallback")))
+    (is (= "東京.qgs" (settings-page/sanitize-filename "東京" qgis/qgis-project-ext "fallback"))))
+
+  (testing "strips illegal characters"
+    ;; https://stackoverflow.com/a/31976060/62130
+    (is (= "foobar.zip"
+           (settings-page/sanitize-filename "foo<>:\"/\\|?*bar" ".zip" "fallback"))
+        "forbidden printable ASCII characters")
+    (is (= "foo.zip"
+           (settings-page/sanitize-filename ".foo" ".zip" "fallback")
+           (settings-page/sanitize-filename "..foo" ".zip" "fallback"))
+        "leading commas (i.e. hidden file)")
+    (is (= "a.b..zip"
+           (settings-page/sanitize-filename "a.b." ".zip" "fallback"))
+        "trailing commas are kept"))
+
+  (testing "normalizes whitespace"
+    (is (= "foo bar.txt" (settings-page/sanitize-filename "  foo   \tbar \n" ".txt" "fallback")))
+    (is (= "foo.txt" (settings-page/sanitize-filename " . . . foo" ".txt" "fallback"))
+        "trimming whitespace should not create leading commands"))
+
+  (testing "uses the fallback if the basename is empty"
+    (is (= "goodbye.txt"
+           (settings-page/sanitize-filename "" ".txt" "goodbye")
+           (settings-page/sanitize-filename " " ".txt" "goodbye")
+           (settings-page/sanitize-filename "/" ".txt" "goodbye")))))
 
 (deftest download-qgis-project-test
   (let [request {:path-params {:congregation cong-id}}]

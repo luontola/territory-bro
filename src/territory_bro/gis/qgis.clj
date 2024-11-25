@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
+(def qgis-project-ext ".qgs")
 (def project-template (io/resource "template-territories.qgs"))
 
 (defn generate-project [{:keys [database-host database-name database-schema database-username database-password]}]
@@ -16,12 +17,3 @@
       (str/replace "SCHEMA_GOES_HERE" database-schema)
       (str/replace "USERNAME_GOES_HERE" database-username)
       (str/replace "PASSWORD_GOES_HERE" database-password)))
-
-(defn project-file-name [name]
-  (let [name (-> name
-                 (str/replace #"[<>:\"/\\|?*]" "") ; not allowed in Windows file names
-                 (str/replace #"\s+" " "))
-        name (if (str/blank? name)
-               "territories"
-               name)]
-    (str name ".qgs")))

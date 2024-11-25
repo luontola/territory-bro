@@ -59,13 +59,12 @@
     (testutil/with-user-id dmz-test/user-id
 
       (testing "generates an Excel spreadsheet with territories and assignments"
-        (let [{:keys [content filename]} (export/export-territories dmz-test/cong-id)
+        (let [content (export/export-territories dmz-test/cong-id)
               wb (XSSFWorkbook. ^InputStream content)
               territories-sheet (-> (.getSheet wb "Territories")
                                     visible-text)
               assignments-sheet (-> (.getSheet wb "Assignments")
                                     visible-text)]
-          (is (= "Cong1 Name.xlsx" filename))
           (is (= ["Territories" "Assignments"]
                  (->> (iterator-seq (.sheetIterator wb))
                       (mapv Sheet/.getSheetName))))

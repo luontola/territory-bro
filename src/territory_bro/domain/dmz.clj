@@ -231,12 +231,11 @@
     (access-denied!))
   (let [congregation (get-congregation cong-id)
         gis-user (gis-user/get-gis-user *state* cong-id (auth/current-user-id))]
-    {:content (qgis/generate-project {:database-host (:gis-database-host config/env)
-                                      :database-name (:gis-database-name config/env)
-                                      :database-schema (:congregation/schema-name congregation)
-                                      :database-username (:gis-user/username gis-user)
-                                      :database-password (:gis-user/password gis-user)})
-     :filename (qgis/project-file-name (:congregation/name congregation))}))
+    (qgis/generate-project {:database-host (:gis-database-host config/env)
+                            :database-name (:gis-database-name config/env)
+                            :database-schema (:congregation/schema-name congregation)
+                            :database-username (:gis-user/username gis-user)
+                            :database-password (:gis-user/password gis-user)})))
 
 
 ;;;; Publishers
