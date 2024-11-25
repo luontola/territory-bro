@@ -182,14 +182,14 @@
              "Export territories and assignments as a spreadsheet (.xlsx)"]]) ; TODO: i18n
       (editing-maps-section model)])))
 
-(defn sanitize-filename [basename extension fallback]
+(defn sanitize-filename [basename extension]
   (let [basename (-> basename
                      (str/replace #"[<>:\"/\\|?*]" "") ; not allowed in Windows file names
                      (str/replace #"^[\.\s]+" "") ; leading comma = hidden file
                      (str/replace #"\s+" " ")
                      (str/trim))
         basename (if (str/blank? basename)
-                   fallback
+                   "file"
                    basename)]
     (str basename extension)))
 
@@ -197,7 +197,7 @@
   (let [cong-id (get-in request [:path-params :congregation])
         content (dmz/download-qgis-project cong-id)
         congregation (dmz/get-congregation cong-id)
-        filename (sanitize-filename (:congregation/name congregation) qgis/qgis-project-ext "territories")]
+        filename (sanitize-filename (:congregation/name congregation) qgis/qgis-project-ext)]
     (-> (http-response/ok content)
         (response/content-type "application/octet-stream")
         (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))
@@ -206,7 +206,7 @@
   (let [cong-id (get-in request [:path-params :congregation])
         content (export/export-territories cong-id)
         congregation (dmz/get-congregation cong-id)
-        filename (sanitize-filename (:congregation/name congregation) export/excel-spreadsheet-ext "territories")]
+        filename (sanitize-filename (:congregation/name congregation) export/excel-spreadsheet-ext)]
     (-> (http-response/ok content)
         (response/content-type "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))

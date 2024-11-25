@@ -244,35 +244,35 @@
 
 (deftest sanitize-filename-test
   (testing "joins the basename and extension"
-    (is (= "hello.txt" (settings-page/sanitize-filename "hello" ".txt" "goodbye"))))
+    (is (= "hello.txt" (settings-page/sanitize-filename "hello" ".txt"))))
 
   (testing "keeps non-ASCII characters"
-    (is (= "Ylöjärvi.qgs" (settings-page/sanitize-filename "Ylöjärvi" qgis/qgis-project-ext "fallback")))
-    (is (= "東京.qgs" (settings-page/sanitize-filename "東京" qgis/qgis-project-ext "fallback"))))
+    (is (= "Ylöjärvi.qgs" (settings-page/sanitize-filename "Ylöjärvi" qgis/qgis-project-ext)))
+    (is (= "東京.qgs" (settings-page/sanitize-filename "東京" qgis/qgis-project-ext))))
 
   (testing "strips illegal characters"
     ;; https://stackoverflow.com/a/31976060/62130
     (is (= "foobar.zip"
-           (settings-page/sanitize-filename "foo<>:\"/\\|?*bar" ".zip" "fallback"))
+           (settings-page/sanitize-filename "foo<>:\"/\\|?*bar" ".zip"))
         "forbidden printable ASCII characters")
     (is (= "foo.zip"
-           (settings-page/sanitize-filename ".foo" ".zip" "fallback")
-           (settings-page/sanitize-filename "..foo" ".zip" "fallback"))
+           (settings-page/sanitize-filename ".foo" ".zip")
+           (settings-page/sanitize-filename "..foo" ".zip"))
         "leading commas (i.e. hidden file)")
     (is (= "a.b..zip"
-           (settings-page/sanitize-filename "a.b." ".zip" "fallback"))
+           (settings-page/sanitize-filename "a.b." ".zip"))
         "trailing commas are kept"))
 
   (testing "normalizes whitespace"
-    (is (= "foo bar.txt" (settings-page/sanitize-filename "  foo   \tbar \n" ".txt" "fallback")))
-    (is (= "foo.txt" (settings-page/sanitize-filename " . . . foo" ".txt" "fallback"))
+    (is (= "foo bar.txt" (settings-page/sanitize-filename "  foo   \tbar \n" ".txt")))
+    (is (= "foo.txt" (settings-page/sanitize-filename " . . . foo" ".txt"))
         "trimming whitespace should not create leading commands"))
 
-  (testing "uses the fallback if the basename is empty"
-    (is (= "goodbye.txt"
-           (settings-page/sanitize-filename "" ".txt" "goodbye")
-           (settings-page/sanitize-filename " " ".txt" "goodbye")
-           (settings-page/sanitize-filename "/" ".txt" "goodbye")))))
+  (testing "uses a fallback if the basename is empty"
+    (is (= "file.txt"
+           (settings-page/sanitize-filename "" ".txt")
+           (settings-page/sanitize-filename " " ".txt")
+           (settings-page/sanitize-filename "/" ".txt")))))
 
 (deftest download-qgis-project-test
   (let [request {:path-params {:congregation cong-id}}]
