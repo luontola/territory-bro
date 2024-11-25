@@ -116,7 +116,8 @@
 
     (doseq [assignment (->> assignments
                             (mapcat (fn [assignment]
-                                      (->> (:assignment/covered-dates assignment)
+                                      (->> (or (seq (:assignment/covered-dates assignment))
+                                               [nil])
                                            (mapv (fn [covered-date]
                                                    (-> assignment
                                                        (dissoc :assignment/covered-dates)

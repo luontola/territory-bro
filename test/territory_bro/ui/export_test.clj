@@ -54,6 +54,17 @@
                  visible-text))
           "assignments")))
 
+  (testing "lists in-progress assignments"
+    (let [assignments [{:territory/number "123A"
+                        :publisher/name "Pete Publisher"
+                        :assignment/start-date (LocalDate/of 2024 1 1)}]
+          wb (XSSFWorkbook. (export/make-spreadsheet {:assignments assignments}))]
+      (is (= (html/normalize-whitespace
+              "Territory   Publisher        Assigned   Covered   Returned
+               123A        Pete Publisher   1/1/24")
+             (-> (.getSheet wb "Assignments")
+                 visible-text)))))
+
   (testing "duplicates assignment rows which have many covered dates"
     (let [assignments [{:territory/number "123A"
                         :publisher/name "Pete Publisher"
