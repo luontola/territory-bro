@@ -1,11 +1,11 @@
-(ns territory-bro.domain.export-test
+(ns territory-bro.ui.export-test
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [territory-bro.domain.dmz-test :as dmz-test]
-            [territory-bro.domain.export :as export]
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil]
+            [territory-bro.ui.export :as export]
             [territory-bro.ui.html :as html])
   (:import (clojure.lang ExceptionInfo)
            (java.io InputStream)

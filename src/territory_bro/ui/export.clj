@@ -1,4 +1,4 @@
-(ns territory-bro.domain.export
+(ns territory-bro.ui.export
   (:require [clojure.string :as str]
             [medley.core :as m]
             [territory-bro.domain.dmz :as dmz]
