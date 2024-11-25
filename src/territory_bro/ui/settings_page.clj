@@ -16,7 +16,10 @@
             [territory-bro.ui.i18n :as i18n]
             [territory-bro.ui.info-box :as info-box]
             [territory-bro.ui.layout :as layout])
-  (:import (territory_bro ValidationException)))
+  (:import (java.net URLEncoder)
+           (java.nio.charset StandardCharsets)
+           (java.text Normalizer Normalizer$Form)
+           (territory_bro ValidationException)))
 
 (defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
@@ -193,6 +196,21 @@
                    basename)]
     (str basename extension)))
 
+(defn- remove-diacritics [^String s]
+  (-> (Normalizer/normalize s Normalizer$Form/NFD) ; decompose characters
+      (str/replace #"\p{M}" ""))) ; remove diacritics
+
+(defn- to-ascii [^String s]
+  (-> (.getBytes s StandardCharsets/US_ASCII) ; replaces non-ASCII characters with "?"
+      (String. StandardCharsets/US_ASCII)
+      (str/replace "?" "_"))) ; filenames can't contain "?", so replace it with "_"
+
+(defn content-disposition [^String filename]
+  (let [ascii-filename (-> filename remove-diacritics to-ascii)
+        utf8-filename (-> (URLEncoder/encode filename StandardCharsets/UTF_8)
+                          (str/replace "+" "%20"))]
+    (str "attachment; filename=\"" ascii-filename "\"; filename*=UTF-8''" utf8-filename)))
+
 (defn download-qgis-project [request]
   (let [cong-id (get-in request [:path-params :congregation])
         content (dmz/download-qgis-project cong-id)
@@ -200,7 +218,7 @@
         filename (sanitize-filename (:congregation/name congregation) qgis/qgis-project-ext)]
     (-> (http-response/ok content)
         (response/content-type "application/octet-stream")
-        (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))
+        (response/header "Content-Disposition" (content-disposition filename)))))
 
 (defn export-territories [request]
   (let [cong-id (get-in request [:path-params :congregation])
@@ -209,7 +227,7 @@
         filename (sanitize-filename (:congregation/name congregation) export/excel-spreadsheet-ext)]
     (-> (http-response/ok content)
         (response/content-type "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        (response/header "Content-Disposition" (str "attachment; filename=\"" filename "\"")))))
+        (response/header "Content-Disposition" (content-disposition filename)))))
 
 ;;;; Publishers
 

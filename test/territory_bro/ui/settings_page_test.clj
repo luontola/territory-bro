@@ -274,6 +274,23 @@
            (settings-page/sanitize-filename " " ".txt")
            (settings-page/sanitize-filename "/" ".txt")))))
 
+(deftest content-disposition-test
+  (testing "encoding space"
+    (is (= "attachment; filename=\"file name.txt\"; filename*=UTF-8''file%20name.txt"
+           (settings-page/content-disposition "file name.txt"))))
+
+  (testing "encoding +"
+    (is (= "attachment; filename=\"a+b.txt\"; filename*=UTF-8''a%2Bb.txt"
+           (settings-page/content-disposition "a+b.txt"))))
+
+  (testing "ASCII fallback by removing diacritics"
+    (is (= "attachment; filename=\"Ylojarvi.txt\"; filename*=UTF-8''Yl%C3%B6j%C3%A4rvi.txt"
+           (settings-page/content-disposition "Ylöjärvi.txt"))))
+
+  (testing "ASCII fallback for non-representable characters"
+    (is (= "attachment; filename=\"__.txt\"; filename*=UTF-8''%E6%9D%B1%E4%BA%AC.txt"
+           (settings-page/content-disposition "東京.txt")))))
+
 (deftest download-qgis-project-test
   (let [request {:path-params {:congregation cong-id}}]
     (testutil/with-events (concat test-events
@@ -290,7 +307,7 @@
             (let [response (settings-page/download-qgis-project request)]
               (is (= {:status 200
                       :headers {"Content-Type" "application/octet-stream"
-                                "Content-Disposition" "attachment; filename=\"Congregation Name.qgs\""}}
+                                "Content-Disposition" "attachment; filename=\"Congregation Name.qgs\"; filename*=UTF-8''Congregation%20Name.qgs"}}
                      (dissoc response :body)))
               (is (str/includes? (:body response) "dbname='example_db' host=gis.example.com port=5432 user='username123'")))))))))
 
@@ -304,7 +321,7 @@
             (let [response (settings-page/export-territories request)]
               (is (= {:status 200
                       :headers {"Content-Type" "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                "Content-Disposition" "attachment; filename=\"Congregation Name.xlsx\""}}
+                                "Content-Disposition" "attachment; filename=\"Congregation Name.xlsx\"; filename*=UTF-8''Congregation%20Name.xlsx"}}
                      (dissoc response :body)))
               (is (= ["Territories" "Assignments"]
                      (->> (XSSFWorkbook. ^InputStream (:body response))
