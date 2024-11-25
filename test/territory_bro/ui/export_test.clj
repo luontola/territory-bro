@@ -78,7 +78,34 @@
                123A        Pete Publisher   1/1/24     2/1/24    3/1/24
                123A        Pete Publisher   1/1/24     2/15/24   3/1/24")
              (-> (.getSheet wb "Assignments")
-                 visible-text))))))
+                 visible-text)))))
+
+  (testing "draws a territory separator on the assignments sheet"
+    (let [assignments [{:territory/number "1"
+                        :publisher/name "A"
+                        :assignment/start-date (LocalDate/of 2024 1 1)}
+                       {:territory/number "1"
+                        :publisher/name "B"
+                        :assignment/start-date (LocalDate/of 2024 2 1)}
+                       {:territory/number "2"
+                        :publisher/name "C"
+                        :assignment/start-date (LocalDate/of 2024 1 1)}]
+          wb (XSSFWorkbook. (export/make-spreadsheet {:assignments assignments}))
+          sheet (.getSheet wb "Assignments")]
+      (is (= (html/normalize-whitespace
+              "Territory   Publisher        Assigned   Covered   Returned
+               1           A                1/1/24
+               1           B                2/1/24
+               2           C                1/1/24")
+             (-> sheet visible-text)))
+      (is (= [{:border-top "NONE", :cell "Territory"}
+              {:border-top "NONE", :cell "1"} ; no border for the first line
+              {:border-top "NONE", :cell "1"} ; no border within the same territory
+              {:border-top "THIN", :cell "2"}] ; draw a border when the territory changes
+             (mapv (fn [^Row row]
+                     {:cell (.getStringCellValue (.getCell row 0))
+                      :border-top (.name (.getBorderTop (.getCellStyle (.getCell row 0))))})
+                   (iterator-seq (.rowIterator sheet))))))))
 
 (deftest export-territories-test
   (with-fixtures [dmz-test/testdata-fixture]

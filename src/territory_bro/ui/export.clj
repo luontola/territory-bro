@@ -4,14 +4,19 @@
             [territory-bro.ui.i18n :as i18n])
   (:import (java.io ByteArrayInputStream ByteArrayOutputStream)
            (java.time LocalDate)
-           (org.apache.poi.ss.usermodel BuiltinFormats VerticalAlignment)
-           (org.apache.poi.xssf.usermodel XSSFSheet XSSFWorkbook)))
+           (org.apache.poi.ss.usermodel BorderStyle BuiltinFormats VerticalAlignment)
+           (org.apache.poi.xssf.usermodel XSSFCellStyle XSSFColor XSSFSheet XSSFWorkbook)))
 
 (def excel-spreadsheet-ext ".xlsx")
 
 (defn- set-date-column-min-width [^XSSFSheet sheet column]
   ;; auto-size doesn't make the cells wide enough to fit all dates, likely depending on locale
   (.setColumnWidth sheet column (max 3000 (.getColumnWidth sheet column))))
+
+(defn- set-top-border [^XSSFCellStyle style]
+  (doto (.copy style)
+    (.setBorderTop BorderStyle/THIN)
+    (.setTopBorderColor (XSSFColor. (byte-array [128 128 128])))))
 
 (defn make-spreadsheet ^ByteArrayInputStream [{:keys [territories assignments]}]
   (let [wb (XSSFWorkbook.)
@@ -22,6 +27,7 @@
                        (.setFont bold-font))
         text-style (doto (.createCellStyle wb)
                      (.setVerticalAlignment VerticalAlignment/TOP))
+        text-style-with-border (set-top-border text-style)
         wrapped-text-style (doto (.createCellStyle wb)
                              (.setVerticalAlignment VerticalAlignment/TOP)
                              (.setWrapText true))
@@ -29,6 +35,7 @@
                      ;; Excel will show this short date format according to the operating system's regional date and time settings
                      (.setDataFormat (BuiltinFormats/getBuiltinFormat "m/d/yy"))
                      (.setVerticalAlignment VerticalAlignment/TOP))
+        date-style-with-border (set-top-border date-style)
         territories-sheet (.createSheet wb (i18n/t "ExcelExport.territories"))
         assignments-sheet (.createSheet wb (i18n/t "ExcelExport.assignments"))]
 
@@ -123,7 +130,13 @@
                                                        (dissoc :assignment/covered-dates)
                                                        (assoc :assignment/covered-date covered-date))))
                                            (sort-by :assignment/covered-date)))))]
-      (let [row (.createRow assignments-sheet (inc (.getLastRowNum assignments-sheet)))]
+      (let [row (.createRow assignments-sheet (inc (.getLastRowNum assignments-sheet)))
+            previous-row (.getRow assignments-sheet (dec (.getRowNum row)))
+            same-as-previous? (or (= (:territory/number assignment)
+                                     (.getStringCellValue (.getCell previous-row 0)))
+                                  (zero? (.getRowNum previous-row)))
+            text-style (if same-as-previous? text-style text-style-with-border)
+            date-style (if same-as-previous? date-style date-style-with-border)]
         (doto (.createCell row 0)
           (.setCellValue (str (:territory/number assignment)))
           (.setCellStyle text-style))
