@@ -1,6 +1,5 @@
 (ns territory-bro.ui.export
-  (:require [medley.core :as m]
-            [territory-bro.domain.dmz :as dmz]
+  (:require [territory-bro.domain.dmz :as dmz]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n])
   (:import (java.io ByteArrayInputStream ByteArrayOutputStream)
@@ -115,7 +114,14 @@
         (.setCellValue "Returned") ; TODO: i18n
         (.setCellStyle header-style)))
 
-    (doseq [assignment assignments]
+    (doseq [assignment (->> assignments
+                            (mapcat (fn [assignment]
+                                      (->> (:assignment/covered-dates assignment)
+                                           (mapv (fn [covered-date]
+                                                   (-> assignment
+                                                       (dissoc :assignment/covered-dates)
+                                                       (assoc :assignment/covered-date covered-date))))
+                                           (sort-by :assignment/covered-date)))))]
       (let [row (.createRow assignments-sheet (inc (.getLastRowNum assignments-sheet)))]
         (doto (.createCell row 0)
           (.setCellValue (str (:territory/number assignment)))
@@ -127,7 +133,7 @@
           (.setCellValue ^LocalDate (:assignment/start-date assignment))
           (.setCellStyle date-style))
         (doto (.createCell row 3)
-          (.setCellValue ^LocalDate (apply m/greatest (:assignment/covered-dates assignment)))
+          (.setCellValue ^LocalDate (:assignment/covered-date assignment))
           (.setCellStyle date-style))
         (doto (.createCell row 4)
           (.setCellValue ^LocalDate (:assignment/end-date assignment))

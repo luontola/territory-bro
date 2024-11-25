@@ -52,7 +52,22 @@
                123A        Pete Publisher   1/1/24     2/1/24    3/1/24")
              (-> (.getSheet wb "Assignments")
                  visible-text))
-          "assignments"))))
+          "assignments")))
+
+  (testing "duplicates assignment rows which have many covered dates"
+    (let [assignments [{:territory/number "123A"
+                        :publisher/name "Pete Publisher"
+                        :assignment/start-date (LocalDate/of 2024 1 1)
+                        :assignment/covered-dates #{(LocalDate/of 2024 2 1)
+                                                    (LocalDate/of 2024 2 15)}
+                        :assignment/end-date (LocalDate/of 2024 3 1)}]
+          wb (XSSFWorkbook. (export/make-spreadsheet {:assignments assignments}))]
+      (is (= (html/normalize-whitespace
+              "Territory   Publisher        Assigned   Covered   Returned
+               123A        Pete Publisher   1/1/24     2/1/24    3/1/24
+               123A        Pete Publisher   1/1/24     2/15/24   3/1/24")
+             (-> (.getSheet wb "Assignments")
+                 visible-text))))))
 
 (deftest export-territories-test
   (with-fixtures [dmz-test/testdata-fixture]
