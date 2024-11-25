@@ -78,6 +78,20 @@ CongregationSettings:
   congregationNameRequired: Seurakunnan nimi on pakollinen.
   experimentalFeatures: Kokeelliset ominaisuudet
   save: Tallenna asetukset
+TerritoriesSection:
+  title: Alueet
+  exportTerritoriesToExcel: Vie alueet ja aluekirjanpito laskentataulukkoon (.xlsx)
+ExcelExport:
+  territories: Alueet
+  assignments: Aluekirjanpito
+  assignedBoolean: Lainassa?
+  territoryBoundaries: Aluerajat
+  assignment:
+    territory: Alue
+    publisher: Julistaja
+    assignedDate: Annettu
+    coveredDate: Käyty
+    returnedDate: Palautettu
 EditingMaps:
   title: Karttojen muokkaus
   introduction: Ohjeet karttojen muokkaukseen ovat <0>käyttöoppaassa</0>. Voit muokata karttoja käyttämällä <1>QGIS-sovellusta</1>, mihin tarvitset seuraavan QGIS-projektitiedoston.

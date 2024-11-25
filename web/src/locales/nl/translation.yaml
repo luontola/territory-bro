@@ -78,6 +78,20 @@ CongregationSettings:
   congregationNameRequired: Gemeentenaam is verplicht.
   experimentalFeatures: Experimentele functies
   save: Instellingen opslaan
+TerritoriesSection:
+  title: Gebieden
+  exportTerritoriesToExcel: Exporteer gebieden en toewijzingen als spreadsheet (.xlsx)
+ExcelExport:
+  territories: Gebieden
+  assignments: Toewijzingen
+  assignedBoolean: Toegewezen?
+  territoryBoundaries: Gebiedsgrenzen
+  assignment:
+    territory: Gebied
+    publisher: Verkondiger
+    assignedDate: Toegewezen
+    coveredDate: Bezocht
+    returnedDate: Teruggegeven
 EditingMaps:
   title: Kaarten bewerken
   introduction: De instructies voor het bewerken van kaarten staan in de <0>gebruikershandleiding</0>. Je kunt de kaarten bewerken met behulp van de <1>QGIS-toepassing</1>, waarvoor je het volgende QGIS-projectbestand nodig hebt.

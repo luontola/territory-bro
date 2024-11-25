@@ -78,6 +78,20 @@ CongregationSettings:
   congregationNameRequired: Nama kongregasi wajib diisi.
   experimentalFeatures: Fitur eksperimental
   save: Simpan pengaturan
+TerritoriesSection:
+  title: Wilayah
+  exportTerritoriesToExcel: Ekspor wilayah dan penugasan sebagai spreadsheet (.xlsx)
+ExcelExport:
+  territories: Wilayah
+  assignments: Penugasan
+  assignedBoolean: Ditugaskan?
+  territoryBoundaries: Batas wilayah
+  assignment:
+    territory: Wilayah
+    publisher: Penyiar
+    assignedDate: Ditugaskan
+    coveredDate: Dilayani
+    returnedDate: Dikembalikan
 EditingMaps:
   title: Mengedit peta
   introduction: Instruksi untuk mengedit peta ada di <0>panduan pengguna</0>. Anda dapat mengedit peta menggunakan aplikasi <1>QGIS</1>, yang memerlukan file proyek QGIS berikut.

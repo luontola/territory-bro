@@ -78,6 +78,20 @@ CongregationSettings:
   congregationNameRequired: Congregation name is required.
   experimentalFeatures: Experimental features
   save: Save settings
+TerritoriesSection:
+  title: Territories
+  exportTerritoriesToExcel: Export territories and assignments as a spreadsheet (.xlsx)
+ExcelExport:
+  territories: Territories
+  assignments: Assignments
+  assignedBoolean:  Assigned?
+  territoryBoundaries: Territory boundaries
+  assignment:
+    territory: Territory
+    publisher: Publisher
+    assignedDate: Assigned
+    coveredDate: Covered
+    returnedDate: Returned
 EditingMaps:
   title: Editing maps
   introduction: The instructions for editing maps are in the <0>user guide</0>. You can edit the maps using the <1>QGIS application</1>, for which you will need the following QGIS project file.

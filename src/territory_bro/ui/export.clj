@@ -29,8 +29,8 @@
                      ;; Excel will show this short date format according to the operating system's regional date and time settings
                      (.setDataFormat (BuiltinFormats/getBuiltinFormat "m/d/yy"))
                      (.setVerticalAlignment VerticalAlignment/TOP))
-        territories-sheet (.createSheet wb "Territories") ; TODO: i18n
-        assignments-sheet (.createSheet wb "Assignments")] ; TODO: i18n
+        territories-sheet (.createSheet wb (i18n/t "ExcelExport.territories"))
+        assignments-sheet (.createSheet wb (i18n/t "ExcelExport.assignments"))]
 
     ;; 100% zoom is too small for my screen, and Excel doesn't have a global default setting for it
     (.setZoom territories-sheet 150)
@@ -52,13 +52,13 @@
         (.setCellValue (html/visible-text (i18n/t "Territory.doNotCalls")))
         (.setCellStyle header-style))
       (doto (.createCell row 4)
-        (.setCellValue "Assigned?") ; TODO: i18n
+        (.setCellValue (i18n/t "ExcelExport.assignedBoolean"))
         (.setCellStyle header-style))
       (doto (.createCell row 5)
         (.setCellValue (i18n/t "Assignment.lastCovered"))
         (.setCellStyle header-style))
       (doto (.createCell row 6)
-        (.setCellValue "Territory boundaries") ; TODO: i18n
+        (.setCellValue (i18n/t "ExcelExport.territoryBoundaries"))
         (.setCellStyle header-style)))
 
     (.autoSizeColumn territories-sheet 6) ; only fit the header, not the WKT location data
@@ -99,19 +99,19 @@
 
     (let [row (.createRow assignments-sheet 0)]
       (doto (.createCell row 0)
-        (.setCellValue "Territory") ; TODO: i18n
+        (.setCellValue (i18n/t "ExcelExport.assignment.territory"))
         (.setCellStyle header-style))
       (doto (.createCell row 1)
-        (.setCellValue "Publisher") ; TODO: i18n
+        (.setCellValue (i18n/t "ExcelExport.assignment.publisher"))
         (.setCellStyle header-style))
       (doto (.createCell row 2)
-        (.setCellValue "Assigned") ; TODO: i18n
+        (.setCellValue (i18n/t "ExcelExport.assignment.assignedDate"))
         (.setCellStyle header-style))
       (doto (.createCell row 3)
-        (.setCellValue "Covered") ; TODO: i18n
+        (.setCellValue (i18n/t "ExcelExport.assignment.coveredDate"))
         (.setCellStyle header-style))
       (doto (.createCell row 4)
-        (.setCellValue "Returned") ; TODO: i18n
+        (.setCellValue (i18n/t "ExcelExport.assignment.returnedDate"))
         (.setCellStyle header-style)))
 
     (doseq [assignment (->> assignments

@@ -179,10 +179,10 @@
             (:gis-access permissions))
     (h/html
      [:section
-      [:h2 {} "Territories"] ; TODO: i18n
+      [:h2 {} (i18n/t "TerritoriesSection.title")]
       (when (:configure-congregation permissions)
         [:p [:a.pure-button {:href (str html/*page-path* "/export-territories")}
-             "Export territories and assignments as a spreadsheet (.xlsx)"]]) ; TODO: i18n
+             (i18n/t "TerritoriesSection.exportTerritoriesToExcel")]])
       (editing-maps-section model)])))
 
 (defn sanitize-filename [basename extension]
