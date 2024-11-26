@@ -1,7 +1,13 @@
 import * as fs from "fs";
-import {languages, resources} from "./i18n.ts";
 import path from "path";
-import {mapRasters} from "./maps/mapOptions.ts";
+import {languages, resources} from "./i18n.ts";
+import {
+  assignedBackgroundColors,
+  assignedBorderColor,
+  mapRasters,
+  vacantBackgroundColors,
+  vacantBorderColor
+} from "./maps/mapOptions.ts";
 import {pick} from "lodash-es";
 import {JSDOM} from "jsdom";
 import {parseFontAwesomeIcon} from "./font-awesome.ts";
@@ -35,6 +41,19 @@ exportJsonFile("i18n.json",
 
 exportJsonFile("map-rasters.json",
   mapRasters.map(raster => pick(raster, ["id", "name"]))
+);
+
+exportJsonFile("map-colors.json",
+  {
+    assigned: {
+      border: assignedBorderColor,
+      background: assignedBackgroundColors,
+    },
+    vacant: {
+      border: vacantBorderColor,
+      background: vacantBackgroundColors,
+    },
+  }
 );
 
 global.DOMParser = new JSDOM().window.DOMParser;  // XXX: workaround to make parseFontAwesomeIcon work on Node.js

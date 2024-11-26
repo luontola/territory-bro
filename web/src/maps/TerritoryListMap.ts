@@ -5,6 +5,8 @@ import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
 import {
+  assignedBackgroundColors,
+  assignedBorderColor,
   LocationOnly,
   makeControls,
   makeInteractions,
@@ -14,6 +16,8 @@ import {
   scaledTerritoryTextStyle,
   TerritoryPlus,
   territoryStrokeStyle,
+  vacantBackgroundColors,
+  vacantBorderColor,
   wktToFeature,
   wktToFeatures
 } from "./mapOptions.ts";
@@ -63,39 +67,6 @@ export class TerritoryListMapElement extends OpenLayersMapElement {
     map.setStreetsLayerRaster(mapRaster);
     return map;
   }
-}
-
-const assignedBorderColor = 'rgba(255, 0, 0, 0.6)';
-const vacantBorderColor = 'rgba(0, 0, 255, 0.6)'
-const assignedBackgroundColors = {
-  0: 'rgba(150, 150, 150, 0.2)',
-  1: 'rgba(150, 150, 150, 0.2)',
-  2: 'rgba(150, 150, 150, 0.2)',
-  3: 'rgba(255, 150, 0, 0.2)',
-  4: 'rgba(255, 150, 0, 0.2)',
-  5: 'rgba(255, 150, 0, 0.2)',
-  6: 'rgba(255, 0, 0, 0.2)',
-  7: 'rgba(255, 0, 0, 0.2)',
-  8: 'rgba(255, 0, 0, 0.2)',
-  9: 'rgba(255, 0, 0, 0.2)',
-  10: 'rgba(255, 0, 0, 0.2)',
-  11: 'rgba(255, 0, 0, 0.2)',
-  12: 'rgba(255, 0, 0, 0.2)',
-}
-const vacantBackgroundColors = {
-  0: 'rgba(150, 150, 150, 0.2)',
-  1: 'rgba(150, 150, 150, 0.2)',
-  2: 'rgba(150, 150, 150, 0.2)',
-  3: 'rgba(0, 200, 255, 0.2)',
-  4: 'rgba(0, 200, 255, 0.2)',
-  5: 'rgba(0, 200, 255, 0.2)',
-  6: 'rgba(0, 0, 255, 0.2)',
-  7: 'rgba(0, 0, 255, 0.2)',
-  8: 'rgba(0, 0, 255, 0.2)',
-  9: 'rgba(0, 0, 255, 0.2)',
-  10: 'rgba(0, 0, 255, 0.2)',
-  11: 'rgba(0, 0, 255, 0.2)',
-  12: 'rgba(0, 0, 255, 0.2)',
 }
 
 function loanableTerritoryStroke(loaned) {

@@ -4,6 +4,7 @@
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.infra.authentication :as auth]
             [territory-bro.infra.json :as json]
+            [territory-bro.infra.resources :as resources]
             [territory-bro.infra.util :as util]
             [territory-bro.ui.assignment :as assignment]
             [territory-bro.ui.css :as css]
@@ -165,6 +166,22 @@
            (when-some [last-covered (:territory/last-covered territory)]
              (assignment/format-months-ago-with-date last-covered today))]])]])))
 
+(defn- coerce-map-colors [m]
+  (-> m
+      (update-in [:assigned :background] update-keys #(parse-long (name %)))
+      (update-in [:vacant :background] update-keys #(parse-long (name %)))))
+
+(def map-colors
+  (resources/auto-refresher "map-colors.json" #(coerce-map-colors (json/read-value (slurp %)))))
+
+(defn- map-legend-months [months month->background]
+  (h/html
+   (for [month months]
+     [:td {:style (identity {:--background-color (month->background month)})}
+      month
+      (when (= month (last months))
+        "+")])))
+
 (defn view [{:keys [has-loans? permissions] :as model}]
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
@@ -183,41 +200,21 @@
         (territory-list-map model))]
 
      [:div {:class (:map-legend styles)}
-      [:table
-       [:tbody
-        [:tr {:class (:months styles)}
-         [:td]
-         [:th {:colspan "13"} "Duration in months"]]
-        [:tr {:class (:assigned styles)}
-         [:th "Assigned"]
-         [:td {:class (:staleness-0 styles)} "0"]
-         [:td {:class (:staleness-1 styles)} "1"]
-         [:td {:class (:staleness-2 styles)} "2"]
-         [:td {:class (:staleness-3 styles)} "3"]
-         [:td {:class (:staleness-4 styles)} "4"]
-         [:td {:class (:staleness-5 styles)} "5"]
-         [:td {:class (:staleness-6 styles)} "6"]
-         [:td {:class (:staleness-7 styles)} "7"]
-         [:td {:class (:staleness-8 styles)} "8"]
-         [:td {:class (:staleness-9 styles)} "9"]
-         [:td {:class (:staleness-10 styles)} "10"]
-         [:td {:class (:staleness-11 styles)} "11"]
-         [:td {:class (:staleness-12 styles)} "12+"]]
-        [:tr {:class (:vacant styles)}
-         [:th "Up for grabs"]
-         [:td {:class (:staleness-0 styles)} "0"]
-         [:td {:class (:staleness-1 styles)} "1"]
-         [:td {:class (:staleness-2 styles)} "2"]
-         [:td {:class (:staleness-3 styles)} "3"]
-         [:td {:class (:staleness-4 styles)} "4"]
-         [:td {:class (:staleness-5 styles)} "5"]
-         [:td {:class (:staleness-6 styles)} "6"]
-         [:td {:class (:staleness-7 styles)} "7"]
-         [:td {:class (:staleness-8 styles)} "8"]
-         [:td {:class (:staleness-9 styles)} "9"]
-         [:td {:class (:staleness-10 styles)} "10"]
-         [:td {:class (:staleness-11 styles)} "11"]
-         [:td {:class (:staleness-12 styles)} "12+"]]]]]
+      (let [colors (map-colors)
+            months (-> colors :assigned :background keys sort vec)]
+        [:table
+         [:tbody
+          [:tr {:class (:months styles)}
+           [:th]
+           [:th {:colspan (count months)} "Duration in months"]] ; TODO: i18n
+          [:tr {:class (:assigned styles)
+                :style (identity {:--border-color (get-in colors [:assigned :border])})}
+           [:th {} "Assigned"] ; TODO: i18n
+           (map-legend-months months (get-in colors [:assigned :background]))]
+          [:tr {:class (:vacant styles)
+                :style {:--border-color (get-in colors [:vacant :border])}}
+           [:th {} "Up for grabs"] ; TODO: i18n
+           (map-legend-months months (get-in colors [:vacant :background]))]]])]
 
      [:form.pure-form {:class (:search styles)
                        :onsubmit "return false"}

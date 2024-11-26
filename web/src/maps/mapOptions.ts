@@ -107,6 +107,39 @@ export const mapRasters: MapRaster[] = [{
   })
 }];
 
+export const assignedBorderColor = 'rgba(255, 0, 0, 0.6)';
+export const assignedBackgroundColors = {
+  0: 'rgba(150, 150, 150, 0.2)',
+  1: 'rgba(150, 150, 150, 0.2)',
+  2: 'rgba(150, 150, 150, 0.2)',
+  3: 'rgba(255, 150, 0, 0.2)',
+  4: 'rgba(255, 150, 0, 0.2)',
+  5: 'rgba(255, 150, 0, 0.2)',
+  6: 'rgba(255, 0, 0, 0.2)',
+  7: 'rgba(255, 0, 0, 0.2)',
+  8: 'rgba(255, 0, 0, 0.2)',
+  9: 'rgba(255, 0, 0, 0.2)',
+  10: 'rgba(255, 0, 0, 0.2)',
+  11: 'rgba(255, 0, 0, 0.2)',
+  12: 'rgba(255, 0, 0, 0.2)',
+}
+export const vacantBorderColor = 'rgba(0, 0, 255, 0.6)'
+export const vacantBackgroundColors = {
+  0: 'rgba(150, 150, 150, 0.2)',
+  1: 'rgba(150, 150, 150, 0.2)',
+  2: 'rgba(150, 150, 150, 0.2)',
+  3: 'rgba(0, 200, 255, 0.2)',
+  4: 'rgba(0, 200, 255, 0.2)',
+  5: 'rgba(0, 200, 255, 0.2)',
+  6: 'rgba(0, 0, 255, 0.2)',
+  7: 'rgba(0, 0, 255, 0.2)',
+  8: 'rgba(0, 0, 255, 0.2)',
+  9: 'rgba(0, 0, 255, 0.2)',
+  10: 'rgba(0, 0, 255, 0.2)',
+  11: 'rgba(0, 0, 255, 0.2)',
+  12: 'rgba(0, 0, 255, 0.2)',
+}
+
 export function findMapRasterById(mapRasterId: string) {
   for (const mapRaster of mapRasters) {
     if (mapRaster.id === mapRasterId) {
