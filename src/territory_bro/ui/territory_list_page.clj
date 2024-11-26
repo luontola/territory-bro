@@ -182,6 +182,43 @@
          (html/inline-svg "icons/map-location.svg")]
         (territory-list-map model))]
 
+     [:div {:class (:map-legend styles)}
+      [:table
+       [:tbody
+        [:tr {:class (:months styles)}
+         [:td]
+         [:th {:colspan "13"} "Duration in months"]]
+        [:tr {:class (:assigned styles)}
+         [:th "Assigned"]
+         [:td {:class (:staleness-0 styles)} "0"]
+         [:td {:class (:staleness-1 styles)} "1"]
+         [:td {:class (:staleness-2 styles)} "2"]
+         [:td {:class (:staleness-3 styles)} "3"]
+         [:td {:class (:staleness-4 styles)} "4"]
+         [:td {:class (:staleness-5 styles)} "5"]
+         [:td {:class (:staleness-6 styles)} "6"]
+         [:td {:class (:staleness-7 styles)} "7"]
+         [:td {:class (:staleness-8 styles)} "8"]
+         [:td {:class (:staleness-9 styles)} "9"]
+         [:td {:class (:staleness-10 styles)} "10"]
+         [:td {:class (:staleness-11 styles)} "11"]
+         [:td {:class (:staleness-12 styles)} "12+"]]
+        [:tr {:class (:vacant styles)}
+         [:th "Up for grabs"]
+         [:td {:class (:staleness-0 styles)} "0"]
+         [:td {:class (:staleness-1 styles)} "1"]
+         [:td {:class (:staleness-2 styles)} "2"]
+         [:td {:class (:staleness-3 styles)} "3"]
+         [:td {:class (:staleness-4 styles)} "4"]
+         [:td {:class (:staleness-5 styles)} "5"]
+         [:td {:class (:staleness-6 styles)} "6"]
+         [:td {:class (:staleness-7 styles)} "7"]
+         [:td {:class (:staleness-8 styles)} "8"]
+         [:td {:class (:staleness-9 styles)} "9"]
+         [:td {:class (:staleness-10 styles)} "10"]
+         [:td {:class (:staleness-11 styles)} "11"]
+         [:td {:class (:staleness-12 styles)} "12+"]]]]]
+
      [:form.pure-form {:class (:search styles)
                        :onsubmit "return false"}
       [:label {:for "territory-search"}

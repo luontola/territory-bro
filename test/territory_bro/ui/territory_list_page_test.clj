@@ -248,6 +248,10 @@
     (is (= (html/normalize-whitespace
             "Territories
 
+                               Duration in months
+             Assigned      0 1 2 3 4 5 6 7 8 9 10 11 12+
+             Up for grabs  0 1 2 3 4 5 6 7 8 9 10 11 12+
+
              Search [] Clear
              Number ↑   Region       Addresses       Status         Last covered
              123        the region   the addresses   Up for grabs")
@@ -258,6 +262,10 @@
     (is (= (html/normalize-whitespace
             "Territories
 
+                               Duration in months
+             Assigned      0 1 2 3 4 5 6 7 8 9 10 11 12+
+             Up for grabs  0 1 2 3 4 5 6 7 8 9 10 11 12+
+
              Search [] Clear
              Number ↑   Region       Addresses       Status                              Last covered
              123        the region   the addresses   Assigned to John Doe for 2 months   1 months ago (2000-02-01)")
@@ -266,6 +274,10 @@
         "territory assigned")
     (is (= (html/normalize-whitespace
             "Territories
+
+                               Duration in months
+             Assigned      0 1 2 3 4 5 6 7 8 9 10 11 12+
+             Up for grabs  0 1 2 3 4 5 6 7 8 9 10 11 12+
 
              Search [] Clear
              Number ↑   Region       Addresses       Status         Last covered
@@ -297,6 +309,10 @@
   (testing "missing territory number: shows a placeholder so that the link can be clicked"
     (is (= (html/normalize-whitespace
             "Territories
+
+                               Duration in months
+             Assigned      0 1 2 3 4 5 6 7 8 9 10 11 12+
+             Up for grabs  0 1 2 3 4 5 6 7 8 9 10 11 12+
 
              Search [] Clear
              Number ↑   Region       Addresses       Status         Last covered
@@ -335,6 +351,10 @@
                Only those territories which have been shared with you are currently shown.
                You will need to login to see the rest.
 
+                                 Duration in months
+               Assigned      0 1 2 3 4 5 6 7 8 9 10 11 12+
+               Up for grabs  0 1 2 3 4 5 6 7 8 9 10 11 12+
+
                Search [] Clear
                Number ↑   Region       Addresses       Status         Last covered
                123        the region   the addresses   Up for grabs")
@@ -348,6 +368,10 @@
                {info.svg} Why so few territories?
                Only those territories which have been shared with you are currently shown.
                You will need to request access to see the rest.
+
+                                 Duration in months
+               Assigned      0 1 2 3 4 5 6 7 8 9 10 11 12+
+               Up for grabs  0 1 2 3 4 5 6 7 8 9 10 11 12+
 
                Search [] Clear
                Number ↑   Region       Addresses       Status         Last covered
