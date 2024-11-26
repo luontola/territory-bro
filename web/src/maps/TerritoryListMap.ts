@@ -65,12 +65,43 @@ export class TerritoryListMapElement extends OpenLayersMapElement {
   }
 }
 
+const assignedBorderColor = 'rgba(255, 0, 0, 0.6)';
+const vacantBorderColor = 'rgba(0, 0, 255, 0.6)'
+const assignedBackgroundColors = {
+  0: 'rgba(150, 150, 150, 0.2)',
+  1: 'rgba(150, 150, 150, 0.2)',
+  2: 'rgba(150, 150, 150, 0.2)',
+  3: 'rgba(255, 150, 0, 0.2)',
+  4: 'rgba(255, 150, 0, 0.2)',
+  5: 'rgba(255, 150, 0, 0.2)',
+  6: 'rgba(255, 0, 0, 0.2)',
+  7: 'rgba(255, 0, 0, 0.2)',
+  8: 'rgba(255, 0, 0, 0.2)',
+  9: 'rgba(255, 0, 0, 0.2)',
+  10: 'rgba(255, 0, 0, 0.2)',
+  11: 'rgba(255, 0, 0, 0.2)',
+  12: 'rgba(255, 0, 0, 0.2)',
+}
+const vacantBackgroundColors = {
+  0: 'rgba(150, 150, 150, 0.2)',
+  1: 'rgba(150, 150, 150, 0.2)',
+  2: 'rgba(150, 150, 150, 0.2)',
+  3: 'rgba(0, 200, 255, 0.2)',
+  4: 'rgba(0, 200, 255, 0.2)',
+  5: 'rgba(0, 200, 255, 0.2)',
+  6: 'rgba(0, 0, 255, 0.2)',
+  7: 'rgba(0, 0, 255, 0.2)',
+  8: 'rgba(0, 0, 255, 0.2)',
+  9: 'rgba(0, 0, 255, 0.2)',
+  10: 'rgba(0, 0, 255, 0.2)',
+  11: 'rgba(0, 0, 255, 0.2)',
+  12: 'rgba(0, 0, 255, 0.2)',
+}
+
 function loanableTerritoryStroke(loaned) {
   const stroke = territoryStrokeStyle();
   if (typeof loaned === 'boolean') {
-    stroke.setColor(loaned ?
-      'rgba(255, 0, 0, 0.6)' :
-      'rgba(0, 0, 255, 0.6)')
+    stroke.setColor(loaned ? assignedBorderColor : vacantBorderColor)
   }
   return stroke;
 }
@@ -80,13 +111,8 @@ function loanableTerritoryFill(loaned, staleness) {
     color: 'rgba(255, 0, 0, 0.0)',
   });
   if (typeof loaned === 'boolean') {
-    fill.setColor(loaned ?
-      (staleness < 3 ? 'rgba(150, 150, 150, 0.2)' :
-        staleness < 6 ? 'rgba(255, 150, 0, 0.2)' :
-          'rgba(255, 0, 0, 0.2)') :
-      (staleness < 3 ? 'rgba(150, 150, 150, 0.2)' :
-        staleness < 6 ? 'rgba(0, 200, 255, 0.2)' :
-          'rgba(0, 0, 255, 0.2)'));
+    staleness = Math.min(12, staleness)
+    fill.setColor(loaned ? assignedBackgroundColors[staleness] : vacantBackgroundColors[staleness])
   }
   return fill;
 }
