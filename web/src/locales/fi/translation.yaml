@@ -47,6 +47,10 @@ TerritoryListPage:
     explanation: Näkyvissä ovat vain ne alueet, jotka on jaettu sinulle.
     needToRequestAccess: Sinun tulee <0>pyytää pääsyä</0> nähdäksesi loput.
     needToLogin: Sinun tulee <0>kirjautua sisään</0> nähdäksesi loput.
+  mapLegend:
+    durationInMonths: Kesto kuukausina
+    assigned: Lainassa
+    vacant: Vapaana
 TerritoryPage:
   title: Alue {{number}}
   edit: Muokkaa

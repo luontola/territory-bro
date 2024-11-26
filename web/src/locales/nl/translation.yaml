@@ -47,6 +47,10 @@ TerritoryListPage:
     explanation: Alleen de territoria die met jou zijn gedeeld, worden momenteel weergegeven.
     needToRequestAccess: Je moet <0>toegang aanvragen</0> om de rest te zien.
     needToLogin: Je moet <0>inloggen</0> om de rest te zien.
+  mapLegend:
+    durationInMonths: Duur in maanden
+    assigned: Toegewezen
+    vacant: Beschikbaar
 TerritoryPage:
   title: Territorium {{number}}
   edit: Bewerken

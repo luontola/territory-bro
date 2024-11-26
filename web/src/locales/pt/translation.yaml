@@ -47,6 +47,10 @@ TerritoryListPage:
     explanation: Apenas os territórios que foram compartilhados com você estão atualmente sendo exibidos.
     needToRequestAccess: Você precisará <0>solicitar acesso</0> para ver o restante.
     needToLogin: Você precisará <0>entrar</0> para ver o restante.
+  mapLegend:
+    durationInMonths: Duração em meses
+    assigned: Atribuído
+    vacant: Disponível
 TerritoryPage:
   title: Território {{number}}
   edit: Editar

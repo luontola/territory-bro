@@ -206,14 +206,17 @@
          [:tbody
           [:tr {:class (:months styles)}
            [:th]
-           [:th {:colspan (count months)} "Duration in months"]] ; TODO: i18n
+           [:th {:colspan (count months)}
+            (i18n/t "TerritoryListPage.mapLegend.durationInMonths")]]
           [:tr {:class (:assigned styles)
                 :style (identity {:--border-color (get-in colors [:assigned :border])})}
-           [:th {} "Assigned"] ; TODO: i18n
+           [:th {}
+            (i18n/t "TerritoryListPage.mapLegend.assigned")]
            (map-legend-months months (get-in colors [:assigned :background]))]
           [:tr {:class (:vacant styles)
                 :style {:--border-color (get-in colors [:vacant :border])}}
-           [:th {} "Up for grabs"] ; TODO: i18n
+           [:th {}
+            (i18n/t "TerritoryListPage.mapLegend.vacant")]
            (map-legend-months months (get-in colors [:vacant :background]))]]])]
 
      [:form.pure-form {:class (:search styles)

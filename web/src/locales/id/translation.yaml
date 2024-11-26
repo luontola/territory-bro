@@ -47,6 +47,10 @@ TerritoryListPage:
     explanation: Hanya wilayah-wilayah yang telah dibagikan dengan Anda yang saat ini ditampilkan.
     needToRequestAccess: Anda perlu <0>meminta akses</0> untuk melihat yang lainnya.
     needToLogin: Anda perlu <0>masuk</0> untuk melihat yang lainnya.
+  mapLegend:
+    durationInMonths: Durasi dalam bulan
+    assigned: Ditugaskan
+    vacant: Tersedia
 TerritoryPage:
   title: Wilayah {{number}}
   edit: Edit

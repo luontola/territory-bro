@@ -47,6 +47,10 @@ TerritoryListPage:
     explanation: Only those territories which have been shared with you are currently shown.
     needToRequestAccess: You will need to <0>request access</0> to see the rest.
     needToLogin: You will need to <0>login</0> to see the rest.
+  mapLegend:
+    durationInMonths: Duration in months
+    assigned: Assigned
+    vacant: Up for grabs
 TerritoryPage:
   title: Territory {{number}}
   edit: Edit
@@ -84,7 +88,7 @@ TerritoriesSection:
 ExcelExport:
   territories: Territories
   assignments: Assignments
-  assignedBoolean:  Assigned?
+  assignedBoolean: Assigned?
   territoryBoundaries: Territory boundaries
   assignment:
     territory: Territory
