@@ -80,6 +80,9 @@ SettingsPage:
 CongregationSettings:
   congregationName: Nombre de la congregación
   congregationNameRequired: Se requiere el nombre de la congregación.
+  timezone: Zona horaria
+  timezoneNotDefined: Define los límites de la congregación para establecer la zona horaria
+  timezoneDefined: Detectada automáticamente según los límites de la congregación
   experimentalFeatures: Funciones experimentales
   save: Guardar configuración
 TerritoriesSection:

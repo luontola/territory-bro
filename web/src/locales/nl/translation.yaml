@@ -80,6 +80,9 @@ SettingsPage:
 CongregationSettings:
   congregationName: Gemeentenaam
   congregationNameRequired: Gemeentenaam is verplicht.
+  timezone: Tijdzone
+  timezoneNotDefined: Stel de grenzen van de gemeente in om de tijdzone vast te stellen
+  timezoneDefined: Automatisch gedetecteerd op basis van de gemeentegrenzen
   experimentalFeatures: Experimentele functies
   save: Instellingen opslaan
 TerritoriesSection:

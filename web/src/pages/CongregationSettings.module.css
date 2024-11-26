@@ -17,3 +17,9 @@ details.experimentalFeatures {
         margin-bottom: 1em;
     }
 }
+
+.current-time {
+    font-size: 0.9rem;
+    vertical-align: text-bottom;
+    margin-right: 1ex;
+}

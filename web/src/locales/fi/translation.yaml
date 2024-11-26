@@ -80,6 +80,9 @@ SettingsPage:
 CongregationSettings:
   congregationName: Seurakunnan nimi
   congregationNameRequired: Seurakunnan nimi on pakollinen.
+  timezone: Aikavyöhyke
+  timezoneNotDefined: Määritä seurakunnan rajat asettaaksesi aikavyöhykkeen
+  timezoneDefined: Automaattisesti tunnistettu seurakunnan rajojen perusteella
   experimentalFeatures: Kokeelliset ominaisuudet
   save: Tallenna asetukset
 TerritoriesSection:

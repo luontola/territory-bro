@@ -80,6 +80,9 @@ SettingsPage:
 CongregationSettings:
   congregationName: Nama kongregasi
   congregationNameRequired: Nama kongregasi wajib diisi.
+  timezone: Zona waktu
+  timezoneNotDefined: Tetapkan batas-batas sidang untuk mengatur zona waktu
+  timezoneDefined: Terdeteksi secara otomatis berdasarkan batas-batas sidang
   experimentalFeatures: Fitur eksperimental
   save: Simpan pengaturan
 TerritoriesSection:

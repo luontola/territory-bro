@@ -3,6 +3,7 @@
             [ring.util.codec :as codec]
             [ring.util.http-response :as http-response]
             [ring.util.response :as response]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz :as dmz]
             [territory-bro.gis.qgis :as qgis]
             [territory-bro.infra.authentication :as auth]
@@ -19,6 +20,8 @@
   (:import (java.net URLEncoder)
            (java.nio.charset StandardCharsets)
            (java.text Normalizer Normalizer$Form)
+           (java.time ZoneId ZoneOffset)
+           (java.time.format DateTimeFormatter)
            (territory_bro ValidationException)))
 
 (defn model! [request]
@@ -44,7 +47,7 @@
         users (dmz/list-congregation-users cong-id)
         new-user (some-> (get-in request [:params :new-user])
                          parse-uuid)]
-    {:congregation (select-keys congregation [:congregation/id :congregation/name])
+    {:congregation (select-keys congregation [:congregation/id :congregation/name :congregation/timezone])
      :publisher (some-> publisher enrich-publisher) ; nil, except when editing a publisher
      :publishers (map enrich-publisher publishers) ; lazy, because not every htmx component uses publishers
      :users (->> users
@@ -98,7 +101,33 @@
       [:p "After you have such a sheet, you can expose it to the Internet through " [:tt "File | Share | Publish to web"] ". "
        "Publish that sheet as a CSV file and enter its URL to the above field on this settings page."]))))
 
-(defn congregation-settings-section [{:keys [permissions form errors]}]
+(def local-date-time (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm"))
+
+(defn congregation-timezone-field [{:keys [congregation]}]
+  (let [styles (:CongregationSettings (css/modules))
+        ^ZoneId timezone (:congregation/timezone congregation)]
+    (h/html
+     [:div.pure-control-group
+      [:label {:for "congregation-timezone"}
+       (i18n/t "CongregationSettings.timezone")]
+      [:span#congregation-timezone {:style {:display "inline-block"
+                                            :vertical-align "middle"}}
+       (if (= ZoneOffset/UTC timezone)
+         "UTC"
+         (.getId timezone))
+       " "
+       [:span {:class (:current-time styles)}
+        "("
+        (-> (congregation/local-time congregation)
+            (.format local-date-time))
+        ")"]
+       " "]
+      [:span.pure-form-message-inline
+       (if (= ZoneOffset/UTC timezone)
+         (i18n/t "CongregationSettings.timezoneNotDefined")
+         (i18n/t "CongregationSettings.timezoneDefined"))]])))
+
+(defn congregation-settings-section [{:keys [permissions form errors] :as model}]
   (when (:configure-congregation permissions)
     (let [styles (:CongregationSettings (css/modules))
           errors (group-by first errors)]
@@ -118,6 +147,8 @@
                                         :aria-invalid (when error? "true")}]
              (when error?
                " ⚠️ ")])
+
+          (congregation-timezone-field model)
 
           [:details {:class (:experimentalFeatures styles)
                      :open (not (str/blank? (:loans-csv-url form)))}

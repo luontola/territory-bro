@@ -24,7 +24,7 @@
             [territory-bro.ui.settings-page :as settings-page])
   (:import (clojure.lang ExceptionInfo)
            (java.io InputStream)
-           (java.time LocalDate)
+           (java.time LocalDate LocalTime OffsetDateTime ZoneOffset)
            (java.util UUID)
            (org.apache.poi.ss.usermodel Sheet)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)
@@ -48,7 +48,8 @@
 
 (def model
   {:congregation {:congregation/id cong-id
-                  :congregation/name "Congregation Name"}
+                  :congregation/name "Congregation Name"
+                  :congregation/timezone ZoneOffset/UTC}
    :publisher nil
    :publishers [enriched-publisher]
    :users [{:user/id user-id
@@ -104,12 +105,15 @@
                         :nickname "esko.luontola"
                         :picture "https://lh6.googleusercontent.com/-AmDv-VVhQBU/AAAAAAAAAAI/AAAAAAAAAeI/bHP8lVNY1aA/photo.jpg"}}]))
 
-(use-fixtures :once (fn [f]
-                      (binding [html/*page-path* "/settings-page-url"
-                                user/get-users fake-get-users
-                                publisher/publishers-by-id (fn [_conn cong-id]
-                                                             (get test-publishers-by-id cong-id))]
-                        (f))))
+(def test-time (.toInstant (OffsetDateTime/of (LocalDate/of 2000 1 30) LocalTime/NOON ZoneOffset/UTC)))
+
+(use-fixtures :once (join-fixtures [(fixed-clock-fixture test-time)
+                                    (fn [f]
+                                      (binding [html/*page-path* "/settings-page-url"
+                                                user/get-users fake-get-users
+                                                publisher/publishers-by-id (fn [_conn cong-id]
+                                                                             (get test-publishers-by-id cong-id))]
+                                        (f)))]))
 
 (deftest model!-test
   (let [request {:path-params {:congregation cong-id}}]
@@ -169,6 +173,18 @@
 
 ;;;; Congregation settings
 
+(deftest congregation-timezone-field-test
+  (testing "timezone is not set"
+    (is (= "Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone"
+           (-> (settings-page/congregation-timezone-field model)
+               html/visible-text))))
+
+  (testing "timezone is set"
+    (let [model (replace-in model [:congregation :congregation/timezone] ZoneOffset/UTC testdata/timezone-helsinki)]
+      (is (= "Timezone Europe/Helsinki (2000-01-30 14:00) Autodetected based on the congregation boundaries"
+             (-> (settings-page/congregation-timezone-field model)
+                 html/visible-text))))))
+
 (deftest congregation-settings-section-test
   (testing "requires the configure-congregation permission"
     (let [model (replace-in model [:permissions :configure-congregation] true false)]
@@ -205,6 +221,7 @@
                    (html/visible-text (:body response))
                    (html/normalize-whitespace
                     "Congregation name [new name] ⚠️
+                     Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone
                      Experimental features
                      Territory loans CSV URL (optional) [new url] ⚠️"))))))))))
 
@@ -686,6 +703,8 @@
           "Settings
 
           Congregation name [Congregation Name]
+
+          Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone
 
           Experimental features
 
