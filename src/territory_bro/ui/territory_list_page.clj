@@ -113,7 +113,8 @@
      [:a {:href query-params
           :hx-get (str html/*page-path* "/table" query-params)
           :hx-replace-url query-params
-          :class (:sortable styles)}
+          :class (:sortable styles)
+          :rel "nofollow"}
       [:span {} label]
       [:span {:class (:sort-icon styles)}
        (html/inline-svg "icons/sort.svg" {:data-test-icon ""})]
@@ -150,7 +151,8 @@
                                     (str/lower-case)
                                     (str/trim))}
           [:td {:class (:number styles)}
-           [:a {:href (str html/*page-path* "/" (:territory/id territory))}
+           [:a {:href (str html/*page-path* "/" (:territory/id territory))
+                :rel "nofollow"}
             (if (str/blank? (:territory/number territory))
               "-"
               (:territory/number territory))]]
