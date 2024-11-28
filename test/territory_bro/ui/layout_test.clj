@@ -176,7 +176,7 @@
 
   (testing "congregation-level navigation"
     (is (= (html/normalize-whitespace
-            "the title - Territory Bro
+            "the title - the congregation - Territory Bro
 
              🏠 Home
              the congregation
@@ -205,7 +205,7 @@
 
     (testing "with minimum permissions"
       (is (= (html/normalize-whitespace
-              "the title - Territory Bro
+              "the title - the congregation - Territory Bro
 
                🏠 Home
                the congregation
@@ -232,7 +232,7 @@
 
   (testing "demo congregation"
     (is (= (html/normalize-whitespace
-            "the title - Territory Bro
+            "the title - Demo Congregation - Territory Bro
 
              🏠 Home
              🔍 Demo

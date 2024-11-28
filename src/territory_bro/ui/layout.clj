@@ -172,23 +172,24 @@
                    (h/html
                     [:p {} (i18n/t "DemoDisclaimer.introduction")]))]))
 
-(defn- parse-title [view]
+(defn- parse-h1-text [view]
   (second (re-find #"<h1>(.*?)</h1>" (str view))))
 
-(defn page [view model]
+(defn page [view {:keys [congregation] :as model}]
   (let [styles (:Layout (css/modules))
-        title (parse-title view)]
+        title (->> [(parse-h1-text view)
+                    (:congregation/name congregation)
+                    "Territory Bro"]
+                   (filter some?)
+                   distinct
+                   (str/join " - "))]
     (str (h/html
           (assert (= :html hiccup.util/*html-mode*))
           (hiccup.page/doctype :html5)
           [:html {:lang (name i18n/*lang*)}
            [:head
             [:meta {:charset "utf-8"}]
-            [:title {}
-             (when (and (some? title)
-                        (not= "Territory Bro" title))
-               (str title " - "))
-             "Territory Bro"]
+            [:title {} title]
             [:meta {:name "viewport"
                     :content "width=device-width, initial-scale=1"}]
             [:link {:rel "stylesheet"
