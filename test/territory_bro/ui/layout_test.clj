@@ -287,6 +287,19 @@
                          "<title>Territory Bro</title>")
           "show only application name"))))
 
+(deftest head-content-test
+  (testing "default head"
+    (let [page (layout/page nil nil)]
+      (is (str/includes? page (str layout/default-head)))))
+
+  (testing "custom head overrides the default"
+    (let [custom-head (h/html
+                       [:meta {:name "description"
+                               :content "My custom description."}])
+          page (layout/page nil {:head custom-head})]
+      (is (not (str/includes? page (str layout/default-head))))
+      (is (str/includes? page (str custom-head))))))
+
 (deftest active-link?-test
   (testing "on home page"
     (let [current-page "/"]

@@ -175,7 +175,15 @@
 (defn- parse-h1-text [view]
   (second (re-find #"<h1>(.*?)</h1>" (str view))))
 
-(defn page [view {:keys [congregation] :as model}]
+(def default-head
+  (h/html
+   [:meta {:name "description"
+           :content "Territory management web app for JW congregations."}]))
+
+(defn page [view {:keys [congregation demo? head main-content-variant]
+                  :or {main-content-variant :narrow
+                       head default-head}
+                  :as model}]
   (let [styles (:Layout (css/modules))
         title (->> [(parse-h1-text view)
                     (:congregation/name congregation)
@@ -201,7 +209,7 @@
             [:link {:rel "canonical"
                     :href (str (:public-url config/env) html/*page-path*)}]
             (head-injections)
-            (:head model)]
+            head]
            [:body {:hx-headers (html/anti-forgery-headers-json)}
             [:nav.no-print {:class (:navbar styles)}
              [:div {:class (:logo styles)}
@@ -226,9 +234,8 @@
                (i18n/t "Errors.closeDialog")]]]
 
             [:main {:class (html/classes (:content styles)
-                                         (get styles (or (:main-content-variant model)
-                                                         :narrow)))}
-             (when (:demo? model)
+                                         (get styles main-content-variant))}
+             (when demo?
                (demo-disclaimer))
              view]]]))))
 
