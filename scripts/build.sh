@@ -26,7 +26,7 @@ fi
 # to avoid breaking some tests and leaving around files that shouldn't be committed
 find resources/public/assets \
   -type f \( -name "*.gz" -o -name "*.br" \) \
-  -exec bash -c 'mv "$1" "target/web-dist/public/${1#resources/public/assets/}"' _ {} \;
+  -exec bash -c 'mv "$1" "target/web-dist/public/assets/${1#resources/public/assets/}"' _ {} \;
 
 lein do kaocha fast slow, uberjar
 
