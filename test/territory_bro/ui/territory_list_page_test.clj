@@ -94,7 +94,7 @@
              :territory/location testdata/wkt-helsinki-rautatientori}]))
 (def demo-events
   (concat [demo/congregation-created]
-          (into [] (demo/transform-gis-events cong-id) test-events)))
+          (into [] demo/transform-gis-events test-events)))
 
 (def fake-publishers {cong-id {publisher-id publisher}})
 

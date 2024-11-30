@@ -38,8 +38,9 @@
 (defn read-all-events
   ([conn]
    (read-all-events conn {}))
-  ([conn {:keys [since]}]
-   (->> (db/plan-query conn queries :read-all-events {:since (or since 0)})
+  ([conn {:keys [since congregation]}]
+   (->> (db/plan-query conn queries :read-all-events {:since (or since 0)
+                                                      :congregation congregation})
         (eduction (map parse-db-row))))) ;; TODO: do we not need next.jdbc.result-set/datafiable-row to realize the row, to manipulate it as a map?
 
 (defn stream-exists? [conn stream-id]

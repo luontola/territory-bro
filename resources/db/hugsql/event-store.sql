@@ -9,6 +9,9 @@ order by stream_revision;
 select stream_id, stream_revision, global_revision, data::text
 from event
 where global_revision > :since
+/*~ (when (some? (:congregation params)) */
+  and data ->> 'congregation/id' = :congregation::text
+/*~ ) ~*/
 order by global_revision;
 
 -- :name find-stream :? :*

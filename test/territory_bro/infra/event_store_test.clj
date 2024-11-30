@@ -7,6 +7,7 @@
             [territory-bro.test.fixtures :refer [db-fixture with-fixtures]]
             [territory-bro.test.testutil :refer [grab-exception re-equals thrown-with-msg?]])
   (:import (clojure.lang ExceptionInfo)
+           (java.time Instant)
            (java.util UUID)
            (org.postgresql.util PSQLException)
            (territory_bro WriteConflictException)))
@@ -257,6 +258,29 @@
                      (str "ERROR: tried to insert stream revision 3 but it should have been 2\n"
                           "  Hint: The transaction might succeed if retried.")))
                 (is (= db/psql-serialization-failure (.getSQLState cause)))))))))))
+
+(deftest read-all-congregation-events-test
+  (db/with-transaction [conn {:rollback-only true}]
+    (let [cong-id-1 (random-uuid)
+          cong-id-2 (random-uuid)
+          event-1 {:event/type :congregation.event/congregation-created
+                   :event/time (Instant/ofEpochSecond 1)
+                   :congregation/id cong-id-1
+                   :congregation/name "Cong1 Name"
+                   :congregation/schema-name "cong1_schema"}
+          event-2 {:event/type :congregation.event/congregation-created
+                   :event/time (Instant/ofEpochSecond 2)
+                   :congregation/id cong-id-2
+                   :congregation/name "Cong2 Name"
+                   :congregation/schema-name "cong2_schema"}]
+      ;; the stream ID will not matter - the query is based on the event's :congregation/id field
+      (event-store/save! conn (random-uuid) 0 [event-1 event-2])
+
+      (testing "read all events by congregation"
+        (is (= [event-1]
+               (into []
+                     (map #(dissoc % :event/stream-id :event/stream-revision :event/global-revision))
+                     (event-store/read-all-events conn {:congregation cong-id-1}))))))))
 
 (deftest event-validation-test
   (db/with-transaction [conn {:rollback-only true}]

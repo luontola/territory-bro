@@ -174,8 +174,8 @@
     (update-with-transient-events! new-events)))
 
 (defn- demo-gis-events [conn source-cong-id]
-  (->> (event-store/read-all-events conn)
-       (eduction (demo/transform-gis-events source-cong-id))))
+  (->> (event-store/read-all-events conn {:congregation source-cong-id})
+       (eduction demo/transform-gis-events)))
 
 (defn apply-demo-events [cache]
   (if-some [source-cong-id (:demo-congregation config/env)]

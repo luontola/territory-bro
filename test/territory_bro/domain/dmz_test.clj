@@ -150,7 +150,7 @@
 
 (def demo-events
   (concat [demo/congregation-created]
-          (into [] (demo/transform-gis-events cong-id) test-events)
+          (into [] demo/transform-gis-events test-events)
           (demo/generate-assignment-events territory-id today)))
 
 ;; deterministically generated random assignments (update manually if the generator algorithm is changed)

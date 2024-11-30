@@ -86,7 +86,7 @@
                              :assignment/id assignment-id
                              :assignment/end-date date}))))))))
 
-(defn transform-gis-events [source-cong-id]
+(def transform-gis-events
   (let [kept-event-types #{:card-minimap-viewport.event/card-minimap-viewport-defined
                            :card-minimap-viewport.event/card-minimap-viewport-deleted
                            :congregation-boundary.event/congregation-boundary-defined
@@ -96,8 +96,7 @@
                            :territory.event/territory-defined
                            :territory.event/territory-deleted}]
     (comp (filter (fn [event]
-                    (and (= source-cong-id (:congregation/id event))
-                         (contains? kept-event-types (:event/type event)))))
+                    (contains? kept-event-types (:event/type event))))
           (map (fn [event]
                  (-> event
                      (assoc :congregation/id cong-id)
