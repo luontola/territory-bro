@@ -352,9 +352,11 @@
         demo-territory (share/demo-share-key->territory-id share-key)]
     (cond
       (some? share)
-      (let [session (update session ::opened-shares conj-set (:share/id share))]
-        (dispatch! {:command/type :share.command/record-share-opened
-                    :share/id (:share/id share)})
+      (let [already-opened? (contains? (::opened-shares session) (:share/id share))
+            session (update session ::opened-shares conj-set (:share/id share))]
+        (when-not already-opened?
+          (dispatch! {:command/type :share.command/record-share-opened
+                      :share/id (:share/id share)}))
         [share session])
 
       (some? demo-territory)

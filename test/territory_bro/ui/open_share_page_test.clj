@@ -54,6 +54,21 @@
                       :other-session-state "stuff"}
                      (:session response))))))
 
+        (testing "if the share has already been opened, does not record an event for it"
+          (with-fixtures [fake-dispatcher-fixture]
+            (let [session {::dmz/opened-shares #{share-id}}
+                  request (assoc request :session session)
+                  response (open-share-page/open-share! request)]
+              (is (nil? @*last-command)
+                  "does not record an event")
+              (is (= {:status 303
+                      :headers {"Location" "/congregation/00000000-0000-0000-0000-000000000001/territories/00000000-0000-0000-0000-000000000002?share-key=abc123"}
+                      :session session
+                      ::middleware/mutative-operation? true
+                      :body ""}
+                     response)
+                  "the response is the same as when opening the share the first time"))))
+
         (testing "open demo share"
           (let [request {:path-params {:share-key demo-share-key}}]
             (with-fixtures [fake-dispatcher-fixture]
