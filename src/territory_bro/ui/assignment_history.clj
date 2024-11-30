@@ -126,8 +126,7 @@
                                    (when editing?
                                      (:edit-mode-assignment styles)))}
         [:div {:class (:timeline styles)
-               ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
-               :style (identity {:grid-row (str "1 / span " (count rows))})}]
+               :style {:grid-row (str "1 / span " (count rows))}}]
 
         (when-not editing?
           [:div {:class (:controls styles)}
@@ -146,8 +145,7 @@
 
         (when editing?
           [:div {:class (:edit-mode-controls styles)
-                 ;; XXX: workaround to Hiccup style attribute bug https://github.com/weavejester/hiccup/issues/211
-                 :style (identity {:grid-row (inc (count rows))})}
+                 :style {:grid-row (inc (count rows))}}
            [:button.pure-button {:type "button"
                                  :hx-delete assignment-url
                                  :class (:delete-button styles)}

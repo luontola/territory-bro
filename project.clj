@@ -18,7 +18,7 @@
                  [com.vladsch.flexmark/flexmark-ext-anchorlink "0.64.8"]
                  [cprop "0.1.20"]
                  [enlive "1.1.6"]
-                 [hiccup "2.0.0-RC3"]
+                 [hiccup "2.0.0-RC4"]
                  [hikari-cp "3.1.0"]
                  [io.nayuki/qrcodegen "1.8.0"]
                  [medley "1.4.0"]

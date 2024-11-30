@@ -178,7 +178,7 @@
 (defn- map-legend-months [months month->background]
   (h/html
    (for [month months]
-     [:td {:style (identity {:--background-color (month->background month)})}
+     [:td {:style {:--background-color (month->background month)}}
       month
       (when (= month (last months))
         "+")])))
@@ -210,7 +210,7 @@
            [:th {:colspan (count months)}
             (i18n/t "TerritoryListPage.mapLegend.durationInMonths")]]
           [:tr {:class (:assigned styles)
-                :style (identity {:--border-color (get-in colors [:assigned :border])})}
+                :style {:--border-color (get-in colors [:assigned :border])}}
            [:th {}
             (i18n/t "TerritoryListPage.mapLegend.assigned")]
            (map-legend-months months (get-in colors [:assigned :background]))]
