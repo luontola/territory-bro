@@ -55,7 +55,7 @@
      [:a {:href href
           :class (when (active-link? href html/*page-path*)
                    (:active styles))}
-      [:span {:aria-hidden true} icon]
+      [:span {:aria-hidden "true"} icon]
       " "
       title])))
 
@@ -64,7 +64,7 @@
    [:a {:href href
         :target "_blank"
         :title (i18n/t "Navigation.opensInNewWindow")}
-    [:span {:aria-hidden true} icon]
+    [:span {:aria-hidden "true"} icon]
     " "
     title
     " "

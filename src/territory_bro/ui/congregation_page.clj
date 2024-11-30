@@ -135,17 +135,17 @@
       [:div.pure-u-1.pure-u-md-1-2
        [:ul.home-navigation {:class (:navigation styles)}
         [:li [:a {:href (str html/*page-path* "/territories")}
-              [:span {:aria-hidden ""} "📍"]
+              [:span {:aria-hidden "true"} "📍"]
               " "
               (i18n/t "TerritoryListPage.title")]]
         (when (:view-printouts-page permissions)
           [:li [:a {:href (str html/*page-path* "/printouts")}
-                [:span {:aria-hidden ""} "🖨️"]
+                [:span {:aria-hidden "true"} "🖨️"]
                 " "
                 (i18n/t "PrintoutPage.title")]])
         (when (:view-settings-page permissions)
           [:li [:a {:href (str html/*page-path* "/settings")}
-                [:span {:aria-hidden ""} "⚙️"]
+                [:span {:aria-hidden "true"} "⚙️"]
                 " "
                 (i18n/t "SettingsPage.title")]])]]
       [:div.pure-u-1.pure-u-md-1-2 {}
