@@ -4,6 +4,7 @@
             [territory-bro.dispatcher :as dispatcher]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.db :as db]
+            [territory-bro.infra.resources :as resources]
             [territory-bro.projections :as projections])
   (:import (java.time Clock Instant ZoneOffset)))
 
@@ -15,7 +16,8 @@
 (defn db-fixture [f]
   (mount/start #'config/env
                #'db/datasource
-               #'projections/*cache)
+               #'projections/*cache
+               #'resources/watcher)
   (let [schema (:database-schema config/env)]
     (assert (= "test_territorybro" schema)
             (str "Not the test database: " (pr-str schema)))
