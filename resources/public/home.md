@@ -1,7 +1,7 @@
 Territory Bro is a web app for managing field service territories in the congregations of Jehovah's Witnesses.
 
 * Print [physical territory cards](#2-print-and-cut) with up-to-date street maps
-* Share links to <a href="/share/5jsrmZQ3zgE/123" rel="nofollow">electronic territory cards</a> - no login required
+* Share links to [electronic territory cards](/share/5jsrmZQ3zgE/123) - no login required
 * Keep track of territory assignments
 * A place to write down do-not-calls - compatible with European privacy laws (GDPR)
 
@@ -13,7 +13,7 @@ To start creating new territory cards for your congregation, read more from the 
 
 <div class="sms-discussion" aria-description="Example SMS discussion">
 <p class="sms-message incoming">May I get a new territory?</p>
-<p class="sms-message outgoing">Sure. Here you go: <a href="/share/5jsrmZQ3zgE/123" rel="nofollow">https://territorybro.com<wbr>/share<wbr>/5jsrmZQ3zgE<wbr>/123</a></p>
+<p class="sms-message outgoing">Sure. Here you go: <a href="/share/5jsrmZQ3zgE/123">https://territorybro.com<wbr>/share<wbr>/5jsrmZQ3zgE<wbr>/123</a></p>
 <p class="sms-message incoming">Thanks!</p>
 </div>
 

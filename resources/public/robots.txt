@@ -1,0 +1,7 @@
+User-Agent: *
+Disallow: /login
+Disallow: /register
+Disallow: /join
+Disallow: /share
+Disallow: /congregation
+Allow: /congregation/demo$

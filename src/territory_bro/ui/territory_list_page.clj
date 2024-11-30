@@ -151,8 +151,7 @@
                                     (str/lower-case)
                                     (str/trim))}
           [:td {:class (:number styles)}
-           [:a {:href (str html/*page-path* "/" (:territory/id territory))
-                :rel "nofollow"}
+           [:a {:href (str html/*page-path* "/" (:territory/id territory))}
             (if (str/blank? (:territory/number territory))
               "-"
               (:territory/number territory))]]

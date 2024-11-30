@@ -49,11 +49,10 @@
     (and (str/starts-with? current-page href)
          (not= "/" href))))
 
-(defn nav-link [{:keys [href icon title rel]}]
+(defn nav-link [{:keys [href icon title]}]
   (let [styles (:Layout (css/modules))]
     (h/html
      [:a {:href href
-          :rel rel
           :class (when (active-link? href html/*page-path*)
                    (:active styles))}
       [:span {:aria-hidden true} icon]
@@ -109,7 +108,6 @@
                          :icon "📖"
                          :title (i18n/t "DocumentationPage.title")})]
       [:li {} (nav-link {:href "/register"
-                         :rel "nofollow" ; registration page requires login, so robots shouldn't try to index it
                          :icon "✍️"
                          :title (i18n/t "Navigation.registration")})]
       [:li {} (external-link {:href "https://groups.google.com/g/territory-bro-announcements"
@@ -159,15 +157,12 @@
                              {:style {:font-size "1.25em"
                                       :vertical-align "middle"}})
             " " (:name user) " "
-            [:a#logout-button.pure-button {:href "/logout"
-                                           :rel "nofollow"}
+            [:a#logout-button.pure-button {:href "/logout"}
              (i18n/t "Navigation.logout")])
-    (h/html [:a#login-button.pure-button {:href login-url
-                                          :rel "nofollow"}
+    (h/html [:a#login-button.pure-button {:href login-url}
              (i18n/t "Navigation.login")]
             (when dev?
-              (h/html " " [:a#dev-login-button.pure-button {:href "/dev-login?sub=developer&name=Developer&email=developer@example.com"
-                                                            :rel "nofollow"}
+              (h/html " " [:a#dev-login-button.pure-button {:href "/dev-login?sub=developer&name=Developer&email=developer@example.com"}
                            "Dev Login"])))))
 
 (defn demo-disclaimer []
