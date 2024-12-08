@@ -411,6 +411,8 @@ if (url.searchParams.has('share-key')) {
            :content (-> (geometry/parse-wkt (:territory/location territory))
                         (geometry/enclosing-tms-tile)
                         (geometry/openstreetmap-tms-url))}]
+   [:meta {:name "robots"
+           :content "noindex"}]
    [:script {:type "module"}
     share-key-cleanup-js]))
 

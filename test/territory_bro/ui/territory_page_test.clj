@@ -259,8 +259,8 @@
 (defn parse-open-graph-tags [html]
   (->> (en/select (en/html-snippet (str html)) [:meta])
        (map :attrs)
-       (reduce (fn [m {:keys [property content]}]
-                 (assoc m property content))
+       (reduce (fn [m {:keys [property name content]}]
+                 (assoc m (or property name) content))
                {})))
 
 (deftest head-test
@@ -268,7 +268,8 @@
     (is (= {"og:type" "website"
             "og:title" "Territory 123 - the region - Congregation 1"
             "og:description" "the addresses"
-            "og:image" "https://tile.openstreetmap.org/16/37308/18969.png"}
+            "og:image" "https://tile.openstreetmap.org/16/37308/18969.png"
+            "robots" "noindex"}
            (-> (territory-page/head model)
                (parse-open-graph-tags)))))
 
