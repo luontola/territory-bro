@@ -75,8 +75,9 @@
         styles (:Layout (css/modules))]
     (h/html
      [:li {} (nav-link {:href (str "/congregation/" cong-id)
+                        :icon (when demo? "🔍")
                         :title (if demo?
-                                 (str "🔍 " (i18n/t "Navigation.demo"))
+                                 (i18n/t "Navigation.demo")
                                  (:congregation/name congregation))})]
      [:ul {:class (:nav-submenu styles)}
       [:li {} (nav-link {:href (str "/congregation/" cong-id "/territories")
