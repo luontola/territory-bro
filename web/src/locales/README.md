@@ -19,4 +19,4 @@ should use different words for *territory* and *region* consistently.
 The texts of `TerritoryCard.title` and `TerritoryCard.footer` have been taken directly from the old territory card
 templates that you get from Bethel.
 
-Use the established words in your language for terms like *congregation*, *territory card*, *territory servant* etc.
+Use the established words in your language for terms like *congregation*, *territory card*, *do-not-calls*, *publisher*, *territory servant* etc.
