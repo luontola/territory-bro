@@ -7,18 +7,18 @@ Navigation:
   demo: Demo
   registration: Registrering
   news: Nyheter
-  opensInNewWindow: Öppna i nytt fönster
+  opensInNewWindow: Öppnas i nytt fönster
 HomePage:
   title: Startsida
-  yourCongregations: Din församling
+  yourCongregations: Dina församlingar
 RegistrationPage:
-  title: Registrera ny församling
+  title: Registrera en ny församling
   register: Registrera
   or: eller
 JoinPage:
   title: Anslut till befintlig församling
-  introduction: För att komma åt din församling i Terrytory Bro, måste du ge ditt <em>användarnamn</em> till församlingens distriktstjänare, så att han kan lägga till dig.
-  yourUserId: "Ditt användarnamn är:"
+  introduction: För att komma åt din församling i Territory Bro, måste du ge ditt <em>användar-ID</em> till församlingens distriktstjänare, så att han kan lägga till dig.
+  yourUserId: "Ditt användar-ID är:"
   copy: Kopiera till skrivbordet
 DemoDisclaimer:
   welcome: Välkommen till demoläget!
@@ -32,12 +32,12 @@ Statistics:
   averageAssignmentDurationDays: "Utlämnade i snitt {{days}} dagar"
 GettingStarted:
   title: Komma igång
-  congregationBoundary: Ställ in distriksgränsen
+  congregationBoundary: Ställ in församlingens gränser
   territories: Lägg till distrikt
   publishers: Lägg till förkunnare
   territoriesAssigned: Lämna ut distrikt
   shareLinkCreated: Prova att dela en länk till distriktet
-  qrCodeScanned: Prova skanna QR-kod till distriktet
+  qrCodeScanned: Prova att skanna QR-kod till distriktet
 TerritoryListPage:
   title: Distrikt
   search: Sök
@@ -78,7 +78,7 @@ PrintoutPage:
 SettingsPage:
   title: Inställningar
 CongregationSettings:
-  congregationName: Namn på församling
+  congregationName: Församlingens namn
   timezone: Tidszon
   timezoneNotDefined: Ställ in församlingens gränser för att ställa in tidszon
   timezoneDefined: Automatiskt inställd efter församlingens gränser
@@ -113,13 +113,13 @@ PublisherManagement:
   cancel: Ångra
   deleteWarning: "{{name}} har distriktet. Du kan inte se vem som har distriktet om förkunnaren tas bort.\n\nVill du ta bort {{name}}?"
   missingNameError: Namn behövs
-  nonUniqueNameError: Finns redan en förkunnare med detta namn
+  nonUniqueNameError: Det finns redan en förkunnare med detta namn
 UserManagement:
   title: Användare
-  userId: Användarnamn
-  userIdWrongFormat: "Det här ser inte ut som ett användarnamn. Den borde se ut ungefär så här: 01234567-89ab-cdef-0123-456789abcdef"
-  userIdNotExist: "Användarenamnet finns inte"
-  addUserInstructions: För att lägga till användare till församlingen, be användaren gå in på <0>{{joinPageUrl}}</0> och sen kopiera <em>användarnamnet</em> från den sidan och skicka den till dig.
+  userId: Användar-ID
+  userIdWrongFormat: "Det här ser inte ut som ett användar-ID. Den borde se ut ungefär så här: 01234567-89ab-cdef-0123-456789abcdef"
+  userIdNotExist: "Användaren finns inte"
+  addUserInstructions: För att lägga till användare till församlingen, be användaren gå in på <0>{{joinPageUrl}}</0> och sen kopiera <em>användar-ID</em> från den sidan och skicka den till dig.
   addUser: Lägg till användare
   name: Namn
   email: E-post
