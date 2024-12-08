@@ -4,22 +4,27 @@ Here is some terminology of key terms for different languages:
 - An area used for door-to-door witnessing
 English: territory
 Finnish: alue
+Swedish: distrikt
 
 - A city suburb or similar area which contains many territories
 English: region
 Finnish: seutu
+Swedish: område
 
 - Addresses which should not be visited
 English: do-not-calls
 Finnish: kieltopaikat
+Swedish: besök inte
 
 - A person who does witnessing
 English: publisher
 Finnish: julistaja
+Swedish: förkunnare
 
 - The person coordinating territory assignments
 English: territory servant
 Finnish: aluepalvelija
+Swedish: distriktstjänare
 
 - When a territory is give to a publisher, so that they'll visit the territory
 English: assignment, assign territory, assigned to somebody
@@ -28,6 +33,7 @@ Finnish: laina, ota alue, annettu jollekin
 - When a publisher has tried meeting every address in the territory
 English: covered, mark as covered
 Finnish: käyty, merkitse käydyksi
+Swedish: genomget, markera som genomgånget
 
 - Place for storing territory cards which are currently not assigned
 English: storage
