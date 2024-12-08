@@ -193,9 +193,8 @@
     cache))
 
 (defn generate-demo-data! []
-  (log/info "Generating demo data...")
-  (swap! *cache apply-demo-events)
-  (log/info "Demo data ready"))
+  (log/info "Generating demo data")
+  (swap! *cache apply-demo-events))
 
 (defn refresh! []
   (let [startup? (nil? (cached-state))]
