@@ -79,7 +79,6 @@ SettingsPage:
   title: Inställningar
 CongregationSettings:
   congregationName: Namn på församling
-  congregationNameRequired: Namn på församling krävs.
   timezone: Tidszon
   timezoneNotDefined: Ställ in församlingens gränser för att ställa in tidszon
   timezoneDefined: Automatiskt inställd efter församlingens gränser
@@ -118,7 +117,6 @@ PublisherManagement:
 UserManagement:
   title: Användare
   userId: Användarnamn
-  userIdRequired: Användarnamn krävs.
   userIdWrongFormat: "Det här ser inte ut som ett användarnamn. Den borde se ut ungefär så här: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "Användarenamnet finns inte"
   addUserInstructions: För att lägga till användare till församlingen, be användaren gå in på <0>{{joinPageUrl}}</0> och sen kopiera <em>användarnamnet</em> från den sidan och skicka den till dig.
@@ -142,11 +140,7 @@ SupportPage:
   translationAd: Se <0>översättningsinstruktioner</0>, om du vill hjälpa till med att förbättra befintliga eller lägga till nya språk.
   issueTrackerAd: Fel och önskemål kan kan rapporteras <0>till projektets verktyg för feluppföljning</0>.
 Errors:
-  pleaseWait: Ett ögonblick...
   pageNotFound: Sidan kan inte hittas 😵
-  linkNotFound:
-    title: Länken kan inte hittas 😵
-    description: Länken verkar vara felaktig eller gammal.
   accessDenied: Åtkomst nekad 🛑
   unknownError: Beklagar, något gick snett 🥺
   returnToFrontPage: Gå till startsidan och prova igen

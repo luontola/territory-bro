@@ -79,7 +79,6 @@ SettingsPage:
   title: Instellingen
 CongregationSettings:
   congregationName: Gemeentenaam
-  congregationNameRequired: Gemeentenaam is verplicht.
   timezone: Tijdzone
   timezoneNotDefined: Stel de grenzen van de gemeente in om de tijdzone vast te stellen
   timezoneDefined: Automatisch gedetecteerd op basis van de gemeentegrenzen
@@ -118,7 +117,6 @@ PublisherManagement:
 UserManagement:
   title: Gebruikers
   userId: Gebruikers-ID
-  userIdRequired: Gebruikers-ID is verplicht.
   userIdWrongFormat: "Dat lijkt niet op een Gebruikers-ID. Het zou er ongeveer zo uit moeten zien: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "Gebruiker bestaat niet"
   addUserInstructions: Om gebruikers aan deze congregatie toe te voegen, vraag hen om <0>{{joinPageUrl}}</0> te bezoeken en hun <em>Gebruikers-ID</em> van die pagina te kopiëren en naar jou te sturen.
@@ -142,11 +140,7 @@ SupportPage:
   translationAd: Zie de <0>vertalinstructies</0> als je wilt helpen bij het verbeteren van de huidige vertalingen of het toevoegen van nieuwe talen.
   issueTrackerAd: Bugs en functieverzoeken kunnen ook worden gemeld bij <0>het issue tracker</0> van dit project.
 Errors:
-  pleaseWait: Even geduld a.u.b....
   pageNotFound: Pagina niet gevonden 😵
-  linkNotFound:
-    title: Link niet gevonden 😵
-    description: De link die je hebt geopend, is mogelijk onjuist of verlopen.
   accessDenied: Toegang geweigerd 🛑
   unknownError: Sorry, er is iets misgegaan 🥺
   returnToFrontPage: Ga terug naar de startpagina en probeer het opnieuw

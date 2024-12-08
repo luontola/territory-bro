@@ -79,7 +79,6 @@ SettingsPage:
   title: Pengaturan
 CongregationSettings:
   congregationName: Nama kongregasi
-  congregationNameRequired: Nama kongregasi wajib diisi.
   timezone: Zona waktu
   timezoneNotDefined: Tetapkan batas-batas sidang untuk mengatur zona waktu
   timezoneDefined: Terdeteksi secara otomatis berdasarkan batas-batas sidang
@@ -118,7 +117,6 @@ PublisherManagement:
 UserManagement:
   title: Pengguna
   userId: ID Pengguna
-  userIdRequired: ID Pengguna wajib diisi.
   userIdWrongFormat: "Sepertinya bukan ID Pengguna. Seharusnya terlihat seperti: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "Pengguna tidak ditemukan"
   addUserInstructions: Untuk menambahkan pengguna ke kongregasi ini, minta mereka mengunjungi <0>{{joinPageUrl}}</0> dan menyalin <em>ID Pengguna</em> mereka dari halaman tersebut dan mengirimkannya kepada Anda.
@@ -142,11 +140,7 @@ SupportPage:
   translationAd: Lihat <0>petunjuk terjemahan</0> jika Anda ingin membantu meningkatkan terjemahan saat ini atau menambahkan bahasa baru.
   issueTrackerAd: Bug dan permintaan fitur juga dapat dilaporkan ke <0>pelacak isu proyek ini</0>.
 Errors:
-  pleaseWait: Harap tunggu...
   pageNotFound: Halaman tidak ditemukan 😵
-  linkNotFound:
-    title: Tautan tidak ditemukan 😵
-    description: Tautan yang Anda buka mungkin salah atau telah kadaluarsa.
   accessDenied: Akses ditolak 🛑
   unknownError: Maaf, terjadi kesalahan 🥺
   returnToFrontPage: Kembali ke halaman depan dan coba lagi

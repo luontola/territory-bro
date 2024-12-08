@@ -79,7 +79,6 @@ SettingsPage:
   title: Impostazioni
 CongregationSettings:
   congregationName: Nome della congregazione
-  congregationNameRequired: Il nome della congregazione è obbligatorio.
   timezone: Fuso orario
   timezoneNotDefined: Definisci i confini della congregazione per impostare il fuso orario
   timezoneDefined: Rilevato automaticamente in base ai confini della congregazione
@@ -118,7 +117,6 @@ PublisherManagement:
 UserManagement:
   title: Utenti
   userId: ID utente
-  userIdRequired: L'ID utente è obbligatorio.
   userIdWrongFormat: "Non sembra un ID utente. Dovrebbe assomigliare a qualcosa del genere: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "L'utente non esiste"
   addUserInstructions: Per aggiungere utenti a questa congregazione, chiedi loro di visitare <0>{{joinPageUrl}}</0> e copiare il loro <em>ID utente</em> da quella pagina e inviarlo a te.
@@ -142,11 +140,7 @@ SupportPage:
   translationAd: Consulta le <0>istruzioni di traduzione</0> se desideri contribuire a migliorare le traduzioni attuali o aggiungere nuove lingue.
   issueTrackerAd: Bug e richieste di nuove funzioni possono essere segnalati anche su <0>questo tracker dei problemi del progetto</0>.
 Errors:
-  pleaseWait: Attendere prego...
   pageNotFound: Pagina non trovata 😵
-  linkNotFound:
-    title: Link non trovato 😵
-    description: Il link che hai aperto potrebbe essere errato o scaduto.
   accessDenied: Accesso negato 🛑
   unknownError: Spiacenti, qualcosa è andato storto 🥺
   returnToFrontPage: Torna alla pagina principale e riprova

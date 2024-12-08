@@ -79,7 +79,6 @@ SettingsPage:
   title: Asetukset
 CongregationSettings:
   congregationName: Seurakunnan nimi
-  congregationNameRequired: Seurakunnan nimi on pakollinen.
   timezone: Aikavyöhyke
   timezoneNotDefined: Määritä seurakunnan rajat asettaaksesi aikavyöhykkeen
   timezoneDefined: Automaattisesti tunnistettu seurakunnan rajojen perusteella
@@ -118,7 +117,6 @@ PublisherManagement:
 UserManagement:
   title: Käyttäjät
   userId: Käyttäjätunnus
-  userIdRequired: Käyttäjätunnus on pakollinen.
   userIdWrongFormat: "Tämä ei näytä käyttäjätunnukselta. Sen tulisi näyttää esimerkiksi tältä: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "Käyttäjää ei ole olemassa"
   addUserInstructions: Lisätäksesi käyttäjiä tähän seurakuntaan, pyydä heitä käymään <0>{{joinPageUrl}}</0> ja kopioimaan <em>käyttäjätunnuksensa</em> siltä sivulta ja lähettämään sen sinulle.
@@ -142,11 +140,7 @@ SupportPage:
   translationAd: Katso <0>käännösohjeet</0>, jos haluat auttaa parantamaan nykyisiä käännöksiä tai lisätä uusia kieliä.
   issueTrackerAd: Virheitä ja ominaisuuspyyntöjä voi myös raportoida <0>tämän projektin virheenseurantatyökaluun</0>.
 Errors:
-  pleaseWait: Odota hetki...
   pageNotFound: Sivua ei löydy 😵
-  linkNotFound:
-    title: Linkkiä ei löydy 😵
-    description: Avaamasi linkki voi olla virheellinen tai se on vanhentunut.
   accessDenied: Pääsy kielletty 🛑
   unknownError: Pahoittelut, jotain meni pieleen 🥺
   returnToFrontPage: Palaa etusivulle ja yritä uudelleen

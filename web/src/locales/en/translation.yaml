@@ -79,7 +79,6 @@ SettingsPage:
   title: Settings
 CongregationSettings:
   congregationName: Congregation name
-  congregationNameRequired: Congregation name is required.
   timezone: Timezone
   timezoneNotDefined: Define congregation boundaries to set the timezone
   timezoneDefined: Autodetected based on the congregation boundaries
@@ -118,7 +117,6 @@ PublisherManagement:
 UserManagement:
   title: Users
   userId: User ID
-  userIdRequired: User ID is required.
   userIdWrongFormat: "That doesn't look like a User ID. It should look something like: 01234567-89ab-cdef-0123-456789abcdef"
   userIdNotExist: "User does not exist"
   addUserInstructions: To add users to this congregation, ask them to visit <0>{{joinPageUrl}}</0> and copy their <em>User ID</em> from that page and send it to you.
@@ -142,11 +140,7 @@ SupportPage:
   translationAd: See the <0>translation instructions</0> if you would like to help improve the current translations or add new languages.
   issueTrackerAd: Bugs and feature requests may also be reported to <0>this project's issue tracker</0>.
 Errors:
-  pleaseWait: Please wait...
   pageNotFound: Page not found 😵
-  linkNotFound:
-    title: Link not found 😵
-    description: The link you opened may be incorrect or it has expired.
   accessDenied: Access denied 🛑
   unknownError: Sorry, something went wrong 🥺
   returnToFrontPage: Return to the front page and try again
