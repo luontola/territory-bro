@@ -45,7 +45,8 @@
             {:code "it", :englishName "Italian", :nativeName "Italiano"}
             {:code "nl", :englishName "Dutch", :nativeName "Nederlands"}
             {:code "pt", :englishName "Portuguese", :nativeName "Português"}
-            {:code "fi", :englishName "Finnish", :nativeName "suomi"}]
+            {:code "fi", :englishName "Finnish", :nativeName "suomi"}
+            {:code "sv", :englishName "Swedish", :nativeName "Svenska"}]
            (i18n/languages)))))
 
 (deftest wrap-current-language-test

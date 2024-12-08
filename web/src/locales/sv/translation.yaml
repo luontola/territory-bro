@@ -1,0 +1,203 @@
+englishName: Swedish
+nativeName: Svenska
+Navigation:
+  changeLanguage: Byt språk
+  login: Logga in
+  logout: Logga ut
+  demo: Demo
+  registration: Registrering
+  news: Nyheter
+  opensInNewWindow: Öppna i nytt fönster
+HomePage:
+  title: Startsida
+  yourCongregations: Din församling
+RegistrationPage:
+  title: Registrera ny församling
+  register: Registrera
+  or: eller
+JoinPage:
+  title: Anslut till befintlig församling
+  introduction: För att komma åt din församling i Terrytory Bro, måste du ge ditt <em>användarnamn</em> till församlingens distriktstjänare, så att han kan lägga till dig.
+  yourUserId: "Ditt användarnamn är:"
+  copy: Kopiera till skrivbordet
+DemoDisclaimer:
+  welcome: Välkommen till demoläget!
+  introduction: Endast du kan se ändringarna du gör i denna demoförsamling.
+Statistics:
+  title: Statistik
+  territories: Antal distrikt
+  assignedTerritories: Tilldelade distrikt
+  coveredInPast6Months: Genomgångna 6 månader
+  coveredInPast12Months: Genomgångna 12 månader
+  averageAssignmentDurationDays: "Utlämnade i snitt {{days}} dagar"
+GettingStarted:
+  title: Komma igång
+  congregationBoundary: Ställ in distriksgränsen
+  territories: Lägg till distrikt
+  publishers: Lägg till förkunnare
+  territoriesAssigned: Lämna ut distrikt
+  shareLinkCreated: Prova att dela en länk till distriktet
+  qrCodeScanned: Prova skanna QR-kod till distriktet
+TerritoryListPage:
+  title: Distrikt
+  search: Sök
+  clear: Töm
+  limitedVisibility:
+    title: Varför så få distrikt?
+    explanation: Du ser bara distrikten som är delade med dig.
+    needToRequestAccess: Du måste <0>be om access</0> för att se resten.
+    needToLogin: Du måste <0>logga in</0> för att se resten
+  mapLegend:
+    durationInMonths: Tid i månader
+    assigned: Utlämnade
+    vacant: Lediga
+TerritoryPage:
+  title: Distrikt {{number}}
+  edit: Ändra
+  save: Spara
+  shareLink:
+    button: Dela länk
+    closePopup: Stäng
+    description: "Med länken kan du se på distrikskartan utan att behöva logga in:"
+    copy: Kopiera till skrivbordet
+PrintoutPage:
+  title: Utskrift
+  printOptions: Utskriftsinställningar
+  template: Mall
+  language: Språk
+  mapRaster: Bakgrundskarta
+  regions: Område
+  territories: Distrikt
+  templates:
+    TerritoryCard: Distriktskort
+    TerritoryCardMapOnly: Distriktskort, endast karta
+    NeighborhoodCard: Närområdet
+    RuralTerritoryCard: Lantdistriktskort
+    QrCodeOnly: Endast QR-kod (för att klistras på gamla distriktskort)
+    RegionPrintout: Områdeskarta
+SettingsPage:
+  title: Inställningar
+CongregationSettings:
+  congregationName: Namn på församling
+  congregationNameRequired: Namn på församling krävs.
+  timezone: Tidszon
+  timezoneNotDefined: Ställ in församlingens gränser för att ställa in tidszon
+  timezoneDefined: Automatiskt inställd efter församlingens gränser
+  experimentalFeatures: Exprimentella funktioner
+  save: Spara inställningar
+TerritoriesSection:
+  title: Distrikt
+  exportTerritoriesToExcel: Exportera distrikt och uppgifter till ett kalkylblad (.xlsx)
+ExcelExport:
+  territories: Distrikt
+  assignments: Uppgifter
+  assignedBoolean: Tilldelade?
+  territoryBoundaries: Distriktsgränser
+  assignment:
+    territory: Distrikt
+    publisher: Förkunnare
+    assignedDate: Utlämnat
+    coveredDate: Genomgånget
+    returnedDate: Inlämnat
+EditingMaps:
+  title: Redigera kartor
+  introduction: Instruktion för redigering av kartor finns i <0>användarguiden</0>. Du kan redigera kartor med <1>QGIS-appen</1>, då behöver du följande QGIS-projektfil.
+  downloadQgisProject: Ladda ned QGIS-projektfil
+PublisherManagement:
+  title: Förkunnare
+  publisherName: Namn
+  assignedTerritories: Utlämnade distrikt
+  addPublisher: Lägg till förkunnare
+  edit: Ändra
+  save: Spara
+  delete: Ta bort
+  cancel: Ångra
+  deleteWarning: "{{name}} har distriktet. Du kan inte se vem som har distriktet om förkunnaren tas bort.\n\nVill du ta bort {{name}}?"
+  missingNameError: Namn behövs
+  nonUniqueNameError: Finns redan en förkunnare med detta namn
+UserManagement:
+  title: Användare
+  userId: Användarnamn
+  userIdRequired: Användarnamn krävs.
+  userIdWrongFormat: "Det här ser inte ut som ett användarnamn. Den borde se ut ungefär så här: 01234567-89ab-cdef-0123-456789abcdef"
+  userIdNotExist: "Användarenamnet finns inte"
+  addUserInstructions: För att lägga till användare till församlingen, be användaren gå in på <0>{{joinPageUrl}}</0> och sen kopiera <em>användarnamnet</em> från den sidan och skicka den till dig.
+  addUser: Lägg till användare
+  name: Namn
+  email: E-post
+  loginMethod: Inloggningsmetod
+  actions: Funktioner
+  you: Du
+  unverified: Obekräftat
+  removeUser: Ta bort användare
+  removeYourselfWarning: Är du säker på att du vill ta BORT DIG SJÄLV från {{congregation}}? Du kan inte lägga dig själv tillbaka.
+DocumentationPage:
+  title: Instruktioner
+SupportPage:
+  title: Support
+  introduction: Territory Bro är ett <0>öppet källkodsprojekt</0>, utvecklad av <1>Esko Luontola</1>.
+  mailingListAd: Vi rekommenderar att du går med i vårt <0>nyhetsbrev</0> så får du information om viktiga Territory Bro-uppdateringar.
+  userGuideAd: <0>Användarguiden</0> svarar på de vanligaste frågorna om hur man skapar distriktskartor.
+  emailAd: Om det inte räcker så kan du skicka e-post till <0>{{email}}</0> så får du hjälp med Territory Bro.
+  translationAd: Se <0>översättningsinstruktioner</0>, om du vill hjälpa till med att förbättra befintliga eller lägga till nya språk.
+  issueTrackerAd: Fel och önskemål kan kan rapporteras <0>till projektets verktyg för feluppföljning</0>.
+Errors:
+  pleaseWait: Ett ögonblick...
+  pageNotFound: Sidan kan inte hittas 😵
+  linkNotFound:
+    title: Länken kan inte hittas 😵
+    description: Länken verkar vara felaktig eller gammal.
+  accessDenied: Åtkomst nekad 🛑
+  unknownError: Beklagar, något gick snett 🥺
+  returnToFrontPage: Gå till startsidan och prova igen
+  reloadAndTryAgain: Kontrollera att du kommer åt internet. Ladda in sidan på nytt och prova igen.
+  closeDialog: Stäng
+Map:
+  zoomIn: Förstora
+  zoomOut: Förminska
+  resetZoom: Återgå till standardstorlek
+  showMyLocation: Visa min plats
+MapInteractionHelp:
+  title: Hur använder man kartan?
+  move: <b>Flytta:</b> dra runt med två fingrar / dra muspekaren med vänstra knappen nedtryckt
+  zoom: <b>Förstora/förminska:</b> nyp ihop eller sprid ut med två fingrar / håll <kbd>{{ctrl}}</kbd> tangenten och scrolla med muspekaren
+  rotate: <b>Snurra:</b> snurra med två fingrar / håll <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> tangenten och tryck ned högra knappen på muspekarens pohjassa samtidigt som du flyttar muspekaren
+Territory:
+  number: Nummer
+  region: Område
+  addresses: Adress
+  doNotCalls: Besök inte
+TerritoryCard:
+  title: Distriktskort
+  footer: "Förvara kortet i fodralet. Håll den ren och gör inga anteckningar på den. \n När distriket är genomgången rapporteras det till brodern som sköter distrikten."
+Assignment:
+  assignedToPublisher: Utlämnat till {{name}}
+  returned: Mottagen
+  covered: Genomget
+  lastCovered: Senast genomgånget
+  status: Status
+  statusVacant: <0>Ledig</0>
+  statusAssignedToPublisher: <0>Utlämnat</0> till {{name}}
+  statusAssignedToPublisherForMonths: <0>Utlämnat</0> till {{name}}, {{months}} månader sedan
+  assignmentHistory: Besökshistork
+  durationMonths: "{{months}} månader"
+  durationMonthsAgo: "{{months}} månader sedan"
+  durationMonthsSinceDate: "{{months}} månader, sedan {{date}}"
+  deletedPublisher: "borttagen"
+  form:
+    assign: Ta ut
+    assignTerritory: Ta ut distrikt
+    return: Återlämna
+    returnTerritory: Återlämna distrikt
+    returnTerritoryDescription: Lämna distriktet i lådan
+    markCovered: Markera som genomgånget
+    markCoveredDescription: Markera distriktet som genomgånget
+    edit: Redigera
+    delete: Ta bort
+    cancel: Ångra
+    date: Datum
+    publisher: Förkunnare
+    publisherNotFound: Namnet kunde inte hittas
+    alreadyAssignedError: Distriktet är redan utlämnat
+    alreadyReturnedError: Distriktet är redan återlämnat
+    assignmentDeleted: Uppgiften borttaget

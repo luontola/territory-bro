@@ -3,7 +3,7 @@
 This directory contains all the languages to which Territory Bro has been translated. Currently, we have translations in
 the following languages:
 
-English (en), Spanish (es), Finnish (fi), Indonesian (id), Italian (it), Dutch (nl), Portuguese (pt)
+English (en), Spanish (es), Finnish (fi), Indonesian (id), Italian (it), Dutch (nl), Portuguese (pt), Swedish (sv)
 
 If you would like to correct some of the current translations or add new languages,
 please [contact me](https://www.luontola.fi/about). The initial translations have been machine-translated with ChatGPT
