@@ -492,6 +492,8 @@
                               :data-1p-ignore true
                               :required true
                               :pattern "\\s*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\s*"
+                              :oninvalid (str "this.validity.patternMismatch && this.setCustomValidity(\"" (i18n/t "UserManagement.userIdWrongFormat") "\")")
+                              :oninput "this.setCustomValidity('')"
                               :aria-invalid (when error? "true")}]
              (when error?
                " ⚠️ ")
