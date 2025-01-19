@@ -154,7 +154,7 @@ MapInteractionHelp:
   title: Hur använder man kartan?
   move: <b>Flytta:</b> dra runt med två fingrar / dra muspekaren med vänstra knappen nedtryckt
   zoom: <b>Förstora/förminska:</b> nyp ihop eller sprid ut med två fingrar / håll <kbd>{{ctrl}}</kbd> tangenten och scrolla med muspekaren
-  rotate: <b>Snurra:</b> snurra med två fingrar / håll <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> tangenten och tryck ned högra knappen på muspekarens pohjassa samtidigt som du flyttar muspekaren
+  rotate: <b>Snurra:</b> snurra med två fingrar / håll <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> tangenten och tryck och håll ned högra knappen på muspekaren samtidigt som du flyttar muspekaren
 Territory:
   number: Nummer
   region: Område
