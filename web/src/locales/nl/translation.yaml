@@ -82,7 +82,6 @@ CongregationSettings:
   timezone: Tijdzone
   timezoneNotDefined: Stel de grenzen van de gemeente in om de tijdzone vast te stellen
   timezoneDefined: Automatisch gedetecteerd op basis van de gemeentegrenzen
-  experimentalFeatures: Experimentele functies
   save: Instellingen opslaan
 TerritoriesSection:
   title: Gebieden

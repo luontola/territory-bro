@@ -82,7 +82,6 @@ CongregationSettings:
   timezone: Fuso orario
   timezoneNotDefined: Definisci i confini della congregazione per impostare il fuso orario
   timezoneDefined: Rilevato automaticamente in base ai confini della congregazione
-  experimentalFeatures: Funzioni sperimentali
   save: Salva le impostazioni
 TerritoriesSection:
   title: Territori

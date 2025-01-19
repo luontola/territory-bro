@@ -15,7 +15,6 @@
             [territory-bro.ui.hiccup :as h]
             [territory-bro.ui.html :as html]
             [territory-bro.ui.i18n :as i18n]
-            [territory-bro.ui.info-box :as info-box]
             [territory-bro.ui.layout :as layout])
   (:import (java.net URLEncoder)
            (java.nio.charset StandardCharsets)
@@ -61,8 +60,6 @@
                    :gis-access (dmz/allowed? [:gis-access cong-id])}
      :form {:congregation-name (or (get-in request [:params :congregation-name])
                                    (:congregation/name congregation))
-            :loans-csv-url (or (get-in request [:params :loans-csv-url])
-                               (:congregation/loans-csv-url congregation))
             :publisher-name (or (get-in request [:params :publisher-name])
                                 (:publisher/name publisher)
                                 "")
@@ -70,36 +67,6 @@
 
 
 ;;;; Congregation settings
-
-(defn loans-csv-url-info []
-  (let [styles (:CongregationSettings (css/modules))]
-    (info-box/view
-     {:title "Early Access Feature: Integrate with territory loans data from Google Sheets"}
-     (h/html
-      [:p "If you keep track of your territory loans using Google Sheets, it's possible to export the data from there and "
-       "visualize it on the map on Territory Bro's Territories page. Eventually Territory Bro will handle the territory "
-       "loans accounting all by itself, but in the meanwhile this workaround gives some of the benefits."]
-      [:p "Here is an "
-       [:a {:href "https://docs.google.com/spreadsheets/d/1pa_EIyuCpWGbEOXFOqjc7P0XfDWbZNRKIKXKLpnKkx4/edit?usp=sharing"
-            :target "_blank"}
-        "example spreadsheet"]
-       " that you can use as a starting point. Also please "
-       [:a {:href "/support"}
-        "contact me"]
-       " for assistance and so that I will know to help you later with migration to full accounting support."]
-      [:p "You'll need to create a sheet with the following structure:"]
-      [:table {:class (:spreadsheet styles)}
-       [:tbody
-        [:tr [:td "Number"] [:td "Loaned"] [:td "Staleness"]]
-        [:tr [:td "101"] [:td "TRUE"] [:td "2"]]
-        [:tr [:td "102"] [:td "FALSE"] [:td "6"]]]]
-      [:p "The " [:i "Number"] " column should contain the territory number. It's should match the territories in Territory Bro."]
-      [:p "The " [:i "Loaned"] " column should contain \"TRUE\" when the territory is currently loaned to a publisher and \"FALSE\" when nobody has it."]
-      [:p "The " [:i "Staleness"] " column should indicate the number of months since the territory was last loaned or returned."]
-      [:p "The first row of the sheet must contain the column names, but otherwise the sheet's structure is flexible: "
-       "The columns can be in any order. Columns with other names are ignored. Empty rows are ignored."]
-      [:p "After you have such a sheet, you can expose it to the Internet through " [:tt "File | Share | Publish to web"] ". "
-       "Publish that sheet as a CSV file and enter its URL to the above field on this settings page."]))))
 
 (def local-date-time (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm"))
 
@@ -129,8 +96,7 @@
 
 (defn congregation-settings-section [{:keys [permissions form errors] :as model}]
   (when (:configure-congregation permissions)
-    (let [styles (:CongregationSettings (css/modules))
-          errors (group-by first errors)]
+    (let [errors (group-by first errors)]
       (h/html
        [:section
         [:form.pure-form.pure-form-aligned {:method "post"}
@@ -150,26 +116,6 @@
 
           (congregation-timezone-field model)
 
-          [:details {:class (:experimentalFeatures styles)
-                     :open (not (str/blank? (:loans-csv-url form)))}
-           [:summary {} (i18n/t "CongregationSettings.experimentalFeatures")]
-
-           [:div {:lang "en"}
-            (let [error? (contains? errors :disallowed-loans-csv-url)]
-              [:div.pure-control-group
-               [:label {:for "loans-csv-url"}
-                "Territory loans CSV URL (optional)"]
-               [:input#loans-csv-url {:type "text"
-                                      :name "loans-csv-url"
-                                      :value (:loans-csv-url form)
-                                      :size "50"
-                                      :pattern "https://docs\\.google\\.com/.*"
-                                      :aria-invalid (when error? "true")}]
-               (when error?
-                 " ⚠️ ")
-               [:span.pure-form-message-inline "Link to a Google Sheets spreadsheet published to the web as CSV"]])
-            (loans-csv-url-info)]]
-
           [:div.pure-controls
            [:button.pure-button.pure-button-primary {:type "submit"}
             (i18n/t "CongregationSettings.save")]]]]]))))
@@ -177,13 +123,11 @@
 (declare view)
 (defn save-congregation-settings! [request]
   (let [cong-id (get-in request [:path-params :congregation])
-        name (get-in request [:params :congregation-name])
-        loans-csv-url (get-in request [:params :loans-csv-url])]
+        name (get-in request [:params :congregation-name])]
     (try
       (dmz/dispatch! {:command/type :congregation.command/update-congregation
                       :congregation/id cong-id
-                      :congregation/name name
-                      :congregation/loans-csv-url loans-csv-url})
+                      :congregation/name name})
       (http-response/see-other html/*page-path*)
       (catch Exception e
         (forms/validation-error-page-response e request model! view)))))

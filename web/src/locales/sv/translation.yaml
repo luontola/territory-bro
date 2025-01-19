@@ -82,7 +82,6 @@ CongregationSettings:
   timezone: Tidszon
   timezoneNotDefined: Ställ in församlingens gränser för att ställa in tidszon
   timezoneDefined: Automatiskt inställd efter församlingens gränser
-  experimentalFeatures: Exprimentella funktioner
   save: Spara inställningar
 TerritoriesSection:
   title: Distrikt

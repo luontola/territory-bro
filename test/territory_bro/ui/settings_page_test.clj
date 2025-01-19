@@ -61,7 +61,6 @@
    :permissions {:configure-congregation true
                  :gis-access true}
    :form {:congregation-name "Congregation Name"
-          :loans-csv-url "https://docs.google.com/spreadsheets/123"
           :publisher-name ""
           :user-id nil}})
 (def publisher-model
@@ -75,9 +74,6 @@
              :congregation/name "Congregation Name"
              :congregation/schema-name "cong1_schema"}
             (congregation/admin-permissions-granted cong-id user-id)
-            {:event/type :congregation.event/settings-updated
-             :congregation/id cong-id
-             :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"}
             {:event/type :territory.event/territory-defined
              :congregation/id cong-id
              :territory/id territory-id
@@ -192,8 +188,7 @@
 
 (deftest save-congregation-settings!-test
   (let [request {:path-params {:congregation cong-id}
-                 :params {:congregation-name "new name"
-                          :loans-csv-url "new url"}}]
+                 :params {:congregation-name "new name"}}]
     (testutil/with-events test-events
       (testutil/with-user-id user-id
 
@@ -207,23 +202,19 @@
               (is (= {:command/type :congregation.command/update-congregation
                       :command/user user-id
                       :congregation/id cong-id
-                      :congregation/loans-csv-url "new url"
                       :congregation/name "new name"}
                      (dissoc @*last-command :command/time))))))
 
         (testing "save failed: highlights erroneous form fields, doesn't forget invalid user input"
           (binding [dispatcher/command! (fn [& _]
-                                          (throw (ValidationException. [[:missing-name]
-                                                                        [:disallowed-loans-csv-url]])))]
+                                          (throw (ValidationException. [[:missing-name]])))]
             (let [response (settings-page/save-congregation-settings! request)]
               (is (= forms/validation-error-http-status (:status response)))
               (is (str/includes?
                    (html/visible-text (:body response))
                    (html/normalize-whitespace
                     "Congregation name [new name] ⚠️
-                     Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone
-                     Experimental features
-                     Territory loans CSV URL (optional) [new url] ⚠️"))))))))))
+                     Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone"))))))))))
 
 
 ;;;; Territories
@@ -705,39 +696,6 @@
           Congregation name [Congregation Name]
 
           Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone
-
-          Experimental features
-
-          Territory loans CSV URL (optional) [https://docs.google.com/spreadsheets/123] Link to a Google Sheets spreadsheet published to the web as CSV
-             
-            {info.svg} Early Access Feature: Integrate with territory loans data from Google Sheets
-
-            If you keep track of your territory loans using Google Sheets, it's possible to export the data from there
-            and visualize it on the map on Territory Bro's Territories page. Eventually Territory Bro will handle the
-            territory loans accounting all by itself, but in the meanwhile this workaround gives some of the benefits.
-
-            Here is an example spreadsheet that you can use as a starting point. Also please contact me for assistance
-            and so that I will know to help you later with migration to full accounting support.
-
-            You'll need to create a sheet with the following structure:
-
-            Number Loaned Staleness
-            101    TRUE   2
-            102    FALSE  6
-
-            The Number column should contain the territory number. It's should match the territories in Territory Bro.
-
-            The Loaned column should contain \"TRUE\" when the territory is currently loaned to a publisher and
-            \"FALSE\" when nobody has it.
-
-            The Staleness column should indicate the number of months since the territory was last loaned or returned.
-
-            The first row of the sheet must contain the column names, but otherwise the sheet's structure is flexible:
-            The columns can be in any order. Columns with other names are ignored. Empty rows are ignored.
-
-            After you have such a sheet, you can expose it to the Internet through File | Share | Publish to web.
-
-            Publish that sheet as a CSV file and enter its URL to the above field on this settings page.
 
           Save settings
           

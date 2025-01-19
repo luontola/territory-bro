@@ -254,42 +254,6 @@
         (is (thrown? NoPermitException
                      (handle-command rename-command [created-event] injections)))))))
 
-(deftest update-settings-test
-  (let [cong-id (UUID. 0 1)
-        user-id (UUID. 0 2)
-        injections {:check-permit (fn [_permit])}
-        created-event {:event/type :congregation.event/congregation-created
-                       :congregation/id cong-id
-                       :congregation/name "name"
-                       :congregation/schema-name ""}
-        update-command {:command/type :congregation.command/update-congregation
-                        :command/time (Instant/now)
-                        :command/user user-id
-                        :congregation/id cong-id
-                        :congregation/name "name"
-                        :congregation/loans-csv-url "https://docs.google.com/spreadsheets/1"}
-        updated-event {:event/type :congregation.event/settings-updated
-                       :congregation/id cong-id
-                       :congregation/loans-csv-url "https://docs.google.com/spreadsheets/1"}]
-
-    (testing "loans-csv-url changed"
-      (is (= [updated-event]
-             (handle-command update-command [created-event] injections))))
-
-    (testing "loans-csv-url not changed"
-      (is (empty? (handle-command update-command [created-event updated-event] injections))))
-
-    (testing "loans-csv-url removed"
-      (let [command (assoc update-command :congregation/loans-csv-url "")]
-        (is (= [(assoc updated-event :congregation/loans-csv-url nil)]
-               (handle-command command [created-event updated-event] injections)))))
-
-    (testing "error: loans-csv-url doesn't point to google docs"
-      (let [command (assoc update-command :congregation/loans-csv-url "https://example.com")]
-        (is (thrown-with-msg?
-             ValidationException (re-equals "[[:disallowed-loans-csv-url]]")
-             (handle-command command [created-event] injections)))))))
-
 (deftest add-user-to-congregation-test
   (let [cong-id (UUID. 0 1)
         admin-id (UUID. 0 2)

@@ -48,7 +48,7 @@ export type Territory = {
 }
 export type TerritoryPlus = Territory & {
   id: string;
-  loaned?: boolean;
+  assigned?: boolean;
   staleness?: number;
 }
 export type MapRaster = {

@@ -64,8 +64,7 @@
   (assoc BaseCommand
          :command/type (s/eq :congregation.command/update-congregation)
          :congregation/id (foreign-key/references :congregation UUID)
-         :congregation/name s/Str
-         (s/optional-key :congregation/loans-csv-url) s/Str))
+         :congregation/name s/Str))
 
 ;;; DB Admin
 

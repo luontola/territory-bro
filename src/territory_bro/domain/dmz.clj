@@ -8,7 +8,6 @@
             [territory-bro.domain.conversion-funnel :as conversion-funnel]
             [territory-bro.domain.demo :as demo]
             [territory-bro.domain.do-not-calls :as do-not-calls]
-            [territory-bro.domain.loan :as loan]
             [territory-bro.domain.publisher :as publisher]
             [territory-bro.domain.region :as region]
             [territory-bro.domain.share :as share]
@@ -297,13 +296,6 @@
                (-> territory
                    (assoc :congregation/id cong-id)
                    (enrich-territory))))))
-
-(defn enrich-territory-loans [cong-id territories]
-  (if (allowed? [:view-congregation cong-id])
-    (if-some [loans-csv-url (:congregation/loans-csv-url (get-congregation cong-id))]
-      (loan/enrich-territory-loans! territories loans-csv-url)
-      territories)
-    territories))
 
 (defn get-territory-assignment-history [cong-id territory-id]
   (when-not (view-territory? cong-id territory-id)

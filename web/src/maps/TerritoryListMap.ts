@@ -69,21 +69,21 @@ export class TerritoryListMapElement extends OpenLayersMapElement {
   }
 }
 
-function loanableTerritoryStroke(loaned) {
+function territoryAssignmentStroke(assigned) {
   const stroke = territoryStrokeStyle();
-  if (typeof loaned === 'boolean') {
-    stroke.setColor(loaned ? assignedBorderColor : vacantBorderColor)
+  if (typeof assigned === 'boolean') {
+    stroke.setColor(assigned ? assignedBorderColor : vacantBorderColor)
   }
   return stroke;
 }
 
-function loanableTerritoryFill(loaned, staleness) {
+function territoryAssignmentFill(assigned, staleness) {
   const fill = new Fill({
     color: 'rgba(255, 0, 0, 0.0)',
   });
-  if (typeof loaned === 'boolean') {
+  if (typeof assigned === 'boolean') {
     staleness = Math.min(12, staleness)
-    fill.setColor(loaned ? assignedBackgroundColors[staleness] : vacantBackgroundColors[staleness])
+    fill.setColor(assigned ? assignedBackgroundColors[staleness] : vacantBackgroundColors[staleness])
   }
   return fill;
 }
@@ -109,12 +109,12 @@ function initMap(element: HTMLDivElement,
     source: new VectorSource({}),
     style: function (feature, resolution) {
       const number = feature.get('number');
-      const loaned = feature.get('loaned');
+      const assigned = feature.get('assigned');
       const staleness = feature.get('staleness');
 
       const style = new Style({
-        stroke: loanableTerritoryStroke(loaned),
-        fill: loanableTerritoryFill(loaned, staleness),
+        stroke: territoryAssignmentStroke(assigned),
+        fill: territoryAssignmentFill(assigned, staleness),
         text: scaledTerritoryTextStyle(number, feature, resolution)
       });
       return [style];
@@ -128,7 +128,7 @@ function initMap(element: HTMLDivElement,
     const feature = wktToFeature(territory.location);
     feature.set('territoryId', territory.id);
     feature.set('number', territory.number);
-    feature.set('loaned', territory.loaned);
+    feature.set('assigned', territory.assigned);
     feature.set('staleness', territory.staleness);
     return feature;
   }

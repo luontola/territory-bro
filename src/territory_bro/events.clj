@@ -94,10 +94,11 @@
          :user/id UUID
          :permission/id PermissionId))
 
-(s/defschema SettingsUpdated
+(s/defschema SettingsUpdated ; deprecated event: no longer used after removing loans-csv-url
   (assoc BaseEvent
          :event/type (s/eq :congregation.event/settings-updated)
          :congregation/id CongId
+         ;; TODO: if reusing this event later, make the loans-csv-url key optional or purge old events
          :congregation/loans-csv-url (s/maybe s/Str)))
 
 (s/defschema GisUserCreated

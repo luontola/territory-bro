@@ -82,7 +82,6 @@ CongregationSettings:
   timezone: Aikavyöhyke
   timezoneNotDefined: Määritä seurakunnan rajat asettaaksesi aikavyöhykkeen
   timezoneDefined: Automaattisesti tunnistettu seurakunnan rajojen perusteella
-  experimentalFeatures: Kokeelliset ominaisuudet
   save: Tallenna asetukset
 TerritoriesSection:
   title: Alueet

@@ -82,7 +82,6 @@ CongregationSettings:
   timezone: Timezone
   timezoneNotDefined: Define congregation boundaries to set the timezone
   timezoneDefined: Autodetected based on the congregation boundaries
-  experimentalFeatures: Experimental features
   save: Save settings
 TerritoriesSection:
   title: Territories

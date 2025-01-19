@@ -34,7 +34,6 @@
                  [org.apache.poi/poi-ooxml "5.3.0"]
                  [org.clojure/clojure "1.12.0"]
                  [org.clojure/core.cache "1.1.234"]
-                 [org.clojure/data.csv "1.1.0"]
                  [org.clojure/tools.logging "1.3.0"] ; TODO: find out what logging framework we use, move to SLF4J if necessary, preferably something that logs ex-data by default (avoid Timbre, it has a bad track record of slow updates)
                  [org.flywaydb/flyway-core "11.0.0"]
                  [org.flywaydb/flyway-database-postgresql "11.0.0"]

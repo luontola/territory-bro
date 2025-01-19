@@ -33,7 +33,7 @@
     (= :number sort-column) (util/natural-sort-by :territory/number)
     sort-reverse? reverse))
 
-(defn model! [request {:keys [fetch-loans?]}]
+(defn model! [request]
   (let [cong-id (get-in request [:path-params :congregation])
         sort-column (if-some [s (get-in request [:params :sort])]
                       (keyword s)
@@ -52,14 +52,11 @@
                                                    (some? last-covered) (util/months-difference last-covered today)
                                                    :else Integer/MAX_VALUE)]
                                    (-> territory
-                                       (assoc :territory/loaned? assigned?)
+                                       (assoc :territory/assigned? assigned?)
                                        (assoc :territory/staleness staleness)))))
-                         (sort-territories sort-column sort-reverse?))
-        territories (cond->> territories
-                      fetch-loans? (dmz/enrich-territory-loans cong-id))]
+                         (sort-territories sort-column sort-reverse?))]
     {:congregation-boundary congregation-boundary
      :territories territories
-     :has-loans? (some? (:congregation/loans-csv-url congregation))
      :today today
      :permissions {:view-congregation-temporarily (dmz/allowed? [:view-congregation-temporarily cong-id])}
      :sort-column sort-column
@@ -83,7 +80,6 @@
            (str/replace "</0>" "</a>")
            (h/raw)))])))
 
-
 (defn territory-list-map [{:keys [congregation-boundary territories]}]
   (h/html
    [:territory-list-map {:map-raster maps/default-for-availability}
@@ -94,13 +90,9 @@
                             {:id (:territory/id territory)
                              :number (:territory/number territory)
                              :location (:territory/location territory)
-                             :loaned (:territory/loaned? territory)
+                             :assigned (:territory/assigned? territory)
                              :staleness (:territory/staleness territory)})
                           territories)})]]))
-
-(defn territory-list-map! [request]
-  (territory-list-map (model! request {:fetch-loans? true})))
-
 
 (defn sortable-column-header [label sort-column model]
   (let [styles (:TerritoryListPage (css/modules))
@@ -183,7 +175,7 @@
       (when (= month (last months))
         "+")])))
 
-(defn view [{:keys [has-loans? permissions] :as model}]
+(defn view [{:keys [permissions] :as model}]
   (let [styles (:TerritoryListPage (css/modules))]
     (h/html
      [:h1 {} (i18n/t "TerritoryListPage.title")]
@@ -191,14 +183,7 @@
        (limited-visibility-help))
 
      [:div {:class (:map styles)}
-      (if has-loans?
-        [:div {:class (:placeholder styles)
-               :hx-target "this"
-               :hx-swap "outerHTML"
-               :hx-trigger "load"
-               :hx-get (str html/*page-path* "/map")}
-         (html/inline-svg "icons/map-location.svg")]
-        (territory-list-map model))]
+      (territory-list-map model)]
 
      [:div {:class (:map-legend styles)}
       (let [colors (map-colors)
@@ -236,7 +221,7 @@
      (territory-list-table model))))
 
 (defn view! [request]
-  (view (model! request {:fetch-loans? false})))
+  (view (model! request)))
 
 (def routes
   ["/congregation/:congregation/territories"
@@ -249,17 +234,10 @@
                           (layout/page! request {:main-content-variant :full-width})
                           (html/response)))}}]
 
-   ["/map"
-    {:name ::map
-     :conflicting true
-     :get {:handler (fn [request]
-                      (-> (territory-list-map! request)
-                          (html/response)))}}]
-
    ["/table"
     {:name ::table
      :conflicting true
      :get {:handler (fn [request]
-                      (-> (model! request {:fetch-loans? false})
+                      (-> (model! request)
                           (territory-list-table)
                           (html/response)))}}]])

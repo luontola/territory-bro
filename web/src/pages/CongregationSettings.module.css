@@ -1,23 +1,3 @@
-table.spreadsheet {
-    margin: 0.5em;
-}
-
-table.spreadsheet td {
-    border: 1px solid gray;
-    padding: 3px;
-}
-
-details.experimentalFeatures {
-    :is(summary) {
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    &[open] summary {
-        margin-bottom: 1em;
-    }
-}
-
 .current-time {
     font-size: 0.9rem;
     vertical-align: text-bottom;
