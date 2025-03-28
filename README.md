@@ -25,6 +25,10 @@ Stop the application (does not remove the database volume)
 
     docker compose down
 
+Remove the database volume
+
+    docker compose down --volumes
+
 ## Developing
 
 The tools for developing this project are
