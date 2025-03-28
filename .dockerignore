@@ -1,3 +1,4 @@
 *
 !/target/uberjar/territory-bro.jar
 !/target/uberjar/classes.list
+!/target/warmup/

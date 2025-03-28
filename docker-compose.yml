@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: warmup
       args:
         - GIT_COMMIT
         - BUILD_TIMESTAMP
@@ -21,6 +22,8 @@ services:
       SUPER_USERS: developer
       SUPPORT_EMAIL: support@example.com
       DEMO_CONGREGATION:
+    volumes:
+      - ./target/warmup:/app/warmup
     ports:
       - "127.0.0.1:8080:8080"
 

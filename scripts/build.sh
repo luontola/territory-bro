@@ -30,22 +30,25 @@ find resources/public/assets \
 
 lein do kaocha fast slow, uberjar
 
-# AppCDS preparation: dump list of loaded classes during e2e test run
-java -XX:DumpLoadedClassList=target/uberjar/classes.list -Dconf=dev-config.edn -jar "target/uberjar/territory-bro.jar" &> target/uberjar/warmup.log &
-warmup=$!
-# Gives the best coverage in the least time:
+export GIT_COMMIT=$(git rev-parse HEAD)
+export BUILD_TIMESTAMP=$(date -Iseconds)
+export BUILDKIT_PROGRESS=plain
+
+# application warmup training run
+docker compose -f docker-compose.yml build --pull app
+docker compose up -d app
+# gives the best coverage in the least time:
 # - registration-test visits nearly every page
 # - gis-access-test syncs GIS data and projects the events
 # - login-and-logout-test goes through the Auth0 OIDC login flow
 lein kaocha e2e --focus territory-bro.browser-test/login-and-logout-test
-kill $warmup
-wait $warmup || true
+docker compose logs app > target/warmup.log
+docker compose stop app
 
-export GIT_COMMIT=$(git rev-parse HEAD)
-export BUILD_TIMESTAMP=$(date -Iseconds)
-export BUILDKIT_PROGRESS=plain
-docker compose build --pull app
+# build an optimized image based on the training run
+docker compose -f docker-compose.yml -f docker-compose.build.yml build app
 
+# run e2e tests against the final docker image
 export DEMO_CONGREGATION=$(cat target/test-congregation-id)
 docker compose up -d app
 lein kaocha e2e --skip-meta prod

@@ -1,4 +1,4 @@
-FROM eclipse-temurin:24-jre
+FROM eclipse-temurin:24-jre AS warmup
 
 EXPOSE 8080
 ENV PORT=8080 \
@@ -11,21 +11,6 @@ WORKDIR /app
 
 COPY target/uberjar/territory-bro.jar /app/
 
-# prepare AppCDS shared archive
-COPY target/uberjar/classes.list /app/
-RUN java -Xshare:dump \
-        -XX:SharedClassListFile=classes.list \
-        -XX:SharedArchiveFile=classes.jsa \
-        --class-path territory-bro.jar && \
-    rm classes.list
-
-USER app
-ENTRYPOINT ["java", \
-            "-Xshare:on", "-XX:SharedArchiveFile=classes.jsa", \
-            "-XX:MaxRAMPercentage=70", \
-            "-XX:+PrintCommandLineFlags", \
-            "-jar", "territory-bro.jar"]
-
 ARG GIT_COMMIT
 ENV GIT_COMMIT=$GIT_COMMIT
 
@@ -36,3 +21,25 @@ ENV BUILD_TIMESTAMP=$BUILD_TIMESTAMP
 # here as a reminder of its existence, and for use during a local build.
 ARG RELEASE_VERSION
 ENV RELEASE_VERSION=$RELEASE_VERSION
+
+# training run for AppCDS
+ENTRYPOINT ["java", \
+            "-XX:DumpLoadedClassList=warmup/classes.list", \
+            "-XX:+PrintCommandLineFlags", \
+            "-jar", "territory-bro.jar"]
+
+FROM warmup AS build
+
+# create an AppCDS shared archive
+COPY target/warmup/classes.list /app/warmup/
+RUN java -Xshare:dump \
+        -XX:SharedClassListFile=warmup/classes.list \
+        -XX:SharedArchiveFile=classes.jsa \
+        --class-path territory-bro.jar
+
+USER app
+ENTRYPOINT ["java", \
+            "-Xshare:on", "-XX:SharedArchiveFile=classes.jsa", \
+            "-XX:MaxRAMPercentage=70", \
+            "-XX:+PrintCommandLineFlags", \
+            "-jar", "territory-bro.jar"]
