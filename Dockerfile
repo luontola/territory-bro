@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21.0.4_7-jre
+FROM eclipse-temurin:24-jre
 
 EXPOSE 8080
 ENV PORT=8080 \

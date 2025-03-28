@@ -81,13 +81,19 @@ Upgrade dependencies
     lein ancient upgrade :all :check-clojure :no-tests
     npm run upgrade
 
-    asdf install java latest:temurin-21
-    asdf local java latest:temurin-21
-    asdf global java latest:temurin-21
+    asdf list all java temurin-24
+    asdf install java temurin-24.0.0+36
+    asdf set java temurin-24.0.0+36
+    asdf set --home java temurin-24.0.0+36
+
+    # TODO: these didn't work last time I tried, see if they'll get fixed in the future
+    asdf install java latest:temurin-24
+    asdf set java latest:temurin-24
+    asdf set --home java latest:temurin-24
 
     asdf install nodejs latest
-    asdf local nodejs latest
-    asdf global nodejs latest
+    asdf set nodejs latest
+    asdf set --home nodejs latest
 
 Download dependency sources
 
