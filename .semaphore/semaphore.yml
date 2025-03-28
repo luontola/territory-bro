@@ -41,7 +41,7 @@ blocks:
       epilogue:
         always:
           commands:
-            - artifact push job target/warmup.log
-            - artifact push job target/etaoin-postmortem
-            - docker compose logs > containers.log
-            - artifact push job containers.log
+            - artifact push job target/warmup.log || true
+            - artifact push job target/etaoin-postmortem || true
+            - docker compose logs > containers.log || true
+            - artifact push job containers.log || true
