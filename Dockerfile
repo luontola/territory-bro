@@ -22,24 +22,29 @@ ENV BUILD_TIMESTAMP=$BUILD_TIMESTAMP
 ARG RELEASE_VERSION
 ENV RELEASE_VERSION=$RELEASE_VERSION
 
-# training run for AppCDS
+# try out JEP 483: Ahead-of-Time Class Loading & Linking
+# 	https://openjdk.org/jeps/483
 ENTRYPOINT ["java", \
-            "-XX:DumpLoadedClassList=warmup/classes.list", \
+            "-XX:AOTMode=record", \
+            "-XX:AOTConfiguration=warmup/app.aotconf", \
             "-XX:+PrintCommandLineFlags", \
             "-jar", "territory-bro.jar"]
 
 FROM warmup AS build
 
-# create an AppCDS shared archive
-COPY target/warmup/classes.list /app/warmup/
-RUN java -Xshare:dump \
-        -XX:SharedClassListFile=warmup/classes.list \
-        -XX:SharedArchiveFile=classes.jsa \
-        --class-path territory-bro.jar
+COPY target/warmup/app.aotconf /app/warmup/
+
+# FIXME: crashes with "Archive heap points to a static field that may hold a different value at runtime"
+RUN java -XX:AOTMode=create \
+         -XX:AOTConfiguration=warmup/app.aotconf \
+         -XX:AOTCache=app.aot \
+         -XX:+PrintCommandLineFlags \
+         --class-path territory-bro.jar
 
 USER app
 ENTRYPOINT ["java", \
-            "-Xshare:on", "-XX:SharedArchiveFile=classes.jsa", \
+            "-XX:AOTMode=on", \
+            "-XX:AOTCache=app.aot", \
             "-XX:MaxRAMPercentage=70", \
             "-XX:+PrintCommandLineFlags", \
             "-jar", "territory-bro.jar"]
