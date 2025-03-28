@@ -21,8 +21,6 @@ services:
       SUPER_USERS: developer
       SUPPORT_EMAIL: support@example.com
       DEMO_CONGREGATION:
-    mem_reservation: 500m
-    mem_limit: 500m
     ports:
       - "127.0.0.1:8080:8080"
 
