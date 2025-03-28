@@ -59,7 +59,10 @@
 
   (doto (Runtime/getRuntime)
     (.addShutdownHook (Thread. ^Runnable stop-app)))
-  (log/infof "Projection state memory usage: %,d bytes" (.totalSize (projections/memory-usage (projections/cached-state))))
+  (try
+    (log/infof "Projection state memory usage: %,d bytes" (.totalSize (projections/memory-usage (projections/cached-state))))
+    (catch Throwable t
+      (log/warn t "Failed to calculate projection state memory usage")))
   (log/info "Started"))
 
 (defn -main [& _args]
