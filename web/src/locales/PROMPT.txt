@@ -34,6 +34,7 @@ Finnish: laina, ota alue, annettu jollekin
 English: covered, mark as covered
 Finnish: käyty, merkitse käydyksi
 Swedish: genomget, markera som genomgånget
+Italian: percorso
 
 - Place for storing territory cards which are currently not assigned
 English: storage

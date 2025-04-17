@@ -4,9 +4,9 @@ Navigation:
   changeLanguage: Cambia lingua
   login: Accedi
   logout: Esci
-  demo: Dimostrazione
+  demo: Demo
   registration: Registrazione
-  news: Notizie
+  news: Novità
   opensInNewWindow: Si apre in una nuova finestra
 HomePage:
   title: Home
@@ -27,8 +27,8 @@ Statistics:
   title: Statistiche del territorio
   territories: Territori
   assignedTerritories: Attualmente assegnati
-  coveredInPast6Months: Coperti negli ultimi 6 mesi
-  coveredInPast12Months: Coperti negli ultimi 12 mesi
+  coveredInPast6Months: Percorsi negli ultimi 6 mesi
+  coveredInPast12Months: Percorsi negli ultimi 12 mesi
   averageAssignmentDurationDays: "Durata media dell'assegnazione: {{days}} giorni"
 GettingStarted:
   title: Iniziare
@@ -71,10 +71,10 @@ PrintoutPage:
   templates:
     TerritoryCard: Scheda territorio
     TerritoryCardMapOnly: Scheda territorio, solo mappa
-    NeighborhoodCard: Mappa del quartiere
+    NeighborhoodCard: Solo mappa territorio
     RuralTerritoryCard: Scheda territorio rurale
     QrCodeOnly: Solo codice QR (per aggiungerli come adesivi alle vecchie schede)
-    RegionPrintout: Mappa della regione
+    RegionPrintout: Mappa del Territorio
 SettingsPage:
   title: Impostazioni
 CongregationSettings:
@@ -85,7 +85,7 @@ CongregationSettings:
   save: Salva le impostazioni
 TerritoriesSection:
   title: Territori
-  exportTerritoriesToExcel: Esporta territori e assegnazioni come foglio di calcolo (.xlsx)
+  exportTerritoriesToExcel: Esporta registrazioni territori e assegnazioni come foglio di calcolo (.xlsx)
 ExcelExport:
   territories: Territori
   assignments: Assegnazioni
@@ -95,7 +95,7 @@ ExcelExport:
     territory: Territorio
     publisher: Proclamatore
     assignedDate: Assegnato
-    coveredDate: Visitato
+    coveredDate: Percorso
     returnedDate: Restituito
 EditingMaps:
   title: Modifica delle mappe
@@ -110,7 +110,7 @@ PublisherManagement:
   save: Salva
   delete: Elimina
   cancel: Annulla
-  deleteWarning: "{{name}} ha territori assegnati. Non sarà possibile vedere a chi sono stati assegnati i territori se il proclamatori viene eliminato.\n\nSei sicuro di voler eliminare {{name}}?"
+  deleteWarning: "{{name}} ha territori assegnati. Non sarà possibile vedere a chi sono stati assegnati i territori se il proclamatore viene eliminato.\n\nSei sicuro di voler eliminare {{name}}?"
   missingNameError: Nome obbligatorio
   nonUniqueNameError: Esiste già un proclamatori con questo nome
 UserManagement:
@@ -157,17 +157,17 @@ MapInteractionHelp:
   rotate: <b>Ruota:</b> ruota con due dita / tieni premuti <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> e trascina con il pulsante sinistro del mouse
 Territory:
   number: Numero
-  region: Regione
+  region: Località
   addresses: Indirizzi
   doNotCalls: Non contattare
 TerritoryCard:
-  title: Piantina del territorio
+  title: Piantina di territorio
   footer: "Tenete questa cartolina nella busta. Non la sciupate, non vi fate segni e non la piegate. Ogni volta che \n il territorio è stato percorso interamente, informate il fratello che si occupa dello schedario dei territori."
 Assignment:
   assignedToPublisher: Assegnato a {{name}}
   returned: Restituito
-  covered: Coperto
-  lastCovered: Ultima visita
+  covered: Percorso
+  lastCovered: Ultima percorrenza
   status: Stato
   statusVacant: <0>Disponibile</0>
   statusAssignedToPublisher: <0>Assegnato</0> a {{name}}
@@ -175,16 +175,16 @@ Assignment:
   assignmentHistory: Cronologia assegnazioni
   durationMonths: "{{months}} mesi"
   durationMonthsAgo: "{{months}} mesi fa"
-  durationMonthsSinceDate: "{{months}} mesi, da {{date}}"
+  durationMonthsSinceDate: "{{months}} mesi, dal {{date}}"
   deletedPublisher: eliminato
   form:
     assign: Assegna
     assignTerritory: Assegna territorio
     return: Restituisci
     returnTerritory: Restituisci territorio
-    returnTerritoryDescription: Restituisci il territorio al magazzino
-    markCovered: Segna come coperto
-    markCoveredDescription: Segna il territorio come coperto
+    returnTerritoryDescription: Restituisci il territorio al reparto
+    markCovered: Segna come percorso
+    markCoveredDescription: Segna il territorio come percorso
     edit: Modifica
     delete: Elimina
     cancel: Annulla
