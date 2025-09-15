@@ -186,7 +186,7 @@ select.languageSelection:not(:focus):hover {
 }
 
 .languageSelectionIcon {
-    font-size: 2em;
+    font-size: 1.5em;
     vertical-align: middle;
 }
 
