@@ -14,8 +14,6 @@ import "purecss/build/grids-responsive.css";
 import "@fortawesome/fontawesome-free/css/svg-with-js.css"
 import "./styles.ts"; // import last to have higher specificity than the library CSS
 
-import.meta.glob('./**/*.svg', {eager: true})
-
 function formatXhrError({xhr, pathInfo}) {
   let message = `${xhr.status} ${xhr.statusText} from ${pathInfo?.requestPath}`;
   if (xhr.responseText && xhr.responseText !== xhr.statusText) {
