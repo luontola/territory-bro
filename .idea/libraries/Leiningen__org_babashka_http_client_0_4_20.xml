@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: org.babashka/http-client:0.4.20">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/babashka/http-client/0.4.20/http-client-0.4.20.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

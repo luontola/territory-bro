@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: net.bytebuddy/byte-buddy-agent:1.17.6">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/bytebuddy/byte-buddy-agent/1.17.6/byte-buddy-agent-1.17.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

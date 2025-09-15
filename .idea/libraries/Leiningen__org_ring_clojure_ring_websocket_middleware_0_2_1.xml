@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.ring-clojure/ring-websocket-middleware:0.2.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/ring-clojure/ring-websocket-middleware/0.2.1/ring-websocket-middleware-0.2.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: metosin/ring-http-response:0.9.5">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/metosin/ring-http-response/0.9.5/ring-http-response-0.9.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

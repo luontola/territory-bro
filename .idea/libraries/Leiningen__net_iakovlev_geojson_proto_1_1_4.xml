@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: net.iakovlev/geojson-proto:1.1.4">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/net/iakovlev/geojson-proto/1.1.4/geojson-proto-1.1.4.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

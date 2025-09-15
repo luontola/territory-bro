@@ -130,7 +130,8 @@
                         middleware/wrap-base)]
         (is (= {:status 409
                 :body "dummy"
-                :headers {"Content-Type" "text/plain; charset=utf-8"}}
+                :headers {"Content-Type" "text/plain; charset=utf-8"
+                          "Content-Length" "5"}}
                (-> (handler (mock/request :get "/some/page"))
                    (simplify))))))
 

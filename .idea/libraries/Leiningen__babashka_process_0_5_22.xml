@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: babashka/process:0.5.22">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/babashka/process/0.5.22/process-0.5.22.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

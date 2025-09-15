@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Leiningen: com.google.guava/guava:32.1.1-jre">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/32.1.1-jre/guava-32.1.1-jre.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
