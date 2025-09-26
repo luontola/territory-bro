@@ -81,15 +81,9 @@ Upgrade dependencies
     lein ancient upgrade :all :check-clojure :no-tests
     npm run upgrade
 
-    asdf list all java temurin-24
-    asdf install java temurin-24.0.0+36
-    asdf set java temurin-24.0.0+36
-    asdf set --home java temurin-24.0.0+36
-
-    # TODO: these didn't work last time I tried, see if they'll get fixed in the future
-    asdf install java latest:temurin-24
-    asdf set java latest:temurin-24
-    asdf set --home java latest:temurin-24
+    asdf install java latest:temurin-25
+    asdf set java latest:temurin-25
+    asdf set --home java latest:temurin-25
 
     asdf install nodejs latest
     asdf set nodejs latest
@@ -106,6 +100,6 @@ Produce canonical XML for better diffs
 
 ## License
 
-Copyright © 2015-2024, [Esko Luontola](https://www.luontola.fi)
+Copyright © 2015-2025, [Esko Luontola](https://www.luontola.fi)
 
 This software is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).

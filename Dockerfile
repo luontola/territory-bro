@@ -1,4 +1,4 @@
-FROM eclipse-temurin:24-jre AS warmup
+FROM eclipse-temurin:25-jre AS warmup
 
 EXPOSE 8080
 ENV PORT=8080 \
