@@ -22,24 +22,16 @@ ENV BUILD_TIMESTAMP=$BUILD_TIMESTAMP
 ARG RELEASE_VERSION
 ENV RELEASE_VERSION=$RELEASE_VERSION
 
-# try out JEP 483: Ahead-of-Time Class Loading & Linking
-# 	https://openjdk.org/jeps/483
+# Training run for the ahead-of-time cache.
+# The warmup directory is mounted during the build process.
 ENTRYPOINT ["java", \
-            "-XX:AOTMode=record", \
-            "-XX:AOTConfiguration=warmup/app.aotconf", \
+            "-XX:AOTCacheOutput=warmup/app.aot", \
             "-XX:+PrintCommandLineFlags", \
             "-jar", "territory-bro.jar"]
 
 FROM warmup AS build
 
-COPY target/warmup/app.aotconf /app/warmup/
-
-# FIXME: crashes with "Archive heap points to a static field that may hold a different value at runtime"
-RUN java -XX:AOTMode=create \
-         -XX:AOTConfiguration=warmup/app.aotconf \
-         -XX:AOTCache=app.aot \
-         -XX:+PrintCommandLineFlags \
-         --class-path territory-bro.jar
+COPY target/warmup/app.aot /app/app.aot
 
 USER app
 ENTRYPOINT ["java", \
