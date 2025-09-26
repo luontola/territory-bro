@@ -35,7 +35,7 @@ COPY target/warmup/app.aot /app/app.aot
 
 USER app
 ENTRYPOINT ["java", \
-            "-XX:AOTMode=on", \
+            "-XX:AOTMode=auto", \
             "-XX:AOTCache=app.aot", \
             "-XX:MaxRAMPercentage=70", \
             "-XX:+PrintCommandLineFlags", \
