@@ -26,6 +26,7 @@ ENV RELEASE_VERSION=$RELEASE_VERSION
 # The warmup directory is mounted during the build process.
 CMD ["java", \
      "-XX:AOTCacheOutput=warmup/app.aot", \
+     "-XX:+UseCompactObjectHeaders", \
      "-XX:+PrintCommandLineFlags", \
      "-jar", "territory-bro.jar"]
 
@@ -38,5 +39,6 @@ CMD ["java", \
      "-XX:AOTMode=auto", \
      "-XX:AOTCache=app.aot", \
      "-XX:MaxRAMPercentage=70", \
+     "-XX:+UseCompactObjectHeaders", \
      "-XX:+PrintCommandLineFlags", \
      "-jar", "territory-bro.jar"]
