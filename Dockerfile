@@ -24,19 +24,19 @@ ENV RELEASE_VERSION=$RELEASE_VERSION
 
 # Training run for the ahead-of-time cache.
 # The warmup directory is mounted during the build process.
-ENTRYPOINT ["java", \
-            "-XX:AOTCacheOutput=warmup/app.aot", \
-            "-XX:+PrintCommandLineFlags", \
-            "-jar", "territory-bro.jar"]
+CMD ["java", \
+     "-XX:AOTCacheOutput=warmup/app.aot", \
+     "-XX:+PrintCommandLineFlags", \
+     "-jar", "territory-bro.jar"]
 
 FROM warmup AS build
 
 COPY target/warmup/app.aot /app/app.aot
 
 USER app
-ENTRYPOINT ["java", \
-            "-XX:AOTMode=auto", \
-            "-XX:AOTCache=app.aot", \
-            "-XX:MaxRAMPercentage=70", \
-            "-XX:+PrintCommandLineFlags", \
-            "-jar", "territory-bro.jar"]
+CMD ["java", \
+     "-XX:AOTMode=auto", \
+     "-XX:AOTCache=app.aot", \
+     "-XX:MaxRAMPercentage=70", \
+     "-XX:+PrintCommandLineFlags", \
+     "-jar", "territory-bro.jar"]
