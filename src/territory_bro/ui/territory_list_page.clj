@@ -139,7 +139,8 @@
          [:tr {:data-territory-id (:territory/id territory)
                :data-searchable (-> (str/join "\n" [(:territory/number territory)
                                                     (:territory/region territory)
-                                                    (:territory/addresses territory)])
+                                                    (:territory/addresses territory)
+                                                    (-> territory :territory/current-assignment :publisher/name)])
                                     (str/lower-case)
                                     (str/trim))}
           [:td {:class (:number styles)}

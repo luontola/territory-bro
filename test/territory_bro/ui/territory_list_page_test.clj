@@ -274,15 +274,15 @@
            "Assigned to [deleted] for 2 months"))))
 
   (testing "each row embeds the searchable text in lowercase"
-    (let [model (-> model
+    (let [model (-> model-with-assignments
                     (replace-in [:territories 0 :territory/number] "123" "123A")
                     (replace-in [:territories 0 :territory/region] "the region" "Some Region")
                     ;; addresses are commonly multiline
-                    (replace-in [:territories 0 :territory/addresses] "the addresses" "Some Street\nAnother Street\n"))]
+                    (replace-in [:territories 0 :territory/addresses] "the addresses" "Some Street\nAnother Street"))]
       ;; newline is used as the separator, so that you could not accidentally search from two
       ;; adjacent fields at the same time (one does not simply type a newline to a search field)
       (is (str/includes? (str (territory-list-page/view model))
-                         "data-searchable=\"123a\nsome region\nsome street\nanother street\""))
+                         "data-searchable=\"123a\nsome region\nsome street\nanother street\njohn doe\""))
       (is (str/includes? (str (territory-list-page/view model))
                          "data-territory-id=\"00000000-0000-0000-0000-000000000001\""))))
 
