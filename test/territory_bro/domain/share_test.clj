@@ -10,7 +10,7 @@
             [territory-bro.infra.user :as user]
             [territory-bro.projections :as projections]
             [territory-bro.test.testutil :as testutil :refer [re-equals thrown-with-msg? thrown?]])
-  (:import (java.time Instant)
+  (:import (java.time Instant LocalDate)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
@@ -22,10 +22,13 @@
 (def share-id2 (UUID. 0 0x20))
 (def share-key "abc123")
 (def share-key2 "def456")
-(def test-time (Instant/ofEpochSecond 42))
+(def time-t0 (Instant/ofEpochSecond 0))
+(def time-t1 (Instant/ofEpochSecond 1))
+(def time-t2 (Instant/ofEpochSecond 2))
 
 (def share-created
   {:event/type :share.event/share-created
+   :event/time time-t1
    :share/id share-id
    :share/key share-key
    :share/type :link
@@ -38,8 +41,18 @@
          :territory/id territory-id2))
 (def share-opened
   {:event/type :share.event/share-opened
-   :event/time test-time
+   :event/time time-t1
    :share/id share-id})
+
+(def territory-returned-first
+  {:event/type :territory.event/territory-returned
+   :event/time time-t0
+   :congregation/id cong-id
+   :territory/id territory-id
+   :assignment/id (UUID/randomUUID)
+   :assignment/end-date (LocalDate/of 2000 1 1)})
+(def territory-returned-last
+  (assoc territory-returned-first :event/time time-t2))
 
 (defn- apply-events [events]
   (testutil/apply-events share/projection events))
@@ -59,13 +72,19 @@
           expected {::share/share-keys {share-key share-id}
                     ::share/shares {share-id {:share/id share-id
                                               :share/type :link
+                                              :share/created time-t1
                                               :congregation/id cong-id
                                               :territory/id territory-id}}}]
       (is (= expected (apply-events events)))
 
       (testing "> opened"
         (let [events (conj events share-opened)
-              expected (assoc-in expected [::share/shares share-id :share/last-opened] test-time)]
+              expected (assoc-in expected [::share/shares share-id :share/last-opened] time-t1)]
+          (is (= expected (apply-events events)))))
+
+      (testing "> territory returned"
+        (let [events (conj events territory-returned-last)
+              expected (assoc-in expected [::share/territory-last-returned territory-id] time-t2)]
           (is (= expected (apply-events events))))))))
 
 (deftest grant-opened-shares-test
@@ -119,17 +138,32 @@
            ValidationException (re-equals "[[:no-such-share #uuid \"00000000-0000-0000-0000-000000000666\"]]")
            (share/check-share-exists state (UUID. 0 0x666)))))))
 
-(deftest find-share-by-key-test
+(deftest find-valid-share-by-key-test
   (let [state (apply-events [share-created])]
     (testing "existing share"
       (is (= {:share/id share-id
               :share/type :link
+              :share/created time-t1
               :congregation/id cong-id
               :territory/id territory-id}
-             (share/find-share-by-key state share-key))))
+             (share/find-valid-share-by-key state share-key))))
 
     (testing "invalid share key"
-      (is (nil? (share/find-share-by-key state "foo"))))))
+      (is (nil? (share/find-valid-share-by-key state "foo")))))
+
+  (testing "share created, territory returned -> share is expired"
+    (let [state (apply-events [share-created territory-returned-last])]
+      (is (nil? (share/find-valid-share-by-key state share-key)))))
+
+  (testing "territory returned, share created -> share is still valid"
+    (let [state (apply-events [territory-returned-first share-created])]
+      (is (some? (share/find-valid-share-by-key state share-key)))))
+
+  (testing "QR code shares don't expire when the territory is returned"
+    (let [state (apply-events [territory-returned-first
+                               (assoc share-created :share/type :qr-code)
+                               territory-returned-last])]
+      (is (some? (share/find-valid-share-by-key state share-key))))))
 
 
 ;;;; Commands
@@ -202,7 +236,7 @@
                         :territory/id territory-id}]
 
     (testing "created"
-      (is (= [share-created]
+      (is (= [(dissoc share-created :event/time)] ; time is enriched by the dispatcher, not the command handler
              (handle-command create-command [] injections))))
 
     (testing "is idempotent"

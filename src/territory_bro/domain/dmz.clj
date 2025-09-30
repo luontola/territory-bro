@@ -340,7 +340,7 @@
      :key share-key}))
 
 (defn open-share! [share-key session]
-  (let [share (share/find-share-by-key *state* share-key)
+  (let [share (share/find-valid-share-by-key *state* share-key)
         demo-territory (share/demo-share-key->territory-id share-key)]
     (cond
       (some? share)
@@ -357,7 +357,7 @@
        nil])))
 
 (defn open-share-without-cookies [state cong-id territory-id share-key]
-  (let [share (share/find-share-by-key *state* share-key)]
+  (let [share (share/find-valid-share-by-key *state* share-key)]
     (if (and (some? share)
              (= cong-id (:congregation/id share))
              (= territory-id (:territory/id share)))

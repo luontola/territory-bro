@@ -6,6 +6,7 @@
            (java.nio ByteBuffer)
            (java.nio.charset StandardCharsets)
            (java.security SecureRandom)
+           (java.time Instant)
            (java.util Base64 UUID)
            (org.apache.commons.lang3 StringUtils)
            (territory_bro ValidationException WriteConflictException)))
@@ -22,15 +23,21 @@
   [state event]
   (-> state
       (assoc-in [::share-keys (:share/key event)] (:share/id event))
-      (assoc-in [::shares (:share/id event)] (select-keys event [:share/id
-                                                                 :share/type
-                                                                 :congregation/id
-                                                                 :territory/id]))))
+      (assoc-in [::shares (:share/id event)] (-> (select-keys event [:share/id
+                                                                     :share/type
+                                                                     :congregation/id
+                                                                     :territory/id])
+                                                 (assoc :share/created (:event/time event))))))
 
 (defmethod projection :share.event/share-opened
   [state event]
   (-> state
       (assoc-in [::shares (:share/id event) :share/last-opened] (:event/time event))))
+
+(defmethod projection :territory.event/territory-returned
+  [state event]
+  (-> state
+      (assoc-in [::territory-last-returned (:territory/id event)] (:event/time event))))
 
 (defn- grant-opened-share [state share-id user-id]
   (let [share (get-in state [::shares share-id])
@@ -58,10 +65,19 @@
   (when-not (share-exists? state share-id)
     (throw (ValidationException. [[:no-such-share share-id]]))))
 
-(defn find-share-by-key [state share-key]
+(defn- share-expired? [state share]
+  (let [^Instant share-created (:share/created share)
+        ^Instant last-returned (get-in state [::territory-last-returned (:territory/id share)])]
+    (and (= :link (:share/type share))
+         (some? share-created)
+         (some? last-returned)
+         (-> last-returned (.isAfter share-created)))))
+
+(defn find-valid-share-by-key [state share-key]
   (let [share-id (get-in state [::share-keys share-key])
         share (get-in state [::shares share-id])]
-    share))
+    (when-not (share-expired? state share)
+      share)))
 
 
 ;;;; Command handlers
