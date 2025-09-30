@@ -29,6 +29,9 @@
 
 (def ^:private handled-status-codes #{500 403 404})
 
+(defn- custom-error-page? [response]
+  (= "text/html" (response/get-header response "content-type")))
+
 (defn- htmx-request? [request]
   (= "true" (get-in request [:headers "hx-request"])))
 
@@ -36,6 +39,7 @@
   (fn [request]
     (let [response (handler request)]
       (if (and (contains? handled-status-codes (:status response))
+               (not (custom-error-page? response))
                (not (htmx-request? request)))
         (-> response
             (assoc :body (page! request response))

@@ -58,6 +58,14 @@
               :headers {"Content-Type" "text/html"}}
              (handle-response (http-response/forbidden)))))
 
+    (testing "ignores custom error pages (i.e. html responses)"
+      (is (= {:status 403
+              :body "Custom error with descriptive explanation."
+              :headers {"Content-Type" "text/html"}}
+             (handle-response {:status 403
+                               :body "<h1>Custom error</h1><p>with descriptive explanation.</p>"
+                               :headers {"Content-Type" "text/html"}}))))
+
     (testing "ignores htmx requests; the response body will be shown in the error message, so it should not be HTML"
       (is (= {:status 403
               :body "original"
