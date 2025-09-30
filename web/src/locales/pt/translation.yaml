@@ -60,6 +60,10 @@ TerritoryPage:
     closePopup: Fechar
     description: "Pessoas com este link poderão visualizar este mapa de território sem fazer login:"
     copy: Copiar para a área de transferência
+OpenSharePage:
+  notFound:
+    title: Link expirado ou incorreto ⛓️‍💥
+    description: Este link expirou e não pode mais ser usado. Se ainda precisar ver este território, peça aos irmãos um novo link.
 PrintoutPage:
   title: Impressões
   printOptions: Opções de impressão

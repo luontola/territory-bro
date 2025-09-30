@@ -60,6 +60,10 @@ TerritoryPage:
     closePopup: Close
     description: "People with this link will be able to view this territory map without logging in:"
     copy: Copy to clipboard
+OpenSharePage:
+  notFound:
+    title: Link expired or incorrect ⛓️‍💥
+    description: This link has expired and can no longer be used. If you still need to view this territory, ask the brothers for a new link.
 PrintoutPage:
   title: Printouts
   printOptions: Print options

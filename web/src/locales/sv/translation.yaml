@@ -60,6 +60,10 @@ TerritoryPage:
     closePopup: Stäng
     description: "Med länken kan du se på distrikskartan utan att behöva logga in:"
     copy: Kopiera till skrivbordet
+OpenSharePage:
+  notFound:
+    title: Länken har gått ut eller är felaktig ⛓️‍💥
+    description: Den här länken har gått ut och kan inte längre användas. Om du fortfarande behöver se detta distrikt, be bröderna om en ny länk.
 PrintoutPage:
   title: Utskrift
   printOptions: Utskriftsinställningar

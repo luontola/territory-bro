@@ -60,6 +60,10 @@ TerritoryPage:
     closePopup: Sluiten
     description: "Mensen met deze link kunnen de territoriumkaart bekijken zonder in te loggen:"
     copy: Kopiëren naar klembord
+OpenSharePage:
+  notFound:
+    title: Link verlopen of onjuist ⛓️‍💥
+    description: Deze link is verlopen en kan niet meer worden gebruikt. Als je dit gebied nog wilt bekijken, vraag de broeders om een nieuwe link.
 PrintoutPage:
   title: Afdrukken
   printOptions: Afdrukopties

@@ -60,6 +60,10 @@ TerritoryPage:
     closePopup: Chiudi
     description: "Le persone con questo link potranno visualizzare questa mappa del territorio senza effettuare l'accesso:"
     copy: Copia negli appunti
+OpenSharePage:
+  notFound:
+    title: Link scaduto o non valido ⛓️‍💥
+    description: Questo link è scaduto e non può più essere utilizzato. Se hai ancora bisogno di vedere questo territorio, chiedi ai fratelli un nuovo link.
 PrintoutPage:
   title: Stampe
   printOptions: Opzioni di stampa

@@ -60,6 +60,10 @@ TerritoryPage:
     closePopup: Tutup
     description: "Orang dengan tautan ini akan dapat melihat peta wilayah ini tanpa masuk:"
     copy: Salin ke clipboard
+OpenSharePage:
+  notFound:
+    title: Tautan kedaluwarsa atau tidak valid ⛓️‍💥
+    description: Tautan ini sudah kedaluwarsa dan tidak bisa lagi digunakan. Jika kamu masih perlu melihat wilayah ini, mintalah tautan baru kepada para saudara.
 PrintoutPage:
   title: Cetakan
   printOptions: Opsi cetak

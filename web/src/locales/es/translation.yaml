@@ -60,6 +60,10 @@ TerritoryPage:
     closePopup: Cerrar
     description: "Las personas con este enlace podrán ver este mapa de territorio sin necesidad de iniciar sesión:"
     copy: Copiar al portapapeles
+OpenSharePage:
+  notFound:
+    title: Enlace caducado o incorrecto ⛓️‍💥
+    description: Este enlace ha caducado y ya no se puede usar. Si todavía necesitas ver este territorio, pide a los hermanos un nuevo enlace.
 PrintoutPage:
   title: Impresiones
   printOptions: Opciones de impresión

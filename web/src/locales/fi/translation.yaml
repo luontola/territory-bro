@@ -60,6 +60,10 @@ TerritoryPage:
     closePopup: Sulje
     description: "Linkin kautta voi katsoa tätä aluekarttaa ilman sisäänkirjautumista:"
     copy: Kopioi leikepöydälle
+OpenSharePage:
+  notFound:
+    title: Linkki vanhentunut tai virheellinen ⛓️‍💥
+    description: Tämä linkki on vanhentunut eikä sitä voi enää käyttää. Jos sinun täytyy vielä nähdä tämä alue, pyydä veljiltä uusi linkki.
 PrintoutPage:
   title: Tulosteet
   printOptions: Tulostusasetukset

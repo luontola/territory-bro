@@ -1,5 +1,6 @@
 (ns territory-bro.ui.open-share-page-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.test :refer :all]
             [matcher-combinators.test :refer :all]
             [reitit.core :as reitit]
             [territory-bro.domain.dmz :as dmz]
@@ -9,8 +10,7 @@
             [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil]
             [territory-bro.ui.open-share-page :as open-share-page])
-  (:import (clojure.lang ExceptionInfo)
-           (java.util UUID)))
+  (:import (java.util UUID)))
 
 (deftest open-share!-test
   (let [cong-id (UUID. 0 1)
@@ -84,13 +84,10 @@
         (testing "share not found"
           (let [request {:path-params {:share-key "bad key"}}]
             (with-fixtures [fake-dispatcher-fixture]
-              (is (thrown-match? ExceptionInfo
-                                 {:type :ring.util.http-response/response
-                                  :response {:status 404
-                                             :body "Share not found"
-                                             :headers {}}}
-                                 (open-share-page/open-share! request)))
-              (is (nil? @*last-command)))))))))
+              (let [response (open-share-page/open-share! request)]
+                (is (= 403 (:status response)))
+                (is (str/includes? (:body response) "<h1>Link expired or incorrect"))
+                (is (nil? @*last-command))))))))))
 
 (deftest routes-test
   (let [router (reitit/router open-share-page/routes)]
