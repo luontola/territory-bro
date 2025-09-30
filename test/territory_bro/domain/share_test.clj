@@ -249,6 +249,21 @@
              WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
              (handle-command conflicting-command [share-created] injections)))))
 
+    (testing "cannot reuse the keys and IDs of an expired share"
+      (let [events [share-created territory-returned-last]
+            state (apply-events events)
+            command-with-reused-key (assoc create-command :share/id (random-uuid))
+            command-with-reused-id (assoc create-command :share/key "NewKey")]
+        (is (nil? (share/find-valid-share-by-key state share-key)))
+        (is (share/share-expired? state (share/get-share state share-id)))
+
+        (is (thrown-with-msg?
+             WriteConflictException (re-equals "share key abc123 already in use by share 00000000-0000-0000-0000-000000000010")
+             (handle-command command-with-reused-key events injections))
+            "reusing expired share's key")
+        (is (empty? (handle-command command-with-reused-id events injections))
+            "reusing expired share's ID")))
+
     (testing "checks permits"
       (let [injections {:check-permit (fn [permit]
                                         (is (= [:share-territory-link cong-id territory-id] permit))

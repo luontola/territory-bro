@@ -65,7 +65,7 @@
   (when-not (share-exists? state share-id)
     (throw (ValidationException. [[:no-such-share share-id]]))))
 
-(defn- share-expired? [state share]
+(defn share-expired? [state share]
   (let [^Instant share-created (:share/created share)
         ^Instant last-returned (get-in state [::territory-last-returned (:territory/id share)])]
     (and (= :link (:share/type share))
