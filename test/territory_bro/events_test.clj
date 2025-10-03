@@ -120,6 +120,18 @@
     (is (thrown? ExceptionInfo (events/validate-events [invalid-event])))
     (is (thrown? ExceptionInfo (events/strict-validate-events [invalid-event])))))
 
+(deftest legacy-event-backward-compatibility-test
+  ;; The database contains events that have been produced by previous
+  ;; versions of the application, but which can no longer be produced.
+  ;; It should still be possible to read and validate those events.
+  (testing "settings-updated since 2025-01-19: loans-csv-url is no longer used"
+    (is (events/validate-event
+         {:event/type :congregation.event/settings-updated
+          :event/time (Instant/now)
+          :event/user (random-uuid)
+          :congregation/id (random-uuid)
+          :congregation/loans-csv-url "https://docs.google.com/spreadsheets/d/e/xyz123/pub?gid=123456&single=true&output=csv"}))))
+
 
 ;;;; Generators for serialization tests
 
