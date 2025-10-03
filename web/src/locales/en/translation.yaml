@@ -86,6 +86,7 @@ CongregationSettings:
   timezone: Timezone
   timezoneNotDefined: Define congregation boundaries to set the timezone
   timezoneDefined: Autodetected based on the congregation boundaries
+  expireSharedLinksOnReturn: Expire shared links when a territory is returned
   save: Save settings
 TerritoriesSection:
   title: Territories

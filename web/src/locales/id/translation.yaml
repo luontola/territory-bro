@@ -86,6 +86,7 @@ CongregationSettings:
   timezone: Zona waktu
   timezoneNotDefined: Tetapkan batas-batas sidang untuk mengatur zona waktu
   timezoneDefined: Terdeteksi secara otomatis berdasarkan batas-batas sidang
+  expireSharedLinksOnReturn: Hapus tautan bersama saat wilayah dikembalikan
   save: Simpan pengaturan
 TerritoriesSection:
   title: Wilayah

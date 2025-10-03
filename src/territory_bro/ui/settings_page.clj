@@ -116,6 +116,18 @@
 
           (congregation-timezone-field model)
 
+          [:div.pure-controls {:style {:margin-top ".75em"
+                                       :margin-bottom ".5em"}}
+           [:label.pure-checkbox
+            [:input {:name "expire-shared-links-on-return"
+                     :type "checkbox"
+                     :value "true"
+                     :checked true ; TODO: read current value from form
+                     :style {:width "1.25rem"
+                             :height "1.25rem"}}]
+            " "
+            (i18n/t "CongregationSettings.expireSharedLinksOnReturn")]]
+
           [:div.pure-controls
            [:button.pure-button.pure-button-primary {:type "submit"}
             (i18n/t "CongregationSettings.save")]]]]]))))

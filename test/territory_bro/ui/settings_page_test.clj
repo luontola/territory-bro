@@ -693,11 +693,13 @@
   (is (= (html/normalize-whitespace
           "Settings
 
-          Congregation name [Congregation Name]
+            Congregation name [Congregation Name]
 
-          Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone
+            Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone
 
-          Save settings
+            [x] Expire shared links when a territory is returned
+
+            Save settings
           
           Territories
 
