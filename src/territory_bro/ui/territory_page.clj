@@ -248,7 +248,9 @@ if (returningCheckbox.checked) {
                                  :max (str today)}]
          (when invalid-end-date? ; HTML form validation should prevent this error, so no user-friendly error message is needed
            (h/html " ⚠️ "))]
-        [:div.pure-controls
+
+        [:div.pure-controls {:style {:margin-top "0"
+                                     :margin-bottom ".5em"}}
          [:label.pure-checkbox
           [:input#returning-checkbox {:name "returning"
                                       :type "checkbox"
@@ -258,6 +260,7 @@ if (returningCheckbox.checked) {
                                               :height "1.5rem"}}]
           " "
           (i18n/t "Assignment.form.returnTerritoryDescription")]
+
          [:label.pure-checkbox
           [:input#covered-checkbox {:name "covered"
                                     :type "checkbox"
@@ -266,8 +269,9 @@ if (returningCheckbox.checked) {
                                     :style {:width "1.5rem"
                                             :height "1.5rem"}}]
           " "
-          (i18n/t "Assignment.form.markCoveredDescription")]
+          (i18n/t "Assignment.form.markCoveredDescription")]]
 
+        [:div.pure-controls
          [:button#returning-button.pure-button.pure-button-primary {:type "submit"
                                                                     :autofocus true}
           (i18n/t "Assignment.form.returnTerritory")]
