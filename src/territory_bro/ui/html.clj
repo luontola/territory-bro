@@ -31,8 +31,17 @@
   ((en/substitute " " (:data-test-icon (:attrs node)) " " (:content node) " ")))
 
 (defn- visualize-input-element [node]
-  (when-not (= "hidden" (:type (:attrs node)))
-    ((en/substitute " [" (:value (:attrs node)) "] "))))
+  (let [type (:type (:attrs node))]
+    (cond
+      (= "hidden" type)
+      nil
+
+      (or (= "checkbox" type)
+          (= "radio" type))
+      ((en/substitute " [" (if (:checked (:attrs node)) "x" " ") "] "))
+
+      :else
+      ((en/substitute " [" (:value (:attrs node)) "] ")))))
 
 (defn- visualize-select-element [node]
   (let [options (:content node)

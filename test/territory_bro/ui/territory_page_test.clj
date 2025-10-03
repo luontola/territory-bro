@@ -411,8 +411,8 @@
   (is (= (html/normalize-whitespace
           "Return territory
              Date [2000-03-01]
-             [true] Return the territory to storage
-             [true] Mark the territory as covered
+             [x] Return the territory to storage
+             [x] Mark the territory as covered
            Return territory
            Mark as covered
            Cancel")

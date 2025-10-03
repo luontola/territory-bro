@@ -25,6 +25,18 @@
     (is (= "" (html/visible-text "<input type=\"hidden\" name=\"foo\" value=\"bar\">"))
         "hidden fields are hidden"))
 
+  (testing "checkboxes and radio buttons show whether they are checked"
+    (is (= "[x]"
+           (html/visible-text "<input type=\"checkbox\" value=\"true\" checked>")
+           (html/visible-text "<input type=\"radio\" value=\"true\" checked>"))
+        "checked")
+    (is (= "[ ]"
+           (html/visible-text "<input type=\"checkbox\" value=\"true\">")
+           (html/visible-text "<input type=\"radio\" value=\"true\">"))
+        "unchecked")
+    (is (= "x [ ] y" (html/visible-text "x<input type=\"checkbox\">y"))
+        "spacing before and after element"))
+
   (testing "select elements are replaced with the selected option's visible text"
     (testing "- single select"
       (is (= "[Option 1]" (html/visible-text "<select><option>Option 1</option><option>Option 2</option></select>"))
