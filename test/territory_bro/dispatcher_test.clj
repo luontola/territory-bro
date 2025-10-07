@@ -106,7 +106,7 @@
                                                    (throw (WriteConflictException. (str "stream " id)))))]
 
       (testing "dispatches commands"
-        (let [command {:command/type :congregation.command/update-congregation
+        (let [command {:command/type :congregation.command/create-congregation
                        :command/time (Instant/now)
                        :command/user user-id
                        :congregation/id cong-id
@@ -120,7 +120,7 @@
           (is (= [conn command state] @*spy))))
 
       (testing "validates commands"
-        (let [command {:command/type :congregation.command/update-congregation}]
+        (let [command {:command/type :congregation.command/create-congregation}]
           (is (thrown-with-msg?
                ExceptionInfo (re-contains "Value does not match schema")
                (dispatcher/command! conn state command)))))
