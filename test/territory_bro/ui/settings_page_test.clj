@@ -61,6 +61,7 @@
    :permissions {:configure-congregation true
                  :gis-access true}
    :form {:congregation-name "Congregation Name"
+          :expire-shared-links-on-return true
           :publisher-name ""
           :user-id nil}})
 (def publisher-model

@@ -60,6 +60,8 @@
                    :gis-access (dmz/allowed? [:gis-access cong-id])}
      :form {:congregation-name (or (get-in request [:params :congregation-name])
                                    (:congregation/name congregation))
+            ;; TODO: remember that a checkbox was unchecked if form validation fails
+            :expire-shared-links-on-return (:congregation/expire-shared-links-on-return congregation)
             :publisher-name (or (get-in request [:params :publisher-name])
                                 (:publisher/name publisher)
                                 "")
@@ -122,7 +124,7 @@
             [:input {:name "expire-shared-links-on-return"
                      :type "checkbox"
                      :value "true"
-                     :checked true ; TODO: read current value from form
+                     :checked (:expire-shared-links-on-return form)
                      :style {:width "1.25rem"
                              :height "1.25rem"}}]
             " "
