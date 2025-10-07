@@ -1,6 +1,7 @@
 (ns territory-bro.domain.share-test
   (:require [clojure.test :refer :all]
             [territory-bro.dispatcher :as dispatcher]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.domain.dmz-test :as dmz-test]
             [territory-bro.domain.share :as share]
             [territory-bro.events :as events]
@@ -54,8 +55,23 @@
 (def territory-returned-last
   (assoc territory-returned-first :event/time time-t2))
 
-(defn- apply-events [events]
-  (testutil/apply-events share/projection events))
+(def expiry-enabled
+  {:event/type :congregation.event/settings-updated
+   :congregation/id cong-id
+   :congregation/expire-shared-links-on-return true})
+(def expiry-disabled
+  (assoc expiry-enabled :congregation/expire-shared-links-on-return false))
+
+(defn- apply-events
+  ([events]
+   (apply-events nil events))
+  ([state events]
+   (testutil/apply-events (fn [state event]
+                            (-> state
+                                (congregation/projection event)
+                                (share/projection event)))
+                          state
+                          events)))
 
 (defn- handle-command [command events injections]
   (->> (share/handle-command (testutil/validate-command command)
@@ -151,19 +167,29 @@
     (testing "invalid share key"
       (is (nil? (share/find-valid-share-by-key state "foo")))))
 
-  (testing "share created, territory returned -> share is expired"
-    (let [state (apply-events [share-created territory-returned-last])]
-      (is (nil? (share/find-valid-share-by-key state share-key)))))
+  (testing "expiry enabled;"
+    (let [state (apply-events [expiry-enabled])]
 
-  (testing "territory returned, share created -> share is still valid"
-    (let [state (apply-events [territory-returned-first share-created])]
-      (is (some? (share/find-valid-share-by-key state share-key)))))
+      (testing "share created, territory returned -> share is expired"
+        (let [state (apply-events state [share-created territory-returned-last])]
+          (is (nil? (share/find-valid-share-by-key state share-key)))))
 
-  (testing "QR code shares don't expire when the territory is returned"
-    (let [state (apply-events [territory-returned-first
-                               (assoc share-created :share/type :qr-code)
-                               territory-returned-last])]
-      (is (some? (share/find-valid-share-by-key state share-key))))))
+      (testing "territory returned, share created -> share is still valid"
+        (let [state (apply-events state [territory-returned-first share-created])]
+          (is (some? (share/find-valid-share-by-key state share-key)))))
+
+      (testing "QR code shares don't expire when the territory is returned"
+        (let [state (apply-events state [territory-returned-first
+                                         (assoc share-created :share/type :qr-code)
+                                         territory-returned-last])]
+          (is (some? (share/find-valid-share-by-key state share-key)))))))
+
+  (testing "expiry disabled;"
+    (let [state (apply-events [expiry-disabled])]
+
+      (testing "share created, territory returned -> share is still valid"
+        (let [state (apply-events state [share-created territory-returned-last])]
+          (is (some? (share/find-valid-share-by-key state share-key))))))))
 
 
 ;;;; Commands
@@ -250,7 +276,7 @@
              (handle-command conflicting-command [share-created] injections)))))
 
     (testing "cannot reuse the keys and IDs of an expired share"
-      (let [events [share-created territory-returned-last]
+      (let [events [share-created territory-returned-last expiry-enabled]
             state (apply-events events)
             command-with-reused-key (assoc create-command :share/id (random-uuid))
             command-with-reused-id (assoc create-command :share/key "NewKey")]

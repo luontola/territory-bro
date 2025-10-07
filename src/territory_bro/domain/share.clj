@@ -1,5 +1,6 @@
 (ns territory-bro.domain.share
   (:require [clojure.string :as str]
+            [territory-bro.domain.congregation :as congregation]
             [territory-bro.infra.config :as config]
             [territory-bro.infra.permissions :as permissions])
   (:import (java.net URLEncoder)
@@ -67,8 +68,10 @@
 
 (defn share-expired? [state share]
   (let [^Instant share-created (:share/created share)
-        ^Instant last-returned (get-in state [::territory-last-returned (:territory/id share)])]
-    (and (= :link (:share/type share))
+        ^Instant last-returned (get-in state [::territory-last-returned (:territory/id share)])
+        congregation (congregation/get-unrestricted-congregation state (:congregation/id share))]
+    (and (true? (:congregation/expire-shared-links-on-return congregation))
+         (= :link (:share/type share))
          (some? share-created)
          (some? last-returned)
          (-> last-returned (.isAfter share-created)))))
