@@ -64,7 +64,8 @@
   (assoc BaseCommand
          :command/type (s/eq :congregation.command/update-congregation)
          :congregation/id (foreign-key/references :congregation UUID)
-         :congregation/name s/Str))
+         :congregation/name s/Str
+         :congregation/expire-shared-links-on-return s/Bool))
 
 ;;; DB Admin
 

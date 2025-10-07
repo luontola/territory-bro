@@ -189,7 +189,8 @@
 
 (deftest save-congregation-settings!-test
   (let [request {:path-params {:congregation cong-id}
-                 :params {:congregation-name "new name"}}]
+                 :params {:congregation-name "new name"
+                          :expire-shared-links-on-return "true"}}]
     (testutil/with-events test-events
       (testutil/with-user-id user-id
 
@@ -203,7 +204,8 @@
               (is (= {:command/type :congregation.command/update-congregation
                       :command/user user-id
                       :congregation/id cong-id
-                      :congregation/name "new name"}
+                      :congregation/name "new name"
+                      :congregation/expire-shared-links-on-return true}
                      (dissoc @*last-command :command/time))))))
 
         (testing "save failed: highlights erroneous form fields, doesn't forget invalid user input"

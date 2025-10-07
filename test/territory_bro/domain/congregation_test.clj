@@ -239,7 +239,8 @@
                         :command/time (Instant/now)
                         :command/user user-id
                         :congregation/id cong-id
-                        :congregation/name "new name"}
+                        :congregation/name "new name"
+                        :congregation/expire-shared-links-on-return true}
         renamed-event {:event/type :congregation.event/congregation-renamed
                        :congregation/id cong-id
                        :congregation/name "new name"}]
@@ -268,6 +269,40 @@
                                         (throw (NoPermitException. nil nil)))}]
         (is (thrown? NoPermitException
                      (handle-command rename-command [created-event] injections)))))))
+
+(deftest update-settings-test
+  (let [cong-id (UUID. 0 1)
+        user-id (UUID. 0 2)
+        injections {:check-permit (fn [_permit])}
+        created-event {:event/type :congregation.event/congregation-created
+                       :congregation/id cong-id
+                       :congregation/name "name"
+                       :congregation/schema-name ""}
+        base-command {:command/type :congregation.command/update-congregation
+                      :command/time (Instant/now)
+                      :command/user user-id
+                      :congregation/id cong-id
+                      :congregation/name "name"}
+        base-event {:event/type :congregation.event/settings-updated
+                    :congregation/id cong-id}]
+
+    (testing "expire-shared-links-on-return"
+      (let [enable-command (assoc base-command :congregation/expire-shared-links-on-return true)
+            disable-command (assoc enable-command :congregation/expire-shared-links-on-return false)
+            enabled-event (assoc base-event :congregation/expire-shared-links-on-return true)
+            disabled-event (assoc enabled-event :congregation/expire-shared-links-on-return false)]
+
+        (testing "enabled"
+          (is (= [enabled-event]
+                 (handle-command enable-command [created-event disabled-event] injections))))
+
+        (testing "disabled"
+          (is (= [disabled-event]
+                 (handle-command disable-command [created-event enabled-event] injections))))
+
+        (testing "not changed"
+          (is (empty? (handle-command enable-command [created-event enabled-event] injections)))
+          (is (empty? (handle-command disable-command [created-event disabled-event] injections))))))))
 
 (deftest add-user-to-congregation-test
   (let [cong-id (UUID. 0 1)

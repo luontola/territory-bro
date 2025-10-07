@@ -137,11 +137,12 @@
 (declare view)
 (defn save-congregation-settings! [request]
   (let [cong-id (get-in request [:path-params :congregation])
-        name (get-in request [:params :congregation-name])]
+        form (:params request)]
     (try
       (dmz/dispatch! {:command/type :congregation.command/update-congregation
                       :congregation/id cong-id
-                      :congregation/name name})
+                      :congregation/name (:congregation-name form)
+                      :congregation/expire-shared-links-on-return (Boolean/parseBoolean (:expire-shared-links-on-return form))})
       (http-response/see-other html/*page-path*)
       (catch Exception e
         (forms/validation-error-page-response e request model! view)))))

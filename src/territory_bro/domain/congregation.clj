@@ -187,14 +187,22 @@
   [command congregation {:keys [check-permit]}]
   (let [cong-id (:congregation/id congregation)
         old-name (:congregation/name congregation)
-        new-name (:congregation/name command)]
+        new-name (:congregation/name command)
+        old-expire-shared-links-on-return (:congregation/expire-shared-links-on-return congregation)
+        new-expire-shared-links-on-return (:congregation/expire-shared-links-on-return command)]
     (check-permit [:configure-congregation cong-id])
     (when (str/blank? new-name)
       (throw (ValidationException. [[:missing-name]])))
-    (when-not (= old-name new-name)
-      [{:event/type :congregation.event/congregation-renamed
-        :congregation/id cong-id
-        :congregation/name new-name}])))
+    (concat
+     (when-not (= old-name new-name)
+       [{:event/type :congregation.event/congregation-renamed
+         :congregation/id cong-id
+         :congregation/name new-name}])
+     (when-not (= old-expire-shared-links-on-return
+                  new-expire-shared-links-on-return)
+       [{:event/type :congregation.event/settings-updated
+         :congregation/id cong-id
+         :congregation/expire-shared-links-on-return new-expire-shared-links-on-return}]))))
 
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))
