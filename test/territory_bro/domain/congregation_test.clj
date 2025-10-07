@@ -3,7 +3,7 @@
             [territory-bro.domain.congregation :as congregation]
             [territory-bro.events :as events]
             [territory-bro.infra.permissions :as permissions]
-            [territory-bro.test.testutil :as testutil :refer [re-equals thrown-with-msg? thrown?]])
+            [territory-bro.test.testutil :as testutil :refer [re-equals replace-in thrown-with-msg? thrown?]])
   (:import (java.time Instant ZoneOffset)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException)))
@@ -28,7 +28,8 @@
                     {cong-id {:congregation/id cong-id
                               :congregation/name "Cong1 Name"
                               :congregation/schema-name "cong1_schema"
-                              :congregation/timezone ZoneOffset/UTC}}}]
+                              :congregation/timezone ZoneOffset/UTC
+                              :congregation/expire-shared-links-on-return true}}}]
       (is (= expected (apply-events events)))
 
       (testing "> view permission granted"
@@ -87,6 +88,20 @@
                                    :congregation/name "New Name"})
               expected (assoc-in expected [::congregation/congregations cong-id
                                            :congregation/name] "New Name")]
+          (is (= expected (apply-events events)))))
+
+      (testing "> settings updated"
+        (let [events (conj events {:event/type :congregation.event/settings-updated
+                                   :congregation/id cong-id
+                                   :congregation/expire-shared-links-on-return false})
+              expected (replace-in expected [::congregation/congregations cong-id
+                                             :congregation/expire-shared-links-on-return] true false)]
+          (is (= expected (apply-events events)))))
+
+      (testing "> legacy settings updated event is ignored"
+        (let [events (conj events {:event/type :congregation.event/settings-updated
+                                   :congregation/id cong-id
+                                   :congregation/loans-csv-url "https://docs.google.com/spreadsheets/123"})]
           (is (= expected (apply-events events))))))))
 
 (deftest congregation-access-test

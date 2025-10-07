@@ -317,14 +317,16 @@
 ;;;; Congregations
 
 (deftest get-congregation-test
-  (let [expected {:congregation/id cong-id
-                  :congregation/name "Cong1 Name"
-                  :congregation/timezone testdata/timezone-helsinki
-                  :congregation/schema-name "cong1_schema"}
-        demo-expected {:congregation/id "demo" ; changed
-                       :congregation/name "Demo Congregation" ; changed
-                       :congregation/timezone testdata/timezone-helsinki
-                       :congregation/schema-name nil}] ; removed
+  (let [expected (merge congregation/default-settings
+                        {:congregation/id cong-id
+                         :congregation/name "Cong1 Name"
+                         :congregation/timezone testdata/timezone-helsinki
+                         :congregation/schema-name "cong1_schema"})
+        demo-expected (merge congregation/default-settings
+                             {:congregation/id "demo" ; changed
+                              :congregation/name "Demo Congregation" ; changed
+                              :congregation/timezone testdata/timezone-helsinki
+                              :congregation/schema-name nil})] ; removed
 
     (testutil/with-user-id user-id
       (testing "full permissions"
@@ -352,10 +354,11 @@
           (is (= expected (dmz/get-congregation cong-id))))))))
 
 (deftest list-congregations-test
-  (let [expected [{:congregation/id cong-id
-                   :congregation/name "Cong1 Name"
-                   :congregation/timezone testdata/timezone-helsinki
-                   :congregation/schema-name "cong1_schema"}]]
+  (let [expected [(merge congregation/default-settings
+                         {:congregation/id cong-id
+                          :congregation/name "Cong1 Name"
+                          :congregation/timezone testdata/timezone-helsinki
+                          :congregation/schema-name "cong1_schema"})]]
 
     (testutil/with-user-id user-id
       (testing "full permissions"

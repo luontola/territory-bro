@@ -18,6 +18,10 @@
 (defn local-time ^ZonedDateTime [congregation]
   (ZonedDateTime/now (.withZone config/*clock* (:congregation/timezone congregation))))
 
+(def default-settings
+  {:congregation/timezone ZoneOffset/UTC ; the correct timezone will be set by territory-bro.domain.congregation-boundary
+   :congregation/expire-shared-links-on-return true})
+
 
 ;;;; Read model
 
@@ -34,12 +38,10 @@
   [state event]
   (-> state
       (update-cong event (fn [congregation]
-                           (-> congregation
+                           (-> (or congregation default-settings)
                                (assoc :congregation/id (:congregation/id event))
                                (assoc :congregation/name (:congregation/name event))
-                               (assoc :congregation/schema-name (:congregation/schema-name event))
-                               ;; set default timezone - the correct timezone will be set by territory-bro.domain.congregation-boundary
-                               (update :congregation/timezone #(or % ZoneOffset/UTC)))))))
+                               (assoc :congregation/schema-name (:congregation/schema-name event)))))))
 
 (defmethod projection :congregation.event/congregation-renamed
   [state event]
@@ -47,6 +49,13 @@
       (update-cong event (fn [congregation]
                            (-> congregation
                                (assoc :congregation/name (:congregation/name event)))))))
+
+(defmethod projection :congregation.event/settings-updated
+  [state event]
+  (-> state
+      (update-cong event (fn [congregation]
+                           (merge congregation
+                                  (select-keys event [:congregation/expire-shared-links-on-return]))))))
 
 (defmethod projection :congregation.event/permission-granted
   [state event]
