@@ -87,6 +87,7 @@ CongregationSettings:
   timezoneNotDefined: Määritä seurakunnan rajat asettaaksesi aikavyöhykkeen
   timezoneDefined: Automaattisesti tunnistettu seurakunnan rajojen perusteella
   expireSharedLinksOnReturn: Vanhenna jaetut linkit, kun alue palautetaan
+  expireSharedLinksAfterTimelimit: Vanhenna jaetut linkit {{days}} päivän kuluttua
   save: Tallenna asetukset
 TerritoriesSection:
   title: Alueet

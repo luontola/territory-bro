@@ -62,6 +62,8 @@
                  :gis-access true}
    :form {:congregation-name "Congregation Name"
           :expire-shared-links-on-return true
+          :expire-shared-links-after-timelimit true
+          :expire-shared-links-timelimit-days 365
           :publisher-name ""
           :user-id nil}})
 (def publisher-model
@@ -190,7 +192,9 @@
 (deftest save-congregation-settings!-test
   (let [request {:path-params {:congregation cong-id}
                  :params {:congregation-name "new name"
-                          :expire-shared-links-on-return "true"}}]
+                          :expire-shared-links-on-return "true"
+                          :expire-shared-links-after-timelimit "true"
+                          :expire-shared-links-timelimit-days "90"}}]
     (testutil/with-events test-events
       (testutil/with-user-id user-id
 
@@ -205,19 +209,25 @@
                       :command/user user-id
                       :congregation/id cong-id
                       :congregation/name "new name"
-                      :congregation/expire-shared-links-on-return true}
+                      :congregation/expire-shared-links-on-return true
+                      :congregation/expire-shared-links-after-timelimit true
+                      :congregation/expire-shared-links-timelimit-days 90}
                      (dissoc @*last-command :command/time))))))
 
         (testing "save failed: highlights erroneous form fields, doesn't forget invalid user input"
           (binding [dispatcher/command! (fn [& _]
-                                          (throw (ValidationException. [[:missing-name]])))]
+                                          (throw (ValidationException. [[:missing-name]
+                                                                        [:invalid-timelimit]])))]
             (let [response (settings-page/save-congregation-settings! request)]
               (is (= forms/validation-error-http-status (:status response)))
               (is (str/includes?
                    (html/visible-text (:body response))
                    (html/normalize-whitespace
                     "Congregation name [new name] ⚠️
-                     Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone"))))))))))
+                     Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone
+                     [x] Expire shared links when a territory is returned
+                     [x] Expire shared links after [90] days ⚠️
+                     Save settings"))))))))))
 
 
 ;;;; Territories
@@ -701,6 +711,7 @@
             Timezone UTC (2000-01-30 12:00) Define congregation boundaries to set the timezone
 
             [x] Expire shared links when a territory is returned
+            [x] Expire shared links after [365] days
 
             Save settings
           

@@ -99,6 +99,8 @@
          :event/type (s/eq :congregation.event/settings-updated)
          :congregation/id CongId
          (s/optional-key :congregation/expire-shared-links-on-return) s/Bool
+         (s/optional-key :congregation/expire-shared-links-after-timelimit) s/Bool
+         (s/optional-key :congregation/expire-shared-links-timelimit-days) s/Int
          ;; deprecated keys, no longer in use
          (s/optional-key :congregation/loans-csv-url) (s/maybe s/Str)))
 

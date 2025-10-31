@@ -62,6 +62,9 @@
                                    (:congregation/name congregation))
             ;; TODO: remember that a checkbox was unchecked if form validation fails
             :expire-shared-links-on-return (:congregation/expire-shared-links-on-return congregation)
+            :expire-shared-links-after-timelimit (:congregation/expire-shared-links-after-timelimit congregation)
+            :expire-shared-links-timelimit-days (or (get-in request [:params :expire-shared-links-timelimit-days])
+                                                    (:congregation/expire-shared-links-timelimit-days congregation))
             :publisher-name (or (get-in request [:params :publisher-name])
                                 (:publisher/name publisher)
                                 "")
@@ -128,7 +131,29 @@
                      :style {:width "1.25rem"
                              :height "1.25rem"}}]
             " "
-            (i18n/t "CongregationSettings.expireSharedLinksOnReturn")]]
+            (i18n/t "CongregationSettings.expireSharedLinksOnReturn")]
+
+           (let [error? (contains? errors :invalid-timelimit)]
+             [:label.pure-checkbox
+              [:input {:name "expire-shared-links-after-timelimit"
+                       :type "checkbox"
+                       :value "true"
+                       :checked (:expire-shared-links-after-timelimit form)
+                       :style {:width "1.25rem"
+                               :height "1.25rem"}}]
+              " "
+              (-> (i18n/t "CongregationSettings.expireSharedLinksAfterTimelimit")
+                  (str/replace "{{days}}"
+                               (str (h/html
+                                     [:input {:name "expire-shared-links-timelimit-days"
+                                              :type "number"
+                                              :required true
+                                              :min "1"
+                                              :value (:expire-shared-links-timelimit-days form)
+                                              :style {:width "5em"}}])))
+                  (h/raw))
+              (when error?
+                " ⚠️ ")])]
 
           [:div.pure-controls
            [:button.pure-button.pure-button-primary {:type "submit"}
@@ -142,7 +167,9 @@
       (dmz/dispatch! {:command/type :congregation.command/update-congregation
                       :congregation/id cong-id
                       :congregation/name (:congregation-name form)
-                      :congregation/expire-shared-links-on-return (Boolean/parseBoolean (:expire-shared-links-on-return form))})
+                      :congregation/expire-shared-links-on-return (Boolean/parseBoolean (:expire-shared-links-on-return form))
+                      :congregation/expire-shared-links-after-timelimit (Boolean/parseBoolean (:expire-shared-links-after-timelimit form))
+                      :congregation/expire-shared-links-timelimit-days (parse-long (:expire-shared-links-timelimit-days form))})
       (http-response/see-other html/*page-path*)
       (catch Exception e
         (forms/validation-error-page-response e request model! view)))))

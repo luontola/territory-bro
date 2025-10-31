@@ -29,7 +29,9 @@
                               :congregation/name "Cong1 Name"
                               :congregation/schema-name "cong1_schema"
                               :congregation/timezone ZoneOffset/UTC
-                              :congregation/expire-shared-links-on-return true}}}]
+                              :congregation/expire-shared-links-on-return true
+                              :congregation/expire-shared-links-after-timelimit true
+                              :congregation/expire-shared-links-timelimit-days 365}}}]
       (is (= expected (apply-events events)))
 
       (testing "> view permission granted"
@@ -93,9 +95,16 @@
       (testing "> settings updated"
         (let [events (conj events {:event/type :congregation.event/settings-updated
                                    :congregation/id cong-id
-                                   :congregation/expire-shared-links-on-return false})
-              expected (replace-in expected [::congregation/congregations cong-id
-                                             :congregation/expire-shared-links-on-return] true false)]
+                                   :congregation/expire-shared-links-on-return false
+                                   :congregation/expire-shared-links-after-timelimit false
+                                   :congregation/expire-shared-links-timelimit-days 180})
+              expected (-> expected
+                           (replace-in [::congregation/congregations cong-id
+                                        :congregation/expire-shared-links-on-return] true false)
+                           (replace-in [::congregation/congregations cong-id
+                                        :congregation/expire-shared-links-after-timelimit] true false)
+                           (replace-in [::congregation/congregations cong-id
+                                        :congregation/expire-shared-links-timelimit-days] 365 180))]
           (is (= expected (apply-events events)))))
 
       (testing "> legacy settings updated event is ignored"
@@ -235,12 +244,13 @@
                        :congregation/id cong-id
                        :congregation/name "old name"
                        :congregation/schema-name ""}
-        rename-command {:command/type :congregation.command/update-congregation
-                        :command/time (Instant/now)
-                        :command/user user-id
-                        :congregation/id cong-id
-                        :congregation/name "new name"
-                        :congregation/expire-shared-links-on-return true}
+        default-settings (select-keys congregation/default-settings congregation/user-changeable-settings)
+        rename-command (merge default-settings
+                              {:command/type :congregation.command/update-congregation
+                               :command/time (Instant/now)
+                               :command/user user-id
+                               :congregation/id cong-id
+                               :congregation/name "new name"})
         renamed-event {:event/type :congregation.event/congregation-renamed
                        :congregation/id cong-id
                        :congregation/name "new name"}]
@@ -278,31 +288,85 @@
                        :congregation/id cong-id
                        :congregation/name "name"
                        :congregation/schema-name ""}
-        base-command {:command/type :congregation.command/update-congregation
-                      :command/time (Instant/now)
-                      :command/user user-id
-                      :congregation/id cong-id
-                      :congregation/name "name"}
-        base-event {:event/type :congregation.event/settings-updated
-                    :congregation/id cong-id}]
+        default-settings (select-keys congregation/default-settings congregation/user-changeable-settings)
+        base-command (merge default-settings
+                            {:command/type :congregation.command/update-congregation
+                             :command/time (Instant/now)
+                             :command/user user-id
+                             :congregation/id cong-id
+                             :congregation/name "name"})
+        base-event (merge default-settings
+                          {:event/type :congregation.event/settings-updated
+                           :congregation/id cong-id})]
 
     (testing "expire-shared-links-on-return"
       (let [enable-command (assoc base-command :congregation/expire-shared-links-on-return true)
-            disable-command (assoc enable-command :congregation/expire-shared-links-on-return false)
+            disable-command (assoc base-command :congregation/expire-shared-links-on-return false)
             enabled-event (assoc base-event :congregation/expire-shared-links-on-return true)
-            disabled-event (assoc enabled-event :congregation/expire-shared-links-on-return false)]
+            disabled-event (assoc base-event :congregation/expire-shared-links-on-return false)]
 
-        (testing "enabled"
+        (testing "change to enabled"
           (is (= [enabled-event]
                  (handle-command enable-command [created-event disabled-event] injections))))
 
-        (testing "disabled"
+        (testing "change to disabled"
           (is (= [disabled-event]
                  (handle-command disable-command [created-event enabled-event] injections))))
 
-        (testing "not changed"
+        (testing "no change"
           (is (empty? (handle-command enable-command [created-event enabled-event] injections)))
-          (is (empty? (handle-command disable-command [created-event disabled-event] injections))))))))
+          (is (empty? (handle-command disable-command [created-event disabled-event] injections))))))
+
+    (testing "expire-shared-links-after-timelimit"
+      (let [enable-command (assoc base-command :congregation/expire-shared-links-after-timelimit true)
+            disable-command (assoc base-command :congregation/expire-shared-links-after-timelimit false)
+            enabled-event (assoc base-event :congregation/expire-shared-links-after-timelimit true)
+            disabled-event (assoc base-event :congregation/expire-shared-links-after-timelimit false)]
+
+        (testing "change to enabled"
+          (is (= [enabled-event]
+                 (handle-command enable-command [created-event disabled-event] injections))))
+
+        (testing "change to disabled"
+          (is (= [disabled-event]
+                 (handle-command disable-command [created-event enabled-event] injections))))
+
+        (testing "no change"
+          (is (empty? (handle-command enable-command [created-event enabled-event] injections)))
+          (is (empty? (handle-command disable-command [created-event disabled-event] injections))))))
+
+    (testing "expire-shared-links-timelimit-days"
+      (let [value1-command (assoc base-command :congregation/expire-shared-links-timelimit-days 100)
+            value2-command (assoc base-command :congregation/expire-shared-links-timelimit-days 200)
+            value1-event (assoc base-event :congregation/expire-shared-links-timelimit-days 100)
+            value2-event (assoc base-event :congregation/expire-shared-links-timelimit-days 200)]
+
+        (testing "change to value 1"
+          (is (= [value1-event]
+                 (handle-command value1-command [created-event value2-event] injections))))
+
+        (testing "change to value 2"
+          (is (= [value2-event]
+                 (handle-command value2-command [created-event value1-event] injections))))
+
+        (testing "no change"
+          (is (empty? (handle-command value1-command [created-event value1-event] injections)))
+          (is (empty? (handle-command value2-command [created-event value2-event] injections))))
+
+        (testing "must be 1 or more"
+          (let [command (assoc base-command :congregation/expire-shared-links-timelimit-days 1)]
+            (is (not (empty? (handle-command command [created-event] injections)))
+                "1 days"))
+          (let [command (assoc base-command :congregation/expire-shared-links-timelimit-days 0)]
+            (is (thrown-with-msg?
+                 ValidationException (re-equals "[[:invalid-timelimit]]")
+                 (handle-command command [created-event] injections))
+                "0 days"))
+          (let [command (assoc base-command :congregation/expire-shared-links-timelimit-days -1)]
+            (is (thrown-with-msg?
+                 ValidationException (re-equals "[[:invalid-timelimit]]")
+                 (handle-command command [created-event] injections))
+                "-1 days")))))))
 
 (deftest add-user-to-congregation-test
   (let [cong-id (UUID. 0 1)

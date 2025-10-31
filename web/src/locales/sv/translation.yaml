@@ -86,7 +86,8 @@ CongregationSettings:
   timezone: Tidszon
   timezoneNotDefined: Ställ in församlingens gränser för att ställa in tidszon
   timezoneDefined: Automatiskt inställd efter församlingens gränser
-  expireSharedLinksOnReturn: Låt delade länkar upphöra när ett distrikt lämnas tillbaka
+  expireSharedLinksOnReturn: Låt delade länkar upphöra när distriktet återlämnas
+  expireSharedLinksAfterTimelimit: Låt delade länkar upphöra efter {{days}} dagar
   save: Spara inställningar
 TerritoriesSection:
   title: Distrikt

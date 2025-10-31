@@ -86,7 +86,8 @@ CongregationSettings:
   timezone: Fuso orario
   timezoneNotDefined: Definisci i confini della congregazione per impostare il fuso orario
   timezoneDefined: Rilevato automaticamente in base ai confini della congregazione
-  expireSharedLinksOnReturn: Scadono i link condivisi quando un territorio viene restituito
+  expireSharedLinksOnReturn: Scadono i link condivisi quando il territorio viene restituito
+  expireSharedLinksAfterTimelimit: Scadono i link condivisi dopo {{days}} giorni
   save: Salva le impostazioni
 TerritoriesSection:
   title: Territori

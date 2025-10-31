@@ -86,7 +86,8 @@ CongregationSettings:
   timezone: Tijdzone
   timezoneNotDefined: Stel de grenzen van de gemeente in om de tijdzone vast te stellen
   timezoneDefined: Automatisch gedetecteerd op basis van de gemeentegrenzen
-  expireSharedLinksOnReturn: Laat gedeelde links vervallen wanneer een gebied wordt teruggebracht
+  expireSharedLinksOnReturn: Gedeelde links laten vervallen wanneer het gebied wordt teruggegeven
+  expireSharedLinksAfterTimelimit: Gedeelde links laten vervallen na {{days}} dagen
   save: Instellingen opslaan
 TerritoriesSection:
   title: Gebieden

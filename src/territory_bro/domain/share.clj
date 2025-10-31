@@ -7,7 +7,7 @@
            (java.nio ByteBuffer)
            (java.nio.charset StandardCharsets)
            (java.security SecureRandom)
-           (java.time Instant)
+           (java.time Duration Instant)
            (java.util Base64 UUID)
            (org.apache.commons.lang3 StringUtils)
            (territory_bro ValidationException WriteConflictException)))
@@ -69,12 +69,17 @@
 (defn share-expired? [state share]
   (let [^Instant share-created (:share/created share)
         ^Instant last-returned (get-in state [::territory-last-returned (:territory/id share)])
-        congregation (congregation/get-unrestricted-congregation state (:congregation/id share))]
-    (and (true? (:congregation/expire-shared-links-on-return congregation))
-         (= :link (:share/type share))
-         (some? share-created)
-         (some? last-returned)
-         (-> last-returned (.isAfter share-created)))))
+        now (config/now)
+        congregation (congregation/get-unrestricted-congregation state (:congregation/id share))
+        timelimit-days (:congregation/expire-shared-links-timelimit-days congregation)]
+    (or (and (true? (:congregation/expire-shared-links-on-return congregation))
+             (= :link (:share/type share))
+             (some? last-returned)
+             (-> last-returned (.isAfter share-created)))
+        (and (true? (:congregation/expire-shared-links-after-timelimit congregation))
+             (= :link (:share/type share))
+             (some? timelimit-days)
+             (-> now (.isAfter (.plus share-created (Duration/ofDays timelimit-days))))))))
 
 (defn find-valid-share-by-key [state share-key]
   (let [share-id (get-in state [::share-keys share-key])

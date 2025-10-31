@@ -10,8 +10,9 @@
             [territory-bro.infra.permissions :as permissions]
             [territory-bro.infra.user :as user]
             [territory-bro.projections :as projections]
+            [territory-bro.test.fixtures :refer :all]
             [territory-bro.test.testutil :as testutil :refer [re-equals thrown-with-msg? thrown?]])
-  (:import (java.time Instant LocalDate)
+  (:import (java.time Duration Instant LocalDate)
            (java.util UUID)
            (territory_bro NoPermitException ValidationException WriteConflictException)))
 
@@ -55,12 +56,19 @@
 (def territory-returned-last
   (assoc territory-returned-first :event/time time-t2))
 
+(def expiry-timelimit-days 30)
 (def expiry-enabled
   {:event/type :congregation.event/settings-updated
    :congregation/id cong-id
-   :congregation/expire-shared-links-on-return true})
+   :congregation/expire-shared-links-on-return true
+   :congregation/expire-shared-links-after-timelimit true
+   :congregation/expire-shared-links-timelimit-days expiry-timelimit-days})
 (def expiry-disabled
-  (assoc expiry-enabled :congregation/expire-shared-links-on-return false))
+  (assoc expiry-enabled
+         :congregation/expire-shared-links-on-return false
+         :congregation/expire-shared-links-after-timelimit false))
+
+(use-fixtures :once (fixed-clock-fixture time-t2))
 
 (defn- apply-events
   ([events]
@@ -182,14 +190,36 @@
         (let [state (apply-events state [territory-returned-first
                                          (assoc share-created :share/type :qr-code)
                                          territory-returned-last])]
-          (is (some? (share/find-valid-share-by-key state share-key)))))))
+          (is (some? (share/find-valid-share-by-key state share-key)))))
+
+      (let [state (apply-events state [share-created])
+            before-timelimit (.plus time-t1 (Duration/ofDays expiry-timelimit-days))
+            after-timelimit (.plusSeconds before-timelimit 1)]
+        (testing "before timelimit -> share is still valid"
+          (with-fixtures [(fixed-clock-fixture before-timelimit)]
+            (is (some? (share/find-valid-share-by-key state share-key)))))
+
+        (testing "after timelimit -> share is expired"
+          (with-fixtures [(fixed-clock-fixture after-timelimit)]
+            (is (nil? (share/find-valid-share-by-key state share-key)))))
+
+        (testing "QR code shares don't expire after timelimit"
+          (with-fixtures [(fixed-clock-fixture after-timelimit)]
+            (let [state (apply-events state [(assoc share-created :share/type :qr-code)])]
+              (is (some? (share/find-valid-share-by-key state share-key)))))))))
 
   (testing "expiry disabled;"
     (let [state (apply-events [expiry-disabled])]
 
       (testing "share created, territory returned -> share is still valid"
         (let [state (apply-events state [share-created territory-returned-last])]
-          (is (some? (share/find-valid-share-by-key state share-key))))))))
+          (is (some? (share/find-valid-share-by-key state share-key)))))
+
+      (testing "after timelimit -> share is still valid"
+        (let [state (apply-events state [share-created])
+              after-timelimit (.plus time-t1 (Duration/ofDays 1000))]
+          (with-fixtures [(fixed-clock-fixture after-timelimit)]
+            (is (some? (share/find-valid-share-by-key state share-key)))))))))
 
 
 ;;;; Commands

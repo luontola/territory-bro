@@ -20,7 +20,10 @@
 
 (def default-settings
   {:congregation/timezone ZoneOffset/UTC ; the correct timezone will be set by territory-bro.domain.congregation-boundary
-   :congregation/expire-shared-links-on-return true})
+   :congregation/expire-shared-links-on-return true
+   :congregation/expire-shared-links-after-timelimit true
+   :congregation/expire-shared-links-timelimit-days 365})
+(def user-changeable-settings (keys (dissoc default-settings :congregation/timezone)))
 
 
 ;;;; Read model
@@ -54,8 +57,7 @@
   [state event]
   (-> state
       (update-cong event (fn [congregation]
-                           (merge congregation
-                                  (select-keys event [:congregation/expire-shared-links-on-return]))))))
+                           (merge congregation (select-keys event user-changeable-settings))))))
 
 (defmethod projection :congregation.event/permission-granted
   [state event]
@@ -188,21 +190,24 @@
   (let [cong-id (:congregation/id congregation)
         old-name (:congregation/name congregation)
         new-name (:congregation/name command)
-        old-expire-shared-links-on-return (:congregation/expire-shared-links-on-return congregation)
-        new-expire-shared-links-on-return (:congregation/expire-shared-links-on-return command)]
+        new-timelimit (:congregation/expire-shared-links-timelimit-days command)
+        settings-keys user-changeable-settings
+        old-settings (select-keys congregation settings-keys)
+        new-settings (select-keys command settings-keys)]
     (check-permit [:configure-congregation cong-id])
     (when (str/blank? new-name)
       (throw (ValidationException. [[:missing-name]])))
+    (when (< new-timelimit 1)
+      (throw (ValidationException. [[:invalid-timelimit]])))
     (concat
      (when-not (= old-name new-name)
        [{:event/type :congregation.event/congregation-renamed
          :congregation/id cong-id
          :congregation/name new-name}])
-     (when-not (= old-expire-shared-links-on-return
-                  new-expire-shared-links-on-return)
-       [{:event/type :congregation.event/settings-updated
-         :congregation/id cong-id
-         :congregation/expire-shared-links-on-return new-expire-shared-links-on-return}]))))
+     (when-not (= old-settings new-settings)
+       [(assoc new-settings
+               :event/type :congregation.event/settings-updated
+               :congregation/id cong-id)]))))
 
 (defn handle-command [command events injections]
   (command-handler command (write-model command events) injections))

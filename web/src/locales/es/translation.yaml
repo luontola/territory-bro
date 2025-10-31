@@ -86,7 +86,8 @@ CongregationSettings:
   timezone: Zona horaria
   timezoneNotDefined: Define los límites de la congregación para establecer la zona horaria
   timezoneDefined: Detectada automáticamente según los límites de la congregación
-  expireSharedLinksOnReturn: Vencer enlaces compartidos cuando se devuelve un territorio
+  expireSharedLinksOnReturn: Vencer los enlaces compartidos cuando se devuelva el territorio
+  expireSharedLinksAfterTimelimit: Vencer los enlaces compartidos después de {{days}} días
   save: Guardar configuración
 TerritoriesSection:
   title: Territorios
