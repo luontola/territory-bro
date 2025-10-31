@@ -1,7 +1,6 @@
 (ns territory-bro.infra.config
   (:require [clojure.string :as str]
             [cprop.core :as cprop]
-            [cprop.source :as cprop.source]
             [mount.core :as mount]
             [schema.core :as s]
             [territory-bro.infra.util :as util]
@@ -52,12 +51,7 @@
                                     parse-uuid)))
 
 (defn load-config []
-  ;; TODO: use ":as-is? true" and schema coercion?
-  ;; XXX: patch from-file as a workaround for https://github.com/tolitius/cprop/issues/60
-  (with-redefs [cprop.source/from-file (if (System/getProperty "conf")
-                                         cprop.source/from-file
-                                         (constantly {}))]
-    (cprop/load-config :resource "config-defaults.edn")))
+  (cprop/load-config :resource "config-defaults.edn")) ; TODO: use ":as-is? true" and schema coercion?
 
 (mount/defstate ^:dynamic env
   :start (-> (load-config)

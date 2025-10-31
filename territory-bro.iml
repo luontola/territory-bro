@@ -92,7 +92,7 @@
     <orderEntry type="library" name="Leiningen: commons-codec:1.19.0" level="project" />
     <orderEntry type="library" name="Leiningen: commons-io:2.20.0" level="project" />
     <orderEntry type="library" name="Leiningen: commons-logging:1.2" level="project" />
-    <orderEntry type="library" name="Leiningen: cprop:0.1.20" level="project" />
+    <orderEntry type="library" name="Leiningen: cprop:0.1.21" level="project" />
     <orderEntry type="library" name="Leiningen: criterium:0.4.6" level="project" />
     <orderEntry type="library" name="Leiningen: crypto-equality:1.0.1" level="project" />
     <orderEntry type="library" name="Leiningen: crypto-random:1.2.1" level="project" />

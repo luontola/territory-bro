@@ -16,7 +16,7 @@
                  [com.nextjournal/beholder "1.0.3"]
                  [com.vladsch.flexmark/flexmark "0.64.8"]
                  [com.vladsch.flexmark/flexmark-ext-anchorlink "0.64.8"]
-                 [cprop "0.1.20"]
+                 [cprop "0.1.21"]
                  [enlive "1.1.6"]
                  [hiccup "2.0.0"]
                  [hikari-cp "3.3.0"]
