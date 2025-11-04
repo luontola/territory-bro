@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.mockito/mockito-core:5.20.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-core/5.20.0/mockito-core-5.20.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

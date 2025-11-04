@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.jetbrains.kotlin/kotlin-stdlib-jdk8:2.2.21">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib-jdk8/2.2.21/kotlin-stdlib-jdk8-2.2.21.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

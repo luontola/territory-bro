@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: net.bytebuddy/byte-buddy:1.17.7">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/bytebuddy/byte-buddy/1.17.7/byte-buddy-1.17.7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

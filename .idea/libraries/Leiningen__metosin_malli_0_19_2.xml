@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: metosin/malli:0.19.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/metosin/malli/0.19.2/malli-0.19.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
