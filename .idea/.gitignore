@@ -1,6 +1,8 @@
-/workspace.xml
-/dataSources/
+/data_source_mapping.xml
 /dataSources.*
+/dataSources/
+/db-forest-config.xml
 /dictionaries/
 /replstate.xml
 /shelf/
+/workspace.xml
