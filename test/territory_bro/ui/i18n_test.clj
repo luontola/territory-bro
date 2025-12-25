@@ -44,6 +44,7 @@
             {:code "id", :englishName "Indonesian", :nativeName "Indonesia"}
             {:code "it", :englishName "Italian", :nativeName "Italiano"}
             {:code "nl", :englishName "Dutch", :nativeName "Nederlands"}
+            {:code "pl", :englishName "Polish", :nativeName "Polski"}
             {:code "pt", :englishName "Portuguese", :nativeName "Português"}
             {:code "fi", :englishName "Finnish", :nativeName "suomi"}
             {:code "sv", :englishName "Swedish", :nativeName "Svenska"}]

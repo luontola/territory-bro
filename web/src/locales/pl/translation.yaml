@@ -1,0 +1,202 @@
+englishName: Polish
+nativeName: Polski
+Navigation:
+  changeLanguage: Zmień język
+  login: Zaloguj się
+  logout: Wyloguj się
+  demo: Demo
+  registration: Rejestracja
+  news: Aktualności
+  opensInNewWindow: Otwiera się w nowym oknie
+HomePage:
+  title: Strona główna
+  yourCongregations: Twoje zbory
+RegistrationPage:
+  title: Zarejestruj nowy zbór
+  register: Zarejestruj
+  or: lub
+JoinPage:
+  title: Dołącz do istniejącego zboru
+  introduction: Aby uzyskać dostęp do zboru w Territory Bro, musisz przekazać swój <em>ID użytkownika</em> słudze terenów w swoim zborze, aby mógł przyznać Ci dostęp.
+  yourUserId: "Twój ID użytkownika to:"
+  copy: Skopiuj do schowka
+DemoDisclaimer:
+  welcome: Witaj w wersji demonstracyjnej
+  introduction: Tylko Ty zobaczysz zmiany, które wprowadzisz w tym demonstracyjnym zborze.
+Statistics:
+  title: Statystyki terenów
+  territories: Tereny
+  assignedTerritories: Aktualnie przydzielone
+  coveredInPast6Months: Opracowane w ciągu ostatnich 6 miesięcy
+  coveredInPast12Months: Opracowane w ciągu ostatnich 12 miesięcy
+  averageAssignmentDurationDays: "Średni czas przydziału: {{days}} dni"
+GettingStarted:
+  title: Pierwsze kroki
+  congregationBoundary: Określ granice zboru
+  territories: Dodaj tereny
+  publishers: Dodaj głosicieli
+  territoriesAssigned: Przydziel teren głosicielowi
+  shareLinkCreated: Spróbuj udostępnić link do terenu
+  qrCodeScanned: Spróbuj zeskanować kod QR z wydruku
+TerritoryListPage:
+  title: Tereny
+  search: Szukaj
+  clear: Wyczyść
+  limitedVisibility:
+    title: Dlaczego tak mało terenów?
+    explanation: Obecnie wyświetlane są tylko te tereny, które zostały Ci udostępnione.
+    needToRequestAccess: Aby zobaczyć pozostałe, musisz <0>poprosić o dostęp</0>.
+    needToLogin: Aby zobaczyć pozostałe, musisz się <0>zalogować</0>.
+  mapLegend:
+    durationInMonths: Czas trwania w miesiącach
+    assigned: Przydzielony
+    vacant: Do wzięcia
+TerritoryPage:
+  title: Teren {{number}}
+  edit: Edytuj
+  save: Zapisz
+  shareLink:
+    button: Udostępnij link
+    closePopup: Zamknij
+    description: "Osoby posiadające ten link będą mogły wyświetlić mapę terenu bez logowania:"
+    copy: Skopiuj do schowka
+OpenSharePage:
+  notFound:
+    title: Link wygasł lub jest nieprawidłowy ⛓️‍💥
+    description: Ten link wygasł i nie może być już użyty. Jeśli nadal potrzebujesz dostępu do tego terenu, poproś braci o nowy link.
+PrintoutPage:
+  title: Wydruki
+  printOptions: Opcje drukowania
+  template: Szablon
+  language: Język
+  mapRaster: Mapa tła
+  regions: Regiony
+  territories: Tereny
+  templates:
+    TerritoryCard: Karta terenu
+    TerritoryCardMapOnly: Karta terenu – tylko mapa
+    NeighborhoodCard: Mapa okolicy
+    RuralTerritoryCard: Karta terenu wiejskiego
+    QrCodeOnly: Tylko kod QR (do naklejenia na stare karty)
+    RegionPrintout: Mapa regionu
+SettingsPage:
+  title: Ustawienia
+CongregationSettings:
+  congregationName: Nazwa zboru
+  timezone: Strefa czasowa
+  timezoneNotDefined: Określ granice zboru, aby ustawić strefę czasową
+  timezoneDefined: Automatycznie wykryta na podstawie granic zboru
+  expireSharedLinksOnReturn: Unieważnij udostępnione linki po zwrocie terenu
+  expireSharedLinksAfterTimelimit: Unieważnij udostępnione linki po {{days}} dniach
+  save: Zapisz ustawienia
+TerritoriesSection:
+  title: Tereny
+  exportTerritoriesToExcel: Eksportuj tereny i przydziały do arkusza (.xlsx)
+ExcelExport:
+  territories: Tereny
+  assignments: Przydziały
+  assignedBoolean: Przydzielony?
+  territoryBoundaries: Granice terenu
+  assignment:
+    territory: Teren
+    publisher: Głosiciel
+    assignedDate: Przydzielono
+    coveredDate: Opracowano
+    returnedDate: Zwrócono
+EditingMaps:
+  title: Edycja map
+  introduction: Instrukcje edycji map znajdują się w <0>podręczniku użytkownika</0>. Mapy można edytować przy użyciu <1>aplikacji QGIS</1>, do czego potrzebny będzie poniższy plik projektu QGIS.
+  downloadQgisProject: Pobierz plik projektu QGIS
+PublisherManagement:
+  title: Głosiciele
+  publisherName: Imię
+  assignedTerritories: Przydzielone tereny
+  addPublisher: Dodaj głosiciela
+  edit: Edytuj
+  save: Zapisz
+  delete: Usuń
+  cancel: Anuluj
+  deleteWarning: "{{name}} ma przydzielone tereny. Po usunięciu głosiciela nie będzie można zobaczyć, komu te tereny były przydzielone.\n\nCzy na pewno chcesz usunąć {{name}}?"
+  missingNameError: Imię jest wymagane
+  nonUniqueNameError: Głosiciel o takiej nazwie już istnieje
+UserManagement:
+  title: Użytkownicy
+  userId: ID użytkownika
+  userIdWrongFormat: "To nie wygląda na poprawny ID użytkownika. Powinien wyglądać np. tak: 01234567-89ab-cdef-0123-456789abcdef"
+  userIdNotExist: "Użytkownik nie istnieje"
+  addUserInstructions: Aby dodać użytkowników do tego zboru, poproś ich o odwiedzenie <0>{{joinPageUrl}}</0>, skopiowanie swojego <em>ID użytkownika</em> i przesłanie go Tobie.
+  addUser: Dodaj użytkownika
+  name: Imię
+  email: E-mail
+  loginMethod: Metoda logowania
+  actions: Akcje
+  you: Ty
+  unverified: Niezweryfikowany
+  removeUser: Usuń użytkownika
+  removeYourselfWarning: Czy na pewno chcesz USUNĄĆ SAMEGO SIEBIE ze zboru {{congregation}}? Nie będziesz mógł dodać się ponownie.
+DocumentationPage:
+  title: Dokumentacja
+SupportPage:
+  title: Wsparcie
+  introduction: Territory Bro jest <0>projektem open source</0> rozwijanym przez <1>Esko Luontola</1>.
+  mailingListAd: Zalecamy <0>subskrypcję listy mailingowej</0>, aby otrzymywać informacje o ważnych aktualizacjach Territory Bro.
+  userGuideAd: <0>Podręcznik użytkownika</0> powinien odpowiedzieć na najczęściej zadawane pytania dotyczące tworzenia map terenów.
+  emailAd: Jeśli to nie wystarczy, możesz wysłać e-mail na <0>{{email}}</0>, aby uzyskać pomoc.
+  translationAd: Zobacz <0>instrukcje tłumaczenia</0>, jeśli chcesz pomóc w ulepszaniu tłumaczeń lub dodać nowy język.
+  issueTrackerAd: Błędy i propozycje funkcji można zgłaszać również w <0>systemie zgłoszeń projektu</0>.
+Errors:
+  pageNotFound: Strona nie została znaleziona 😵
+  accessDenied: Brak dostępu 🛑
+  unknownError: Przepraszamy, coś poszło nie tak 🥺
+  returnToFrontPage: Wróć na stronę główną i spróbuj ponownie
+  reloadAndTryAgain: Sprawdź połączenie z internetem. Odśwież stronę i spróbuj ponownie.
+  closeDialog: Zamknij
+Map:
+  zoomIn: Przybliż
+  zoomOut: Oddal
+  resetZoom: Resetuj powiększenie
+  showMyLocation: Pokaż moją lokalizację
+MapInteractionHelp:
+  title: Jak korzystać z map?
+  move: <b>Przesuwanie:</b> przeciągnij dwoma palcami / przeciągnij lewym przyciskiem myszy
+  zoom: <b>Powiększanie:</b> zbliż lub oddal dwoma palcami / przytrzymaj <kbd>{{ctrl}}</kbd> i przewiń kółkiem myszy
+  rotate: <b>Obrót:</b> obracaj dwoma palcami / przytrzymaj <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> i przeciągnij lewym przyciskiem myszy
+Territory:
+  number: Numer
+  region: Region
+  addresses: Adresy
+  doNotCalls: Nie odwiedzać
+TerritoryCard:
+  title: Karta mapy terenu
+  footer: "Prosimy przechowywać kartę w kopercie. Nie brudzić, nie zaznaczać ani nie zginać.\n Za każdym razem, gdy teren zostanie opracowany, poinformuj brata odpowiedzialnego za kartotekę terenów."
+Assignment:
+  assignedToPublisher: Przydzielony do {{name}}
+  returned: Zwrócony
+  covered: Opracowany
+  lastCovered: Ostatnio opracowany
+  status: Status
+  statusVacant: <0>Do wzięcia</0>
+  statusAssignedToPublisher: <0>Przydzielony</0> do {{name}}
+  statusAssignedToPublisherForMonths: <0>Przydzielony</0> do {{name}} na {{months}} miesięcy
+  assignmentHistory: Historia przydziałów
+  durationMonths: "{{months}} miesięcy"
+  durationMonthsAgo: "{{months}} miesięcy temu"
+  durationMonthsSinceDate: "{{months}} miesięcy, od {{date}}"
+  deletedPublisher: usunięty
+  form:
+    assign: Przydziel
+    assignTerritory: Przydziel teren
+    return: Zwróć
+    returnTerritory: Zwróć teren
+    returnTerritoryDescription: Zwróć teren do magazynu
+    markCovered: Oznacz jako opracowany
+    markCoveredDescription: Oznacz teren jako opracowany
+    edit: Edytuj
+    delete: Usuń
+    cancel: Anuluj
+    date: Data
+    publisher: Głosiciel
+    publisherNotFound: Nie znaleziono imienia
+    alreadyAssignedError: Teren był już przydzielony
+    alreadyReturnedError: Teren został już zwrócony
+    assignmentDeleted: Przydział terenu został usunięty
