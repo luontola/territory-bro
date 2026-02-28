@@ -167,8 +167,8 @@ Territory:
   addresses: Adresy
   doNotCalls: Nie odwiedzać
 TerritoryCard:
-  title: Karta mapy terenu
-  footer: "Prosimy przechowywać kartę w kopercie. Nie brudzić, nie zaznaczać ani nie zginać.\n Za każdym razem, gdy teren zostanie opracowany, poinformuj brata odpowiedzialnego za kartotekę terenów."
+  title: Karta z mapą terenu
+  footer: "Prosimy przechowywać tę kartę w oprawce. Karty nie należy brudzić, zaginać ani nanosić na niej oznaczeń. \n Po każdym opracowaniu terenu prosimy poinformować o tym brata, który zajmuje się terenami."
 Assignment:
   assignedToPublisher: Przydzielony do {{name}}
   returned: Zwrócony
