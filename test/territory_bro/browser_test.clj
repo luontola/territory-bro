@@ -96,12 +96,39 @@
   ;; don't have a direct method for observing what was copied to clipboard.
   (b/js-execute driver "return window.latestCopyToClipboard"))
 
+(def auth0-username-field {:css "input#username"})
+(def auth0-password-field {:css "input#password"})
+(def auth0-submit-button {:css "button[type=submit]"})
+
+;; Auth0's hosted login page can still run delayed autofocus/validation scripts
+;; after the inputs become visible. When that races with WebDriver key entry, the
+;; password may be appended to the username field instead of going into the
+;; password field. Fill, verify, and retry before submitting so this fails at the
+;; credential-entry step instead of timing out later on the post-login page.
+(defn fill-auth0-field [driver q text]
+  (doto driver
+    (b/wait-visible q)
+    (b/wait-enabled q)
+    (b/click q)
+    (b/clear q)
+    (b/fill q text)))
+
+(defn auth0-credentials-entered? [driver]
+  (and (= auth0-username (b/get-element-value driver auth0-username-field))
+       (= auth0-password (b/get-element-value driver auth0-password-field))))
+
+(defn enter-auth0-credentials [driver]
+  (b/wait-predicate
+   #(do
+      (fill-auth0-field driver auth0-username-field auth0-username)
+      (fill-auth0-field driver auth0-password-field auth0-password)
+      (auth0-credentials-entered? driver))
+   {:message "Wait until Auth0 login form contains the expected credentials"}))
+
 (defn submit-auth0-login-form [driver]
   (doto driver
-    (b/wait-visible :username)
-    (b/fill :username auth0-username)
-    (b/fill :password auth0-password)
-    (wait-and-click {:css "button[type=submit]"})))
+    (enter-auth0-credentials)
+    (wait-and-click auth0-submit-button)))
 
 (defn do-auth0-login [driver]
   (doto driver
