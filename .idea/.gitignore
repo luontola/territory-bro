@@ -3,6 +3,7 @@
 /dataSources/
 /db-forest-config.xml
 /dictionaries/
+/go.imports.xml
 /replstate.xml
 /shelf/
 /workspace.xml
