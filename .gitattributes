@@ -7,3 +7,5 @@
 *.ts            eol=lf
 *.txt           eol=lf
 *.xml           eol=lf
+*.yml           eol=lf
+*.yaml          eol=lf
