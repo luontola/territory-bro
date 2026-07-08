@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: borkdude/edamame:1.5.37">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/borkdude/edamame/1.5.37/edamame-1.5.37.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

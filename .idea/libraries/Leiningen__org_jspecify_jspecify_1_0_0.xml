@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.jspecify/jspecify:1.0.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
