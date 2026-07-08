@@ -39,7 +39,8 @@
 
 (deftest languages-test
   (testing "lists all supported languages, sorted by native name"
-    (is (= [{:code "en", :englishName "English", :nativeName "English"}
+    (is (= [{:code "de", :englishName "German", :nativeName "Deutsch"}
+            {:code "en", :englishName "English", :nativeName "English"}
             {:code "es", :englishName "Spanish", :nativeName "español"}
             {:code "id", :englishName "Indonesian", :nativeName "Indonesia"}
             {:code "it", :englishName "Italian", :nativeName "Italiano"}

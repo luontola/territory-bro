@@ -1,0 +1,202 @@
+englishName: German
+nativeName: Deutsch
+Navigation:
+  changeLanguage: Sprache ändern
+  login: Anmelden
+  logout: Abmelden
+  demo: Demo
+  registration: Registrierung
+  news: Neuigkeiten
+  opensInNewWindow: Öffnet in neuem Fenster
+HomePage:
+  title: Startseite
+  yourCongregations: Deine Versammlungen
+RegistrationPage:
+  title: Neue Versammlung registrieren
+  register: Registrieren
+  or: oder
+JoinPage:
+  title: Einer bestehenden Versammlung beitreten
+  introduction: Um auf eine Versammlung in Territory Bro zuzugreifen, musst du deinem Gebietsdiener deine <em>Benutzer‑ID</em> mitteilen, damit er dir Zugriff geben kann.
+  yourUserId: "Deine Benutzer‑ID ist:"
+  copy: In die Zwischenablage kopieren
+DemoDisclaimer:
+  welcome: Willkommen zur Demo
+  introduction: Nur du siehst die Änderungen, die du an dieser Demo‑Versammlung vornimmst.
+Statistics:
+  title: Gebietsstatisiken
+  territories: Gebiete
+  assignedTerritories: Derzeit zugewiesen
+  coveredInPast6Months: In den letzten 6 Monaten bearbeitet
+  coveredInPast12Months: In den letzten 12 Monaten bearbeitet
+  averageAssignmentDurationDays: "Durchschnittliche Bearbeitungsdauer: {{days}} Tage"
+GettingStarted:
+  title: Erste Schritte
+  congregationBoundary: Versammlungs-Gebietsgrenze festlegen
+  territories: Einige Gebiete hinzufügen
+  publishers: Einige Verkündiger hinzufügen
+  territoriesAssigned: Ein Gebiet einem Verkündiger zuweisen
+  shareLinkCreated: Versuche einen Link zu einem Gebiet zu teilen
+  qrCodeScanned: Versuche den QR‑Code eines Ausdrucks zu scannen
+TerritoryListPage:
+  title: Gebiete
+  search: Suchen
+  clear: Löschen
+  limitedVisibility:
+    title: Warum so wenige Gebiete?
+    explanation: Zurzeit werden nur die Gebiete angezeigt, die mit dir geteilt wurden.
+    needToRequestAccess: Du musst <0>Zugriff anfordern</0>, um die restlichen Gebiete zu sehen.
+    needToLogin: Du musst dich <0>anmelden</0>, um die restlichen Gebiete zu sehen.
+  mapLegend:
+    durationInMonths: Dauer in Monaten
+    assigned: Zugewiesen
+    vacant: Zu vergeben
+TerritoryPage:
+  title: Gebiet {{number}}
+  edit: Bearbeiten
+  save: Speichern
+  shareLink:
+    button: Link teilen
+    closePopup: Schließen
+    description: "Personen mit diesem Link können diese Gebietskarte ohne Anmeldung ansehen:"
+    copy: In die Zwischenablage kopieren
+OpenSharePage:
+  notFound:
+    title: Link abgelaufen oder ungültig ⛓️‍💥
+    description: Dieser Link ist abgelaufen und kann nicht mehr verwendet werden. Bitte den Gebietsdiener um einen neuen Link, wenn du dieses Gebiet weiterhin ansehen musst.
+PrintoutPage:
+  title: Ausdrucke
+  printOptions: Druckoptionen
+  template: Vorlage
+  language: Sprache
+  mapRaster: Hintergrundkarte
+  regions: Regionen
+  territories: Gebiete
+  templates:
+    TerritoryCard: Gebietskarte
+    TerritoryCardMapOnly: Gebietskarte, nur Karte
+    NeighborhoodCard: Nachbarschaftskarte
+    RuralTerritoryCard: Ländliche Gebietskarte
+    QrCodeOnly: Nur QR‑Code (zum Aufkleben auf alte Karten)
+    RegionPrintout: Regionenkarte
+SettingsPage:
+  title: Einstellungen
+CongregationSettings:
+  congregationName: Name der Versammlung
+  timezone: Zeitzone
+  timezoneNotDefined: Definiere die Versammlungs-Gebietsgrenzen, um die Zeitzone festzulegen
+  timezoneDefined: Automatisch anhand der Versammlungsgrenzen erkannt
+  expireSharedLinksOnReturn: Geteilte Links beim Zurückgeben eines Gebiets ungültig machen
+  expireSharedLinksAfterTimelimit: Geteilte Links nach {{days}} Tagen ungültig machen
+  save: Einstellungen speichern
+TerritoriesSection:
+  title: Gebiete
+  exportTerritoriesToExcel: Gebiete und Zuweisungen als Tabelle exportieren (.xlsx)
+ExcelExport:
+  territories: Gebiete
+  assignments: Zuweisungen
+  assignedBoolean: Zugewiesen?
+  territoryBoundaries: Gebietsgrenzen
+  assignment:
+    territory: Gebiet
+    publisher: Verkündiger
+    assignedDate: Zugewiesen
+    coveredDate: Bearbeitet
+    returnedDate: Zurückgegeben
+EditingMaps:
+  title: Karten bearbeiten
+  introduction: Die Anleitungen zum Bearbeiten von Karten findest du im <0>Benutzerhandbuch</0>. Du kannst die Karten mit der <1>QGIS‑Anwendung</1> bearbeiten; dafür benötigst du die folgende QGIS‑Projektdatei.
+  downloadQgisProject: QGIS‑Projektdatei herunterladen
+PublisherManagement:
+  title: Verkündiger
+  publisherName: Name
+  assignedTerritories: Zugewiesene Gebiete
+  addPublisher: Verkündiger hinzufügen
+  edit: Bearbeiten
+  save: Speichern
+  delete: Löschen
+  cancel: Abbrechen
+  deleteWarning: "{{name}} hat zugewiesene Gebiete. Es wird nicht mehr möglich sein nachzuvollziehen, wem die Gebiete zugewiesen sind, wenn der Verkündiger gelöscht wird.\n\nBist du sicher, dass du {{name}} löschen möchtest?"
+  missingNameError: Name ist erforderlich
+  nonUniqueNameError: Es gibt bereits einen Verkündiger mit diesem Namen
+UserManagement:
+  title: Benutzer
+  userId: Benutzer‑ID
+  userIdWrongFormat: "Das sieht nicht wie eine Benutzer‑ID aus. Sie sollte ungefähr so aussehen: 01234567-89ab-cdef-0123-456789abcdef"
+  userIdNotExist: "Benutzer existiert nicht"
+  addUserInstructions: Um Benutzer zu dieser Versammlung hinzuzufügen, bitte sie, <0>{{joinPageUrl}}</0> zu besuchen, ihre <em>Benutzer‑ID</em> von dieser Seite zu kopieren und dir zu schicken.
+  addUser: Benutzer hinzufügen
+  name: Name
+  email: E‑Mail
+  loginMethod: Anmeldemethode
+  actions: Aktionen
+  you: Du
+  unverified: Unverifiziert
+  removeUser: Benutzer entfernen
+  removeYourselfWarning: Bist du sicher, dass du DICH SELBST aus {{congregation}} ENTFERNEN möchtest? Du wist dich nicht wieder hinzufügen können.
+DocumentationPage:
+  title: Dokumentation
+SupportPage:
+  title: Support
+  introduction: Territory Bro ist ein <0>Open‑Source‑Projekt</0>, entwickelt von <1>Esko Luontola</1>.
+  mailingListAd: Wir empfehlen, sich <0>für unsere Mailingliste anzumelden</0>, um über wichtige Territory Bro‑Updates informiert zu werden.
+  userGuideAd: Das <0>Benutzerhandbuch</0> sollte die häufigsten Fragen zur Erstellung von Gebietskarten beantworten.
+  emailAd: Wenn das nicht ausreicht, kannst du eine E‑Mail an <0>{{email}}</0> senden, um Hilfe bei der Nutzung von Territory Bro zu erhalten.
+  translationAd: Siehe die <0>Übersetzungsanleitung</0>, wenn du helfen möchtest, die aktuellen Übersetzungen zu verbessern oder neue Sprachen hinzuzufügen.
+  issueTrackerAd: Fehler und Funktionswünsche können auch im <0>Issue‑Tracker dieses Projekts</0> gemeldet werden.
+Errors:
+  pageNotFound: Seite nicht gefunden 😵
+  accessDenied: Zugriff verweigert 🛑
+  unknownError: Entschuldigung, es ist ein Fehler aufgetreten 🥺
+  returnToFrontPage: Zur Startseite zurückkehren und es erneut versuchen
+  reloadAndTryAgain: Überprüfe deine Internetverbindung. Lade die Seite neu und versuche es erneut.
+  closeDialog: Schließen
+Map:
+  zoomIn: Hineinzoomen
+  zoomOut: Herauszoomen
+  resetZoom: Zoom zurücksetzen
+  showMyLocation: Meinen Standort anzeigen
+MapInteractionHelp:
+  title: Wie interagiere ich mit den Karten?
+  move: <b>Verschieben:</b> mit zwei Fingern ziehen / mit der linken Maustaste ziehen
+  zoom: <b>Zoomen:</b> zwei Fingern zusammenziehen oder spreizen / halte <kbd>{{ctrl}}</kbd> und scrolle mit dem Mausrad
+  rotate: <b>Drehen:</b> mit zwei Fingern drehen / halte <kbd>{{alt}}</kbd>+<kbd>{{shift}}</kbd> und ziehe mit der linken Maustaste
+Territory:
+  number: Nummer
+  region: Region
+  addresses: Adressen
+  doNotCalls: Nicht besuchen
+TerritoryCard:
+  title: Gebietskarte
+  footer: "Bewahre diese Karte bitte in der Schutzhülle auf. Beschmutze, beschreibe und knicke sie nicht. Teile \nbitte dem Bruder, der sich um die Gebietsablage kümmert, jede Bearbeitung des Gebietes mit."
+Assignment:
+  assignedToPublisher: Zugewiesen an {{name}}
+  returned: Zurückgegeben
+  covered: Bearbeitet
+  lastCovered: Zuletzt bearbeitet
+  status: Status
+  statusVacant: <0>Zu vergeben</0>
+  statusAssignedToPublisher: <0>Zugewiesen</0> an {{name}}
+  statusAssignedToPublisherForMonths: <0>Zugewiesen</0> an {{name}} für {{months}} Monate
+  assignmentHistory: Zuweisungshistorie
+  durationMonths: "{{months}} Monate"
+  durationMonthsAgo: "vor {{months}} Monat(en)"
+  durationMonthsSinceDate: "{{months}} Monat(e), seit {{date}}"
+  deletedPublisher: gelöscht
+  form:
+    assign: Zuweisen
+    assignTerritory: Gebiet zuweisen
+    return: Zurückgeben
+    returnTerritory: Gebiet zurückgeben
+    returnTerritoryDescription: Das Gebiet in die Ablage zurückgeben
+    markCovered: Als bearbeitet markieren
+    markCoveredDescription: Das Gebiet als bearbeitet markieren
+    edit: Bearbeiten
+    delete: Löschen
+    cancel: Abbrechen
+    date: Datum
+    publisher: Verkündiger
+    publisherNotFound: Name nicht gefunden
+    alreadyAssignedError: Das Gebiet war bereits zugewiesen
+    alreadyReturnedError: Das Gebiet war bereits zurückgegeben
+    assignmentDeleted: Die Gebietszuteilung wurde gelöscht
