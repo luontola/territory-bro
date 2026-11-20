@@ -31,7 +31,7 @@
 (def jdbc-opts {:builder-fn result-set/as-unqualified-lower-maps})
 (hugsql/set-adapter! (next-adapter/hugsql-adapter-next-jdbc jdbc-opts))
 
-(def expected-postgresql-version 16)
+(def expected-postgresql-version 18)
 (def ^:dynamic *explain* false)
 
 ;; PostgreSQL error codes

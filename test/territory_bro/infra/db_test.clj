@@ -26,7 +26,7 @@
     (is (nil? (db/check-database-version current-version))
         "allow same as expected")
     (is (thrown-with-msg?
-         AssertionError (re-contains "Expected the database to be PostgreSQL 17 but it was PostgreSQL 16")
+         AssertionError (re-contains "Expected the database to be PostgreSQL 19 but it was PostgreSQL 18")
          (db/check-database-version (inc current-version)))
         "error if older than expected")))
 
